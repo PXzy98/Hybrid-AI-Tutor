@@ -84,6 +84,14 @@ class BktDefaults(Section):
     guess: float = Field(0.25, ge=0, lt=0.5)
 
 
+class BktOverride(Section):
+    """Per-level BKT parameters; unset fields fall back to bkt_defaults."""
+
+    learn: float | None = Field(None, ge=0, lt=1)
+    slip: float | None = Field(None, ge=0, lt=0.5)
+    guess: float | None = Field(None, ge=0, lt=0.5)
+
+
 class WeakLikelihood(Section):
     given_mastered: float = Field(0.30, gt=0, lt=1)
     given_not_mastered: float = Field(0.60, gt=0, lt=1)
@@ -101,6 +109,7 @@ class LearnerConfig(Section):
     levels: LevelsConfig = LevelsConfig()
     recommender: RecommenderConfig = RecommenderConfig()
     bkt_defaults: BktDefaults = BktDefaults()
+    bkt_by_level: dict[Literal["basic", "intermediate", "advanced"], BktOverride] = {}  # item level -> params
     weak_likelihood: WeakLikelihood = WeakLikelihood()
     rule: RuleConfig = RuleConfig()
     class_summary_min_group: int = Field(5, ge=1)

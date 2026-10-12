@@ -1,4 +1,5 @@
 import copy
+import os
 from pathlib import Path
 
 import pytest
@@ -18,7 +19,9 @@ def _deep_merge(base: dict, overrides: dict) -> dict:
 
 
 # Applied under every test's config: the small spaCy model (the large one is for production).
-TEST_BASE = {"privacy": {"spacy_model": "en_core_web_sm"}}
+# TEST_LEARNER_KNOWLEDGE=rule runs the whole suite with the fallback knowledge model.
+TEST_BASE = {"privacy": {"spacy_model": "en_core_web_sm"},
+             "learner": {"knowledge": os.environ.get("TEST_LEARNER_KNOWLEDGE", "bkt")}}
 
 
 def _write_config(path: Path, overrides: dict) -> None:

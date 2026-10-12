@@ -6,6 +6,7 @@ from sqlalchemy import Engine
 from app.auth.service import AccountService
 from app.core.config import Settings, get_settings
 from app.learner.content import ContentStore
+from app.learner.facade import LearnerModel, build_learner_model
 from app.llm import CloudClient, LLMClient, build_llm_clients
 from app.rag import Retriever, load_retriever
 from app.routing import RouteScorer, load_router
@@ -24,6 +25,7 @@ class Services:
     local_llm: LLMClient
     cloud_llm: CloudClient
     content: ContentStore
+    learner: LearnerModel
 
 
 def build_services(settings: Settings | None = None) -> Services:
@@ -31,6 +33,7 @@ def build_services(settings: Settings | None = None) -> Services:
     engine = make_engine(settings.database_url)
     init_db(engine)
     local_llm, cloud_llm = build_llm_clients(settings)
+    content = ContentStore(settings.content_dir(), settings.content.serve_unreviewed)  # validated here
     return Services(
         settings=settings,
         engine=engine,
@@ -40,5 +43,6 @@ def build_services(settings: Settings | None = None) -> Services:
         accounts=AccountService(engine, settings),
         local_llm=local_llm,
         cloud_llm=cloud_llm,
-        content=ContentStore(settings.content_dir(), settings.content.serve_unreviewed),  # validated here
+        content=content,
+        learner=build_learner_model(settings, engine, content),
     )

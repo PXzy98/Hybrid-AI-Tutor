@@ -77,3 +77,67 @@ class SessionTurn(SQLModel, table=True):
     role: str
     text: str  # sanitized
     created_at: datetime = Field(default_factory=utcnow)
+
+
+# ---------------------------------------------------------------------- learner model (design §5, §9)
+# Keyed by student_id only. No free-text columns: evidence holds IDs, flags and numbers, never question text.
+class LearnerKcState(SQLModel, table=True):
+    __tablename__ = "learner_kc_state"
+
+    id: int | None = Field(default=None, primary_key=True)
+    student_id: str = Field(index=True)
+    kc_id: str = Field(index=True)
+    p_mastery: float
+    level: str  # basic | intermediate | advanced (with hysteresis)
+    n_obs: int = 0  # graded answers (check + diagnostic)
+    last_seen: datetime | None = None
+
+
+class LearnerTopicLevel(SQLModel, table=True):
+    """Focus level per topic, kept so that hysteresis also applies to the topic-level estimate."""
+
+    __tablename__ = "learner_topic_level"
+
+    id: int | None = Field(default=None, primary_key=True)
+    student_id: str = Field(index=True)
+    topic: str
+    level: str
+    updated_at: datetime = Field(default_factory=utcnow)
+
+
+class LearnerPreference(SQLModel, table=True):
+    __tablename__ = "learner_preference"
+
+    id: int | None = Field(default=None, primary_key=True)
+    student_id: str = Field(unique=True, index=True)
+    sequencing: str = "example_first"
+    detail: str = "concise"
+    source: str = "default"
+    implicit: dict = Field(default_factory=dict, sa_column=Column(JSON))  # streak counters per dimension
+    updated_at: datetime = Field(default_factory=utcnow)
+
+
+class EvidenceLog(SQLModel, table=True):
+    __tablename__ = "evidence_log"
+
+    id: int | None = Field(default=None, primary_key=True)
+    student_id: str = Field(index=True)
+    kc_id: str = Field(index=True)
+    kind: str  # strong | weak | diagnostic
+    source: str  # check | understand | onboarding
+    item_id: str | None = None
+    correct: bool | None = None
+    signal: str | None = None  # confusion | misconception
+    misconception_id: str | None = None
+    weight: float = 1.0  # likelihood ratio of a weak signal; 1.0 for graded answers
+    created_at: datetime = Field(default_factory=utcnow)
+
+
+class Consent(SQLModel, table=True):
+    __tablename__ = "consent"
+
+    id: int | None = Field(default=None, primary_key=True)
+    student_id: str = Field(unique=True, index=True)
+    given: bool
+    created_at: datetime = Field(default_factory=utcnow)
+    updated_at: datetime = Field(default_factory=utcnow)

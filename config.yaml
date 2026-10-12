@@ -36,6 +36,7 @@ learner:
   levels: { basic_below: 0.40, advanced_above: 0.70, hysteresis: 0.05 }
   recommender: { ready: 0.70, mastered: 0.90 }
   bkt_defaults: { p_init: 0.20, learn: 0.10, slip: 0.10, guess: 0.25 }
+  bkt_by_level: {}                    # e.g. { advanced: { slip: 0.15 } } — tuned in E2 (Step 14)
   weak_likelihood: { given_mastered: 0.30, given_not_mastered: 0.60 }
   rule: { last_n: 5, weak_penalty: 0.05 }
   class_summary_min_group: 5

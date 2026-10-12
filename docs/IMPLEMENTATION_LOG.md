@@ -374,3 +374,67 @@ How to try it:
 cd backend
 ..\.venv\Scripts\python -m pytest tests/test_content.py -q
 ```
+
+## Step 6 — Learner model core (2026-10-12)
+
+Done:
+- `learner/knowledge/bkt_math.py` (pure functions): `posterior`, `learn`, `weak_update`, `level_with_hysteresis`.
+  - Probabilities are clamped to [1e-4, 1−1e-4], so later evidence can always move them.
+  - Hysteresis moves the band boundaries by ±h against the direction of change. For example, from `basic` the level rises only above 0.45; from `intermediate` it falls only below 0.35.
+- Tables in `storage/models.py`: `learner_kc_state`, `learner_topic_level`, `learner_preference` (with implicit streak counters), `evidence_log` (IDs, flags, weight; **no free-text column**) and `consent`. All are keyed by `student_id`, so the Step 2b account purge covers them automatically; a test checks this.
+- `learner/repository.py`: all learner DB access. `reset()` clears state, topic level, preferences and evidence, and keeps consent.
+- Knowledge models (`learner.knowledge`):
+  - A shared `BaseKnowledgeModel` handles the prior for unseen KCs, hysteresis, validation (unknown KC; graded evidence without `correct`), evidence logging and persistence.
+  - **`bkt`**:
+    - strong → posterior + learning step;
+    - diagnostic → posterior only;
+    - weak → `weak_update` (likelihoods 0.30/0.60), no learning step.
+    - Parameters come from `bkt_defaults`, overridden per **item level** by the new `learner.bkt_by_level`.
+  - **`rule`**: `(correct+1)/(n+2)` over the last N graded answers (strong + diagnostic), minus `weak_penalty` for each weak signal since the last graded answer, clipped to [0, 1]. It is recomputed from the evidence log.
+  - `n_obs` counts graded answers only. Weak evidence is logged with weight = likelihood ratio (2.0).
+- Preference model `simple`: explicit signals apply at once (source onboarding or feedback). Implicit signals need a streak of 3 consistent signals, and an explicit choice resets the streak. `PreferenceSignal(dimension, value, explicit, source)` validates its values.
+- `learner/recommender.py`: candidates are KCs whose prerequisites are all ≥ 0.70 and whose own mastery is < 0.90. They are ordered by lowest p, then fewest observations. The current topic is searched first, and other topics only when it has no candidate.
+- `learner/facade.py` (`LearnerModel`, built into `Services.learner`):
+  - `context()`, `observe()`, `observe_request()` (at most one weak update per KC per request), `update_preferences()`, `set_consent()` (withdrawing consent resets the profile), `has_consent()`, `reset()`.
+  - **No consent → `LearnerContext(personalized=False)`, and nothing is read or written.**
+  - Focus level: the lowest level among the question's KCs when they are known; otherwise (temporary, until Step 11) the hysteresis level of the topic's mean mastery, stored in `learner_topic_level`.
+- The real `learner_context` step (skip on error). `/ask` now returns `kc_level` and `next_kc` for students who consented, and the local prompt carries their level.
+- Tests: 229 offline (36 new). They cover:
+  - the math against hand-computed values;
+  - hysteresis at 0.40 ± 0.03 and at 0.70;
+  - both models move up and down, and weak evidence moves less than strong (both models);
+  - no learning step for diagnostics; per-level overrides; the exact rule formula; invalid evidence;
+  - evidence columns; the weak cap; consent, withdrawal and reset; the account purge;
+  - preferences (explicit, implicit streak, reset of the streak);
+  - recommender order, prerequisites and topic switching; focus level by KCs and by topic mean;
+  - the step, and the API with and without consent.
+- **Swap check (Done when): the whole suite passes with `TEST_LEARNER_KNOWLEDGE=rule` (229/229).** CI now runs the suite twice, once with BKT and once with the rule model.
+
+Files: `backend/app/learner/{facade,recommender,repository}.py`, `backend/app/learner/knowledge/{__init__,interface,bkt,rule,bkt_math}.py`, `backend/app/learner/preference/{__init__,interface,simple}.py`, `backend/app/pipeline/steps/learner_context.py`, `backend/app/storage/models.py`, `backend/app/core/{config,services}.py`, `config.yaml`, `backend/tests/{conftest,test_bkt_math,test_learner}.py`, `.github/workflows/ci.yml`.
+
+Decisions:
+- **The recommender restricts itself to the current topic** and moves to another topic only when nothing in the current one qualifies. The design says "current topic breaks ties", but the four placeholder topics all sit at the prior (0.20). With pure tie-breaking, a student who made any progress in High Blood Pressure would be sent to Asthma.
+- **The design's "weakest prerequisite" fallback was removed as unreachable.** In a DAG, following unready prerequisites always ends at a KC whose prerequisites are ready, and that KC is a candidate. So `None` means everything is mastered.
+- In the rule model, a KC without graded answers starts at the prior (0.20), not at (0+1)/(0+2) = 0.5, so that both models agree on new students.
+- Diagnostic answers count as graded answers in the rule model.
+- `PreferenceSignal` lives in `learner/preference/interface.py`, not in `core/schemas.py`, because it is internal.
+- `context()` writes `learner_topic_level` only when the level changes.
+- `TEST_LEARNER_KNOWLEDGE` (environment variable) selects the knowledge model for the whole test suite.
+
+Interface changes:
+- `Services` gained `learner`.
+- Config: `learner.bkt_by_level` (new, default `{}`).
+- New tables: `learner_kc_state`, `learner_topic_level`, `learner_preference`, `evidence_log`, `consent`. No schema changes.
+
+Known gaps / TODO:
+- There is no API for consent or preferences yet: until the Step 7 onboarding, every student is unpersonalized in the running app (`kc_level: null`).
+- `LearnerContext.misconceptions` stays empty until Step 12, although the evidence log already records misconception IDs.
+- The focus level uses the topic mean until the understand step (Step 11) provides KC IDs.
+- The full test suite now takes about 45 s, mostly argon2 hashing and app startups. It could be parallelised later.
+
+How to try it:
+```powershell
+cd backend
+..\.venv\Scripts\python -m pytest tests/test_learner.py tests/test_bkt_math.py -q
+$env:TEST_LEARNER_KNOWLEDGE="rule"; ..\.venv\Scripts\python -m pytest -q; Remove-Item Env:TEST_LEARNER_KNOWLEDGE
+```
