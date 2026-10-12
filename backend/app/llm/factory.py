@@ -18,9 +18,16 @@ def build_llm_clients(settings: Settings) -> tuple[LLMClient, CloudClient, LLMCl
         transport = OpenAICompatClient(settings.cloud_base_url, settings.cloud_api_key.get_secret_value(),
                                        settings.cloud_model, timeout_s=cloud.timeout_s,
                                        max_tokens=cloud.max_tokens)
+    cloud_client = CloudClient(transport)
+    if settings.llm.cloud.audit_log or settings.llm.cloud.audit_echo:  # E4 privacy audit only
+        from app.llm.audit import EchoTransport, RecordingCloudClient
+
+        transport = EchoTransport() if settings.llm.cloud.audit_echo else transport
+        cloud_client = (RecordingCloudClient(transport, settings.llm.cloud.audit_log)
+                        if settings.llm.cloud.audit_log else CloudClient(transport))
     und = settings.llm.understand
     # same num_ctx as the answer client: with the same model, a different context size would make Ollama
     # reload the model between the two calls of every request
     understand = OllamaClient(settings.ollama_url, und.model, temperature=0.0, num_ctx=loc.num_ctx,
                               timeout_s=und.timeout_s, max_tokens=200)
-    return local, CloudClient(transport), understand
+    return local, cloud_client, understand

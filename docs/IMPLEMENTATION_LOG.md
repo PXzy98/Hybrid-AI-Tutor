@@ -911,3 +911,99 @@ How to try it:
 # backend + frontend (DEMO.md), log in as the instructor -> /admin
 # Settings: change the threshold; Class summary: needs >= 5 students with consent
 ```
+
+
+## Step 14 — Evaluation harnesses (E2, E3, E4) — 2026-10-12
+
+Branch `feature/evaluation` (stacked on `feature/dashboard`).
+
+What was built:
+- **E2, `eval/learner-sim/`** (`sim.py` + `run.py`). Simulated students go through the **real** `LearnerModel`: an in-memory SQLite database, the real `apply_diagnostic`, `next_kc`, `choose_item`, `observe` and `check_answered`.
+  - The student model: a hidden true mastery per KC (Beta draw, capped at prerequisite + 0.2); learning in [0.05, 0.20]; forgetting 0.02 per step on every KC (multiplicative); slip in [0.10, 0.25] and guess in [0.20, 0.40], away from the BKT defaults.
+  - Weak confusion signals are drawn from the true mastery and mis-tagged at the E1 error rate. It is read from the E1 report (8%).
+  - Runs: bkt and rule, each with weak evidence off and on, on the same students (same seed); then a one-at-a-time sweep of the BKT parameters.
+  - Metrics: MAE, next-answer AUC (with an **oracle AUC** from the true P(correct) as the ceiling), and level-band accuracy.
+  - The report applies the pre-registered rule, prints the recommended `learner.knowledge`, and includes 3 SVG charts. They are written by hand: no matplotlib dependency.
+- **E4, `eval/privacy-audit/`** (`audit.py` + `run.py` + `pii_questions.jsonl`).
+  - The recording cloud client is installed **through config**: `llm.cloud.audit_log` (JSONL of every CloudRequest plus the exact messages) and `llm.cloud.audit_echo` (a local echo instead of a provider; nothing leaves the machine). See `app/llm/audit.py`; the factory installs it only when configured.
+  - The scripted run creates the personas through `admin/students`, onboards them, and asks the E3 questions, the E1 cases and the planted-PII questions, all forced to the cloud route.
+  - The audit checks:
+    - fields outside the allow-list, and messages that are not exactly `render_cloud(request)`;
+    - identity values (usernames, display names, surnames);
+    - profile data (student IDs, item and misconception IDs, misconception texts);
+    - typed PII values, plus an analyzer re-scan;
+    - identity and raw typed PII in the database (outside `account`) and in the logs.
+  - **Exit 1 on any leak.**
+- **E3, `eval/personalization/`** (`run.py` + `questions.jsonl` with 20 HBP questions).
+  - Four personas (`eval/common/harness.py`) are created through `admin/students` with onboarding, preferences and scripted check answers: novice; intermediate with MC5; advanced; mixed prerequisites.
+  - Personalization on and off uses the new switch `learner.personalize` (false → `LearnerContext(personalized=False)` in `learner_context`). The run uses the local route, and post-response learning is off, so on and off see the same profile.
+  - A blind pairwise judge compares the answers in random A/B order. It can be any OpenAI-compatible API (`JUDGE_BASE_URL`, `JUDGE_MODEL`, `JUDGE_API_KEY`); the default is Ollama `/v1` with `gemma4:e4b`, a different model from the one that answers. Judge token limit: 4000, because gemma4 reasons first on that endpoint.
+  - Metrics and targets follow design §11 E3, with its decision.
+  - `abbas_sample.csv` holds 30 blind pairs with empty rating columns, plus `abbas_key.csv`.
+- `eval/common/harness.py`: the in-process app on its own temporary database, configured through `SECTION__FIELD` variables. It provides the instructor, the personas, the fake models for smoke mode, and log capture.
+- CI: the backend job also runs the three harnesses in smoke mode. E4 fails the build on any leak.
+- `eval/README.md`: how to run each harness, its options, and where the reports go.
+
+**Privacy fix found by E4:**
+- The first smoke audit found real leaks. With `en_core_web_sm`, NER missed the student's own name in "Hi, I'm Lucas Bergeron…" and "This is Maya Okafor…", and a typed username can never be found by NER. These values reached the cloud payload, and they were also stored in `request_log` as "sanitized" text.
+- Fix: `AccountService.identity_terms(student_id)` returns the student's display name, its parts (3+ letters) and the username. They are read per request and kept in memory only. The privacy filter passes them to `PIIAnalyzer.analyze(text, names, usernames)`, which always marks whole-word occurrences as `PERSON` / `USERNAME`.
+- After the fix, the smoke audit is clean. New tests in `test_privacy.py` cover the analyzer, the stored sanitized text, and the whole-word rule ("Tom" ≠ "symptoms").
+
+Tests:
+- `tests/test_eval_tools.py` has 16 tests:
+  - the auditor finds each planted leak class, a clean request passes, a typed own name counts as PII rather than identity, and storage matching is whole-word;
+  - AUC;
+  - a tiny simulation through the real learner model, for bkt and rule;
+  - the recording client is installed through config and captures exactly the allow-listed request, and is absent otherwise;
+  - the personalization switch.
+- `tests/test_privacy.py`: 2 new tests.
+- Backend: 350 tests pass with BKT and 350 with `rule`. Ruff is clean. All three smoke runs pass from `backend/`, as in CI.
+
+Full runs, against the real servers (reports in each `results/`):
+
+- **E2** (200 students × 40 interactions, HBP; the other topics have no item bank yet, so they are skipped):
+
+  | Config | MAE | AUC (oracle) | Band accuracy |
+  |---|---|---|---|
+  | bkt | 0.260 | 0.522 (0.621) | 43.3% |
+  | rule | 0.203 | 0.551 (0.628) | 61.2% |
+  | bkt+weak | 0.242 | 0.524 | 46.5% |
+  | rule+weak | 0.196 | 0.541 | 63.1% |
+
+  - BKT − rule MAE per student: **+0.057 (95% CI ± 0.006)**. BKT's AUC is also lower.
+  - **Pre-registered decision: switch to `learner.knowledge: rule`. Weak evidence: keep (it lowers MAE for rule, 0.203 → 0.196).**
+  - Sweep: BKT's MAE ranges from 0.210 to 0.324. It is best with guess = 0.35 and learn = 0.05, which are closer to the simulated students.
+  - The rule method copes better with forgetting, which BKT does not model.
+  - The low AUCs are expected: the oracle ceiling is only about 0.62, because of slip and guess.
+- **E3** (4 personas × 20 questions × on/off = 160 answers from qwen3.5:9b; judge gemma4:e4b, 80 of 80 judged):
+  - level-fit win rate **85%** ✅ (novice 20/20, intermediate 19/20, advanced 20/20, mixed 9/20);
+  - known misconception addressed **100%** (75% without personalization) ✅;
+  - preference respected **90%** ✅;
+  - critical errors 0 vs 0 ✅;
+  - **correct 98% vs 100% ❌**. Two personalized answers were judged `minor_error`: intermediate_mc Q05 got the **safe fallback message** (the medical-safety check rejected both attempts at a general question, so it over-blocked), and mixed Q05 is borderline.
+  - Following the design rule (all metrics above marginal), the decision is to keep personalization as designed. The correctness miss is flagged in the report for review.
+  - `abbas_sample.csv`: 30 blind pairs are ready for Dr. Abbas.
+- **E4** (4 personas × 70 questions = 280 asks forced to the cloud; local echo provider):
+  - 260 cloud requests recorded. 20 asks stayed local because of personal health details (local-only by design).
+  - Fields outside the allow-list 0, identity 0, profile 0, PII 0 (0.0%), and nothing in the DB or logs. **Verdict: no leak.**
+  - This is after the fix above. The run used `en_core_web_sm`; production uses `en_core_web_lg`.
+
+Decisions:
+- **E2's recommendation has not been applied to `config.yaml`**: it is a design default. The user decides, either via the dashboard (Settings → knowledge model) or in `config.yaml`.
+- E2 has no simulated time, so the 24-hour no-repeat rule runs out of items after a few interactions per KC. The least recently answered item is reused, and the report counts how often.
+- E3 runs on the local route with post-response learning off, so the "on" and "off" answers see the same profile. The E3 judge is a local model, a different model from the one that answers.
+- The own-identity redaction is a strengthening inside the privacy filter. No design decision changes, and the values never leave memory.
+
+Interface changes:
+- Config: `llm.cloud.audit_log`, `llm.cloud.audit_echo`, `learner.personalize`.
+- Code: `PIIAnalyzer.analyze(text, names=(), usernames=())` and `AccountService.identity_terms()`.
+- New placeholder type `<USERNAME_n>`.
+- No change to `schemas.py`.
+
+Known gaps / TODO:
+- E1/E3/E4 cover HBP only, until the other four topics have KCs, items and catalogs.
+- E3's correctness criterion missed: look into medical-safety over-blocking on "How do doctors decide that someone has high blood pressure?" (personalized intermediate answer).
+- Run E4 with `en_core_web_lg`, and with `--real-cloud` once a provider is configured.
+- Dr. Abbas still has to rate `abbas_sample.csv`.
+
+How to try it: see `eval/README.md`.

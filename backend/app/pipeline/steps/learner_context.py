@@ -1,5 +1,5 @@
 from app.core.registry import steps
-from app.core.schemas import RequestContext
+from app.core.schemas import LearnerContext, RequestContext
 from app.pipeline.base import BaseStep
 
 
@@ -15,6 +15,9 @@ class LearnerContextStep(BaseStep):
     on_error = "skip"
 
     async def run(self, ctx: RequestContext) -> RequestContext:
+        if not self.services.settings.learner.personalize:  # E3 "off" condition
+            ctx.learner = LearnerContext(personalized=False)
+            return ctx
         kc_ids = ctx.understanding.kc_ids if ctx.understanding else None
         ctx.learner = self.services.learner.context(ctx.request.student_id, ctx.request.topic, kc_ids)
         return ctx

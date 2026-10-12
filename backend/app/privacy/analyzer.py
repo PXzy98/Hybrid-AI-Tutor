@@ -63,7 +63,14 @@ class PIIAnalyzer:
             v = v.removeprefix(title)
         return v in self.allow
 
-    def analyze(self, text: str) -> list[Finding]:
+    def analyze(self, text: str, names: list[str] | tuple[str, ...] = (),
+                usernames: list[str] | tuple[str, ...] = ()) -> list[Finding]:
+        """PII findings. `names` / `usernames` are known identity values of the asking student: every
+        whole-word occurrence is a finding, whatever the NER model thinks."""
+        known = [Finding(kind, m.start(), m.end(), 1.0)
+                 for kind, values in (("PERSON", names), ("USERNAME", usernames))
+                 for v in values if v and not self._allowed(v)
+                 for m in re.finditer(rf"(?<!\w){re.escape(v)}(?!\w)", text, re.I)]
         results: list[RecognizerResult] = self.engine.analyze(
             text=text, language="en", entities=list(self.cfg.entities),
             score_threshold=self.cfg.score_threshold)
@@ -74,7 +81,7 @@ class PIIAnalyzer:
                 f = clean_person(text, f)
             if f and not self._allowed(text[f.start:f.end]):
                 found.append(f)
-        return resolve_overlaps(found)
+        return resolve_overlaps(found + known)
 
 
 _EPONYM_NOUNS = {"score", "scores", "kappa", "test", "index", "coefficient", "theorem", "rule", "law",

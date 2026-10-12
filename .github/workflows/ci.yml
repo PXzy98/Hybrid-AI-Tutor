@@ -31,6 +31,11 @@ jobs:
         run: python -m pytest -q
         env:
           TEST_LEARNER_KNOWLEDGE: rule
+      - name: Evaluation harnesses, smoke mode (E2, E4 gates on any leak, E3)
+        run: |
+          python ../eval/learner-sim/run.py --smoke --out "$RUNNER_TEMP/e2"
+          python ../eval/privacy-audit/run.py --smoke --out "$RUNNER_TEMP/e4"
+          python ../eval/personalization/run.py --smoke --out "$RUNNER_TEMP/e3"
 
   frontend:
     runs-on: ubuntu-latest

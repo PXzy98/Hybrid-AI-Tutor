@@ -107,6 +107,7 @@ class LearnerConfig(Section):
     knowledge: str = "bkt"
     preference: str = "simple"
     weak_evidence: bool = False
+    personalize: bool = True  # False: every answer is unpersonalized (E3 "personalization off" condition)
     levels: LevelsConfig = LevelsConfig()
     recommender: RecommenderConfig = RecommenderConfig()
     bkt_defaults: BktDefaults = BktDefaults()
@@ -147,6 +148,8 @@ class CloudLLMConfig(Section):
     max_tokens: int = 800
     fallback_to_local: bool = True
     history_turns: int = Field(0, ge=0)
+    audit_log: str | None = None  # E4: record every cloud request to this JSONL file (app/llm/audit.py)
+    audit_echo: bool = False  # E4: answer cloud requests with a local echo instead of a provider
 
 
 class LLMConfig(Section):

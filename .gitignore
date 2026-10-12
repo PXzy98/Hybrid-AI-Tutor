@@ -28,3 +28,6 @@ Thumbs.db
 
 # Frontend build cache
 frontend/tsconfig.tsbuildinfo
+
+# E4 raw payload capture (large; the report is kept)
+eval/privacy-audit/results/cloud_requests.jsonl
