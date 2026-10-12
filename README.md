@@ -6,22 +6,40 @@ A health-education tutor (ELG 5902, Group 1). Students pick one of five topics (
 - Implementation plan, step by step: [docs/IMPLEMENTATION_PROMPTS.md](docs/IMPLEMENTATION_PROMPTS.md)
 - Progress log: [docs/IMPLEMENTATION_LOG.md](docs/IMPLEMENTATION_LOG.md)
 - For teammates (routing, RAG): [docs/INTERFACES.md](docs/INTERFACES.md)
+- MVP status: [docs/MVP_CHECKLIST.md](docs/MVP_CHECKLIST.md) · demo script: [docs/DEMO.md](docs/DEMO.md)
+
+## Quick start (Docker)
+
+Requirements: Docker with Compose, and the Ollama GPU server on the network (`OLLAMA_URL`).
+
+```powershell
+Copy-Item .env.example .env       # set OLLAMA_URL, INSTRUCTOR_USERNAME, INSTRUCTOR_INITIAL_PASSWORD
+docker compose up --build -d      # http://localhost:8080 (WEB_PORT changes the port)
+```
+
+- `api`: FastAPI with the privacy filter and the learner model; SQLite lives in the `tutor-data` volume.
+- `web`: nginx serving the React app and proxying `/api` to `api`. The browser sees one origin.
+- The first build downloads the spaCy model `en_core_web_lg` (about 400 MB). `SPACY_MODEL=en_core_web_sm` gives a smaller image.
+- Log in as the instructor, choose a new password, then create students (API `/api/v1/admin/students` until the dashboard of Step 13). For a demo with three prepared students, see [docs/DEMO.md](docs/DEMO.md).
+- Any `config.yaml` value can be overridden in `.env` as `SECTION__FIELD`, e.g. `CONTENT__SERVE_UNREVIEWED=true` (needed while the course content is unreviewed) or `ROUTING__THRESHOLD=0.7`.
+- `docker compose down` stops the app; `docker compose down -v` also deletes all accounts and data.
 
 ## Repository layout
 
 | Path | Contents |
 |---|---|
 | `backend/` | FastAPI app (`app/`) and tests |
-| `frontend/` | React + TypeScript web app (Step 9) |
-| `content/topics/` | KCs, check questions, misconception catalog per topic (Step 5) |
+| `frontend/` | React + TypeScript web app (see `frontend/README.md`) |
+| `content/topics/` | KCs, check questions, misconception catalog per topic |
+| `scripts/` | Content review export, demo seeding |
 | `config.yaml` | Pipeline steps, models, thresholds, learner settings |
 | `.env` | Secrets and machine-specific URLs (copy from `.env.example`) |
 | `eval/` | Evaluations; `model-boundary-test/` is done |
 | `data/synthetic/` | Synthetic test data (fictional people only) |
 
-## Development setup
+## Development setup (without Docker)
 
-Requirements: Python 3.12, Node 20+ (frontend, from Step 9). The commands below are for PowerShell; on bash use `.venv/bin/` (Linux/macOS) or `.venv/Scripts/` (Git Bash) instead of `.venv\Scripts\`.
+Requirements: Python 3.12, Node 20+. The commands below are for PowerShell; on bash use `.venv/bin/` (Linux/macOS) or `.venv/Scripts/` (Git Bash) instead of `.venv\Scripts\`.
 
 ```powershell
 python -m venv .venv
@@ -46,7 +64,14 @@ The server refuses to start without the spaCy model named in `config.yaml` (`pri
 .venv\Scripts\python -m spacy download en_core_web_lg
 ```
 
-For quick local development you can use the small model instead: copy `config.yaml`, set `privacy.spacy_model: en_core_web_sm`, and point `APP_CONFIG` at the copy. Tests always use the small model.
+For quick local development you can use the small model instead: set `PRIVACY__SPACY_MODEL=en_core_web_sm` in `.env`. Tests always use the small model.
+
+Run the app in development mode (two terminals):
+
+```powershell
+cd backend; ..\.venv\Scripts\python -m uvicorn app.main:app --reload     # http://localhost:8000/docs
+cd frontend; npm install; npm run dev                                   # http://localhost:5173
+```
 
 ### First instructor account
 

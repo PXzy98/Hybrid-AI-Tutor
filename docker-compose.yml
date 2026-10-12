@@ -1,0 +1,32 @@
+# Privacy-Aware Hybrid AI Tutor: one command to run the app.
+#   docker compose up --build            -> http://localhost:8080
+# Ollama runs on the GPU server (OLLAMA_URL in .env); it is not part of this file.
+# Settings come from .env (see .env.example); SECTION__FIELD variables override config.yaml values,
+# e.g. CONTENT__SERVE_UNREVIEWED=true for the demo (docs/DEMO.md).
+services:
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      args:
+        SPACY_MODEL: ${SPACY_MODEL:-en_core_web_lg}
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: sqlite:////app/data/app.db  # inside the named volume, whatever .env says
+    volumes:
+      - tutor-data:/app/data
+    restart: unless-stopped
+
+  web:
+    build: ./frontend
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  tutor-data:

@@ -613,3 +613,71 @@ cd backend; $env:APP_CONFIG="<path to dev config>"; ..\.venv\Scripts\python -m u
 cd frontend; npm install; npm run dev     # open http://localhost:5173
 npm test; npm run build
 ```
+
+## Step 10 — Packaging and MVP demo (2026-10-12)
+
+Done:
+- **Nested environment overrides.** `Settings` now has `env_nested_delimiter="__"`, so `SECTION__FIELD=value` overrides one `config.yaml` value (deep-merged; sibling values stay), e.g. `CONTENT__SERVE_UNREVIEWED=true`, `PRIVACY__SPACY_MODEL=…`, `ROUTING__STUB_SCORE=1.0`. Type-enforced invariants still hold (`LLM__LOCAL__THINK=true` is rejected; tested). This replaces the copied dev config files used in Steps 4–9.
+- `backend/Dockerfile` (build context: the repository root): python:3.12-slim.
+  - The repository layout is kept (`/app/backend`, `/app/content`, `/app/config.yaml`), so `REPO_ROOT` and the content directory resolve.
+  - The package is installed **editable** from `/app/backend`. Dependencies and the spaCy model are installed in their own cached layer.
+  - Build arg `SPACY_MODEL` (default `en_core_web_lg`) sets `PRIVACY__SPACY_MODEL` as well, so the image and the privacy filter always agree.
+  - The container runs as a non-root user, with a `HEALTHCHECK` on `/api/v1/health` and `DATABASE_URL=sqlite:////app/data/app.db`.
+- `frontend/Dockerfile`: node:20-slim build → nginx:1.27-alpine. `frontend/nginx.conf`:
+  - serves the SPA (`try_files … /index.html`) and proxies `/api/` to `api:8000` with 180 s timeouts (for slow local answers);
+  - long cache for the hashed `/assets/`;
+  - `nosniff` and a same-origin referrer policy, repeated per location because a location's `add_header` replaces the server-level ones.
+- `docker-compose.yml`:
+  - `api`: `env_file: .env` (optional) and the named volume `tutor-data`.
+  - `web`: `${WEB_PORT:-8080}:80`; waits for `api` to become healthy.
+  - Ollama stays external (`OLLAMA_URL`). `.dockerignore` files keep `.venv`, `node_modules`, `data`, `eval`, `docs` and `.env` out of the build contexts.
+- `scripts/demo_seed.py` works only through the public API. As the instructor it creates (or, when they exist, reactivates and resets) three demo students; then, as each student, it sets the demo password, resets the profile and completes onboarding:
+  - `demo.novice` misses the first diagnostic question → all basic (the dependents are not assessed);
+  - `demo.intermediate` answers the diagnostic correctly → all intermediate;
+  - `demo.advanced` answers the diagnostic plus one correct check answer per KC → all advanced.
+
+  Answer keys are read from `content/` only to simulate students. The script fails with clear messages when the server is unreachable, when the instructor still has to change the password, or when unreviewed content is not served. It can be re-run.
+- `docs/DEMO.md`: preparation (`.env`, compose, first instructor login, seeding, warming up the model) and a 5-minute table of what to do and what to say:
+  1. novice: basic, example first, check question;
+  2. a wrong and then a right check answer → the band changes;
+  3. advanced: same question, advanced and concept-first;
+  4. a privacy question (name, student number, health detail) → local;
+  5. what was stored (a `docker compose exec` one-liner);
+  6. local vs cloud via `ROUTING__STUB_SCORE`.
+- `docs/MVP_CHECKLIST.md`: the 16 MVP deliverables of design §12 with their code, tests and status. 12 are ✅. 4 are 🟡 because of open items outside the code: the cloud provider, the content review, and the real router and RAG from teammates.
+- README: Docker quick start, `SECTION__FIELD` overrides, and development mode with two terminals. `.env.example`: Compose variables and override examples (with the warning to use `SPACY_MODEL`, not `PRIVACY__SPACY_MODEL`, with Docker).
+
+Verification (Done when):
+- `docker compose up --build` built and started both images (test project `tutortest`, port 8081, `SPACY_MODEL=en_core_web_sm`, demo overrides in a scratch override file). `api` became healthy and `web` waited for it. Image sizes: api 815 MB (with the small spaCy model), web 74 MB.
+- **One port serves everything**:
+  - `/api/v1/health` through nginx → ok, **Ollama reachable from the container, `qwen3.5:9b` available**;
+  - `/`, `/login`, `/chat`, `/me` → 200 text/html (SPA fallback);
+  - `X-Content-Type-Options` and `Referrer-Policy` present.
+- The instructor's first login and password change worked. **`demo_seed.py` against the Docker deployment** gave novice: all basic (5 not assessed), intermediate: all intermediate, advanced: all advanced. Re-running works (also checked against uvicorn).
+- Real model through Docker: "My name is Alice Tremblay, student 300418277, and I have asthma…" → `route=local`, all four checks passed, 1.8 s. The `docker compose exec` command from DEMO.md showed only `My name is <PERSON_1>, student <STUDENT_ID_1>, and I have <HEALTH_DETAIL_1>…`, and none of the raw values occur anywhere in the DB.
+- Before Docker, against uvicorn with the real model, the same question showed the contrast for the demo: demo.novice → basic, example first, short (7.9 s, basic check item); demo.advanced → advanced, concept first, precise terms (4.0 s, advanced check item).
+- The test stack was removed afterwards (`down -v --rmi local`); the build cache was kept. Backend: 289 tests pass (including 2 new tests for the nested overrides).
+
+Files: `backend/Dockerfile`, `frontend/{Dockerfile,nginx.conf,.dockerignore}`, `docker-compose.yml`, `.dockerignore`, `scripts/demo_seed.py`, `docs/{DEMO,MVP_CHECKLIST}.md`, `README.md`, `.env.example`, `backend/app/core/config.py`, `backend/tests/test_config.py`.
+
+Decisions:
+- The SQLite database lives in a **named volume**, not a bind mount, so file permissions work the same on Windows, macOS and Linux hosts. `docker compose down -v` deletes it.
+- The demo student password is a fixed demo value (`demo-student-2026`, overridable with `DEMO_STUDENT_PASSWORD`), written down in `docs/DEMO.md`. It is only for demo accounts.
+- The image keeps the default `en_core_web_lg`. The verification build used `SPACY_MODEL=en_core_web_sm`, so that the 400 MB model was not downloaded without asking.
+- `api` gets `DATABASE_URL` from `environment:`, which takes precedence over `.env`, so a developer's local `DATABASE_URL` cannot point the container elsewhere.
+
+Interface changes:
+- Settings: `SECTION__FIELD` environment variables override config values. No API or schema changes.
+
+Known gaps / TODO:
+- The default `en_core_web_lg` image has not been built on this machine yet; only the `en_core_web_sm` variant was.
+- No TLS in the compose setup. Behind HTTPS, set `AUTH__COOKIE_SECURE=true`.
+- Alembic migrations are still missing; recreate the volume after schema changes until they exist.
+
+How to try it:
+```powershell
+Copy-Item .env.example .env   # OLLAMA_URL, INSTRUCTOR_USERNAME, INSTRUCTOR_INITIAL_PASSWORD, CONTENT__SERVE_UNREVIEWED=true
+docker compose up --build -d  # http://localhost:8080
+# log in as the instructor once and change the password, then:
+$env:DEMO_INSTRUCTOR_PASSWORD="<new password>"; .venv\Scripts\python scripts\demo_seed.py
+```

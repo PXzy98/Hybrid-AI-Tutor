@@ -168,6 +168,9 @@ class Settings(BaseSettings):
         env_file=REPO_ROOT / ".env",
         env_file_encoding="utf-8",
         extra="ignore",
+        # SECTION__FIELD overrides one config.yaml value, e.g. PRIVACY__SPACY_MODEL=en_core_web_sm or
+        # CONTENT__SERVE_UNREVIEWED=true (used by the Docker image and the demo)
+        env_nested_delimiter="__",
     )
 
     # --- from config.yaml
