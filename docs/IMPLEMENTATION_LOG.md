@@ -820,3 +820,94 @@ How to try it:
 # backend + frontend as in DEMO.md, with CONTENT__SERVE_UNREVIEWED=true
 # Chat: answer a check question with a wrong option -> "What I know" lists the misunderstanding
 ```
+
+
+## Step 13 — Admin service and instructor dashboard — 2026-10-12
+
+Branch `feature/dashboard` (stacked on `feature/misconceptions`).
+
+What was built (backend, `app/admin/` + `app/api/v1/admin.py`; every route requires the instructor):
+- **Runtime config** (`GET/PUT /admin/config`). The editable subset: `routing.threshold`, `verify.checkers`, `learner.knowledge`, `learner.weak_evidence`, `learner.levels`.
+  - A PUT is validated against the registries and the section validators. It then replaces the settings object (`Services.reconfigure`), rebuilds the learner model and the pipeline runner, and stores a row in the new `config_history` table: values before and after, plus the instructor's `account_id` (no username).
+  - The next `/ask` uses the new values; requests already running keep the old ones. A PUT without changes adds no history row.
+  - The newest history row is applied again at startup, so a change survives a restart.
+  - `medical_safety`, `pii_leak` and `profile_leak` cannot be switched off (422). Only `grounding`, and later non-safety checkers, are optional.
+- **Class summary** (`GET /admin/class-summary?topic=`):
+  - The population is the students with consent.
+  - For each KC, it counts students per band: `not_assessed` (no graded answer yet), basic, intermediate, advanced, mastered.
+  - The top misconceptions are counted as students with that misconception open.
+  - **Suppression** uses `learner.class_summary_min_group` (5):
+    - population < 5 → only `suppressed: true`;
+    - a band count of 1–4 → `null` (0 is shown);
+    - if a row then has exactly one hidden cell, the next smallest non-zero cell is hidden too, so the hidden one cannot be computed from the total;
+    - misconceptions held by fewer than 5 students are not listed, only counted (`misconceptions_hidden`).
+  - No student IDs are returned (test).
+- **Logs** (`GET /admin/logs?page=&page_size=&topic=`):
+  - entries hold the sanitized question, route and score, model, latency (sum of step timings), check statuses and warnings. There is no student or session ID.
+  - stats: the number of requests, local/cloud counts, the cloud share, and latency p50/p95.
+- **Materials** (`POST /admin/topics/{topic}/materials`, multipart): the file goes to `<rag.materials_dir>/<topic>/` (new setting, default `data/topics`, git-ignored).
+  - The file name is cleaned, so the path part is dropped. Allowed types: `.md .txt .pdf .html .htm .docx`, up to 20 MB, not empty.
+  - An existing file returns 409 unless `replace=true`.
+  - If the retriever has `ingest(topic, path)` (Siyun's part, as documented in `rag/interface.py`), it is called; an ingest error is reported, and the file stays.
+  - New dependency: `python-multipart`.
+- **Content status** (`GET /admin/content`): per topic, the KC count, items reviewed of total, corrections reviewed of total, and the uploaded materials, plus the `serve_unreviewed` flag.
+
+Frontend `/admin/*` (tabs):
+- **Students:**
+  - add a student, with the hint "Do not use real student numbers as usernames";
+  - the temporary password is shown once with a Copy button;
+  - reset password (shown once), activate/deactivate;
+  - delete with a typed-username confirmation that lists what is deleted.
+- **Class summary:** a topic picker and one stacked bar per KC. Hidden groups are pooled in one hatched "<5" segment, and the screen-reader label says "fewer than 5". The suppression notice appears for small classes, followed by the misconception list and the hidden count.
+- **Settings:** the form for the runtime subset (required checkers are checked and disabled), "Save and apply", and the change history.
+- **Logs:** stat cards (questions, routed to cloud, p50, p95), a paginated table with "answered by <model>", so a cloud route with local fallback is visible.
+- **Content:** a review status per topic, a development-mode warning while `serve_unreviewed` is on, and a materials list with upload.
+
+Tests:
+- `tests/test_admin_dashboard.py` has 14 tests:
+  - every `/admin/*` route returns 403 for a student and 401 without a login, read from the OpenAPI paths;
+  - config contents; a threshold change takes effect on the next `/ask` (local → cloud);
+  - checkers and the knowledge model are swapped live;
+  - invalid changes are rejected (required checker, unknown checker or model, bad levels, threshold > 1);
+  - history, the no-op PUT, and a restart restoring the value;
+  - the suppression rules, full suppression for 3 students, and counts for 7 students (one misconception listed, one hidden, no IDs);
+  - logs are sanitized ("Alice" → `<PERSON_1>`), paginated, with stats;
+  - uploads: stored, listed, the rules (type, empty, 409, replace, path traversal, unknown topic), and `ingest` is called.
+- Vitest `Admin.test.tsx` has 4 tests:
+  - adding a student shows the temporary password once;
+  - delete stays disabled until the username is typed;
+  - the suppression message;
+  - bars with the hidden segment and its accessible label.
+- Backend: 332 tests pass with BKT and 332 with `rule`. Ruff is clean. Frontend: 7 Vitest tests pass and `npm run build` succeeds.
+
+Verification (Done when), with uvicorn and Vite on a scratch DB (`serve_unreviewed`, `ROUTING__STUB_SCORE=0.5`) and the real local model, in the built-in browser:
+1. `scripts/demo_seed.py` seeded the 3 demo students → the Class summary tab showed "Fewer than 5 students have a learning profile… hidden to protect their privacy".
+2. After adding 6 simulated students (9 in total), the tab showed bars per KC with exact counts (for example, 7 basic) and hatched "<5" segments for the small groups.
+3. Settings: the threshold went from 0.6 to 0.4 with "Save and apply" ("Saved. The next question uses the new settings."; the history shows `routing_threshold`).
+   - Before the change: demo.novice's question → `local (0.50)`.
+   - After it, without a restart: the router chose `cloud (0.50)`. No cloud key is configured on this machine, so the answer fell back to the local model with the warning "The cloud model was unavailable…". The Logs tab shows both rows, "routed to cloud 50%", and "answered by qwen3.5:9b".
+4. The Students, Logs and Content tabs rendered as described.
+
+Decisions:
+- The safety and privacy checkers are locked on in the dashboard. Design §2 says the safety and privacy rules never depend on configuration.
+- A dashboard change is stored in the DB and wins over `config.yaml` after a restart. To go back to the file values, save them again in Settings. A "reset to config.yaml" button can be added if wanted.
+- The class-summary population is students with consent (only they have a profile). `not_assessed` is shown separately, so a prior estimate is not shown as "basic".
+- Secondary suppression was added on top of the design's n < 5 rule, so a hidden count cannot be worked out from the total.
+
+Interface changes:
+- New tables: `config_history`, plus `learner_misconception` from Step 12.
+- New setting: `rag.materials_dir`.
+- New API routes: `/admin/config`, `/admin/class-summary`, `/admin/logs`, `/admin/content`, `/admin/topics/{topic}/materials`.
+- `Services.reconfigure()`. The optional `Retriever.ingest(topic, path)` is now called.
+- New dependency: `python-multipart`.
+
+Known gaps / TODO:
+- Uploads are stored but not indexed until Siyun's retriever implements `ingest`.
+- There is no route to delete an uploaded material yet; remove files from `data/topics/<topic>/` by hand.
+- The runtime config is per process. With several API workers, each worker applies the change only on restart (the compose setup runs one worker).
+
+How to try it:
+```powershell
+# backend + frontend (DEMO.md), log in as the instructor -> /admin
+# Settings: change the threshold; Class summary: needs >= 5 students with consent
+```

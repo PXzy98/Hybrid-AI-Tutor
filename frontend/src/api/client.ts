@@ -40,3 +40,11 @@ export async function request<T>(method: string, path: string, body?: unknown): 
   if (!res.ok) throw new ApiError(res.status, detailOf(data));
   return data as T;
 }
+
+/** multipart/form-data upload (the browser sets the boundary header). */
+export async function upload<T>(path: string, form: FormData): Promise<T> {
+  const res = await fetch(BASE + path, { method: "POST", credentials: "include", body: form });
+  const data = await res.json().catch(() => null);
+  if (!res.ok) throw new ApiError(res.status, detailOf(data));
+  return data as T;
+}

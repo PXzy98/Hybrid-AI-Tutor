@@ -44,6 +44,7 @@ class RoutingConfig(Section):
 class RagConfig(Section):
     impl: str = "stub"
     k: int = Field(4, ge=1)
+    materials_dir: str = "data/topics"  # instructor uploads: <materials_dir>/<topic>/ (relative to the repo)
 
 
 class PrivacyConfig(Section):
@@ -216,6 +217,10 @@ class Settings(BaseSettings):
     def topics(self, course_id: str = "default") -> list[str]:
         course = self.courses.get(course_id)
         return list(course.topics) if course else []
+
+    def materials_dir(self, topic: str) -> Path:
+        p = Path(self.rag.materials_dir)
+        return (p if p.is_absolute() else REPO_ROOT / p) / topic
 
     def content_dir(self) -> Path:
         p = Path(self.content.dir)

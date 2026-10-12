@@ -16,6 +16,7 @@ routing:
 rag:
   impl: stub                          # Siyun's implementation name once registered
   k: 4
+  materials_dir: data/topics          # instructor uploads (admin dashboard), one folder per topic
 
 privacy:
   spacy_model: en_core_web_lg         # tests use en_core_web_sm

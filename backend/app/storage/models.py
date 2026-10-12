@@ -155,3 +155,15 @@ class LearnerMisconception(SQLModel, table=True):
     status: str  # suspected | confirmed | resolved
     evidence_count: int = 0  # signals since the misconception was last opened
     updated_at: datetime = Field(default_factory=utcnow)
+
+
+class ConfigHistory(SQLModel, table=True):
+    """Runtime config changes from the dashboard (design §9). The newest row is applied at startup."""
+
+    __tablename__ = "config_history"
+
+    id: int | None = Field(default=None, primary_key=True)
+    changed_at: datetime = Field(default_factory=utcnow)
+    account_id: int | None = None  # the instructor (no username here: identity stays in `account`)
+    values: dict = Field(default_factory=dict, sa_column=Column(JSON))  # the full editable subset after
+    previous: dict = Field(default_factory=dict, sa_column=Column(JSON))  # ... and before the change

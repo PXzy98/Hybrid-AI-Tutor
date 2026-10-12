@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.admin.runtime_config import restore_latest
 from app.api.v1 import api_router
 from app.core.services import build_services
 from app.pipeline.runner import build_runner
@@ -18,6 +19,8 @@ async def lifespan(app: FastAPI):
     services.accounts.bootstrap_instructor()
     app.state.services = services
     app.state.runner = build_runner(services)
+    if restore_latest(app):  # the newest dashboard change survives a restart
+        logging.getLogger("app").info("runtime config restored from config_history")
     logging.getLogger("app").info("pipeline: %s", " -> ".join(app.state.runner.step_names))
     yield
     services.engine.dispose()

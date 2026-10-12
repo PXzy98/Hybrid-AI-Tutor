@@ -17,6 +17,8 @@ frontend/dist/
 .env
 data/*.db
 data/*.db-journal
+# course-material uploads from the dashboard
+data/topics/
 
 # OS / editors
 .DS_Store
