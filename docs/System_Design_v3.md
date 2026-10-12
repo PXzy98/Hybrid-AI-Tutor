@@ -2,6 +2,7 @@
 
 Oct 11, 2026 · Zhenyan Xing · ELG 5902, Group 1
 Replaces System Plan v2 (Oct 6, 2026). Diagrams: [`docs/diagrams/`](diagrams/) (`.drawio` files are editable in draw.io; `.png` files are exports).
+**Revision Oct 12, 2026:** student and instructor accounts. The instructor manages student accounts, and identity is kept apart from the learner profile (§2, §7.5, §8.1, §8.3, §9).
 
 ---
 
@@ -16,7 +17,8 @@ v2 was a privacy-aware question-answering tutor: it removed PII, routed each que
 | Student model | `ProfileProvider` with static background fields | **Learner Model** with two independent parts: a Knowledge Model (core) and a Preference Model (auxiliary), behind one interface |
 | Content | 5 topics, RAG chunks per topic | 5 topics → **20–30 KCs** with prerequisites; chunks tagged with KC + difficulty; check-question **item bank**; **misconception catalog** |
 | Pipeline | 7 steps | 10 steps + 1 post-response step (`learner_context`, `understand`, `attach_check`, `update_learner` are new) |
-| API | ask, sessions, topics, admin | + `check`, `onboarding`, `learner/me`, `admin/class-summary` |
+| API | ask, sessions, topics, admin | + `check`, `onboarding`, `learner/me`, `admin/class-summary`, `auth/*`, `admin/students` |
+| Identity | none (an anonymous browser token was planned) | **Accounts**: many students and one instructor, with no self-registration. The instructor adds, resets, deactivates and deletes student accounts. Login uses server-side sessions. Only the `account` table links a username to the pseudonymous `student_id`. |
 | Cloud payload | sanitized text, by convention | sanitized text + **coarse labels only**, enforced by an allow-list schema (`CloudRequest`, `extra="forbid"`) |
 | Evaluation | privacy + answer quality | + KC tagging accuracy, simulated-student knowledge tracing, personalization on/off, cloud-payload audit |
 
@@ -49,6 +51,7 @@ The system is a health-education tutor. A student picks one of five topics (High
 3. Adapt presentation (example-first vs concept-first, concise vs detailed) to stated preferences.
 4. Keep the full learner profile inside the privacy boundary. The cloud sees only a sanitized question and coarse labels.
 5. Keep every model replaceable through an interface, so a component can be swapped by changing configuration (for example BKT ↔ rule method, simple preferences ↔ full ILS).
+6. Give every student a personal account, so the learner profile follows the student across devices and sessions. One instructor account manages the student accounts.
 
 **Out of scope:** personal diagnosis or treatment advice, which the system never gives at any level. Grading for credit. Real student data before ethics and consent are settled.
 
@@ -59,12 +62,16 @@ The system is a health-education tutor. A student picks one of five topics (High
 ## 2. Design principles
 
 1. **Raw PII and the learner profile never leave the privacy boundary.** The cloud receives only a sanitized question, course passages and a fixed set of coarse labels. Logs, session history and the evidence log never store raw question text.
-2. **Knowing what to teach comes before how to present it.** The Knowledge Model decides content and depth. The Preference Model only changes presentation and can never change level, KC or content.
-3. **Every model sits behind an interface.** Each of `KnowledgeModel`, `PreferenceModel` and `Recommender` can be replaced by changing `config.yaml`.
-4. **Degrade, don't fail.** If any learner step fails, the student still gets a correct, unpersonalized answer.
-5. **Extend by adding files, not by editing existing code** (unchanged from v2). A new step, checker, recognizer, model or topic is a new file plus a config entry.
-6. **Reviewed content over generated content.** Check questions, misconception corrections and KC definitions are drafted by an LLM and then reviewed by the team and, where possible, Dr. Abbas.
-7. **Safety does not depend on the level.** A basic-level answer may be simpler, but it must not be less accurate. The medical-safety checker runs at every level.
+2. **Identity is kept apart from learning data.**
+   - Usernames, display names and password hashes exist only in the `account` table.
+   - Learner state, evidence, logs, sessions, prompts and cloud payloads use only the random `student_id`.
+   - The **server** decides who the student is, from the login session. A `student_id` in a request body or query string is never trusted.
+3. **Knowing what to teach comes before how to present it.** The Knowledge Model decides content and depth. The Preference Model only changes presentation and can never change level, KC or content.
+4. **Every model sits behind an interface.** Each of `KnowledgeModel`, `PreferenceModel` and `Recommender` can be replaced by changing `config.yaml`.
+5. **Degrade, don't fail.** If any learner step fails, the student still gets a correct, unpersonalized answer.
+6. **Extend by adding files, not by editing existing code** (unchanged from v2). A new step, checker, recognizer, model or topic is a new file plus a config entry.
+7. **Reviewed content over generated content.** Check questions, misconception corrections and KC definitions are drafted by an LLM and then reviewed by the team and, where possible, Dr. Abbas.
+8. **Safety does not depend on the level.** A basic-level answer may be simpler, but it must not be less accurate. The medical-safety checker runs at every level.
 
 ---
 
@@ -76,8 +83,9 @@ The system has three layers, as in v2: a React client, a FastAPI application ser
 
 | Component | Responsibility | Input → Output | Owner |
 |---|---|---|---|
-| Web frontend (React) | Chat, onboarding, check questions, "What I know" view; instructor dashboard | user actions → `/api/v1/*` | Zhenyan |
-| API service | Versioned routes, validation | HTTP → `RequestContext` | Zhenyan |
+| Web frontend (React) | Login, chat, onboarding, check questions, "What I know" view; instructor dashboard including student accounts | user actions → `/api/v1/*` | Zhenyan |
+| API service | Versioned routes, validation; identity from the login session | HTTP → `RequestContext` | Zhenyan |
+| **Auth & accounts** | Login, server-side sessions (httpOnly cookie), roles (`student`, `instructor`), password hashing (argon2), lockout after failed logins, the instructor's student-account management, deletion of a student's data | credentials → `CurrentUser` | Zhenyan |
 | Pipeline runner | Runs steps from `config.yaml`, timing, failure policy | `RequestContext` → `RequestContext` | Zhenyan |
 | Privacy filter (step 1) | Presidio + custom recognizers | question → `PIIResult` | Zhenyan |
 | **Learner context (step 2)** | Loads knowledge state and preferences | `student_id` → `LearnerContext` | Zhenyan |
@@ -93,7 +101,7 @@ The system has three layers, as in v2: a React client, a FastAPI application ser
 | **Learner Model** | Knowledge Model, Preference Model, Recommender behind `LearnerModel` | §5 | Zhenyan |
 | **Cloud request guard** | Allow-list schema for everything sent to the cloud | context → `CloudRequest` | Zhenyan |
 | **Domain content** | KC map, item bank, misconception catalog | YAML files, reviewed | Team + Dr. Abbas |
-| Admin service | Config, materials, logs, class summary (aggregates) | admin requests → config / DB | Zhenyan |
+| Admin service | Config, materials, logs, class summary (aggregates), student accounts; instructor role only | admin requests → config / DB | Zhenyan |
 
 ---
 
@@ -269,6 +277,7 @@ class LearnerModel:                       # facade; implementations chosen in co
 
 ### 5.5 Cold start
 
+0. **First login.** The student logs in with the temporary password from the instructor and must set their own password before doing anything else.
 1. **Consent screen.** It explains what is stored (mastery per KC, misconception IDs, preferences), where it is stored (locally), and how to view, reset or delete it. Without consent, the tutor runs unpersonalized and stores nothing about the student.
 2. **2–3 preference questions** (sequencing, detail).
 3. **5–10 diagnostic MCQs** for the chosen topic, one per KC, starting with KCs that have no prerequisites. If the student misses a prerequisite, its dependent KCs are skipped and keep `p_init`. The answers update mastery through BKT without the learning step.
@@ -299,6 +308,8 @@ The loop: **student asks or answers → extract evidence → update learner stat
 
 ### 7.1 Ask (`POST /api/v1/ask`)
 
+The caller must be a logged-in student. The request body has no `student_id`. The API fills `AskRequest.student_id` from the session, and a `session_id` that belongs to another student is rejected (404).
+
 ```yaml
 pipeline: [privacy_filter, learner_context, understand, retrieve, route, generate, restore, verify, attach_check, record]
 post_response: [update_learner]
@@ -322,7 +333,7 @@ post_response: [update_learner]
 
 ### 7.2 Check answer (`POST /api/v1/check`)
 
-`{session_id, item_id, choice}` → graded by code against the key → strong `Evidence` → `KnowledgeModel.update` → the misconception status is updated from the chosen distractor → response `{correct, explanation, kc_level, next_kc}`. No LLM and no cloud are involved, so the answer is immediate.
+`{session_id, item_id, choice}` (the student comes from the login session) → graded by code against the key → strong `Evidence` → `KnowledgeModel.update` → the misconception status is updated from the chosen distractor → response `{correct, explanation, kc_level, next_kc}`. No LLM and no cloud are involved, so the answer is immediate.
 
 ### 7.3 Onboarding (`GET/POST /api/v1/onboarding`)
 
@@ -330,7 +341,21 @@ The GET returns the consent text, the preference questions and the diagnostic it
 
 ### 7.4 Learner view (`GET/DELETE /api/v1/learner/me`)
 
-GET shows each KC as a band (basic / intermediate / advanced / mastered) and the open misconceptions in plain language. Raw probabilities are not shown. DELETE resets the profile and removes the evidence log.
+The student is taken from the login session; there is no ID parameter. GET shows each KC as a band (basic / intermediate / advanced / mastered) and the open misconceptions in plain language. Raw probabilities are not shown. DELETE resets the learning profile and removes the evidence log; the account stays.
+
+### 7.5 Accounts and login
+
+| Flow | Rule |
+|---|---|
+| Bootstrap | On first start, if no instructor exists, one is created from `INSTRUCTOR_USERNAME` / `INSTRUCTOR_INITIAL_PASSWORD` in `.env`. It must change that password at first login. A CLI command creates or resets an instructor if access is lost. |
+| Student accounts | **No self-registration.** The instructor adds a student (username + display name), and the system generates a one-time temporary password that is shown once. The student must change it at first login. |
+| Login | `POST /api/v1/auth/login`. Passwords are hashed with argon2. The server creates a session token and stores only its SHA-256 hash; the browser gets the token in an httpOnly, SameSite=Lax cookie (Secure behind HTTPS). Sessions expire after `auth.session_ttl_hours`. |
+| Failed logins | One generic error ("invalid username or password"). After `auth.max_failed_logins` failures the account is locked for `auth.lockout_minutes`. |
+| Must change password | Until the password is changed, the account can only call `auth/*`. Everything else returns 403. |
+| Reset / deactivate | The instructor can generate a new temporary password or deactivate a student. Both end all of that student's sessions **immediately**, which is why server-side sessions are used instead of JWTs. |
+| Delete | The instructor can delete a student. See §8.3 for exactly what is removed. |
+| Roles | Student endpoints accept only `student` accounts; `admin/*` accepts only `instructor` accounts. The student-management endpoints act only on student accounts, so the instructor cannot delete itself or the last instructor through them. |
+| Usernames | 3–32 characters from `a-z 0-9 . _ -`, case-insensitive. The instructor should **not** use real student numbers as usernames. |
 
 ---
 
@@ -342,7 +367,8 @@ GET shows each KC as a band (basic / intermediate / advanced / mastered) and the
 |---|---|---|---|
 | Raw question | no | yes | **no** (sanitized version only) |
 | Sanitized question | yes (logs) | yes | yes |
-| Student ID | internal pseudonymous ID | no | **no** |
+| Student ID | random pseudonymous ID; linked to the username only in `account` | no | **no** |
+| Username, display name, password hash | `account` table only | **no** | **no** |
 | Mastery per KC | yes | level per KC | **one coarse label** for this question (`level`) |
 | Misconceptions | catalog IDs + status | reviewed statement + correction | **no** (correction added locally) |
 | Preferences | yes | yes | 2 labels (`sequencing`, `detail`) |
@@ -375,11 +401,18 @@ class CloudRequest(BaseModel):            # the ONLY type the cloud client accep
 - The `pii_leak` checker runs Presidio again on the serialized `CloudRequest`. The `profile_leak` checker fails if the payload contains a student ID, an item ID or a misconception statement.
 - In the end-to-end tests, every cloud request is intercepted and audited (§11, E4).
 
-### 8.3 Instructor view and student rights
+### 8.3 Instructor view, accounts and student rights
 
 - The instructor dashboard shows **aggregates only**: the mastery distribution per KC, the most common misconceptions, and usage. Any group smaller than **n = 5** is suppressed.
-- Individual student views are not built unless the client requires them and students consent (open item).
-- Students can view, reset or delete their profile at any time. The retention period (for example, deletion at the end of the course) is an open item for the client.
+- **Student-account management** shows account data only: username, display name, active, must-change-password, created, last login. It shows no learning data.
+- **Individual learning views are off by default.** `learner.instructor_individual_view: false` keeps them off. They are built only if the client requires them and the student consents during onboarding.
+- **Deleting a student** removes:
+  - the account and all its login sessions;
+  - the learning profile (mastery, misconceptions, preferences, evidence log, consent);
+  - the student's session history.
+
+  Request-log rows are **kept but anonymized**: their `student_id` is replaced with `deleted`. Class-level statistics stay correct, but nothing links them to the person any more. Deletion is implemented generically: every table with a `student_id` column is purged, and `request_log` is anonymized. Tables added later are therefore covered automatically, and a test checks this.
+- Students can view or reset their learning profile at any time (`learner/me`). Deleting the whole account goes through the instructor. The retention period (for example, deleting all students at the end of the course) is an open item for the client.
 
 ---
 
@@ -441,12 +474,26 @@ class RouteInput(BaseModel):                    # + optional level and kc_ids, i
 
 `Chunk` gains `kc_ids` and `level`. `AskResponse` gains `check_item`, `kc_level` and `next_kc`.
 
-**Database tables** (SQLModel): `learner_kc_state`, `learner_misconception`, `learner_preference`, `evidence_log` (student_id, kc_id, kind, item_id, correct, weight, created_at; no text), `consent`, plus the v2 tables (logs, sessions, config history).
+**Identity.** `AskRequest.student_id` stays in the internal schema, which teammates use, but clients never send it. The public request body is `AskBody` (session_id, course_id, topic, question, language), and the API fills `student_id` from the login session.
+
+**Database tables** (SQLModel):
+- `account` (id, username, display_name, role, password_hash, student_id, active, must_change_password, failed_logins, locked_until, created_at, last_login_at)
+- `auth_session` (token_hash, account_id, created_at, expires_at)
+- `learner_kc_state`, `learner_misconception`, `learner_preference`
+- `evidence_log` (student_id, kc_id, kind, item_id, correct, weight, created_at; no text)
+- `consent`
+- the v2 tables: logs, sessions (`session_turn` now has a `student_id` for ownership checks), config history.
 
 **REST API v1**
 
 | Method | Path | Purpose | Caller |
 |---|---|---|---|
+| POST | `/api/v1/auth/login` · `/auth/logout` | Start / end a session (httpOnly cookie) | Login page |
+| GET | `/api/v1/auth/me` | Current account (username, display name, role, must-change-password) | All pages |
+| POST | `/api/v1/auth/change-password` | Change own password; ends the account's other sessions | All users |
+| GET / POST | `/api/v1/admin/students` | List student accounts / add one (returns a one-time temporary password) | Dashboard |
+| PATCH / DELETE | `/api/v1/admin/students/{id}` | Rename or (de)activate / delete a student and their data | Dashboard |
+| POST | `/api/v1/admin/students/{id}/reset-password` | New temporary password; ends the student's sessions | Dashboard |
 | POST | `/api/v1/ask` | Ask a question; returns the answer + check item + next KC | Chat |
 | POST | `/api/v1/check` | Answer a check question | Chat |
 | GET / POST | `/api/v1/onboarding` | Consent, preference questions, diagnostic | Onboarding |
@@ -476,6 +523,15 @@ learner:
   weak_likelihood: { given_mastered: 0.30, given_not_mastered: 0.60 }
   rule: { last_n: 5, weak_penalty: 0.05 }
   class_summary_min_group: 5
+  instructor_individual_view: false # individual learning views stay off unless the client requires them
+auth:
+  session_ttl_hours: 12
+  cookie_name: tutor_session
+  cookie_secure: false            # true behind HTTPS
+  min_password_length: 10
+  max_failed_logins: 5
+  lockout_minutes: 15
+# .env: INSTRUCTOR_USERNAME, INSTRUCTOR_INITIAL_PASSWORD (bootstrap of the first instructor)
 llm:
   local: { base_url: "http://192.168.2.25:11434/v1", model: "qwen3.5:9b", think: false, timeout_s: 60 }
   understand: { model: "qwen3.5:9b", think: false, format: json, timeout_s: 5 }
@@ -493,6 +549,7 @@ content:
 ai-tutor/
 ├── content/topics/<topic>/        # NEW: kcs.yaml, items.yaml, misconceptions.yaml (reviewed)
 ├── backend/app/
+│   ├── auth/                      # NEW: passwords, sessions, account service, deps (roles), purge, CLI
 │   ├── pipeline/steps/            # + learner_context.py, understand.py, attach_check.py, update_learner.py
 │   ├── learner/                   # NEW
 │   │   ├── facade.py              # LearnerModel, LearnerContext, to_cloud_labels()
@@ -503,7 +560,8 @@ ai-tutor/
 │   ├── llm/cloud_guard.py         # NEW: CloudRequest, the only cloud entry point
 │   ├── verify/checkers/           # + profile_leak.py
 │   └── prompts/                   # base + {level}.{sequencing}.{detail} partials
-├── frontend/src/pages/            # + Onboarding.tsx, WhatIKnow.tsx, admin/ClassSummary.tsx
+├── frontend/src/pages/            # + Login.tsx, ChangePassword.tsx, Onboarding.tsx, WhatIKnow.tsx,
+│                                  #   admin/ClassSummary.tsx, admin/Students.tsx
 └── eval/
     ├── model-boundary-test/       # done (Oct 6)
     ├── understand-tagging/        # NEW: E1
@@ -523,10 +581,17 @@ The decision rules are fixed here, **before** the experiments run.
 | **E1** | Can the local model tag questions reliably? | 120–150 labelled student-style questions (~25 per topic, including paraphrases and off-topic questions); run the `understand` step | KC top-1 accuracy ≥ 85% / 75%; misconception-ID precision ≥ 80% / 70%; p50 ≤ 0.6 s | Below marginal → turn off weak evidence (`weak_evidence: false`) and use topic-only retrieval |
 | **E2** | Does BKT estimate mastery better than the rule method? | 200 simulated students × 40 interactions per topic. Each has a hidden true mastery with learning, **forgetting (0.02/step)** and slip/guess drawn **differently** from BKT's defaults. Weak signals have noise at the E1 error rate. | MAE between estimate and true mastery; next-answer AUC; level-band accuracy | Keep BKT only if its MAE is lower by **≥ 0.03** and its AUC is not lower; otherwise switch to `rule`. Also run weak evidence on/off: keep it only if it lowers MAE. Also run a parameter sensitivity sweep. |
 | **E3** | Does personalization give better-fitting answers without losing accuracy? | 4 personas (novice; intermediate with a misconception; advanced; mixed prerequisites) × 20 questions × personalization on/off = 160 answers. Blind pairwise judgement by an LLM judge; Dr. Abbas rates a sample of 30. | Win rate on "level fits this student" ≥ 65% / 55%; no drop in correctness or rise in critical errors; known misconception addressed ≥ 80% / 70%; preference respected ≥ 90% | Below marginal → keep only level adaptation and the misconception note; turn off preference templates |
-| **E4** | Does any profile data reach the cloud? | Intercept every cloud request during E3 and the end-to-end runs | Fields outside the allow-list: **0**; profile leak: **0**; PII leak ≤ 1% / 5% (as in v2) | Any profile leak blocks the release |
+| **E4** | Does any profile or identity data reach the cloud? | Intercept every cloud request during E3 and the end-to-end runs; also check that usernames and display names never appear in prompts, logs or payloads | Fields outside the allow-list: **0**; profile or identity leak: **0**; PII leak ≤ 1% / 5% (as in v2) | Any profile or identity leak blocks the release |
 | **E5** | Is the default local model good on the actual topics? | 20–30 questions per topic (the boundary test used medical-AI course questions, not these topics); local / cloud / hybrid, as in v2 | v2 quality targets; learner steps add ≤ 0.8 s p50 | Weak topic → raise the routing threshold for it, or extend RAG |
 
 The v2 privacy and end-to-end tests (detection recall, leakage, semantic preservation, verification accuracy) are unchanged.
+
+**Access-control tests**, which run in CI:
+- a student cannot read another student's session or profile;
+- a student cannot call `admin/*`;
+- an account that must change its password can only call `auth/*`;
+- deactivating, resetting or deleting a student ends that student's sessions at once;
+- deleting a student purges every table with a `student_id` column and anonymizes `request_log`.
 
 ---
 
@@ -534,9 +599,9 @@ The v2 privacy and end-to-end tests (detection recall, leakage, semantic preserv
 
 | Milestone | Date | Deliverables (learner modelling) | Depends on |
 |---|---|---|---|
-| **MVP** | Oct 21 | Schemas + `LearnerModel` facade; BKT **and** rule implementations; consent + onboarding (preferences + diagnostic); level-aware prompts; `attach_check` + `/check`; `CloudRequest` guard; **High Blood Pressure** content complete (second topic only if reviewed); v2 MVP items (step runner, Presidio, local + cloud, chat page) | Stub routing and RAG; HBP content |
+| **MVP** | Oct 21 | Accounts and login (instructor bootstrap, student-account API, login and change-password pages); schemas + `LearnerModel` facade; BKT **and** rule implementations; consent + onboarding (preferences + diagnostic); level-aware prompts; `attach_check` + `/check`; `CloudRequest` guard; **High Blood Pressure** content complete (second topic only if reviewed); v2 MVP items (step runner, Presidio, local + cloud, chat page) | Stub routing and RAG; HBP content |
 | Decision | Nov 1 | E2 simulation → BKT or rule; parameter sensitivity | MVP |
-| **Beta** | Nov 11 | All five topics' content; `understand` step + weak evidence (E1 first); misconception catalog + tracking; recommender; "What I know" view; instructor class summary; `profile_leak` checker; E4 audit | Real RAG with KC/level tags; Dr. Abbas review of corrections |
+| **Beta** | Nov 11 | Student-account management page in the dashboard; all five topics' content; `understand` step + weak evidence (E1 first); misconception catalog + tracking; recommender; "What I know" view; instructor class summary; `profile_leak` checker; E4 audit | Real RAG with KC/level tags; Dr. Abbas review of corrections |
 | Showcase | Nov 25 | E3 personalization on/off; E5 per-topic quality; demo with personas | Final routing threshold |
 | Final presentation | Dec 3 | Results and comparison | |
 | Final report + handoff | Dec 13 | Report, deployment guide, content-authoring guide, code cleanup | |
@@ -558,6 +623,8 @@ The v2 privacy and end-to-end tests (detection recall, leakage, semantic preserv
 | Extra latency from the `understand` step | Slower answers | Thinking off, same loaded model, 5 s timeout with skip; weak-evidence update after the response |
 | Ten days to MVP | MVP slips | Learner MVP excludes weak evidence, misconceptions, recommender and the instructor view; those come in Beta |
 | Black-box interfaces gain fields | Integration rework | Fields are optional with defaults; one contract test per interface, as in v2 |
+| Weak account security (guessed or shared passwords) | One student sees or changes another's profile | argon2 hashes; minimum length; lockout after failed logins; forced change of temporary passwords; httpOnly SameSite cookies; server-side sessions revoked on reset, deactivation and deletion; access-control tests in CI |
+| Usernames chosen as real student numbers | Identity data spreads | The guidance in the dashboard says not to; usernames live only in `account`; E4 checks prompts, logs and payloads |
 
 ---
 
@@ -578,12 +645,13 @@ The v2 privacy and end-to-end tests (detection recall, leakage, semantic preserv
 
 - ☐ Client confirms the five topics, the KC lists and the guideline each topic follows (Dr. Abbas).
 - ☐ How much review time Dr. Abbas has (items, misconception corrections).
-- ☐ Whether instructors may see individual students, with consent, or only aggregates.
+- ☐ Whether instructors may see individual students' learning data, with consent. Default: aggregates only (`learner.instructor_individual_view: false`).
 - ☐ Profile retention period, and the wording of the consent text.
+- ☐ Inform the professor of the deletion rule: a deleted student's data is purged, and request logs are kept anonymized (§8.3).
 - ☐ Whether the client wants the full ILS questionnaire.
 - ☐ `cloud_safe = false` → force local (agree with Tongkai); whether the route score uses `level`.
 - ☐ Cloud provider and model, and who pays (unchanged from v2).
-- ☐ Student login: the learner model needs a stable pseudonymous ID, so the MVP needs at least a simple login or a persistent anonymous token.
+- ☑ Student login: decided Oct 12. The instructor creates student accounts, students log in with a password, and identity is kept apart from the profile (§7.5).
 
 ---
 

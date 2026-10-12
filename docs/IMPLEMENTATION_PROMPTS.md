@@ -7,7 +7,7 @@
 > Read docs/IMPLEMENTATION_PROMPTS.md. Follow "Global rules" and do Step N only. Stop when Step N's "Done when" checks pass and report back.
 > ```
 >
-> - 按顺序做：Step 0 → 10 是 MVP（10/21），Step 11 → 14 是 Beta（11/11）。
+> - 按顺序做：Step 0 → 1 → 2 → **2b（账户，10/12 新增）** → 3 → … → 10 是 MVP（10/21），Step 11 → 14 是 Beta（11/11）。
 > - 每一步结束后，agent 会更新 `docs/IMPLEMENTATION_LOG.md`。下一个会话靠这个文件了解上一步做了什么，所以每步都可以开新会话。
 > - 每一步做完先自己运行一遍，再进入下一步。
 > - 路由（Tongkai）和 RAG（Siyun）只做接口和 stub，不实现内部逻辑。
@@ -36,6 +36,7 @@ You are implementing the system specified in **`docs/System_Design_v3.md`** (the
 3. A `CloudRequest` never contains a student ID, answer history, item IDs or misconception text. Its only labels are `level`, `sequencing` and `detail`.
 4. The learner profile is read and written only by backend code. The frontend gets bands and plain-language summaries, never raw probabilities.
 5. A failure in `privacy_filter` stops the request. It is never skipped.
+6. **Identity comes from the login session**, never from a request body or query string. Student endpoints use the session's `student_id`. Usernames, display names and password hashes live only in the `account` table; every other table, log, prompt and payload uses `student_id` (from Step 2b on).
 
 ### Engineering rules
 - Small modules, type hints everywhere, short docstrings. Match the existing code style once it exists.
@@ -44,6 +45,7 @@ You are implementing the system specified in **`docs/System_Design_v3.md`** (the
   - Use `FakeLLMClient` (Step 3) instead of real models.
   - Mark tests that need the network with `@pytest.mark.ollama` or `@pytest.mark.cloud`. They are skipped by default and run with `-m ollama`.
   - Tests that need a spaCy model use `en_core_web_sm`.
+  - API tests log in through the `student_client` / `instructor_client` fixtures (Step 2b).
 - Never commit secrets. `.env` is git-ignored; `.env.example` documents every variable.
 - Do not pull, delete or change models on the Ollama server. Do not change design decisions. Do not delete user files. **Ask the user first** in all three cases.
 - If something is ambiguous, choose the simplest option consistent with the design, and note it in the log under "Decisions".
@@ -77,7 +79,7 @@ You are implementing the system specified in **`docs/System_Design_v3.md`** (the
    - ruff config: line length 110, rules `E,F,I,UP,B`;
    - pytest config: `asyncio_mode = "auto"`, markers `ollama`, `cloud`, `presidio`, default `-m "not ollama and not cloud"`.
 3. Create `.gitignore` for Python, Node, `.env`, `data/*.db`, `.venv`, `node_modules`, `dist`, `__pycache__`.
-4. Create `.env.example` with `OLLAMA_URL`, `CLOUD_BASE_URL`, `CLOUD_API_KEY`, `CLOUD_MODEL`, `ADMIN_TOKEN`, `DATABASE_URL`.
+4. Create `.env.example` with `OLLAMA_URL`, `CLOUD_BASE_URL`, `CLOUD_API_KEY`, `CLOUD_MODEL`, `DATABASE_URL` (Step 2b adds `INSTRUCTOR_USERNAME`, `INSTRUCTOR_INITIAL_PASSWORD`).
 5. Create `config.yaml` with the full structure from design §9 (pipeline, post_response, verify, learner, llm, content). Add:
    ```yaml
    routing: { impl: stub, threshold: 0.6 }
@@ -237,6 +239,66 @@ This step fixes the interfaces that teammates code against. Be exact.
 
 ---
 
+## Step 2b — Accounts and authentication
+
+**Read:** design §2 (principle 2), §7.5, §8.1, §8.3, §9 (identity, tables, REST API, config `auth`).
+
+This step was added on Oct 12 when accounts were introduced. It changes the Step 2 API: from now on, identity always comes from the login session.
+
+**Tasks**
+1. Dependencies: add `argon2-cffi`.
+   - Config: an `auth` section (design §9) and `learner.instructor_individual_view: false`.
+   - Settings/env: `INSTRUCTOR_USERNAME`, `INSTRUCTOR_INITIAL_PASSWORD`. Remove `ADMIN_TOKEN`.
+2. Tables (`storage/models.py`):
+   - `account`:
+     - `id`; `username` (unique, lower-case); `display_name`; `role` (`student` | `instructor`);
+     - `password_hash`; `student_id` (unique random UUID for students, null for instructors);
+     - `active`; `must_change_password`; `failed_logins`; `locked_until`; `created_at`; `last_login_at`.
+   - `auth_session`: `id`; `token_hash` (SHA-256 of the token, unique); `account_id`; `created_at`; `expires_at`.
+   - Add an indexed `student_id` column to `session_turn`. `SessionStore` gains `owner(session_id)` and takes the student in `append`.
+3. `app/auth/`:
+   - `passwords.py`: argon2 hash / verify / needs-rehash, and a temporary-password generator.
+   - `sessions.py`: create a session (random token, store only the hash), resolve a token, revoke one, revoke all of an account's sessions, and purge expired ones lazily.
+   - `service.py` (`AccountService`):
+     - create a student or an instructor;
+     - authenticate: one generic failure message; lockout after `auth.max_failed_logins` for `auth.lockout_minutes`; constant-time behaviour for unknown usernames;
+     - change password (ends the account's other sessions);
+     - reset password (temporary password, `must_change_password`, ends sessions);
+     - activate or deactivate (deactivation ends sessions);
+     - delete a student;
+     - `bootstrap_instructor()` from `.env` at startup when no instructor exists.
+   - `purge.py`: `purge_student(session, student_id)` deletes rows from **every** table that has a `student_id` column, except `request_log`, where `student_id` becomes `deleted`. It finds the tables through `SQLModel.metadata`, so learner tables added later are covered without any change.
+   - `deps.py`: `CurrentUser` from the session cookie; `require_student` / `require_instructor`. An account with `must_change_password` may only call `auth/*`; everything else returns 403 `password change required`.
+   - `cli.py`: `python -m app.auth.cli create-instructor <username>` and `reset-password <username>`, with the password read through `getpass`.
+4. API:
+   - `POST /api/v1/auth/login` sets an httpOnly, SameSite=Lax cookie (`auth.cookie_name`, Secure from `auth.cookie_secure`, max-age from `auth.session_ttl_hours`) and returns `Me`.
+   - `POST /api/v1/auth/logout`, `GET /api/v1/auth/me`, `POST /api/v1/auth/change-password`.
+   - Admin endpoints (instructor only, acting **only on student accounts**):
+     - `GET` and `POST /api/v1/admin/students`; POST returns the temporary password once;
+     - `PATCH /api/v1/admin/students/{id}` (`display_name`, `active`);
+     - `DELETE /api/v1/admin/students/{id}`;
+     - `POST /api/v1/admin/students/{id}/reset-password`.
+     - The list shows account data only, never learning data.
+   - Usernames: 3–32 characters from `[a-z0-9._-]`, normalized to lower case. Duplicates → 409.
+5. Changes to the Step 2 endpoints:
+   - `POST /api/v1/ask` requires a student. The body is `AskBody` (no `student_id`), and the server builds `AskRequest` with the session's `student_id`. A `session_id` owned by another student → 404.
+   - `GET /api/v1/sessions/{id}` requires a student and returns 404 for sessions the student does not own.
+   - `GET /api/v1/topics` requires any logged-in account. `GET /api/v1/health` stays public.
+   - CORS: `allow_credentials=True` with the explicit dev origins.
+6. Tests:
+   - Fixtures in `conftest.py`: `accounts(client)` creates accounts directly through `AccountService`; `student_client` and `instructor_client` return logged-in clients.
+   - Update the Step 2 API tests to log in.
+   - New tests:
+     - login, logout, me and change password; generic error; lockout; temporary password → 403 until changed;
+     - student A cannot read student B's session or continue it;
+     - a student gets 403 on `admin/*`, and an anonymous caller gets 401;
+     - reset and deactivate end the student's live sessions at once;
+     - delete purges the account, sessions and turns and anonymizes `request_log`. Add a throw-away table with a `student_id` column in the test to show the generic purge covers it;
+     - bootstrap of the instructor from env;
+     - usernames and display names never appear in `request_log` or `session_turn`.
+
+**Done when:** all tests pass. With uvicorn and a bootstrapped instructor, one can log in as the instructor, change the password, create a student, log in as that student (forced password change), ask a question, and delete the student, after which the student's cookie no longer works.
+
 ## Step 3 — LLM layer: local client, cloud guard, generate
 
 **Read:** design §6 (prompt templates, safety), §7.1 (generate, latency), §8.
@@ -299,7 +361,7 @@ This step fixes the interfaces that teammates code against. Be exact.
 
 ## Step 5 — Domain content: format, loader, High Blood Pressure draft
 
-**Read:** design §4 (all), §2 principle 6.
+**Read:** design §4 (all), §2 principle 7.
 
 **Tasks**
 1. Pydantic models plus a loader in `backend/app/learner/content.py` for `content/topics/<topic>/kcs.yaml`, `items.yaml` and `misconceptions.yaml`, using the formats in design §4.1–4.4. Validation:
@@ -382,12 +444,12 @@ This step fixes the interfaces that teammates code against. Be exact.
    - Add a test that every one of the 12 combinations contains the base safety block.
 2. Onboarding API:
    - `GET /api/v1/onboarding?topic=` returns the consent text, 2 preference questions and the diagnostic items. Diagnostic: one item per KC, prerequisite-free KCs first, `CheckItemPublic` only, max 10.
-   - `POST /api/v1/onboarding` takes `{student_id, topic, consent, preferences, answers:[{item_id, choice}]}`.
+   - `POST /api/v1/onboarding` (logged-in student) takes `{topic, consent, preferences, answers:[{item_id, choice}]}`.
      - It stores consent and preferences.
      - It grades answers by key and applies `diagnostic` evidence.
      - If a prerequisite is wrong, its dependents keep `p_init`.
      - Every part is optional.
-3. `POST /api/v1/check` takes `{student_id, session_id, item_id, choice}`.
+3. `POST /api/v1/check` (logged-in student) takes `{session_id, item_id, choice}`.
    - It grades by key, applies `strong` evidence, and records the chosen distractor's misconception ID in the evidence log (tracking comes in Step 12).
    - It returns `{correct, correct_choice, explanation, kc_id, kc_level, next_kc}`.
    - Unknown item → 404. No LLM call.
@@ -395,8 +457,8 @@ This step fixes the interfaces that teammates code against. Be exact.
    - KC = the first of `understanding.kc_ids` if present, else the recommender's `next_kc`, else the topic's lowest-mastery KC.
    - It picks an unseen item for that KC, avoids items answered in the last 24 h (from the evidence log), and prefers the item level that matches the KC level.
    - It sets `ctx.check_item`.
-5. `GET /api/v1/learner/me?student_id=&topic=` returns per KC: name and band (`basic`/`intermediate`/`advanced`/`mastered` when ≥ 0.90). No probabilities.
-   - `DELETE /api/v1/learner/me?student_id=` resets the profile.
+5. `GET /api/v1/learner/me?topic=` (logged-in student) returns per KC: name and band (`basic`/`intermediate`/`advanced`/`mastered` when ≥ 0.90). No probabilities.
+   - `DELETE /api/v1/learner/me` resets the learning profile (the account stays).
    - `POST /api/v1/learner/me/preferences` takes explicit feedback (`more_detail`, `shorter`, `example_first`, `concept_first`).
 6. `AskResponse` now fills `check_item`, `kc_level` and `next_kc`.
 7. Tests: an end-to-end flow with fakes — onboarding → ask (check attached) → wrong check answer lowers the level → the next ask uses a basic-level prompt (assert on the recorded fake LLM messages).
@@ -407,7 +469,7 @@ This step fixes the interfaces that teammates code against. Be exact.
 
 ## Step 8 — Verification, end-to-end hardening
 
-**Read:** design §2 principle 7, §7.1 (verify), §8.2, §13.
+**Read:** design §2 principle 8, §7.1 (verify), §8.2, §13.
 
 **Tasks**
 1. Checkers in `verify/checkers/`, registered by name:
@@ -436,7 +498,13 @@ This step fixes the interfaces that teammates code against. Be exact.
 1. `frontend/`: Vite React TS, Tailwind, React Router, TanStack Query.
    - `npm run gen:api` runs openapi-typescript on `openapi.json` (exported by `python -m app.export_openapi`) and writes `src/api/schema.d.ts`.
    - A typed fetch wrapper in `src/api/client.ts`. Base URL from `VITE_API_URL`, default `/api`, with a Vite dev proxy to `http://localhost:8000`.
-2. Identity: generate a random `student_id` (uuid) on first visit and store it in `localStorage` (pseudonymous; there is no login in the MVP). Show a small "Reset my data" link that calls DELETE `/learner/me`.
+2. Identity and login:
+   - **Login** page (`/login`).
+   - **Change password** page; it is forced when `must_change_password` is set.
+   - A route guard driven by `GET /auth/me`: students go to `/chat` or `/start`, the instructor goes to `/admin`.
+   - Logout in the header.
+   - Requests use `credentials: "include"`. Nothing about identity is kept in `localStorage`.
+   - Keep a small "Reset my learning data" link that calls DELETE `/learner/me`.
 3. Pages:
    - **Onboarding** (`/start`): consent text with an explicit checkbox; 2 preference questions; diagnostic MCQs; a "Skip" button on each part.
    - **Chat** (`/chat`):
@@ -463,7 +531,7 @@ This step fixes the interfaces that teammates code against. Be exact.
 1. `backend/Dockerfile`: python:3.12-slim; installs the package and `en_core_web_lg` (build arg to switch to `sm`); runs uvicorn.
 2. `frontend/Dockerfile`: multi-stage Node build → nginx. Its `nginx.conf` serves the SPA and proxies `/api` to `api:8000`.
 3. `docker-compose.yml`: services `api` and `web`, with a `data/` volume for SQLite and `env_file: .env`. Ollama stays external (`OLLAMA_URL`).
-4. `scripts/demo_seed.py` creates 3 demo students (novice, intermediate, advanced) via the onboarding API. `docs/DEMO.md` gives a 5-minute demo script that shows the level change, a check question, local vs cloud routing (by temporarily setting the stub router score) and the privacy guarantees.
+4. `scripts/demo_seed.py` logs in as the instructor, creates 3 demo student accounts (novice, intermediate, advanced) through `admin/students`, then logs in as each one (setting a known demo password) and completes onboarding. `docs/DEMO.md` gives a 5-minute demo script that shows the level change, a check question, local vs cloud routing (by temporarily setting the stub router score) and the privacy guarantees.
 5. `docs/MVP_CHECKLIST.md` maps each MVP deliverable in design §12 to where it is implemented and tested, with status.
 6. Update the README: quick start with docker compose, and dev mode.
 
@@ -513,7 +581,7 @@ This step fixes the interfaces that teammates code against. Be exact.
 
 **Read:** design §3, §8.3, §9 (REST API admin rows), §12 Beta.
 
-1. Admin auth: a bearer token from `ADMIN_TOKEN`, as a FastAPI dependency on `/api/v1/admin/*`.
+1. Admin auth: `require_instructor` from Step 2b on every `/api/v1/admin/*` route. `learner.instructor_individual_view` stays false, so no route returns one student's learning data.
 2. Config endpoints:
    - `GET/PUT /api/v1/admin/config` covers a runtime-editable subset: routing threshold, enabled checkers, `learner.knowledge`, `learner.weak_evidence`, level thresholds.
    - Store changes in a `config_history` table and apply them without a restart.
@@ -524,8 +592,8 @@ This step fixes the interfaces that teammates code against. Be exact.
 4. `GET /api/v1/admin/logs` returns paginated sanitized request logs, latency percentiles and the local/cloud share.
 5. `POST /api/v1/admin/topics/{topic}/materials` stores uploads in `data/topics/<topic>/` and calls an optional `ingest()` on the retriever if it implements one (Siyun's part).
 6. Frontend `/admin`:
-   - token entry (kept in sessionStorage);
-   - pages: Settings, Class summary (bar charts per KC), Logs, Content (review status per topic from the content store).
+   - instructor login (the Step 9 login page);
+   - pages: **Students** (list; add → show the temporary password once with a copy button and the hint "do not use real student numbers as usernames"; reset password; activate/deactivate; delete with a typed confirmation that explains what is deleted), Settings, Class summary (bar charts per KC), Logs, Content (review status per topic from the content store).
 
 **Done when:** the dashboard shows the class summary for the seeded demo students (with suppression visible when n < 5), and changing the threshold takes effect on the next `/ask`.
 
@@ -542,7 +610,7 @@ This step fixes the interfaces that teammates code against. Be exact.
    - Write `results/report.md` with plots, and apply the pre-registered decision rule from design §11. Print the recommended `learner.knowledge` value.
 2. `eval/privacy-audit/` (E4): a recording cloud client (installed through config) captures every `CloudRequest` during a scripted run of all test questions and personas. It reports any field outside the allow-list, PII hits and profile hits. **Exit non-zero on any leak** so it can gate CI.
 3. `eval/personalization/` (E3):
-   - personas as onboarding answers + scripted check answers;
+   - personas as student accounts (created through `admin/students`) with onboarding answers + scripted check answers;
    - 20 questions;
    - personalization on/off (`personalized=False` override);
    - blind pairwise judging with a configurable OpenAI-compatible judge (random A/B order);
