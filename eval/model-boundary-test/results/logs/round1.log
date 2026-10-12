@@ -1,0 +1,14 @@
+03:28:29 START qwen3.5:9b 
+
+=== qwen3.5:9b  think=False  repeat=0: 110 questions ===
+  [1/110] K1-1        1.2s   74.8 tok/s
+  [2/110] K1-2       27.6s   74.5 tok/s  (hit max tokens)
+  [3/110] K1-3        1.3s   74.4 tok/s
+  [4/110] K1-4        0.9s   75.0 tok/s
+  [5/110] K1-5        1.0s   74.7 tok/s
+  [6/110] K2-1        1.4s   74.4 tok/s
+  [7/110] K2-2        2.0s   74.1 tok/s
+  [8/110] K2-3        2.5s   74.0 tok/s
+  [9/110] K2-4        2.3s   74.1 tok/s
+  [10/110] K2-5        1.0s   74.7 tok/s
+  [11/110] K3-1        3.2s   75.1 tok/s

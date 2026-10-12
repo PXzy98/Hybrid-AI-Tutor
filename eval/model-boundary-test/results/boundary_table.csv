@@ -1,0 +1,12 @@
+config,params_B,Knowledge,Concept,Calculation,Applied reasoning,Instruction following,overall_acc,format_ok,median_s,median_tok_s,hit_max_tokens
+qwen3.5:0.8b,0.8,L1,L4,L2,L3,L1,0.69,0.94,0.6,235.6,2
+qwen3.5:2b,2.0,L3,L3,L3,L3,L3,0.8,0.98,1.4,149.3,1
+gemma4:e2b,2.3,L3,L4,L3,L3,L4,0.87,0.99,1.0,199.0,1
+qwen3.5:4b,4.0,L4,L4,L4,L4,L2,0.92,1.0,2.0,108.9,0
+gemma4:e4b,4.5,L4,L4,L4,L4,L4,0.95,1.0,1.5,137.1,0
+qwen3.5:9b,9.0,L4,L4,L4,L4,L4,0.99,1.0,2.7,73.4,1
+gemma4:12b,12.0,L4,L4,L4,L4,L3,0.95,1.0,2.5,75.0,0
+gemma4:26b,25.2,L4,L4,L4,L4,L4,0.98,1.0,2.9,102.5,0
+qwen3.5:27b,27.0,L4,L4,L4,L4,L4,0.99,1.0,10.8,25.5,0
+qwen3.8:27b,27.0,L4,L4,L4,L4,L4,0.99,1.0,7.7,36.9,0
+gemma4:31b,30.7,L4,L4,L4,L4,L3,0.97,1.0,8.5,21.1,0

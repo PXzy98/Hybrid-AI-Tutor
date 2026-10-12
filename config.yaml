@@ -1,0 +1,53 @@
+# Privacy-Aware Hybrid AI Tutor: runtime configuration (design: docs/System_Design_v3.md §9).
+# Secrets and machine-specific URLs live in .env (see .env.example), not here.
+
+pipeline: [privacy_filter, learner_context, understand, retrieve, route, generate, restore, verify, attach_check, record]
+post_response: [update_learner]
+
+verify:
+  checkers: [grounding, medical_safety, pii_leak, profile_leak]
+
+routing:
+  impl: stub                          # Tongkai's implementation name once registered
+  threshold: 0.6                      # ROUTE_THRESHOLD: score >= threshold -> cloud
+  force_local_if_not_cloud_safe: true # to be confirmed with Tongkai
+  stub_score: 0.0                     # stub router: 0.0 = always local
+
+rag:
+  impl: stub                          # Siyun's implementation name once registered
+  k: 4
+
+privacy:
+  spacy_model: en_core_web_lg         # tests use en_core_web_sm
+  score_threshold: 0.5
+  entities: [PERSON, EMAIL_ADDRESS, PHONE_NUMBER, STUDENT_ID, GRADE, HEALTH_DETAIL]
+  local_only_types: [HEALTH_DETAIL]   # any of these -> cloud_safe = false
+  log_raw_text: false                 # must stay false
+
+sessions:
+  store: sqlite
+  history_turns: 6
+
+learner:
+  knowledge: bkt                      # bkt | rule
+  preference: simple                  # simple | ils (later)
+  weak_evidence: false                # off in the MVP; Beta turns it on after E1
+  levels: { basic_below: 0.40, advanced_above: 0.70, hysteresis: 0.05 }
+  recommender: { ready: 0.70, mastered: 0.90 }
+  bkt_defaults: { p_init: 0.20, learn: 0.10, slip: 0.10, guess: 0.25 }
+  weak_likelihood: { given_mastered: 0.30, given_not_mastered: 0.60 }
+  rule: { last_n: 5, weak_penalty: 0.05 }
+  class_summary_min_group: 5
+
+llm:
+  local: { model: "qwen3.5:9b", think: false, temperature: 0.2, num_ctx: 8192, timeout_s: 60 }
+  understand: { model: "qwen3.5:9b", think: false, format: json, timeout_s: 5 }
+  cloud: { timeout_s: 30, max_tokens: 800, fallback_to_local: true, history_turns: 0 }
+
+content:
+  dir: content/topics
+  serve_unreviewed: false             # true only in development
+
+courses:
+  default:
+    topics: [high_blood_pressure, type2_diabetes, asthma, migraine, pneumonia]
