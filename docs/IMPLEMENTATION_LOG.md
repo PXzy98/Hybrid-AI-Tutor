@@ -556,3 +556,60 @@ cd backend
 ..\.venv\Scripts\python -m pytest tests/test_verification.py -q
 ..\.venv\Scripts\python -m pytest tests/test_verification.py -q -k privacy_end_to_end
 ```
+
+## Step 9 — Frontend MVP (2026-10-12)
+
+Done:
+- `frontend/`: Vite 5 + React 18 + TypeScript (strict), Tailwind 3, React Router 6, TanStack Query 5, Vitest 2 + Testing Library.
+  - `npm run gen:api` runs openapi-typescript on `openapi.json` (written by `python -m app.export_openapi`) and produces `src/api/schema.d.ts`. Both files are committed, so the frontend builds without the backend.
+- API layer:
+  - `src/api/client.ts`: a typed `request()` with `credentials: "include"` that maps FastAPI `detail` errors to `ApiError(status, message)`.
+  - `src/api/endpoints.ts`: one function per endpoint, using the generated types.
+- **Identity**: only the httpOnly session cookie; nothing in `localStorage`.
+  - `useMe()` (`GET /auth/me`; 401 → null) drives a route guard: not logged in → `/login`; must change password → `/change-password`; wrong role → home of the role (students `/chat`, instructor `/admin`).
+  - Logout clears the query cache.
+- Pages:
+  - `/login`.
+  - `/change-password` (forced; a student then goes to `/start`).
+  - `/start` (onboarding): topic picker; consent text and checkbox; 2 preference questions; the diagnostic MCQs; "Skip" per section and "Skip all"; a result screen with the band per KC.
+  - `/chat`: topic picker, per-topic conversations (`session_id` kept per topic), tutor messages with sources, warnings, "Suggested next" and a check-question card; a level badge; presentation-feedback buttons (shown when personalized); a banner linking to `/start` when not personalized.
+  - `/me` ("What I know"): bands per KC for every topic, the current preferences, "Reset my learning data" with an inline confirmation.
+  - `/admin`: a placeholder until Step 13.
+  - A fixed footer: "For learning only — not medical advice…".
+- `CheckCard`: options A–D in order, never an answer key. "Check answer" is enabled only after a choice. It posts `{item_id, choice, session_id}`, then shows correct / not quite (with the key), the explanation, the KC band and the suggested next KC, and locks the options.
+- Accessibility: labelled inputs; fieldset and legend for option groups; `role="status"` / `role="alert"` for results and errors; `aria-live` on the conversation; visible focus rings; bands carry text, not only colour.
+- `ErrorBoundary` around every page: a crash shows a message instead of a blank page.
+- Vitest (`src/test/CheckCard.test.tsx`), 2 tests: options render in order without a key, and the button is disabled until a choice; the chosen option is posted with credentials and the server's verdict is shown.
+- **The CI frontend job is enabled**: `npm ci`, `npm run build`, `npm test` on Node 20.
+- **Manual check (Done when), in the desktop app's browser pane** (backend on :8000 with dev config and real qwen3.5:9b; Vite on :5173; throw-away student in a scratch DB):
+  1. Login with the temporary password → forced to `/change-password` → `/start`.
+  2. Onboarding: consent, "example first" and "short", 6 answers with Q2 wrong → result HBP.1/3/5 intermediate; HBP.2 basic (missed); **HBP.4 and HBP.6 basic (skipped: they depend on HBP.2)**.
+  3. Chat: "Why is high blood pressure dangerous if I feel fine?" → an example-first, short answer, the badge "Explained at level: basic", "Suggested next: What blood pressure numbers mean", and check question HBP.1-q3.
+  4. Wrong answer B → "Not quite. The answer is C." + explanation + "This topic part: basic".
+  5. **What I know: "What blood pressure numbers mean" went intermediate → basic**, with preferences "Example first, short answers".
+- **Bug found and fixed during the manual check**: the chat page went blank. `useEffect(() => ref.scrollIntoView(...))` returned the call's result, and in this browser `scrollIntoView` returns a Promise, which React then called as a cleanup function. The effect now uses a block body, and the ErrorBoundary was added so such a crash cannot blank the page again.
+
+Files: `frontend/{package.json,package-lock.json,vite.config.ts,tsconfig.json,tailwind.config.js,postcss.config.js,index.html,openapi.json,README.md}`, `frontend/src/**` (`api/`, `components/{Layout,Band,CheckCard,TopicPicker,ErrorBoundary}.tsx`, `pages/{Login,ChangePassword,Onboarding,Chat,WhatIKnow,Admin}.tsx`, `auth.ts`, `App.tsx`, `main.tsx`, `index.css`, `test/`), `.github/workflows/ci.yml`, `.gitignore`.
+
+Decisions:
+- **The API base defaults to "" (same origin), not `/api`.** The schema's paths already start with `/api/v1`; the Vite dev proxy forwards `/api` to `localhost:8000`, and in Step 10 nginx does the same. `VITE_API_URL` is only for a cross-origin API.
+- Conversations are kept in page state per topic (not persisted in the browser); the server keeps the sanitized history.
+- Presentation-feedback buttons appear only for personalized students (the API answers 409 otherwise).
+- The diagnostic radio groups use the item ID as the group name; only the server knows the keys.
+
+Interface changes: none in the backend.
+
+Known gaps / TODO:
+- The instructor UI (students, class summary, settings, logs) is Step 13. Until then, use `/docs` or the API.
+- Chat history is not reloaded after a page refresh (`GET /sessions/{id}` exists; the UI could use it later).
+- React Router prints v7 "future flag" warnings in the console (harmless).
+- Interaction note for agents: the browser pane needs the desktop app window to be visible for clicks; when it was minimized, `form_input` and `get_page_text` still worked.
+
+How to try it:
+```powershell
+# terminal 1 (backend; dev config copy with en_core_web_sm and serve_unreviewed: true)
+cd backend; $env:APP_CONFIG="<path to dev config>"; ..\.venv\Scripts\python -m uvicorn app.main:app --reload
+# terminal 2
+cd frontend; npm install; npm run dev     # open http://localhost:5173
+npm test; npm run build
+```

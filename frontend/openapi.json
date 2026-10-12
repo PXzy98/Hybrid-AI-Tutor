@@ -1,0 +1,1845 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Privacy-Aware Hybrid AI Tutor",
+    "description": "Health-education tutor with a local learner model. Design: docs/System_Design_v3.md",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Login",
+        "operationId": "login_api_v1_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Me"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Logout",
+        "operationId": "logout_api_v1_auth_logout_post",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Me",
+        "description": "Allowed even when a password change is pending, so the client knows to ask for it.",
+        "operationId": "me_api_v1_auth_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Me"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/change-password": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Change Password",
+        "operationId": "change_password_api_v1_auth_change_password_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Me"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ask": {
+      "post": {
+        "summary": "Ask",
+        "operationId": "ask_api_v1_ask_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AskBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AskResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/check": {
+      "post": {
+        "tags": [
+          "learner"
+        ],
+        "summary": "Check",
+        "operationId": "check_api_v1_check_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/onboarding": {
+      "get": {
+        "tags": [
+          "learner"
+        ],
+        "summary": "Get Onboarding",
+        "operationId": "get_onboarding_api_v1_onboarding_get",
+        "parameters": [
+          {
+            "name": "topic",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Topic"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OnboardingInfo"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "learner"
+        ],
+        "summary": "Post Onboarding",
+        "operationId": "post_onboarding_api_v1_onboarding_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OnboardingBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OnboardingResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/learner/me": {
+      "get": {
+        "tags": [
+          "learner"
+        ],
+        "summary": "Get Profile",
+        "operationId": "get_profile_api_v1_learner_me_get",
+        "parameters": [
+          {
+            "name": "topic",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Topic"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Profile"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "learner"
+        ],
+        "summary": "Reset Profile",
+        "description": "Forget the learning profile (state, evidence, preferences). The account and consent stay.",
+        "operationId": "reset_profile_api_v1_learner_me_delete",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          }
+        }
+      }
+    },
+    "/api/v1/learner/me/preferences": {
+      "post": {
+        "tags": [
+          "learner"
+        ],
+        "summary": "Feedback",
+        "operationId": "feedback_api_v1_learner_me_preferences_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedbackBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Preferences"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sessions/{session_id}": {
+      "get": {
+        "summary": "Get Session",
+        "description": "Sanitized history of one of the caller's own sessions (oldest first).",
+        "operationId": "get_session_api_v1_sessions__session_id__get",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          },
+          {
+            "name": "last",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "title": "Last"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionHistory"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/topics": {
+      "get": {
+        "summary": "List Topics",
+        "operationId": "list_topics_api_v1_topics_get",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "default",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TopicInfo"
+                  },
+                  "title": "Response List Topics Api V1 Topics Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/students": {
+      "get": {
+        "tags": [
+          "admin: students"
+        ],
+        "summary": "List Students",
+        "operationId": "list_students_api_v1_admin_students_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/StudentAccountOut"
+                  },
+                  "type": "array",
+                  "title": "Response List Students Api V1 Admin Students Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "admin: students"
+        ],
+        "summary": "Create Student",
+        "operationId": "create_student_api_v1_admin_students_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateStudentBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedStudent"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/students/{account_id}": {
+      "patch": {
+        "tags": [
+          "admin: students"
+        ],
+        "summary": "Update Student",
+        "operationId": "update_student_api_v1_admin_students__account_id__patch",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Account Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStudentBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentAccountOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "admin: students"
+        ],
+        "summary": "Delete Student",
+        "description": "Deletes the account, its sessions and all of its learning data; request logs are anonymized.",
+        "operationId": "delete_student_api_v1_admin_students__account_id__delete",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Account Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/students/{account_id}/reset-password": {
+      "post": {
+        "tags": [
+          "admin: students"
+        ],
+        "summary": "Reset Password",
+        "operationId": "reset_password_api_v1_admin_students__account_id__reset_password_post",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Account Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TemporaryPassword"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_api_v1_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AskBody": {
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "maxLength": 64,
+            "title": "Session Id",
+            "default": ""
+          },
+          "course_id": {
+            "type": "string",
+            "title": "Course Id",
+            "default": "default"
+          },
+          "topic": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Topic"
+          },
+          "question": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Question"
+          },
+          "language": {
+            "type": "string",
+            "title": "Language",
+            "default": "en"
+          }
+        },
+        "type": "object",
+        "required": [
+          "topic",
+          "question"
+        ],
+        "title": "AskBody",
+        "description": "Public request body. Deliberately has no student_id: the server takes it from the login session."
+      },
+      "AskResponse": {
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          },
+          "answer": {
+            "type": "string",
+            "title": "Answer"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/Source"
+            },
+            "type": "array",
+            "title": "Sources",
+            "default": []
+          },
+          "model_used": {
+            "type": "string",
+            "title": "Model Used"
+          },
+          "route_target": {
+            "type": "string",
+            "enum": [
+              "local",
+              "cloud"
+            ],
+            "title": "Route Target"
+          },
+          "route_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Route Score"
+          },
+          "check_item": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CheckItemPublic"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "kc_level": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "basic",
+                  "intermediate",
+                  "advanced"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kc Level"
+          },
+          "next_kc": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/KcRecommendation"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/CheckResult"
+            },
+            "type": "array",
+            "title": "Checks",
+            "default": []
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings",
+            "default": []
+          },
+          "timings_ms": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Timings Ms",
+            "default": {}
+          }
+        },
+        "type": "object",
+        "required": [
+          "session_id",
+          "answer",
+          "model_used",
+          "route_target"
+        ],
+        "title": "AskResponse"
+      },
+      "ChangePasswordBody": {
+        "properties": {
+          "current_password": {
+            "type": "string",
+            "maxLength": 256,
+            "minLength": 1,
+            "title": "Current Password"
+          },
+          "new_password": {
+            "type": "string",
+            "maxLength": 256,
+            "minLength": 1,
+            "title": "New Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "current_password",
+          "new_password"
+        ],
+        "title": "ChangePasswordBody"
+      },
+      "CheckBody": {
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "maxLength": 64,
+            "title": "Session Id",
+            "default": ""
+          },
+          "item_id": {
+            "type": "string",
+            "title": "Item Id"
+          },
+          "choice": {
+            "type": "string",
+            "enum": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "title": "Choice"
+          }
+        },
+        "type": "object",
+        "required": [
+          "item_id",
+          "choice"
+        ],
+        "title": "CheckBody"
+      },
+      "CheckItemPublic": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "kc_id": {
+            "type": "string",
+            "title": "Kc Id"
+          },
+          "stem": {
+            "type": "string",
+            "title": "Stem"
+          },
+          "options": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Options"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "kc_id",
+          "stem",
+          "options"
+        ],
+        "title": "CheckItemPublic",
+        "description": "A check question as sent to the student: deliberately has no answer key."
+      },
+      "CheckResponse": {
+        "properties": {
+          "correct": {
+            "type": "boolean",
+            "title": "Correct"
+          },
+          "correct_choice": {
+            "type": "string",
+            "title": "Correct Choice"
+          },
+          "explanation": {
+            "type": "string",
+            "title": "Explanation"
+          },
+          "kc_id": {
+            "type": "string",
+            "title": "Kc Id"
+          },
+          "kc_level": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "basic",
+                  "intermediate",
+                  "advanced"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kc Level"
+          },
+          "kc_band": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kc Band"
+          },
+          "next_kc": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/KcRecommendation"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "correct",
+          "correct_choice",
+          "explanation",
+          "kc_id"
+        ],
+        "title": "CheckResponse"
+      },
+      "CheckResult": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pass",
+              "warn",
+              "fail"
+            ],
+            "title": "Status"
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "status"
+        ],
+        "title": "CheckResult"
+      },
+      "Choice": {
+        "properties": {
+          "value": {
+            "type": "string",
+            "title": "Value"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          }
+        },
+        "type": "object",
+        "required": [
+          "value",
+          "label"
+        ],
+        "title": "Choice"
+      },
+      "CreateStudentBody": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 3,
+            "title": "Username",
+            "description": "not a real student number"
+          },
+          "display_name": {
+            "type": "string",
+            "maxLength": 80,
+            "title": "Display Name",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "username"
+        ],
+        "title": "CreateStudentBody"
+      },
+      "CreatedStudent": {
+        "properties": {
+          "account": {
+            "$ref": "#/components/schemas/StudentAccountOut"
+          },
+          "temporary_password": {
+            "type": "string",
+            "title": "Temporary Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "account",
+          "temporary_password"
+        ],
+        "title": "CreatedStudent"
+      },
+      "DiagnosticAnswer": {
+        "properties": {
+          "item_id": {
+            "type": "string",
+            "title": "Item Id"
+          },
+          "choice": {
+            "type": "string",
+            "enum": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "title": "Choice"
+          }
+        },
+        "type": "object",
+        "required": [
+          "item_id",
+          "choice"
+        ],
+        "title": "DiagnosticAnswer"
+      },
+      "ErrorBody": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          },
+          "step": {
+            "type": "string",
+            "title": "Step"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail",
+          "step",
+          "request_id"
+        ],
+        "title": "ErrorBody"
+      },
+      "FeedbackBody": {
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "more_detail",
+              "shorter",
+              "example_first",
+              "concept_first"
+            ],
+            "title": "Action"
+          }
+        },
+        "type": "object",
+        "required": [
+          "action"
+        ],
+        "title": "FeedbackBody"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Health": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "config": {
+            "type": "boolean",
+            "title": "Config"
+          },
+          "db": {
+            "type": "boolean",
+            "title": "Db"
+          },
+          "ollama": {
+            "$ref": "#/components/schemas/OllamaStatus"
+          },
+          "cloud_enabled": {
+            "type": "boolean",
+            "title": "Cloud Enabled"
+          },
+          "routing_impl": {
+            "type": "string",
+            "title": "Routing Impl"
+          },
+          "rag_impl": {
+            "type": "string",
+            "title": "Rag Impl"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "config",
+          "db",
+          "ollama",
+          "cloud_enabled",
+          "routing_impl",
+          "rag_impl"
+        ],
+        "title": "Health"
+      },
+      "KcBand": {
+        "properties": {
+          "kc_id": {
+            "type": "string",
+            "title": "Kc Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "band": {
+            "type": "string",
+            "title": "Band"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kc_id",
+          "name",
+          "band"
+        ],
+        "title": "KcBand"
+      },
+      "KcRecommendation": {
+        "properties": {
+          "kc_id": {
+            "type": "string",
+            "title": "Kc Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kc_id",
+          "name",
+          "reason"
+        ],
+        "title": "KcRecommendation"
+      },
+      "LoginBody": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Username"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 256,
+            "minLength": 1,
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "title": "LoginBody"
+      },
+      "Me": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role"
+          },
+          "must_change_password": {
+            "type": "boolean",
+            "title": "Must Change Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "display_name",
+          "role",
+          "must_change_password"
+        ],
+        "title": "Me"
+      },
+      "OllamaStatus": {
+        "properties": {
+          "reachable": {
+            "type": "boolean",
+            "title": "Reachable"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model"
+          },
+          "model_available": {
+            "type": "boolean",
+            "title": "Model Available",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "reachable",
+          "model"
+        ],
+        "title": "OllamaStatus"
+      },
+      "OnboardingBody": {
+        "properties": {
+          "topic": {
+            "type": "string",
+            "title": "Topic"
+          },
+          "consent": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Consent"
+          },
+          "preferences": {
+            "$ref": "#/components/schemas/PreferenceAnswers",
+            "default": {}
+          },
+          "answers": {
+            "items": {
+              "$ref": "#/components/schemas/DiagnosticAnswer"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Answers"
+          }
+        },
+        "type": "object",
+        "required": [
+          "topic"
+        ],
+        "title": "OnboardingBody"
+      },
+      "OnboardingInfo": {
+        "properties": {
+          "topic": {
+            "type": "string",
+            "title": "Topic"
+          },
+          "consent_text": {
+            "type": "string",
+            "title": "Consent Text"
+          },
+          "consent_given": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Consent Given"
+          },
+          "preference_questions": {
+            "items": {
+              "$ref": "#/components/schemas/PreferenceQuestion"
+            },
+            "type": "array",
+            "title": "Preference Questions"
+          },
+          "diagnostic": {
+            "items": {
+              "$ref": "#/components/schemas/CheckItemPublic"
+            },
+            "type": "array",
+            "title": "Diagnostic"
+          }
+        },
+        "type": "object",
+        "required": [
+          "topic",
+          "consent_text",
+          "consent_given",
+          "preference_questions",
+          "diagnostic"
+        ],
+        "title": "OnboardingInfo"
+      },
+      "OnboardingResult": {
+        "properties": {
+          "personalized": {
+            "type": "boolean",
+            "title": "Personalized"
+          },
+          "assessed": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "type": "object",
+            "title": "Assessed",
+            "default": {}
+          },
+          "skipped": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Skipped",
+            "default": []
+          },
+          "kcs": {
+            "items": {
+              "$ref": "#/components/schemas/KcBand"
+            },
+            "type": "array",
+            "title": "Kcs",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "personalized"
+        ],
+        "title": "OnboardingResult"
+      },
+      "PreferenceAnswers": {
+        "properties": {
+          "sequencing": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "example_first",
+                  "concept_first"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sequencing"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "concise",
+                  "detailed"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "PreferenceAnswers"
+      },
+      "PreferenceQuestion": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "sequencing",
+              "detail"
+            ],
+            "title": "Id"
+          },
+          "question": {
+            "type": "string",
+            "title": "Question"
+          },
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/Choice"
+            },
+            "type": "array",
+            "title": "Options"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "question",
+          "options"
+        ],
+        "title": "PreferenceQuestion"
+      },
+      "Preferences": {
+        "properties": {
+          "sequencing": {
+            "type": "string",
+            "enum": [
+              "example_first",
+              "concept_first"
+            ],
+            "title": "Sequencing",
+            "default": "example_first"
+          },
+          "detail": {
+            "type": "string",
+            "enum": [
+              "concise",
+              "detailed"
+            ],
+            "title": "Detail",
+            "default": "concise"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "default",
+              "onboarding",
+              "feedback"
+            ],
+            "title": "Source",
+            "default": "default"
+          }
+        },
+        "type": "object",
+        "title": "Preferences"
+      },
+      "Profile": {
+        "properties": {
+          "personalized": {
+            "type": "boolean",
+            "title": "Personalized"
+          },
+          "preferences": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Preferences"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "topics": {
+            "items": {
+              "$ref": "#/components/schemas/TopicProfile"
+            },
+            "type": "array",
+            "title": "Topics",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "personalized"
+        ],
+        "title": "Profile"
+      },
+      "SessionHistory": {
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          },
+          "turns": {
+            "items": {
+              "$ref": "#/components/schemas/Turn"
+            },
+            "type": "array",
+            "title": "Turns"
+          }
+        },
+        "type": "object",
+        "required": [
+          "session_id",
+          "turns"
+        ],
+        "title": "SessionHistory"
+      },
+      "Source": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "kc_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Kc Ids",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "source"
+        ],
+        "title": "Source"
+      },
+      "StudentAccountOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "active": {
+            "type": "boolean",
+            "title": "Active"
+          },
+          "must_change_password": {
+            "type": "boolean",
+            "title": "Must Change Password"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "last_login_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Login At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "username",
+          "display_name",
+          "active",
+          "must_change_password",
+          "created_at",
+          "last_login_at"
+        ],
+        "title": "StudentAccountOut"
+      },
+      "TemporaryPassword": {
+        "properties": {
+          "temporary_password": {
+            "type": "string",
+            "title": "Temporary Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "temporary_password"
+        ],
+        "title": "TemporaryPassword"
+      },
+      "TopicInfo": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "kc_count": {
+            "type": "integer",
+            "title": "Kc Count",
+            "default": 0
+          },
+          "reviewed_item_count": {
+            "type": "integer",
+            "title": "Reviewed Item Count",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "TopicInfo"
+      },
+      "TopicProfile": {
+        "properties": {
+          "topic": {
+            "type": "string",
+            "title": "Topic"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "kcs": {
+            "items": {
+              "$ref": "#/components/schemas/KcBand"
+            },
+            "type": "array",
+            "title": "Kcs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "topic",
+          "name",
+          "kcs"
+        ],
+        "title": "TopicProfile"
+      },
+      "Turn": {
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "student",
+              "tutor"
+            ],
+            "title": "Role"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role",
+          "text"
+        ],
+        "title": "Turn"
+      },
+      "UpdateStudentBody": {
+        "properties": {
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name"
+          },
+          "active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active"
+          }
+        },
+        "type": "object",
+        "title": "UpdateStudentBody"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

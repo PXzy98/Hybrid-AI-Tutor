@@ -23,3 +23,6 @@ data/*.db-journal
 Thumbs.db
 .idea/
 .vscode/
+
+# Frontend build cache
+frontend/tsconfig.tsbuildinfo
