@@ -14,6 +14,13 @@ from app.llm.base import Message
 
 PROMPT_DIR = Path(__file__).parent
 
+# Added (as this exact constant, never free text) when the medical-safety check rejected the first answer.
+SAFETY_RETRY_INSTRUCTION = (
+    "Your previous answer broke the safety rules. Answer again with general health education only: no doses, "
+    "no advice to start, stop or change any medicine, and no statement that the student has a condition. "
+    "Tell the student that a doctor, nurse or pharmacist should advise on their own situation."
+)
+
 CLOUD_PLACEHOLDER_RULE = (
     "The question may contain placeholders such as <PERSON_1> or <STUDENT_ID_1>. "
     "Keep them exactly as written and never guess what they stand for."
@@ -60,7 +67,7 @@ def _user_message(topic: str, passages: list[str], question: str) -> Message:
     return {"role": "user", "content": content}
 
 
-def render_local(ctx: RequestContext) -> list[Message]:
+def render_local(ctx: RequestContext, *, safety_retry: bool = False) -> list[Message]:
     """Messages for the LOCAL model. May contain the original question and the learner context."""
     learner = ctx.learner if ctx.learner and ctx.learner.personalized else None
     if learner:
@@ -68,6 +75,8 @@ def render_local(ctx: RequestContext) -> list[Message]:
         system = system_prompt(learner.focus_level, prefs.sequencing, prefs.detail)
     else:
         system = system_prompt()
+    if safety_retry:
+        system += "\n\n" + SAFETY_RETRY_INSTRUCTION
     messages: list[Message] = [{"role": "system", "content": system}]
     for turn in ctx.history:  # sanitized earlier turns
         messages.append({"role": "user" if turn.role == "student" else "assistant", "content": turn.text})
@@ -75,9 +84,11 @@ def render_local(ctx: RequestContext) -> list[Message]:
     return messages
 
 
-def render_cloud(req: CloudRequest) -> list[Message]:
+def render_cloud(req: CloudRequest, *, safety_retry: bool = False) -> list[Message]:
     """Messages for the CLOUD model, built from the allow-listed CloudRequest only."""
     labels = req.labels
     system = system_prompt(labels.level, labels.sequencing, labels.detail) + "\n\n" + CLOUD_PLACEHOLDER_RULE
+    if safety_retry:
+        system += "\n\n" + SAFETY_RETRY_INSTRUCTION
     return [{"role": "system", "content": system},
             _user_message(req.topic, req.passages, req.sanitized_question)]

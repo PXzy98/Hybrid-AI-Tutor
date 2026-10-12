@@ -118,8 +118,10 @@ async def test_cloud_client_unavailable_without_transport():
 
 
 def test_render_cloud_signature_takes_only_a_cloud_request():
+    """The only data input is the CloudRequest; anything else must be a keyword-only boolean switch."""
     params = list(inspect.signature(render_cloud).parameters.values())
-    assert [p.name for p in params] == ["req"] and params[0].annotation is CloudRequest
+    assert params[0].name == "req" and params[0].annotation is CloudRequest
+    assert all(p.kind is p.KEYWORD_ONLY and p.annotation is bool for p in params[1:])
 
 
 def test_cloud_request_schema_has_no_room_for_profile_data():

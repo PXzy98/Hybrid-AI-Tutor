@@ -40,4 +40,5 @@ class RecordStep(BaseStep):
             s.commit()
         self.services.sessions.append(req.session_id, req.student_id, Turn(role="student", text=question))
         self.services.sessions.append(req.session_id, req.student_id, Turn(role="tutor", text=answer))
+        ctx.clear_pii_mapping()  # nothing after this step needs the original values
         return ctx

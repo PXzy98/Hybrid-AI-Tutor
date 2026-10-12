@@ -64,9 +64,11 @@ async def ask(body: AskBody, user: Student, background: BackgroundTasks, service
     try:
         ctx = await runner.run(ctx)
     except PipelineError as e:
+        ctx.clear_pii_mapping()
         return JSONResponse(status_code=503, content=ErrorBody(
             detail=FAILURE_MESSAGES.get(e.step, DEFAULT_FAILURE), step=e.step, request_id=ctx.request_id,
         ).model_dump())
+    ctx.clear_pii_mapping()  # also when `record` was skipped after an error
     background.add_task(runner.run_post, ctx)
 
     learner = ctx.learner if ctx.learner and ctx.learner.personalized else None

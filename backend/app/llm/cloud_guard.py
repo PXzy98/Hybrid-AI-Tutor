@@ -36,12 +36,16 @@ class CloudClient:
     def model(self) -> str | None:
         return self._transport.model if self._transport else None
 
-    async def complete(self, req: CloudRequest) -> LLMResult:
+    async def complete(self, req: CloudRequest, *, safety_retry: bool = False) -> LLMResult:
+        """Send a CloudRequest.
+
+        `safety_retry` only adds a fixed instruction; no free text can reach the cloud through it.
+        """
         if not isinstance(req, CloudRequest):
             raise TypeError("CloudClient accepts only a CloudRequest")
         # re-validate, even if it was built with model_construct
         req = CloudRequest.model_validate(req.model_dump())
         if self._transport is None:
             raise LLMUnavailable("cloud model not configured (CLOUD_API_KEY / CLOUD_MODEL)")
-        result = await self._transport.complete(render_cloud(req))
+        result = await self._transport.complete(render_cloud(req, safety_retry=safety_retry))
         return result.model_copy(update={"backend": "cloud"})

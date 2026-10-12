@@ -145,13 +145,14 @@ async def test_clean_question_is_not_sensitive(use_config):
     assert ctx.pii.sanitized_text == "What triggers an asthma attack?"
 
 
-async def test_restore_step_puts_values_back_and_forgets_them(use_config):
+async def test_restore_step_puts_values_back(use_config):
     services = build_services(use_config())
     ctx = RequestContext(request_id="r", request=AskRequest(student_id="s", topic="asthma", question="q"),
                          answer="Hello <PERSON_1>, see <person_1>.")
     ctx.set_pii_mapping({"<PERSON_1>": "Wei Zhang"})
     ctx = await RestoreStep(services).run(ctx)
-    assert ctx.answer == "Hello Wei Zhang, see Wei Zhang." and ctx.pii_mapping == {}
+    assert ctx.answer == "Hello Wei Zhang, see Wei Zhang."
+    assert ctx.pii_mapping  # kept for a possible regeneration in verify; `record` and the API clear it
 
 
 def test_missing_spacy_model_stops_startup(use_config):

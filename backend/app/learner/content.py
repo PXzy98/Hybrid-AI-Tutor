@@ -222,3 +222,6 @@ class ContentStore:
 
     def misconceptions(self, kc_id: str) -> list[Misconception]:
         return [m for m in self._mcs.values() if m.kc == kc_id]
+
+    def all_misconceptions(self) -> list[Misconception]:
+        return list(self._mcs.values())

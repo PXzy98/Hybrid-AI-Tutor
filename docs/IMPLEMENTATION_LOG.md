@@ -499,3 +499,60 @@ cd backend
 # log in → GET /api/v1/onboarding?topic=high_blood_pressure → POST /api/v1/onboarding → POST /api/v1/ask
 # → POST /api/v1/check → GET /api/v1/learner/me
 ```
+
+## Step 8 — Verification, end-to-end hardening (2026-10-12)
+
+Done:
+- Checkers in `verify/checkers/`, registered and selected by `verify.checkers`:
+  - **`medical_safety`** (rule-based; failures are reported as short labels and never quote the answer).
+    - **fail** on: a dosing instruction (an amount with a unit and a dosing verb in the same sentence); advice to start, stop or change a medicine ("you can stop…", "it is fine to skip your inhaler…"; negations such as "you should not stop" are excluded); a diagnosis of the student ("you have hypertension", unless it is conditional: "if you have…"); a diagnosis from the student's own reading ("your reading shows…", "a reading of 150/95 indicates high blood pressure"). The last rule closes the Step 3 gap.
+    - **warn** when the question had a HEALTH_DETAIL (or, from Step 11, `question_type == self_management`) and the answer does not refer to a clinician.
+  - **`grounding`**: a sentence counts as supported when ≥ 20% of its content words appear in one passage; if fewer than 50% of the sentences (with ≥ 4 content words) are supported → warn. Without passages → pass with "no material".
+  - **`pii_leak`**: runs the analyzer again on the **sanitized question** of `ctx.cloud_request` (placeholders blanked).
+  - **`profile_leak`**: fails on the student_id anywhere in the request, a check-item ID (`X.n-qn`), or a catalog misconception statement in the question that the student did not write.
+- `verify/leaks.py`: the detection functions plus `CloudLeakGuard`. **The generate step now runs the same checks BEFORE sending**: a finding blocks the request, logs the kinds as an error, adds a warning, and lets the local model answer. `ctx.cloud_request` is set only when something was actually sent.
+- The real `verify` step (warn):
+  - It runs all checkers; a crashing checker becomes `warn: checker error`.
+  - medical_safety **fail** → regenerate once on the same route with `safety_retry=True`, then restore placeholders and re-check. `safety_retry` adds the fixed `SAFETY_RETRY_INSTRUCTION` constant; for the cloud it is only a boolean on `CloudClient.complete`, so no free text can travel.
+  - Still failing → the safe fallback message (+ "course material listed below" when there are passages) and a warning; the sources are still returned.
+  - medical_safety **warn** → a referral sentence is appended to the answer.
+  - grounding warn → a warning. Leak failures → a warning and an error log (kinds only).
+- **The PII mapping lifetime changed.** `restore` no longer clears it, because `verify` may need it for a regenerated cloud answer. `record` clears it as the last step, and `/ask` also clears it after the pipeline (including after errors). The mapping still never leaves the in-memory context.
+- `CloudClient.complete(req, *, safety_retry=False)` and `render_cloud(req, *, safety_retry=False)`. The signature test now allows only keyword-only boolean switches besides the `CloudRequest`.
+- `ContentStore.all_misconceptions()`.
+- Tests: **287 offline, passing with both BKT and the rule model**. The new ones cover:
+  - 8 failing and 8 passing medical-safety sentences; the referral warning;
+  - grounding (no material / supported / off-topic);
+  - pii_leak and profile_leak (including "the student wrote it themselves");
+  - regenerate-once; fallback after two failures; the appended referral; a broken checker and grounding warnings;
+  - the pipeline and failure-policy table of design §7.1;
+  - the pre-send guard blocking a request whose "sanitized" text still contains a name;
+  - **the full privacy E2E**: a student with consent, preferences, a diagnostic and a misconception, asking with a name and a student number, forced to the cloud (stub score 1.0, fake cloud transport). It checks route = cloud, the answer restored to "Hello Alice Tremblay!", pii_leak and profile_leak pass, the cloud saw only placeholders and labels (no name, number, student_id, item ID, misconception statement or preference words), and the DB holds only the sanitized answer. It runs in the default suite, so it is in CI.
+- Manual check with the real qwen3.5:9b (in-process, dev config):
+  - "My reading today was 150 over 95. Should I stop taking my pills?" → the model said "higher than the target range", not a diagnosis, advised against stopping and referred to a doctor or pharmacist. medical_safety passed.
+  - The checkers took about 0.1 ms per request.
+
+Files: `backend/app/verify/leaks.py`, `backend/app/verify/checkers/{medical_safety,grounding,leaks}.py`, `backend/app/pipeline/steps/{verify,generate,restore,record}.py`, `backend/app/llm/cloud_guard.py`, `backend/app/prompts/render.py`, `backend/app/learner/content.py`, `backend/app/api/v1/ask.py`, `backend/tests/{test_verification,test_cloud_guard,test_privacy}.py`.
+
+Decisions:
+- **pii_leak scans the sanitized question only, not the passages.** Passages are course material, which legitimately contains names (authors, eponyms); scanning them would make the check fail on clean requests. Likewise, profile_leak checks misconception statements only in the question, and only if the student did not type them.
+- **The pre-send block always falls back to local**, even if `fallback_to_local` is false: privacy comes before availability.
+- The "diagnosis from a reading" rule needs "your/this … reading" or an actual BP-style number in the sentence, so general teaching sentences ("several readings over time are needed before hypertension is diagnosed") pass.
+- Regeneration uses the same route; the cloud gets the same `CloudRequest` plus the fixed retry flag.
+- Design §7.1 says `restore` "discards the mapping". It now does so in `record` and in the API (documented above).
+
+Interface changes:
+- `CloudClient.complete(req, *, safety_retry=False)`, `render_cloud(req, *, safety_retry=False)`, `render_local(ctx, *, safety_retry=False)`.
+- `GenerateStep.produce(ctx, *, safety_retry=False)` is reused by `verify`. No schema changes.
+
+Known gaps / TODO:
+- The safety rules are English-only regex. Chinese answers are only covered by the prompt.
+- Grounding is lexical; paraphrased support can be under-counted (it only warns). An embedding-based check could replace it later (Siyun's embeddings).
+- In the manual run the model wrote "[No course material was provided for this topic.]" in brackets. The prompt wording of the material block could be refined (E3).
+
+How to try it:
+```powershell
+cd backend
+..\.venv\Scripts\python -m pytest tests/test_verification.py -q
+..\.venv\Scripts\python -m pytest tests/test_verification.py -q -k privacy_end_to_end
+```

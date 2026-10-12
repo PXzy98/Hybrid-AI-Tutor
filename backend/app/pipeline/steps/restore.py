@@ -6,10 +6,11 @@ from app.privacy.anonymizer import restore
 
 @steps.register("restore")
 class RestoreStep(BaseStep):
-    """Step 7: put the original values back into placeholders of the answer, then discard the mapping.
+    """Step 7: put the original values back into placeholders of the answer.
 
     Mostly matters for cloud answers; a local answer normally has no placeholders, and is left unchanged.
-    The misconception note for cloud answers is added here in Step 12.
+    The mapping is kept until `record` (the last step), because `verify` may regenerate a cloud answer that
+    needs restoring again; the API also clears it after the pipeline. Misconception notes: Step 12.
     """
 
     name = "restore"
@@ -18,5 +19,4 @@ class RestoreStep(BaseStep):
     async def run(self, ctx: RequestContext) -> RequestContext:
         if ctx.answer:
             ctx.answer = restore(ctx.answer, ctx.pii_mapping)
-        ctx.clear_pii_mapping()
         return ctx
