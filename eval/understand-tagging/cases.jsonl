@@ -1,0 +1,40 @@
+{"id": "U01", "question": "What does the top number in a blood pressure reading mean?", "kc_ids": ["HBP.1"], "misconception_ids": [], "confusion": false, "question_type": "definition", "note": ""}
+{"id": "U02", "question": "What is diastolic pressure?", "kc_ids": ["HBP.1"], "misconception_ids": [], "confusion": false, "question_type": "definition", "note": ""}
+{"id": "U03", "question": "Why are there two numbers when they measure blood pressure?", "kc_ids": ["HBP.1"], "misconception_ids": [], "confusion": false, "question_type": "how_why", "note": "paraphrase of U01"}
+{"id": "U04", "question": "What does mmHg mean on a blood pressure monitor?", "kc_ids": ["HBP.1"], "misconception_ids": [], "confusion": false, "question_type": "definition", "note": ""}
+{"id": "U05", "question": "The bottom number is when the heart stops beating between beats, right?", "kc_ids": ["HBP.1"], "misconception_ids": ["HBP.MC5"], "confusion": false, "question_type": "check_my_answer", "note": "stated misconception"}
+{"id": "U06", "question": "Does high blood pressure always give you headaches?", "kc_ids": ["HBP.1", "HBP.4"], "misconception_ids": [], "confusion": false, "question_type": "how_why", "note": "asks, does not assert"}
+{"id": "U07", "question": "How do doctors decide that someone has hypertension?", "kc_ids": ["HBP.2"], "misconception_ids": [], "confusion": false, "question_type": "how_why", "note": ""}
+{"id": "U08", "question": "My reading was high once at the pharmacy, so that means I have high blood pressure, right?", "kc_ids": ["HBP.2"], "misconception_ids": ["HBP.MC1"], "confusion": false, "question_type": "self_management", "note": "stated misconception, personal"}
+{"id": "U09", "question": "How should I sit when I measure my blood pressure at home?", "kc_ids": ["HBP.2"], "misconception_ids": [], "confusion": false, "question_type": "self_management", "note": ""}
+{"id": "U10", "question": "What is white coat hypertension?", "kc_ids": ["HBP.2"], "misconception_ids": [], "confusion": false, "question_type": "definition", "note": ""}
+{"id": "U11", "question": "Are home blood pressure readings useful, or only the ones taken at the clinic?", "kc_ids": ["HBP.2"], "misconception_ids": [], "confusion": false, "question_type": "how_why", "note": "asks, does not assert"}
+{"id": "U12", "question": "What do categories like elevated and stage 1 mean?", "kc_ids": ["HBP.2"], "misconception_ids": [], "confusion": false, "question_type": "definition", "note": ""}
+{"id": "U13", "question": "Why do nurses take my blood pressure more than once?", "kc_ids": ["HBP.2"], "misconception_ids": [], "confusion": false, "question_type": "how_why", "note": ""}
+{"id": "U14", "question": "What causes high blood pressure?", "kc_ids": ["HBP.3"], "misconception_ids": [], "confusion": false, "question_type": "how_why", "note": ""}
+{"id": "U15", "question": "Can young people get high blood pressure too?", "kc_ids": ["HBP.3"], "misconception_ids": [], "confusion": false, "question_type": "how_why", "note": "asks, does not assert"}
+{"id": "U16", "question": "Is high blood pressure caused only by stress?", "kc_ids": ["HBP.3"], "misconception_ids": [], "confusion": false, "question_type": "how_why", "note": "asks, does not assert"}
+{"id": "U17", "question": "I'm never stressed, so my blood pressure must be fine.", "kc_ids": ["HBP.3"], "misconception_ids": ["HBP.MC7"], "confusion": false, "question_type": "check_my_answer", "note": "stated misconception"}
+{"id": "U18", "question": "Does high blood pressure run in families?", "kc_ids": ["HBP.3"], "misconception_ids": [], "confusion": false, "question_type": "how_why", "note": ""}
+{"id": "U19", "question": "Which risk factors for hypertension can a person change?", "kc_ids": ["HBP.3", "HBP.5"], "misconception_ids": [], "confusion": false, "question_type": "how_why", "note": ""}
+{"id": "U20", "question": "What happens to the body if high blood pressure is never treated?", "kc_ids": ["HBP.4"], "misconception_ids": [], "confusion": false, "question_type": "how_why", "note": ""}
+{"id": "U21", "question": "How can high blood pressure lead to a stroke?", "kc_ids": ["HBP.4"], "misconception_ids": [], "confusion": false, "question_type": "how_why", "note": ""}
+{"id": "U22", "question": "Can high blood pressure damage the kidneys?", "kc_ids": ["HBP.4"], "misconception_ids": [], "confusion": false, "question_type": "how_why", "note": ""}
+{"id": "U23", "question": "Why is hypertension called a silent killer?", "kc_ids": ["HBP.4", "HBP.1"], "misconception_ids": [], "confusion": false, "question_type": "how_why", "note": ""}
+{"id": "U24", "question": "High blood pressure only affects the heart, so the eyes and kidneys are safe, correct?", "kc_ids": ["HBP.4"], "misconception_ids": ["HBP.MC10"], "confusion": false, "question_type": "check_my_answer", "note": "stated misconception"}
+{"id": "U25", "question": "How much salt can someone with high blood pressure eat?", "kc_ids": ["HBP.5"], "misconception_ids": [], "confusion": false, "question_type": "self_management", "note": ""}
+{"id": "U26", "question": "Does regular exercise lower blood pressure?", "kc_ids": ["HBP.5"], "misconception_ids": [], "confusion": false, "question_type": "how_why", "note": ""}
+{"id": "U27", "question": "I never add salt at the table, so my salt intake is already low.", "kc_ids": ["HBP.5"], "misconception_ids": ["HBP.MC8"], "confusion": false, "question_type": "check_my_answer", "note": "stated misconception"}
+{"id": "U28", "question": "What is the DASH diet?", "kc_ids": ["HBP.5"], "misconception_ids": [], "confusion": false, "question_type": "definition", "note": ""}
+{"id": "U29", "question": "Does drinking alcohol affect blood pressure?", "kc_ids": ["HBP.5", "HBP.3"], "misconception_ids": [], "confusion": false, "question_type": "how_why", "note": ""}
+{"id": "U30", "question": "Is it too late to change your diet once you already have high blood pressure?", "kc_ids": ["HBP.5"], "misconception_ids": [], "confusion": false, "question_type": "how_why", "note": "asks, does not assert"}
+{"id": "U31", "question": "Why do people need to take blood pressure pills every day?", "kc_ids": ["HBP.6"], "misconception_ids": [], "confusion": false, "question_type": "how_why", "note": ""}
+{"id": "U32", "question": "My blood pressure is normal now, so I can stop my medication, right?", "kc_ids": ["HBP.6"], "misconception_ids": ["HBP.MC2"], "confusion": false, "question_type": "self_management", "note": "stated misconception, personal"}
+{"id": "U33", "question": "Why would a doctor prescribe two different blood pressure medicines?", "kc_ids": ["HBP.6"], "misconception_ids": [], "confusion": false, "question_type": "how_why", "note": ""}
+{"id": "U34", "question": "What should I do if my blood pressure pills make me dizzy?", "kc_ids": ["HBP.6"], "misconception_ids": [], "confusion": false, "question_type": "self_management", "note": ""}
+{"id": "U35", "question": "I only take my pills on days when I feel bad, that's fine isn't it?", "kc_ids": ["HBP.6"], "misconception_ids": ["HBP.MC11"], "confusion": false, "question_type": "self_management", "note": "stated misconception, personal"}
+{"id": "U36", "question": "I'm so confused, what's the difference between systolic and diastolic again?", "kc_ids": ["HBP.1"], "misconception_ids": [], "confusion": true, "question_type": "definition", "note": "confusion"}
+{"id": "U37", "question": "I don't get it at all. Why does salt raise blood pressure?", "kc_ids": ["HBP.5", "HBP.3"], "misconception_ids": [], "confusion": true, "question_type": "how_why", "note": "confusion"}
+{"id": "U38", "question": "What's the capital of France?", "kc_ids": [], "misconception_ids": [], "confusion": false, "question_type": "other", "note": "off-topic"}
+{"id": "U39", "question": "Can you help me with my statistics homework on p-values?", "kc_ids": [], "misconception_ids": [], "confusion": false, "question_type": "other", "note": "off-topic"}
+{"id": "U40", "question": "What is asthma?", "kc_ids": [], "misconception_ids": [], "confusion": false, "question_type": "definition", "note": "another topic"}

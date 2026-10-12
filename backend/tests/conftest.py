@@ -77,12 +77,14 @@ def use_config(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
 
 # ------------------------------------------------------------------------------- accounts
 PASSWORD = "correct-horse-battery"
+UNDERSTOOD_NOTHING = '{"k": [], "t": "other", "c": false, "m": []}'
 
 
 class Api:
     """A started TestClient plus helpers to create accounts and log in.
 
-    The local model is replaced by a FakeLLMClient (`api.local_llm`), so API tests never need Ollama.
+    The local models are replaced by FakeLLMClients (`api.local_llm`, `api.understand_llm`), so API tests
+    never need Ollama.
     """
 
     def __init__(self, client) -> None:
@@ -93,6 +95,9 @@ class Api:
         self.accounts = self.services.accounts
         self.local_llm = FakeLLMClient("Fake local answer.", model="fake-local")
         self.services.local_llm = self.local_llm
+        # the understand step: "no KC" by default; tests that need tags script their own reply
+        self.understand_llm = FakeLLMClient(UNDERSTOOD_NOTHING, model="fake-understand")
+        self.services.understand_llm = self.understand_llm
 
     def make_student(self, username: str = "alice", display_name: str = "Alice Tremblay",
                      password: str = PASSWORD, must_change: bool = False):

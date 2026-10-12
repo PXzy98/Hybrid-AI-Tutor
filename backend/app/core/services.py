@@ -26,6 +26,7 @@ class Services:
     accounts: AccountService
     local_llm: LLMClient
     cloud_llm: CloudClient
+    understand_llm: LLMClient
     content: ContentStore
     learner: LearnerModel
 
@@ -34,7 +35,7 @@ def build_services(settings: Settings | None = None) -> Services:
     settings = settings or get_settings()
     engine = make_engine(settings.database_url)
     init_db(engine)
-    local_llm, cloud_llm = build_llm_clients(settings)
+    local_llm, cloud_llm, understand_llm = build_llm_clients(settings)
     content = ContentStore(settings.content_dir(), settings.content.serve_unreviewed)  # validated here
     return Services(
         settings=settings,
@@ -45,6 +46,7 @@ def build_services(settings: Settings | None = None) -> Services:
         accounts=AccountService(engine, settings),
         local_llm=local_llm,
         cloud_llm=cloud_llm,
+        understand_llm=understand_llm,
         content=content,
         learner=build_learner_model(settings, engine, content),
     )

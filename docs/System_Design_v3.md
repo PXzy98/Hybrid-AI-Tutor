@@ -311,15 +311,15 @@ The loop: **student asks or answers → extract evidence → update learner stat
 The caller must be a logged-in student. The request body has no `student_id`. The API fills `AskRequest.student_id` from the session, and a `session_id` that belongs to another student is rejected (404).
 
 ```yaml
-pipeline: [privacy_filter, learner_context, understand, retrieve, route, generate, restore, verify, attach_check, record]
+pipeline: [privacy_filter, understand, learner_context, retrieve, route, generate, restore, verify, attach_check, record]
 post_response: [update_learner]
 ```
 
 | # | Step | What it does | On error |
 |---|---|---|---|
 | 1 | privacy_filter | Finds PII; stores `PIIResult` (entities, is_sensitive, cloud_safe, sanitized text) | **stop** |
-| 2 | learner_context | Loads `LearnerContext` for the topic's KCs | skip → default intermediate level, no personalization |
-| 3 | understand | Local model, JSON output limited to the topic's KC IDs and catalog misconception IDs: `{kc_ids, question_type, confusion, misconception_ids}`; uses the already-loaded local model with thinking off | skip → topic-only retrieval, no weak evidence |
+| 2 | understand | Local model, JSON output limited to the topic's KC IDs and catalog misconception IDs: `{kc_ids, question_type, confusion, misconception_ids}`; thinking off; model `llm.understand.model` (default: the already-loaded local model) | skip → topic-only retrieval, no weak evidence |
+| 3 | learner_context | Loads `LearnerContext`; the focus level is the lowest level among the question's KCs from step 2 (topic level when there are none) | skip → default intermediate level, no personalization |
 | 4 | retrieve | Sanitized query + `kc_ids` + level | skip → no passages (the answer says so) |
 | 5 | route | `route_score()` vs threshold; `cloud_safe = false` forces local (to be confirmed with Tongkai) | skip → local |
 | 6 | generate | Local: full `LearnerContext`. Cloud: a `CloudRequest` built by the guard. A failed cloud call falls back to local. | stop |
@@ -327,7 +327,7 @@ post_response: [update_learner]
 | 8 | verify | grounding, medical_safety, pii_leak, profile_leak | warn |
 | 9 | attach_check | Picks an MCQ for the main KC | skip |
 | 10 | record | Sanitized logs, route score, timings, tokens | skip (logged) |
-| post | update_learner | Applies weak evidence from step 3 to the Knowledge Model and preference signals to the Preference Model | log only |
+| post | update_learner | Applies weak evidence from step 2 to the Knowledge Model and preference signals to the Preference Model | log only |
 
 **Latency budget.** The learner steps may add at most **0.8 s at p50**. Step 3 is the only new model call. In the boundary test, a short JSON classification took 0.37 s on qwen3.5:9b and 0.21 s on gemma4:e4b with thinking off. Thinking must stay off here: in the boundary test it raised the router-style latency to 11–48 s.
 
@@ -509,7 +509,7 @@ class RouteInput(BaseModel):                    # + optional level and kc_ids, i
 **config.yaml (additions)**
 
 ```yaml
-pipeline: [privacy_filter, learner_context, understand, retrieve, route, generate, restore, verify, attach_check, record]
+pipeline: [privacy_filter, understand, learner_context, retrieve, route, generate, restore, verify, attach_check, record]
 post_response: [update_learner]
 verify:
   checkers: [grounding, medical_safety, pii_leak, profile_leak]

@@ -681,3 +681,63 @@ docker compose up --build -d  # http://localhost:8080
 # log in as the instructor once and change the password, then:
 $env:DEMO_INSTRUCTOR_PASSWORD="<new password>"; .venv\Scripts\python scripts\demo_seed.py
 ```
+
+
+## Step 11 — Understand step and weak evidence (+ E1 harness) — 2026-10-12
+
+Branch `feature/understand` (stacked on `feature/packaging`).
+
+What was built:
+- `app/learner/understand.py`: prompt, JSON schema and parser for the `understand` step.
+  - The schema enums are the topic's own KC IDs and catalog misconception IDs (`maxItems` 2 / 3), so the model can only choose from the catalog.
+  - The prompt lists KC id + name + definition and the catalog statements, followed by 4 few-shot examples (HBP only): confusion, a stated misconception, a *question* about a misconception (→ none), and off-topic.
+  - The wire format uses one-letter keys (`k`, `t`, `c`, `m`). The reply is generated token by token, so short keys cut the latency of the step roughly in half.
+  - `parse` rejects bad JSON and unknown IDs (`ValueError` → the step is skipped), removes duplicates and keeps at most 2 KCs.
+  - **Misconception gate:** misconception IDs are kept only when the question type is `check_my_answer` or `self_management` **and** the student states a belief. A plain question ("Does…?", "Is…?", "Why…?") without an assertion marker (", right?", "isn't it", "I think", "so my…") does not count. This raised precision from 50% to 88% on qwen3.5:9b.
+- The `understand` step (`on_error: skip`) uses `services.understand_llm`, built by `llm/factory.py`: an `OllamaClient` with `llm.understand.model`, temperature 0, the same `num_ctx` as the local model (no reload) and the `llm.understand.timeout_s` timeout.
+- **Pipeline reorder:** `[privacy_filter, understand, learner_context, retrieve, …]`. `learner_context` needs the question's KC IDs for the focus level (lowest level among them), so `understand` must run first. `retrieve` gets `kc_ids` and the level, and `attach_check` uses the first understood KC. Design §7.1 is updated to match.
+- The `update_learner` post-response step:
+  - weak evidence (design §5.1), only when `learner.weak_evidence` is true: `confusion` → one weak update per understood KC; a stated misconception → one weak update on its KC. The facade caps this at one weak update per KC per request.
+  - implicit preference hints from the student's wording ("example", "the idea", "step by step", "briefly", …). They go through the simple preference model, so a preference changes only after 3 consistent hints. Both parts are no-ops without consent.
+- Tests: the `Api` helper installs a fake `understand_llm` (default reply: no KC), so API tests never wait for Ollama. `tests/test_understand.py` has 14 tests:
+  - the schema enums and the prompt;
+  - bad JSON and unknown IDs are rejected, and the step is skipped while the answer still comes;
+  - deduplication and the 2-KC cap;
+  - the misconception gate, checked against every E1 case;
+  - the check question follows the understood KC;
+  - weak evidence is off by default, capped at one per KC, and absent without consent;
+  - preference hints and the streak of 3.
+- `eval/understand-tagging/`: `cases.jsonl` (40 DRAFT HBP cases U01–U40: paraphrases, 7 stated misconceptions, 6 questions *about* a misconception, 2 confusion cases, 3 off-topic) and `run.py` (the real prompt, schema and client; `--model`, `--repeat`; writes `results/report.md` and `predictions.jsonl`).
+
+Verification (Done when), against the real Ollama server, 40 cases × 2:
+
+| Model | KC top-1 | No-KC | MC precision | MC recall | Confusion | Q-type | p50 / p95 |
+|---|---|---|---|---|---|---|---|
+| qwen3.5:9b (config default) | 92% ✅ | 6/6 | 88% ✅ | 100% | 88% | 70% | 1.05 s / 1.14 s ❌ |
+| gemma4:e4b | 100% ✅ | 6/6 | 100% ✅ | 100% | 99% | 80% | 0.35 s / 0.41 s ✅ |
+
+Reports: `eval/understand-tagging/results/report.md` (qwen3.5:9b) and `report_gemma4-e4b.md`. Before the gate, qwen3.5:9b had 50% misconception precision: all 7 false positives were questions about a misconception ("Is high blood pressure caused only by stress?").
+
+Both suites pass: 303 tests with BKT and 303 with `TEST_LEARNER_KNOWLEDGE=rule`. Ruff is clean.
+
+Decisions:
+- **E1 accuracy is "ideal" for both models**, so the design's decision rule does not turn weak evidence off. `learner.weak_evidence` stays **false** for now. Design §11 E2 decides whether to keep it ("keep it only if it lowers MAE"), and E2 is Step 14. The code path is tested and can be turned on with `LEARNER__WEAK_EVIDENCE=true`.
+- **Latency:** qwen3.5:9b is above the p50 ≤ 0.6 s target (a 9B model writing about 35 tokens). gemma4:e4b meets every target. The design says the understand step "uses the already-loaded local model", so the default stays `qwen3.5:9b`, and the switch is a user decision (open question below). Switching is a single config value; gemma4:e4b is already on the server, so nothing has to be pulled.
+- Few-shot examples are used only for HBP, because they contain HBP IDs. Other topics rely on the instructions plus the schema.
+
+Interface changes:
+- None in `schemas.py`: `Understanding` and `RequestContext.understanding` already existed. `Services` gained `understand_llm`.
+- The pipeline order in `config.yaml` and design §7.1 changed: `understand` now comes before `learner_context`.
+
+Open questions for the user:
+- Use `gemma4:e4b` for the understand step (`llm.understand.model`)? It is faster (0.35 s vs 1.05 s) and more accurate, but it keeps a second model in VRAM (~5.5 GB for qwen plus several GB more).
+
+Known gaps / TODO:
+- `cases.jsonl` is a DRAFT with 40 HBP cases. The team should extend it to 120–150 cases across all five topics (design §11) and re-run E1.
+- Misconception IDs from `understand` are used only as weak evidence for now. Tracking (suspected / confirmed / resolved) is Step 12.
+
+How to try it:
+```powershell
+.venv\Scripts\python eval\understand-tagging\run.py                          # model from config.yaml
+.venv\Scripts\python eval\understand-tagging\run.py --model gemma4:e4b --repeat 2
+```
