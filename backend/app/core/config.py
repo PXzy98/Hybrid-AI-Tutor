@@ -121,6 +121,7 @@ class LocalLLMConfig(Section):
     temperature: float = 0.2
     num_ctx: int = 8192
     timeout_s: float = 60
+    max_tokens: int = Field(1024, ge=64)
 
 
 class UnderstandLLMConfig(Section):

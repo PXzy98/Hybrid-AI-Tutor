@@ -1,5 +1,9 @@
 from app.core.schemas import PIIEntity
 
+# Set by the fail-closed placeholder privacy filter (until Step 4). When the question is withheld,
+# the answer is withheld from storage too: nothing is known about which PII it might repeat.
+WITHHELD_QUESTION = "[question withheld: privacy filter not installed]"
+
 
 def redact_known(text: str, entities: list[PIIEntity]) -> str:
     """Replace every known PII value in `text` with its placeholder.

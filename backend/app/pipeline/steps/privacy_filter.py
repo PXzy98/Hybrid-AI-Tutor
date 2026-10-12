@@ -1,8 +1,7 @@
 from app.core.registry import steps
 from app.core.schemas import PIIResult, RequestContext
 from app.pipeline.base import BaseStep
-
-WITHHELD = "[question withheld: privacy filter not installed]"
+from app.privacy.redact import WITHHELD_QUESTION as WITHHELD
 
 
 @steps.register("privacy_filter")

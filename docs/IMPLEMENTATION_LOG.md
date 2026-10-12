@@ -197,3 +197,60 @@ cd backend
 $env:INSTRUCTOR_USERNAME="prof"; $env:INSTRUCTOR_INITIAL_PASSWORD="initial-pass-123"
 ..\.venv\Scripts\python -m uvicorn app.main:app --reload      # then use /docs: auth/login, change-password, admin/students
 ```
+
+## Step 3 — LLM layer: local client, cloud guard, generate (2026-10-12)
+
+Done:
+- `llm/base.py`: the `LLMClient` protocol (`async complete(messages, *, json_schema, max_tokens) -> LLMResult`), `LLMError` / `LLMUnavailable`, and `strip_think()`. Error messages never contain prompt text.
+- `llm/ollama_client.py`: native `POST /api/chat` with `stream: false` and **`think: false` always**.
+  - Options: `temperature`, `num_ctx`, `num_predict` (`llm.local.max_tokens`, new, default 1024). `json_schema` is sent as Ollama `format`.
+  - Retries once on connection errors only; a timeout is not retried.
+  - HTTP errors, invalid JSON or an empty reply → `LLMError`.
+  - An httpx transport can be injected for tests.
+- `llm/openai_compat.py`: OpenAI-compatible client (`openai` SDK, `max_retries=1`). Connection, timeout, rate-limit and auth errors → `LLMUnavailable`; other API errors → `LLMError`. A JSON schema becomes `response_format: json_object`.
+- `llm/cloud_guard.py`:
+  - `build_cloud_request(ctx)`: the allow-list is sanitized question, topic, passage texts, `to_cloud_labels()` (default labels when unpersonalized) and language.
+  - `CloudClient.complete(req)` is the **only** way to the cloud. It rejects anything that is not a `CloudRequest` (`TypeError`), re-validates the request (so `model_construct` cannot smuggle extra fields), and builds messages with `render_cloud(req)`. `available` is False when `CLOUD_API_KEY` / `CLOUD_MODEL` are missing.
+- `llm/fake.py`: `FakeLLMClient`. Replies can be scripted as text, a callable or an exception; it records calls and has `sent_text()` for leak assertions.
+- `llm/__init__.py`: `build_llm_clients(settings)`. `Services` gained `local_llm` and `cloud_llm`.
+- `prompts/` (now a package):
+  - `base_system.md` holds the safety rules: general knowledge only, no diagnosis, no medication or dose changes, refer personal situations to a clinician, emergency signs → urgent care, cite material as [n] and say so when it does not cover the question, no invented facts. They are identical for every level and both routes.
+  - `render_local(ctx)` may use the raw question, the sanitized history, the passages and a one-line level.
+  - `render_cloud(req)` takes only a `CloudRequest` and adds the rule to keep placeholders such as `<PERSON_1>`.
+- The real `generate` step:
+  - local route → `render_local` + Ollama;
+  - cloud route → `build_cloud_request` (stored in `ctx.cloud_request`) → `CloudClient`;
+  - cloud not configured or failing → local fallback (`fell_back=True`, user-visible warning) if `llm.cloud.fallback_to_local`, otherwise the request fails (503).
+- `core/topics.py`: `topic_name()`, shared by the API and the prompts.
+- Tests (142 offline, plus 1 marked `ollama`):
+  - Ollama client: body (think off), schema, retry, timeout, bad replies; OpenAI client: request and errors;
+  - guard: exact allow-list dump; none of 10 secrets (name, student number, health detail, student_id, history, misconception text, KC IDs, mastery, item ID) reach the request or the cloud messages; `TypeError` for non-`CloudRequest`; a `model_construct` smuggling attempt is stripped; `render_cloud` signature;
+  - generate: local, cloud, fallback (not configured / error), no-fallback, local failure;
+  - API: Ollama down → generic 503; **an answer that repeats the student's name is not stored**.
+- Manual check: `pytest -m ollama` passed against 192.168.2.25. Through the API as a logged-in student (scratch DB), qwen3.5:9b answered in about 2.4 s ("what do the two numbers mean") and about 3.2 s (a personal medication question). It referred the student to a clinician and said not to stop medication. Stored turns stayed withheld.
+
+Files: `backend/app/llm/{__init__,base,ollama_client,openai_compat,cloud_guard,fake}.py`, `backend/app/prompts/{__init__,render}.py`, `backend/app/prompts/base_system.md`, `backend/app/pipeline/steps/{generate,record,privacy_filter}.py`, `backend/app/privacy/redact.py`, `backend/app/core/{topics,services,config}.py`, `backend/app/api/v1/topics.py`, `config.yaml`, `backend/tests/{conftest,test_api,test_llm_clients,test_cloud_guard,test_generate}.py`.
+
+Decisions:
+- **Until Step 4, answers are withheld from storage.** While the placeholder privacy filter withholds the question, `record` also stores the answer as `[withheld: not sanitized]`: nothing is known about which PII the local model might repeat. The student still sees the real answer. As a side effect, the local model's history consists of withheld placeholders until Step 4.
+- `CloudClient` wraps a transport instead of extending `OpenAICompatClient`. This keeps the "CloudRequest only" check in one place and makes the cloud path testable with `FakeLLMClient`.
+- The cloud prompt never includes history (`CloudRequest` has no field for it); `llm.cloud.history_turns` stays 0.
+- A fallback adds the warning "The cloud model was unavailable, so the local model answered."
+- The test `Api` helper installs `FakeLLMClient("Fake local answer.")` as the local model, so API tests never need Ollama.
+
+Interface changes:
+- `Services` gained `local_llm` and `cloud_llm`.
+- Config: `llm.local.max_tokens` (default 1024). No schema changes.
+
+Known gaps / TODO:
+- **Prompt tuning (for Step 8 / E3).** For "150 over 95, should I stop my pills?" the model correctly refused, but it opened with "indicates high blood pressure (hypertension)". That reads like a diagnosis from one reading. The Step 8 `medical_safety` checker and the prompt wording should catch this ("a single reading cannot tell…").
+- `OpenAICompatClient` sends `max_tokens`. Some newer OpenAI models require `max_completion_tokens`; check this when the cloud provider is chosen.
+- One `httpx.AsyncClient` is created per call. That is fine at this scale; a shared client is an easy optimisation later.
+
+How to try it:
+```powershell
+cd backend
+..\.venv\Scripts\python -m pytest -q
+..\.venv\Scripts\python -m pytest -m ollama -q        # needs the GPU server
+..\.venv\Scripts\python -m uvicorn app.main:app --reload   # log in, then POST /api/v1/ask → real qwen3.5:9b answer
+```

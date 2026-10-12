@@ -3,7 +3,7 @@ from sqlmodel import Session
 from app.core.registry import steps
 from app.core.schemas import RequestContext, Turn
 from app.pipeline.base import BaseStep
-from app.privacy.redact import redact_known
+from app.privacy.redact import WITHHELD_QUESTION, redact_known
 from app.storage.models import RequestLog
 
 WITHHELD = "[withheld: not sanitized]"
@@ -20,6 +20,8 @@ class RecordStep(BaseStep):
         question = ctx.pii.sanitized_text if ctx.pii else WITHHELD
         # the answer may repeat PII that the local model saw: replace known values with placeholders
         answer = redact_known(ctx.answer or "", ctx.pii.entities) if ctx.pii else WITHHELD
+        if question in (WITHHELD, WITHHELD_QUESTION):
+            answer = WITHHELD  # PII unknown: do not store an answer that may repeat it
         req = ctx.request
         with Session(self.services.engine) as s:
             s.add(RequestLog(

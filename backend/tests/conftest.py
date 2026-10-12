@@ -67,11 +67,19 @@ PASSWORD = "correct-horse-battery"
 
 
 class Api:
-    """A started TestClient plus helpers to create accounts and log in."""
+    """A started TestClient plus helpers to create accounts and log in.
+
+    The local model is replaced by a FakeLLMClient (`api.local_llm`), so API tests never need Ollama.
+    """
 
     def __init__(self, client) -> None:
+        from app.llm.fake import FakeLLMClient
+
         self.client = client
-        self.accounts = client.app.state.services.accounts
+        self.services = client.app.state.services
+        self.accounts = self.services.accounts
+        self.local_llm = FakeLLMClient("Fake local answer.", model="fake-local")
+        self.services.local_llm = self.local_llm
 
     def make_student(self, username: str = "alice", display_name: str = "Alice Tremblay",
                      password: str = PASSWORD, must_change: bool = False):

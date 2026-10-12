@@ -3,17 +3,10 @@ from pydantic import BaseModel
 
 from app.api.deps import ServicesDep
 from app.auth.deps import AnyUser
+from app.core.topics import topic_name
 
 router = APIRouter()
 
-# Display names until content/topics/<topic>/kcs.yaml provides them (Step 5).
-TOPIC_NAMES = {
-    "high_blood_pressure": "High Blood Pressure",
-    "type2_diabetes": "Type 2 Diabetes",
-    "asthma": "Asthma",
-    "migraine": "Migraine",
-    "pneumonia": "Pneumonia",
-}
 
 
 class TopicInfo(BaseModel):
@@ -25,5 +18,5 @@ class TopicInfo(BaseModel):
 
 @router.get("/topics", response_model=list[TopicInfo])
 def list_topics(_: AnyUser, services: ServicesDep, course_id: str = "default"):
-    return [TopicInfo(id=t, name=TOPIC_NAMES.get(t, t.replace("_", " ").title()))
+    return [TopicInfo(id=t, name=topic_name(t))
             for t in services.settings.topics(course_id)]

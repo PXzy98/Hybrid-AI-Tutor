@@ -29,9 +29,9 @@ def test_ask_runs_every_step(student_client):
     body = r.json()
     assert body["session_id"]
     assert body["route_target"] == "local"
-    assert body["model_used"] == "placeholder"
+    assert body["model_used"] == "fake-local"
+    assert body["answer"] == "Fake local answer."
     assert set(body["timings_ms"]) == set(get_settings().pipeline)
-    assert "Alice" not in body["answer"]  # placeholder privacy filter withholds the question
 
 
 def test_ask_requires_login(api):
@@ -134,3 +134,27 @@ def test_export_openapi(tmp_path):
     out = export_openapi(tmp_path / "openapi.json")
     text = out.read_text(encoding="utf-8")
     assert '"/api/v1/ask"' in text and '"AskBody"' in text and '"/api/v1/auth/login"' in text
+
+
+def test_local_model_down_is_503_without_question(api):
+    from app.llm.base import LLMUnavailable
+    from app.llm.fake import FakeLLMClient
+
+    api.services.local_llm = FakeLLMClient(LLMUnavailable("ollama unreachable"))
+    api.make_student()
+    api.login("alice")
+    r = ask(api.client)
+    assert r.status_code == 503 and r.json()["step"] == "generate"
+    assert r.json()["detail"] == "The tutor could not answer right now. Please try again."
+    assert "Alice" not in r.text
+
+
+def test_answer_repeating_pii_is_not_stored(api):
+    """The local model sees the raw question and may repeat the name; storage must not."""
+    api.local_llm.replies = [lambda msgs: "Hello Alice Tremblay (300418277)! Salt makes you retain water."]
+    api.make_student()
+    api.login("alice")
+    r = ask(api.client)
+    assert "Alice Tremblay" in r.json()["answer"]  # the student sees their own answer
+    logs = table_dump("request_log") + table_dump("session_turn")
+    assert "Alice" not in logs and "300418277" not in logs and "retain water" not in logs
