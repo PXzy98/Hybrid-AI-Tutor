@@ -438,3 +438,64 @@ cd backend
 ..\.venv\Scripts\python -m pytest tests/test_learner.py tests/test_bkt_math.py -q
 $env:TEST_LEARNER_KNOWLEDGE="rule"; ..\.venv\Scripts\python -m pytest -q; Remove-Item Env:TEST_LEARNER_KNOWLEDGE
 ```
+
+## Step 7 — Adaptive flow: onboarding, check questions, level-aware prompts (2026-10-12)
+
+Done:
+- Prompt partials: `prompts/levels/{basic,intermediate,advanced}.md` and `prompts/style/{example_first,concept_first}.{concise,detailed}.md`.
+  - `system_prompt(level, sequencing, detail)` = base (safety) + level + style.
+  - `render_local` uses the learner's level and preferences, and only the base prompt when unpersonalized. `render_cloud` uses the `CloudLabels`.
+  - The safety text exists only in `base_system.md`. Tests check that all 12 combinations start with the unchanged base block, and that no partial mentions diagnosis, doses, medication, rules or overrides.
+- `learner/checks.py`:
+  - `grade()` uses the key only; a wrong choice reports its distractor's misconception ID.
+  - `diagnostic_items()`: one item per KC, prerequisites first (`topological()`), preferring the KC's basic item, at most 10.
+  - `choose_item()`: unseen items first, never an item answered in the last 24 h, then the item whose level matches the KC's level; None when every item was used recently.
+- Facade: `apply_diagnostic()` grades onboarding answers in prerequisite order. **A KC whose prerequisite was missed (or itself skipped) is not assessed and keeps its prior (transitively)**. `band()` gives basic / intermediate / advanced / mastered (≥ 0.90).
+- API, every route for logged-in students only:
+  - `GET /api/v1/onboarding?topic=` returns the consent text, 2 preference questions and the public diagnostic items (no key).
+  - `POST /api/v1/onboarding` takes `{topic, consent, preferences, answers}`, and every part is optional. Without consent it stores nothing and returns `personalized: false`.
+  - `POST /api/v1/check` takes `{session_id, item_id, choice}`. It grades by key and applies **strong** evidence, with the item ID and the distractor's misconception ID in the evidence log. It returns `{correct, correct_choice, explanation, kc_id, kc_level, kc_band, next_kc}`. An unknown or unservable (unreviewed) item → 404. Without consent it grades but records nothing.
+  - `GET /api/v1/learner/me[?topic=]` returns the bands per KC and the preferences, **never probabilities**.
+  - `DELETE /api/v1/learner/me` resets the learning profile; consent and the account stay.
+  - `POST /api/v1/learner/me/preferences` takes `{action: more_detail | shorter | example_first | concept_first}`; without consent → 409.
+- The real `attach_check` step (skip). KC: the question's first KC (Step 11), else the recommended next KC **of the same topic**, else the topic's lowest-mastery KC (the first KC when unpersonalized). `/ask` now returns `check_item`.
+- **Fixed a latent import cycle.** Importing `app.prompts` before `app.llm` failed, because `app/llm/__init__.py` imported `cloud_guard`, which imports `app.prompts`. `build_llm_clients` moved to `app/llm/factory.py`, and the package `__init__` imports nothing.
+- Tests: **260 offline, passing with both BKT and the rule model**. They cover:
+  - prompt partials (12 combinations, content rules, local and cloud use);
+  - grading; the diagnostic order; item choice (level match, no repeat within 24 h, return after a day);
+  - onboarding: info, no consent, the transitive skip, topic validation;
+  - check: evidence and misconception, no consent, errors, unreviewed items not served;
+  - learner/me: bands only, reset, feedback, 401;
+  - **the end-to-end flow** onboarding → ask (check attached, intermediate partial) → wrong answers until every KC is basic (written to hold for both models) → the next ask uses the basic partial.
+- Manual check (uvicorn, `en_core_web_sm`, `serve_unreviewed: true`, real qwen3.5:9b):
+  1. onboarding with 6 correct diagnostic answers → all KCs intermediate;
+  2. "Why does eating less salt help?" → answered in 8.2 s in the example-first, concise style ("think of your blood vessels like garden hoses…"), with check item HBP.1-q3;
+  3. a wrong answer → key C, explanation shown, **HBP.1 band intermediate → basic in `/learner/me`**;
+  4. the next ask got another HBP.1 item (q2).
+
+Files: `backend/app/prompts/{render,__init__}.py`, `backend/app/prompts/levels/*.md`, `backend/app/prompts/style/*.md`, `backend/app/learner/{checks,facade,repository}.py`, `backend/app/pipeline/steps/attach_check.py`, `backend/app/api/v1/{onboarding,check,learner_me,__init__}.py`, `backend/app/llm/{__init__,factory}.py`, `backend/app/core/services.py`, `backend/tests/{test_prompt_partials,test_adaptive_flow}.py`.
+
+Decisions:
+- The level partials keep the first line "Teaching level for this student: <level>." (the Step 3 one-liner), so earlier tests and logs stay comparable.
+- An unpersonalized local prompt is the base only. A cloud prompt always has partials, because a `CloudRequest` always carries labels (defaults for unpersonalized students).
+- The diagnostic prefers basic items: it places students and should not test details.
+- A check question that was shown but not answered can be offered again. Only answered items count for the 24 h rule.
+- `/check` accepts only items the content store may serve, so students cannot answer unreviewed items in production.
+
+Interface changes:
+- `app.llm` package: import `build_llm_clients` from `app.llm.factory` (previously from `app.llm`).
+- New API routes as listed above. No schema changes.
+
+Known gaps / TODO:
+- **Until the understand step (Step 11) tags questions with KCs, the focus level is the topic mean**, so one wrong answer on HBP.1 lowers HBP.1's band and its next check item, but not the level of the next free answer (it stayed intermediate in the manual run). Step 11 fixes this by using the question's KC.
+- Content quality, for E3 and the review: one generated answer used a loose analogy ("salt is like pouring extra weight on the hose"). The level and style partials could ask for medically accurate analogies only.
+- Content is unreviewed, so the demo needs `content.serve_unreviewed: true` (Step 10 should document this in the demo config).
+
+How to try it (development config: small spaCy model, unreviewed content served):
+```powershell
+cd backend
+..\.venv\Scripts\python -m pytest tests/test_adaptive_flow.py tests/test_prompt_partials.py -q
+# run uvicorn with APP_CONFIG pointing at a config copy with en_core_web_sm and serve_unreviewed: true, then:
+# log in → GET /api/v1/onboarding?topic=high_blood_pressure → POST /api/v1/onboarding → POST /api/v1/ask
+# → POST /api/v1/check → GET /api/v1/learner/me
+```

@@ -91,6 +91,42 @@ class LearnerModel:
                 out.append(state)
         return out
 
+    def apply_diagnostic(self, student_id: str, topic: str,
+                         answers: list[tuple[str, str]]) -> tuple[dict[str, bool], list[str]]:
+        """Grade onboarding answers and apply them as diagnostic evidence, prerequisites first.
+
+        A KC whose prerequisite was answered wrongly (or was itself skipped) is not assessed and keeps its
+        prior: a correct answer there is more likely a guess. Returns ({kc_id: correct}, skipped kc_ids).
+        """
+        from app.learner.checks import evidence_for, grade, topological
+
+        by_kc: dict[str, tuple] = {}
+        for item_id, choice in answers:
+            item = self.content.item(item_id)
+            if item is None or self.content.topic_of(item.kc) != topic:
+                raise ValueError(f"unknown item for this topic: {item_id}")
+            by_kc.setdefault(item.kc, (item, grade(item, choice)))
+        assessed: dict[str, bool] = {}
+        blocked: set[str] = set()
+        skipped: list[str] = []
+        for kc_id in topological(self.content, topic):
+            if kc_id not in by_kc:
+                continue
+            if any(p in blocked for p in self.content.prerequisites(kc_id)):
+                blocked.add(kc_id)
+                skipped.append(kc_id)
+                continue
+            item, graded = by_kc[kc_id]
+            self.observe(student_id, evidence_for(item, graded, "diagnostic", "onboarding"))
+            assessed[kc_id] = graded.correct
+            if not graded.correct:
+                blocked.add(kc_id)
+        return assessed, skipped
+
+    def band(self, state: KcState) -> str:
+        """What the student sees: basic / intermediate / advanced, or mastered. Never the probability."""
+        return "mastered" if state.p_mastery >= self.cfg.recommender.mastered else state.level
+
     # --------------------------------------------------------------- preferences
     def update_preferences(self, student_id: str, signal: PreferenceSignal) -> Preferences | None:
         if not self.has_consent(student_id):

@@ -11,6 +11,7 @@ from app.storage.models import (
     LearnerKcState,
     LearnerPreference,
     LearnerTopicLevel,
+    as_utc,
     utcnow,
 )
 
@@ -61,6 +62,14 @@ class LearnerRepository:
             stmt = stmt.where(EvidenceLog.kc_id == kc_id)
         with self._db() as db:
             return list(db.exec(stmt.order_by(col(EvidenceLog.id))).all())
+
+    def answered_items(self, student_id: str) -> dict[str, datetime]:
+        """item_id -> when it was last answered (UTC)."""
+        out: dict[str, datetime] = {}
+        for row in self.evidence(student_id):
+            if row.item_id:
+                out[row.item_id] = as_utc(row.created_at)
+        return out
 
     # ---------------------------------------------------------------- topic level
     def topic_level(self, student_id: str, topic: str) -> str | None:

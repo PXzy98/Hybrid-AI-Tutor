@@ -7,7 +7,9 @@ from app.auth.service import AccountService
 from app.core.config import Settings, get_settings
 from app.learner.content import ContentStore
 from app.learner.facade import LearnerModel, build_learner_model
-from app.llm import CloudClient, LLMClient, build_llm_clients
+from app.llm.base import LLMClient
+from app.llm.cloud_guard import CloudClient
+from app.llm.factory import build_llm_clients
 from app.rag import Retriever, load_retriever
 from app.routing import RouteScorer, load_router
 from app.sessions import SessionStore, load_session_store
