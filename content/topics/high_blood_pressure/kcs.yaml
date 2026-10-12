@@ -1,0 +1,49 @@
+# DRAFT — generated, not medically reviewed. Do not use with students before review.
+# Knowledge components (KCs) for High Blood Pressure. Design: docs/System_Design_v3.md §4.1.
+# General health education only. No numeric diagnostic thresholds: they depend on the guideline (TBD).
+topic: high_blood_pressure
+name: High Blood Pressure
+guideline: "TBD: guideline (to be chosen with Dr. Abbas, e.g. Hypertension Canada)"
+kcs:
+  - id: HBP.1
+    name: What blood pressure numbers mean
+    definition: >-
+      The top (systolic) and bottom (diastolic) numbers, what each measures, the unit (mmHg), and why a
+      single reading can differ from a person's usual blood pressure.
+    difficulty: basic
+    prerequisites: []
+  - id: HBP.2
+    name: How high blood pressure is classified and diagnosed
+    definition: >-
+      Diagnosis is based on several readings over time, sometimes with home or 24-hour monitoring;
+      readings are grouped into categories whose cut-offs depend on the guideline; how to measure correctly.
+    difficulty: basic
+    prerequisites: [HBP.1]
+  - id: HBP.3
+    name: Risk factors and causes
+    definition: >-
+      Factors that raise the risk, such as a high-salt diet, low physical activity, excess weight,
+      heavy alcohol use, older age and family history; which of them can and cannot be changed.
+    difficulty: basic
+    prerequisites: [HBP.1]
+  - id: HBP.4
+    name: Why it matters (heart, brain, kidney and eye complications)
+    definition: >-
+      Long-term high blood pressure strains the heart and damages blood vessels, raising the risk of heart
+      attack, stroke, kidney disease and eye problems, often without symptoms.
+    difficulty: intermediate
+    prerequisites: [HBP.2]
+  - id: HBP.5
+    name: Lifestyle management (salt, diet, activity, alcohol, weight)
+    definition: >-
+      Everyday changes that help lower blood pressure, where most dietary salt comes from, and how
+      lifestyle changes work alongside medicine.
+    difficulty: intermediate
+    prerequisites: [HBP.3]
+  - id: HBP.6
+    name: Medication and adherence (general principles only)
+    definition: >-
+      Why blood pressure medicines are taken regularly as prescribed, why normal readings on treatment do not
+      mean stopping, and why side effects or changes are discussed with a clinician. No drug names or doses.
+    difficulty: advanced
+    prerequisites: [HBP.2, HBP.4]

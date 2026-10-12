@@ -1,0 +1,86 @@
+# DRAFT — generated, not medically reviewed. Do not use with students before review.
+# Misconception catalog for High Blood Pressure (design §4.4). The `correction` text is shown to students
+# as written, so it is the part Dr. Abbas should review first. `reviewed_by` stays null until then.
+- id: HBP.MC1
+  kc: HBP.2
+  statement: "One high reading means a person has high blood pressure."
+  correction: >-
+    Blood pressure changes during the day, for example with activity, stress or caffeine. High blood pressure
+    is diagnosed from several readings taken on different occasions, sometimes with home or 24-hour monitoring.
+  reviewed_by: null
+- id: HBP.MC2
+  kc: HBP.6
+  statement: "Blood pressure medication can be stopped once readings are normal."
+  correction: >-
+    Normal readings while taking a medicine usually show that the treatment is working. Stopping or changing
+    it should be discussed with a clinician first.
+  reviewed_by: null
+- id: HBP.MC3
+  kc: HBP.1
+  statement: "High blood pressure always causes symptoms such as headaches."
+  correction: >-
+    High blood pressure often causes no symptoms at all, which is why regular measurement matters. Feeling
+    well does not show that blood pressure is normal.
+  reviewed_by: null
+- id: HBP.MC4
+  kc: HBP.1
+  statement: "Only the top number of a blood pressure reading matters."
+  correction: >-
+    Both numbers matter. Either the top (systolic) or the bottom (diastolic) number can be raised, and both
+    are used to judge blood pressure.
+  reviewed_by: null
+- id: HBP.MC5
+  kc: HBP.1
+  statement: "The bottom number is the pressure when the heart stops."
+  correction: >-
+    The heart does not stop between beats; it relaxes and refills. The bottom (diastolic) number is the
+    pressure in the arteries while the heart rests between beats.
+  reviewed_by: null
+- id: HBP.MC6
+  kc: HBP.3
+  statement: "Only older people get high blood pressure."
+  correction: >-
+    The risk rises with age, but younger adults and sometimes children can also have high blood pressure.
+  reviewed_by: null
+- id: HBP.MC7
+  kc: HBP.3
+  statement: "High blood pressure is caused only by stress."
+  correction: >-
+    Stress can raise blood pressure for a while, but long-term high blood pressure has many contributing
+    factors, such as diet, physical activity, body weight, alcohol, family history and other health conditions.
+  reviewed_by: null
+- id: HBP.MC8
+  kc: HBP.5
+  statement: "Not using the salt shaker is enough to eat little salt."
+  correction: >-
+    Most salt (sodium) in a typical diet comes from processed, packaged and restaurant foods, not from the
+    salt shaker. Reading food labels helps.
+  reviewed_by: null
+- id: HBP.MC9
+  kc: HBP.5
+  statement: "Once blood pressure is high, lifestyle changes no longer help."
+  correction: >-
+    Lifestyle changes can lower blood pressure at any stage, and they work alongside medicine when medicine
+    is needed.
+  reviewed_by: null
+- id: HBP.MC10
+  kc: HBP.4
+  statement: "High blood pressure only affects the heart."
+  correction: >-
+    Long-term high blood pressure can also damage the blood vessels of the brain, kidneys and eyes, raising
+    the risk of stroke, kidney disease and vision problems.
+  reviewed_by: null
+- id: HBP.MC11
+  kc: HBP.6
+  statement: "Blood pressure medicine is only needed on days when you feel unwell."
+  correction: >-
+    High blood pressure usually cannot be felt. Medicine keeps blood pressure controlled when it is taken
+    regularly as prescribed, not only on days with symptoms.
+  reviewed_by: null
+- id: HBP.MC12
+  kc: HBP.2
+  statement: "Home blood pressure readings are not useful; only clinic readings count."
+  correction: >-
+    Home readings taken with a validated device and the right technique give useful information over time,
+    and clinicians often use them, for example when clinic readings may be higher than usual.
+  reviewed_by: null

@@ -1,0 +1,304 @@
+# DRAFT — generated, not medically reviewed. Do not use with students before review.
+# Check questions for High Blood Pressure (design §4.3): 4 per KC, one or more per level.
+# Distractors that reveal a catalogued misconception carry its ID (misconceptions.yaml).
+# Rules for authors: general education only, no drug names or doses, no numeric diagnostic thresholds.
+
+# ---------------------------------------------------------------- HBP.1 What the numbers mean
+- id: HBP.1-q1
+  kc: HBP.1
+  level: basic
+  stem: "A blood pressure reading is written as two numbers, one over the other. What does the top number measure?"
+  options:
+    A: "The amount of blood in the body"
+    B: "The number of heartbeats per minute"
+    C: "The pressure in the arteries while the heart beats and pumps blood"
+    D: "The pressure in the arteries while the heart rests between beats"
+  answer: C
+  explanation: "The top (systolic) number is the pressure while the heart contracts; the bottom (diastolic) number is the pressure while it rests between beats."
+  reviewed_by: null
+- id: HBP.1-q2
+  kc: HBP.1
+  level: basic
+  stem: "What does the bottom (diastolic) number of a blood pressure reading measure?"
+  options:
+    A: "The pressure in the arteries while the heart rests between beats"
+    B: "How fast blood flows through the body"
+    C: {text: "The pressure while the heart has stopped", misconception: HBP.MC5}
+    D: "The pressure inside the veins"
+  answer: A
+  explanation: "The heart does not stop between beats; it relaxes and refills. The diastolic number is the arterial pressure during that pause."
+  reviewed_by: null
+- id: HBP.1-q3
+  kc: HBP.1
+  level: intermediate
+  stem: "Why is high blood pressure often called a 'silent' condition?"
+  options:
+    A: "It can only be measured while a person sleeps"
+    B: {text: "It only matters in older adults", misconception: HBP.MC6}
+    C: "It often causes no noticeable symptoms"
+    D: {text: "It always causes headaches that people tend to ignore", misconception: HBP.MC3}
+  answer: C
+  explanation: "Many people with high blood pressure feel completely well, so regular measurement is the only way to know."
+  reviewed_by: null
+- id: HBP.1-q4
+  kc: HBP.1
+  level: advanced
+  stem: "A person's top number is usually in the normal range, but their bottom number is repeatedly raised. Which general statement is most accurate?"
+  options:
+    A: {text: "It does not matter, because only the top number counts", misconception: HBP.MC4}
+    B: "It proves that the blood pressure monitor is broken"
+    C: {text: "It means the heart stops for too long between beats", misconception: HBP.MC5}
+    D: "A raised bottom number can still be a concern and is worth discussing with a clinician"
+  answer: D
+  explanation: "Both numbers are used to judge blood pressure; either one can be raised."
+  reviewed_by: null
+
+# ------------------------------------------------- HBP.2 Classification and diagnosis
+- id: HBP.2-q1
+  kc: HBP.2
+  level: basic
+  stem: "How is high blood pressure usually confirmed?"
+  options:
+    A: {text: "From whether the person has headaches", misconception: HBP.MC3}
+    B: "From a blood test alone"
+    C: {text: "From a single reading at one visit", misconception: HBP.MC1}
+    D: "From several readings taken on different occasions"
+  answer: D
+  explanation: "Blood pressure varies, so a diagnosis is based on repeated readings over time, sometimes including home or 24-hour monitoring."
+  reviewed_by: null
+- id: HBP.2-q2
+  kc: HBP.2
+  level: basic
+  stem: "Which of these helps get an accurate blood pressure reading at home?"
+  options:
+    A: "Measuring right after climbing stairs or drinking coffee"
+    B: "Sitting quietly for a few minutes with the back supported, feet flat and the arm resting at heart level"
+    C: "Measuring over thick clothing while talking"
+    D: {text: "Measuring only when you feel a headache", misconception: HBP.MC3}
+  answer: B
+  explanation: "Rest, a supported back and arm, feet flat, the cuff on a bare arm and no talking all help the reading reflect usual blood pressure."
+  reviewed_by: null
+- id: HBP.2-q3
+  kc: HBP.2
+  level: intermediate
+  stem: "Why might a clinician suggest home or 24-hour (ambulatory) blood pressure monitoring?"
+  options:
+    A: "To see blood pressure over time and outside the clinic, for example when clinic readings may be higher than usual"
+    B: {text: "As a formality, because home readings cannot be trusted", misconception: HBP.MC12}
+    C: {text: "Because one clinic reading is always enough to decide", misconception: HBP.MC1}
+    D: "To measure cholesterol"
+  answer: A
+  explanation: "Some people's readings are higher in the clinic than in daily life; readings over time give a fuller picture."
+  reviewed_by: null
+- id: HBP.2-q4
+  kc: HBP.2
+  level: advanced
+  stem: "Why do clinicians group readings into categories such as 'normal', 'elevated' and 'high'?"
+  options:
+    A: "Because the cut-offs are the same in every country and never change"
+    B: "Because the categories describe how a person feels"
+    C: "To guide follow-up and treatment decisions; the exact cut-offs depend on the guideline being followed"
+    D: "Because any reading above normal means medicine must be started immediately"
+  answer: C
+  explanation: "Categories support decisions about checks, lifestyle and treatment. Guidelines differ in their exact numbers, so this course states which guideline it follows."
+  reviewed_by: null
+
+# ------------------------------------------------------------ HBP.3 Risk factors
+- id: HBP.3-q1
+  kc: HBP.3
+  level: basic
+  stem: "Which of these is a common risk factor for high blood pressure?"
+  options:
+    A: "Sleeping on the left side"
+    B: "Eating fruit every day"
+    C: "Drinking water regularly"
+    D: "A diet high in salt (sodium)"
+  answer: D
+  explanation: "A high-salt diet is one of the best-known risk factors; others include low activity, excess weight, heavy alcohol use, age and family history."
+  reviewed_by: null
+- id: HBP.3-q2
+  kc: HBP.3
+  level: basic
+  stem: "Which statement about age and high blood pressure is correct?"
+  options:
+    A: {text: "Only people over 60 can have high blood pressure", misconception: HBP.MC6}
+    B: "Blood pressure always falls as people get older"
+    C: "The risk rises with age, but younger adults can also have high blood pressure"
+    D: "Age has nothing to do with blood pressure"
+  answer: C
+  explanation: "Age is a risk factor, but high blood pressure is not limited to older people."
+  reviewed_by: null
+- id: HBP.3-q3
+  kc: HBP.3
+  level: intermediate
+  stem: "Which risk factor for high blood pressure cannot be changed by lifestyle?"
+  options:
+    A: "Alcohol use"
+    B: "Salt intake"
+    C: "Family history"
+    D: "Physical activity"
+  answer: C
+  explanation: "Family history and age cannot be changed; diet, activity, weight and alcohol can."
+  reviewed_by: null
+- id: HBP.3-q4
+  kc: HBP.3
+  level: advanced
+  stem: "Why can someone who feels well and is not stressed still have high blood pressure?"
+  options:
+    A: {text: "Because stress is the only cause, so they must be stressed without knowing it", misconception: HBP.MC7}
+    B: "Because long-term factors such as family history, diet and weight also raise blood pressure, and it usually causes no symptoms"
+    C: {text: "Because high blood pressure is caused only by old age", misconception: HBP.MC6}
+    D: {text: "They cannot: feeling well shows that blood pressure is normal", misconception: HBP.MC3}
+  answer: B
+  explanation: "High blood pressure has many contributing factors and is often silent, so how a person feels says little about it."
+  reviewed_by: null
+
+# ---------------------------------------------------------- HBP.4 Why it matters
+- id: HBP.4-q1
+  kc: HBP.4
+  level: basic
+  stem: "Over many years, untreated high blood pressure raises the risk of which problems?"
+  options:
+    A: "The common cold"
+    B: "Sunburn"
+    C: {text: "Heart problems only, and nothing else", misconception: HBP.MC10}
+    D: "Heart attack, stroke and kidney disease"
+  answer: D
+  explanation: "High pressure damages blood vessels throughout the body, including those of the heart, brain and kidneys."
+  reviewed_by: null
+- id: HBP.4-q2
+  kc: HBP.4
+  level: intermediate
+  stem: "How does long-term high blood pressure harm the body?"
+  options:
+    A: "It thickens the blood within a single day"
+    B: "It makes the heart work harder and damages blood vessels over time"
+    C: {text: "It affects the heart but no other organ", misconception: HBP.MC10}
+    D: {text: "It only harms people who notice symptoms", misconception: HBP.MC3}
+  answer: B
+  explanation: "The extra pressure strains the heart and gradually damages artery walls, which affects many organs."
+  reviewed_by: null
+- id: HBP.4-q3
+  kc: HBP.4
+  level: intermediate
+  stem: "Why do regular blood pressure checks matter even when a person feels fine?"
+  options:
+    A: "They do not matter as long as the person feels fine"
+    B: "Because the check itself lowers blood pressure"
+    C: "High blood pressure often has no symptoms but can still cause damage"
+    D: {text: "Because headaches always come first and warn the person", misconception: HBP.MC3}
+  answer: C
+  explanation: "Because the condition is often silent, measuring is the only way to find it early."
+  reviewed_by: null
+- id: HBP.4-q4
+  kc: HBP.4
+  level: advanced
+  stem: "Which organs can be affected by long-term high blood pressure?"
+  options:
+    A: "Only the skin"
+    B: {text: "Only the heart", misconception: HBP.MC10}
+    C: "Only the lungs"
+    D: "The heart, brain, kidneys and eyes"
+  answer: D
+  explanation: "Damage to blood vessels can lead to heart disease, stroke, kidney disease and changes in the eyes."
+  reviewed_by: null
+
+# ------------------------------------------------------ HBP.5 Lifestyle management
+- id: HBP.5-q1
+  kc: HBP.5
+  level: basic
+  stem: "Which change can help lower blood pressure?"
+  options:
+    A: "Drinking more alcohol"
+    B: "Sitting for longer each day"
+    C: "Adding more salt to meals"
+    D: "Eating less salt"
+  answer: D
+  explanation: "Reducing salt is one of the most effective dietary changes for blood pressure."
+  reviewed_by: null
+- id: HBP.5-q2
+  kc: HBP.5
+  level: intermediate
+  stem: "Where does most of the salt (sodium) in a typical diet come from?"
+  options:
+    A: {text: "The salt shaker at the table", misconception: HBP.MC8}
+    B: "Fresh fruit"
+    C: "Drinking water"
+    D: "Processed, packaged and restaurant foods"
+  answer: D
+  explanation: "Most sodium is already in foods before they reach the table, so reading labels and cooking at home help."
+  reviewed_by: null
+- id: HBP.5-q3
+  kc: HBP.5
+  level: intermediate
+  stem: "Which combination is generally recommended to help manage blood pressure?"
+  options:
+    A: "Avoiding all physical activity"
+    B: "Regular physical activity, a diet rich in vegetables, fruit and whole grains, limiting alcohol and keeping a healthy weight"
+    C: {text: "Only leaving out table salt, with no other change", misconception: HBP.MC8}
+    D: {text: "No change, because nothing helps once blood pressure is high", misconception: HBP.MC9}
+  answer: B
+  explanation: "Several everyday changes together have the largest effect."
+  reviewed_by: null
+- id: HBP.5-q4
+  kc: HBP.5
+  level: advanced
+  stem: "A person already takes blood pressure medicine. Which statement about lifestyle changes is most accurate?"
+  options:
+    A: {text: "They only matter for older people", misconception: HBP.MC6}
+    B: "They can still help and work alongside the medicine; any change to the medicine is discussed with a clinician"
+    C: {text: "They no longer make any difference", misconception: HBP.MC9}
+    D: {text: "They mean the medicine can be stopped right away", misconception: HBP.MC2}
+  answer: B
+  explanation: "Lifestyle changes and medicine complement each other; decisions about medicine are made with a clinician."
+  reviewed_by: null
+
+# ----------------------------------------------------- HBP.6 Medication and adherence
+- id: HBP.6-q1
+  kc: HBP.6
+  level: basic
+  stem: "A person's blood pressure has been normal for three months while taking medication. What is generally recommended?"
+  options:
+    A: {text: "Take half of it from now on without asking anyone", misconception: HBP.MC2}
+    B: {text: "Take it only on days with headaches", misconception: HBP.MC11}
+    C: "Keep taking it, and discuss any change with their doctor"
+    D: {text: "Stop the medication, because blood pressure is now normal", misconception: HBP.MC2}
+  answer: C
+  explanation: "Normal readings on treatment usually mean the medicine is working. Changes are decided with a clinician."
+  reviewed_by: null
+- id: HBP.6-q2
+  kc: HBP.6
+  level: intermediate
+  stem: "Why is it important to take blood pressure medicine regularly, as prescribed?"
+  options:
+    A: "It keeps blood pressure controlled over time, and high blood pressure usually cannot be felt"
+    B: {text: "Because a person can feel when their pressure rises and take it only then", misconception: HBP.MC11}
+    C: {text: "It is only needed on days with symptoms", misconception: HBP.MC11}
+    D: "Because one dose cures high blood pressure permanently"
+  answer: A
+  explanation: "Blood pressure medicines work while they are taken regularly; symptoms are not a reliable guide."
+  reviewed_by: null
+- id: HBP.6-q3
+  kc: HBP.6
+  level: intermediate
+  stem: "Why might a clinician prescribe more than one blood pressure medicine for some people?"
+  options:
+    A: "Because all blood pressure medicines work in exactly the same way"
+    B: "Because the first medicine always fails"
+    C: "So that lifestyle changes are no longer needed"
+    D: "Different medicines work in different ways and can be combined to control blood pressure"
+  answer: D
+  explanation: "Combining medicines with different actions is a common way to reach control; lifestyle changes still help."
+  reviewed_by: null
+- id: HBP.6-q4
+  kc: HBP.6
+  level: advanced
+  stem: "Someone notices a possible side effect from their blood pressure medicine. What is the safest general step?"
+  options:
+    A: "Contact a doctor, nurse or pharmacist to discuss it rather than stopping on their own"
+    B: "Take a double dose to make up for it"
+    C: {text: "Stop the medicine immediately without telling anyone", misconception: HBP.MC2}
+    D: "Switch to a family member's medicine"
+  answer: A
+  explanation: "A clinician can check whether it is a side effect and adjust treatment safely."
+  reviewed_by: null

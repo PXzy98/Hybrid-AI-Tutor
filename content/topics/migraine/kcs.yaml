@@ -1,0 +1,10 @@
+# DRAFT — placeholder skeleton. Real KCs (4–6), items and misconceptions are added later (Beta).
+topic: migraine
+name: Migraine
+guideline: "TBD: guideline (to be chosen with Dr. Abbas)"
+kcs:
+  - id: MIG.1
+    name: "Placeholder: what Migraine is"
+    definition: "Placeholder KC so the topic loads. Replace with the reviewed KC map."
+    difficulty: basic
+    prerequisites: []

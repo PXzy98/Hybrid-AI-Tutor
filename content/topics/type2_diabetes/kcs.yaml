@@ -1,0 +1,10 @@
+# DRAFT — placeholder skeleton. Real KCs (4–6), items and misconceptions are added later (Beta).
+topic: type2_diabetes
+name: Type 2 Diabetes
+guideline: "TBD: guideline (to be chosen with Dr. Abbas)"
+kcs:
+  - id: T2D.1
+    name: "Placeholder: what Type 2 Diabetes is"
+    definition: "Placeholder KC so the topic loads. Replace with the reviewed KC map."
+    difficulty: basic
+    prerequisites: []

@@ -317,3 +317,60 @@ cd backend
 ..\.venv\Scripts\python -m pytest -q
 ..\.venv\Scripts\python -m pytest tests/test_privacy.py -s -q   # prints the bench recall
 ```
+
+## Step 5 — Domain content: format, loader, High Blood Pressure draft (2026-10-12)
+
+Done:
+- `backend/app/learner/content.py`:
+  - Pydantic models `KC`, `Option`, `Item`, `Misconception`, `TopicContent`, all with `extra="forbid"`. An option may be written as a plain string or as `{text, misconception}`.
+  - The loader reads `content/topics/<topic>/{kcs,items,misconceptions}.yaml`.
+  - `validate()` collects **every** problem with a readable message:
+    - duplicate IDs (across KCs, items and misconceptions);
+    - unknown prerequisites; prerequisite cycles (reported as a path, e.g. `A.1 -> A.2 -> A.1`);
+    - an item that does not have exactly A–D, or whose answer is not an option, or whose correct answer is tagged as a misconception;
+    - an unknown misconception tag; an item or misconception that refers to an unknown KC;
+    - a topic without KCs; unknown YAML fields.
+- `ContentStore`: `topics()`, `topic()`, `kcs()`, `kc()`, `topic_of()`, `prerequisites()`, `items(kc_id, reviewed_only=None)`, `item()`, `reviewed_item_count()`, `misconception()`, `misconceptions(kc_id)`.
+  - `items()` serves unreviewed items only when `content.serve_unreviewed` is true.
+  - `Item.public()` → `CheckItemPublic`, without the key, explanation or misconception tags.
+- `Services.content` is built at startup, so **invalid content stops the app**.
+- **The High Blood Pressure draft** (every file starts with `# DRAFT — generated, not medically reviewed…`, and every `reviewed_by` is null):
+  - 6 KCs with definitions and prerequisites, as in design §4.1.
+  - 24 MCQs, 4 per KC. Each KC has basic, intermediate and advanced items. Every one of the 12 misconceptions (HBP.MC1–MC12) is the tag of at least one distractor.
+  - 12 misconceptions with corrections.
+  - No drug names or doses, no numeric thresholds. The guideline is "TBD", and one reading example ("120 over 80") was removed so that it cannot be read as a threshold.
+- **Option positions were shuffled.** The first draft had the correct answer at A in 23 of 24 items, so a student could guess. A deterministic shuffle seeded by the item ID moved them to A 4 / B 5 / C 7 / D 8; stems, option texts, tags and explanations were verified unchanged. A test now fails if any letter holds more than 40% of a topic's answers.
+- Skeletons for type2_diabetes, asthma, migraine and pneumonia: one placeholder KC each (T2D.1, AST.1, MIG.1, PNA.1) and empty items and misconceptions.
+- `scripts/export_content_review.py <topic> | --all` writes `docs/review/<topic>_review.csv` (UTF-8 with BOM for Excel): one row per topic, KC, item and misconception, with options, answer, explanation or correction, distractor tags, `reviewed_by` and an empty `reviewer_comment` column. **`docs/review/high_blood_pressure_review.csv` is generated and ready to send to Dr. Abbas.**
+- `GET /api/v1/topics` now returns the topic names from the content, plus `kc_count` and `reviewed_item_count`.
+- CI also lints `scripts/`.
+- Tests (193 offline):
+  - all topics load, and the HBP draft has the expected shape; answer positions are spread;
+  - authoring rules: DRAFT header, no dose patterns, no BP readings;
+  - reviewed-only serving; the public item hides the key; lookups;
+  - **each of the 10 validation rules** has its own broken fixture, and `find_cycle` has its own tests;
+  - invalid content stops startup; the topics endpoint counts; the review export.
+
+Files: `backend/app/learner/content.py`, `backend/app/core/services.py`, `backend/app/api/v1/topics.py`, `content/topics/*/{kcs,items,misconceptions}.yaml`, `content/topics/README.md`, `scripts/export_content_review.py`, `docs/review/high_blood_pressure_review.csv`, `backend/tests/test_content.py`, `.github/workflows/ci.yml`.
+
+Decisions:
+- Items use `level` (basic / intermediate / advanced, like chunks); KCs use `difficulty`.
+- An item ID is `<KC>-q<n>` (e.g. `HBP.6-q1`). The Step 8 profile-leak checker relies on this pattern.
+- Prerequisites may only point within the same topic.
+- The topic display name comes from `kcs.yaml` (`name`); `core/topics.py` remains the fallback.
+- Item `explanation` texts are part of the review as well: Step 7 shows them after a check answer.
+
+Interface changes:
+- `Services` gained `content`. No schema changes.
+
+Known gaps / TODO:
+- **Nothing is reviewed yet.** With the default `content.serve_unreviewed: false`, the app serves no check questions. Development and the MVP demo need `serve_unreviewed: true` until Dr. Abbas approves items (then set `reviewed_by`).
+- The other four topics are placeholders (Beta: 4–6 KCs each, items, misconceptions).
+- Siyun's RAG chunks must use these KC IDs (`HBP.1` … `HBP.6`) in `kc_ids`.
+
+How to try it:
+```powershell
+.venv\Scripts\python scripts\export_content_review.py high_blood_pressure   # -> docs\review\high_blood_pressure_review.csv
+cd backend
+..\.venv\Scripts\python -m pytest tests/test_content.py -q
+```
