@@ -10,6 +10,7 @@ from pathlib import Path
 
 from app.core.schemas import CloudRequest, Detail, Level, RequestContext, Sequencing
 from app.core.topics import topic_name
+from app.learner.misconceptions import prompt_block
 from app.llm.base import Message
 
 PROMPT_DIR = Path(__file__).parent
@@ -73,6 +74,8 @@ def render_local(ctx: RequestContext, *, safety_retry: bool = False) -> list[Mes
     if learner:
         prefs = learner.preferences
         system = system_prompt(learner.focus_level, prefs.sequencing, prefs.detail)
+        if learner.misconceptions:  # local only: render_cloud has no access to the learner context
+            system += "\n\n" + prompt_block(learner.misconceptions)
     else:
         system = system_prompt()
     if safety_retry:

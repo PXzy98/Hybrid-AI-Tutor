@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from app.api.deps import ServicesDep
 from app.api.v1.onboarding import KcBand
 from app.auth.deps import Student
-from app.core.schemas import Preferences
+from app.core.schemas import MisconceptionRef, Preferences
 from app.learner.preference import PreferenceSignal
 
 router = APIRouter(prefix="/learner/me", tags=["learner"])
@@ -20,10 +20,24 @@ FEEDBACK = {
 }
 
 
+class OpenMisconception(BaseModel):
+    """A misunderstanding the tutor is working on, in plain language (no catalog ID)."""
+
+    kc_id: str
+    statement: str
+    correction: str
+    status: Literal["suspected", "confirmed"]
+
+    @classmethod
+    def of(cls, ref: MisconceptionRef) -> "OpenMisconception":
+        return cls(kc_id=ref.kc_id, statement=ref.statement, correction=ref.correction, status=ref.status)
+
+
 class TopicProfile(BaseModel):
     topic: str
     name: str
     kcs: list[KcBand]
+    misconceptions: list[OpenMisconception] = []
 
 
 class Profile(BaseModel):
@@ -46,10 +60,13 @@ def get_profile(user: Student, services: ServicesDep, topic: str | None = None):
     for t in topics:
         if content.topic(t) is None:
             raise HTTPException(422, "unknown topic")
-        states = learner.knowledge.state(sid, [k.id for k in content.kcs(t)])
+        kc_ids = [k.id for k in content.kcs(t)]
+        states = learner.knowledge.state(sid, kc_ids)
         out.append(TopicProfile(topic=t, name=content.topic(t).name,
                                 kcs=[KcBand(kc_id=k.id, name=k.name, band=learner.band(states[k.id]))
-                                     for k in content.kcs(t)]))
+                                     for k in content.kcs(t)],
+                                misconceptions=[OpenMisconception.of(m)
+                                                for m in learner.open_misconceptions(sid, kc_ids)]))
     return Profile(personalized=True, preferences=learner.preferences.get(sid), topics=out)
 
 

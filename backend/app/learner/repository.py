@@ -9,6 +9,7 @@ from app.storage.models import (
     Consent,
     EvidenceLog,
     LearnerKcState,
+    LearnerMisconception,
     LearnerPreference,
     LearnerTopicLevel,
     as_utc,
@@ -16,7 +17,7 @@ from app.storage.models import (
 )
 
 # what reset() clears; consent and the account stay (design §7.4)
-LEARNING_TABLES = (LearnerKcState, LearnerTopicLevel, LearnerPreference, EvidenceLog)
+LEARNING_TABLES = (LearnerKcState, LearnerTopicLevel, LearnerPreference, EvidenceLog, LearnerMisconception)
 
 
 class LearnerRepository:
@@ -99,6 +100,29 @@ class LearnerRepository:
             row = row or LearnerPreference(student_id=student_id)
             row.sequencing, row.detail, row.source = prefs.sequencing, prefs.detail, prefs.source
             row.implicit, row.updated_at = dict(implicit), utcnow()
+            db.add(row)
+            db.commit()
+
+    # ------------------------------------------------------------- misconceptions
+    def misconceptions(self, student_id: str, statuses: tuple[str, ...] | None = None
+                       ) -> list[LearnerMisconception]:
+        """Tracked misconceptions, most recently updated first."""
+        stmt = select(LearnerMisconception).where(LearnerMisconception.student_id == student_id)
+        if statuses:
+            stmt = stmt.where(col(LearnerMisconception.status).in_(statuses))
+        with self._db() as db:
+            rows = db.exec(stmt).all()
+        return sorted(rows, key=lambda r: (as_utc(r.updated_at), r.id), reverse=True)
+
+    def misconception(self, student_id: str, misconception_id: str) -> LearnerMisconception | None:
+        with self._db() as db:
+            return db.exec(select(LearnerMisconception).where(
+                LearnerMisconception.student_id == student_id,
+                LearnerMisconception.misconception_id == misconception_id)).first()
+
+    def save_misconception(self, row: LearnerMisconception) -> None:
+        row.updated_at = utcnow()
+        with self._db() as db:
             db.add(row)
             db.commit()
 

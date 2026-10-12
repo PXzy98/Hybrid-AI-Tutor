@@ -741,3 +741,82 @@ How to try it:
 .venv\Scripts\python eval\understand-tagging\run.py                          # model from config.yaml
 .venv\Scripts\python eval\understand-tagging\run.py --model gemma4:e4b --repeat 2
 ```
+
+
+## Step 12 — Misconception tracking and corrections — 2026-10-12
+
+Branch `feature/misconceptions` (stacked on `feature/understand`).
+
+What was built:
+- New table `learner_misconception` (student_id, misconception_id, kc_id, status, evidence_count, updated_at). It holds IDs and counts only, never text.
+  - It is part of `LEARNING_TABLES`, so "reset my learning data" and withdrawing consent clear it.
+  - The generic purge in `auth/purge.py` covers it when a student is deleted (every table with `student_id`).
+- `app/learner/misconceptions.py`, `MisconceptionTracker`, with the status rules of design §5.1:
+
+  | Signal | none / resolved | suspected | confirmed |
+  |---|---|---|---|
+  | understand step tagged it (weak) | suspected | confirmed | confirmed |
+  | a tagged distractor was chosen | confirmed | confirmed | confirmed |
+  | correct answer on an item that targets it | – | resolved | resolved |
+
+  A resolved misconception that comes up again is reopened as suspected and counted from 1.
+- `LearnerModel` facade (consent checked everywhere):
+  - `misconception_stated`, `check_answered`, `open_misconceptions`;
+  - `context()` fills `LearnerContext.misconceptions` with the open misconceptions of the question's KCs (the whole topic when the understand step found none). At most 2, confirmed first, then the most recent.
+- `/check`: a tagged distractor → confirmed. A correct answer resolves every open misconception the item's distractors target, across KCs (for example, MC3 is targeted by items of HBP.1, HBP.2 and HBP.3).
+- `update_learner`: misconception IDs from the understand step → `misconception_stated`. This does **not** depend on `learner.weak_evidence`, which only gates the knowledge-model update. Tracking is separate, and the Step 11 gate already requires a stated belief.
+- Local prompt (`render_local`): one block "Known misunderstandings", with one line per misconception: "Address this misunderstanding the student may have: "<statement>" Correct it gently with this reviewed correction: <correction>". `render_cloud` has no access to the learner context, so the cloud prompt cannot contain it.
+- Cloud route: `append_corrections` in the `restore` step adds "A common misunderstanding to watch for: <correction>" when the answer does not already address it.
+  - The keyword check: the answer must contain at least 50% of the correction's key words (words of 5+ letters, minus a stoplist).
+  - `verify` calls it again after a safety regeneration.
+  - The `grounding` checker ignores the appended note, because it is catalog text, not generated text.
+  - Every catalog correction passes `medical_safety` (test).
+- `attach_check` / `choose_item`: within the chosen KC, an unseen item comes first, then an item whose distractors target one of the student's open misconceptions, then the level match.
+- `GET /learner/me`: each topic has `misconceptions: [{kc_id, statement, correction, status}]`. Only open ones are listed, and there are no catalog IDs.
+  - "What I know" shows them under "Ideas we are working on". The plain-language source is "seen in your answers" (confirmed) or "may have come up in a question" (suspected).
+  - `openapi.json` and `schema.d.ts` are regenerated.
+- **Review gate:** statements and corrections reach students and the local prompt only when `content.servable(mc)` allows it (reviewed, or `content.serve_unreviewed`), the same rule as items. Tracking by ID happens either way.
+
+Tests:
+- `tests/test_misconceptions.py` has 15 tests:
+  - the transitions, including reopening;
+  - only IDs and counts are stored;
+  - no consent → nothing tracked; reset clears;
+  - the full /check → What I know → resolve flow;
+  - stated twice → suspected then confirmed, with weak evidence off;
+  - unreviewed content is tracked but not shown;
+  - the local prompt has exactly one "address" line;
+  - prompt scope (the question's KCs, at most 2) and order (confirmed first);
+  - the cloud note is appended only when needed and only on the cloud route;
+  - the keyword check; medical safety of every correction;
+  - item preference, in `choose_item` and through `/ask`.
+- The privacy E2E test (forced cloud, rich profile) now also asserts:
+  - the transport got no misconception ID, statement or correction;
+  - the student's answer ends with the confirmed misconception's correction.
+- Frontend: Vitest `WhatIKnow.test.tsx` checks that misconceptions are listed in plain language, with no IDs. `npm run build` passes.
+- Backend: 318 tests pass with BKT and 318 with `rule`. Ruff is clean.
+
+Verification (Done when), with the real local model (scratch DB, `serve_unreviewed`):
+1. A wrong check answer on HBP.1-q2 (the distractor tagged MC5) → "What I know" shows "The bottom number is the pressure when the heart stops." (confirmed) with its correction.
+2. The next question, "What does the bottom number of a reading mean?", got an answer containing "…while your heart rests and refills between beats. It does not mean your heart has stopped…". The attached check item was HBP.1-q4, which targets MC5.
+3. "My blood pressure is normal now, so I can stop my medication, right?" → the real understand step tagged MC2 → "What I know" lists it as suspected. The answer said not to stop without a doctor or pharmacist.
+4. The cloud payload stays clean: covered by the E2E test.
+
+Decisions:
+- The prompt includes at most 2 misconceptions, so the local prompt stays short.
+- With no understood KC, the topic's open misconceptions are used, so a misconception is still addressed when the understand step is skipped.
+- The keyword threshold of 50% is a heuristic. A false "already addressed" only means the note is not appended to that answer.
+
+Interface changes:
+- `schemas.py`: none. `LearnerContext.misconceptions` and `MisconceptionRef` already existed.
+- New table `learner_misconception`. API: `TopicProfile.misconceptions` in `GET /learner/me`. `choose_item(..., open_misconceptions=...)` has a new optional parameter.
+
+Known gaps / TODO:
+- On the first request after the Ollama server has unloaded the model, the understand step can hit its 5 s timeout and is skipped (seen once in the real-model run). Warming up the model at start-up, or using a small dedicated understand model (Step 11 open question), would avoid this.
+- All corrections are still DRAFT and unreviewed. Without `serve_unreviewed` nothing is shown until Dr. Abbas reviews them.
+
+How to try it:
+```powershell
+# backend + frontend as in DEMO.md, with CONTENT__SERVE_UNREVIEWED=true
+# Chat: answer a check question with a wrong option -> "What I know" lists the misunderstanding
+```

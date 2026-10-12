@@ -2,6 +2,7 @@ import logging
 
 from app.core.registry import checkers, import_submodules, steps
 from app.core.schemas import CheckResult, RequestContext
+from app.learner.misconceptions import append_corrections
 from app.pipeline.base import BaseStep
 from app.pipeline.steps.generate import GenerateStep
 from app.privacy.anonymizer import restore
@@ -58,6 +59,7 @@ class VerifyStep(BaseStep):
             log.warning("medical safety check failed, regenerating once, request=%s", ctx.request_id)
             result = await self.generate.produce(ctx, safety_retry=True)
             ctx.llm, ctx.answer = result, restore(result.text, ctx.pii_mapping)
+            append_corrections(ctx)  # as the restore step did for the first answer
             ctx.checks = self._run_all(ctx)
             if self._status(ctx.checks, "medical_safety") == "fail":
                 log.warning("medical safety check failed again, using the safe fallback, request=%s",

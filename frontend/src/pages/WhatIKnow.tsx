@@ -12,7 +12,13 @@ const PREF_LABELS: Record<string, string> = {
   detailed: "Detailed answers",
 };
 
-/** The student's own profile: bands per knowledge component, never probabilities (design §7.4). */
+const SOURCE: Record<string, string> = {
+  confirmed: "seen in your answers",
+  suspected: "may have come up in a question",
+};
+
+/** The student's own profile: bands per knowledge component, never probabilities (design §7.4),
+ * and the open misconceptions with their reviewed corrections (Step 12). */
 export default function WhatIKnow() {
   const qc = useQueryClient();
   const profile = useQuery({ queryKey: ["profile"], queryFn: api.profile });
@@ -74,6 +80,22 @@ export default function WhatIKnow() {
               </li>
             ))}
           </ul>
+          {t.misconceptions && t.misconceptions.length > 0 && (
+            <div className="mt-4">
+              <h3 className="mb-2 text-sm font-semibold">Ideas we are working on</h3>
+              <ul className="space-y-2">
+                {t.misconceptions.map((m) => (
+                  <li key={m.statement} className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm">
+                    <p className="text-amber-900">
+                      <span className="font-medium">A common mix-up:</span> {m.statement}{" "}
+                      <span className="text-xs text-amber-800">({SOURCE[m.status]})</span>
+                    </p>
+                    <p className="mt-1 text-slate-800"><span className="font-medium">What is true:</span> {m.correction}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </section>
       ))}
     </div>

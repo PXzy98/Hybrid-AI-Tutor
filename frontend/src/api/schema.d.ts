@@ -583,6 +583,23 @@ export interface components {
              */
             kcs: components["schemas"]["KcBand"][];
         };
+        /**
+         * OpenMisconception
+         * @description A misunderstanding the tutor is working on, in plain language (no catalog ID).
+         */
+        OpenMisconception: {
+            /** Kc Id */
+            kc_id: string;
+            /** Statement */
+            statement: string;
+            /** Correction */
+            correction: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "suspected" | "confirmed";
+        };
         /** PreferenceAnswers */
         PreferenceAnswers: {
             /** Sequencing */
@@ -703,6 +720,11 @@ export interface components {
             name: string;
             /** Kcs */
             kcs: components["schemas"]["KcBand"][];
+            /**
+             * Misconceptions
+             * @default []
+             */
+            misconceptions: components["schemas"]["OpenMisconception"][];
         };
         /** Turn */
         Turn: {

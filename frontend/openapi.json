@@ -1447,6 +1447,39 @@
         ],
         "title": "OnboardingResult"
       },
+      "OpenMisconception": {
+        "properties": {
+          "kc_id": {
+            "type": "string",
+            "title": "Kc Id"
+          },
+          "statement": {
+            "type": "string",
+            "title": "Statement"
+          },
+          "correction": {
+            "type": "string",
+            "title": "Correction"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "suspected",
+              "confirmed"
+            ],
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kc_id",
+          "statement",
+          "correction",
+          "status"
+        ],
+        "title": "OpenMisconception",
+        "description": "A misunderstanding the tutor is working on, in plain language (no catalog ID)."
+      },
       "PreferenceAnswers": {
         "properties": {
           "sequencing": {
@@ -1734,6 +1767,14 @@
             },
             "type": "array",
             "title": "Kcs"
+          },
+          "misconceptions": {
+            "items": {
+              "$ref": "#/components/schemas/OpenMisconception"
+            },
+            "type": "array",
+            "title": "Misconceptions",
+            "default": []
           }
         },
         "type": "object",

@@ -141,3 +141,17 @@ class Consent(SQLModel, table=True):
     given: bool
     created_at: datetime = Field(default_factory=utcnow)
     updated_at: datetime = Field(default_factory=utcnow)
+
+
+class LearnerMisconception(SQLModel, table=True):
+    """Tracked catalog misconceptions (design §5.1): IDs and counts only, never text."""
+
+    __tablename__ = "learner_misconception"
+
+    id: int | None = Field(default=None, primary_key=True)
+    student_id: str = Field(index=True)
+    misconception_id: str = Field(index=True)
+    kc_id: str
+    status: str  # suspected | confirmed | resolved
+    evidence_count: int = 0  # signals since the misconception was last opened
+    updated_at: datetime = Field(default_factory=utcnow)

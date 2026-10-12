@@ -4,16 +4,22 @@ It hides which KnowledgeModel / PreferenceModel is configured, applies the conse
 LearnerContext for the prompt builder. Everything here stays inside the privacy boundary; the cloud only
 ever sees LearnerContext.to_cloud_labels().
 """
+from typing import TYPE_CHECKING
+
 from sqlalchemy import Engine
 
 from app.core.config import Settings
-from app.core.schemas import Evidence, KcState, LearnerContext, Level, Preferences
-from app.learner.content import ContentStore
+from app.core.schemas import Evidence, KcState, LearnerContext, Level, MisconceptionRef, Preferences
+from app.learner.content import ContentStore, Item
 from app.learner.knowledge import KnowledgeModel, load_knowledge_model
 from app.learner.knowledge.bkt_math import level_with_hysteresis
+from app.learner.misconceptions import MAX_IN_PROMPT, MisconceptionTracker
 from app.learner.preference import PreferenceModel, PreferenceSignal, load_preference_model
 from app.learner.recommender import Recommender
 from app.learner.repository import LearnerRepository
+
+if TYPE_CHECKING:
+    from app.learner.checks import Graded
 
 LEVEL_ORDER: dict[Level, int] = {"basic": 0, "intermediate": 1, "advanced": 2}
 
@@ -27,6 +33,7 @@ class LearnerModel:
         self.recommender = recommender
         self.content = content
         self.cfg = settings.learner
+        self.tracker = MisconceptionTracker(repo, content)
 
     # ------------------------------------------------------------------- consent
     def has_consent(self, student_id: str) -> bool:
@@ -49,6 +56,8 @@ class LearnerModel:
         return LearnerContext(
             kc_states=states,
             focus_level=self._focus_level(student_id, topic, topic_kcs, asked, states),
+            # the question's KCs when known, else the whole topic; at most MAX_IN_PROMPT, confirmed first
+            misconceptions=self.tracker.refs(student_id, asked or topic_kcs, MAX_IN_PROMPT),
             preferences=self.preferences.get(student_id),
             next_kc=self.recommender.next_kc(student_id, topic),
             personalized=True,
@@ -126,6 +135,25 @@ class LearnerModel:
     def band(self, state: KcState) -> str:
         """What the student sees: basic / intermediate / advanced, or mastered. Never the probability."""
         return "mastered" if state.p_mastery >= self.cfg.recommender.mastered else state.level
+
+    # ------------------------------------------------------------ misconceptions
+    def misconception_stated(self, student_id: str, mc_id: str) -> str | None:
+        """Weak signal from the understand step: suspected, or confirmed on the second signal."""
+        return self.tracker.weak_signal(student_id, mc_id) if self.has_consent(student_id) else None
+
+    def check_answered(self, student_id: str, item: Item, graded: "Graded") -> None:
+        """Misconception side of a graded check answer: a tagged distractor confirms its misconception, a
+        correct answer resolves the open misconceptions the item targets."""
+        if not self.has_consent(student_id):
+            return
+        if graded.misconception_id:
+            self.tracker.distractor_chosen(student_id, graded.misconception_id)
+        if graded.correct:
+            self.tracker.answered_correctly(student_id, item)
+
+    def open_misconceptions(self, student_id: str, kc_ids: list[str]) -> list[MisconceptionRef]:
+        """Open, showable misconceptions of these KCs (for "What I know")."""
+        return self.tracker.refs(student_id, kc_ids) if self.has_consent(student_id) else []
 
     # --------------------------------------------------------------- preferences
     def update_preferences(self, student_id: str, signal: PreferenceSignal) -> Preferences | None:

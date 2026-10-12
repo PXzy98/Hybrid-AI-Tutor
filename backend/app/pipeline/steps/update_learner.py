@@ -39,14 +39,17 @@ def preference_hints(question: str) -> list[PreferenceSignal]:
 
 @steps.register("update_learner")
 class UpdateLearnerStep(BaseStep):
-    """Post-response (background): weak evidence when learner.weak_evidence is on, and implicit presentation
-    hints. Both are no-ops without consent (the facade checks it)."""
+    """Post-response (background): misconceptions the student stated (tracking: suspected, then confirmed on
+    a second signal), weak evidence for the knowledge model when learner.weak_evidence is on, and implicit
+    presentation hints. All are no-ops without consent (the facade checks it)."""
 
     name = "update_learner"
     on_error = "skip"
 
     async def run(self, ctx: RequestContext) -> RequestContext:
         learner, sid = self.services.learner, ctx.request.student_id
+        for mc_id in ctx.understanding.misconception_ids if ctx.understanding else []:
+            learner.misconception_stated(sid, mc_id)
         if self.services.settings.learner.weak_evidence:
             learner.observe_request(sid, weak_evidence(ctx, self.services.content))
         for signal in preference_hints(ctx.request.question):

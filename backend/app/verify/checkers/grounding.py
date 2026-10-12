@@ -2,12 +2,14 @@
 
 Heuristic: an answer sentence counts as supported when at least 20% of its content words appear in one
 passage. If fewer than half of the sentences are supported, warn. Without passages there is nothing to
-check against, so the check passes with "no material".
+check against, so the check passes with "no material". A reviewed misconception note appended by the
+restore step (Step 12) is catalog text, not generated text, so it is not checked.
 """
 import re
 
 from app.core.registry import checkers
 from app.core.schemas import CheckResult, RequestContext
+from app.learner.misconceptions import NOTE_HEADER
 
 NAME = "grounding"
 SENTENCE_OVERLAP = 0.2
@@ -48,6 +50,7 @@ class GroundingChecker:
     def check(self, ctx: RequestContext) -> CheckResult:
         if not ctx.passages:
             return CheckResult(name=NAME, status="pass", detail="no material")
-        share, n = supported_share(ctx.answer or "", [c.text for c in ctx.passages])
+        generated = (ctx.answer or "").split(NOTE_HEADER)[0]
+        share, n = supported_share(generated, [c.text for c in ctx.passages])
         detail = f"{share:.0%} of {n} sentences supported"
         return CheckResult(name=NAME, status="pass" if share >= SUPPORTED_SHARE else "warn", detail=detail)
