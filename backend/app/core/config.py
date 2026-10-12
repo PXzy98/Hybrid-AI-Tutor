@@ -103,6 +103,16 @@ class LearnerConfig(Section):
     weak_likelihood: WeakLikelihood = WeakLikelihood()
     rule: RuleConfig = RuleConfig()
     class_summary_min_group: int = Field(5, ge=1)
+    instructor_individual_view: bool = False
+
+
+class AuthConfig(Section):
+    session_ttl_hours: float = Field(12, gt=0, le=24 * 30)
+    cookie_name: str = "tutor_session"
+    cookie_secure: bool = False
+    min_password_length: int = Field(10, ge=8)
+    max_failed_logins: int = Field(5, ge=1)
+    lockout_minutes: float = Field(15, gt=0)
 
 
 class LocalLLMConfig(Section):
@@ -158,6 +168,7 @@ class Settings(BaseSettings):
     privacy: PrivacyConfig = PrivacyConfig()
     sessions: SessionsConfig = SessionsConfig()
     learner: LearnerConfig = LearnerConfig()
+    auth: AuthConfig = AuthConfig()
     llm: LLMConfig = LLMConfig()
     content: ContentConfig = ContentConfig()
     courses: dict[str, CourseConfig] = {}
@@ -167,10 +178,12 @@ class Settings(BaseSettings):
     cloud_base_url: str = "https://api.openai.com/v1"
     cloud_api_key: SecretStr | None = None
     cloud_model: str | None = None
-    admin_token: SecretStr | None = None
+    instructor_username: str | None = None
+    instructor_initial_password: SecretStr | None = None
     database_url: str = f"sqlite:///{(REPO_ROOT / 'data' / 'app.db').as_posix()}"
 
-    @field_validator("cloud_api_key", "cloud_model", "admin_token", mode="before")
+    @field_validator("cloud_api_key", "cloud_model", "instructor_username", "instructor_initial_password",
+                     mode="before")
     @classmethod
     def _empty_is_none(cls, v):
         return None if isinstance(v, str) and not v.strip() else v

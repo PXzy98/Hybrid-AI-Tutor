@@ -3,9 +3,10 @@ from pathlib import PurePosixPath
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.api.deps import RunnerDep, ServicesDep
+from app.auth.deps import Student
 from app.core.schemas import AskRequest, AskResponse, RequestContext, Source
 from app.pipeline.runner import PipelineError
 
@@ -16,6 +17,16 @@ FAILURE_MESSAGES = {
     "privacy_filter": "The privacy filter is unavailable, so the question was not processed.",
 }
 DEFAULT_FAILURE = "The tutor could not answer right now. Please try again."
+
+
+class AskBody(BaseModel):
+    """Public request body. Deliberately has no student_id: the server takes it from the login session."""
+
+    session_id: str = Field("", max_length=64)
+    course_id: str = "default"
+    topic: str = Field(min_length=1)
+    question: str = Field(min_length=1, max_length=4000)
+    language: str = "en"
 
 
 class ErrorBody(BaseModel):
@@ -34,14 +45,20 @@ def _sources(ctx: RequestContext) -> list[Source]:
 
 
 @router.post("/ask", response_model=AskResponse, responses={503: {"model": ErrorBody}})
-async def ask(req: AskRequest, background: BackgroundTasks, services: ServicesDep, runner: RunnerDep):
+async def ask(body: AskBody, user: Student, background: BackgroundTasks, services: ServicesDep,
+              runner: RunnerDep):
     settings = services.settings
-    if req.topic not in settings.topics(req.course_id):
-        raise HTTPException(422, f"unknown topic for course '{req.course_id}'")
-    session_id = req.session_id or str(uuid.uuid4())
+    if body.topic not in settings.topics(body.course_id):
+        raise HTTPException(422, f"unknown topic for course '{body.course_id}'")
+    session_id = body.session_id or str(uuid.uuid4())
+    owner = services.sessions.owner(session_id)
+    if owner is not None and owner != user.student_id:
+        raise HTTPException(404, "session not found")
+    req = AskRequest(**body.model_dump(exclude={"session_id"}), session_id=session_id,
+                     student_id=user.student_id)
     ctx = RequestContext(
         request_id=str(uuid.uuid4()),
-        request=req.model_copy(update={"session_id": session_id}),
+        request=req,
         history=services.sessions.history(session_id, last=settings.sessions.history_turns),
     )
     try:

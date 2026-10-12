@@ -38,6 +38,6 @@ class RecordStep(BaseStep):
                 warnings=list(ctx.warnings),
             ))
             s.commit()
-        self.services.sessions.append(req.session_id, Turn(role="student", text=question))
-        self.services.sessions.append(req.session_id, Turn(role="tutor", text=answer))
+        self.services.sessions.append(req.session_id, req.student_id, Turn(role="student", text=question))
+        self.services.sessions.append(req.session_id, req.student_id, Turn(role="tutor", text=answer))
         return ctx

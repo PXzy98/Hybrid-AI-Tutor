@@ -38,6 +38,15 @@ cd backend
 ..\.venv\Scripts\python -m pytest -q
 ```
 
+### First instructor account
+
+There is no self-registration: the instructor creates student accounts. To create the first instructor, set `INSTRUCTOR_USERNAME` and `INSTRUCTOR_INITIAL_PASSWORD` in `.env` before the first start; that password must be changed at first login. Alternatively, run from `backend/`:
+
+```powershell
+..\.venv\Scripts\python -m app.auth.cli create-instructor <username>
+..\.venv\Scripts\python -m app.auth.cli set-password <username>      # recovery: also clears a lockout
+```
+
 Tests run offline by default. Tests that need the Ollama server or a cloud key are marked; run them with `-m ollama` or `-m cloud`.
 
 ## Team

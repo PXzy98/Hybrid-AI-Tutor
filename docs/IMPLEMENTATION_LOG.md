@@ -128,3 +128,72 @@ cd backend
 ```bash
 curl -X POST http://127.0.0.1:8000/api/v1/ask -H "Content-Type: application/json" -d '{"student_id":"demo-1","topic":"high_blood_pressure","question":"What does the top number mean?"}'
 ```
+
+## Step 2b — Accounts and authentication (2026-10-12)
+
+Added on Oct 12, after the decision to give each student an account. The design (§2 principle 2, §7.5, §8.1, §8.3, §9) and the implementation prompts (new Step 2b; Steps 7, 9, 10, 13 and 14 now take identity from the session) were updated in a separate commit first.
+
+Done:
+- Tables:
+  - `account`: username (lower-case, unique), display_name, role, argon2 password_hash, random `student_id` (students only), active, must_change_password, failed_logins, locked_until, timestamps.
+  - `auth_session`: only the SHA-256 of the cookie token is stored.
+  - `session_turn` has a `student_id` column for ownership checks.
+- `app/auth/`:
+  - `passwords.py`: argon2; temporary passwords with no look-alike characters; `burn_time` gives unknown usernames the same cost as real ones.
+  - `sessions.py`: create, resolve (expired → deleted; inactive account → rejected), revoke, `revoke_all`.
+  - `service.py` (`AccountService`): create student / instructor; login with lockout; change / set / reset password; update; delete; `bootstrap_instructor()` from `.env`.
+  - `purge.py`: generic `purge_student` (see Decisions).
+  - `deps.py`: `CurrentUser` and `AnyUser` / `Student` / `Instructor`. A pending password change blocks everything except `auth/*`.
+  - `cli.py`: `create-instructor` and `set-password`.
+- API:
+  - `auth/login` (httpOnly, SameSite=Lax cookie), `auth/logout`, `auth/me`, `auth/change-password`.
+  - `admin/students`: GET, POST, PATCH, DELETE, and POST `reset-password`. They are instructor-only, act on student accounts only, and send `Cache-Control: no-store` with temporary passwords.
+- Changed Step 2 endpoints:
+  - `/ask` requires a student. The body is `AskBody`, with no `student_id`; the server fills `AskRequest.student_id` from the session. A session owned by someone else → 404.
+  - `/sessions/{id}` returns only the caller's own sessions.
+  - `/topics` needs any login; `/health` stays public.
+  - CORS allows credentials.
+- The lifespan bootstraps the first instructor from `INSTRUCTOR_USERNAME` / `INSTRUCTOR_INITIAL_PASSWORD`.
+- Tests (113 in total, all passing):
+  - login, logout and me; generic errors; lockout; expiry; forced password change; other sessions ended on password change;
+  - students cannot see or continue each other's sessions; a forged `student_id` in the body is ignored;
+  - students get 403 on `admin/*`, anonymous callers get 401, the instructor gets 403 on `/ask`;
+  - admin endpoints cannot touch the instructor;
+  - reset and deactivate end live sessions;
+  - delete purges the account, sessions, turns and a throw-away "future" table, keeps other students' rows and anonymizes `request_log`;
+  - usernames and display names never appear in `request_log`, `session_turn` or `auth_session`;
+  - env bootstrap without duplicates; CLI recovery from a lockout.
+- Manual check with uvicorn and curl, all as expected:
+  1. bootstrap instructor → login → 403 until the password is changed → change it;
+  2. create a student → login with the temporary password → `/ask` blocked → change the password → `/ask` works;
+  3. the student gets 403 on admin;
+  4. delete the student → the student's cookie returns 401 → the list is empty.
+
+Files: `backend/app/auth/*`, `backend/app/api/v1/{auth,admin_students,ask,sessions,topics,__init__}.py`, `backend/app/storage/models.py`, `backend/app/sessions/{interface,sqlite}.py`, `backend/app/pipeline/steps/record.py`, `backend/app/core/{config,services}.py`, `backend/app/main.py`, `config.yaml`, `.env.example`, `backend/pyproject.toml`, `backend/tests/{conftest,test_api,test_auth,test_admin_students}.py`, `README.md`, `docs/System_Design_v3.md`, `docs/IMPLEMENTATION_PROMPTS.md`, `docs/diagrams/architecture-v3.*`.
+
+Decisions:
+- **Server-side sessions, not JWT.** Deactivating, resetting or deleting a student must log them out immediately.
+- **Deletion is generic.** `purge_student` deletes from every table that has a `student_id` column (found through `SQLModel.metadata`), so the learner tables of Steps 6 and 12 are covered automatically. `request_log` rows are anonymized to `student_id = "deleted"` instead.
+- **Locked accounts answer 429** ("too many failed attempts"). All other failures answer the same 401 "invalid username or password". Deactivated accounts look like wrong credentials.
+- **Errors return the same answer as "not found".** A session or account the caller may not see returns 404, so its existence is not revealed.
+- The instructor's display name defaults to the username. Instructors have no `student_id` and cannot use student endpoints.
+- `ADMIN_TOKEN` is removed; Step 13 uses `require_instructor`.
+- Tests: `conftest.py` blanks `INSTRUCTOR_*` env vars, so a developer's `.env` cannot change test behaviour. The `api`, `student_client` and `instructor_client` fixtures log in through the real endpoint.
+
+Interface changes:
+- `SessionStore.append(session_id, student_id, turn)` (was `append(session_id, turn)`), plus a new `SessionStore.owner(session_id)`. This is internal; teammates do not implement session stores.
+- `/api/v1/ask` request body: `AskBody` without `student_id`. `core/schemas.AskRequest` is **unchanged**, so routing and RAG are unaffected.
+- `Services` gained `accounts`.
+
+Known gaps / TODO:
+- There are no DB migrations. A `data/app.db` created before this step must be deleted (done on this machine). Consider Alembic before real data exists.
+- There is no rate limit per IP, only per-account lockout. That is acceptable on a closed LAN; revisit before any public deployment.
+- The frontend login and student-management pages come in Steps 9 and 13.
+
+How to try it:
+```powershell
+cd backend
+..\.venv\Scripts\python -m pytest -q
+$env:INSTRUCTOR_USERNAME="prof"; $env:INSTRUCTOR_INITIAL_PASSWORD="initial-pass-123"
+..\.venv\Scripts\python -m uvicorn app.main:app --reload      # then use /docs: auth/login, change-password, admin/students
+```

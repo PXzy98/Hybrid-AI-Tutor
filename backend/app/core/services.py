@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 from sqlalchemy import Engine
 
+from app.auth.service import AccountService
 from app.core.config import Settings, get_settings
 from app.rag import Retriever, load_retriever
 from app.routing import RouteScorer, load_router
@@ -17,6 +18,7 @@ class Services:
     router: RouteScorer
     retriever: Retriever
     sessions: SessionStore
+    accounts: AccountService
 
 
 def build_services(settings: Settings | None = None) -> Services:
@@ -29,4 +31,5 @@ def build_services(settings: Settings | None = None) -> Services:
         router=load_router(settings.routing.impl),
         retriever=load_retriever(settings.rag.impl),
         sessions=load_session_store(settings.sessions.store, engine),
+        accounts=AccountService(engine, settings),
     )

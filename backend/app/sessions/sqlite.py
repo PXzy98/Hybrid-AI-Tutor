@@ -23,8 +23,13 @@ class SqliteSessionStore:
             ).all()
         return [Turn(role=r.role, text=r.text, created_at=r.created_at) for r in reversed(rows)]
 
-    def append(self, session_id: str, turn: Turn) -> None:
+    def append(self, session_id: str, student_id: str, turn: Turn) -> None:
         with Session(self.engine) as s:
-            s.add(SessionTurn(session_id=session_id, role=turn.role, text=turn.text,
+            s.add(SessionTurn(session_id=session_id, student_id=student_id, role=turn.role, text=turn.text,
                               created_at=turn.created_at))
             s.commit()
+
+    def owner(self, session_id: str) -> str | None:
+        with Session(self.engine) as s:
+            row = s.exec(select(SessionTurn.student_id).where(SessionTurn.session_id == session_id)).first()
+        return row

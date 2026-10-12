@@ -21,6 +21,9 @@ def _deep_merge(base: dict, overrides: dict) -> dict:
 def _fresh_settings(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     """Every test starts with an empty settings cache and its own SQLite file (never data/app.db)."""
     monkeypatch.setenv("DATABASE_URL", f"sqlite:///{(tmp_path / 'test.db').as_posix()}")
+    # a developer's .env must not change test behaviour: no instructor bootstrap unless a test asks for it
+    monkeypatch.setenv("INSTRUCTOR_USERNAME", "")
+    monkeypatch.setenv("INSTRUCTOR_INITIAL_PASSWORD", "")
     get_settings.cache_clear()
     yield
     get_settings.cache_clear()
@@ -57,3 +60,52 @@ def use_config(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         return get_settings()
 
     return _apply
+
+
+# ------------------------------------------------------------------------------- accounts
+PASSWORD = "correct-horse-battery"
+
+
+class Api:
+    """A started TestClient plus helpers to create accounts and log in."""
+
+    def __init__(self, client) -> None:
+        self.client = client
+        self.accounts = client.app.state.services.accounts
+
+    def make_student(self, username: str = "alice", display_name: str = "Alice Tremblay",
+                     password: str = PASSWORD, must_change: bool = False):
+        account, temp = self.accounts.create_student(username, display_name)
+        if not must_change:
+            account = self.accounts.set_password(account.id, password, must_change=False)
+        self.last_temp_password = temp  # for tests of the first-login flow
+        return account
+
+    def make_instructor(self, username: str = "prof", password: str = PASSWORD, must_change: bool = False):
+        return self.accounts.create_instructor(username, password, must_change=must_change)
+
+    def login(self, username: str, password: str = PASSWORD, expect: int = 200):
+        self.client.cookies.clear()
+        r = self.client.post("/api/v1/auth/login", json={"username": username, "password": password})
+        assert r.status_code == expect, r.text
+        return r
+
+
+@pytest.fixture
+def api(make_client):
+    with make_client() as client:
+        yield Api(client)
+
+
+@pytest.fixture
+def student_client(api):
+    api.make_student()
+    api.login("alice")
+    return api.client
+
+
+@pytest.fixture
+def instructor_client(api):
+    api.make_instructor()
+    api.login("prof")
+    return api.client

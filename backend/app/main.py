@@ -15,6 +15,7 @@ DEV_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"]  # Vite dev ser
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     services = build_services()
+    services.accounts.bootstrap_instructor()
     app.state.services = services
     app.state.runner = build_runner(services)
     logging.getLogger("app").info("pipeline: %s", " -> ".join(app.state.runner.step_names))
@@ -29,7 +30,8 @@ def create_app() -> FastAPI:
         description="Health-education tutor with a local learner model. Design: docs/System_Design_v3.md",
         lifespan=lifespan,
     )
-    app.add_middleware(CORSMiddleware, allow_origins=DEV_ORIGINS, allow_methods=["*"], allow_headers=["*"])
+    app.add_middleware(CORSMiddleware, allow_origins=DEV_ORIGINS, allow_credentials=True,  # session cookie
+                       allow_methods=["*"], allow_headers=["*"])
     app.include_router(api_router)
     return app
 

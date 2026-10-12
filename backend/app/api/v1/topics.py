@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 
 from app.api.deps import ServicesDep
+from app.auth.deps import AnyUser
 
 router = APIRouter()
 
@@ -23,6 +24,6 @@ class TopicInfo(BaseModel):
 
 
 @router.get("/topics", response_model=list[TopicInfo])
-def list_topics(services: ServicesDep, course_id: str = "default"):
+def list_topics(_: AnyUser, services: ServicesDep, course_id: str = "default"):
     return [TopicInfo(id=t, name=TOPIC_NAMES.get(t, t.replace("_", " ").title()))
             for t in services.settings.topics(course_id)]
