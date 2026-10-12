@@ -18,11 +18,27 @@ def _deep_merge(base: dict, overrides: dict) -> dict:
 
 
 @pytest.fixture(autouse=True)
-def _fresh_settings():
-    """Every test starts and ends with an empty settings cache."""
+def _fresh_settings(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """Every test starts with an empty settings cache and its own SQLite file (never data/app.db)."""
+    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{(tmp_path / 'test.db').as_posix()}")
     get_settings.cache_clear()
     yield
     get_settings.cache_clear()
+
+
+@pytest.fixture
+def make_client(use_config, monkeypatch: pytest.MonkeyPatch):
+    """Start the app (lifespan included) with config overrides: `with make_client({...}) as client:`."""
+    from fastapi.testclient import TestClient
+
+    from app.main import create_app
+
+    def _make(overrides: dict | None = None) -> TestClient:
+        monkeypatch.setenv("OLLAMA_URL", "http://127.0.0.1:9")  # closed port: health check fails fast
+        use_config(overrides)
+        return TestClient(create_app())
+
+    return _make
 
 
 @pytest.fixture
