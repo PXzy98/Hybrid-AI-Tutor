@@ -41,3 +41,39 @@ cd backend
 ..\.venv\Scripts\python -m ruff check .
 ..\.venv\Scripts\python -m pytest -q
 ```
+
+## Step 1 — Contracts: schemas, registries, black-box stubs (2026-10-12)
+
+Done:
+- `app/core/schemas.py`: all shared models from the Step 1 spec, field names exact.
+  - `CloudLabels`, `CloudRequest` and `CheckItemPublic` use `extra="forbid"`.
+  - `RequestContext` keeps the PII mapping in a private attribute, accessed through `pii_mapping` / `set_pii_mapping()` / `clear_pii_mapping()`. It never appears in a dump, JSON or repr.
+- `app/core/registry.py`: generic `Registry` (`register` / `get` / `names`), plus `import_submodules()` so that any new file in a package registers itself. Instances: `steps`, `checkers`, `knowledge_models`, `preference_models`, `routers`, `retrievers`.
+- `app/pipeline/base.py`: `Step` and `Checker` protocols.
+- Routing: `RouteScorer` protocol; `stub` router (fixed `routing.stub_score`, default 0.0); `load_router(name)`.
+- RAG: `Retriever` protocol; `stub` retriever (returns `[]`); `fixture` retriever (keyword overlap over `data/synthetic/rag_fixture.jsonl`, 6 synthetic HBP chunks, with filter-then-fallback); `load_retriever(name)`.
+- Contract tests (`tests/contracts/`) are parametrized over every registered implementation. Verified with a throw-away router file: it appeared as `[demo]` without any other change.
+- `docs/INTERFACES.md`: a handout for Tongkai and Siyun.
+
+Files: `backend/app/core/{schemas,registry}.py`, `backend/app/pipeline/base.py`, `backend/app/routing/{__init__,interface,stub}.py`, `backend/app/rag/{__init__,interface,stub}.py`, `data/synthetic/rag_fixture.jsonl`, `backend/tests/{test_schemas,test_registry}.py`, `backend/tests/contracts/*`, `docs/INTERFACES.md`.
+
+Decisions:
+- Black boxes are **classes with a no-argument constructor**, registered by name, with a sync method (`route_score` / `retrieve`). This replaces the design's plain functions. Classes can load models once in `__init__`, and the method signatures are exactly the design's functions.
+- `retrieve()` gained optional `kc_ids` and `level` (as planned in design §9).
+- `AskRequest.question` has a max length of 4000 characters. `student_id` and `topic` must not be empty. Whether the topic is in the config is checked by the API (Step 2), not by the schema.
+- `Turn.created_at` defaults to the current UTC time.
+- Routing contract: no network, under 1 s, deterministic. RAG contract: at most k chunks, all from the topic, filter falls back to topic results, never raises.
+
+Interface changes:
+- New: every model in `schemas.py` (first version). `retrieve()` has the extra optional parameters `kc_ids` and `level`. `RouteInput` has the optional `level` and `kc_ids`.
+
+Known gaps / TODO:
+- `docs/INTERFACES.md` still needs to be sent to Tongkai and Siyun, who must confirm the `cloud_safe` force-local rule and the threshold ownership.
+- The fixture chunks are synthetic placeholders, not course material.
+
+How to try it:
+```powershell
+cd backend
+..\.venv\Scripts\python -m pytest -q
+..\.venv\Scripts\python -m pytest tests/contracts -v
+```

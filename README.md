@@ -5,6 +5,7 @@ A health-education tutor (ELG 5902, Group 1). Students pick one of five topics (
 - Design: [docs/System_Design_v3.md](docs/System_Design_v3.md) (diagrams in [docs/diagrams/](docs/diagrams/))
 - Implementation plan, step by step: [docs/IMPLEMENTATION_PROMPTS.md](docs/IMPLEMENTATION_PROMPTS.md)
 - Progress log: [docs/IMPLEMENTATION_LOG.md](docs/IMPLEMENTATION_LOG.md)
+- For teammates (routing, RAG): [docs/INTERFACES.md](docs/INTERFACES.md)
 
 ## Repository layout
 
