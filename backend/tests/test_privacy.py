@@ -1,0 +1,162 @@
+"""Privacy filter: recognizers, anonymization, restore (design §7.1 steps 1 and 7, §11 privacy targets)."""
+import json
+from pathlib import Path
+
+import pytest
+
+from app.core.config import PrivacyConfig, get_settings
+from app.core.schemas import AskRequest, RequestContext
+from app.core.services import build_services
+from app.pipeline.steps.privacy_filter import PrivacyFilterStep
+from app.pipeline.steps.restore import RestoreStep
+from app.pipeline.steps.route import RouteStep
+from app.privacy.analyzer import Finding, PIIAnalyzer, PrivacyFilterUnavailable, resolve_overlaps
+from app.privacy.anonymizer import anonymize, restore
+
+pytestmark = pytest.mark.presidio
+
+DATA = Path(__file__).resolve().parents[2] / "data" / "synthetic"
+# labelled types in the ai-tutor-bench set -> our entity types; other labels are out of scope for the MVP
+COVERED = {"PERSON": "PERSON", "STUDENT_ID": "STUDENT_ID", "GRADE": "GRADE", "EMAIL": "EMAIL_ADDRESS",
+           "PHONE": "PHONE_NUMBER", "HEALTH": "HEALTH_DETAIL"}
+
+
+@pytest.fixture(scope="module")
+def analyzer() -> PIIAnalyzer:
+    return PIIAnalyzer(PrivacyConfig(spacy_model="en_core_web_sm", score_threshold=0.5, allow_list=["Abbas"]))
+
+
+def find(analyzer, text):
+    return [(f.type, text[f.start:f.end]) for f in analyzer.analyze(text)]
+
+
+def bench_items():
+    lines = (DATA / "ai_tutor_bench_testset.jsonl").read_text("utf-8").splitlines()
+    rows = [json.loads(line) for line in lines]
+    return [r for r in rows if r["category"] == "pii"]
+
+
+def test_bench_recall_and_no_over_redaction(analyzer):
+    hits, total, misses, out_of_scope = 0, 0, [], []
+    for item in bench_items():
+        q = item["question"]
+        findings = analyzer.analyze(q)
+        sanitized, _, _ = anonymize(q, findings)
+        for e in item["pii_entities"]:
+            if e["type"] not in COVERED:
+                out_of_scope.append(e["type"])
+                continue
+            total += 1
+            start = q.find(e["text"])
+            covered = sum(max(0, min(f.end, start + len(e["text"])) - max(f.start, start)) for f in findings)
+            need = 1 if e["type"] == "HEALTH" else 0.8 * len(e["text"])  # health spans are labelled loosely
+            if covered >= need:
+                hits += 1
+            else:
+                misses.append((item["id"], e["type"], e["text"]))
+        for term in item["non_pii_terms"]:
+            assert term in sanitized, f"{item['id']}: '{term}' was redacted"
+    recall = hits / total
+    print(f"\nrecall {hits}/{total} = {recall:.2f}; misses: {misses!a}")  # !a: console-safe
+    print(f"out of scope for the MVP: {sorted(set(out_of_scope))}")
+    assert recall >= 0.85
+
+
+def test_health_cases_personal_vs_general(analyzer):
+    for line in (DATA / "pii_health_cases.jsonl").read_text("utf-8").splitlines():
+        case = json.loads(line)
+        findings = analyzer.analyze(case["text"])
+        sanitized, _, _ = anonymize(case["text"], findings)
+        is_health = any(f.type == "HEALTH_DETAIL" for f in findings)
+        assert is_health == case["personal"], f"{case['id']}: {sanitized}"
+        for value in case["redacted"]:
+            assert value not in sanitized, f"{case['id']}: '{value}' survived: {sanitized}"
+
+
+@pytest.mark.parametrize(("text", "expected"), [
+    ("My student number is 300418277.", [("STUDENT_ID", "300418277")]),
+    ("ID: 300 418 277 please", [("STUDENT_ID", "300 418 277")]),
+    ("call 6135550148123 now", []),  # 13 digits: not a student number
+    ("Call me at 613-555-0148.", [("PHONE_NUMBER", "613-555-0148")]),
+    ("(613) 555-0148 is my cell", [("PHONE_NUMBER", "(613) 555-0148")]),
+    ("sensitivity 0.6135550148", []),
+    ("the value is 0.300418277", []),
+    ("I got 58/100 on the midterm", [("GRADE", "I got 58/100")]),
+    ("I got an A- on the quiz", [("GRADE", "I got an A-")]),
+    ("I got a lot of questions wrong", []),
+    ("The class average is 62%.", []),
+    ("I failed the midterm", [("GRADE", "I failed the midterm")]),
+    ("My email is s.nguyen92@gmail.com", [("EMAIL_ADDRESS", "s.nguyen92@gmail.com")]),
+    ("Prof. Abbas explained it, and Dr. Abbas's slides too.", []),  # allow-listed course staff
+    ("Compute Cohen's kappa and the Brier score.", []),  # eponyms are not people
+    ("Can you explain what DICOM metadata contains?", []),
+    ("Group: Tom Becker 300477120", [("PERSON", "Tom Becker"), ("STUDENT_ID", "300477120")]),
+])
+def test_recognizers(analyzer, text, expected):
+    assert find(analyzer, text) == expected
+
+
+def test_overlaps_prefer_longer_then_higher_score():
+    kept = resolve_overlaps([Finding("PERSON", 0, 5, 0.9), Finding("HEALTH_DETAIL", 0, 12, 0.85),
+                             Finding("GRADE", 20, 25, 0.7)])
+    assert [(f.type, f.start) for f in kept] == [("HEALTH_DETAIL", 0), ("GRADE", 20)]
+
+
+def test_anonymize_numbers_per_type_and_reuses_placeholders():
+    text = "Alice met Bob. alice  emailed bob@x.ca and Alice again."
+    findings = [Finding("PERSON", 0, 5, 0.9), Finding("PERSON", 10, 13, 0.9), Finding("PERSON", 15, 20, 0.9),
+                Finding("EMAIL_ADDRESS", 30, 38, 1.0), Finding("PERSON", 43, 48, 0.9)]
+    sanitized, entities, mapping = anonymize(text, findings)
+    assert sanitized == ("<PERSON_1> met <PERSON_2>. <PERSON_1>  emailed <EMAIL_ADDRESS_1> "
+                         "and <PERSON_1> again.")
+    assert mapping == {"<PERSON_1>": "Alice", "<PERSON_2>": "Bob", "<EMAIL_ADDRESS_1>": "bob@x.ca"}
+    assert len(entities) == 5
+    assert restore(sanitized, mapping) == "Alice met Bob. Alice  emailed bob@x.ca and Alice again."
+
+
+@pytest.mark.parametrize("variant", ["<PERSON_1>", "<person_1>", "< PERSON_1 >", "[PERSON_1]"])
+def test_restore_tolerates_formatting_and_ignores_unknown(variant):
+    mapping = {"<PERSON_1>": "Alice", "<STUDENT_ID_1>": "300418277"}
+    out = restore(f"Hi {variant}, id <STUDENT_ID_1>, <PERSON_9>", mapping)
+    assert out == "Hi Alice, id 300418277, <PERSON_9>"
+    assert restore("<PERSON_1>", {}) == "<PERSON_1>"
+
+
+async def test_step_done_when_example(use_config):
+    """'My student ID is 300418277 and I have asthma' -> local only, sanitized."""
+    services = build_services(use_config({"routing": {"stub_score": 1.0}}))
+    ctx = RequestContext(request_id="r", request=AskRequest(
+        student_id="s", topic="asthma", question="My student ID is 300418277 and I have asthma. What helps?"))
+    ctx = await PrivacyFilterStep(services).run(ctx)
+    assert ctx.pii.sanitized_text == ("My student ID is <STUDENT_ID_1> and I have <HEALTH_DETAIL_1>. "
+                                      "What helps?")
+    assert ctx.pii.is_sensitive and not ctx.pii.cloud_safe
+    assert ctx.pii_mapping == {"<STUDENT_ID_1>": "300418277", "<HEALTH_DETAIL_1>": "asthma"}
+    ctx = await RouteStep(services).run(ctx)
+    assert ctx.target == "local" and "forced local: not cloud_safe" in ctx.route.reasons
+
+
+async def test_clean_question_is_not_sensitive(use_config):
+    services = build_services(use_config())
+    ctx = RequestContext(request_id="r", request=AskRequest(student_id="s", topic="asthma",
+                                                            question="What triggers an asthma attack?"))
+    ctx = await PrivacyFilterStep(services).run(ctx)
+    assert ctx.pii.entities == [] and ctx.pii.cloud_safe and not ctx.pii.is_sensitive
+    assert ctx.pii.sanitized_text == "What triggers an asthma attack?"
+
+
+async def test_restore_step_puts_values_back_and_forgets_them(use_config):
+    services = build_services(use_config())
+    ctx = RequestContext(request_id="r", request=AskRequest(student_id="s", topic="asthma", question="q"),
+                         answer="Hello <PERSON_1>, see <person_1>.")
+    ctx.set_pii_mapping({"<PERSON_1>": "Wei Zhang"})
+    ctx = await RestoreStep(services).run(ctx)
+    assert ctx.answer == "Hello Wei Zhang, see Wei Zhang." and ctx.pii_mapping == {}
+
+
+def test_missing_spacy_model_stops_startup(use_config):
+    from app.pipeline.runner import build_runner
+
+    use_config({"privacy": {"spacy_model": "en_core_web_doesnotexist"}})
+    with pytest.raises(PrivacyFilterUnavailable, match="spacy download en_core_web_doesnotexist"):
+        build_runner(build_services(get_settings()))

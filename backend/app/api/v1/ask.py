@@ -75,7 +75,7 @@ async def ask(body: AskBody, user: Student, background: BackgroundTasks, service
         answer=ctx.answer or "",
         sources=_sources(ctx),
         model_used=ctx.llm.model if ctx.llm else "none",
-        route_target=ctx.target or "local",
+        route_target=ctx.llm.backend if ctx.llm else (ctx.target or "local"),  # who actually answered
         route_score=ctx.route.score if ctx.route else None,
         check_item=ctx.check_item,
         kc_level=learner.focus_level if learner else None,

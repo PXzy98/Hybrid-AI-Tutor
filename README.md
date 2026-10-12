@@ -38,6 +38,16 @@ cd backend
 ..\.venv\Scripts\python -m pytest -q
 ```
 
+### spaCy model for the privacy filter
+
+The server refuses to start without the spaCy model named in `config.yaml` (`privacy.spacy_model`, default `en_core_web_lg`, about 400 MB). It never downloads it by itself.
+
+```powershell
+.venv\Scripts\python -m spacy download en_core_web_lg
+```
+
+For quick local development you can use the small model instead: copy `config.yaml`, set `privacy.spacy_model: en_core_web_sm`, and point `APP_CONFIG` at the copy. Tests always use the small model.
+
 ### First instructor account
 
 There is no self-registration: the instructor creates student accounts. To create the first instructor, set `INSTRUCTOR_USERNAME` and `INSTRUCTOR_INITIAL_PASSWORD` in `.env` before the first start; that password must be changed at first login. Alternatively, run from `backend/`:

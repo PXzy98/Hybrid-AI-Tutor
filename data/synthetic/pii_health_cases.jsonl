@@ -1,0 +1,15 @@
+{"id": "H-01", "text": "I have asthma. Why does my inhaler make me shaky?", "personal": true, "redacted": ["asthma", "my inhaler"]}
+{"id": "H-02", "text": "My father was diagnosed with type 2 diabetes last month. What does HbA1c measure?", "personal": true, "redacted": ["type 2 diabetes"]}
+{"id": "H-03", "text": "My reading today was 150 over 95. Should I stop taking my pills?", "personal": true, "redacted": ["150 over 95", "my pills"]}
+{"id": "H-04", "text": "I've been getting migraines every week. Are triptans safe?", "personal": true, "redacted": ["migraines"]}
+{"id": "H-05", "text": "My mom takes metformin and lisinopril. Do they interact?", "personal": true, "redacted": ["metformin", "lisinopril"]}
+{"id": "H-06", "text": "I'm pregnant. Is it normal for my blood pressure to change?", "personal": true, "redacted": ["pregnant"]}
+{"id": "H-07", "text": "I was in hospital with pneumonia in January. Can it come back?", "personal": true, "redacted": ["hospital", "pneumonia"]}
+{"id": "H-08", "text": "My brother has had chest pain since this morning. What could cause it?", "personal": true, "redacted": ["chest pain"]}
+{"id": "H-09", "text": "What is asthma and how is it diagnosed?", "personal": false, "redacted": []}
+{"id": "H-10", "text": "Can you help me understand type 2 diabetes?", "personal": false, "redacted": []}
+{"id": "H-11", "text": "I have a question about migraines: what are the common triggers?", "personal": false, "redacted": []}
+{"id": "H-12", "text": "What does a blood pressure of 120/80 mean?", "personal": false, "redacted": []}
+{"id": "H-13", "text": "I am studying pneumonia for my exam. What are the main symptoms?", "personal": false, "redacted": []}
+{"id": "H-14", "text": "How do salt and alcohol affect high blood pressure?", "personal": false, "redacted": []}
+{"id": "H-15", "text": "I read that statins lower cholesterol. How do they work?", "personal": false, "redacted": []}

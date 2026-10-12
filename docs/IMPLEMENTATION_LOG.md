@@ -254,3 +254,66 @@ cd backend
 ..\.venv\Scripts\python -m pytest -m ollama -q        # needs the GPU server
 ..\.venv\Scripts\python -m uvicorn app.main:app --reload   # log in, then POST /api/v1/ask → real qwen3.5:9b answer
 ```
+
+## Step 4 — Privacy filter, anonymization, restore (2026-10-12)
+
+Done:
+- `privacy/analyzer.py`: Presidio `AnalyzerEngine`, built once per spaCy model (`privacy.spacy_model`), with Presidio's predefined English recognizers plus every recognizer registered in `pii_recognizers` (new registry).
+  - Only `privacy.entities` are reported: PERSON, EMAIL_ADDRESS, PHONE_NUMBER, STUDENT_ID, GRADE, HEALTH_DETAIL.
+  - **A missing model raises `PrivacyFilterUnavailable` at startup**, with the download command. Presidio itself would otherwise try to download the model, so `spacy.util.is_package` is checked first.
+  - Post-processing:
+    - an allow-list (`privacy.allow_list: [Abbas]`; titles such as Dr./Prof. and a trailing 's are ignored);
+    - `clean_person()`, which fixes common English-NER mistakes: cut at the first digit ("Tom Becker 300477120"); drop spans without a capitalised name word ("FN=", "−") and spans containing an all-caps acronym ("DICOM metadata"); drop eponyms followed by a statistics, unit or disease noun ("Cohen's kappa", "Brier score", "Hounsfield units"). Chinese names skip these Latin-script rules;
+    - overlap resolution: longer span first, then higher score.
+- Recognizers in `privacy/recognizers/` (auto-registered):
+  - `student_id`: 9 digits (0.6; context words such as "student", "id", 学号 raise it). The spaced form 3-3-3 counts only with context.
+  - `grade`: "I got 58/100", "I got an A-", "my GPA dropped to 2.9", "I failed the midterm", "61 分". Letter grades are case-sensitive, so "I got a lot" does not match.
+  - `health_detail`: a custom recognizer. A condition, symptom or medicine term counts only when it is
+    - attributed to the student or a relative (subject + verb within the sentence, with "blocker" words such as about/question/studying/exam in between cancelling the match), or
+    - owned ("my inhaler", "my therapist", "my pills"), or
+    - a BP-style reading in a first-person sentence.
+  - `zh_person`: Chinese self-introductions (我是/我叫 + 2–4 characters).
+  - `phone_na`: North-American numbers **with separators** (0.6). Presidio's phone recognizer needs a context word and missed "Call me at …".
+- `privacy/anonymizer.py`: `anonymize()` gives numbered placeholders per type (`<PERSON_1>`); the same value (case and whitespace-insensitive) always gets the same placeholder. `restore()` tolerates `<person_1>`, `< PERSON_1 >` and `[PERSON_1]`, and leaves unknown placeholders alone.
+- Steps:
+  - the real `privacy_filter` (stop): `is_sensitive = bool(entities)`, `cloud_safe = no entity in privacy.local_only_types`; the mapping goes only to the private context attribute; no logging of text;
+  - the real `restore`: placeholders → values, then the mapping is cleared.
+- The Step 3 "withheld" workaround is removed. The DB now stores sanitized questions and answers; `record` re-redacts known PII values in answers.
+- `AskResponse.route_target` now reports the backend that actually answered (`ctx.llm.backend`), so a cloud→local fallback shows as `local` together with the warning.
+- Tests (171 offline):
+  - **ai-tutor-bench PII items: recall 28/28 = 1.00 on the covered types**, and every `non_pii_terms` entry survives. Out of scope for the MVP: ACADEMIC_STATUS, ACCOMMODATION, ADDRESS, AGE, FINANCIAL, MEDICAL_RECORD_NUMBER, PERSONAL_CIRCUMSTANCE.
+  - 15 health cases (8 personal / 7 general, `data/synthetic/pii_health_cases.jsonl`) are all correct.
+  - Also: 18 recognizer cases, overlap and anonymize/restore unit tests, the Done-when example at step level, the restore step, and refusal to start without the model.
+- Manual check (uvicorn with `en_core_web_sm`; the production config without `en_core_web_lg` refused to start with the download hint):
+  - "My student ID is 300418277 and I have asthma. Why does my inhaler make my hands shake?" → `cloud_safe=false`, routed local; the filter took 22 ms.
+  - qwen3.5:9b answered with a clinician referral plus general information about beta-agonist tremor.
+  - The DB holds only "My student ID is <STUDENT_ID_1> and I have <HEALTH_DETAIL_1>. Why does <HEALTH_DETAIL_2> make my hands shake?"; neither the student number nor "I have asthma" occurs anywhere in it.
+
+Files: `backend/app/privacy/{analyzer,anonymizer,redact}.py`, `backend/app/privacy/recognizers/{student_id,grade,health_detail,zh_person,phone_na}.py`, `backend/app/pipeline/steps/{privacy_filter,restore,record}.py`, `backend/app/api/v1/ask.py`, `backend/app/core/{config,registry}.py`, `config.yaml`, `data/synthetic/pii_health_cases.jsonl`, `backend/tests/{conftest,test_privacy,test_api}.py`, `README.md`.
+
+Decisions:
+- **Tests always use `en_core_web_sm`.** `conftest.py` writes every test's config with `TEST_BASE` on top of `config.yaml`. Production keeps `en_core_web_lg`. The large model is **not installed on this machine yet** (about 400 MB; not downloaded without asking).
+- `score_threshold` stays 0.5. Lowering it to 0.4 let Presidio's phone recognizer tag "0.300418277".
+- HEALTH_DETAIL redacts the **term** ("asthma", "my inhaler"), not the whole clause, so the sanitized question keeps its structure.
+- A first-person how-to such as "How do I use an inhaler?" counts as personal ("I use … inhaler") and stays local. This is deliberately conservative: a false positive only costs the cloud route; a false negative would leak.
+- Repeated values reuse one placeholder; the first spelling is restored.
+- The file-writing tool turns `一-鿿` into the literal characters; `zh_person.py` keeps them in a named `CJK` constant with a comment.
+
+Interface changes:
+- New registry `pii_recognizers` in `core/registry.py`. A new PII type is one file with `@pii_recognizers.register(...)`, plus its entity name in `privacy.entities`.
+- Config: `privacy.allow_list` (new). No schema changes.
+
+Known gaps / TODO:
+- `record` replaces every occurrence of a detected value in the answer, so a stored answer also loses general uses of the word ("<HEALTH_DETAIL_1> inhalers contain…"). This is privacy-safe but lowers the quality of the history. A per-entity approach could replace only the student's own phrasing.
+- Chinese coverage is limited to self-introductions, student numbers and "分" grades; there is no Chinese NER.
+- The MVP does not detect addresses, MRNs, ages, financial or academic situations, or accommodations (all labelled in the bench set). The routing owner may want `local_only` heuristics for them.
+- `en_core_web_lg` must be installed before running the server with the default config.
+- In this run qwen3.5:9b took about 9.9 s for a long, safety-heavy answer (2.4–3.2 s in Step 3).
+
+How to try it:
+```powershell
+.venv\Scripts\python -m spacy download en_core_web_lg      # once, ~400 MB (or use a config copy with en_core_web_sm)
+cd backend
+..\.venv\Scripts\python -m pytest -q
+..\.venv\Scripts\python -m pytest tests/test_privacy.py -s -q   # prints the bench recall
+```

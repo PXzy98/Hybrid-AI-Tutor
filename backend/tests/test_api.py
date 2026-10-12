@@ -48,13 +48,13 @@ def test_student_id_in_body_is_ignored(api):
     assert alice.student_id in table_dump("request_log")
 
 
-def test_raw_question_and_identity_never_reach_learning_tables(student_client):
+def test_only_sanitized_text_reaches_the_database(student_client):
     assert ask(student_client).status_code == 200
     logs = table_dump("request_log") + table_dump("session_turn")
-    for secret in ("Alice", "Tremblay", "alice", "300418277", "salt"):
+    for secret in ("Alice", "Tremblay", "alice", "300418277"):
         assert secret not in logs
-    # the question words are nowhere in the DB; the display name exists only in the account table
-    assert "salt" not in db_dump() and "300418277" not in db_dump()
+    assert "<PERSON_1>" in logs and "<STUDENT_ID_1>" in logs and "salt" in logs  # the sanitized question
+    assert "300418277" not in db_dump()  # nowhere in the DB; the display name lives only in `account`
 
 
 def test_session_round_trip(student_client):
@@ -101,14 +101,18 @@ def test_privacy_filter_failure_is_503_without_question(student_client, monkeypa
 def test_cloud_score_with_fixture_rag(make_client):
     from tests.conftest import Api
 
-    # the placeholder privacy filter is fail-closed (cloud_safe=False), so even a high score stays local
     with make_client({"routing": {"stub_score": 1.0}, "rag": {"impl": "fixture"}}) as client:
         api = Api(client)
         api.make_student()
         api.login("alice")
-        body = ask(client).json()
-    assert body["route_target"] == "local" and body["route_score"] == 1.0
+        body = ask(client).json()  # name + student number only: cloud_safe, routed to the cloud
+        health = ask(client, question="I have high blood pressure. Is salt bad for me?").json()
+    # no cloud model configured in tests: the local model answered, and the response says so
+    assert body["route_score"] == 1.0 and body["route_target"] == "local"
+    assert "The cloud model was unavailable, so the local model answered." in body["warnings"]
     assert body["sources"]  # fixture chunks for the topic
+    # a personal health detail is never cloud_safe: kept local without even trying the cloud
+    assert health["route_target"] == "local" and health["warnings"] == []
 
 
 def test_topics_need_login_health_is_public(api):
@@ -157,4 +161,5 @@ def test_answer_repeating_pii_is_not_stored(api):
     r = ask(api.client)
     assert "Alice Tremblay" in r.json()["answer"]  # the student sees their own answer
     logs = table_dump("request_log") + table_dump("session_turn")
-    assert "Alice" not in logs and "300418277" not in logs and "retain water" not in logs
+    assert "Alice" not in logs and "300418277" not in logs  # replaced before storage...
+    assert "Hello <PERSON_1> (<STUDENT_ID_1>)! Salt makes you retain water." in logs  # ...the rest is kept

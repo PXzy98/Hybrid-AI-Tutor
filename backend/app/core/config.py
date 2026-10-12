@@ -51,6 +51,7 @@ class PrivacyConfig(Section):
     score_threshold: float = Field(0.5, ge=0, le=1)
     entities: list[str] = ["PERSON", "EMAIL_ADDRESS", "PHONE_NUMBER", "STUDENT_ID", "GRADE", "HEALTH_DETAIL"]
     local_only_types: list[str] = ["HEALTH_DETAIL"]
+    allow_list: list[str] = []  # course staff names etc. that must never be redacted
     log_raw_text: Literal[False] = False  # privacy invariant 1: cannot be switched on
 
 

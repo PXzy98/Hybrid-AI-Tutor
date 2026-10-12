@@ -17,9 +17,20 @@ def _deep_merge(base: dict, overrides: dict) -> dict:
     return out
 
 
+# Applied under every test's config: the small spaCy model (the large one is for production).
+TEST_BASE = {"privacy": {"spacy_model": "en_core_web_sm"}}
+
+
+def _write_config(path: Path, overrides: dict) -> None:
+    base = yaml.safe_load(DEFAULT_CONFIG.read_text(encoding="utf-8"))
+    path.write_text(yaml.safe_dump(_deep_merge(_deep_merge(base, TEST_BASE), overrides)), encoding="utf-8")
+
+
 @pytest.fixture(autouse=True)
 def _fresh_settings(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     """Every test starts with an empty settings cache and its own SQLite file (never data/app.db)."""
+    _write_config(tmp_path / "config.yaml", {})
+    monkeypatch.setenv("APP_CONFIG", str(tmp_path / "config.yaml"))
     monkeypatch.setenv("DATABASE_URL", f"sqlite:///{(tmp_path / 'test.db').as_posix()}")
     # a developer's .env must not change test behaviour: no instructor bootstrap unless a test asks for it
     monkeypatch.setenv("INSTRUCTOR_USERNAME", "")
@@ -52,9 +63,8 @@ def use_config(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     """
 
     def _apply(overrides: dict | None = None):
-        base = yaml.safe_load(DEFAULT_CONFIG.read_text(encoding="utf-8"))
         path = tmp_path / "config.yaml"
-        path.write_text(yaml.safe_dump(_deep_merge(base, overrides or {})), encoding="utf-8")
+        _write_config(path, overrides or {})
         monkeypatch.setenv("APP_CONFIG", str(path))
         get_settings.cache_clear()
         return get_settings()
