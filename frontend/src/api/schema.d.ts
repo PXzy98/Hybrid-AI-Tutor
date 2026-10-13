@@ -258,6 +258,95 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Config */
+        get: operations["get_config_api_v1_admin_config_get"];
+        /**
+         * Put Config
+         * @description Applied at once (the next /ask uses it) and stored in config_history.
+         */
+        put: operations["put_config_api_v1_admin_config_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/class-summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Class Summary */
+        get: operations["get_class_summary_api_v1_admin_class_summary_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/logs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Logs */
+        get: operations["get_logs_api_v1_admin_logs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Content */
+        get: operations["get_content_api_v1_admin_content_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/topics/{topic}/materials": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload Material */
+        post: operations["upload_material_api_v1_admin_topics__topic__materials_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health": {
         parameters: {
             query?: never;
@@ -279,6 +368,13 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AdminConfig */
+        AdminConfig: {
+            values: components["schemas"]["RuntimeConfig"];
+            options: components["schemas"]["ConfigOptions"];
+            /** History */
+            history: components["schemas"]["ConfigChange"][];
+        };
         /**
          * AskBody
          * @description Public request body. Deliberately has no student_id: the server takes it from the login session.
@@ -345,6 +441,11 @@ export interface components {
             timings_ms: {
                 [key: string]: number;
             };
+        };
+        /** Body_upload_material_api_v1_admin_topics__topic__materials_post */
+        Body_upload_material_api_v1_admin_topics__topic__materials_post: {
+            /** File */
+            file: string;
         };
         /** ChangePasswordBody */
         ChangePasswordBody: {
@@ -421,6 +522,58 @@ export interface components {
             value: string;
             /** Label */
             label: string;
+        };
+        /** ClassSummary */
+        ClassSummary: {
+            /** Topic */
+            topic: string;
+            /** Min Group */
+            min_group: number;
+            /** Suppressed */
+            suppressed: boolean;
+            /** Students */
+            students?: number | null;
+            /**
+             * Kcs
+             * @default []
+             */
+            kcs: components["schemas"]["KcSummary"][];
+            /**
+             * Misconceptions
+             * @default []
+             */
+            misconceptions: components["schemas"]["MisconceptionSummary"][];
+            /**
+             * Misconceptions Hidden
+             * @default 0
+             */
+            misconceptions_hidden: number;
+        };
+        /** ConfigChange */
+        ConfigChange: {
+            /**
+             * Changed At
+             * Format: date-time
+             */
+            changed_at: string;
+            /** Changed */
+            changed: string[];
+        };
+        /** ConfigOptions */
+        ConfigOptions: {
+            /** Checkers */
+            checkers: string[];
+            /** Required Checkers */
+            required_checkers: string[];
+            /** Knowledge Models */
+            knowledge_models: string[];
+        };
+        /** ContentStatus */
+        ContentStatus: {
+            /** Serve Unreviewed */
+            serve_unreviewed: boolean;
+            /** Topics */
+            topics: components["schemas"]["TopicContentStatus"][];
         };
         /** CreateStudentBody */
         CreateStudentBody: {
@@ -507,12 +660,108 @@ export interface components {
             /** Reason */
             reason: string;
         };
+        /** KcSummary */
+        KcSummary: {
+            /** Kc Id */
+            kc_id: string;
+            /** Name */
+            name: string;
+            /** Counts */
+            counts: {
+                [key: string]: number | null;
+            };
+        };
+        /** LevelsConfig */
+        LevelsConfig: {
+            /**
+             * Basic Below
+             * @default 0.4
+             */
+            basic_below: number;
+            /**
+             * Advanced Above
+             * @default 0.7
+             */
+            advanced_above: number;
+            /**
+             * Hysteresis
+             * @default 0.05
+             */
+            hysteresis: number;
+        };
+        /** LogEntry */
+        LogEntry: {
+            /** Request Id */
+            request_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Topic */
+            topic: string;
+            /** Sanitized Question */
+            sanitized_question: string;
+            /** Target */
+            target: string | null;
+            /** Route Score */
+            route_score: number | null;
+            /** Model */
+            model: string | null;
+            /** Latency Ms */
+            latency_ms: number;
+            /** Checks */
+            checks: {
+                [key: string]: string;
+            };
+            /** Warnings */
+            warnings: string[];
+        };
+        /** LogPage */
+        LogPage: {
+            /** Page */
+            page: number;
+            /** Page Size */
+            page_size: number;
+            /** Total */
+            total: number;
+            stats: components["schemas"]["LogStats"];
+            /** Entries */
+            entries: components["schemas"]["LogEntry"][];
+        };
+        /** LogStats */
+        LogStats: {
+            /** Requests */
+            requests: number;
+            /** Local */
+            local: number;
+            /** Cloud */
+            cloud: number;
+            /** Cloud Share */
+            cloud_share: number | null;
+            /** Latency P50 Ms */
+            latency_p50_ms: number | null;
+            /** Latency P95 Ms */
+            latency_p95_ms: number | null;
+        };
         /** LoginBody */
         LoginBody: {
             /** Username */
             username: string;
             /** Password */
             password: string;
+        };
+        /** MaterialFile */
+        MaterialFile: {
+            /** Name */
+            name: string;
+            /** Size Bytes */
+            size_bytes: number;
+            /**
+             * Uploaded At
+             * Format: date-time
+             */
+            uploaded_at: string;
         };
         /** Me */
         Me: {
@@ -524,6 +773,17 @@ export interface components {
             role: string;
             /** Must Change Password */
             must_change_password: boolean;
+        };
+        /** MisconceptionSummary */
+        MisconceptionSummary: {
+            /** Misconception Id */
+            misconception_id: string;
+            /** Kc Id */
+            kc_id: string;
+            /** Statement */
+            statement: string;
+            /** Students */
+            students: number;
         };
         /** OllamaStatus */
         OllamaStatus: {
@@ -583,6 +843,23 @@ export interface components {
              */
             kcs: components["schemas"]["KcBand"][];
         };
+        /**
+         * OpenMisconception
+         * @description A misunderstanding the tutor is working on, in plain language (no catalog ID).
+         */
+        OpenMisconception: {
+            /** Kc Id */
+            kc_id: string;
+            /** Statement */
+            statement: string;
+            /** Correction */
+            correction: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "suspected" | "confirmed";
+        };
         /** PreferenceAnswers */
         PreferenceAnswers: {
             /** Sequencing */
@@ -634,6 +911,18 @@ export interface components {
              */
             topics: components["schemas"]["TopicProfile"][];
         };
+        /** RuntimeConfig */
+        RuntimeConfig: {
+            /** Routing Threshold */
+            routing_threshold: number;
+            /** Checkers */
+            checkers: string[];
+            /** Knowledge */
+            knowledge: string;
+            /** Weak Evidence */
+            weak_evidence: boolean;
+            levels: components["schemas"]["LevelsConfig"];
+        };
         /** SessionHistory */
         SessionHistory: {
             /** Session Id */
@@ -678,6 +967,25 @@ export interface components {
             /** Temporary Password */
             temporary_password: string;
         };
+        /** TopicContentStatus */
+        TopicContentStatus: {
+            /** Topic */
+            topic: string;
+            /** Name */
+            name: string;
+            /** Kcs */
+            kcs: number;
+            /** Items */
+            items: number;
+            /** Items Reviewed */
+            items_reviewed: number;
+            /** Misconceptions */
+            misconceptions: number;
+            /** Misconceptions Reviewed */
+            misconceptions_reviewed: number;
+            /** Materials */
+            materials: components["schemas"]["MaterialFile"][];
+        };
         /** TopicInfo */
         TopicInfo: {
             /** Id */
@@ -703,6 +1011,11 @@ export interface components {
             name: string;
             /** Kcs */
             kcs: components["schemas"]["KcBand"][];
+            /**
+             * Misconceptions
+             * @default []
+             */
+            misconceptions: components["schemas"]["OpenMisconception"][];
         };
         /** Turn */
         Turn: {
@@ -725,6 +1038,14 @@ export interface components {
             display_name?: string | null;
             /** Active */
             active?: boolean | null;
+        };
+        /** UploadResult */
+        UploadResult: {
+            file: components["schemas"]["MaterialFile"];
+            /** Ingested */
+            ingested: boolean;
+            /** Ingest Error */
+            ingest_error?: string | null;
         };
         /** ValidationError */
         ValidationError: {
@@ -1272,6 +1593,180 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TemporaryPassword"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_config_api_v1_admin_config_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminConfig"];
+                };
+            };
+        };
+    };
+    put_config_api_v1_admin_config_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RuntimeConfig"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminConfig"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_class_summary_api_v1_admin_class_summary_get: {
+        parameters: {
+            query: {
+                topic: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClassSummary"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_logs_api_v1_admin_logs_get: {
+        parameters: {
+            query?: {
+                page?: number;
+                page_size?: number;
+                topic?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_content_api_v1_admin_content_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContentStatus"];
+                };
+            };
+        };
+    };
+    upload_material_api_v1_admin_topics__topic__materials_post: {
+        parameters: {
+            query?: {
+                replace?: boolean;
+            };
+            header?: never;
+            path: {
+                topic: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_upload_material_api_v1_admin_topics__topic__materials_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadResult"];
                 };
             };
             /** @description Validation Error */

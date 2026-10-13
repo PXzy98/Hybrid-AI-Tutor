@@ -44,6 +44,7 @@ class RoutingConfig(Section):
 class RagConfig(Section):
     impl: str = "stub"
     k: int = Field(4, ge=1)
+    materials_dir: str = "data/topics"  # instructor uploads: <materials_dir>/<topic>/ (relative to the repo)
 
 
 class PrivacyConfig(Section):
@@ -106,6 +107,7 @@ class LearnerConfig(Section):
     knowledge: str = "bkt"
     preference: str = "simple"
     weak_evidence: bool = False
+    personalize: bool = True  # False: every answer is unpersonalized (E3 "personalization off" condition)
     levels: LevelsConfig = LevelsConfig()
     recommender: RecommenderConfig = RecommenderConfig()
     bkt_defaults: BktDefaults = BktDefaults()
@@ -146,6 +148,8 @@ class CloudLLMConfig(Section):
     max_tokens: int = 800
     fallback_to_local: bool = True
     history_turns: int = Field(0, ge=0)
+    audit_log: str | None = None  # E4: record every cloud request to this JSONL file (app/llm/audit.py)
+    audit_echo: bool = False  # E4: answer cloud requests with a local echo instead of a provider
 
 
 class LLMConfig(Section):
@@ -216,6 +220,10 @@ class Settings(BaseSettings):
     def topics(self, course_id: str = "default") -> list[str]:
         course = self.courses.get(course_id)
         return list(course.topics) if course else []
+
+    def materials_dir(self, topic: str) -> Path:
+        p = Path(self.rag.materials_dir)
+        return (p if p.is_absolute() else REPO_ROOT / p) / topic
 
     def content_dir(self) -> Path:
         p = Path(self.content.dir)

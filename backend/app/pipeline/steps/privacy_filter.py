@@ -11,6 +11,8 @@ class PrivacyFilterStep(BaseStep):
 
     Built at startup, so a missing spaCy model stops the app instead of letting requests through unfiltered.
     The placeholder -> value mapping lives only in the private attribute of the RequestContext.
+    The student's own display name and username (from `account`, in memory only) are always redacted,
+    even when the NER model misses them (found by the E4 privacy audit).
     """
 
     name = "privacy_filter"
@@ -23,7 +25,8 @@ class PrivacyFilterStep(BaseStep):
 
     async def run(self, ctx: RequestContext) -> RequestContext:
         question = ctx.request.question
-        findings = self.analyzer.analyze(question)
+        names, usernames = self.services.accounts.identity_terms(ctx.request.student_id)
+        findings = self.analyzer.analyze(question, names, usernames)
         sanitized, entities, mapping = anonymize(question, findings)
         local_only = set(self.cfg.local_only_types)
         ctx.pii = PIIResult(

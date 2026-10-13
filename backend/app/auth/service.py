@@ -204,6 +204,19 @@ class AccountService:
             raise AccountNotFound(username)
         return account
 
+    def identity_terms(self, student_id: str | None) -> tuple[list[str], list[str]]:
+        """(names, usernames) of this student, for the privacy filter: a student who types their own name
+        or username gets it redacted even when NER misses it (E4). Read per request, kept in memory only."""
+        if not student_id:
+            return [], []
+        with self._db() as db:
+            a = db.exec(select(Account).where(Account.student_id == student_id)).first()
+        if a is None:
+            return [], []
+        names = [a.display_name.strip()] if a.display_name.strip() else []
+        names += [w for w in a.display_name.split() if len(w) >= 3]
+        return list(dict.fromkeys(names)), [a.username]
+
     def list_students(self) -> list[Account]:
         with self._db() as db:
             return list(db.exec(select(Account).where(Account.role == "student")

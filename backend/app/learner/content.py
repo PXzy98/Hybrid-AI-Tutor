@@ -69,6 +69,10 @@ class Misconception(Strict):
     correction: str
     reviewed_by: str | None = None
 
+    @property
+    def reviewed(self) -> bool:
+        return bool(self.reviewed_by)
+
 
 class TopicContent(Strict):
     topic: str
@@ -225,3 +229,12 @@ class ContentStore:
 
     def all_misconceptions(self) -> list[Misconception]:
         return list(self._mcs.values())
+
+    def servable(self, mc: Misconception) -> bool:
+        """May the statement and correction be shown to students? Same rule as items: reviewed, or
+        content.serve_unreviewed. Tracking by ID happens either way."""
+        return mc.reviewed or self.serve_unreviewed
+
+    def targeted_misconceptions(self, item: Item) -> set[str]:
+        """Misconceptions this item's distractors are written to reveal."""
+        return {o.misconception for o in item.options.values() if o.misconception}

@@ -1,7 +1,7 @@
 # Privacy-Aware Hybrid AI Tutor: runtime configuration (design: docs/System_Design_v3.md §9).
 # Secrets and machine-specific URLs live in .env (see .env.example), not here.
 
-pipeline: [privacy_filter, learner_context, understand, retrieve, route, generate, restore, verify, attach_check, record]
+pipeline: [privacy_filter, understand, learner_context, retrieve, route, generate, restore, verify, attach_check, record]
 post_response: [update_learner]
 
 verify:
@@ -16,6 +16,7 @@ routing:
 rag:
   impl: stub                          # Siyun's implementation name once registered
   k: 4
+  materials_dir: data/topics          # instructor uploads (admin dashboard), one folder per topic
 
 privacy:
   spacy_model: en_core_web_lg         # tests use en_core_web_sm

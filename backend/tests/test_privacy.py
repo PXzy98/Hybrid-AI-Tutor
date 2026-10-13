@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 
 import pytest
+from sqlmodel import Session, select
 
 from app.core.config import PrivacyConfig, get_settings
 from app.core.schemas import AskRequest, RequestContext
@@ -12,6 +13,7 @@ from app.pipeline.steps.restore import RestoreStep
 from app.pipeline.steps.route import RouteStep
 from app.privacy.analyzer import Finding, PIIAnalyzer, PrivacyFilterUnavailable, resolve_overlaps
 from app.privacy.anonymizer import anonymize, restore
+from app.storage.models import RequestLog
 
 pytestmark = pytest.mark.presidio
 
@@ -161,3 +163,29 @@ def test_missing_spacy_model_stops_startup(use_config):
     use_config({"privacy": {"spacy_model": "en_core_web_doesnotexist"}})
     with pytest.raises(PrivacyFilterUnavailable, match="spacy download en_core_web_doesnotexist"):
         build_runner(build_services(get_settings()))
+
+
+# ------------------------------------------------------------------- the student's own identity (E4)
+def test_known_identity_values_are_always_found(analyzer):
+    text = "this is lucas bergeron, username p.intermediate, and Bergeron again; symptoms differ"
+    found = analyzer.analyze(text, names=["Lucas Bergeron", "Lucas", "Bergeron", "Tom"],
+                             usernames=["p.intermediate"])
+    spans = {(f.type, text[f.start:f.end]) for f in found}
+    assert ("PERSON", "lucas bergeron") in spans and ("PERSON", "Bergeron") in spans
+    assert ("USERNAME", "p.intermediate") in spans
+    assert not any("symptoms" in v or v == "tom" for _, v in spans)  # whole words only
+
+
+def test_ask_redacts_the_students_own_name_and_username(api):
+    api.make_student("p.intermediate", "Lucas Bergeron")
+    api.login("p.intermediate")
+    r = api.client.post("/api/v1/ask", json={
+        "topic": "high_blood_pressure",
+        "question": "hi it's lucas bergeron (p.intermediate). What does the bottom number mean?"})
+    assert r.status_code == 200, r.text
+    sent = api.local_llm.sent_text()  # the local model may see raw text; check what is stored instead
+    assert "lucas bergeron" in sent.lower()
+    with Session(api.services.engine) as db:
+        stored = [row.sanitized_question for row in db.exec(select(RequestLog))]
+    assert stored and "bergeron" not in stored[0].lower() and "p.intermediate" not in stored[0]
+    assert "<PERSON_1>" in stored[0] and "<USERNAME_1>" in stored[0]

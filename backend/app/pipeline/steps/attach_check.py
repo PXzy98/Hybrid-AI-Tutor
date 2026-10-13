@@ -10,7 +10,7 @@ class AttachCheckStep(BaseStep):
 
     KC: the first KC of the question (understand step, Step 11), else the recommended next KC, else the
     topic's KC with the lowest mastery (the first KC when unpersonalized).
-    Item: see learner.checks.choose_item.
+    Item: see learner.checks.choose_item (prefers items that target the student's open misconceptions).
     Only items the content store may serve are used (content.serve_unreviewed).
     """
 
@@ -35,7 +35,10 @@ class AttachCheckStep(BaseStep):
         if kc_id is None:
             return ctx
         state = learner.kc_states.get(kc_id) if learner else None
+        open_mcs = {m.id for m in learner.misconceptions} if learner else set()
+        if learner:  # also the open misconceptions not in the prompt (other KCs: an item may target them)
+            open_mcs |= self.services.learner.tracker.open_ids(ctx.request.student_id)
         item = choose_item(content, self.services.learner.repo, ctx.request.student_id if learner else None,
-                           kc_id, state.level if state else None)
+                           kc_id, state.level if state else None, open_mcs)
         ctx.check_item = item.public() if item else None
         return ctx

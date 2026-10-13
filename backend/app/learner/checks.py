@@ -54,9 +54,11 @@ def diagnostic_items(content: ContentStore, topic: str) -> list[Item]:
 
 
 def choose_item(content: ContentStore, repo: LearnerRepository, student_id: str | None, kc_id: str,
-                kc_level: Level | None) -> Item | None:
-    """An item of the KC: never answered first, never one answered in the last 24 h, then the item whose
-    level matches the KC's current level. None when every item was answered recently."""
+                kc_level: Level | None, open_misconceptions: set[str] | frozenset[str] = frozenset()
+                ) -> Item | None:
+    """An item of the KC: never answered first, never one answered in the last 24 h, then an item whose
+    distractors target one of the student's open misconceptions, then the item whose level matches the KC's
+    current level. None when every item was answered recently."""
     items = content.items(kc_id)
     if not items:
         return None
@@ -67,4 +69,6 @@ def choose_item(content: ContentStore, repo: LearnerRepository, student_id: str 
     fresh = [i for i in items if i.id not in answered or answered[i.id] < recent]
     if not fresh:
         return None
-    return min(fresh, key=lambda i: (i.id in answered, i.level != kc_level, i.id))
+    return min(fresh, key=lambda i: (i.id in answered,
+                                     not content.targeted_misconceptions(i) & open_misconceptions,
+                                     i.level != kc_level, i.id))

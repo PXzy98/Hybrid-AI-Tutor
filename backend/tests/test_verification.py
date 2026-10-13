@@ -217,8 +217,12 @@ def test_privacy_end_to_end_forced_cloud(make_client):
     sent = transport.sent_text()
     assert "<PERSON_1>" in sent and "<STUDENT_ID_1>" in sent
     statement = content.misconception(item.options[tagged].misconception).statement
-    for secret in ("Alice", "Tremblay", "alice", "300418277", alice.student_id, "HBP.6-q1", statement):
+    misconception = content.misconception(item.options[tagged].misconception)
+    for secret in ("Alice", "Tremblay", "alice", "300418277", alice.student_id, "HBP.6-q1", statement,
+                   misconception.id, misconception.correction[:40]):
         assert secret not in sent, secret
+    # Step 12: the confirmed misconception's reviewed correction is appended locally, after the cloud call
+    assert body["answer"].endswith(misconception.correction)
     assert "concept first" not in sent and "Teaching level for this student" in sent  # labels only
 
     path = get_settings().database_url.removeprefix("sqlite:///")

@@ -1,0 +1,20 @@
+{"id": "Q01", "kc_ids": ["HBP.1"], "question": "What do the two numbers in a blood pressure reading mean?"}
+{"id": "Q02", "kc_ids": ["HBP.1"], "question": "What does the bottom number of a blood pressure reading tell you?"}
+{"id": "Q03", "kc_ids": ["HBP.1"], "question": "Why is high blood pressure often called a silent condition?"}
+{"id": "Q04", "kc_ids": ["HBP.1"], "question": "What is a normal blood pressure for an adult?"}
+{"id": "Q05", "kc_ids": ["HBP.2"], "question": "How do doctors decide that someone has high blood pressure?"}
+{"id": "Q06", "kc_ids": ["HBP.2"], "question": "Why should blood pressure be measured more than once?"}
+{"id": "Q07", "kc_ids": ["HBP.2"], "question": "What is white coat hypertension?"}
+{"id": "Q08", "kc_ids": ["HBP.3"], "question": "What are the main risk factors for high blood pressure?"}
+{"id": "Q09", "kc_ids": ["HBP.3"], "question": "Can young people get high blood pressure?"}
+{"id": "Q10", "kc_ids": ["HBP.3"], "question": "Does high blood pressure run in families?"}
+{"id": "Q11", "kc_ids": ["HBP.4"], "question": "How can high blood pressure damage the kidneys?"}
+{"id": "Q12", "kc_ids": ["HBP.4"], "question": "Why does high blood pressure increase the risk of stroke?"}
+{"id": "Q13", "kc_ids": ["HBP.4"], "question": "Can high blood pressure affect the eyes?"}
+{"id": "Q14", "kc_ids": ["HBP.5"], "question": "Why does eating less salt help lower blood pressure?"}
+{"id": "Q15", "kc_ids": ["HBP.5"], "question": "What is the DASH diet and how does it help?"}
+{"id": "Q16", "kc_ids": ["HBP.5"], "question": "How does regular exercise affect blood pressure?"}
+{"id": "Q17", "kc_ids": ["HBP.6"], "question": "Why do people with high blood pressure often need medicine every day?"}
+{"id": "Q18", "kc_ids": ["HBP.6"], "question": "Why might a doctor prescribe two different blood pressure medicines?"}
+{"id": "Q19", "kc_ids": ["HBP.6"], "question": "Why is it important to keep taking blood pressure medicine when readings are normal?"}
+{"id": "Q20", "kc_ids": ["HBP.1", "HBP.4"], "question": "What happens in the arteries when blood pressure stays high for years?"}

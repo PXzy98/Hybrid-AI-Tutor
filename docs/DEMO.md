@@ -85,7 +85,13 @@ docker compose up -d api
 
 ## Instructor view
 
-`/admin` is a placeholder in the MVP. Student accounts are managed through the API (`/api/v1/admin/students`); the dashboard with the student list, class summary and settings is Step 13 (Beta).
+Log in as the instructor; `/admin` has five tabs:
+
+- **Students**: add a student (the temporary password is shown once, with a copy button), reset a password, deactivate, or delete with a typed confirmation.
+- **Class summary**: mastery bands per knowledge component and the most common misconceptions. Any group smaller than 5 is hidden. With only the three demo students, the whole summary is hidden, which is worth showing as the privacy rule at work.
+- **Settings**: the cloud threshold, answer checks, knowledge model, weak evidence and level thresholds. Changes apply to the next question without a restart. To show it: with `ROUTING__STUB_SCORE=0.5`, a threshold of 0.6 keeps questions local, and 0.4 sends them to the cloud.
+- **Logs**: sanitized questions, the route, latency p50/p95 and the share routed to the cloud. No student IDs.
+- **Content**: review status per topic, and course-material uploads for the RAG pipeline.
 
 ## Reset after the demo
 

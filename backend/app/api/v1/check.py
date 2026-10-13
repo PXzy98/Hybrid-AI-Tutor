@@ -39,6 +39,7 @@ def check(body: CheckBody, user: Student, services: ServicesDep):
         raise HTTPException(404, "session not found")
     graded = grade(item, body.choice)
     state = learner.observe(user.student_id, evidence_for(item, graded, "strong", "check"))
+    learner.check_answered(user.student_id, item, graded)  # confirm / resolve misconceptions (Step 12)
     topic = content.topic_of(item.kc)
     next_kc = learner.recommender.next_kc(user.student_id, topic) if state else None
     return CheckResponse(correct=graded.correct, correct_choice=graded.correct_choice,

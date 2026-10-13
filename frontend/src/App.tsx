@@ -40,7 +40,7 @@ export default function App() {
       <Route path="/start" element={<Guard role="student"><Onboarding /></Guard>} />
       <Route path="/chat" element={<Guard role="student"><Chat /></Guard>} />
       <Route path="/me" element={<Guard role="student"><WhatIKnow /></Guard>} />
-      <Route path="/admin" element={<Guard role="instructor"><Admin /></Guard>} />
+      <Route path="/admin/*" element={<Guard role="instructor"><Admin /></Guard>} />
       <Route path="*" element={<Home />} />
     </Routes>
   );

@@ -681,3 +681,329 @@ docker compose up --build -d  # http://localhost:8080
 # log in as the instructor once and change the password, then:
 $env:DEMO_INSTRUCTOR_PASSWORD="<new password>"; .venv\Scripts\python scripts\demo_seed.py
 ```
+
+
+## Step 11 — Understand step and weak evidence (+ E1 harness) — 2026-10-12
+
+Branch `feature/understand` (stacked on `feature/packaging`).
+
+What was built:
+- `app/learner/understand.py`: prompt, JSON schema and parser for the `understand` step.
+  - The schema enums are the topic's own KC IDs and catalog misconception IDs (`maxItems` 2 / 3), so the model can only choose from the catalog.
+  - The prompt lists KC id + name + definition and the catalog statements, followed by 4 few-shot examples (HBP only): confusion, a stated misconception, a *question* about a misconception (→ none), and off-topic.
+  - The wire format uses one-letter keys (`k`, `t`, `c`, `m`). The reply is generated token by token, so short keys cut the latency of the step roughly in half.
+  - `parse` rejects bad JSON and unknown IDs (`ValueError` → the step is skipped), removes duplicates and keeps at most 2 KCs.
+  - **Misconception gate:** misconception IDs are kept only when the question type is `check_my_answer` or `self_management` **and** the student states a belief. A plain question ("Does…?", "Is…?", "Why…?") without an assertion marker (", right?", "isn't it", "I think", "so my…") does not count. This raised precision from 50% to 88% on qwen3.5:9b.
+- The `understand` step (`on_error: skip`) uses `services.understand_llm`, built by `llm/factory.py`: an `OllamaClient` with `llm.understand.model`, temperature 0, the same `num_ctx` as the local model (no reload) and the `llm.understand.timeout_s` timeout.
+- **Pipeline reorder:** `[privacy_filter, understand, learner_context, retrieve, …]`. `learner_context` needs the question's KC IDs for the focus level (lowest level among them), so `understand` must run first. `retrieve` gets `kc_ids` and the level, and `attach_check` uses the first understood KC. Design §7.1 is updated to match.
+- The `update_learner` post-response step:
+  - weak evidence (design §5.1), only when `learner.weak_evidence` is true: `confusion` → one weak update per understood KC; a stated misconception → one weak update on its KC. The facade caps this at one weak update per KC per request.
+  - implicit preference hints from the student's wording ("example", "the idea", "step by step", "briefly", …). They go through the simple preference model, so a preference changes only after 3 consistent hints. Both parts are no-ops without consent.
+- Tests: the `Api` helper installs a fake `understand_llm` (default reply: no KC), so API tests never wait for Ollama. `tests/test_understand.py` has 14 tests:
+  - the schema enums and the prompt;
+  - bad JSON and unknown IDs are rejected, and the step is skipped while the answer still comes;
+  - deduplication and the 2-KC cap;
+  - the misconception gate, checked against every E1 case;
+  - the check question follows the understood KC;
+  - weak evidence is off by default, capped at one per KC, and absent without consent;
+  - preference hints and the streak of 3.
+- `eval/understand-tagging/`: `cases.jsonl` (40 DRAFT HBP cases U01–U40: paraphrases, 7 stated misconceptions, 6 questions *about* a misconception, 2 confusion cases, 3 off-topic) and `run.py` (the real prompt, schema and client; `--model`, `--repeat`; writes `results/report.md` and `predictions.jsonl`).
+
+Verification (Done when), against the real Ollama server, 40 cases × 2:
+
+| Model | KC top-1 | No-KC | MC precision | MC recall | Confusion | Q-type | p50 / p95 |
+|---|---|---|---|---|---|---|---|
+| qwen3.5:9b (config default) | 92% ✅ | 6/6 | 88% ✅ | 100% | 88% | 70% | 1.05 s / 1.14 s ❌ |
+| gemma4:e4b | 100% ✅ | 6/6 | 100% ✅ | 100% | 99% | 80% | 0.35 s / 0.41 s ✅ |
+
+Reports: `eval/understand-tagging/results/report.md` (qwen3.5:9b) and `report_gemma4-e4b.md`. Before the gate, qwen3.5:9b had 50% misconception precision: all 7 false positives were questions about a misconception ("Is high blood pressure caused only by stress?").
+
+Both suites pass: 303 tests with BKT and 303 with `TEST_LEARNER_KNOWLEDGE=rule`. Ruff is clean.
+
+Decisions:
+- **E1 accuracy is "ideal" for both models**, so the design's decision rule does not turn weak evidence off. `learner.weak_evidence` stays **false** for now. Design §11 E2 decides whether to keep it ("keep it only if it lowers MAE"), and E2 is Step 14. The code path is tested and can be turned on with `LEARNER__WEAK_EVIDENCE=true`.
+- **Latency:** qwen3.5:9b is above the p50 ≤ 0.6 s target (a 9B model writing about 35 tokens). gemma4:e4b meets every target. The design says the understand step "uses the already-loaded local model", so the default stays `qwen3.5:9b`, and the switch is a user decision (open question below). Switching is a single config value; gemma4:e4b is already on the server, so nothing has to be pulled.
+- Few-shot examples are used only for HBP, because they contain HBP IDs. Other topics rely on the instructions plus the schema.
+
+Interface changes:
+- None in `schemas.py`: `Understanding` and `RequestContext.understanding` already existed. `Services` gained `understand_llm`.
+- The pipeline order in `config.yaml` and design §7.1 changed: `understand` now comes before `learner_context`.
+
+Open questions for the user:
+- Use `gemma4:e4b` for the understand step (`llm.understand.model`)? It is faster (0.35 s vs 1.05 s) and more accurate, but it keeps a second model in VRAM (~5.5 GB for qwen plus several GB more).
+
+Known gaps / TODO:
+- `cases.jsonl` is a DRAFT with 40 HBP cases. The team should extend it to 120–150 cases across all five topics (design §11) and re-run E1.
+- Misconception IDs from `understand` are used only as weak evidence for now. Tracking (suspected / confirmed / resolved) is Step 12.
+
+How to try it:
+```powershell
+.venv\Scripts\python eval\understand-tagging\run.py                          # model from config.yaml
+.venv\Scripts\python eval\understand-tagging\run.py --model gemma4:e4b --repeat 2
+```
+
+
+## Step 12 — Misconception tracking and corrections — 2026-10-12
+
+Branch `feature/misconceptions` (stacked on `feature/understand`).
+
+What was built:
+- New table `learner_misconception` (student_id, misconception_id, kc_id, status, evidence_count, updated_at). It holds IDs and counts only, never text.
+  - It is part of `LEARNING_TABLES`, so "reset my learning data" and withdrawing consent clear it.
+  - The generic purge in `auth/purge.py` covers it when a student is deleted (every table with `student_id`).
+- `app/learner/misconceptions.py`, `MisconceptionTracker`, with the status rules of design §5.1:
+
+  | Signal | none / resolved | suspected | confirmed |
+  |---|---|---|---|
+  | understand step tagged it (weak) | suspected | confirmed | confirmed |
+  | a tagged distractor was chosen | confirmed | confirmed | confirmed |
+  | correct answer on an item that targets it | – | resolved | resolved |
+
+  A resolved misconception that comes up again is reopened as suspected and counted from 1.
+- `LearnerModel` facade (consent checked everywhere):
+  - `misconception_stated`, `check_answered`, `open_misconceptions`;
+  - `context()` fills `LearnerContext.misconceptions` with the open misconceptions of the question's KCs (the whole topic when the understand step found none). At most 2, confirmed first, then the most recent.
+- `/check`: a tagged distractor → confirmed. A correct answer resolves every open misconception the item's distractors target, across KCs (for example, MC3 is targeted by items of HBP.1, HBP.2 and HBP.3).
+- `update_learner`: misconception IDs from the understand step → `misconception_stated`. This does **not** depend on `learner.weak_evidence`, which only gates the knowledge-model update. Tracking is separate, and the Step 11 gate already requires a stated belief.
+- Local prompt (`render_local`): one block "Known misunderstandings", with one line per misconception: "Address this misunderstanding the student may have: "<statement>" Correct it gently with this reviewed correction: <correction>". `render_cloud` has no access to the learner context, so the cloud prompt cannot contain it.
+- Cloud route: `append_corrections` in the `restore` step adds "A common misunderstanding to watch for: <correction>" when the answer does not already address it.
+  - The keyword check: the answer must contain at least 50% of the correction's key words (words of 5+ letters, minus a stoplist).
+  - `verify` calls it again after a safety regeneration.
+  - The `grounding` checker ignores the appended note, because it is catalog text, not generated text.
+  - Every catalog correction passes `medical_safety` (test).
+- `attach_check` / `choose_item`: within the chosen KC, an unseen item comes first, then an item whose distractors target one of the student's open misconceptions, then the level match.
+- `GET /learner/me`: each topic has `misconceptions: [{kc_id, statement, correction, status}]`. Only open ones are listed, and there are no catalog IDs.
+  - "What I know" shows them under "Ideas we are working on". The plain-language source is "seen in your answers" (confirmed) or "may have come up in a question" (suspected).
+  - `openapi.json` and `schema.d.ts` are regenerated.
+- **Review gate:** statements and corrections reach students and the local prompt only when `content.servable(mc)` allows it (reviewed, or `content.serve_unreviewed`), the same rule as items. Tracking by ID happens either way.
+
+Tests:
+- `tests/test_misconceptions.py` has 15 tests:
+  - the transitions, including reopening;
+  - only IDs and counts are stored;
+  - no consent → nothing tracked; reset clears;
+  - the full /check → What I know → resolve flow;
+  - stated twice → suspected then confirmed, with weak evidence off;
+  - unreviewed content is tracked but not shown;
+  - the local prompt has exactly one "address" line;
+  - prompt scope (the question's KCs, at most 2) and order (confirmed first);
+  - the cloud note is appended only when needed and only on the cloud route;
+  - the keyword check; medical safety of every correction;
+  - item preference, in `choose_item` and through `/ask`.
+- The privacy E2E test (forced cloud, rich profile) now also asserts:
+  - the transport got no misconception ID, statement or correction;
+  - the student's answer ends with the confirmed misconception's correction.
+- Frontend: Vitest `WhatIKnow.test.tsx` checks that misconceptions are listed in plain language, with no IDs. `npm run build` passes.
+- Backend: 318 tests pass with BKT and 318 with `rule`. Ruff is clean.
+
+Verification (Done when), with the real local model (scratch DB, `serve_unreviewed`):
+1. A wrong check answer on HBP.1-q2 (the distractor tagged MC5) → "What I know" shows "The bottom number is the pressure when the heart stops." (confirmed) with its correction.
+2. The next question, "What does the bottom number of a reading mean?", got an answer containing "…while your heart rests and refills between beats. It does not mean your heart has stopped…". The attached check item was HBP.1-q4, which targets MC5.
+3. "My blood pressure is normal now, so I can stop my medication, right?" → the real understand step tagged MC2 → "What I know" lists it as suspected. The answer said not to stop without a doctor or pharmacist.
+4. The cloud payload stays clean: covered by the E2E test.
+
+Decisions:
+- The prompt includes at most 2 misconceptions, so the local prompt stays short.
+- With no understood KC, the topic's open misconceptions are used, so a misconception is still addressed when the understand step is skipped.
+- The keyword threshold of 50% is a heuristic. A false "already addressed" only means the note is not appended to that answer.
+
+Interface changes:
+- `schemas.py`: none. `LearnerContext.misconceptions` and `MisconceptionRef` already existed.
+- New table `learner_misconception`. API: `TopicProfile.misconceptions` in `GET /learner/me`. `choose_item(..., open_misconceptions=...)` has a new optional parameter.
+
+Known gaps / TODO:
+- On the first request after the Ollama server has unloaded the model, the understand step can hit its 5 s timeout and is skipped (seen once in the real-model run). Warming up the model at start-up, or using a small dedicated understand model (Step 11 open question), would avoid this.
+- All corrections are still DRAFT and unreviewed. Without `serve_unreviewed` nothing is shown until Dr. Abbas reviews them.
+
+How to try it:
+```powershell
+# backend + frontend as in DEMO.md, with CONTENT__SERVE_UNREVIEWED=true
+# Chat: answer a check question with a wrong option -> "What I know" lists the misunderstanding
+```
+
+
+## Step 13 — Admin service and instructor dashboard — 2026-10-12
+
+Branch `feature/dashboard` (stacked on `feature/misconceptions`).
+
+What was built (backend, `app/admin/` + `app/api/v1/admin.py`; every route requires the instructor):
+- **Runtime config** (`GET/PUT /admin/config`). The editable subset: `routing.threshold`, `verify.checkers`, `learner.knowledge`, `learner.weak_evidence`, `learner.levels`.
+  - A PUT is validated against the registries and the section validators. It then replaces the settings object (`Services.reconfigure`), rebuilds the learner model and the pipeline runner, and stores a row in the new `config_history` table: values before and after, plus the instructor's `account_id` (no username).
+  - The next `/ask` uses the new values; requests already running keep the old ones. A PUT without changes adds no history row.
+  - The newest history row is applied again at startup, so a change survives a restart.
+  - `medical_safety`, `pii_leak` and `profile_leak` cannot be switched off (422). Only `grounding`, and later non-safety checkers, are optional.
+- **Class summary** (`GET /admin/class-summary?topic=`):
+  - The population is the students with consent.
+  - For each KC, it counts students per band: `not_assessed` (no graded answer yet), basic, intermediate, advanced, mastered.
+  - The top misconceptions are counted as students with that misconception open.
+  - **Suppression** uses `learner.class_summary_min_group` (5):
+    - population < 5 → only `suppressed: true`;
+    - a band count of 1–4 → `null` (0 is shown);
+    - if a row then has exactly one hidden cell, the next smallest non-zero cell is hidden too, so the hidden one cannot be computed from the total;
+    - misconceptions held by fewer than 5 students are not listed, only counted (`misconceptions_hidden`).
+  - No student IDs are returned (test).
+- **Logs** (`GET /admin/logs?page=&page_size=&topic=`):
+  - entries hold the sanitized question, route and score, model, latency (sum of step timings), check statuses and warnings. There is no student or session ID.
+  - stats: the number of requests, local/cloud counts, the cloud share, and latency p50/p95.
+- **Materials** (`POST /admin/topics/{topic}/materials`, multipart): the file goes to `<rag.materials_dir>/<topic>/` (new setting, default `data/topics`, git-ignored).
+  - The file name is cleaned, so the path part is dropped. Allowed types: `.md .txt .pdf .html .htm .docx`, up to 20 MB, not empty.
+  - An existing file returns 409 unless `replace=true`.
+  - If the retriever has `ingest(topic, path)` (Siyun's part, as documented in `rag/interface.py`), it is called; an ingest error is reported, and the file stays.
+  - New dependency: `python-multipart`.
+- **Content status** (`GET /admin/content`): per topic, the KC count, items reviewed of total, corrections reviewed of total, and the uploaded materials, plus the `serve_unreviewed` flag.
+
+Frontend `/admin/*` (tabs):
+- **Students:**
+  - add a student, with the hint "Do not use real student numbers as usernames";
+  - the temporary password is shown once with a Copy button;
+  - reset password (shown once), activate/deactivate;
+  - delete with a typed-username confirmation that lists what is deleted.
+- **Class summary:** a topic picker and one stacked bar per KC. Hidden groups are pooled in one hatched "<5" segment, and the screen-reader label says "fewer than 5". The suppression notice appears for small classes, followed by the misconception list and the hidden count.
+- **Settings:** the form for the runtime subset (required checkers are checked and disabled), "Save and apply", and the change history.
+- **Logs:** stat cards (questions, routed to cloud, p50, p95), a paginated table with "answered by <model>", so a cloud route with local fallback is visible.
+- **Content:** a review status per topic, a development-mode warning while `serve_unreviewed` is on, and a materials list with upload.
+
+Tests:
+- `tests/test_admin_dashboard.py` has 14 tests:
+  - every `/admin/*` route returns 403 for a student and 401 without a login, read from the OpenAPI paths;
+  - config contents; a threshold change takes effect on the next `/ask` (local → cloud);
+  - checkers and the knowledge model are swapped live;
+  - invalid changes are rejected (required checker, unknown checker or model, bad levels, threshold > 1);
+  - history, the no-op PUT, and a restart restoring the value;
+  - the suppression rules, full suppression for 3 students, and counts for 7 students (one misconception listed, one hidden, no IDs);
+  - logs are sanitized ("Alice" → `<PERSON_1>`), paginated, with stats;
+  - uploads: stored, listed, the rules (type, empty, 409, replace, path traversal, unknown topic), and `ingest` is called.
+- Vitest `Admin.test.tsx` has 4 tests:
+  - adding a student shows the temporary password once;
+  - delete stays disabled until the username is typed;
+  - the suppression message;
+  - bars with the hidden segment and its accessible label.
+- Backend: 332 tests pass with BKT and 332 with `rule`. Ruff is clean. Frontend: 7 Vitest tests pass and `npm run build` succeeds.
+
+Verification (Done when), with uvicorn and Vite on a scratch DB (`serve_unreviewed`, `ROUTING__STUB_SCORE=0.5`) and the real local model, in the built-in browser:
+1. `scripts/demo_seed.py` seeded the 3 demo students → the Class summary tab showed "Fewer than 5 students have a learning profile… hidden to protect their privacy".
+2. After adding 6 simulated students (9 in total), the tab showed bars per KC with exact counts (for example, 7 basic) and hatched "<5" segments for the small groups.
+3. Settings: the threshold went from 0.6 to 0.4 with "Save and apply" ("Saved. The next question uses the new settings."; the history shows `routing_threshold`).
+   - Before the change: demo.novice's question → `local (0.50)`.
+   - After it, without a restart: the router chose `cloud (0.50)`. No cloud key is configured on this machine, so the answer fell back to the local model with the warning "The cloud model was unavailable…". The Logs tab shows both rows, "routed to cloud 50%", and "answered by qwen3.5:9b".
+4. The Students, Logs and Content tabs rendered as described.
+
+Decisions:
+- The safety and privacy checkers are locked on in the dashboard. Design §2 says the safety and privacy rules never depend on configuration.
+- A dashboard change is stored in the DB and wins over `config.yaml` after a restart. To go back to the file values, save them again in Settings. A "reset to config.yaml" button can be added if wanted.
+- The class-summary population is students with consent (only they have a profile). `not_assessed` is shown separately, so a prior estimate is not shown as "basic".
+- Secondary suppression was added on top of the design's n < 5 rule, so a hidden count cannot be worked out from the total.
+
+Interface changes:
+- New tables: `config_history`, plus `learner_misconception` from Step 12.
+- New setting: `rag.materials_dir`.
+- New API routes: `/admin/config`, `/admin/class-summary`, `/admin/logs`, `/admin/content`, `/admin/topics/{topic}/materials`.
+- `Services.reconfigure()`. The optional `Retriever.ingest(topic, path)` is now called.
+- New dependency: `python-multipart`.
+
+Known gaps / TODO:
+- Uploads are stored but not indexed until Siyun's retriever implements `ingest`.
+- There is no route to delete an uploaded material yet; remove files from `data/topics/<topic>/` by hand.
+- The runtime config is per process. With several API workers, each worker applies the change only on restart (the compose setup runs one worker).
+
+How to try it:
+```powershell
+# backend + frontend (DEMO.md), log in as the instructor -> /admin
+# Settings: change the threshold; Class summary: needs >= 5 students with consent
+```
+
+
+## Step 14 — Evaluation harnesses (E2, E3, E4) — 2026-10-12
+
+Branch `feature/evaluation` (stacked on `feature/dashboard`).
+
+What was built:
+- **E2, `eval/learner-sim/`** (`sim.py` + `run.py`). Simulated students go through the **real** `LearnerModel`: an in-memory SQLite database, the real `apply_diagnostic`, `next_kc`, `choose_item`, `observe` and `check_answered`.
+  - The student model: a hidden true mastery per KC (Beta draw, capped at prerequisite + 0.2); learning in [0.05, 0.20]; forgetting 0.02 per step on every KC (multiplicative); slip in [0.10, 0.25] and guess in [0.20, 0.40], away from the BKT defaults.
+  - Weak confusion signals are drawn from the true mastery and mis-tagged at the E1 error rate. It is read from the E1 report (8%).
+  - Runs: bkt and rule, each with weak evidence off and on, on the same students (same seed); then a one-at-a-time sweep of the BKT parameters.
+  - Metrics: MAE, next-answer AUC (with an **oracle AUC** from the true P(correct) as the ceiling), and level-band accuracy.
+  - The report applies the pre-registered rule, prints the recommended `learner.knowledge`, and includes 3 SVG charts. They are written by hand: no matplotlib dependency.
+- **E4, `eval/privacy-audit/`** (`audit.py` + `run.py` + `pii_questions.jsonl`).
+  - The recording cloud client is installed **through config**: `llm.cloud.audit_log` (JSONL of every CloudRequest plus the exact messages) and `llm.cloud.audit_echo` (a local echo instead of a provider; nothing leaves the machine). See `app/llm/audit.py`; the factory installs it only when configured.
+  - The scripted run creates the personas through `admin/students`, onboards them, and asks the E3 questions, the E1 cases and the planted-PII questions, all forced to the cloud route.
+  - The audit checks:
+    - fields outside the allow-list, and messages that are not exactly `render_cloud(request)`;
+    - identity values (usernames, display names, surnames);
+    - profile data (student IDs, item and misconception IDs, misconception texts);
+    - typed PII values, plus an analyzer re-scan;
+    - identity and raw typed PII in the database (outside `account`) and in the logs.
+  - **Exit 1 on any leak.**
+- **E3, `eval/personalization/`** (`run.py` + `questions.jsonl` with 20 HBP questions).
+  - Four personas (`eval/common/harness.py`) are created through `admin/students` with onboarding, preferences and scripted check answers: novice; intermediate with MC5; advanced; mixed prerequisites.
+  - Personalization on and off uses the new switch `learner.personalize` (false → `LearnerContext(personalized=False)` in `learner_context`). The run uses the local route, and post-response learning is off, so on and off see the same profile.
+  - A blind pairwise judge compares the answers in random A/B order. It can be any OpenAI-compatible API (`JUDGE_BASE_URL`, `JUDGE_MODEL`, `JUDGE_API_KEY`); the default is Ollama `/v1` with `gemma4:e4b`, a different model from the one that answers. Judge token limit: 4000, because gemma4 reasons first on that endpoint.
+  - Metrics and targets follow design §11 E3, with its decision.
+  - `abbas_sample.csv` holds 30 blind pairs with empty rating columns, plus `abbas_key.csv`.
+- `eval/common/harness.py`: the in-process app on its own temporary database, configured through `SECTION__FIELD` variables. It provides the instructor, the personas, the fake models for smoke mode, and log capture.
+- CI: the backend job also runs the three harnesses in smoke mode. E4 fails the build on any leak.
+- `eval/README.md`: how to run each harness, its options, and where the reports go.
+
+**Privacy fix found by E4:**
+- The first smoke audit found real leaks. With `en_core_web_sm`, NER missed the student's own name in "Hi, I'm Lucas Bergeron…" and "This is Maya Okafor…", and a typed username can never be found by NER. These values reached the cloud payload, and they were also stored in `request_log` as "sanitized" text.
+- Fix: `AccountService.identity_terms(student_id)` returns the student's display name, its parts (3+ letters) and the username. They are read per request and kept in memory only. The privacy filter passes them to `PIIAnalyzer.analyze(text, names, usernames)`, which always marks whole-word occurrences as `PERSON` / `USERNAME`.
+- After the fix, the smoke audit is clean. New tests in `test_privacy.py` cover the analyzer, the stored sanitized text, and the whole-word rule ("Tom" ≠ "symptoms").
+
+Tests:
+- `tests/test_eval_tools.py` has 16 tests:
+  - the auditor finds each planted leak class, a clean request passes, a typed own name counts as PII rather than identity, and storage matching is whole-word;
+  - AUC;
+  - a tiny simulation through the real learner model, for bkt and rule;
+  - the recording client is installed through config and captures exactly the allow-listed request, and is absent otherwise;
+  - the personalization switch.
+- `tests/test_privacy.py`: 2 new tests.
+- Backend: 350 tests pass with BKT and 350 with `rule`. Ruff is clean. All three smoke runs pass from `backend/`, as in CI.
+
+Full runs, against the real servers (reports in each `results/`):
+
+- **E2** (200 students × 40 interactions, HBP; the other topics have no item bank yet, so they are skipped):
+
+  | Config | MAE | AUC (oracle) | Band accuracy |
+  |---|---|---|---|
+  | bkt | 0.260 | 0.522 (0.621) | 43.3% |
+  | rule | 0.203 | 0.551 (0.628) | 61.2% |
+  | bkt+weak | 0.242 | 0.524 | 46.5% |
+  | rule+weak | 0.196 | 0.541 | 63.1% |
+
+  - BKT − rule MAE per student: **+0.057 (95% CI ± 0.006)**. BKT's AUC is also lower.
+  - **Pre-registered decision: switch to `learner.knowledge: rule`. Weak evidence: keep (it lowers MAE for rule, 0.203 → 0.196).**
+  - Sweep: BKT's MAE ranges from 0.210 to 0.324. It is best with guess = 0.35 and learn = 0.05, which are closer to the simulated students.
+  - The rule method copes better with forgetting, which BKT does not model.
+  - The low AUCs are expected: the oracle ceiling is only about 0.62, because of slip and guess.
+- **E3** (4 personas × 20 questions × on/off = 160 answers from qwen3.5:9b; judge gemma4:e4b, 80 of 80 judged):
+  - level-fit win rate **85%** ✅ (novice 20/20, intermediate 19/20, advanced 20/20, mixed 9/20);
+  - known misconception addressed **100%** (75% without personalization) ✅;
+  - preference respected **90%** ✅;
+  - critical errors 0 vs 0 ✅;
+  - **correct 98% vs 100% ❌**. Two personalized answers were judged `minor_error`: intermediate_mc Q05 got the **safe fallback message** (the medical-safety check rejected both attempts at a general question, so it over-blocked), and mixed Q05 is borderline.
+  - Following the design rule (all metrics above marginal), the decision is to keep personalization as designed. The correctness miss is flagged in the report for review.
+  - `abbas_sample.csv`: 30 blind pairs are ready for Dr. Abbas.
+- **E4** (4 personas × 70 questions = 280 asks forced to the cloud; local echo provider):
+  - 260 cloud requests recorded. 20 asks stayed local because of personal health details (local-only by design).
+  - Fields outside the allow-list 0, identity 0, profile 0, PII 0 (0.0%), and nothing in the DB or logs. **Verdict: no leak.**
+  - This is after the fix above. The run used `en_core_web_sm`; production uses `en_core_web_lg`.
+
+Decisions:
+- **E2's recommendation has not been applied to `config.yaml`**: it is a design default. The user decides, either via the dashboard (Settings → knowledge model) or in `config.yaml`.
+- E2 has no simulated time, so the 24-hour no-repeat rule runs out of items after a few interactions per KC. The least recently answered item is reused, and the report counts how often.
+- E3 runs on the local route with post-response learning off, so the "on" and "off" answers see the same profile. The E3 judge is a local model, a different model from the one that answers.
+- The own-identity redaction is a strengthening inside the privacy filter. No design decision changes, and the values never leave memory.
+
+Interface changes:
+- Config: `llm.cloud.audit_log`, `llm.cloud.audit_echo`, `learner.personalize`.
+- Code: `PIIAnalyzer.analyze(text, names=(), usernames=())` and `AccountService.identity_terms()`.
+- New placeholder type `<USERNAME_n>`.
+- No change to `schemas.py`.
+
+Known gaps / TODO:
+- E1/E3/E4 cover HBP only, until the other four topics have KCs, items and catalogs.
+- E3's correctness criterion missed: look into medical-safety over-blocking on "How do doctors decide that someone has high blood pressure?" (personalized intermediate answer).
+- Run E4 with `en_core_web_lg`, and with `--real-cloud` once a provider is configured.
+- Dr. Abbas still has to rate `abbas_sample.csv`.
+
+How to try it: see `eval/README.md`.

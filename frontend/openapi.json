@@ -683,6 +683,261 @@
         }
       }
     },
+    "/api/v1/admin/config": {
+      "get": {
+        "tags": [
+          "admin: dashboard"
+        ],
+        "summary": "Get Config",
+        "operationId": "get_config_api_v1_admin_config_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminConfig"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "admin: dashboard"
+        ],
+        "summary": "Put Config",
+        "description": "Applied at once (the next /ask uses it) and stored in config_history.",
+        "operationId": "put_config_api_v1_admin_config_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuntimeConfig"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminConfig"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/class-summary": {
+      "get": {
+        "tags": [
+          "admin: dashboard"
+        ],
+        "summary": "Get Class Summary",
+        "operationId": "get_class_summary_api_v1_admin_class_summary_get",
+        "parameters": [
+          {
+            "name": "topic",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Topic"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassSummary"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/logs": {
+      "get": {
+        "tags": [
+          "admin: dashboard"
+        ],
+        "summary": "Get Logs",
+        "operationId": "get_logs_api_v1_admin_logs_get",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "title": "Page Size"
+            }
+          },
+          {
+            "name": "topic",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Topic"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/content": {
+      "get": {
+        "tags": [
+          "admin: dashboard"
+        ],
+        "summary": "Get Content",
+        "operationId": "get_content_api_v1_admin_content_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/topics/{topic}/materials": {
+      "post": {
+        "tags": [
+          "admin: dashboard"
+        ],
+        "summary": "Upload Material",
+        "operationId": "upload_material_api_v1_admin_topics__topic__materials_post",
+        "parameters": [
+          {
+            "name": "topic",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Topic"
+            }
+          },
+          {
+            "name": "replace",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Replace"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_material_api_v1_admin_topics__topic__materials_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/health": {
       "get": {
         "summary": "Health",
@@ -704,6 +959,30 @@
   },
   "components": {
     "schemas": {
+      "AdminConfig": {
+        "properties": {
+          "values": {
+            "$ref": "#/components/schemas/RuntimeConfig"
+          },
+          "options": {
+            "$ref": "#/components/schemas/ConfigOptions"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/ConfigChange"
+            },
+            "type": "array",
+            "title": "History"
+          }
+        },
+        "type": "object",
+        "required": [
+          "values",
+          "options",
+          "history"
+        ],
+        "title": "AdminConfig"
+      },
       "AskBody": {
         "properties": {
           "session_id": {
@@ -852,6 +1131,20 @@
           "route_target"
         ],
         "title": "AskResponse"
+      },
+      "Body_upload_material_api_v1_admin_topics__topic__materials_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_upload_material_api_v1_admin_topics__topic__materials_post"
       },
       "ChangePasswordBody": {
         "properties": {
@@ -1048,6 +1341,136 @@
           "label"
         ],
         "title": "Choice"
+      },
+      "ClassSummary": {
+        "properties": {
+          "topic": {
+            "type": "string",
+            "title": "Topic"
+          },
+          "min_group": {
+            "type": "integer",
+            "title": "Min Group"
+          },
+          "suppressed": {
+            "type": "boolean",
+            "title": "Suppressed"
+          },
+          "students": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Students"
+          },
+          "kcs": {
+            "items": {
+              "$ref": "#/components/schemas/KcSummary"
+            },
+            "type": "array",
+            "title": "Kcs",
+            "default": []
+          },
+          "misconceptions": {
+            "items": {
+              "$ref": "#/components/schemas/MisconceptionSummary"
+            },
+            "type": "array",
+            "title": "Misconceptions",
+            "default": []
+          },
+          "misconceptions_hidden": {
+            "type": "integer",
+            "title": "Misconceptions Hidden",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "topic",
+          "min_group",
+          "suppressed"
+        ],
+        "title": "ClassSummary"
+      },
+      "ConfigChange": {
+        "properties": {
+          "changed_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Changed At"
+          },
+          "changed": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Changed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "changed_at",
+          "changed"
+        ],
+        "title": "ConfigChange"
+      },
+      "ConfigOptions": {
+        "properties": {
+          "checkers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Checkers"
+          },
+          "required_checkers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Required Checkers"
+          },
+          "knowledge_models": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Knowledge Models"
+          }
+        },
+        "type": "object",
+        "required": [
+          "checkers",
+          "required_checkers",
+          "knowledge_models"
+        ],
+        "title": "ConfigOptions"
+      },
+      "ContentStatus": {
+        "properties": {
+          "serve_unreviewed": {
+            "type": "boolean",
+            "title": "Serve Unreviewed"
+          },
+          "topics": {
+            "items": {
+              "$ref": "#/components/schemas/TopicContentStatus"
+            },
+            "type": "array",
+            "title": "Topics"
+          }
+        },
+        "type": "object",
+        "required": [
+          "serve_unreviewed",
+          "topics"
+        ],
+        "title": "ContentStatus"
       },
       "CreateStudentBody": {
         "properties": {
@@ -1255,6 +1678,243 @@
         ],
         "title": "KcRecommendation"
       },
+      "KcSummary": {
+        "properties": {
+          "kc_id": {
+            "type": "string",
+            "title": "Kc Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "counts": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Counts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kc_id",
+          "name",
+          "counts"
+        ],
+        "title": "KcSummary"
+      },
+      "LevelsConfig": {
+        "properties": {
+          "basic_below": {
+            "type": "number",
+            "title": "Basic Below",
+            "default": 0.4
+          },
+          "advanced_above": {
+            "type": "number",
+            "title": "Advanced Above",
+            "default": 0.7
+          },
+          "hysteresis": {
+            "type": "number",
+            "maximum": 0.2,
+            "minimum": 0.0,
+            "title": "Hysteresis",
+            "default": 0.05
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "LevelsConfig"
+      },
+      "LogEntry": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "topic": {
+            "type": "string",
+            "title": "Topic"
+          },
+          "sanitized_question": {
+            "type": "string",
+            "title": "Sanitized Question"
+          },
+          "target": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target"
+          },
+          "route_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Route Score"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "latency_ms": {
+            "type": "number",
+            "title": "Latency Ms"
+          },
+          "checks": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Checks"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "request_id",
+          "created_at",
+          "topic",
+          "sanitized_question",
+          "target",
+          "route_score",
+          "model",
+          "latency_ms",
+          "checks",
+          "warnings"
+        ],
+        "title": "LogEntry"
+      },
+      "LogPage": {
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page"
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/LogStats"
+          },
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/LogEntry"
+            },
+            "type": "array",
+            "title": "Entries"
+          }
+        },
+        "type": "object",
+        "required": [
+          "page",
+          "page_size",
+          "total",
+          "stats",
+          "entries"
+        ],
+        "title": "LogPage"
+      },
+      "LogStats": {
+        "properties": {
+          "requests": {
+            "type": "integer",
+            "title": "Requests"
+          },
+          "local": {
+            "type": "integer",
+            "title": "Local"
+          },
+          "cloud": {
+            "type": "integer",
+            "title": "Cloud"
+          },
+          "cloud_share": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cloud Share"
+          },
+          "latency_p50_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latency P50 Ms"
+          },
+          "latency_p95_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latency P95 Ms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "requests",
+          "local",
+          "cloud",
+          "cloud_share",
+          "latency_p50_ms",
+          "latency_p95_ms"
+        ],
+        "title": "LogStats"
+      },
       "LoginBody": {
         "properties": {
           "username": {
@@ -1276,6 +1936,30 @@
           "password"
         ],
         "title": "LoginBody"
+      },
+      "MaterialFile": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "title": "Size Bytes"
+          },
+          "uploaded_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Uploaded At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "size_bytes",
+          "uploaded_at"
+        ],
+        "title": "MaterialFile"
       },
       "Me": {
         "properties": {
@@ -1304,6 +1988,34 @@
           "must_change_password"
         ],
         "title": "Me"
+      },
+      "MisconceptionSummary": {
+        "properties": {
+          "misconception_id": {
+            "type": "string",
+            "title": "Misconception Id"
+          },
+          "kc_id": {
+            "type": "string",
+            "title": "Kc Id"
+          },
+          "statement": {
+            "type": "string",
+            "title": "Statement"
+          },
+          "students": {
+            "type": "integer",
+            "title": "Students"
+          }
+        },
+        "type": "object",
+        "required": [
+          "misconception_id",
+          "kc_id",
+          "statement",
+          "students"
+        ],
+        "title": "MisconceptionSummary"
       },
       "OllamaStatus": {
         "properties": {
@@ -1447,6 +2159,39 @@
         ],
         "title": "OnboardingResult"
       },
+      "OpenMisconception": {
+        "properties": {
+          "kc_id": {
+            "type": "string",
+            "title": "Kc Id"
+          },
+          "statement": {
+            "type": "string",
+            "title": "Statement"
+          },
+          "correction": {
+            "type": "string",
+            "title": "Correction"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "suspected",
+              "confirmed"
+            ],
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kc_id",
+          "statement",
+          "correction",
+          "status"
+        ],
+        "title": "OpenMisconception",
+        "description": "A misunderstanding the tutor is working on, in plain language (no catalog ID)."
+      },
       "PreferenceAnswers": {
         "properties": {
           "sequencing": {
@@ -1578,6 +2323,44 @@
         ],
         "title": "Profile"
       },
+      "RuntimeConfig": {
+        "properties": {
+          "routing_threshold": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Routing Threshold"
+          },
+          "checkers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Checkers"
+          },
+          "knowledge": {
+            "type": "string",
+            "title": "Knowledge"
+          },
+          "weak_evidence": {
+            "type": "boolean",
+            "title": "Weak Evidence"
+          },
+          "levels": {
+            "$ref": "#/components/schemas/LevelsConfig"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "routing_threshold",
+          "checkers",
+          "knowledge",
+          "weak_evidence",
+          "levels"
+        ],
+        "title": "RuntimeConfig"
+      },
       "SessionHistory": {
         "properties": {
           "session_id": {
@@ -1690,6 +2473,57 @@
         ],
         "title": "TemporaryPassword"
       },
+      "TopicContentStatus": {
+        "properties": {
+          "topic": {
+            "type": "string",
+            "title": "Topic"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "kcs": {
+            "type": "integer",
+            "title": "Kcs"
+          },
+          "items": {
+            "type": "integer",
+            "title": "Items"
+          },
+          "items_reviewed": {
+            "type": "integer",
+            "title": "Items Reviewed"
+          },
+          "misconceptions": {
+            "type": "integer",
+            "title": "Misconceptions"
+          },
+          "misconceptions_reviewed": {
+            "type": "integer",
+            "title": "Misconceptions Reviewed"
+          },
+          "materials": {
+            "items": {
+              "$ref": "#/components/schemas/MaterialFile"
+            },
+            "type": "array",
+            "title": "Materials"
+          }
+        },
+        "type": "object",
+        "required": [
+          "topic",
+          "name",
+          "kcs",
+          "items",
+          "items_reviewed",
+          "misconceptions",
+          "misconceptions_reviewed",
+          "materials"
+        ],
+        "title": "TopicContentStatus"
+      },
       "TopicInfo": {
         "properties": {
           "id": {
@@ -1734,6 +2568,14 @@
             },
             "type": "array",
             "title": "Kcs"
+          },
+          "misconceptions": {
+            "items": {
+              "$ref": "#/components/schemas/OpenMisconception"
+            },
+            "type": "array",
+            "title": "Misconceptions",
+            "default": []
           }
         },
         "type": "object",
@@ -1799,6 +2641,34 @@
         },
         "type": "object",
         "title": "UpdateStudentBody"
+      },
+      "UploadResult": {
+        "properties": {
+          "file": {
+            "$ref": "#/components/schemas/MaterialFile"
+          },
+          "ingested": {
+            "type": "boolean",
+            "title": "Ingested"
+          },
+          "ingest_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ingest Error"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file",
+          "ingested"
+        ],
+        "title": "UploadResult"
       },
       "ValidationError": {
         "properties": {
