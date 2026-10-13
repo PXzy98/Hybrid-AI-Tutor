@@ -14,7 +14,7 @@ routing:
   stub_score: 0.0                     # stub router: 0.0 = always local
 
 rag:
-  impl: stub                          # Siyun's implementation name once registered
+  impl: medical_hybrid                # BM25 + word/char TF-IDF, section-aware retrieval
   k: 4
 
 privacy:

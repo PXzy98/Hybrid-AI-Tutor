@@ -1,0 +1,52 @@
+[
+  {
+    "id": "hypertension",
+    "title": "High Blood Pressure",
+    "url": "https://medlineplus.gov/highbloodpressure.html",
+    "publisher": "MedlinePlus, U.S. National Library of Medicine",
+    "source_last_modified": "2026-01-22",
+    "fetched_at_utc": "2026-10-06T15:05:33+00:00",
+    "characters": 3037,
+    "local_file": "data\\raw\\hypertension.txt"
+  },
+  {
+    "id": "type2_diabetes",
+    "title": "Type 2 Diabetes",
+    "url": "https://medlineplus.gov/diabetestype2.html",
+    "publisher": "MedlinePlus, U.S. National Library of Medicine",
+    "source_last_modified": "2026-01-21",
+    "fetched_at_utc": "2026-10-06T15:05:33+00:00",
+    "characters": 4365,
+    "local_file": "data\\raw\\type2_diabetes.txt"
+  },
+  {
+    "id": "asthma",
+    "title": "Asthma",
+    "url": "https://medlineplus.gov/asthma.html",
+    "publisher": "MedlinePlus, U.S. National Library of Medicine",
+    "source_last_modified": "2024-01-24",
+    "fetched_at_utc": "2026-10-06T15:05:33+00:00",
+    "characters": 5135,
+    "local_file": "data\\raw\\asthma.txt"
+  },
+  {
+    "id": "migraine",
+    "title": "Migraine",
+    "url": "https://medlineplus.gov/migraine.html",
+    "publisher": "MedlinePlus, U.S. National Library of Medicine",
+    "source_last_modified": "2025-11-20",
+    "fetched_at_utc": "2026-10-06T15:05:33+00:00",
+    "characters": 5075,
+    "local_file": "data\\raw\\migraine.txt"
+  },
+  {
+    "id": "pneumonia",
+    "title": "Pneumonia",
+    "url": "https://medlineplus.gov/pneumonia.html",
+    "publisher": "MedlinePlus, U.S. National Library of Medicine",
+    "source_last_modified": "2023-12-08",
+    "fetched_at_utc": "2026-10-06T15:05:33+00:00",
+    "characters": 6119,
+    "local_file": "data\\raw\\pneumonia.txt"
+  }
+]

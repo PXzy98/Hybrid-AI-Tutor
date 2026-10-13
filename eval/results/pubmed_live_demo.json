@@ -1,0 +1,79 @@
+﻿{
+  "demo": "ELG5902 course-specific RAG evidence",
+  "question": "What are the symptoms of asthma?",
+  "retriever": "medical_hybrid",
+  "retrieved": [
+    {
+      "evidence_id": "7e8994d203938c07",
+      "source_title": "Asthma",
+      "source_url": "https://medlineplus.gov/asthma.html",
+      "source_last_modified": "2024-01-24",
+      "corpus_fetched_at": "2026-10-06T15:05:33+00:00",
+      "score": 1.0,
+      "kc_ids": [
+        "AST.1"
+      ],
+      "level": "basic",
+      "text_excerpt": "What are the symptoms of asthma?\nThe symptoms of asthma include:\nChest tightness\nCoughing, especially at night or early morning\nShortness of breath\nWheezing, which causes a whistling sound when you breathe out\nThese symptoms can r"
+    },
+    {
+      "evidence_id": "4be1c63a5d8fab2c",
+      "source_title": "Asthma",
+      "source_url": "https://medlineplus.gov/asthma.html",
+      "source_last_modified": "2024-01-24",
+      "corpus_fetched_at": "2026-10-06T15:05:33+00:00",
+      "score": 0.798394,
+      "kc_ids": [
+        "AST.1"
+      ],
+      "level": "basic",
+      "text_excerpt": "What are the treatments for asthma?\nShort-term relief medicines, also called quick-relief medicines. They help prevent symptoms or relieve symptoms during an asthma attack. They include an inhaler to carry with you all the time. I"
+    },
+    {
+      "evidence_id": "457ad6c71f1c0185",
+      "source_title": "Asthma",
+      "source_url": "https://medlineplus.gov/asthma.html",
+      "source_last_modified": "2024-01-24",
+      "corpus_fetched_at": "2026-10-06T15:05:33+00:00",
+      "score": 0.76632,
+      "kc_ids": [
+        "AST.1"
+      ],
+      "level": "basic",
+      "text_excerpt": "What are the treatments for asthma?\nIf you have asthma, you will work with your health care provider to create a treatment plan. The plan will include ways to manage your asthma symptoms and prevent asthma attacks. It will include"
+    }
+  ],
+  "hypothetical_numeric_claim_check": {
+    "status": "numeric_evidence_missing",
+    "numbers_in_claim": [
+      "20%",
+      "40%"
+    ],
+    "candidate_evidence_ids": [],
+    "note": "No retrieved passage contains all claimed numeric tokens. Do not present this quantitative claim as evidence-grounded."
+  },
+  "pubmed": {
+    "status": "returned_candidates",
+    "note": "Metadata/abstract records are not evidence that a specific claim is correct.",
+    "public_candidates": [
+      {
+        "pmid": "39465893",
+        "title": "Inhaled Reliever Therapies for Asthma: A Systematic Review and Meta-Analysis.",
+        "journal": "JAMA",
+        "year": "2025",
+        "source_url": "https://pubmed.ncbi.nlm.nih.gov/39465893/",
+        "abstract_excerpt": "IMPORTANCE: The optimal inhaled reliever therapy for asthma remains unclear. OBJECTIVE: To compare short-acting β agonists (SABA) alone with SABA combined with inhaled corticosteroids (ICS) and with the fast-onset, long-acting β agonist formoterol combined with ICS for asthma. DATA SOURCES: The MEDLINE, Embase, and CENTRAL databases were searched from January 1, 2020, to September 27, 2024, without language restrictions. STUDY SELECTION: Pairs of reviewers independently selected randomized clinical trials evaluating (1) SABA alone, (2) ICS with formoterol, and (3) ICS with SABA (combined or separate inhalers). DATA EXTRACTION AND SYNTHESIS: Two reviewers independently extracted data and assessed risk of bias. Random-effects meta-analyses synthesized outcomes. GRADE (Grading of Recommendations Assessment, Development, and Evaluation) was used to evaluate the certainty of evidence. MAIN OUTCOMES AND MEASURES: Asthma symptom control (5-item Asthma Control Questionnaire; range, 0-6, lower scores indicate better asthma control; minimum important difference [MID], 0.5 points), asthma-related quality of life (Asthma Quality of Life Questionnaire; range, 1-7, higher scores indicate better quality of life; MID, 0.5 points), risk of severe exacerbations, and risk of serious adverse events. RESULTS: A total of 27 randomized clinical trials (N = 50 496 adult and pediatric patients; mean age, 41.0 years; 20 288 male [40%]) were included. Compared with SABA alone, both ICS-containing relievers were associated with fewer severe exacerbations (ICS-formoterol risk ratio [RR], 0.65 [95% CI, ",
+        "verification_status": "unreviewed_candidate"
+      },
+      {
+        "pmid": "37286218",
+        "title": "Extreme weather and asthma: a systematic review and meta-analysis.",
+        "journal": "European respiratory review : an official journal of the European Respiratory Society",
+        "year": "2023",
+        "source_url": "https://pubmed.ncbi.nlm.nih.gov/37286218/",
+        "abstract_excerpt": "BACKGROUND: Climate change's influence on extreme weather events poses a significant threat to the morbidity and mortality of asthma patients. The aim of this study was to examine associations between extreme weather events and asthma-related outcomes. METHODS: A systematic literature search for relevant studies was performed using the PubMed, EMBASE, Web of Science and ProQuest databases. Fixed-effects and random-effects models were applied to estimate the effects of extreme weather events on asthma-related outcomes. RESULTS: We observed that extreme weather events were associated with increasing risks of general asthma outcomes with relative risks of 1.18-fold for asthma events (95% CI 1.13-1.24), 1.10-fold for asthma symptoms (95% CI 1.03-1.18) and 1.09-fold for asthma diagnoses (95% CI 1.00-1.19). Extreme weather events were associated with increased risks of acute asthma exacerbation with risk ratios of asthma emergency department visits of 1.25-fold (95% CI 1.14-1.37), of asthma hospital admissions of 1.10-fold (95% CI 1.04-1.17), of asthma outpatient visits of 1.19-fold (95% CI 1.06-1.34) and of asthma mortality of 2.10-fold (95% CI 1.35-3.27). Additionally, an increase in extreme weather events increased risk ratios of asthma events by 1.19-fold in children and 1.29-fold in females (95% CI 1.08-1.32 and 95% CI 0.98-1.69, respectively). Thunderstorms increased the risk ratio of asthma events by 1.24-fold (95% CI 1.13-1.36). CONCLUSIONS: Our study showed that extreme weather events more prominently increased the risk of asthma morbidity and mortality in children and f",
+        "verification_status": "unreviewed_candidate"
+      }
+    ]
+  }
+}

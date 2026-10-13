@@ -1,0 +1,663 @@
+{
+  "note": "20 small hand-authored snippet-anchor tests. Measures whether a text fragment is retrieved, not clinical relevance, truth, grounded generation or generalization.",
+  "baseline": {
+    "queries": 20,
+    "hit_at_1": 0.55,
+    "hit_at_4": 0.9,
+    "mrr_at_4": 0.6875,
+    "mean_latency_ms": 0.46,
+    "p95_latency_ms": 0.63,
+    "cases": [
+      {
+        "topic": "high_blood_pressure",
+        "query": "What do systolic and diastolic blood pressure mean?",
+        "anchor": "systolic pressure",
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_4": true,
+        "reciprocal_rank": 1.0,
+        "latency_ms": 0.63,
+        "retrieved_scores": [
+          0.231888,
+          0.206722,
+          0.126525,
+          0.051045
+        ]
+      },
+      {
+        "topic": "high_blood_pressure",
+        "query": "How is high blood pressure diagnosed over multiple visits?",
+        "anchor": "two or more readings",
+        "first_relevant_rank": 2,
+        "hit_at_1": false,
+        "hit_at_4": true,
+        "reciprocal_rank": 0.5,
+        "latency_ms": 0.47,
+        "retrieved_scores": [
+          0.254016,
+          0.252364,
+          0.12311,
+          0.070368
+        ]
+      },
+      {
+        "topic": "high_blood_pressure",
+        "query": "What changes can help manage hypertension?",
+        "anchor": "heart-healthy lifestyle changes",
+        "first_relevant_rank": 2,
+        "hit_at_1": false,
+        "hit_at_4": true,
+        "reciprocal_rank": 0.5,
+        "latency_ms": 0.44,
+        "retrieved_scores": [
+          0.318509,
+          0.259134,
+          0.092257,
+          0.0
+        ]
+      },
+      {
+        "topic": "high_blood_pressure",
+        "query": "Why is high blood pressure dangerous over time?",
+        "anchor": "stroke",
+        "first_relevant_rank": 3,
+        "hit_at_1": false,
+        "hit_at_4": true,
+        "reciprocal_rank": 0.3333333333333333,
+        "latency_ms": 0.46,
+        "retrieved_scores": [
+          0.285515,
+          0.19409,
+          0.164366,
+          0.105298
+        ]
+      },
+      {
+        "topic": "asthma",
+        "query": "What common allergens may trigger allergic asthma?",
+        "anchor": "Dust mites",
+        "first_relevant_rank": 2,
+        "hit_at_1": false,
+        "hit_at_4": true,
+        "reciprocal_rank": 0.5,
+        "latency_ms": 0.46,
+        "retrieved_scores": [
+          0.332114,
+          0.161428,
+          0.112387,
+          0.098207
+        ]
+      },
+      {
+        "topic": "asthma",
+        "query": "What are typical symptoms of asthma?",
+        "anchor": "Wheezing",
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_4": true,
+        "reciprocal_rank": 1.0,
+        "latency_ms": 0.43,
+        "retrieved_scores": [
+          0.278295,
+          0.202921,
+          0.162332,
+          0.09305
+        ]
+      },
+      {
+        "topic": "asthma",
+        "query": "How does a clinician test lung function for asthma?",
+        "anchor": "spirometry",
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_4": true,
+        "reciprocal_rank": 1.0,
+        "latency_ms": 0.47,
+        "retrieved_scores": [
+          0.242139,
+          0.217124,
+          0.082491,
+          0.042879
+        ]
+      },
+      {
+        "topic": "asthma",
+        "query": "When does a severe asthma attack require emergency care?",
+        "anchor": "emergency care",
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_4": true,
+        "reciprocal_rank": 1.0,
+        "latency_ms": 0.43,
+        "retrieved_scores": [
+          0.227465,
+          0.192916,
+          0.134354,
+          0.130188
+        ]
+      },
+      {
+        "topic": "migraine",
+        "query": "What are some environmental triggers for migraines?",
+        "anchor": "Bright or flashing lights",
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_4": true,
+        "reciprocal_rank": 1.0,
+        "latency_ms": 0.46,
+        "retrieved_scores": [
+          0.101292,
+          0.101018,
+          0.075682,
+          0.070596
+        ]
+      },
+      {
+        "topic": "migraine",
+        "query": "How can you feel in the postdrome after a migraine?",
+        "anchor": "exhausted, weak, and confused",
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_4": true,
+        "reciprocal_rank": 1.0,
+        "latency_ms": 0.44,
+        "retrieved_scores": [
+          0.225477,
+          0.142276,
+          0.096828,
+          0.094408
+        ]
+      },
+      {
+        "topic": "migraine",
+        "query": "What symptoms can accompany migraine attacks?",
+        "anchor": "Nausea and vomiting",
+        "first_relevant_rank": 3,
+        "hit_at_1": false,
+        "hit_at_4": true,
+        "reciprocal_rank": 0.3333333333333333,
+        "latency_ms": 0.43,
+        "retrieved_scores": [
+          0.160884,
+          0.147265,
+          0.128408,
+          0.114559
+        ]
+      },
+      {
+        "topic": "migraine",
+        "query": "What can help during a migraine attack without medicine?",
+        "anchor": "quiet, darkened room",
+        "first_relevant_rank": null,
+        "hit_at_1": false,
+        "hit_at_4": false,
+        "reciprocal_rank": 0,
+        "latency_ms": 0.42,
+        "retrieved_scores": [
+          0.127227,
+          0.122206,
+          0.094657,
+          0.089478
+        ]
+      },
+      {
+        "topic": "pneumonia",
+        "query": "Which kinds of infection can cause pneumonia?",
+        "anchor": "Bacterial, viral, and fungal infections",
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_4": true,
+        "reciprocal_rank": 1.0,
+        "latency_ms": 0.44,
+        "retrieved_scores": [
+          0.225466,
+          0.200907,
+          0.177505,
+          0.169993
+        ]
+      },
+      {
+        "topic": "pneumonia",
+        "query": "What breathing symptoms can pneumonia cause?",
+        "anchor": "Shortness of breath",
+        "first_relevant_rank": 3,
+        "hit_at_1": false,
+        "hit_at_4": true,
+        "reciprocal_rank": 0.3333333333333333,
+        "latency_ms": 0.47,
+        "retrieved_scores": [
+          0.238466,
+          0.232718,
+          0.15576,
+          0.11837
+        ]
+      },
+      {
+        "topic": "pneumonia",
+        "query": "What is bacteremia, a complication of pneumonia?",
+        "anchor": "Bacteremia",
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_4": true,
+        "reciprocal_rank": 1.0,
+        "latency_ms": 0.44,
+        "retrieved_scores": [
+          0.176791,
+          0.160994,
+          0.047563,
+          0.044408
+        ]
+      },
+      {
+        "topic": "pneumonia",
+        "query": "What would a doctor listen to during a pneumonia exam?",
+        "anchor": "stethoscope",
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_4": true,
+        "reciprocal_rank": 1.0,
+        "latency_ms": 0.42,
+        "retrieved_scores": [
+          0.111509,
+          0.086104,
+          0.047563,
+          0.044408
+        ]
+      },
+      {
+        "topic": "type2_diabetes",
+        "query": "What test measures average blood glucose over three months?",
+        "anchor": "A1C test",
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_4": true,
+        "reciprocal_rank": 1.0,
+        "latency_ms": 0.52,
+        "retrieved_scores": [
+          0.432165,
+          0.355423,
+          0.218476,
+          0.050266
+        ]
+      },
+      {
+        "topic": "type2_diabetes",
+        "query": "What are early signs of type 2 diabetes?",
+        "anchor": "Increased thirst and urination",
+        "first_relevant_rank": null,
+        "hit_at_1": false,
+        "hit_at_4": false,
+        "reciprocal_rank": 0,
+        "latency_ms": 0.43,
+        "retrieved_scores": [
+          0.191159,
+          0.175366,
+          0.175131,
+          0.15525
+        ]
+      },
+      {
+        "topic": "type2_diabetes",
+        "query": "How does family history affect type 2 diabetes risk?",
+        "anchor": "family history",
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_4": true,
+        "reciprocal_rank": 1.0,
+        "latency_ms": 0.46,
+        "retrieved_scores": [
+          0.165293,
+          0.160158,
+          0.146207,
+          0.142973
+        ]
+      },
+      {
+        "topic": "type2_diabetes",
+        "query": "Does prediabetes increase the risk of type 2 diabetes?",
+        "anchor": "Have prediabetes",
+        "first_relevant_rank": 4,
+        "hit_at_1": false,
+        "hit_at_4": true,
+        "reciprocal_rank": 0.25,
+        "latency_ms": 0.43,
+        "retrieved_scores": [
+          0.228226,
+          0.179207,
+          0.163803,
+          0.11493
+        ]
+      }
+    ]
+  },
+  "hybrid": {
+    "queries": 20,
+    "hit_at_1": 0.75,
+    "hit_at_4": 0.95,
+    "mrr_at_4": 0.8375,
+    "mean_latency_ms": 4.45,
+    "p95_latency_ms": 5.95,
+    "cases": [
+      {
+        "topic": "high_blood_pressure",
+        "query": "What do systolic and diastolic blood pressure mean?",
+        "anchor": "systolic pressure",
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_4": true,
+        "reciprocal_rank": 1.0,
+        "latency_ms": 3.24,
+        "retrieved_scores": [
+          1.0,
+          0.690543,
+          0.295593,
+          0.25063
+        ]
+      },
+      {
+        "topic": "high_blood_pressure",
+        "query": "How is high blood pressure diagnosed over multiple visits?",
+        "anchor": "two or more readings",
+        "first_relevant_rank": 2,
+        "hit_at_1": false,
+        "hit_at_4": true,
+        "reciprocal_rank": 0.5,
+        "latency_ms": 3.02,
+        "retrieved_scores": [
+          1.0,
+          0.853943,
+          0.560407,
+          0.558158
+        ]
+      },
+      {
+        "topic": "high_blood_pressure",
+        "query": "What changes can help manage hypertension?",
+        "anchor": "heart-healthy lifestyle changes",
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_4": true,
+        "reciprocal_rank": 1.0,
+        "latency_ms": 2.09,
+        "retrieved_scores": [
+          1.0,
+          0.181969,
+          0.123262,
+          0.039822
+        ]
+      },
+      {
+        "topic": "high_blood_pressure",
+        "query": "Why is high blood pressure dangerous over time?",
+        "anchor": "stroke",
+        "first_relevant_rank": 2,
+        "hit_at_1": false,
+        "hit_at_4": true,
+        "reciprocal_rank": 0.5,
+        "latency_ms": 2.81,
+        "retrieved_scores": [
+          0.926281,
+          0.897322,
+          0.66486,
+          0.629114
+        ]
+      },
+      {
+        "topic": "asthma",
+        "query": "What common allergens may trigger allergic asthma?",
+        "anchor": "Dust mites",
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_4": true,
+        "reciprocal_rank": 1.0,
+        "latency_ms": 4.43,
+        "retrieved_scores": [
+          1.0,
+          0.520001,
+          0.264404,
+          0.268805
+        ]
+      },
+      {
+        "topic": "asthma",
+        "query": "What are typical symptoms of asthma?",
+        "anchor": "Wheezing",
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_4": true,
+        "reciprocal_rank": 1.0,
+        "latency_ms": 4.92,
+        "retrieved_scores": [
+          1.0,
+          0.807682,
+          0.777098,
+          0.558426
+        ]
+      },
+      {
+        "topic": "asthma",
+        "query": "How does a clinician test lung function for asthma?",
+        "anchor": "spirometry",
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_4": true,
+        "reciprocal_rank": 1.0,
+        "latency_ms": 4.71,
+        "retrieved_scores": [
+          1.0,
+          0.345686,
+          0.125761,
+          0.116596
+        ]
+      },
+      {
+        "topic": "asthma",
+        "query": "When does a severe asthma attack require emergency care?",
+        "anchor": "emergency care",
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_4": true,
+        "reciprocal_rank": 1.0,
+        "latency_ms": 4.56,
+        "retrieved_scores": [
+          1.0,
+          0.633187,
+          0.300283,
+          0.353839
+        ]
+      },
+      {
+        "topic": "migraine",
+        "query": "What are some environmental triggers for migraines?",
+        "anchor": "Bright or flashing lights",
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_4": true,
+        "reciprocal_rank": 1.0,
+        "latency_ms": 5.15,
+        "retrieved_scores": [
+          1.0,
+          0.26918,
+          0.227702,
+          0.233353
+        ]
+      },
+      {
+        "topic": "migraine",
+        "query": "How can you feel in the postdrome after a migraine?",
+        "anchor": "exhausted, weak, and confused",
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_4": true,
+        "reciprocal_rank": 1.0,
+        "latency_ms": 4.52,
+        "retrieved_scores": [
+          1.0,
+          0.568884,
+          0.532426,
+          0.253404
+        ]
+      },
+      {
+        "topic": "migraine",
+        "query": "What symptoms can accompany migraine attacks?",
+        "anchor": "Nausea and vomiting",
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_4": true,
+        "reciprocal_rank": 1.0,
+        "latency_ms": 4.87,
+        "retrieved_scores": [
+          0.980032,
+          0.839807,
+          0.888225,
+          0.648307
+        ]
+      },
+      {
+        "topic": "migraine",
+        "query": "What can help during a migraine attack without medicine?",
+        "anchor": "quiet, darkened room",
+        "first_relevant_rank": null,
+        "hit_at_1": false,
+        "hit_at_4": false,
+        "reciprocal_rank": 0,
+        "latency_ms": 5.14,
+        "retrieved_scores": [
+          0.930764,
+          0.850198,
+          0.732228,
+          0.682884
+        ]
+      },
+      {
+        "topic": "pneumonia",
+        "query": "Which kinds of infection can cause pneumonia?",
+        "anchor": "Bacterial, viral, and fungal infections",
+        "first_relevant_rank": 2,
+        "hit_at_1": false,
+        "hit_at_4": true,
+        "reciprocal_rank": 0.5,
+        "latency_ms": 5.83,
+        "retrieved_scores": [
+          0.988966,
+          0.711507,
+          0.656488,
+          0.580151
+        ]
+      },
+      {
+        "topic": "pneumonia",
+        "query": "What breathing symptoms can pneumonia cause?",
+        "anchor": "Shortness of breath",
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_4": true,
+        "reciprocal_rank": 1.0,
+        "latency_ms": 5.95,
+        "retrieved_scores": [
+          0.855501,
+          0.797676,
+          0.699747,
+          0.666359
+        ]
+      },
+      {
+        "topic": "pneumonia",
+        "query": "What is bacteremia, a complication of pneumonia?",
+        "anchor": "Bacteremia",
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_4": true,
+        "reciprocal_rank": 1.0,
+        "latency_ms": 5.89,
+        "retrieved_scores": [
+          1.0,
+          0.259844,
+          0.253704,
+          0.221683
+        ]
+      },
+      {
+        "topic": "pneumonia",
+        "query": "What would a doctor listen to during a pneumonia exam?",
+        "anchor": "stethoscope",
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_4": true,
+        "reciprocal_rank": 1.0,
+        "latency_ms": 5.72,
+        "retrieved_scores": [
+          1.0,
+          0.315447,
+          0.276332,
+          0.252412
+        ]
+      },
+      {
+        "topic": "type2_diabetes",
+        "query": "What test measures average blood glucose over three months?",
+        "anchor": "A1C test",
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_4": true,
+        "reciprocal_rank": 1.0,
+        "latency_ms": 3.18,
+        "retrieved_scores": [
+          1.0,
+          0.163347,
+          0.150688,
+          0.102238
+        ]
+      },
+      {
+        "topic": "type2_diabetes",
+        "query": "What are early signs of type 2 diabetes?",
+        "anchor": "Increased thirst and urination",
+        "first_relevant_rank": 4,
+        "hit_at_1": false,
+        "hit_at_4": true,
+        "reciprocal_rank": 0.25,
+        "latency_ms": 4.41,
+        "retrieved_scores": [
+          1.0,
+          0.793315,
+          0.768392,
+          0.755628
+        ]
+      },
+      {
+        "topic": "type2_diabetes",
+        "query": "How does family history affect type 2 diabetes risk?",
+        "anchor": "family history",
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_4": true,
+        "reciprocal_rank": 1.0,
+        "latency_ms": 4.4,
+        "retrieved_scores": [
+          1.0,
+          0.844939,
+          0.595762,
+          0.46463
+        ]
+      },
+      {
+        "topic": "type2_diabetes",
+        "query": "Does prediabetes increase the risk of type 2 diabetes?",
+        "anchor": "Have prediabetes",
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_4": true,
+        "reciprocal_rank": 1.0,
+        "latency_ms": 4.11,
+        "retrieved_scores": [
+          0.943975,
+          0.812991,
+          0.535874,
+          0.551422
+        ]
+      }
+    ]
+  }
+}
