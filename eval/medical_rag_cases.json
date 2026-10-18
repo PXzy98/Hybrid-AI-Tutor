@@ -1,0 +1,22 @@
+[
+  {"topic":"high_blood_pressure","query":"What do systolic and diastolic blood pressure mean?","anchor":"systolic pressure"},
+  {"topic":"high_blood_pressure","query":"How is high blood pressure diagnosed over multiple visits?","anchor":"two or more readings"},
+  {"topic":"high_blood_pressure","query":"What changes can help manage hypertension?","anchor":"heart-healthy lifestyle changes"},
+  {"topic":"high_blood_pressure","query":"Why is high blood pressure dangerous over time?","anchor":"stroke"},
+  {"topic":"asthma","query":"What common allergens may trigger allergic asthma?","anchor":"Dust mites"},
+  {"topic":"asthma","query":"What are typical symptoms of asthma?","anchor":"Wheezing"},
+  {"topic":"asthma","query":"How does a clinician test lung function for asthma?","anchor":"spirometry"},
+  {"topic":"asthma","query":"When does a severe asthma attack require emergency care?","anchor":"emergency care"},
+  {"topic":"migraine","query":"What are some environmental triggers for migraines?","anchor":"Bright or flashing lights"},
+  {"topic":"migraine","query":"How can you feel in the postdrome after a migraine?","anchor":"exhausted, weak, and confused"},
+  {"topic":"migraine","query":"What symptoms can accompany migraine attacks?","anchor":"Nausea and vomiting"},
+  {"topic":"migraine","query":"What can help during a migraine attack without medicine?","anchor":"quiet, darkened room"},
+  {"topic":"pneumonia","query":"Which kinds of infection can cause pneumonia?","anchor":"Bacterial, viral, and fungal infections"},
+  {"topic":"pneumonia","query":"What breathing symptoms can pneumonia cause?","anchor":"Shortness of breath"},
+  {"topic":"pneumonia","query":"What is bacteremia, a complication of pneumonia?","anchor":"Bacteremia"},
+  {"topic":"pneumonia","query":"What would a doctor listen to during a pneumonia exam?","anchor":"stethoscope"},
+  {"topic":"type2_diabetes","query":"What test measures average blood glucose over three months?","anchor":"A1C test"},
+  {"topic":"type2_diabetes","query":"What are early signs of type 2 diabetes?","anchor":"Increased thirst and urination"},
+  {"topic":"type2_diabetes","query":"How does family history affect type 2 diabetes risk?","anchor":"family history"},
+  {"topic":"type2_diabetes","query":"Does prediabetes increase the risk of type 2 diabetes?","anchor":"Have prediabetes"}
+]

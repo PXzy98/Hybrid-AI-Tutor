@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from app.core.config import DEFAULT_CONFIG, get_settings
+from app.core.config import DEFAULT_CONFIG, Settings, get_settings
 
 
 def _deep_merge(base: dict, overrides: dict) -> dict:
@@ -32,6 +32,8 @@ def _write_config(path: Path, overrides: dict) -> None:
 @pytest.fixture(autouse=True)
 def _fresh_settings(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     """Every test starts with an empty settings cache and its own SQLite file (never data/app.db)."""
+    # Isolate tests from machine-specific .env (including RAG and privacy overrides).
+    monkeypatch.setitem(Settings.model_config, "env_file", None)
     _write_config(tmp_path / "config.yaml", {})
     monkeypatch.setenv("APP_CONFIG", str(tmp_path / "config.yaml"))
     monkeypatch.setenv("DATABASE_URL", f"sqlite:///{(tmp_path / 'test.db').as_posix()}")
