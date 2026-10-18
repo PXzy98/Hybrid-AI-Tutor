@@ -18,6 +18,9 @@ async def lifespan(app: FastAPI):
     services.accounts.bootstrap_instructor()
     app.state.services = services
     app.state.runner = build_runner(services)
+    from app.admin.runtime_config import restore_latest
+
+    restore_latest(app)
     logging.getLogger("app").info("pipeline: %s", " -> ".join(app.state.runner.step_names))
     yield
     services.engine.dispose()

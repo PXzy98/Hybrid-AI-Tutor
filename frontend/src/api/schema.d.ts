@@ -75,6 +75,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/routing/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Routing Options */
+        get: operations["routing_options_api_v1_routing_options_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/ask": {
         parameters: {
             query?: never;
@@ -86,6 +103,29 @@ export interface paths {
         put?: never;
         /** Ask */
         post: operations["ask_api_v1_ask_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ask/stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ask Stream
+         * @description POST + fetch streaming so the cookie/session and per-question method are preserved.
+         *
+         *     Progress events contain fixed status text/scores only, never question or passage text.
+         *     Instructor display-off suppresses progress and routing diagnostics server-side.
+         */
+        post: operations["ask_stream_api_v1_ask_stream_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -258,6 +298,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Config */
+        get: operations["get_config_api_v1_admin_config_get"];
+        /**
+         * Put Config
+         * @description Applied at once (the next /ask uses it) and stored in config_history.
+         */
+        put: operations["put_config_api_v1_admin_config_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health": {
         parameters: {
             query?: never;
@@ -279,9 +340,16 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AdminConfig */
+        AdminConfig: {
+            values: components["schemas"]["RuntimeConfig"];
+            options: components["schemas"]["ConfigOptions"];
+            /** History */
+            history: components["schemas"]["ConfigChange"][];
+        };
         /**
          * AskBody
-         * @description Public request body. Deliberately has no student_id: the server takes it from the login session.
+         * @description Identity comes from the login session. Routing method is per question, never global.
          */
         AskBody: {
             /**
@@ -303,6 +371,8 @@ export interface components {
              * @default en
              */
             language: string;
+            /** Routing Method */
+            routing_method?: ("lr" | "svm") | null;
         };
         /** AskResponse */
         AskResponse: {
@@ -345,6 +415,14 @@ export interface components {
             timings_ms: {
                 [key: string]: number;
             };
+            /** Routing Method */
+            routing_method?: string | null;
+            routing_details?: components["schemas"]["RouteScore"] | null;
+            /**
+             * Routing Progress
+             * @default []
+             */
+            routing_progress: components["schemas"]["RoutingProgress"][];
         };
         /** ChangePasswordBody */
         ChangePasswordBody: {
@@ -422,6 +500,25 @@ export interface components {
             /** Label */
             label: string;
         };
+        /** ConfigChange */
+        ConfigChange: {
+            /**
+             * Changed At
+             * Format: date-time
+             */
+            changed_at: string;
+            /** Changed */
+            changed: string[];
+        };
+        /** ConfigOptions */
+        ConfigOptions: {
+            /** Checkers */
+            checkers: string[];
+            /** Required Checkers */
+            required_checkers: string[];
+            /** Knowledge Models */
+            knowledge_models: string[];
+        };
         /** CreateStudentBody */
         CreateStudentBody: {
             /**
@@ -459,6 +556,39 @@ export interface components {
             step: string;
             /** Request Id */
             request_id: string;
+        };
+        /** EvidenceAssessment */
+        EvidenceAssessment: {
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "not_required" | "unavailable" | "empty" | "insufficient" | "uncertain" | "sufficient";
+            /**
+             * Retrieved Count
+             * @default 0
+             */
+            retrieved_count: number;
+            /**
+             * Accepted Indices
+             * @default []
+             */
+            accepted_indices: number[];
+            /**
+             * Coverage
+             * @default 0
+             */
+            coverage: number;
+            /**
+             * Support Scores
+             * @default []
+             */
+            support_scores: number[];
+            /**
+             * Reason
+             * @default
+             */
+            reason: string;
         };
         /** FeedbackBody */
         FeedbackBody: {
@@ -506,6 +636,24 @@ export interface components {
             name: string;
             /** Reason */
             reason: string;
+        };
+        /** LevelsConfig */
+        LevelsConfig: {
+            /**
+             * Basic Below
+             * @default 0.4
+             */
+            basic_below: number;
+            /**
+             * Advanced Above
+             * @default 0.7
+             */
+            advanced_above: number;
+            /**
+             * Hysteresis
+             * @default 0.05
+             */
+            hysteresis: number;
         };
         /** LoginBody */
         LoginBody: {
@@ -633,6 +781,129 @@ export interface components {
              * @default []
              */
             topics: components["schemas"]["TopicProfile"][];
+        };
+        /** RouteScore */
+        RouteScore: {
+            /** Score */
+            score: number;
+            /**
+             * Reasons
+             * @default []
+             */
+            reasons: string[];
+            /** Target */
+            target?: ("local" | "cloud") | null;
+            /** Method */
+            method?: string | null;
+            analysis?: components["schemas"]["SemanticAnalysis"] | null;
+            evidence?: components["schemas"]["EvidenceAssessment"] | null;
+            /**
+             * Accepted Indices
+             * @default []
+             */
+            accepted_indices: number[];
+        };
+        /** RoutingMethodOption */
+        RoutingMethodOption: {
+            /** Id */
+            id: string;
+            /** Label */
+            label: string;
+        };
+        /** RoutingOptions */
+        RoutingOptions: {
+            /** Show Progress */
+            show_progress: boolean;
+            /** Default Method */
+            default_method: string;
+            /** Methods */
+            methods: components["schemas"]["RoutingMethodOption"][];
+        };
+        /** RoutingProgress */
+        RoutingProgress: {
+            /** Stage */
+            stage: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "running" | "completed" | "skipped" | "failed";
+            /** Elapsed Ms */
+            elapsed_ms: number;
+            /** Duration Ms */
+            duration_ms?: number | null;
+            /**
+             * Detail
+             * @default
+             */
+            detail: string;
+        };
+        /** RuntimeConfig */
+        RuntimeConfig: {
+            /** Routing Threshold */
+            routing_threshold: number;
+            /**
+             * Show Routing Progress
+             * @default true
+             */
+            show_routing_progress: boolean;
+            /** Checkers */
+            checkers: string[];
+            /** Knowledge */
+            knowledge: string;
+            /** Weak Evidence */
+            weak_evidence: boolean;
+            levels: components["schemas"]["LevelsConfig"];
+        };
+        /** SemanticAnalysis */
+        SemanticAnalysis: {
+            /** Method */
+            method: string;
+            /**
+             * Cloud Probability
+             * @default 1
+             */
+            cloud_probability: number;
+            /**
+             * Evidence Probability
+             * @default 1
+             */
+            evidence_probability: number;
+            /**
+             * Freshness Probability
+             * @default 0
+             */
+            freshness_probability: number;
+            /**
+             * Nearest Similarity
+             * @default 0
+             */
+            nearest_similarity: number;
+            /**
+             * Requires Evidence
+             * @default true
+             */
+            requires_evidence: boolean;
+            /**
+             * Requires Fresh Evidence
+             * @default false
+             */
+            requires_fresh_evidence: boolean;
+            /**
+             * Reliable
+             * @default false
+             */
+            reliable: boolean;
+            /**
+             * Label Origin
+             * @default unavailable
+             */
+            label_origin: string;
+            /**
+             * Reason
+             * @default semantic models unavailable
+             */
+            reason: string;
         };
         /** SessionHistory */
         SessionHistory: {
@@ -852,6 +1123,26 @@ export interface operations {
             };
         };
     };
+    routing_options_api_v1_routing_options_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoutingOptions"];
+                };
+            };
+        };
+    };
     ask_api_v1_ask_post: {
         parameters: {
             query?: never;
@@ -890,6 +1181,40 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    ask_stream_api_v1_ask_stream_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AskBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                    "text/event-stream": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -1272,6 +1597,59 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TemporaryPassword"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_config_api_v1_admin_config_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminConfig"];
+                };
+            };
+        };
+    };
+    put_config_api_v1_admin_config_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RuntimeConfig"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminConfig"];
                 };
             };
             /** @description Validation Error */

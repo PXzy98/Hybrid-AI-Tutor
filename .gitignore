@@ -26,3 +26,9 @@ Thumbs.db
 
 # Frontend build cache
 frontend/tsconfig.tsbuildinfo
+
+# Local patch backups and SQLite sidecars
+.routing_patch_backups/
+routing_patch_backup_*/
+data/*.db-wal
+data/*.db-shm

@@ -681,3 +681,20 @@ docker compose up --build -d  # http://localhost:8080
 # log in as the instructor once and change the password, then:
 $env:DEMO_INSTRUCTOR_PASSWORD="<new password>"; .venv\Scripts\python scripts\demo_seed.py
 ```
+
+
+## 2026-10-17 — Semantic routing on the RAG branch
+
+Base: feature/rag-siyun-clean at 2ca304ffb0ea27e8a6b3dc1cf855af0fa5aa60d7.
+
+- Add local MiniLM embeddings and selectable calibrated LR/SVM heads using 500-question NPZ weights.
+- Retain capability, evidence and freshness policy; merge Local and Local-with-RAG into one target.
+- Connect existing medical_hybrid retrieval to relevance, QA-support and metadata checks.
+- Add live SSE stages/timings, student per-question method choice and protected teacher settings.
+- Persist settings in an additive config_history table and restore them at application startup.
+- Keep teammate-owned RAG code/data, PubMed helper and base privacy pipeline unchanged.
+- Mark the requested semantic-route privacy integration boundary with TEAM INTEGRATION comments.
+
+Interface changes are additive: Chunk.metadata; AskRequest.routing_method; expanded RouteInput and
+RouteScore; AskResponse.routing_method/routing_details/routing_progress; SSE and routing-options
+endpoints; runtime-config API. See ROUTING_PATCH.md for exact behavior and limitations.

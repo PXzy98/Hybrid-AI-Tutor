@@ -1,9 +1,13 @@
 import { request, type Schemas } from "./client";
+import { askStream } from "./askStream";
 
 export type Me = Schemas["Me"];
 export type TopicInfo = Schemas["TopicInfo"];
 export type AskBody = Schemas["AskBody"];
 export type AskResponse = Schemas["AskResponse"];
+export type RoutingOptions = Schemas["RoutingOptions"];
+export type AdminConfig = Schemas["AdminConfig"];
+export type RuntimeConfig = Schemas["RuntimeConfig"];
 export type CheckItem = Schemas["CheckItemPublic"];
 export type CheckResponse = Schemas["CheckResponse"];
 export type OnboardingInfo = Schemas["OnboardingInfo"];
@@ -25,6 +29,8 @@ export const api = {
 
   topics: () => request<TopicInfo[]>("GET", `${V1}/topics`),
   ask: (body: AskBody) => request<AskResponse>("POST", `${V1}/ask`, body),
+  askStream,
+  routingOptions: () => request<RoutingOptions>("GET", `${V1}/routing/options`),
   check: (item_id: string, choice: string, session_id = "") =>
     request<CheckResponse>("POST", `${V1}/check`, { item_id, choice, session_id }),
 
@@ -35,4 +41,9 @@ export const api = {
   profile: () => request<Profile>("GET", `${V1}/learner/me`),
   resetProfile: () => request<void>("DELETE", `${V1}/learner/me`),
   feedback: (action: FeedbackAction) => request<Preferences>("POST", `${V1}/learner/me/preferences`, { action }),
+};
+
+export const admin = {
+  config: () => request<AdminConfig>("GET", `${V1}/admin/config`),
+  saveConfig: (values: RuntimeConfig) => request<AdminConfig>("PUT", `${V1}/admin/config`, values),
 };

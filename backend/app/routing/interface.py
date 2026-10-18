@@ -1,4 +1,5 @@
 """Routing score: black box owned by Tongkai. Only this interface is fixed here (design §1, §9)."""
+
 from typing import Protocol, runtime_checkable
 
 from app.core.schemas import RouteInput, RouteScore

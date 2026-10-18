@@ -29,6 +29,12 @@ class Services:
     content: ContentStore
     learner: LearnerModel
 
+    def reconfigure(self, settings: Settings) -> None:
+        """Apply instructor settings; callers rebuild the request pipeline."""
+        self.settings = settings
+        self.router.cfg = settings.routing
+        self.learner = build_learner_model(settings, self.engine, self.content)
+
 
 def build_services(settings: Settings | None = None) -> Services:
     settings = settings or get_settings()

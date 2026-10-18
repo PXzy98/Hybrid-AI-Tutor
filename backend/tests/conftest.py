@@ -21,7 +21,11 @@ def _deep_merge(base: dict, overrides: dict) -> dict:
 # Applied under every test's config: the small spaCy model (the large one is for production).
 # TEST_LEARNER_KNOWLEDGE=rule runs the whole suite with the fallback knowledge model.
 TEST_BASE = {"privacy": {"spacy_model": "en_core_web_sm"},
-             "learner": {"knowledge": os.environ.get("TEST_LEARNER_KNOWLEDGE", "bkt")}}
+             "learner": {"knowledge": os.environ.get("TEST_LEARNER_KNOWLEDGE", "bkt")},
+             "routing": {"impl": "stub"}, "rag": {"impl": "stub"},
+             "llm": {"cloud": {"fallback_to_local": True}},
+             "pipeline": ["privacy_filter", "learner_context", "understand", "retrieve", "route",
+                          "generate", "restore", "verify", "attach_check", "record"]}
 
 
 def _write_config(path: Path, overrides: dict) -> None:

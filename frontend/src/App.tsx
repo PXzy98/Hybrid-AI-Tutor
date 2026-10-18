@@ -4,6 +4,7 @@ import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { homeFor, useMe } from "./auth";
 import Layout from "./components/Layout";
 import Admin from "./pages/Admin";
+import Settings from "./pages/admin/Settings";
 import ChangePassword from "./pages/ChangePassword";
 import Chat from "./pages/Chat";
 import Login from "./pages/Login";
@@ -40,6 +41,7 @@ export default function App() {
       <Route path="/start" element={<Guard role="student"><Onboarding /></Guard>} />
       <Route path="/chat" element={<Guard role="student"><Chat /></Guard>} />
       <Route path="/me" element={<Guard role="student"><WhatIKnow /></Guard>} />
+      <Route path="/admin/settings" element={<Guard role="instructor"><Settings /></Guard>} />
       <Route path="/admin" element={<Guard role="instructor"><Admin /></Guard>} />
       <Route path="*" element={<Home />} />
     </Routes>

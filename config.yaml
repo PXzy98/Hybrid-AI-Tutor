@@ -1,17 +1,33 @@
 # Privacy-Aware Hybrid AI Tutor: runtime configuration (design: docs/System_Design_v3.md §9).
 # Secrets and machine-specific URLs live in .env (see .env.example), not here.
 
-pipeline: [privacy_filter, learner_context, understand, retrieve, route, generate, restore, verify, attach_check, record]
+pipeline: [privacy_filter, learner_context, understand, analyze_route, retrieve, route, generate, restore, verify, attach_check, record]
 post_response: [update_learner]
 
 verify:
   checkers: [grounding, medical_safety, pii_leak, profile_leak]
 
 routing:
-  impl: stub                          # Tongkai's implementation name once registered
-  threshold: 0.6                      # ROUTE_THRESHOLD: score >= threshold -> cloud
-  force_local_if_not_cloud_safe: true # to be confirmed with Tongkai
-  stub_score: 0.0                     # stub router: 0.0 = always local
+  impl: semantic
+  threshold: 0.6
+  force_local_if_not_cloud_safe: true
+  stub_score: 0.0
+  show_progress: true
+  enabled_methods:
+  - lr
+  - svm
+  default_method: lr
+  embedding_model: sentence-transformers/all-MiniLM-L6-v2
+  model_dir: data/routing/models
+  local_files_only: true
+  uncertainty_margin: 0.08
+  evidence_required_threshold: 0.35
+  freshness_required_threshold: 0.35
+  ood_similarity_threshold: 0.25
+  relevance_model: cross-encoder/ms-marco-MiniLM-L6-v2
+  answerability_model: cross-encoder/qnli-electra-base
+  relevance_threshold: 0.6
+  answerability_threshold: 0.8
 
 rag:
   impl: medical_hybrid                # BM25 + word/char TF-IDF, section-aware retrieval

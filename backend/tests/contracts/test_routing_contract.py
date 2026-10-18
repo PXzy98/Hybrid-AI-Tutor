@@ -32,7 +32,12 @@ INPUTS = [
 
 @pytest.fixture(params=routers.names())
 def router(request) -> RouteScorer:
-    return routers.get(request.param)()
+    scorer = routers.get(request.param)()
+    if request.param == "semantic":
+        # Cold model loading is measured separately in the live progress panel.
+        # This contract measures steady-state classification latency.
+        scorer.route_score(INPUTS[0])
+    return scorer
 
 
 def test_implements_protocol(router):

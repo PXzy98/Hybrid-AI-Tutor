@@ -1,3 +1,9 @@
+> **Semantic routing integration (2026-10-17):** based on `feature/rag-siyun-clean` at
+> `2ca304ffb0ea27e8a6b3dc1cf855af0fa5aa60d7`. The default is now semantic LR/SVM routing
+> with the real `medical_hybrid` retriever. Read [docs/ROUTING_PATCH.md](docs/ROUTING_PATCH.md)
+> for preparation, teacher settings, the 500-question weights and known limitations.
+> The base branch's original setup reference follows below.
+
 # Privacy-Aware Hybrid AI Tutor
 
 A health-education tutor (ELG 5902, Group 1). Students pick one of five topics (High Blood Pressure, Type 2 Diabetes, Asthma, Migraine, Pneumonia) and ask questions. The system removes private information locally, then routes each question to a local model (Ollama) or a cloud model. Answers are grounded in course material (RAG) and adapted to what the student already knows. The tutor tracks the student's mastery of each knowledge component and adapts the level, the material and the check questions. Learning preferences only change how the answer is presented. The learner profile never leaves the local network.

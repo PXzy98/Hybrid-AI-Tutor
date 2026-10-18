@@ -11,7 +11,7 @@ export type Schemas = components["schemas"];
 
 // Paths in the schema already start with /api/v1. VITE_API_URL is only needed when the API is served
 // from another origin; in development Vite proxies /api to the backend.
-const BASE = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, "") ?? "";
+export const BASE = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, "") ?? "";
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -36,6 +36,14 @@ export async function request<T>(method: string, path: string, body?: unknown): 
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   if (res.status === 204) return undefined as T;
+  const data = await res.json().catch(() => null);
+  if (!res.ok) throw new ApiError(res.status, detailOf(data));
+  return data as T;
+}
+
+/** multipart/form-data upload (the browser sets the boundary header). */
+export async function upload<T>(path: string, form: FormData): Promise<T> {
+  const res = await fetch(BASE + path, { method: "POST", credentials: "include", body: form });
   const data = await res.json().catch(() => null);
   if (!res.ok) throw new ApiError(res.status, detailOf(data));
   return data as T;

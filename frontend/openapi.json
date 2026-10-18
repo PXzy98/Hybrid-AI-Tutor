@@ -124,6 +124,24 @@
         }
       }
     },
+    "/api/v1/routing/options": {
+      "get": {
+        "summary": "Routing Options",
+        "operationId": "routing_options_api_v1_routing_options_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoutingOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/ask": {
       "post": {
         "summary": "Ask",
@@ -157,6 +175,44 @@
                   "$ref": "#/components/schemas/ErrorBody"
                 }
               }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ask/stream": {
+      "post": {
+        "summary": "Ask Stream",
+        "description": "POST + fetch streaming so the cookie/session and per-question method are preserved.\n\nProgress events contain fixed status text/scores only, never question or passage text.\nInstructor display-off suppresses progress and routing diagnostics server-side.",
+        "operationId": "ask_stream_api_v1_ask_stream_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AskBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              },
+              "text/event-stream": {}
             }
           },
           "422": {
@@ -683,6 +739,67 @@
         }
       }
     },
+    "/api/v1/admin/config": {
+      "get": {
+        "tags": [
+          "admin: dashboard"
+        ],
+        "summary": "Get Config",
+        "operationId": "get_config_api_v1_admin_config_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminConfig"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "admin: dashboard"
+        ],
+        "summary": "Put Config",
+        "description": "Applied at once (the next /ask uses it) and stored in config_history.",
+        "operationId": "put_config_api_v1_admin_config_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuntimeConfig"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminConfig"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/health": {
       "get": {
         "summary": "Health",
@@ -704,6 +821,30 @@
   },
   "components": {
     "schemas": {
+      "AdminConfig": {
+        "properties": {
+          "values": {
+            "$ref": "#/components/schemas/RuntimeConfig"
+          },
+          "options": {
+            "$ref": "#/components/schemas/ConfigOptions"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/ConfigChange"
+            },
+            "type": "array",
+            "title": "History"
+          }
+        },
+        "type": "object",
+        "required": [
+          "values",
+          "options",
+          "history"
+        ],
+        "title": "AdminConfig"
+      },
       "AskBody": {
         "properties": {
           "session_id": {
@@ -732,6 +873,21 @@
             "type": "string",
             "title": "Language",
             "default": "en"
+          },
+          "routing_method": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "lr",
+                  "svm"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Routing Method"
           }
         },
         "type": "object",
@@ -740,7 +896,7 @@
           "question"
         ],
         "title": "AskBody",
-        "description": "Public request body. Deliberately has no student_id: the server takes it from the login session."
+        "description": "Identity comes from the login session. Routing method is per question, never global."
       },
       "AskResponse": {
         "properties": {
@@ -842,6 +998,35 @@
             "type": "object",
             "title": "Timings Ms",
             "default": {}
+          },
+          "routing_method": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Routing Method"
+          },
+          "routing_details": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RouteScore"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "routing_progress": {
+            "items": {
+              "$ref": "#/components/schemas/RoutingProgress"
+            },
+            "type": "array",
+            "title": "Routing Progress",
+            "default": []
           }
         },
         "type": "object",
@@ -1049,6 +1234,60 @@
         ],
         "title": "Choice"
       },
+      "ConfigChange": {
+        "properties": {
+          "changed_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Changed At"
+          },
+          "changed": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Changed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "changed_at",
+          "changed"
+        ],
+        "title": "ConfigChange"
+      },
+      "ConfigOptions": {
+        "properties": {
+          "checkers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Checkers"
+          },
+          "required_checkers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Required Checkers"
+          },
+          "knowledge_models": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Knowledge Models"
+          }
+        },
+        "type": "object",
+        "required": [
+          "checkers",
+          "required_checkers",
+          "knowledge_models"
+        ],
+        "title": "ConfigOptions"
+      },
       "CreateStudentBody": {
         "properties": {
           "username": {
@@ -1134,6 +1373,60 @@
           "request_id"
         ],
         "title": "ErrorBody"
+      },
+      "EvidenceAssessment": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "not_required",
+              "unavailable",
+              "empty",
+              "insufficient",
+              "uncertain",
+              "sufficient"
+            ],
+            "title": "Status"
+          },
+          "retrieved_count": {
+            "type": "integer",
+            "title": "Retrieved Count",
+            "default": 0
+          },
+          "accepted_indices": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Accepted Indices",
+            "default": []
+          },
+          "coverage": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Coverage",
+            "default": 0
+          },
+          "support_scores": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Support Scores",
+            "default": []
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "EvidenceAssessment"
       },
       "FeedbackBody": {
         "properties": {
@@ -1254,6 +1547,30 @@
           "reason"
         ],
         "title": "KcRecommendation"
+      },
+      "LevelsConfig": {
+        "properties": {
+          "basic_below": {
+            "type": "number",
+            "title": "Basic Below",
+            "default": 0.4
+          },
+          "advanced_above": {
+            "type": "number",
+            "title": "Advanced Above",
+            "default": 0.7
+          },
+          "hysteresis": {
+            "type": "number",
+            "maximum": 0.2,
+            "minimum": 0.0,
+            "title": "Hysteresis",
+            "default": 0.05
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "LevelsConfig"
       },
       "LoginBody": {
         "properties": {
@@ -1577,6 +1894,281 @@
           "personalized"
         ],
         "title": "Profile"
+      },
+      "RouteScore": {
+        "properties": {
+          "score": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Score"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reasons",
+            "default": []
+          },
+          "target": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "local",
+                  "cloud"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target"
+          },
+          "method": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Method"
+          },
+          "analysis": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SemanticAnalysis"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "evidence": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EvidenceAssessment"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "accepted_indices": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Accepted Indices",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "score"
+        ],
+        "title": "RouteScore"
+      },
+      "RoutingMethodOption": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "label"
+        ],
+        "title": "RoutingMethodOption"
+      },
+      "RoutingOptions": {
+        "properties": {
+          "show_progress": {
+            "type": "boolean",
+            "title": "Show Progress"
+          },
+          "default_method": {
+            "type": "string",
+            "title": "Default Method"
+          },
+          "methods": {
+            "items": {
+              "$ref": "#/components/schemas/RoutingMethodOption"
+            },
+            "type": "array",
+            "title": "Methods"
+          }
+        },
+        "type": "object",
+        "required": [
+          "show_progress",
+          "default_method",
+          "methods"
+        ],
+        "title": "RoutingOptions"
+      },
+      "RoutingProgress": {
+        "properties": {
+          "stage": {
+            "type": "string",
+            "title": "Stage"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "running",
+              "completed",
+              "skipped",
+              "failed"
+            ],
+            "title": "Status"
+          },
+          "elapsed_ms": {
+            "type": "number",
+            "title": "Elapsed Ms"
+          },
+          "duration_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Ms"
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "stage",
+          "status",
+          "elapsed_ms"
+        ],
+        "title": "RoutingProgress"
+      },
+      "RuntimeConfig": {
+        "properties": {
+          "routing_threshold": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Routing Threshold"
+          },
+          "show_routing_progress": {
+            "type": "boolean",
+            "title": "Show Routing Progress",
+            "default": true
+          },
+          "checkers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Checkers"
+          },
+          "knowledge": {
+            "type": "string",
+            "title": "Knowledge"
+          },
+          "weak_evidence": {
+            "type": "boolean",
+            "title": "Weak Evidence"
+          },
+          "levels": {
+            "$ref": "#/components/schemas/LevelsConfig"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "routing_threshold",
+          "checkers",
+          "knowledge",
+          "weak_evidence",
+          "levels"
+        ],
+        "title": "RuntimeConfig"
+      },
+      "SemanticAnalysis": {
+        "properties": {
+          "method": {
+            "type": "string",
+            "title": "Method"
+          },
+          "cloud_probability": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Cloud Probability",
+            "default": 1
+          },
+          "evidence_probability": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Evidence Probability",
+            "default": 1
+          },
+          "freshness_probability": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Freshness Probability",
+            "default": 0
+          },
+          "nearest_similarity": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": -1.0,
+            "title": "Nearest Similarity",
+            "default": 0
+          },
+          "requires_evidence": {
+            "type": "boolean",
+            "title": "Requires Evidence",
+            "default": true
+          },
+          "requires_fresh_evidence": {
+            "type": "boolean",
+            "title": "Requires Fresh Evidence",
+            "default": false
+          },
+          "reliable": {
+            "type": "boolean",
+            "title": "Reliable",
+            "default": false
+          },
+          "label_origin": {
+            "type": "string",
+            "title": "Label Origin",
+            "default": "unavailable"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason",
+            "default": "semantic models unavailable"
+          }
+        },
+        "type": "object",
+        "required": [
+          "method"
+        ],
+        "title": "SemanticAnalysis"
       },
       "SessionHistory": {
         "properties": {
