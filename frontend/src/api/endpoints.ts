@@ -1,9 +1,11 @@
 import { request, type Schemas, upload } from "./client";
+import { askStream } from "./askStream";
 
 export type Me = Schemas["Me"];
 export type TopicInfo = Schemas["TopicInfo"];
 export type AskBody = Schemas["AskBody"];
 export type AskResponse = Schemas["AskResponse"];
+export type RoutingOptions = Schemas["RoutingOptions"];
 export type CheckItem = Schemas["CheckItemPublic"];
 export type CheckResponse = Schemas["CheckResponse"];
 export type OnboardingInfo = Schemas["OnboardingInfo"];
@@ -35,6 +37,8 @@ export const api = {
 
   topics: () => request<TopicInfo[]>("GET", `${V1}/topics`),
   ask: (body: AskBody) => request<AskResponse>("POST", `${V1}/ask`, body),
+  askStream,
+  routingOptions: () => request<RoutingOptions>("GET", `${V1}/routing/options`),
   check: (item_id: string, choice: string, session_id = "") =>
     request<CheckResponse>("POST", `${V1}/check`, { item_id, choice, session_id }),
 

@@ -11,7 +11,7 @@ export type Schemas = components["schemas"];
 
 // Paths in the schema already start with /api/v1. VITE_API_URL is only needed when the API is served
 // from another origin; in development Vite proxies /api to the backend.
-const BASE = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, "") ?? "";
+export const BASE = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, "") ?? "";
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {

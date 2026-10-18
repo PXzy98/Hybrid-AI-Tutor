@@ -1,0 +1,43 @@
+{
+  "label_origin": "prototype_policy",
+  "rows": 500,
+  "heldout_rows": 97,
+  "warning": "Policy-label holdout is NOT a benchmark of local LLM answer quality.",
+  "split": "GroupShuffleSplit by paraphrase group; calibration uses separate group folds",
+  "methods": {
+    "lr": {
+      "cloud_required": {
+        "accuracy": 0.9587628865979382,
+        "positive_recall": 0.9230769230769231,
+        "brier": 0.031401397552589076
+      },
+      "requires_evidence": {
+        "accuracy": 0.9072164948453608,
+        "positive_recall": 0.9038461538461539,
+        "brier": 0.06881514305638253
+      },
+      "requires_fresh_evidence": {
+        "accuracy": 0.9072164948453608,
+        "positive_recall": 0.5,
+        "brier": 0.05428933950770882
+      }
+    },
+    "svm": {
+      "cloud_required": {
+        "accuracy": 0.9587628865979382,
+        "positive_recall": 0.9230769230769231,
+        "brier": 0.02577797316998704
+      },
+      "requires_evidence": {
+        "accuracy": 0.8969072164948454,
+        "positive_recall": 0.8846153846153846,
+        "brier": 0.062303466129168886
+      },
+      "requires_fresh_evidence": {
+        "accuracy": 0.9072164948453608,
+        "positive_recall": 0.5,
+        "brier": 0.0585888356347475
+      }
+    }
+  }
+}

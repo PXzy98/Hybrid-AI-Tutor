@@ -34,6 +34,7 @@ class Services:
         """Runtime config change (admin dashboard): new settings, and a learner model built from them.
         The pipeline is rebuilt by the caller (app.admin.runtime_config.apply)."""
         self.settings = settings
+        self.router.cfg = settings.routing
         self.learner = build_learner_model(settings, self.engine, self.content)
 
 

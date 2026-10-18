@@ -3,6 +3,7 @@
 Failure policy per step: stop -> PipelineError, skip -> continue, warn -> continue + ctx.warnings.
 Log lines carry the step name, the exception type and the request id only, never request text.
 """
+
 import logging
 from collections.abc import Sequence
 from time import perf_counter
@@ -41,17 +42,37 @@ class PipelineRunner:
     async def run(self, ctx: RequestContext) -> RequestContext:
         for step in self.pipeline:
             t0 = perf_counter()
+            progress_stage = {
+                "understand": "preparation",
+                "generate": "generation",
+                "verify": "verification",
+            }.get(step.name)
+            if progress_stage:
+                await ctx.report(progress_stage, "running")
+            failed = False
             try:
                 ctx = await step.run(ctx) or ctx
             except Exception as e:
-                log.warning("step %s failed (%s), policy=%s, request=%s",
-                            step.name, type(e).__name__, step.on_error, ctx.request_id)
+                failed = True
+                log.warning(
+                    "step %s failed (%s), policy=%s, request=%s",
+                    step.name,
+                    type(e).__name__,
+                    step.on_error,
+                    ctx.request_id,
+                )
                 if step.on_error == "stop":
                     raise PipelineError(step.name, type(e).__name__) from e
                 if step.on_error == "warn":
                     ctx.warnings.append(f"{step.name}: could not be completed")
             finally:
                 ctx.timings_ms[step.name] = round((perf_counter() - t0) * 1000, 2)
+                if progress_stage:
+                    await ctx.report(
+                        progress_stage,
+                        "failed" if failed else "completed",
+                        duration_ms=ctx.timings_ms[step.name],
+                    )
         return ctx
 
     async def run_post(self, ctx: RequestContext) -> None:
@@ -60,8 +81,12 @@ class PipelineRunner:
             try:
                 await step.run(ctx)
             except Exception as e:  # noqa: BLE001
-                log.warning("post-response step %s failed (%s), request=%s",
-                            step.name, type(e).__name__, ctx.request_id)
+                log.warning(
+                    "post-response step %s failed (%s), request=%s",
+                    step.name,
+                    type(e).__name__,
+                    ctx.request_id,
+                )
 
 
 def build_runner(services: "Services") -> PipelineRunner:

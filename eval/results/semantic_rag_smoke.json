@@ -1,0 +1,347 @@
+{
+  "note": "Actual local encoder, 500-question weights, medical_hybrid and cross-encoders. No answer generation or clinical correctness evaluation.",
+  "rows": [
+    {
+      "topic": "high_blood_pressure",
+      "question": "Using the course material, explain what systolic and diastolic blood pressure mean.",
+      "method": "lr",
+      "target": "local",
+      "cloud_probability": 0.0014742857085820824,
+      "requires_evidence": true,
+      "requires_fresh_evidence": false,
+      "retrieved": 4,
+      "evidence": {
+        "status": "sufficient",
+        "retrieved_count": 4,
+        "accepted_indices": [
+          0
+        ],
+        "coverage": 1.0,
+        "support_scores": [
+          0.9417
+        ],
+        "reason": "1/1 question units have QA support."
+      },
+      "elapsed_ms": 3594
+    },
+    {
+      "topic": "high_blood_pressure",
+      "question": "Using the course material, explain what systolic and diastolic blood pressure mean.",
+      "method": "svm",
+      "target": "local",
+      "cloud_probability": 0.0015182660709876815,
+      "requires_evidence": true,
+      "requires_fresh_evidence": false,
+      "retrieved": 4,
+      "evidence": {
+        "status": "sufficient",
+        "retrieved_count": 4,
+        "accepted_indices": [
+          0
+        ],
+        "coverage": 1.0,
+        "support_scores": [
+          0.9417
+        ],
+        "reason": "1/1 question units have QA support."
+      },
+      "elapsed_ms": 449
+    },
+    {
+      "topic": "type2_diabetes",
+      "question": "According to the course material, what is insulin resistance?",
+      "method": "lr",
+      "target": "local",
+      "cloud_probability": 0.00017415224101186702,
+      "requires_evidence": false,
+      "requires_fresh_evidence": false,
+      "retrieved": 4,
+      "evidence": {
+        "status": "not_required",
+        "retrieved_count": 4,
+        "accepted_indices": [],
+        "coverage": 0.0,
+        "support_scores": [
+          0.0
+        ],
+        "reason": "0/1 question units have QA support."
+      },
+      "elapsed_ms": 208
+    },
+    {
+      "topic": "type2_diabetes",
+      "question": "According to the course material, what is insulin resistance?",
+      "method": "svm",
+      "target": "local",
+      "cloud_probability": 8.815745084625709e-05,
+      "requires_evidence": false,
+      "requires_fresh_evidence": false,
+      "retrieved": 4,
+      "evidence": {
+        "status": "not_required",
+        "retrieved_count": 4,
+        "accepted_indices": [],
+        "coverage": 0.0,
+        "support_scores": [
+          0.0
+        ],
+        "reason": "0/1 question units have QA support."
+      },
+      "elapsed_ms": 207
+    },
+    {
+      "topic": "asthma",
+      "question": "Using the course material, explain what happens to the airways during asthma.",
+      "method": "lr",
+      "target": "cloud",
+      "cloud_probability": 0.0003574048831184496,
+      "requires_evidence": true,
+      "requires_fresh_evidence": false,
+      "retrieved": 4,
+      "evidence": {
+        "status": "insufficient",
+        "retrieved_count": 4,
+        "accepted_indices": [],
+        "coverage": 0.0,
+        "support_scores": [
+          0.0
+        ],
+        "reason": "0/1 question units have QA support."
+      },
+      "elapsed_ms": 182
+    },
+    {
+      "topic": "asthma",
+      "question": "Using the course material, explain what happens to the airways during asthma.",
+      "method": "svm",
+      "target": "cloud",
+      "cloud_probability": 0.00024212641084272446,
+      "requires_evidence": true,
+      "requires_fresh_evidence": false,
+      "retrieved": 4,
+      "evidence": {
+        "status": "insufficient",
+        "retrieved_count": 4,
+        "accepted_indices": [],
+        "coverage": 0.0,
+        "support_scores": [
+          0.0
+        ],
+        "reason": "0/1 question units have QA support."
+      },
+      "elapsed_ms": 171
+    },
+    {
+      "topic": "migraine",
+      "question": "According to the course material, what symptoms can occur during a migraine?",
+      "method": "lr",
+      "target": "local",
+      "cloud_probability": 0.010696291566318681,
+      "requires_evidence": true,
+      "requires_fresh_evidence": false,
+      "retrieved": 4,
+      "evidence": {
+        "status": "sufficient",
+        "retrieved_count": 4,
+        "accepted_indices": [
+          2
+        ],
+        "coverage": 1.0,
+        "support_scores": [
+          0.9934
+        ],
+        "reason": "1/1 question units have QA support."
+      },
+      "elapsed_ms": 1291
+    },
+    {
+      "topic": "migraine",
+      "question": "According to the course material, what symptoms can occur during a migraine?",
+      "method": "svm",
+      "target": "local",
+      "cloud_probability": 0.007556284534674967,
+      "requires_evidence": true,
+      "requires_fresh_evidence": false,
+      "retrieved": 4,
+      "evidence": {
+        "status": "sufficient",
+        "retrieved_count": 4,
+        "accepted_indices": [
+          2
+        ],
+        "coverage": 1.0,
+        "support_scores": [
+          0.9934
+        ],
+        "reason": "1/1 question units have QA support."
+      },
+      "elapsed_ms": 1146
+    },
+    {
+      "topic": "pneumonia",
+      "question": "Using the course material, explain what pneumonia is and which symptoms it can cause.",
+      "method": "lr",
+      "target": "cloud",
+      "cloud_probability": 0.0391386443348958,
+      "requires_evidence": true,
+      "requires_fresh_evidence": false,
+      "retrieved": 4,
+      "evidence": {
+        "status": "insufficient",
+        "retrieved_count": 4,
+        "accepted_indices": [],
+        "coverage": 0.0,
+        "support_scores": [
+          0.0,
+          0.0
+        ],
+        "reason": "0/2 question units have QA support."
+      },
+      "elapsed_ms": 314
+    },
+    {
+      "topic": "pneumonia",
+      "question": "Using the course material, explain what pneumonia is and which symptoms it can cause.",
+      "method": "svm",
+      "target": "cloud",
+      "cloud_probability": 0.027875977583631237,
+      "requires_evidence": true,
+      "requires_fresh_evidence": false,
+      "retrieved": 4,
+      "evidence": {
+        "status": "insufficient",
+        "retrieved_count": 4,
+        "accepted_indices": [],
+        "coverage": 0.0,
+        "support_scores": [
+          0.0,
+          0.0
+        ],
+        "reason": "0/2 question units have QA support."
+      },
+      "elapsed_ms": 318
+    },
+    {
+      "topic": "asthma",
+      "question": "What is asthma?",
+      "method": "lr",
+      "target": "local",
+      "cloud_probability": 0.0005531605901209366,
+      "requires_evidence": false,
+      "requires_fresh_evidence": false,
+      "retrieved": 4,
+      "evidence": {
+        "status": "sufficient",
+        "retrieved_count": 4,
+        "accepted_indices": [
+          0
+        ],
+        "coverage": 1.0,
+        "support_scores": [
+          0.9926
+        ],
+        "reason": "1/1 question units have QA support."
+      },
+      "elapsed_ms": 597
+    },
+    {
+      "topic": "asthma",
+      "question": "What is asthma?",
+      "method": "svm",
+      "target": "local",
+      "cloud_probability": 0.0005117060647830174,
+      "requires_evidence": false,
+      "requires_fresh_evidence": false,
+      "retrieved": 4,
+      "evidence": {
+        "status": "sufficient",
+        "retrieved_count": 4,
+        "accepted_indices": [
+          0
+        ],
+        "coverage": 1.0,
+        "support_scores": [
+          0.9926
+        ],
+        "reason": "1/1 question units have QA support."
+      },
+      "elapsed_ms": 602
+    },
+    {
+      "topic": "type2_diabetes",
+      "question": "A person with type 2 diabetes has advanced kidney impairment, repeated low glucose episodes and several medications. Weigh the interacting risks and justify a management approach.",
+      "method": "lr",
+      "target": "cloud",
+      "cloud_probability": 0.9940916896254155,
+      "requires_evidence": true,
+      "requires_fresh_evidence": false,
+      "retrieved": 0,
+      "evidence": {
+        "status": "unavailable",
+        "retrieved_count": 0,
+        "accepted_indices": [],
+        "coverage": 0,
+        "support_scores": [],
+        "reason": "Skipped: capability gate did not pass."
+      },
+      "elapsed_ms": 15
+    },
+    {
+      "topic": "type2_diabetes",
+      "question": "A person with type 2 diabetes has advanced kidney impairment, repeated low glucose episodes and several medications. Weigh the interacting risks and justify a management approach.",
+      "method": "svm",
+      "target": "cloud",
+      "cloud_probability": 0.9946548096591301,
+      "requires_evidence": true,
+      "requires_fresh_evidence": false,
+      "retrieved": 0,
+      "evidence": {
+        "status": "unavailable",
+        "retrieved_count": 0,
+        "accepted_indices": [],
+        "coverage": 0,
+        "support_scores": [],
+        "reason": "Skipped: capability gate did not pass."
+      },
+      "elapsed_ms": 15
+    },
+    {
+      "topic": "pneumonia",
+      "question": "What is the latest official Canadian recommendation for pneumococcal vaccination? Include the update date and an authoritative source.",
+      "method": "lr",
+      "target": "cloud",
+      "cloud_probability": 0.04795475626418044,
+      "requires_evidence": true,
+      "requires_fresh_evidence": true,
+      "retrieved": 4,
+      "evidence": {
+        "status": "insufficient",
+        "retrieved_count": 4,
+        "accepted_indices": [],
+        "coverage": 0,
+        "support_scores": [],
+        "reason": "No source passed provenance/time checks."
+      },
+      "elapsed_ms": 20
+    },
+    {
+      "topic": "pneumonia",
+      "question": "What is the latest official Canadian recommendation for pneumococcal vaccination? Include the update date and an authoritative source.",
+      "method": "svm",
+      "target": "cloud",
+      "cloud_probability": 0.06533942537980017,
+      "requires_evidence": true,
+      "requires_fresh_evidence": true,
+      "retrieved": 4,
+      "evidence": {
+        "status": "insufficient",
+        "retrieved_count": 4,
+        "accepted_indices": [],
+        "coverage": 0,
+        "support_scores": [],
+        "reason": "No source passed provenance/time checks."
+      },
+      "elapsed_ms": 22
+    }
+  ]
+}

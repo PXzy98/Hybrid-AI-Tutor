@@ -29,7 +29,7 @@ function Upload({ topic }: { topic: string }) {
       <button type="submit" className="btn-secondary py-1" disabled={!file || up.isPending}>Upload</button>
       {up.isSuccess && (
         <span role="status" className="text-teal-800">
-          Uploaded{up.data.ingested ? " and indexed." : ". It will be indexed by the RAG pipeline."}
+          {up.data.ingested ? "Uploaded and indexed." : "File saved. It has not been added to searchable course material yet."}
         </span>
       )}
       {up.isError && <span role="alert" className="text-rose-700">{(up.error as Error).message}</span>}

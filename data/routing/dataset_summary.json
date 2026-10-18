@@ -1,0 +1,32 @@
+{
+  "rows": 500,
+  "topics": {
+    "high_blood_pressure": 100,
+    "type2_diabetes": 100,
+    "asthma": 100,
+    "migraine": 100,
+    "pneumonia": 100
+  },
+  "categories": {
+    "basic_concepts": 100,
+    "mechanism_explanation": 75,
+    "simple_application": 50,
+    "course_evidence": 100,
+    "complex_reasoning": 125,
+    "current_information": 50
+  },
+  "groups": 337,
+  "positive_labels": {
+    "cloud_required": 135,
+    "requires_evidence": 260,
+    "requires_fresh_evidence": 50
+  },
+  "label_origin": "prototype_policy",
+  "dataset_sha256": "83f09926a935c2b9a20b13f318ca9d2801c0ffd5952a96ab3e2ce324d6579a49",
+  "notes": [
+    "Original synthetic questions; not an external medical benchmark.",
+    "No actual Qwen answers were generated or graded.",
+    "Repeated paraphrases and shared cross-topic templates have common split groups.",
+    "No textbook/RAG source collection or QA support fine-tuning is included."
+  ]
+}

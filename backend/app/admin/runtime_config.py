@@ -8,6 +8,7 @@ is applied again at startup, so a change survives a restart.
 The medical-safety and privacy checkers cannot be switched off from the dashboard (design §2: safety and
 privacy rules never depend on configuration).
 """
+
 from fastapi import FastAPI
 from pydantic import BaseModel, ConfigDict, Field
 from sqlmodel import Session, col, select
@@ -23,6 +24,7 @@ class RuntimeConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     routing_threshold: float = Field(ge=0, le=1)
+    show_routing_progress: bool = True
     checkers: list[str]
     knowledge: str
     weak_evidence: bool
@@ -44,9 +46,14 @@ def available_knowledge_models() -> list[str]:
 
 
 def current(settings: Settings) -> RuntimeConfig:
-    return RuntimeConfig(routing_threshold=settings.routing.threshold,
-                         checkers=list(settings.verify.checkers), knowledge=settings.learner.knowledge,
-                         weak_evidence=settings.learner.weak_evidence, levels=settings.learner.levels)
+    return RuntimeConfig(
+        routing_threshold=settings.routing.threshold,
+        show_routing_progress=settings.routing.show_progress,
+        checkers=list(settings.verify.checkers),
+        knowledge=settings.learner.knowledge,
+        weak_evidence=settings.learner.weak_evidence,
+        levels=settings.learner.levels,
+    )
 
 
 def validate(rc: RuntimeConfig) -> None:
@@ -65,12 +72,22 @@ def validate(rc: RuntimeConfig) -> None:
 
 def with_runtime(settings: Settings, rc: RuntimeConfig) -> Settings:
     """A copy of the settings with the runtime subset replaced (sections re-validated)."""
-    routing = settings.routing.model_validate({**settings.routing.model_dump(),
-                                               "threshold": rc.routing_threshold})
+    routing = settings.routing.model_validate(
+        {
+            **settings.routing.model_dump(),
+            "threshold": rc.routing_threshold,
+            "show_progress": rc.show_routing_progress,
+        }
+    )
     verify = settings.verify.model_validate({**settings.verify.model_dump(), "checkers": rc.checkers})
-    learner = settings.learner.model_validate({**settings.learner.model_dump(), "knowledge": rc.knowledge,
-                                               "weak_evidence": rc.weak_evidence,
-                                               "levels": rc.levels.model_dump()})
+    learner = settings.learner.model_validate(
+        {
+            **settings.learner.model_dump(),
+            "knowledge": rc.knowledge,
+            "weak_evidence": rc.weak_evidence,
+            "levels": rc.levels.model_dump(),
+        }
+    )
     return settings.model_copy(update={"routing": routing, "verify": verify, "learner": learner})
 
 

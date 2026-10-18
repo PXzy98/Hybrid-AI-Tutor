@@ -40,8 +40,8 @@ export default function SettingsPage() {
     },
   });
 
-  if (cfg.isLoading || !v) return <p className="text-sm text-slate-600">Loading…</p>;
-  if (cfg.isError || !cfg.data) return <p role="alert" className="text-sm text-rose-700">Could not load the settings.</p>;
+  if (cfg.isError) return <p role="alert" className="text-sm text-rose-700">Could not load the settings.</p>;
+  if (cfg.isLoading || !v || !cfg.data) return <p className="text-sm text-slate-600">Loading…</p>;
   const { options, history } = cfg.data;
   const set = (patch: Partial<RuntimeConfig>) => {
     setSaved(false);
@@ -63,7 +63,13 @@ export default function SettingsPage() {
           <legend className="font-semibold">Routing</legend>
           <NumberField id="threshold" label="Cloud threshold" value={v.routing_threshold}
                        onChange={(x) => set({ routing_threshold: x })}
-                       hint="A question goes to the cloud model when its route score is at or above this value. Questions with sensitive personal data always stay local." />
+                       hint="Controls the semantic capability boundary. Uncertain questions and missing required evidence also select Cloud." />
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={v.show_routing_progress ?? true}
+                   onChange={(e) => set({ show_routing_progress: e.target.checked })} />
+            Show routing progress and timings in the student chat
+          </label>
+          <p className="text-xs text-slate-600">Applies to new questions. Turning this off also suppresses progress details in the API.</p>
         </fieldset>
 
         <fieldset className="space-y-2">
