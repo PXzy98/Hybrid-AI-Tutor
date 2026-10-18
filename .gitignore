@@ -35,6 +35,7 @@ eval/privacy-audit/results/cloud_requests.jsonl
 
 # Integration backups and SQLite sidecars
 .routing_patch_backups/
+.materials_patch_backups/
 routing_patch_backup_*/
 data/*.db-wal
 data/*.db-shm

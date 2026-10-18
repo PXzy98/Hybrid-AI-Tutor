@@ -51,7 +51,7 @@ Chunk(
 
 Plain old-style chunks without metadata work for ordinary instructor-provided course material. This trusts the course Retriever's provenance contract; it does not infer source authority from text. Freshness-dependent questions additionally require a recent `verified_at` and `verified_current=True`. A publication date alone does not prove a source is current.
 
-`rag.impl: medical_hybrid` is enabled. Siyun's existing BM25 + word/character TF-IDF retriever and bundled five-topic source snapshots are retained unchanged. Its optional PubMed helper is not automatically invoked by student requests. Instructor uploads are stored and listed, but the existing snapshot retriever has no `ingest` hook, so new uploads are not yet searchable. The UI reports this explicitly.
+`rag.impl: medical_hybrid` is enabled. Siyun's BM25 + word/character TF-IDF retrieval and bundled five-topic snapshots are retained. The materials-sync patch indexes instructor uploads alongside the snapshots and displays their status in the Content page. Its optional PubMed helper is not automatically invoked by student requests. See `docs/MATERIALS_SYNC.md` for formats and limits.
 
 RAG states distinguish `disabled`, `error`, `empty`, `returned` and `skipped`. Zero passages have zero support coverage. A question that needs evidence is never admitted to Local with zero evidence. A question that does not need external evidence can still use Local without RAG.
 

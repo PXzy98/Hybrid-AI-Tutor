@@ -41,10 +41,12 @@ boundary is marked TEAM INTEGRATION in routing/generation code.
 
 ## Upload boundary
 
-The instructor material-management functionality from main is present. Its upload API stores and lists
-files and calls an optional `ingest` hook when the active retriever supplies one. Siyun's current
-medical_hybrid class indexes bundled source snapshots and does not supply that hook. New uploads
-therefore remain stored but unindexed. No indexing implementation has been invented in this merge.
+The materials-sync patch adds `ingest` and `material_status` hooks to `medical_hybrid`. The instructor
+Content page lists bundled snapshots and uploads separately, with indexing status and passage counts.
+Uploaded text, Markdown, HTML, DOCX and text PDFs are indexed immediately and reloaded from disk on
+startup. Replacing a file removes its previous passages; unreadable documents remain saved with an
+explicit error and are excluded from retrieval. Scanned PDFs need OCR before uploading.
+See `docs/MATERIALS_SYNC.md` for limits and verification.
 
 The bundled snapshots/KC labels remain a research baseline; PubMed discovery is opt-in and is not
 automatically attached to student requests. A snapshot download date is not treated as verified current

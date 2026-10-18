@@ -994,6 +994,27 @@ export interface components {
              */
             topics: components["schemas"]["TopicProfile"][];
         };
+        /** RagMaterial */
+        RagMaterial: {
+            /** Name */
+            name: string;
+            /**
+             * Origin
+             * @enum {string}
+             */
+            origin: "builtin" | "uploaded";
+            /** Source */
+            source: string;
+            /** Indexed */
+            indexed: boolean;
+            /**
+             * Passage Count
+             * @default 0
+             */
+            passage_count: number;
+            /** Message */
+            message?: string | null;
+        };
         /** RouteScore */
         RouteScore: {
             /** Score */
@@ -1179,6 +1200,11 @@ export interface components {
             misconceptions_reviewed: number;
             /** Materials */
             materials: components["schemas"]["MaterialFile"][];
+            /**
+             * Rag Materials
+             * @default []
+             */
+            rag_materials: components["schemas"]["RagMaterial"][];
         };
         /** TopicInfo */
         TopicInfo: {

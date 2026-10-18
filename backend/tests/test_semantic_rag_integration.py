@@ -138,7 +138,7 @@ def test_complete_dashboard_and_upload_coexist_with_semantic_rag(make_client, mo
             "file": ("notes.txt", b"Teacher course notes.", "text/plain"),
         })
         assert upload.status_code == 201, upload.text
-        assert upload.json()["ingested"] is False  # Existing RAG snapshots have no ingest hook.
+        assert upload.json()["ingested"] is True
         assert (tmp_path / "uploads/high_blood_pressure/notes.txt").is_file()
         api.login("alice")
         assert client.get("/api/v1/admin/content").status_code == 403

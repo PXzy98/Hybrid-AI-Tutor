@@ -2477,6 +2477,54 @@
         ],
         "title": "Profile"
       },
+      "RagMaterial": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "origin": {
+            "type": "string",
+            "enum": [
+              "builtin",
+              "uploaded"
+            ],
+            "title": "Origin"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "indexed": {
+            "type": "boolean",
+            "title": "Indexed"
+          },
+          "passage_count": {
+            "type": "integer",
+            "title": "Passage Count",
+            "default": 0
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "origin",
+          "source",
+          "indexed"
+        ],
+        "title": "RagMaterial"
+      },
       "RouteScore": {
         "properties": {
           "score": {
@@ -2900,6 +2948,14 @@
             },
             "type": "array",
             "title": "Materials"
+          },
+          "rag_materials": {
+            "items": {
+              "$ref": "#/components/schemas/RagMaterial"
+            },
+            "type": "array",
+            "title": "Rag Materials",
+            "default": []
           }
         },
         "type": "object",
