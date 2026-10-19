@@ -27,29 +27,41 @@ TERMS = [
     # symptoms
     r"chest pains?", r"shortness of breath", r"trouble breathing", r"wheez(?:e|ing)", r"dizz(?:y|iness)",
     r"fevers?", r"headaches?", r"nausea", r"(?:high|low) blood sugar",
+    # found by the E6 held-out set
+    r"(?:high|low) bp", r"cough(?:s|ing)?(?: fits)?", r"chest tightness", r"flare[- ]?ups?", r"fatigue",
     # medicines
     r"metformin", r"insulin", r"lisinopril", r"amlodipine", r"salbutamol", r"albuterol", r"ventolin",
     r"(?:\w+\s)?inhalers?", r"sumatriptan", r"triptans?", r"ibuprofen", r"acetaminophen", r"tylenol",
     r"advil",
     r"statins?", r"antibiotics?", r"antidepressants?", r"steroids?",
+    r"fluticasone", r"budesonide", r"prednisone", r"montelukast", r"ceftriaxone", r"amoxicillin",
+    r"azithromycin", r"losartan", r"hydrochlorothiazide", r"glipizide", r"semaglutide", r"ozempic",
+    r"(?:bp|blood pressure|breathing|heart|sugar) (?:issues|problems)", r"exacerbations?", r"chronic pain",
+    r"short(?:ness)? (?:of )?breath(?: episodes)?",
     r"(?:blood pressure|bp)\s+(?:pills|meds|medication|medicine)",
 ]
 TERM_RE = re.compile(r"\b(?:" + "|".join(TERMS) + r")\b", re.I)
 
 # subject + attribution verb: "I have", "I'm", "I've been having", "my dad takes", "my father was diagnosed"
 ATTRIBUTION_RE = re.compile(
-    r"\b(?:I|my\s+" + FAMILY + r")\b[^.?!\n]{0,25}?"
-    r"(?:'m|'ve been|'d|\b(?:am|is|are|was|were|been|have|has|had|got|get|gets|having|take|takes|taking|took|"
-    r"use|uses|using|diagnosed|suffer|suffers|suffering|live|lives|living|went|go|goes|feel|feels|feeling)\b)",
+    r"\b(?:I|she|he|my\s+" + FAMILY + r")\b[^.?!\n]{0,25}?"  # she/he: the person the student just named
+    r"(?:'m|'ve been|'d|'s|’s|\b(?:am|is|are|was|were|been|have|has|had|got|get|gets|having|take|takes|"
+    r"taking|took|use|uses|using|diagnosed|suffer|suffers|suffering|live|lives|living|went|go|goes|feel|feels|feeling|"
+    r"experience[ds]?|experiencing|struggl(?:e|es|ed|ing)|deal|deals|dealing|keep|keeps)\b)",
     re.I,
 )
 # words that turn "I have ... asthma" into a study question rather than a health detail
 BLOCKERS_RE = re.compile(
     r"\b(?:about|question|questions|regarding|learn|learning|understand|explain|study|studying|studied|read|"
     r"reading|notes|lecture|lectures|course|class|exam|quiz|assignment|homework|lab|project|presentation|"
-    r"essay|report|topic|chapter|slides|practice|research|definition|mean|means)\b",
+    r"essay|report|topic|chapter|slides|practice|research|definition|mean|means|section|module|unit|"
+    r"material|materials)\b",
     re.I,
 )
+# a term that names coursework: "I'm struggling with the asthma section", "my diabetes assignment"
+COURSE_AFTER_RE = re.compile(
+    r"\s+(?:assignment|project|quiz|exam|test\b|module|unit|section|chapter|lecture|notes|essay|report|grade|"
+    r"score|mark|class|course|presentation|homework|lab\b|case stud)", re.I)
 WINDOW = 70  # characters after the verb in which a term still counts
 
 OWNED_RE = re.compile(
@@ -60,6 +72,9 @@ OWNED_RE = re.compile(
 )
 FIRST_PERSON_RE = re.compile(r"\b(?:I|I'm|I've|me|my|mine)\b", re.I)
 READING_RE = re.compile(r"\b\d{2,3}\s*(?:/|over)\s*\d{2,3}\b", re.I)
+# "My mark on quiz 2 was 13/20" is a grade, not a reading (found by E6); the grade recognizer handles it
+COURSEWORK_RE = re.compile(r"\b(?:mark|marks|grade|graded|score|scored|quiz|exam|midterm|final|assignment|"
+                           r"essay|homework|project|GPA)\b", re.I)
 SENTENCE_RE = re.compile(r"[^.?!\n]+")
 
 
@@ -80,11 +95,12 @@ class HealthDetailRecognizer(EntityRecognizer):
             for m in ATTRIBUTION_RE.finditer(s):
                 window_end = min(len(s), m.end() + WINDOW)
                 for t in TERM_RE.finditer(s, m.end(), window_end):
-                    if not BLOCKERS_RE.search(s, m.end(), t.start()):
-                        spans.add((base + t.start(), base + t.end()))
+                    if BLOCKERS_RE.search(s, m.end(), t.start()) or COURSE_AFTER_RE.match(s, t.end()):
+                        continue
+                    spans.add((base + t.start(), base + t.end()))
             for m in OWNED_RE.finditer(s):
                 spans.add((base + m.start(), base + m.end()))
-            if FIRST_PERSON_RE.search(s):
+            if FIRST_PERSON_RE.search(s) and not COURSEWORK_RE.search(s):
                 for m in READING_RE.finditer(s):
                     spans.add((base + m.start(), base + m.end()))
         return [RecognizerResult("HEALTH_DETAIL", a, b, self.SCORE) for a, b in sorted(spans)]

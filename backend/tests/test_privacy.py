@@ -93,15 +93,55 @@ def test_health_cases_personal_vs_general(analyzer):
     ("Compute Cohen's kappa and the Brier score.", []),  # eponyms are not people
     ("Can you explain what DICOM metadata contains?", []),
     ("Group: Tom Becker 300477120", [("PERSON", "Tom Becker"), ("STUDENT_ID", "300477120")]),
+    # gaps found by E6 (eval/privacy-filter)
+    ("My mark on quiz 2 was 13/20.", [("GRADE", "My mark on quiz 2 was 13/20")]),  # a grade, not a reading
+    ("I failed my first exam.", [("GRADE", "I failed my first exam")]),
+    ("What is the Fick principle?", []),
+    ("My postal code is K1N 6N5.", [("POSTAL_CODE", "K1N 6N5")]),
+    ("My health card is 1234 567 890 AB.", [("HEALTH_CARD", "1234 567 890 AB")]),
+    ("Room 1234 567 890 is booked.", []),  # 10 digits without a health card word
+    ("My SIN is 046 454 286.", [("ID_NUMBER", "046 454 286")]),
+    ("I was born on March 3, 2001.", [("DATE_OF_BIRTH", "born on March 3, 2001")]),
+    ("I live at 75 Laurier Avenue East.", [("ADDRESS", "75 Laurier Avenue")]),
+    # gaps found by the E6 held-out set (eval/privacy-filter/holdout_review.md)
+    ("I need advice on managing my diabetes diet.", [("HEALTH_DETAIL", "diabetes")]),
+    ("My uncle's pneumonia made me worry.", [("HEALTH_DETAIL", "pneumonia")]),
+    ("She's on fluticasone now.", [("HEALTH_DETAIL", "fluticasone")]),
+    ("I need help with my blood pressure project.", []),
+    ("I am struggling with the asthma section.", []),
+    ("My grade is D+, sadly.", [("GRADE", "My grade is D+")]),
+    ("My GPA is hovering around 3.2.", [("GRADE", "My GPA is hovering around 3.2")]),
 ])
 def test_recognizers(analyzer, text, expected):
     assert find(analyzer, text) == expected
+
+
+@pytest.mark.parametrize(("text", "types", "cloud_safe"), [
+    ("J'ai de l'asthme. Est-ce que je peux courir?", {"HEALTH_DETAIL"}, False),
+    ("Je m'appelle Chloé Martin.", {"PERSON"}, True),
+    ("J'ai eu 58/100 à l'examen.", {"GRADE"}, True),
+    ("Qu'est-ce que l'hypertension?", set(), True),
+])
+def test_french(analyzer, text, types, cloud_safe):
+    found = analyzer.analyze(text)
+    assert {f.type for f in found} == types
+    assert (not any(f.type in analyzer.cfg.local_only_types for f in found)) == cloud_safe
 
 
 def test_overlaps_prefer_longer_then_higher_score():
     kept = resolve_overlaps([Finding("PERSON", 0, 5, 0.9), Finding("HEALTH_DETAIL", 0, 12, 0.85),
                              Finding("GRADE", 20, 25, 0.7)])
     assert [(f.type, f.start) for f in kept] == [("HEALTH_DETAIL", 0), ("GRADE", 20)]
+
+
+def test_person_never_hides_a_local_only_finding():
+    """NER tagged "J'ai de l'asthme" as a PERSON longer than the health term (E6)."""
+    kept = resolve_overlaps([Finding("PERSON", 0, 16, 0.85), Finding("HEALTH_DETAIL", 9, 16, 0.8)],
+                            prefer=("HEALTH_DETAIL",))
+    assert [f.type for f in kept] == ["HEALTH_DETAIL"]
+    kept = resolve_overlaps([Finding("GRADE", 0, 16, 0.7), Finding("HEALTH_DETAIL", 9, 16, 0.8)],
+                            prefer=("HEALTH_DETAIL",))
+    assert [f.type for f in kept] == ["GRADE"]  # pattern types keep the length rule
 
 
 def test_anonymize_numbers_per_type_and_reuses_placeholders():

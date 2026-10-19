@@ -22,23 +22,36 @@ class PrivacyFilterUnavailable(RuntimeError):
 
 
 @cache
-def _engine(spacy_model: str) -> AnalyzerEngine:
+def _nlp(spacy_model: str):
     # Presidio would try to DOWNLOAD a missing model at startup; refuse instead, with a clear message
     if not spacy.util.is_package(spacy_model):
         raise PrivacyFilterUnavailable(
             f"spaCy model '{spacy_model}' is not installed: python -m spacy download {spacy_model}")
     try:
-        nlp = NlpEngineProvider(nlp_configuration={
+        return NlpEngineProvider(nlp_configuration={
             "nlp_engine_name": "spacy",
             "models": [{"lang_code": "en", "model_name": spacy_model}],
         }).create_engine()
     except (OSError, ValueError) as e:
         raise PrivacyFilterUnavailable(
             f"spaCy model '{spacy_model}' is not installed: python -m spacy download {spacy_model}") from e
+
+
+def custom_recognizer_names() -> list[str]:
+    import_submodules("app.privacy.recognizers")
+    return pii_recognizers.names()
+
+
+@cache
+def _engine(spacy_model: str, recognizers: tuple[str, ...]) -> AnalyzerEngine:
+    """One engine per (model, custom recognizer set); the spaCy model itself is loaded once."""
+    nlp = _nlp(spacy_model)
     registry = RecognizerRegistry(supported_languages=["en"])
     registry.load_predefined_recognizers(languages=["en"], nlp_engine=nlp)
-    import_submodules("app.privacy.recognizers")
-    for name in pii_recognizers.names():
+    known = custom_recognizer_names()
+    for name in recognizers:
+        if name not in known:
+            raise ValueError(f"unknown PII recognizer '{name}' (registered: {', '.join(known)})")
         registry.add_recognizer(pii_recognizers.get(name)())
     return AnalyzerEngine(registry=registry, nlp_engine=nlp, supported_languages=["en"])
 
@@ -54,7 +67,8 @@ class Finding:
 class PIIAnalyzer:
     def __init__(self, cfg: PrivacyConfig) -> None:
         self.cfg = cfg
-        self.engine = _engine(cfg.spacy_model)  # fails at startup if the model is missing
+        names = tuple(cfg.recognizers) if cfg.recognizers is not None else tuple(custom_recognizer_names())
+        self.engine = _engine(cfg.spacy_model, names)  # fails at startup if the model is missing
         self.allow = {a.strip().lower() for a in cfg.allow_list}
 
     def _allowed(self, value: str) -> bool:
@@ -81,16 +95,20 @@ class PIIAnalyzer:
                 f = clean_person(text, f)
             if f and not self._allowed(text[f.start:f.end]):
                 found.append(f)
-        return resolve_overlaps(found + known)
+        return resolve_overlaps(found + known, prefer=tuple(self.cfg.local_only_types))
 
 
 _EPONYM_NOUNS = {"score", "scores", "kappa", "test", "index", "coefficient", "theorem", "rule", "law",
                  "method", "distribution", "correlation", "criterion", "criteria", "curve", "plot", "disease",
                  "syndrome", "sign", "scale", "equation", "formula", "algorithm", "statistic", "ratio",
                  "classification",
-                 "unit", "units", "optimizer", "optimiser", "j", "estimator", "model", "network", "loss"}
+                 "unit", "units", "optimizer", "optimiser", "j", "estimator", "model", "network", "loss",
+                 "thyroiditis", "effect", "principle", "reflex", "maneuver", "manoeuvre", "phenomenon"}  # E6
 _NEXT_WORD = re.compile(r"(?:'s|’s|')?\s+([A-Za-z]+)")
-_NAME_WORD = re.compile(r"[A-Z][a-zA-Z'’-]+")
+_NAME_WORD = re.compile(r"[A-ZÀ-ÖØ-Ý][\w'’-]+")
+# French function words that English NER sometimes glues to a name or tags as one ("J'ai de l'asthme")
+_FR_LEAD = re.compile(r"(?i)(?:je m['’]appelle|j['’]ai(?:\s+(?:de|du|des|eu)(?:\s+l['’])?)?|je suis|c['’]est|"
+                      r"je|mon|ma|mes|qu['’]est-ce que|l['’])\s*")
 
 
 def clean_person(text: str, f: Finding) -> Finding | None:
@@ -99,8 +117,16 @@ def clean_person(text: str, f: Finding) -> Finding | None:
     - "Tom Becker 300477120": cut the span before the first digit (the number is found as STUDENT_ID).
     - "DICOM metadata": spans containing an all-caps acronym are not names.
     - "Cohen's kappa", "Brier score": eponyms of statistics, units and diseases are not people here.
+    - "Je m'appelle Chloé Martin", "J'ai de l'asthme": leading French function words are cut; nothing left
+      that looks like a name → not a person.
     """
     value = text[f.start:f.end]
+    lead = _FR_LEAD.match(value)  # "Je m'appelle Chloé Martin" (English NER on French text)
+    if lead:
+        f = Finding(f.type, f.start + lead.end(), f.end, f.score)
+        value = value[lead.end():]
+        if not value.strip():
+            return None
     digit = re.search(r"\d", value)
     if digit:
         value = value[:digit.start()].rstrip(" ,;(-")
@@ -120,8 +146,16 @@ def clean_person(text: str, f: Finding) -> Finding | None:
     return f
 
 
-def resolve_overlaps(findings: list[Finding]) -> list[Finding]:
-    """Keep non-overlapping findings, preferring longer spans, then higher scores."""
+def resolve_overlaps(findings: list[Finding], prefer: tuple[str, ...] = ()) -> list[Finding]:
+    """Keep non-overlapping findings, preferring longer spans, then higher scores.
+
+    A PERSON span that overlaps a `prefer` finding (the local-only types) is dropped first: NER sometimes tags
+    a whole clause such as "J'ai de l'asthme" as a person, which would otherwise hide the health detail from
+    the cloud_safe decision (found by E6). Pattern-based types keep the usual length rule.
+    """
+    pinned = [p for p in findings if p.type in prefer]
+    findings = [f for f in findings
+                if not (f.type == "PERSON" and any(f.start < p.end and p.start < f.end for p in pinned))]
     kept: list[Finding] = []
     for f in sorted(findings, key=lambda f: (-(f.end - f.start), -f.score, f.start)):
         if all(f.end <= k.start or f.start >= k.end for k in kept):

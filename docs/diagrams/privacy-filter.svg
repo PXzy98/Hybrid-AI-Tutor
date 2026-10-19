@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1200" font-family="Arial, sans-serif">
+<defs><marker id="arr" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#5b6472"/></marker></defs>
+<rect width="1500" height="1200" fill="white"/>
+<text x="30" y="36" font-size="22" font-weight="bold">Privacy filter · detailed flow (subfunctions and links)</text>
+<rect x="30" y="50" width="1080" height="1010" fill="none" stroke="#d64545" stroke-dasharray="8,6"/>
+<text x="1170" y="760" font-size="13" fill="#d64545">outside the boundary</text>
+<text x="40" y="1085" font-size="13" fill="#d64545">Red dashed line = privacy boundary (application server + local GPU server). Only the CloudRequest crosses it; the raw question and the placeholder mapping never leave it.</text>
+<polyline points="925,890 925,925 220,925 220,890" fill="none" stroke="#5b6472" stroke-width="1.6" stroke-dasharray="5,4" marker-end="url(#arr)"/>
+<rect x="480" y="917" width="190" height="16" fill="white"/><text x="575" y="929" font-size="11" text-anchor="middle" fill="#334155">blocked → local + notice</text>
+<line x1="210" y1="150" x2="210" y2="190" stroke="#5b6472" stroke-width="1.6" marker-end="url(#arr)"/>
+<line x1="360" y1="128" x2="440" y2="138" stroke="#5b6472" stroke-width="1.6" marker-end="url(#arr)"/>
+<rect x="374" y="123" width="53" height="16" fill="white"/><text x="400" y="135" font-size="11" text-anchor="middle" fill="#334155">raw text</text>
+<line x1="360" y1="218" x2="440" y2="209" stroke="#5b6472" stroke-width="1.6" marker-end="url(#arr)"/>
+<rect x="384" y="203" width="33" height="16" fill="white"/><text x="400" y="215" font-size="11" text-anchor="middle" fill="#334155">terms</text>
+<line x1="740" y1="290" x2="740" y2="330" stroke="#5b6472" stroke-width="1.6" marker-end="url(#arr)"/>
+<rect x="714" y="300" width="53" height="16" fill="white"/><text x="740" y="312" font-size="11" text-anchor="middle" fill="#334155">findings</text>
+<line x1="740" y1="460" x2="740" y2="500" stroke="#5b6472" stroke-width="1.6" marker-end="url(#arr)"/>
+<line x1="740" y1="600" x2="740" y2="640" stroke="#5b6472" stroke-width="1.6" marker-end="url(#arr)"/>
+<line x1="441" y1="290" x2="363" y2="320" stroke="#5b6472" stroke-width="1.6" marker-end="url(#arr)"/>
+<rect x="386" y="295" width="33" height="16" fill="white"/><text x="402" y="307" font-size="11" text-anchor="middle" fill="#334155">error</text>
+<line x1="440" y1="550" x2="380" y2="550" stroke="#5b6472" stroke-width="1.6" marker-end="url(#arr)"/>
+<rect x="364" y="540" width="92" height="16" fill="white"/><text x="410" y="552" font-size="11" text-anchor="middle" fill="#334155">sanitized text</text>
+<line x1="689" y1="730" x2="631" y2="780" stroke="#5b6472" stroke-width="1.6" marker-end="url(#arr)"/>
+<rect x="610" y="745" width="99" height="16" fill="white"/><text x="660" y="757" font-size="11" text-anchor="middle" fill="#334155">cloud_safe flag</text>
+<line x1="440" y1="829" x2="380" y2="831" stroke="#5b6472" stroke-width="1.6" marker-end="url(#arr)"/>
+<rect x="394" y="820" width="33" height="16" fill="white"/><text x="410" y="832" font-size="11" text-anchor="middle" fill="#334155">local</text>
+<line x1="720" y1="829" x2="770" y2="831" stroke="#5b6472" stroke-width="1.6" marker-end="url(#arr)"/>
+<rect x="728" y="820" width="33" height="16" fill="white"/><text x="745" y="832" font-size="11" text-anchor="middle" fill="#334155">cloud</text>
+<line x1="1080" y1="837" x2="1170" y2="838" stroke="#5b6472" stroke-width="1.6" marker-end="url(#arr)"/>
+<rect x="1112" y="828" width="26" height="16" fill="white"/><text x="1125" y="840" font-size="11" text-anchor="middle" fill="#334155">pass</text>
+<line x1="380" y1="884" x2="594" y2="950" stroke="#5b6472" stroke-width="1.6" marker-end="url(#arr)"/>
+<rect x="467" y="907" width="40" height="16" fill="white"/><text x="487" y="919" font-size="11" text-anchor="middle" fill="#334155">answer</text>
+<line x1="1170" y1="880" x2="908" y2="950" stroke="#5b6472" stroke-width="1.6" marker-end="url(#arr)"/>
+<rect x="1019" y="905" width="40" height="16" fill="white"/><text x="1039" y="917" font-size="11" text-anchor="middle" fill="#334155">answer</text>
+<line x1="1040" y1="995" x2="1170" y2="995" stroke="#5b6472" stroke-width="1.6" marker-end="url(#arr)"/>
+<rect x="60" y="70" width="300" height="80" rx="10" fill="#e3edf9" stroke="#2b6cc4" stroke-width="2"/>
+<text x="210.0" y="102" font-size="14" font-weight="bold" text-anchor="middle">Student question (raw text)</text>
+<text x="210.0" y="120" font-size="11.5" fill="#475569" text-anchor="middle">POST /api/v1/ask · student_id from the login</text>
+<text x="210.0" y="135" font-size="11.5" fill="#475569" text-anchor="middle">session</text>
+<rect x="60" y="190" width="300" height="90" rx="10" fill="#e6f4ee" stroke="#1f9e6e" stroke-width="2"/>
+<text x="210.0" y="220" font-size="14" font-weight="bold" text-anchor="middle">Load identity terms</text>
+<text x="210.0" y="238" font-size="11.5" fill="#475569" text-anchor="middle">display name, its parts (≥ 3 letters),</text>
+<text x="210.0" y="252" font-size="11.5" fill="#475569" text-anchor="middle">username · read from `account`, kept in</text>
+<text x="210.0" y="268" font-size="11.5" fill="#475569" text-anchor="middle">memory only</text>
+<rect x="440" y="60" width="600" height="230" rx="10" fill="#e6f4ee" stroke="#1f9e6e" stroke-width="2"/>
+<text x="740.0" y="107" font-size="14" font-weight="bold" text-anchor="middle">1 · Detect (all recognizers run on the same text)</text>
+<text x="740.0" y="125" font-size="11.5" fill="#475569" text-anchor="middle">spaCy NER (en_core_web_lg) → PERSON</text>
+<text x="740.0" y="140" font-size="11.5" fill="#475569" text-anchor="middle">Presidio patterns → EMAIL_ADDRESS, PHONE_NUMBER</text>
+<text x="740.0" y="155" font-size="11.5" fill="#475569" text-anchor="middle">custom: STUDENT_ID (9 digits; spaced only with context words) · GRADE (“I got 58/100”, “my</text>
+<text x="740.0" y="170" font-size="11.5" fill="#475569" text-anchor="middle">GPA…”)</text>
+<text x="740.0" y="185" font-size="11.5" fill="#475569" text-anchor="middle">custom: PHONE (North American, separators required) · Chinese self-introduction names</text>
+<text x="740.0" y="200" font-size="11.5" fill="#475569" text-anchor="middle">custom: HEALTH_DETAIL — condition / symptom / medicine / reading of the student or someone</text>
+<text x="740.0" y="215" font-size="11.5" fill="#475569" text-anchor="middle">they know</text>
+<text x="740.0" y="230" font-size="11.5" fill="#475569" text-anchor="middle">custom: POSTAL_CODE · HEALTH_CARD · ID_NUMBER (SIN, MRN) · DATE_OF_BIRTH · ADDRESS · French</text>
+<text x="740.0" y="245" font-size="11.5" fill="#475569" text-anchor="middle">phrasing</text>
+<text x="740.0" y="260" font-size="11.5" fill="#475569" text-anchor="middle">identity terms → PERSON / USERNAME (whole words, always)</text>
+<rect x="440" y="330" width="600" height="130" rx="10" fill="#e6f4ee" stroke="#1f9e6e" stroke-width="2"/>
+<text x="740.0" y="380" font-size="14" font-weight="bold" text-anchor="middle">2 · Clean up</text>
+<text x="740.0" y="398" font-size="11.5" fill="#475569" text-anchor="middle">drop scores &lt; 0.5 · person fixes: cut digits, drop acronyms, drop eponyms (Cohen&#x27;s kappa)</text>
+<text x="740.0" y="412" font-size="11.5" fill="#475569" text-anchor="middle">allow-list: course staff (Dr. Abbas) · overlaps: a PERSON span never hides a health detail;</text>
+<text x="740.0" y="428" font-size="11.5" fill="#475569" text-anchor="middle">otherwise keep the longer span, then the higher score</text>
+<rect x="440" y="500" width="600" height="100" rx="10" fill="#e6f4ee" stroke="#1f9e6e" stroke-width="2"/>
+<text x="740.0" y="542" font-size="14" font-weight="bold" text-anchor="middle">3 · Anonymize</text>
+<text x="740.0" y="560" font-size="11.5" fill="#475569" text-anchor="middle">replace each finding by a numbered placeholder &lt;PERSON_1&gt;, &lt;STUDENT_ID_1&gt;, …</text>
+<text x="740.0" y="575" font-size="11.5" fill="#475569" text-anchor="middle">placeholder → value mapping: private attribute of the request, memory only</text>
+<polygon points="740.0,640 920,685.0 740.0,730 560,685.0" fill="#fff6d8" stroke="#c9930a" stroke-width="2"/>
+<text x="740.0" y="677" font-size="14" font-weight="bold" text-anchor="middle">4 · Local-only type present?</text>
+<text x="740.0" y="695" font-size="11.5" fill="#475569" text-anchor="middle">HEALTH_DETAIL found →</text>
+<text x="740.0" y="710" font-size="11.5" fill="#475569" text-anchor="middle">cloud_safe = false</text>
+<rect x="60" y="320" width="320" height="110" rx="10" fill="#fbe5e5" stroke="#d64545" stroke-width="2"/>
+<text x="220.0" y="367" font-size="14" font-weight="bold" text-anchor="middle">Filter unavailable / error</text>
+<text x="220.0" y="385" font-size="11.5" fill="#475569" text-anchor="middle">missing spaCy model or exception → request</text>
+<text x="220.0" y="400" font-size="11.5" fill="#475569" text-anchor="middle">stops (HTTP 503) · never skipped</text>
+<rect x="60" y="490" width="320" height="120" rx="10" fill="#f1f1ef" stroke="#6b6b6b" stroke-width="2"/>
+<text x="220.0" y="542" font-size="14" font-weight="bold" text-anchor="middle">Stored and logged</text>
+<text x="220.0" y="560" font-size="11.5" fill="#475569" text-anchor="middle">sanitized text only: request_log, session</text>
+<text x="220.0" y="575" font-size="11.5" fill="#475569" text-anchor="middle">history, admin logs · never the raw question</text>
+<rect x="440" y="780" width="280" height="90" rx="10" fill="#ffffff" stroke="#5b6472" stroke-width="2"/>
+<text x="580.0" y="817" font-size="14" font-weight="bold" text-anchor="middle">Route (Tongkai)</text>
+<text x="580.0" y="835" font-size="11.5" fill="#475569" text-anchor="middle">score vs threshold · cloud_safe = false</text>
+<text x="580.0" y="850" font-size="11.5" fill="#475569" text-anchor="middle">forces local</text>
+<rect x="60" y="780" width="320" height="110" rx="10" fill="#fdebe1" stroke="#e06a2c" stroke-width="2"/>
+<text x="220.0" y="827" font-size="14" font-weight="bold" text-anchor="middle">Local model (inside the boundary)</text>
+<text x="220.0" y="845" font-size="11.5" fill="#475569" text-anchor="middle">may see the raw question and the full learner</text>
+<text x="220.0" y="860" font-size="11.5" fill="#475569" text-anchor="middle">context</text>
+<rect x="770" y="780" width="310" height="110" rx="10" fill="#e6f4ee" stroke="#1f9e6e" stroke-width="2"/>
+<text x="925.0" y="820" font-size="14" font-weight="bold" text-anchor="middle">5 · Pre-send leak guard</text>
+<text x="925.0" y="838" font-size="11.5" fill="#475569" text-anchor="middle">re-scan the sanitized question for PII ·</text>
+<text x="925.0" y="852" font-size="11.5" fill="#475569" text-anchor="middle">student_id, item IDs, misconception text →</text>
+<text x="925.0" y="868" font-size="11.5" fill="#475569" text-anchor="middle">block</text>
+<rect x="1170" y="780" width="300" height="120" rx="10" fill="#fbe5e5" stroke="#d64545" stroke-width="2"/>
+<text x="1320.0" y="832" font-size="14" font-weight="bold" text-anchor="middle">Cloud LLM (outside)</text>
+<text x="1320.0" y="850" font-size="11.5" fill="#475569" text-anchor="middle">CloudRequest only: sanitized question,</text>
+<text x="1320.0" y="865" font-size="11.5" fill="#475569" text-anchor="middle">topic, passages, 3 coarse labels</text>
+<rect x="440" y="950" width="600" height="90" rx="10" fill="#e6f4ee" stroke="#1f9e6e" stroke-width="2"/>
+<text x="740.0" y="987" font-size="14" font-weight="bold" text-anchor="middle">6 · Restore + verify</text>
+<text x="740.0" y="1005" font-size="11.5" fill="#475569" text-anchor="middle">placeholders → original values in the answer · pii_leak / profile_leak checkers · mapping</text>
+<text x="740.0" y="1020" font-size="11.5" fill="#475569" text-anchor="middle">cleared</text>
+<rect x="1170" y="955" width="300" height="80" rx="10" fill="#e3edf9" stroke="#2b6cc4" stroke-width="2"/>
+<text x="1320.0" y="994" font-size="14" font-weight="bold" text-anchor="middle">Answer to the student</text>
+<text x="1320.0" y="1012" font-size="11.5" fill="#475569" text-anchor="middle">with sources and a check question</text>
+<rect x="40" y="1120" width="16" height="16" fill="#e6f4ee" stroke="#1f9e6e"/><text x="62" y="1133" font-size="12">privacy subfunction (ours)</text>
+<rect x="275" y="1120" width="16" height="16" fill="#ffffff" stroke="#5b6472"/><text x="297" y="1133" font-size="12">pipeline step</text>
+<rect x="510" y="1120" width="16" height="16" fill="#fff6d8" stroke="#c9930a"/><text x="532" y="1133" font-size="12">decision</text>
+<rect x="745" y="1120" width="16" height="16" fill="#fdebe1" stroke="#e06a2c"/><text x="767" y="1133" font-size="12">local model</text>
+<rect x="980" y="1120" width="16" height="16" fill="#fbe5e5" stroke="#d64545"/><text x="1002" y="1133" font-size="12">cloud</text>
+<rect x="1215" y="1120" width="16" height="16" fill="#f1f1ef" stroke="#6b6b6b"/><text x="1237" y="1133" font-size="12">storage</text>
+</svg>
