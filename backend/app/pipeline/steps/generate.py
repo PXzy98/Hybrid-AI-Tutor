@@ -1,18 +1,22 @@
 import logging
 
 from app.core.registry import steps
-from app.core.schemas import LLMResult, RequestContext
+from app.core.schemas import CloudRequest, LLMResult, RequestContext
 from app.llm.base import LLMError
 from app.llm.cloud_guard import build_cloud_request
 from app.pipeline.base import BaseStep
 from app.privacy.analyzer import PIIAnalyzer
+from app.privacy.generalize import generalize
 from app.prompts import render_local
 from app.verify.leaks import CloudLeakGuard
 
 log = logging.getLogger("app.pipeline")
 
 CLOUD_FALLBACK_WARNING = "The cloud model was unavailable, so the local model answered."
+CLOUD_MISSING_WARNING = "No cloud model is connected, so the local model answered this question."
 PRIVACY_BLOCK_WARNING = "A privacy check kept this question on the local model."
+LOCAL_CAPABILITY_NOTE = ("This question may be beyond what the local model does well; "
+                         "please check the answer against the sources below.")
 
 
 @steps.register("generate")
@@ -47,36 +51,57 @@ class GenerateStep(BaseStep):
         return await self.services.local_llm.complete(render_local(ctx, safety_retry=safety_retry))
 
     async def _cloud(self, ctx: RequestContext, safety_retry: bool) -> LLMResult:
+        """The cloud gate. The same privacy rules apply whichever router chose the cloud route:
+
+        1. a personal health detail (not cloud_safe): `local_only` answers locally; `generalize` sends only a
+           checked hypothetical rewrite of the question, or answers locally if the rewrite fails its checks;
+        2. the leak guard re-checks the CloudRequest; a finding blocks it;
+        3. a missing or failing cloud model falls back to the local model (llm.cloud.fallback_to_local).
+        Every fallback tells the student why, and that the router expected the cloud model to do better.
+        """
+        req = await self._cloud_request(ctx)
+        if req is None:
+            return await self._fallback(ctx, safety_retry, PRIVACY_BLOCK_WARNING)
+        found = self.leaks.problems(req, ctx)
+        if found:  # never send; kinds only in the log, never the text
+            log.error("cloud request blocked by the leak guard (%s), request=%s",
+                      ", ".join(found), ctx.request_id)
+            return await self._fallback(ctx, safety_retry, PRIVACY_BLOCK_WARNING)
         cloud = self.services.cloud_llm
-        if cloud.available:
-            req = build_cloud_request(ctx)
-            # TEAM INTEGRATION: semantic routing delegates privacy policy to the
-            # upstream teammate-owned filter. It does not add a second privacy
-            # routing gate. CloudRequest still contains sanitized/allow-listed data.
-            semantic = self.services.settings.routing.impl == "semantic"
-            found = [] if semantic else self.leaks.problems(req, ctx)
-            if found:  # never send; kinds only in the log, never the text
-                log.error(
-                    "cloud request blocked by the leak guard (%s), request=%s",
-                    ", ".join(found),
-                    ctx.request_id,
-                )
-                if PRIVACY_BLOCK_WARNING not in ctx.warnings:
-                    ctx.warnings.append(PRIVACY_BLOCK_WARNING)
-                return (await self._local(ctx, safety_retry)).model_copy(update={"fell_back": True})
-            ctx.cloud_request = req  # what was actually sent: audited by the leak checkers and E4
-            try:
-                return await cloud.complete(req, safety_retry=safety_retry)
-            except LLMError as e:
-                log.warning("cloud model failed (%s), request=%s", type(e).__name__, ctx.request_id)
-                if semantic or not self.services.settings.llm.cloud.fallback_to_local:
-                    raise
-        elif (
-            self.services.settings.routing.impl == "semantic"
-            or not self.services.settings.llm.cloud.fallback_to_local
-        ):
-            raise LLMError("cloud route chosen but no cloud model is configured")
-        if CLOUD_FALLBACK_WARNING not in ctx.warnings:
-            ctx.warnings.append(CLOUD_FALLBACK_WARNING)
+        if not cloud.available:
+            if not self.services.settings.llm.cloud.fallback_to_local:
+                raise LLMError("cloud route chosen but no cloud model is configured")
+            return await self._fallback(ctx, safety_retry, CLOUD_MISSING_WARNING)
+        ctx.cloud_request = req  # what was actually sent: audited by the leak checkers and E4
+        try:
+            return await cloud.complete(req, safety_retry=safety_retry)
+        except LLMError as e:
+            log.warning("cloud model failed (%s), request=%s", type(e).__name__, ctx.request_id)
+            if not self.services.settings.llm.cloud.fallback_to_local:
+                raise
+            return await self._fallback(ctx, safety_retry, CLOUD_FALLBACK_WARNING)
+
+    async def _cloud_request(self, ctx: RequestContext) -> CloudRequest | None:
+        """The CloudRequest to send, or None if the question must stay local (personal health detail)."""
+        req = build_cloud_request(ctx)
+        if ctx.pii.cloud_safe:
+            return req
+        if self.services.settings.privacy.health_detail_policy != "generalize":
+            return None
+        rewrite = ctx.generalized_question  # a safety retry reuses the rewrite of the first attempt
+        if rewrite is None:
+            names, usernames = self.services.accounts.identity_terms(ctx.request.student_id)
+            rewrite = await generalize(ctx.request.question, self.services.local_llm, self.leaks.analyzer,
+                                       names, usernames)
+        if rewrite is None:
+            return None
+        ctx.generalized_question = rewrite
+        return req.model_copy(update={"sanitized_question": rewrite})
+
+    async def _fallback(self, ctx: RequestContext, safety_retry: bool, reason: str) -> LLMResult:
+        log.info("routed to cloud, answered locally (%s), request=%s", reason, ctx.request_id)
+        for w in (reason, LOCAL_CAPABILITY_NOTE):
+            if w not in ctx.warnings:
+                ctx.warnings.append(w)
         result = await self._local(ctx, safety_retry)
         return result.model_copy(update={"fell_back": True})

@@ -33,7 +33,8 @@ class RouteStep(BaseStep):
         )
         score = await asyncio.to_thread(self.services.router.route_score, x)
         if score.score >= cfg.threshold:
-            if cfg.force_local_if_not_cloud_safe and not ctx.pii.cloud_safe:
+            generalize = self.services.settings.privacy.health_detail_policy == "generalize"
+            if cfg.force_local_if_not_cloud_safe and not ctx.pii.cloud_safe and not generalize:
                 score = score.model_copy(update={"reasons": [*score.reasons, "forced local: not cloud_safe"]})
             else:
                 ctx.target = "cloud"
@@ -41,8 +42,8 @@ class RouteStep(BaseStep):
         return ctx
 
     async def _semantic(self, ctx):
-        # TEAM INTEGRATION: no pii/cloud_safe routing condition. Privacy belongs
-        # to the teammate-owned upstream filter, independently of this decision.
+        # No pii/cloud_safe condition here: the privacy rules (personal health, leak guard) apply at the cloud
+        # gate in the generate step, for every router.
         ctx.target = "cloud"  # failures must never silently admit a question to Local
         router = self.services.router
         x = route_input(ctx)

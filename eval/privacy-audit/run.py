@@ -79,7 +79,9 @@ def main(argv: list[str] | None = None) -> int:
     a.out.mkdir(parents=True, exist_ok=True)
     log_path = a.out / "cloud_requests.jsonl"
     log_path.unlink(missing_ok=True)
-    env = {"ROUTING__STUB_SCORE": "1.0", "LLM__CLOUD__AUDIT_LOG": str(log_path),
+    # the stub router forces every question to the cloud route, so every payload is audited (semantic
+    # routing would keep most questions local and leave the cloud path untested)
+    env = {"ROUTING__IMPL": "stub", "ROUTING__STUB_SCORE": "1.0", "LLM__CLOUD__AUDIT_LOG": str(log_path),
            "LLM__CLOUD__AUDIT_ECHO": "false" if a.real_cloud else "true"}
     personas = harness.PERSONAS[:1] if a.e6 else harness.PERSONAS[:2] if a.smoke else harness.PERSONAS
     questions = e6_questions(a.smoke) if a.e6 else question_set(a.smoke)

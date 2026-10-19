@@ -284,6 +284,7 @@ class RequestContext(BaseModel):
     route: RouteScore | None = None
     target: Target | None = None
     cloud_request: CloudRequest | None = None
+    generalized_question: str | None = None  # privacy.health_detail_policy=generalize: the checked rewrite
     llm: LLMResult | None = None
     answer: str | None = None
     check_item: CheckItemPublic | None = None

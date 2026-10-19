@@ -109,7 +109,7 @@ def test_cloud_score_with_fixture_rag(make_client):
         health = ask(client, question="I have high blood pressure. Is salt bad for me?").json()
     # no cloud model configured in tests: the local model answered, and the response says so
     assert body["route_score"] == 1.0 and body["route_target"] == "local"
-    assert "The cloud model was unavailable, so the local model answered." in body["warnings"]
+    assert "No cloud model is connected, so the local model answered this question." in body["warnings"]
     assert body["sources"]  # fixture chunks for the topic
     # a personal health detail is never cloud_safe: kept local without even trying the cloud
     assert health["route_target"] == "local" and health["warnings"] == []

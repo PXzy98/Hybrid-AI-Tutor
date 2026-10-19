@@ -8,6 +8,7 @@ import pytest
 
 from app.core.config import REPO_ROOT, RoutingConfig
 from app.core.schemas import Chunk, PIIResult, RouteInput, SemanticAnalysis
+from app.pipeline.steps.generate import CLOUD_MISSING_WARNING, LOCAL_CAPABILITY_NOTE
 from app.routing.evidence import assess_evidence
 from app.routing.semantic import SemanticRouter
 
@@ -259,7 +260,9 @@ def test_single_method_removal_updates_options_and_rejects_disabled_method(make_
         cm.__exit__(None, None, None)
 
 
-def test_cloud_unavailable_does_not_silently_answer_locally(make_client, monkeypatch):
+def test_cloud_unavailable_answers_locally_and_says_why(make_client, monkeypatch):
+    """Team decision (TODO 1.3): no 503 when the cloud is missing; the local model answers and the student is
+    told why, and that the router expected the cloud model to do better."""
     cm, api = semantic_api(make_client, monkeypatch)
     try:
         monkeypatch.setattr(
@@ -274,9 +277,9 @@ def test_cloud_unavailable_does_not_silently_answer_locally(make_client, monkeyp
                 "/api/v1/ask/stream", json={"topic": "high_blood_pressure", "question": "Complex case."}
             )
         )
-        assert any(k == "error" and v["step"] == "generate" for k, v in ev)
-        assert not any(k == "result" for k, _ in ev)
-        assert not api.local_llm.calls
+        reply = next(v for k, v in ev if k == "result")
+        assert reply["route_target"] == "local" and api.local_llm.calls
+        assert CLOUD_MISSING_WARNING in reply["warnings"] and LOCAL_CAPABILITY_NOTE in reply["warnings"]
     finally:
         cm.__exit__(None, None, None)
 
