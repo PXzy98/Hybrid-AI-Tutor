@@ -95,7 +95,8 @@ B4 原型用于验证关键假设、结果用"预期 vs 实际"表格，B5 Jira 
 - [ ] understand 步骤是否换成 `gemma4:e4b`（E1：更快更准，多占显存）— Z
 - [ ] 是否开启弱证据（E2：对 rule 有帮助）— Z
 
-## 4. 网络搜索（"最新证据"来源）
+## 4. 网络搜索（"最新证据"来源）— Jira G1-92（future）
+- 现状（10/19 核实）：本地和云端都不搜索网络；云端客户端只调用普通 `chat.completions`，不带任何工具
 - [ ] 确定需求：课程场景里"最新证据"具体指什么 — T/Z
 - [ ] 首选方案：MedlinePlus Health Topics Web Service（免费，85 次/分钟/IP，须注明来源）+ PubMed E-utilities（分支已有 `pubmed.py`）接入检索层，结果走证据验证 — S
 - [ ] 只发送一般化查询（主题 + 关注点的固定词表），绝不发送学生原句 — S/Z
@@ -106,14 +107,19 @@ B4 原型用于验证关键假设、结果用"预期 vs 实际"表格，B5 Jira 
 ## 5. MVP（10/21）前
 - [ ] 确认 MVP 提交要求（演示 / 录屏 / 报告 / 代码链接）— Z
 - [ ] 确认演示时 GPU 服务器（192.168.2.25）能否访问，准备备用方案 — Z
-- [ ] 按 `docs/DEMO.md` 完整排练一次；在演示机上跑 `docker compose up` — 全员
-- [ ] 云端 API key + 消费上限 — Z/教授
-- [ ] 安装 `en_core_web_lg`（约 400 MB）— Z
+- [ ] 按 `docs/DEMO.md`（10/19 已按整合版重写，开发模式）完整排练一次 — 全员
+- [x] 云端 API key：DeepSeek，10/19 测通（实测问答 + E4 `--real-cloud` 0 泄漏）
+- [ ] **客户确认云端服务商和数据存放地**（DeepSeek 在中国）；消费上限 — Z/教授（`docs/隐私升级.md` §1）
+- [x] 安装 `en_core_web_lg`；下载路由和证据模型（`python -m app.routing.prepare`）— 10/19 本机已完成
+- [ ] Docker 镜像里加入路由和证据模型（现在镜像里没有：路由会选云端、资料标"未检查"）— T/Z
+- [ ] 老师上传资料用隐私过滤扫描（`docs/隐私升级.md` §2，约半天）— Z
+- [ ] 测试不受本地 `.env` 影响（`conftest.py`，后台任务已在做，需同步到新 main）— Z
 - [ ] Abbas 医生审核高血压内容（`docs/review/high_blood_pressure_review.csv`）— Z 联系
 - [ ] Jira：删除旧的 G1-1～G1-4；启动 Sprint 2；更新 Story 状态 — Z
 - [ ] PPT：项目 Key 由 `PAHT` 改为 `G1`；补全组员全名（Tongkai Liu、Siyun Tan）— Z
 
 ## 6. Beta 及以后
+- [ ] 隐私升级 §3–§5：存储回答里的病情词、多轮追问、Qwen 二次检查（按客户决定）— Z（`docs/隐私升级.md`）
 - [ ] E5 评估（本地 / 云端 / 混合 的质量与延迟）— Z/T
 - [ ] 另外四个主题的知识点、选择题、误解清单 + Abbas 审核 — S/Z
 - [ ] E1 测试集扩到 120–150 条（五个主题）— Z

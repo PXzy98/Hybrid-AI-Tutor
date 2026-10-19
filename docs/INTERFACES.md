@@ -1,5 +1,7 @@
 # Interfaces for teammates (routing and RAG)
 
+> Status 19 Oct 2026: both components are integrated (semantic router `routing.impl: semantic`, medical RAG `rag.impl: medical_hybrid`). This page describes the plug-in contract, which is unchanged; as-built details are in [ROUTING_PATCH.md](ROUTING_PATCH.md), [RAG_INTEGRATION.md](RAG_INTEGRATION.md) and [System_Design_v3.md §16](System_Design_v3.md).
+
 For **Tongkai** (routing score) and **Siyun** (RAG retrieval). This document covers what your code receives, what it must return, and how it plugs in. You do not need to touch the pipeline or any other code.
 
 Source of truth: [`backend/app/core/schemas.py`](../backend/app/core/schemas.py). Design background: [System_Design_v3.md](System_Design_v3.md) §7.1 and §9.
@@ -45,7 +47,7 @@ class RouteInput(BaseModel):
 class PIIResult(BaseModel):
     entities: list[PIIEntity] = []   # type, text, start, end, score, placeholder
     is_sensitive: bool = False
-    cloud_safe: bool = True          # False -> the pipeline keeps it local whatever you return
+    cloud_safe: bool = True          # False -> the cloud gate keeps it local whatever you return
     sanitized_text: str
 ```
 
@@ -57,7 +59,7 @@ class PIIResult(BaseModel):
 - Synchronous, deterministic (same input → same score), under 1 s.
 - Never raise on unusual input, such as an empty question.
 - Use only the fields of `RouteInput`; it is all you get.
-- You do **not** need to handle `cloud_safe = False`. The pipeline forces those requests local (`routing.force_local_if_not_cloud_safe: true`, still to be confirmed with you).
+- You do **not** need to handle `cloud_safe = False`. Decided 19 Oct 2026: the cloud gate in the generate step applies the privacy rules whichever router chose the cloud (`privacy.health_detail_policy`: `local_only` by default, `generalize` optional), runs the leak guard, and falls back to the local model with a notice. The stub router additionally keeps `routing.force_local_if_not_cloud_safe`.
 
 ---
 

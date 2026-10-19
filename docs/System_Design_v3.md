@@ -311,7 +311,7 @@ The loop: **student asks or answers → extract evidence → update learner stat
 The caller must be a logged-in student. The request body has no `student_id`. The API fills `AskRequest.student_id` from the session, and a `session_id` that belongs to another student is rejected (404).
 
 ```yaml
-pipeline: [privacy_filter, understand, learner_context, retrieve, route, generate, restore, verify, attach_check, record]
+pipeline: [privacy_filter, understand, learner_context, analyze_route, retrieve, route, generate, restore, verify, attach_check, record]
 post_response: [update_learner]
 ```
 
@@ -320,9 +320,10 @@ post_response: [update_learner]
 | 1 | privacy_filter | Finds PII; stores `PIIResult` (entities, is_sensitive, cloud_safe, sanitized text) | **stop** |
 | 2 | understand | Local model, JSON output limited to the topic's KC IDs and catalog misconception IDs: `{kc_ids, question_type, confusion, misconception_ids}`; thinking off; model `llm.understand.model` (default: the already-loaded local model) | skip → topic-only retrieval, no weak evidence |
 | 3 | learner_context | Loads `LearnerContext`; the focus level is the lowest level among the question's KCs from step 2 (topic level when there are none) | skip → default intermediate level, no personalization |
-| 4 | retrieve | Sanitized query + `kc_ids` + level | skip → no passages (the answer says so) |
-| 5 | route | `route_score()` vs threshold; `cloud_safe = false` forces local (to be confirmed with Tongkai) | skip → local |
-| 6 | generate | Local: full `LearnerContext`. Cloud: a `CloudRequest` built by the guard. A failed cloud call falls back to local. | stop |
+| 3b | analyze_route | As built (Tongkai): local MiniLM embedding of the sanitized question (+ recent sanitized turns) → LR/SVM heads: cloud need, evidence needed, fresh evidence needed | stop (encoder or classifier failures are handled inside → cloud) |
+| 4 | retrieve | Sanitized query + `kc_ids` + level. As built (Siyun): hybrid BM25 + word/char TF-IDF over MedlinePlus (5 topics) and instructor uploads, with a relevance gate | skip → no passages (the answer says so) |
+| 5 | route | As built: semantic router (capability + cross-encoder evidence check) decides local or cloud; no privacy branch. The answer's passages are chosen separately (`select_passages`: relevant passages, or unverified ones if the evidence models are missing). The stub router keeps `cloud_safe = false` → local | skip → local |
+| 6 | generate | Local: full `LearnerContext`. Cloud: a `CloudRequest` built by the guard, through the **cloud gate** (every router): personal health → `privacy.health_detail_policy` (`local_only` / `generalize`), leak guard, missing or failing cloud → local answer with a notice | stop |
 | 7 | restore | Placeholders → original values (cloud answers); appends the reviewed misconception correction (cloud route); discards the mapping | stop |
 | 8 | verify | grounding, medical_safety, pii_leak, profile_leak | warn |
 | 9 | attach_check | Picks an MCQ for the main KC | skip |
@@ -400,6 +401,7 @@ class CloudRequest(BaseModel):            # the ONLY type the cloud client accep
 - `CloudClient.complete()` accepts only `CloudRequest`. A unit test asserts that its signature does not change.
 - The `pii_leak` checker runs Presidio again on the serialized `CloudRequest`. The `profile_leak` checker fails if the payload contains a student ID, an item ID or a misconception statement.
 - In the end-to-end tests, every cloud request is intercepted and audited (§11, E4).
+- As built (19 Oct 2026): the generate step is the single cloud gate for every router. Before anything is sent it re-checks the `CloudRequest` (PII, `student_id`, item IDs, misconception text); a question with a personal health detail follows `privacy.health_detail_policy` (`local_only` by default, or a checked hypothetical rewrite with `generalize`). See `docs/report/privacy_subsystem.md`.
 
 ### 8.3 Instructor view, accounts and student rights
 
@@ -649,9 +651,25 @@ The v2 privacy and end-to-end tests (detection recall, leakage, semantic preserv
 - ☐ Profile retention period, and the wording of the consent text.
 - ☐ Inform the professor of the deletion rule: a deleted student's data is purged, and request logs are kept anonymized (§8.3).
 - ☐ Whether the client wants the full ILS questionnaire.
-- ☐ `cloud_safe = false` → force local (agree with Tongkai); whether the route score uses `level`.
-- ☐ Cloud provider and model, and who pays (unchanged from v2).
+- ☑ `cloud_safe = false`: decided Oct 19. Enforced at the cloud gate for every router (`local_only` default, `generalize` optional); the router has no privacy branch. Still open: whether the route score uses `level`.
+- ☐ Cloud provider and model, and who pays. Tested with DeepSeek (Oct 19); its data location (China) needs the client's approval (`docs/隐私升级.md` §1).
 - ☑ Student login: decided Oct 12. The instructor creates student accounts, students log in with a password, and identity is kept apart from the profile (§7.5).
+
+## 16. As built (19 Oct 2026): differences from this design
+
+The design above is kept as the plan; this section lists what the integrated system (main after PR #3) does
+differently. Architecture figure: `docs/diagrams/architecture-v3.png` (v3.1).
+
+| Area | Design (this document) | As built |
+|---|---|---|
+| Routing | Black-box `route_score()` vs threshold (stub until Tongkai's router) | Semantic router: MiniLM embedding, LR/SVM heads (cloud need, evidence, freshness), cross-encoder evidence check (`docs/ROUTING_PATCH.md`); new step `analyze_route`; `/ask/stream` sends progress events; the student can pick LR or SVM |
+| Retrieval | TF-IDF over course chunks tagged with KC and level | Medical hybrid retrieval (BM25 + word/char TF-IDF), MedlinePlus pages for the five topics plus instructor uploads (PDF, DOCX, HTML, TXT, MD) indexed on upload (`docs/RAG_INTEGRATION.md`, `docs/RAG_MVP_VALIDATION.md`) |
+| Passages for the answer | Retrieved passages | Chosen separately from routing: relevant passages when the evidence models ran, retrieved passages marked unverified otherwise |
+| Privacy enforcement | `cloud_safe = false` forces local in the route step; pre-send guard | One cloud gate in the generate step for every router: health policy (`local_only` / `generalize`), leak guard, local fallback with a notice; 14 custom recognizers (`docs/report/privacy_subsystem.md`) |
+| Cloud model | Provider to be decided | Any OpenAI-compatible API in `.env`; tested with DeepSeek `deepseek-flash`; `max_tokens: 2000` for reasoning models |
+| Grounding check | Content-word overlap | Also warns when no material was found, and when a sentence's numbers are not in any passage |
+| Feedback | – | Optional student rating survey (4 scores, no IDs, no free text), instructor sees aggregates of 3 or more |
+| Local assets | spaCy model, Ollama | Also MiniLM and two cross-encoders, downloaded once with `python -m app.routing.prepare` |
 
 ---
 

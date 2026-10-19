@@ -1,6 +1,7 @@
 """Builds docs/diagrams/privacy-filter.drawio (editable) and privacy-filter.svg from one layout spec.
 
     .venv\\Scripts\\python docs\\diagrams\\make_privacy_filter.py
+    python docs\\diagrams\\render_drawio.py docs\\diagrams\\privacy-filter.drawio --width 1520 --height 1260
 """
 from html import escape
 from pathlib import Path
@@ -35,16 +36,19 @@ NODES = {
     "anon": (440, 500, 600, 100, "step", "3 · Anonymize",
              "replace each finding by a numbered placeholder <PERSON_1>, <STUDENT_ID_1>, …\n"
              "placeholder → value mapping: private attribute of the request, memory only"),
-    "dec": (560, 640, 360, 90, "dec", "4 · Local-only type present?", "HEALTH_DETAIL found → cloud_safe = false"),
+    "dec": (560, 640, 360, 90, "dec", "4 · Personal health detail?", "HEALTH_DETAIL found → cloud_safe = false"),
     "err": (60, 320, 320, 110, "stop", "Filter unavailable / error",
             "missing spaCy model or exception → request stops (HTTP 503) · never skipped"),
     "store": (60, 490, 320, 120, "store", "Stored and logged",
               "sanitized text only: request_log, session history, admin logs · never the raw question"),
-    "route": (440, 780, 280, 90, "core", "Route (Tongkai)", "score vs threshold · cloud_safe = false forces local"),
+    "route": (440, 780, 280, 90, "core", "Router (Tongkai, semantic)",
+              "capability + evidence → local or cloud · no privacy branch"),
     "local": (60, 780, 320, 110, "local", "Local model (inside the boundary)",
               "may see the raw question and the full learner context"),
-    "guard": (770, 780, 310, 110, "step", "5 · Pre-send leak guard",
-              "re-scan the sanitized question for PII · student_id, item IDs, misconception text → block"),
+    "guard": (770, 780, 310, 130, "step", "5 · Cloud gate (every router)",
+              "cloud_safe = false: local_only → local · generalize → checked hypothetical rewrite\n"
+              "leak guard: PII, student_id, item IDs, misconception text → block\n"
+              "no / failing cloud model → local"),
     "cloud": (1170, 780, 300, 120, "cloud", "Cloud LLM (outside)",
               "CloudRequest only: sanitized question, topic, passages, 3 coarse labels"),
     "restore": (440, 950, 600, 90, "step", "6 · Restore + verify",
@@ -54,7 +58,7 @@ NODES = {
 EDGES = [
     ("q", "id", ""), ("q", "det", "raw text"), ("id", "det", "terms"), ("det", "clean", "findings"),
     ("clean", "anon", ""), ("anon", "dec", ""), ("det", "err", "error"), ("anon", "store", "sanitized text"),
-    ("dec", "route", "cloud_safe flag"), ("route", "local", "local"), ("route", "guard", "cloud"),
+    ("dec", "route", "sanitized text + flag"), ("route", "local", "local"), ("route", "guard", "cloud"),
     ("guard", "cloud", "pass"), ("local", "restore", "answer"),
     ("cloud", "restore", "answer"), ("restore", "ans", ""),
 ]
@@ -95,7 +99,7 @@ def wrap(text: str, width: float, px: float = 6.2) -> list[str]:
 
 
 # guard -> local when blocked: drawn under the route box, with waypoints
-BLOCKED = [(925, 890), (925, 925), (220, 925), (220, 890)]
+BLOCKED = [(925, 910), (925, 932), (220, 932), (220, 890)]
 
 
 def svg() -> str:
@@ -111,8 +115,8 @@ def svg() -> str:
            'mapping never leave it.</text>',
            '<polyline points="' + " ".join(f"{x},{y}" for x, y in BLOCKED) + '" fill="none" stroke="#5b6472" '
            'stroke-width="1.6" stroke-dasharray="5,4" marker-end="url(#arr)"/>',
-           '<rect x="480" y="917" width="190" height="16" fill="white"/><text x="575" y="929" font-size="11" '
-           'text-anchor="middle" fill="#334155">blocked → local + notice</text>']
+           '<rect x="440" y="924" width="270" height="16" fill="white"/><text x="575" y="936" font-size="11" '
+           'text-anchor="middle" fill="#334155">kept local / blocked / no cloud → local + notice</text>']
     for a, b, label in EDGES:
         x1, y1 = anchor(a, b)
         x2, y2 = anchor(b, a)
@@ -146,7 +150,21 @@ def svg() -> str:
 
 
 def drawio() -> str:
-    cells = ['<mxCell id="0"/>', '<mxCell id="1" parent="0"/>']
+    def text(cid, x, y, w, h, value, style):
+        return (f'<mxCell id="{cid}" value="{escape(value)}" style="text;html=1;align=left;verticalAlign=middle;'
+                f'{style}" vertex="1" parent="1"><mxGeometry x="{x}" y="{y}" width="{w}" height="{h}" '
+                f'as="geometry"/></mxCell>')
+
+    cells = ['<mxCell id="0"/>', '<mxCell id="1" parent="0"/>',
+             f'<mxCell id="boundary" value="" style="rounded=0;html=1;fillColor=none;strokeColor=#d64545;dashed=1;'
+             f'dashPattern=8 6;strokeWidth=1.5;" vertex="1" parent="1"><mxGeometry x="30" y="50" '
+             f'width="{BOUNDARY_W}" height="1010" as="geometry"/></mxCell>',
+             text("title", 30, 14, 900, 30, "<b>Privacy filter · detailed flow (subfunctions and links)</b>",
+                  "fontSize=22;"),
+             text("outside", 1170, 750, 200, 20, "outside the boundary", "fontSize=13;fontColor=#d64545;"),
+             text("note", 40, 1072, 1400, 24, "Red dashed line = privacy boundary (application server + local GPU "
+                  "server). Only the CloudRequest crosses it; the raw question and the placeholder mapping never "
+                  "leave it.", "fontSize=13;fontColor=#d64545;")]
     for n, (x, y, w, h, kind, title, body) in NODES.items():
         fill, stroke = STYLE[kind]
         shape = "rhombus;" if kind == "dec" else "rounded=1;arcSize=8;"
@@ -159,6 +177,12 @@ def drawio() -> str:
         cells.append(f'<mxCell id="e{i}" value="{escape(label)}" style="endArrow=block;html=1;strokeColor=#5b6472;'
                      f'fontSize=10;" edge="1" parent="1" source="{a}" target="{b}">'
                      f'<mxGeometry relative="1" as="geometry"/></mxCell>')
+    points = "".join(f'<mxPoint x="{x}" y="{y}"/>' for x, y in BLOCKED[1:-1])
+    cells.append('<mxCell id="blocked" value="kept local / blocked / no cloud → local + notice" '
+                 'style="endArrow=block;html=1;strokeColor=#5b6472;dashed=1;dashPattern=5 4;fontSize=10;'
+                 'exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;'
+                 'labelBackgroundColor=#ffffff;" edge="1" parent="1" source="guard" target="local">'
+                 f'<mxGeometry relative="1" as="geometry"><Array as="points">{points}</Array></mxGeometry></mxCell>')
     return (f'<mxfile host="app.diagrams.net" type="device"><diagram id="privacy-filter" name="privacy-filter">'
             f'<mxGraphModel dx="1200" dy="900" grid="1" gridSize="10" page="1" pageWidth="{W}" pageHeight="{H}">'
             f'<root>{"".join(cells)}</root></mxGraphModel></diagram></mxfile>')

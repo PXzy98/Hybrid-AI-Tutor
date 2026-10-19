@@ -1,14 +1,16 @@
-# MVP demo (about 5 minutes)
+# MVP demo (about 6 minutes)
 
-This script shows the four ideas of the system:
+This script shows the five ideas of the system:
 1. The tutor adapts to what each student knows.
 2. Check questions update that knowledge.
-3. Questions are routed between a local and a cloud model.
-4. Private data never leaves the local network.
+3. Questions are routed between a local and a cloud model (semantic router).
+4. Answers cite course material (medical RAG).
+5. Private data never leaves the local network; personal health questions stay local.
 
-Everything runs locally with Docker; the model runs on the GPU server.
+Updated 19 Oct 2026 for the integrated system (semantic routing, medical RAG, cloud gate, survey). The run below
+was tested in development mode with the local GPU server and DeepSeek as the cloud model.
 
-## Before the demo (once, about 10 minutes)
+## Before the demo (once, about 15 minutes)
 
 1. Create `.env` from `.env.example`. For the demo, set:
 
@@ -17,26 +19,38 @@ Everything runs locally with Docker; the model runs on the GPU server.
    INSTRUCTOR_USERNAME=prof
    INSTRUCTOR_INITIAL_PASSWORD=<choose one>
    CONTENT__SERVE_UNREVIEWED=true      # the HBP content is still a draft (docs/review/)
-   # optional cloud model, to show real cloud answers:
-   # CLOUD_API_KEY=...   CLOUD_MODEL=...
+   # cloud model (optional; without it the local model answers and says so):
+   CLOUD_BASE_URL=https://api.deepseek.com
+   CLOUD_API_KEY=<key>
+   CLOUD_MODEL=deepseek-flash
    ```
 
-2. Start the app and check that it is healthy:
+2. Install the local models once (see the README): `en_core_web_lg` for the privacy filter, and the routing and
+   evidence models:
 
    ```powershell
-   docker compose up --build -d          # first build: several minutes (spaCy model download)
-   curl http://localhost:8080/api/v1/health
+   .venv\Scripts\python -m spacy download en_core_web_lg
+   cd backend; ..\.venv\Scripts\python -m app.routing.prepare
    ```
 
-   For a quicker build, add `SPACY_MODEL=en_core_web_sm` to `.env` or to the command. The image and the privacy filter always use the same model.
+3. Start the app in development mode (two terminals) and check that it is healthy:
 
-3. Open http://localhost:8080 and log in as `prof` with the initial password. The app asks you to choose a new password; do that.
+   ```powershell
+   cd backend; ..\.venv\Scripts\python -m uvicorn app.main:app      # http://localhost:8000
+   cd frontend; npm install; npm run dev                            # http://localhost:5173
+   curl http://localhost:8000/api/v1/health   # "cloud_enabled": true when a key is set, "routing_impl": "semantic"
+   ```
 
-4. Seed the three demo students (it runs through the public API and can be re-run at any time):
+   Docker (`docker compose up --build -d`, http://localhost:8080) also works, but its image does not yet contain
+   the routing and evidence models: routing then selects the cloud and sources are marked "not checked".
+
+4. Open the web app and log in as `prof` with the initial password. The app asks you to choose a new password.
+
+5. Seed the three demo students (through the public API; can be re-run at any time):
 
    ```powershell
    $env:DEMO_INSTRUCTOR_PASSWORD="<the new instructor password>"
-   .venv\Scripts\python scripts\demo_seed.py --base-url http://localhost:8080
+   .venv\Scripts\python scripts\demo_seed.py --base-url http://localhost:8000
    ```
 
    Expected output:
@@ -49,53 +63,60 @@ Everything runs locally with Docker; the model runs on the GPU server.
 
    The demo students' password is `demo-student-2026` (or `DEMO_STUDENT_PASSWORD`). These are demo accounts only.
 
-5. Ask one question once before the audience arrives, so the model is loaded on the GPU. The first answer after a pause can take 20–30 s.
+6. Ask one question once before the audience arrives, so the local model is loaded on the GPU. The first answer
+   after a pause can take 20–30 s; then local answers take about 5–15 s and cloud answers 8–12 s.
 
 ## The demo
 
 | Time | Do | Say |
 |---|---|---|
 | 0:00 | Log in as **demo.novice**. Point at "What I know": everything is *basic*. | "The tutor keeps a learning profile per knowledge component. This student missed the first diagnostic question, so the parts that build on it were not even assessed." |
-| 0:45 | **Chat**, ask: *Why does eating too much salt raise blood pressure?* | "Badge: *basic*. The answer starts with an everyday example and stays short, because that is what this student chose in onboarding. Below it is a check question for the weakest part." |
+| 0:45 | **Chat** (topic High Blood Pressure), ask: *What do the two numbers in a blood pressure reading mean?* | "The progress panel shows the router at work. Badge: *basic*, an everyday example first. Below the answer: the MedlinePlus source it used, then a check question for the weakest part." |
 | 1:30 | Answer the check question **wrongly**, then **correctly** on the next one. | "The answer is graded by the key, not by the model, so it is reliable evidence. The band of that part changes immediately." Show it in "What I know". |
-| 2:15 | Log out and log in as **demo.advanced**. Ask the same question. | "Same question, different student: *advanced*, the idea first, precise terms (osmosis, vascular resistance). The check question is an advanced one." |
-| 3:00 | Ask: *My name is Alice Tremblay, student 300418277, and I have asthma. Why does my inhaler make me shaky?* | "Before any model sees this, the privacy filter replaces the name, the student number and the personal health detail. A personal health detail is never sent to the cloud, so this stays local. The safety check makes sure there is no diagnosis or dose in the answer, and that it refers to a clinician." |
-| 3:45 | Show what was stored (command below). | "The database only has the placeholders. The name, the number and 'I have asthma' are nowhere in it." |
-| 4:15 | Local vs cloud routing (below). | "The router score decides. The cloud only ever gets the sanitized question plus three coarse labels such as *basic*: never the student ID, the profile or the misconceptions." |
-| 4:45 | Wrap up | "The learner model, the privacy filter and the checks are local. The routing score and RAG are teammates' components behind fixed interfaces." |
+| 2:15 | Log out and log in as **demo.advanced**. Ask the same question. | "Same question, different student: *advanced*, the idea first, precise terms. The check question is an advanced one." |
+| 3:00 | Ask: *Compare the long-term cardiovascular outcomes of SGLT2 inhibitors versus GLP-1 receptor agonists in adults with chronic kidney disease.* (topic Type 2 Diabetes) | "This needs more than the local model and the course material, so the router chooses the cloud. The cloud model only gets the sanitized question, the topic, course passages and three coarse labels." |
+| 3:45 | Ask the same with identity: *I'm Priya Raman, student 300418277, email priya.raman@uottawa.ca. Compare …* | "The cloud saw only `<PERSON_1>`, `<STUDENT_ID_1>`, `<EMAIL_ADDRESS_1>` (show the stored request below); the student sees the real values filled back in." |
+| 4:30 | Ask: *I have type 2 diabetes and take metformin. Compare … for someone like me.* | "A personal health detail. Whatever the router decides, the cloud gate keeps it local, and the student is told: *A privacy check kept this question on the local model.* The safety check makes sure there is no diagnosis or dose, and that it refers to a clinician." |
+| 5:15 | Click **Rate this answer (optional)** and submit. | "Voluntary feedback: four 1–5 ratings, no student ID, no free text. The instructor only sees averages once three ratings exist." |
+| 5:40 | Wrap up | "The privacy filter, the learner model, the router's models and the evidence check run locally. Only a sanitized, allow-listed request can reach the cloud, and the E4 audit checks every one." |
 
 ### Show what was stored
 
-```powershell
-docker compose exec api python -c "import sqlite3; c=sqlite3.connect('/app/data/app.db'); [print(r) for r in c.execute('select target, sanitized_question from request_log order by id desc limit 3')]"
-```
-
-### Show local vs cloud routing
-
-The routing score is a stub until Tongkai's router is plugged in. Its fixed score can be raised for the demo:
+The request log keeps only sanitized text:
 
 ```powershell
-# in .env:  ROUTING__STUB_SCORE=1.0      (back to 0.0 afterwards)
-docker compose up -d api
+.venv\Scripts\python -c "import sqlite3; c=sqlite3.connect('data/app.db'); [print(r) for r in c.execute('select target, sanitized_question from request_log order by id desc limit 3')]"
 ```
 
-- Without a cloud key, the answer shows "The cloud model was unavailable, so the local model answered." This demonstrates the fallback.
-- With `CLOUD_API_KEY` and `CLOUD_MODEL` set, a question **without** personal health details (for example the salt question with a name in it) is answered by the cloud model, and the name in the answer comes back filled in for the student.
-- A question **with** a personal health detail stays local regardless of the score (`cloud_safe = false`).
+(Docker: `docker compose exec api python -c "..."` with the path `/app/data/app.db`.)
+
+### If something goes wrong
+
+- No cloud key, or the cloud fails: the local model answers with *No cloud model is connected…* or *The cloud
+  model was unavailable…* plus *This question may be beyond what the local model does well…*. This is the
+  intended fallback; say so.
+- Answers without sources and the note *…found by search but not checked for relevance*: the evidence models are
+  missing; run `python -m app.routing.prepare` and restart.
+- Some questions have no source at all (for example the DASH diet): the course material does not cover them; the
+  answer says that it goes beyond the course material.
 
 ## Instructor view
 
-Log in as the instructor; `/admin` has five tabs:
+Log in as the instructor; `/admin` has these tabs:
 
-- **Students**: add a student (the temporary password is shown once, with a copy button), reset a password, deactivate, or delete with a typed confirmation.
-- **Class summary**: mastery bands per knowledge component and the most common misconceptions. Any group smaller than 5 is hidden. With only the three demo students, the whole summary is hidden, which is worth showing as the privacy rule at work.
-- **Settings**: the cloud threshold, answer checks, knowledge model, weak evidence and level thresholds. Changes apply to the next question without a restart. To show it: with `ROUTING__STUB_SCORE=0.5`, a threshold of 0.6 keeps questions local, and 0.4 sends them to the cloud.
+- **Students**: add a student (the temporary password is shown once, with a copy button), reset a password,
+  deactivate, or delete with a typed confirmation.
+- **Class summary**: mastery bands per knowledge component and the most common misconceptions. Any group smaller
+  than 5 is hidden; with only the three demo students the whole summary is hidden, which shows the privacy rule.
+- **Settings**: the cloud threshold, whether students see the routing progress panel, answer checks, knowledge
+  model, weak evidence and level thresholds. Changes apply to the next question without a restart.
 - **Logs**: sanitized questions, the route, latency p50/p95 and the share routed to the cloud. No student IDs.
-- **Content**: review status per topic, and course-material uploads for the RAG pipeline.
+- **Content**: review status per topic, and course-material uploads (PDF, DOCX, HTML, TXT, MD), indexed for RAG
+  on upload.
+- **Feedback**: average survey ratings per topic, shown only with three or more ratings.
 
 ## Reset after the demo
 
 ```powershell
-.venv\Scripts\python scripts\demo_seed.py --base-url http://localhost:8080   # re-seeds the three students
-docker compose down        # keeps the data volume; add -v to delete all accounts and data
+.venv\Scripts\python scripts\demo_seed.py --base-url http://localhost:8000   # re-seeds the three students
 ```
