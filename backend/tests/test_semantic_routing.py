@@ -370,3 +370,10 @@ def test_missing_evidence_models_keep_the_retrieved_passages_unverified(monkeypa
     kept = select_passages(x, r, RoutingConfig())
     assert [c.text for c in kept] == [chunk().text]  # provenance and topic checks still apply
     assert kept[0].metadata["evidence_check"] == "unverified"
+
+
+def test_sources_rejected_by_the_freshness_check_are_not_used_as_unverified():
+    a = analysis(requires_fresh_evidence=True)
+    x = input_for(passages=[chunk()])  # no verified_current metadata: fails the freshness check
+    r = assess_evidence(x, a, RoutingConfig())
+    assert r.checked and select_passages(x, r, RoutingConfig()) == []

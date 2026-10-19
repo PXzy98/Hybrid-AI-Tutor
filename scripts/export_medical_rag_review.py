@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 
-from app.rag.medical_hybrid import MedicalHybridRetriever, _chunk_id
+from app.rag.medical_hybrid import MedicalHybridRetriever, _chunk_id  # noqa: E402
 
 OUT = ROOT / "docs" / "review" / "medical_rag_kc_review.csv"
 

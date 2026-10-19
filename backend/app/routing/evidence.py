@@ -84,6 +84,7 @@ def assess_evidence(x: RouteInput, analysis: SemanticAnalysis, cfg: RoutingConfi
         return EvidenceAssessment(
             status="insufficient" if required else "not_required",
             retrieved_count=count,
+            checked=True,  # the provenance/time check ran and rejected every source: none may be used
             reason="No source passed provenance/time checks.",
         )
     if len(candidates) > cfg.max_evidence_windows:
