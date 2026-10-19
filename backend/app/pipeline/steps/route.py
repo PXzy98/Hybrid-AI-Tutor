@@ -5,7 +5,9 @@ from app.core.registry import steps
 from app.core.schemas import RequestContext, RouteInput
 from app.pipeline.base import BaseStep
 from app.pipeline.steps.analyze_route import route_input
-from app.routing.evidence import assess_evidence
+from app.routing.evidence import assess_evidence, select_passages
+
+UNVERIFIED_SOURCES_NOTE = "The course sources below were found by search but not checked for relevance."
 
 
 @steps.register("route")
@@ -64,8 +66,11 @@ class RouteStep(BaseStep):
         score = router.decide(x, analysis, threshold, evidence)
         ctx.route = score
         ctx.target = score.target
-        # Preserve original indices in diagnostics; only verified passages reach prompts/sources.
-        ctx.passages = [x.passages[i] for i in score.accepted_indices]
+        # Preserve original indices in diagnostics. Which passages the answer may use is decided separately
+        # from the routing decision: relevant ones if the evidence models ran, otherwise unverified ones.
+        ctx.passages = select_passages(x, score.evidence, self.services.settings.routing)
+        if ctx.passages and evidence is not None and not score.evidence.checked:
+            ctx.warnings.append(UNVERIFIED_SOURCES_NOTE)
         await ctx.report(
             "decision",
             "completed",

@@ -4,14 +4,18 @@ Relevance and QNLI answerability are separate signals. Their thresholds need
 domain validation; neither proves medical correctness or source authority.
 """
 
+import logging
 import re
 from datetime import UTC, datetime, timedelta
 
 import numpy as np
 
 from app.core.config import RoutingConfig
-from app.core.schemas import EvidenceAssessment, RouteInput, SemanticAnalysis
+from app.core.schemas import Chunk, EvidenceAssessment, RouteInput, SemanticAnalysis
 from app.routing.models import pair_scores
+
+log = logging.getLogger("app.routing")
+_warned_unavailable = False
 
 
 def question_units(question: str) -> list[str]:
@@ -111,6 +115,7 @@ def assess_evidence(x: RouteInput, analysis: SemanticAnalysis, cfg: RoutingConfi
         best = supported.max(axis=1)
         passed = best >= cfg.answerability_threshold
         accepted = sorted({candidates[int(supported[u].argmax())][0] for u in range(len(units)) if passed[u]})
+        relevant_idx = sorted({candidates[j][0] for _, j in selected})
         coverage = float(passed.mean())
         if bool(passed.all()):
             status = "sufficient"
@@ -120,14 +125,35 @@ def assess_evidence(x: RouteInput, analysis: SemanticAnalysis, cfg: RoutingConfi
             status=status,
             retrieved_count=count,
             accepted_indices=accepted,
+            relevant_indices=relevant_idx,
+            checked=True,
             coverage=coverage,
             support_scores=[round(float(s), 4) for s in best],
             reason=f"{int(passed.sum())}/{len(units)} question units have QA support.",
         )
-    except Exception:
+    except Exception as e:
         # Missing/offline model assets and scoring errors are never sufficient evidence.
+        global _warned_unavailable
+        if not _warned_unavailable:  # once per process: an environment problem, not a per-question one
+            log.warning("evidence models unavailable (%s): passages are used unverified; run "
+                        "`python -m app.routing.prepare` to download them", type(e).__name__)
+            _warned_unavailable = True
         return EvidenceAssessment(
             status="uncertain" if required else "not_required",
             retrieved_count=count,
             reason="Evidence models unavailable or scoring failed.",
         )
+
+
+def select_passages(x: RouteInput, evidence: EvidenceAssessment | None, cfg: RoutingConfig) -> list[Chunk]:
+    """The passages the answer may use. Separate from the routing decision (`accepted_indices`).
+
+    - Evidence models ran: every passage judged relevant to the question. Answerability is a routing signal;
+      a relevant passage that does not fully answer the question still teaches (the answer cites it).
+    - Evidence skipped, missing or failed: the retriever's own results (it has its own relevance gate) that
+      pass the provenance checks, tagged `evidence_check: unverified`, instead of no material at all.
+    """
+    if evidence is not None and evidence.checked:
+        return [x.passages[i] for i in evidence.relevant_indices]
+    return [c.model_copy(update={"metadata": {**c.metadata, "evidence_check": "unverified"}})
+            for c in x.passages if c.topic == x.topic and source_usable(c, False, cfg)]

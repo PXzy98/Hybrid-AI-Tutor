@@ -99,7 +99,10 @@ class SemanticAnalysis(BaseModel):
 class EvidenceAssessment(BaseModel):
     status: Literal["not_required", "unavailable", "empty", "insufficient", "uncertain", "sufficient"]
     retrieved_count: int = 0
-    accepted_indices: list[int] = []
+    accepted_indices: list[int] = []  # best QA-supported passage per question unit: the routing decision
+    # passages the relevance model judged relevant to the question: what the answer may use
+    relevant_indices: list[int] = []
+    checked: bool = False  # the evidence models actually ran (False: skipped, missing or failed)
     coverage: float = Field(0, ge=0, le=1)
     # A QA-support estimate, not a factual-correctness probability.
     support_scores: list[float] = []

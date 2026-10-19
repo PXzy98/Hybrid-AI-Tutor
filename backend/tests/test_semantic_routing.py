@@ -9,7 +9,7 @@ import pytest
 from app.core.config import REPO_ROOT, RoutingConfig
 from app.core.schemas import Chunk, PIIResult, RouteInput, SemanticAnalysis
 from app.pipeline.steps.generate import CLOUD_MISSING_WARNING, LOCAL_CAPABILITY_NOTE
-from app.routing.evidence import assess_evidence
+from app.routing.evidence import assess_evidence, select_passages
 from app.routing.semantic import SemanticRouter
 
 
@@ -338,3 +338,35 @@ def test_sanitized_history_is_available_to_follow_up_routing():
     )
     assert "kidney disease" in route_input(ctx).contextual_question
     assert "Current question: Why?" in route_input(ctx).contextual_question
+
+
+def test_relevant_passages_reach_the_answer_even_without_full_qa_support(monkeypatch):
+    """Answerability decides the route; every relevant passage may still teach (not only the best one)."""
+    monkeypatch.setattr(
+        "app.routing.evidence.pair_scores",
+        lambda name, pairs, cfg: np.array(
+            [(0.9 if "pressure" in t else 0.05) if name == cfg.relevance_model else 0.2 for _, t in pairs]),
+    )
+    passages = [chunk(), chunk(text="Salt raises blood pressure."), chunk(text="Unrelated text about lungs.")]
+    x = input_for(passages=passages)
+    r = assess_evidence(x, analysis(), RoutingConfig())
+    assert r.checked and r.status == "insufficient" and r.accepted_indices == []  # routing is unchanged
+    assert [c.text for c in select_passages(x, r, RoutingConfig())] == [passages[0].text, passages[1].text]
+
+
+def test_missing_evidence_models_keep_the_retrieved_passages_unverified(monkeypatch, caplog):
+    def broken(name, pairs, cfg):
+        raise OSError("model files not found")
+
+    monkeypatch.setattr("app.routing.evidence.pair_scores", broken)
+    monkeypatch.setattr("app.routing.evidence._warned_unavailable", False)
+    off_topic = chunk(text="Pneumonia is a lung infection.")
+    off_topic.topic = "pneumonia"
+    draft = chunk(text="Unapproved draft.", metadata={"approved": False})
+    x = input_for(passages=[chunk(), draft, off_topic])
+    with caplog.at_level("WARNING", logger="app.routing"):
+        r = assess_evidence(x, analysis(), RoutingConfig())
+    assert not r.checked and "evidence models unavailable" in caplog.text  # not silent any more
+    kept = select_passages(x, r, RoutingConfig())
+    assert [c.text for c in kept] == [chunk().text]  # provenance and topic checks still apply
+    assert kept[0].metadata["evidence_check"] == "unverified"
