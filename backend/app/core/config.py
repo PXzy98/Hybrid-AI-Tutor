@@ -78,9 +78,11 @@ class RagConfig(Section):
 class PrivacyConfig(Section):
     spacy_model: str = "en_core_web_lg"
     score_threshold: float = Field(0.5, ge=0, le=1)
-    entities: list[str] = ["PERSON", "EMAIL_ADDRESS", "PHONE_NUMBER", "STUDENT_ID", "GRADE", "HEALTH_DETAIL"]
+    entities: list[str] = ["PERSON", "EMAIL_ADDRESS", "PHONE_NUMBER", "STUDENT_ID", "GRADE", "HEALTH_DETAIL",
+                           "POSTAL_CODE", "HEALTH_CARD", "ID_NUMBER", "DATE_OF_BIRTH", "ADDRESS"]
     local_only_types: list[str] = ["HEALTH_DETAIL"]
     allow_list: list[str] = []  # course staff names etc. that must never be redacted
+    recognizers: list[str] | None = None  # custom recognizers to enable; None = all registered (E6 ablation)
     log_raw_text: Literal[False] = False  # privacy invariant 1: cannot be switched on
 
 

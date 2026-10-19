@@ -10,7 +10,8 @@ each push, and a **full mode** against the real servers, run on request.
 | `understand-tagging/` | **E1** Can the local model tag questions? | `run.py [--model M] [--repeat N]` | — | `results/report.md` |
 | `learner-sim/` | **E2** Does BKT beat the rule method? | `run.py` (~3 min, no LLM) | `run.py --smoke` | `results/report.md` + SVG charts |
 | `personalization/` | **E3** Does personalization fit better without losing accuracy? | `run.py` (~40 min with local models) | `run.py --smoke` | `results/report.md`, `abbas_sample.csv` |
-| `privacy-audit/` | **E4** Does any profile or identity data reach the cloud? | `run.py` | `run.py --smoke` (exit 1 on any leak) | `results/report.md` |
+| `privacy-filter/` | **E6** Does the privacy filter find the PII in student questions? Benchmark vs Presidio, upgrades (trf, GLiNER, local LLM), ablation, held-out sets, answer quality after redaction | `run.py` (~10 min with Ollama; `--fast` ~1 min), `exposure.py`, `utility.py`; see its README | `run.py --smoke` | `results/report.md`, `results/holdout_test/report.md`, `results/exposure.md`, `results/utility.md` |
+| `privacy-audit/` | **E4** Does any profile or identity data reach the cloud? `--e6`: the E6 questions end to end, incl. "no personal health question reaches the cloud" | `run.py`, `run.py --e6` | `run.py --smoke` (exit 1 on any leak) | `results/report.md`, `results/e6/report.md` |
 
 ```powershell
 .venv\Scripts\python eval\understand-tagging\run.py --repeat 2

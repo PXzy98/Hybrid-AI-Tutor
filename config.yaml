@@ -37,7 +37,8 @@ rag:
 privacy:
   spacy_model: en_core_web_lg         # tests use en_core_web_sm
   score_threshold: 0.5                # phone numbers need a context word ("phone", "call"): 0.4 -> 0.75
-  entities: [PERSON, EMAIL_ADDRESS, PHONE_NUMBER, STUDENT_ID, GRADE, HEALTH_DETAIL]
+  entities: [PERSON, EMAIL_ADDRESS, PHONE_NUMBER, STUDENT_ID, GRADE, HEALTH_DETAIL,
+             POSTAL_CODE, HEALTH_CARD, ID_NUMBER, DATE_OF_BIRTH, ADDRESS]   # E6 A5; ages are not redacted
   local_only_types: [HEALTH_DETAIL]   # any of these -> cloud_safe = false
   allow_list: [Abbas]                 # course staff names, never redacted (titles like Dr./Prof. are ignored)
   log_raw_text: false                 # must stay false
