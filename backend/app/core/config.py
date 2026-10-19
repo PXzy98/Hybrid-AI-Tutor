@@ -177,7 +177,7 @@ class UnderstandLLMConfig(Section):
 
 class CloudLLMConfig(Section):
     timeout_s: float = 30
-    max_tokens: int = 800
+    max_tokens: int = 2000  # reasoning models count their hidden reasoning too (DeepSeek: up to ~800)
     fallback_to_local: bool = True
     history_turns: int = Field(0, ge=0)
     audit_log: str | None = None  # E4: record every cloud request to this JSONL file (app/llm/audit.py)

@@ -106,7 +106,7 @@ def main(argv: list[str] | None = None) -> int:
                 stored.append("\n".join(line for line in rows_after if line not in rows_before))
                 rows_before = set(rows_after)
                 if r.status_code != 200:
-                    print(f"ask failed ({r.status_code}) for {p.key}/{q['id']}", file=sys.stderr)
+                    print(f"ask failed ({r.status_code}) for {p.key}/{q['id']}: {r.text[:200]}", file=sys.stderr)
                     return 2
                 after = sum(1 for _ in log_path.open(encoding="utf-8")) if log_path.exists() else 0
                 body = r.json()
