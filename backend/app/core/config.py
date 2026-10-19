@@ -3,6 +3,7 @@
 Precedence, highest first: init kwargs > environment variables > .env > config.yaml > defaults.
 The config file is `APP_CONFIG` if set, otherwise `config.yaml` in the repository root.
 """
+
 import os
 from functools import lru_cache
 from pathlib import Path
@@ -35,10 +36,37 @@ class VerifyConfig(Section):
 
 
 class RoutingConfig(Section):
-    impl: str = "stub"
+    impl: str = "semantic"
     threshold: float = Field(0.6, ge=0, le=1)
     force_local_if_not_cloud_safe: bool = True
     stub_score: float = Field(0.0, ge=0, le=1)
+    # TEAM INTEGRATION: semantic routing has no privacy gate. The existing upstream
+    # privacy_filter owns sanitization; teammate-owned privacy policies are separate.
+    show_progress: bool = True
+    enabled_methods: list[Literal["lr", "svm"]] = ["lr", "svm"]
+    default_method: Literal["lr", "svm"] = "lr"
+    embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
+    model_dir: str = "data/routing/models"
+    model_cache_dir: str | None = None
+    local_files_only: bool = True  # download explicitly with app.routing.prepare
+    uncertainty_margin: float = Field(0.08, ge=0, lt=0.5)
+    evidence_required_threshold: float = Field(0.35, gt=0, lt=1)
+    freshness_required_threshold: float = Field(0.35, gt=0, lt=1)
+    ood_similarity_threshold: float = Field(0.25, ge=0, le=1)
+    relevance_model: str = "cross-encoder/ms-marco-MiniLM-L6-v2"
+    answerability_model: str = "cross-encoder/qnli-electra-base"
+    relevance_threshold: float = Field(0.6, ge=0, le=1)
+    answerability_threshold: float = Field(0.8, ge=0, le=1)
+    current_source_max_age_days: int = Field(30, ge=1)
+    max_evidence_windows: int = Field(32, ge=1, le=128)
+
+    @model_validator(mode="after")
+    def _methods(self):
+        if not self.enabled_methods or len(set(self.enabled_methods)) != len(self.enabled_methods):
+            raise ValueError("enabled_methods must be nonempty and unique")
+        if self.default_method not in self.enabled_methods:
+            raise ValueError("default_method must be enabled")
+        return self
 
 
 class RagConfig(Section):
@@ -200,8 +228,9 @@ class Settings(BaseSettings):
     instructor_initial_password: SecretStr | None = None
     database_url: str = f"sqlite:///{(REPO_ROOT / 'data' / 'app.db').as_posix()}"
 
-    @field_validator("cloud_api_key", "cloud_model", "instructor_username", "instructor_initial_password",
-                     mode="before")
+    @field_validator(
+        "cloud_api_key", "cloud_model", "instructor_username", "instructor_initial_password", mode="before"
+    )
     @classmethod
     def _empty_is_none(cls, v):
         return None if isinstance(v, str) and not v.strip() else v

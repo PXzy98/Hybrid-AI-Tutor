@@ -72,7 +72,8 @@ def test_every_admin_route_needs_the_instructor(dash):
 # ------------------------------------------------------------------------------ config
 def test_config_shows_the_runtime_subset(dash):
     c = config(dash())
-    assert c["values"] == {"routing_threshold": 0.6, "checkers": ["grounding", "medical_safety", "pii_leak",
+    assert c["values"] == {"routing_threshold": 0.6, "show_routing_progress": True,
+                           "checkers": ["grounding", "medical_safety", "pii_leak",
                                                                   "profile_leak"],
                            "knowledge": c["values"]["knowledge"], "weak_evidence": False,
                            "levels": {"basic_below": 0.4, "advanced_above": 0.7, "hysteresis": 0.05}}

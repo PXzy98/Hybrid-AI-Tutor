@@ -4,8 +4,10 @@ Design: docs/System_Design_v3.md §9. Teammates code against these models, so an
 must be listed under "Interface changes" in docs/IMPLEMENTATION_LOG.md. Never rename or remove a field
 without agreement.
 """
+
 from datetime import UTC, datetime
-from typing import Literal
+from time import perf_counter
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
 
@@ -27,6 +29,7 @@ class AskRequest(BaseModel):
     topic: str = Field(min_length=1)  # must be listed in config.yaml (checked by the API)
     question: str = Field(min_length=1, max_length=4000)
     language: str = "en"
+    routing_method: Literal["lr", "svm"] | None = None
 
 
 class PIIEntity(BaseModel):
@@ -53,6 +56,9 @@ class Chunk(BaseModel):
     score: float
     kc_ids: list[str] = []
     level: Level | None = None
+    # Optional; old Retriever implementations continue to work unchanged.
+    # approved=False rejects a source; verified_at/valid_until support freshness checks.
+    metadata: dict[str, Any] = {}
 
 
 class RouteInput(BaseModel):
@@ -62,11 +68,61 @@ class RouteInput(BaseModel):
     passage_count: int = Field(ge=0)
     level: Level | None = None
     kc_ids: list[str] = []
+    passages: list[Chunk] = []
+    method: Literal["lr", "svm"] | None = None
+    retrieval_status: str = "unknown"
+    conversation_context: str = ""
+
+    @property
+    def contextual_question(self) -> str:
+        if not self.conversation_context:
+            return self.sanitized_question
+        return (
+            f"Previous student questions: {self.conversation_context}\n"
+            f"Current question: {self.sanitized_question}"
+        )
+
+
+class SemanticAnalysis(BaseModel):
+    method: str
+    cloud_probability: float = Field(1, ge=0, le=1)
+    evidence_probability: float = Field(1, ge=0, le=1)
+    freshness_probability: float = Field(0, ge=0, le=1)
+    nearest_similarity: float = Field(0, ge=-1, le=1)
+    requires_evidence: bool = True
+    requires_fresh_evidence: bool = False
+    reliable: bool = False
+    label_origin: str = "unavailable"
+    reason: str = "semantic models unavailable"
+
+
+class EvidenceAssessment(BaseModel):
+    status: Literal["not_required", "unavailable", "empty", "insufficient", "uncertain", "sufficient"]
+    retrieved_count: int = 0
+    accepted_indices: list[int] = []
+    coverage: float = Field(0, ge=0, le=1)
+    # A QA-support estimate, not a factual-correctness probability.
+    support_scores: list[float] = []
+    reason: str = ""
+
+
+class RoutingProgress(BaseModel):
+    stage: str
+    status: Literal["running", "completed", "skipped", "failed"]
+    elapsed_ms: float
+    duration_ms: float | None = None
+    detail: str = ""
 
 
 class RouteScore(BaseModel):
     score: float = Field(ge=0.0, le=1.0)  # >= routing.threshold -> cloud
     reasons: list[str] = []
+    target: Target | None = None
+    method: str | None = None
+    analysis: SemanticAnalysis | None = None
+    evidence: EvidenceAssessment | None = None
+    # Only accepted course evidence is passed to either generator.
+    accepted_indices: list[int] = []
 
 
 # ------------------------------------------------------------------------------ LLM
@@ -210,6 +266,9 @@ class AskResponse(BaseModel):
     checks: list[CheckResult] = []
     warnings: list[str] = []
     timings_ms: dict[str, float] = {}
+    routing_method: str | None = None
+    routing_details: RouteScore | None = None
+    routing_progress: list[RoutingProgress] = []
 
 
 class RequestContext(BaseModel):
@@ -231,6 +290,29 @@ class RequestContext(BaseModel):
     checks: list[CheckResult] = []
     warnings: list[str] = []
     timings_ms: dict[str, float] = {}
+    semantic_analysis: SemanticAnalysis | None = None
+    retrieval_status: str = "unknown"
+    routing_progress: list[RoutingProgress] = []
+    show_routing_progress: bool = False
+    _progress_sink: Any = PrivateAttr(default=None)
+    _request_started: float = PrivateAttr(default_factory=perf_counter)
+
+    def set_progress_sink(self, sink) -> None:
+        self._progress_sink = sink
+
+    async def report(self, stage: str, status: str, detail: str = "", duration_ms: float | None = None):
+        if not self.show_routing_progress:
+            return
+        event = RoutingProgress(
+            stage=stage,
+            status=status,
+            detail=detail,
+            duration_ms=duration_ms,
+            elapsed_ms=round((perf_counter() - self._request_started) * 1000, 2),
+        )
+        self.routing_progress.append(event)
+        if self._progress_sink is not None:
+            await self._progress_sink(event)
 
     # placeholder -> original value. Private: never serialized, logged or shown in repr.
     _pii_mapping: dict[str, str] = PrivateAttr(default_factory=dict)

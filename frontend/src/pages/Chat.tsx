@@ -2,15 +2,21 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 
-import { api, type AskResponse, type FeedbackAction } from "../api/endpoints";
+import { api, type AskBody, type AskResponse, type FeedbackAction } from "../api/endpoints";
 import Band from "../components/Band";
 import CheckCard from "../components/CheckCard";
+import FeedbackSurvey from "../components/FeedbackSurvey";
+import { TRIAL_QUESTIONS } from "../components/surveyScenarios";
 import TopicPicker from "../components/TopicPicker";
+import RoutingProgress, { type RoutingTrace } from "../components/RoutingProgress";
 
 type Message =
   | { role: "student"; text: string }
   | { role: "tutor"; reply: AskResponse }
-  | { role: "error"; text: string };
+  | { role: "error"; text: string }
+  | { role: "routing"; trace: RoutingTrace };
+
+type SendInput = { question: string; topic: string; sessionId: string; traceId: string; method: NonNullable<AskBody["routing_method"]> };
 
 const FEEDBACK: { action: FeedbackAction; label: string }[] = [
   { action: "more_detail", label: "More detail" },
@@ -23,20 +29,50 @@ export default function Chat() {
   const [topic, setTopic] = useState("high_blood_pressure");
   const [byTopic, setByTopic] = useState<Record<string, { sessionId: string; messages: Message[] }>>({});
   const [question, setQuestion] = useState("");
+  const [method, setMethod] = useState<NonNullable<AskBody["routing_method"]>>("lr");
+  const routingOptions = useQuery({ queryKey: ["routing-options"], queryFn: api.routingOptions, refetchInterval: 5000 });
+  const controller = useRef<AbortController | null>(null);
+  const traceSequence = useRef(0);
+  useEffect(() => () => controller.current?.abort(), []);
+  useEffect(() => {
+    const options = routingOptions.data;
+    if (options && !options.methods.some((m) => m.id === method)) setMethod(options.default_method as typeof method);
+  }, [routingOptions.data, method]);
   const profile = useQuery({ queryKey: ["profile"], queryFn: api.profile });
   const conversation = byTopic[topic] ?? { sessionId: "", messages: [] };
   const endRef = useRef<HTMLDivElement>(null);
 
-  const push = (m: Message, sessionId?: string) =>
+  const push = (m: Message, targetTopic = topic, sessionId?: string) =>
     setByTopic((prev) => {
-      const cur = prev[topic] ?? { sessionId: "", messages: [] };
-      return { ...prev, [topic]: { sessionId: sessionId ?? cur.sessionId, messages: [...cur.messages, m] } };
+      const cur = prev[targetTopic] ?? { sessionId: "", messages: [] };
+      return { ...prev, [targetTopic]: { sessionId: sessionId ?? cur.sessionId, messages: [...cur.messages, m] } };
     });
-
+  const updateTrace = (input: SendInput, patch: Partial<RoutingTrace>, event?: RoutingTrace["events"][number]) =>
+    setByTopic((prev) => {
+      const cur = prev[input.topic] ?? { sessionId: "", messages: [] };
+      return { ...prev, [input.topic]: { ...cur, messages: cur.messages.map((m) =>
+        m.role === "routing" && m.trace.id === input.traceId
+          ? { ...m, trace: { ...m.trace, ...patch, events: event ? [...m.trace.events, event] : patch.events ?? m.trace.events } }
+          : m) } };
+    });
   const ask = useMutation({
-    mutationFn: (q: string) => api.ask({ topic, question: q, session_id: conversation.sessionId, course_id: "default", language: "en" }),
-    onSuccess: (reply) => push({ role: "tutor", reply }, reply.session_id),
-    onError: (e) => push({ role: "error", text: (e as Error).message }),
+    mutationFn: (input: SendInput) => {
+      controller.current = new AbortController();
+      return api.askStream({ topic: input.topic, question: input.question, session_id: input.sessionId,
+        course_id: "default", language: "en", routing_method: input.method }, (event) => {
+        if (event.type === "meta") updateTrace(input, { visible: event.data.show_progress, method: event.data.method });
+        if (event.type === "progress") updateTrace(input, {}, event.data);
+        if (event.type === "result") updateTrace(input, { details: event.data.routing_details, events: event.data.routing_progress ?? [] });
+      }, controller.current.signal);
+    },
+    onSuccess: (reply, input) => {
+      updateTrace(input, { running: false, finishedAt: Date.now(), details: reply.routing_details });
+      push({ role: "tutor", reply }, input.topic, reply.session_id);
+    },
+    onError: (e, input) => {
+      updateTrace(input, { running: false, finishedAt: Date.now(), error: (e as Error).message });
+      push({ role: "error", text: (e as Error).message }, input.topic);
+    },
   });
   const feedback = useMutation({ mutationFn: api.feedback });
 
@@ -49,10 +85,13 @@ export default function Chat() {
   function send(e: FormEvent) {
     e.preventDefault();
     const q = question.trim();
-    if (!q || ask.isPending) return;
+    if (!q || ask.isPending || !routingOptions.data) return;
+    const traceId = `routing-${++traceSequence.current}`;
     push({ role: "student", text: q });
+    push({ role: "routing", trace: { id: traceId, method, visible: routingOptions.data.show_progress,
+      events: [], running: true, startedAt: Date.now() } });
     setQuestion("");
-    ask.mutate(q);
+    ask.mutate({ question: q, topic, sessionId: conversation.sessionId, traceId, method });
   }
 
   const lastTutor = [...conversation.messages].reverse().find((m) => m.role === "tutor") as
@@ -79,6 +118,8 @@ export default function Chat() {
         {conversation.messages.map((m, i) =>
           m.role === "student" ? (
             <div key={i} className="self-end max-w-[80%] rounded-lg bg-teal-700 px-4 py-2 text-white">{m.text}</div>
+          ) : m.role === "routing" ? (
+            routingOptions.data?.show_progress && m.trace.visible ? <RoutingProgress key={m.trace.id} trace={m.trace} /> : null
           ) : m.role === "error" ? (
             <p key={i} role="alert" className="text-sm text-rose-700">{m.text}</p>
           ) : (
@@ -86,16 +127,36 @@ export default function Chat() {
           ),
         )}
         {ask.isPending && <p className="text-sm text-slate-500">The tutor is thinking…</p>}
+        {lastTutor && (
+          <div className="self-start">
+            <FeedbackSurvey key={topic} topic={topic} />
+          </div>
+        )}
         <div ref={endRef} />
       </section>
 
+      {conversation.messages.length === 0 && TRIAL_QUESTIONS[topic] && (
+        <button type="button" className="btn-secondary self-start text-sm"
+                onClick={() => setQuestion(TRIAL_QUESTIONS[topic])}>
+          Try a sample question for this topic
+        </button>
+      )}
       <form onSubmit={send} className="sticky bottom-0 flex flex-col gap-2 border-t border-slate-200 bg-slate-50 pt-3">
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          <label htmlFor="routing-method" className="text-slate-700">Routing method</label>
+          <select id="routing-method" className="input max-w-72 py-1.5" value={method}
+                  disabled={ask.isPending || !routingOptions.data || routingOptions.data.methods.length < 2}
+                  onChange={(e) => setMethod(e.target.value as typeof method)}>
+            {routingOptions.data?.methods.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
+          </select>
+          {routingOptions.isError && <span role="alert" className="text-xs text-rose-700">Could not load routing options. Refresh and retry.</span>}
+        </div>
         <label htmlFor="question" className="sr-only">Your question</label>
         <div className="flex gap-2">
           <textarea id="question" rows={2} className="input resize-y" placeholder="Type your question…" value={question}
                     onChange={(e) => setQuestion(e.target.value)}
                     onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) send(e); }} />
-          <button type="submit" className="btn-primary self-end" disabled={!question.trim() || ask.isPending}>Send</button>
+          <button type="submit" className="btn-primary self-end" disabled={!question.trim() || ask.isPending || !routingOptions.data}>Send</button>
         </div>
         {profile.data?.personalized && (
           <div className="flex flex-wrap items-center gap-2 text-sm" role="group" aria-label="How should answers look?">

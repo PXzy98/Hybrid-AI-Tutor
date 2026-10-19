@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from app.core.config import DEFAULT_CONFIG, get_settings
+from app.core.config import DEFAULT_CONFIG, Settings, get_settings
 
 
 def _deep_merge(base: dict, overrides: dict) -> dict:
@@ -21,7 +21,11 @@ def _deep_merge(base: dict, overrides: dict) -> dict:
 # Applied under every test's config: the small spaCy model (the large one is for production).
 # TEST_LEARNER_KNOWLEDGE=rule runs the whole suite with the fallback knowledge model.
 TEST_BASE = {"privacy": {"spacy_model": "en_core_web_sm"},
-             "learner": {"knowledge": os.environ.get("TEST_LEARNER_KNOWLEDGE", "bkt")}}
+             "learner": {"knowledge": os.environ.get("TEST_LEARNER_KNOWLEDGE", "bkt")},
+             "routing": {"impl": "stub"}, "rag": {"impl": "stub"},
+             "llm": {"cloud": {"fallback_to_local": True}},
+             "pipeline": ["privacy_filter", "understand", "learner_context", "retrieve", "route",
+                          "generate", "restore", "verify", "attach_check", "record"]}
 
 
 def _write_config(path: Path, overrides: dict) -> None:
@@ -32,6 +36,8 @@ def _write_config(path: Path, overrides: dict) -> None:
 @pytest.fixture(autouse=True)
 def _fresh_settings(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     """Every test starts with an empty settings cache and its own SQLite file (never data/app.db)."""
+    # Isolate tests from machine-specific .env (including RAG and privacy overrides).
+    monkeypatch.setitem(Settings.model_config, "env_file", None)
     _write_config(tmp_path / "config.yaml", {})
     monkeypatch.setenv("APP_CONFIG", str(tmp_path / "config.yaml"))
     monkeypatch.setenv("DATABASE_URL", f"sqlite:///{(tmp_path / 'test.db').as_posix()}")

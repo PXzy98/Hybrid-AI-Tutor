@@ -1,0 +1,12 @@
+{
+  "branch": "integration/main-rag-semantic",
+  "repository": "https://github.com/PXzy98/Hybrid-AI-Tutor",
+  "sources": {
+    "main": "4cf64d7bea85e249592961649289720e30782cfb",
+    "feature/rag-siyun-clean": "2ca304ffb0ea27e8a6b3dc1cf855af0fa5aa60d7",
+    "semantic-routing-tongkai": "090803b73e5d11881232c44e34ff1dc588782921"
+  },
+  "trained_questions": 500,
+  "label_origin": "prototype_policy",
+  "remote_push_performed": false
+}

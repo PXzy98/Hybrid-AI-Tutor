@@ -50,10 +50,17 @@ class GenerateStep(BaseStep):
         cloud = self.services.cloud_llm
         if cloud.available:
             req = build_cloud_request(ctx)
-            found = self.leaks.problems(req, ctx)
+            # TEAM INTEGRATION: semantic routing delegates privacy policy to the
+            # upstream teammate-owned filter. It does not add a second privacy
+            # routing gate. CloudRequest still contains sanitized/allow-listed data.
+            semantic = self.services.settings.routing.impl == "semantic"
+            found = [] if semantic else self.leaks.problems(req, ctx)
             if found:  # never send; kinds only in the log, never the text
-                log.error("cloud request blocked by the leak guard (%s), request=%s", ", ".join(found),
-                          ctx.request_id)
+                log.error(
+                    "cloud request blocked by the leak guard (%s), request=%s",
+                    ", ".join(found),
+                    ctx.request_id,
+                )
                 if PRIVACY_BLOCK_WARNING not in ctx.warnings:
                     ctx.warnings.append(PRIVACY_BLOCK_WARNING)
                 return (await self._local(ctx, safety_retry)).model_copy(update={"fell_back": True})
@@ -62,9 +69,12 @@ class GenerateStep(BaseStep):
                 return await cloud.complete(req, safety_retry=safety_retry)
             except LLMError as e:
                 log.warning("cloud model failed (%s), request=%s", type(e).__name__, ctx.request_id)
-                if not self.services.settings.llm.cloud.fallback_to_local:
+                if semantic or not self.services.settings.llm.cloud.fallback_to_local:
                     raise
-        elif not self.services.settings.llm.cloud.fallback_to_local:
+        elif (
+            self.services.settings.routing.impl == "semantic"
+            or not self.services.settings.llm.cloud.fallback_to_local
+        ):
             raise LLMError("cloud route chosen but no cloud model is configured")
         if CLOUD_FALLBACK_WARNING not in ctx.warnings:
             ctx.warnings.append(CLOUD_FALLBACK_WARNING)

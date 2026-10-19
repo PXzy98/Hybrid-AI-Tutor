@@ -90,7 +90,7 @@ def get_logs(_: Instructor, services: ServicesDep, page: int = 1, page_size: int
 @router.get("/content", response_model=ContentStatus)
 def get_content(_: Instructor, services: ServicesDep):
     topics = list(dict.fromkeys(services.settings.topics() + services.content.topics()))
-    return content_status(services.content, topics, services.settings.materials_dir)
+    return content_status(services.content, topics, services.settings.materials_dir, services.retriever)
 
 
 @router.post("/topics/{topic}/materials", response_model=UploadResult, status_code=status.HTTP_201_CREATED)

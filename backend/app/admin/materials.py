@@ -6,13 +6,17 @@ waits there for the RAG pipeline.
 """
 import asyncio
 import logging
+import os
 import re
+import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Literal
 
 from pydantic import BaseModel
 
 from app.learner.content import ContentStore
+from app.rag.documents import DocumentError
 
 log = logging.getLogger("app.admin")
 
@@ -37,6 +41,15 @@ class UploadResult(BaseModel):
     ingest_error: str | None = None
 
 
+class RagMaterial(BaseModel):
+    name: str
+    origin: Literal["builtin", "uploaded"]
+    source: str
+    indexed: bool
+    passage_count: int = 0
+    message: str | None = None
+
+
 class TopicContentStatus(BaseModel):
     topic: str
     name: str
@@ -46,6 +59,7 @@ class TopicContentStatus(BaseModel):
     misconceptions: int
     misconceptions_reviewed: int
     materials: list[MaterialFile]
+    rag_materials: list[RagMaterial] = []
 
 
 class ContentStatus(BaseModel):
@@ -69,7 +83,8 @@ def describe(path: Path) -> MaterialFile:
 def list_materials(folder: Path) -> list[MaterialFile]:
     if not folder.is_dir():
         return []
-    return [describe(p) for p in sorted(folder.iterdir()) if p.is_file()]
+    return [describe(p) for p in sorted(folder.iterdir())
+            if p.is_file() and not p.is_symlink() and p.suffix.lower() in ALLOWED_SUFFIXES]
 
 
 async def store_upload(folder: Path, filename: str, data: bytes, retriever, topic: str,
@@ -81,9 +96,25 @@ async def store_upload(folder: Path, filename: str, data: bytes, retriever, topi
         raise MaterialError(f"the file is larger than {MAX_BYTES // (1024 * 1024)} MB")
     folder.mkdir(parents=True, exist_ok=True)
     path = folder / name
-    if path.exists() and not replace:
+    reserved = False
+    if not replace and path.exists():
         raise FileExistsError(name)
-    path.write_bytes(data)
+    fd, temporary = tempfile.mkstemp(dir=folder, prefix=".upload_", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "wb") as stream:
+            stream.write(data)
+        if not replace:
+            # Reserve exclusively only after all bytes are ready for atomic publication.
+            with path.open("xb"):
+                pass
+            reserved = True
+        os.replace(temporary, path)
+    except BaseException:
+        if reserved:
+            path.unlink(missing_ok=True)
+        raise
+    finally:
+        Path(temporary).unlink(missing_ok=True)
     ingest = getattr(retriever, "ingest", None)
     if not callable(ingest):
         return UploadResult(file=describe(path), ingested=False)
@@ -91,19 +122,22 @@ async def store_upload(folder: Path, filename: str, data: bytes, retriever, topi
         await asyncio.to_thread(ingest, topic, str(path))
     except Exception as e:  # noqa: BLE001  the file is stored either way; indexing can be retried
         log.warning("retriever ingest failed for topic %s (%s)", topic, type(e).__name__)
-        return UploadResult(file=describe(path), ingested=False, ingest_error=type(e).__name__)
+        message = str(e) if isinstance(e, DocumentError) else type(e).__name__
+        return UploadResult(file=describe(path), ingested=False, ingest_error=message)
     return UploadResult(file=describe(path), ingested=True)
 
 
-def content_status(content: ContentStore, topics: list[str], materials_dir) -> ContentStatus:
+def content_status(content: ContentStore, topics: list[str], materials_dir, retriever=None) -> ContentStatus:
     out = []
     for t in topics:
         tc = content.topic(t)
         if tc is None:
             continue
+        status = getattr(retriever, "material_status", None)
+        indexed = status(t) if callable(status) else []
         out.append(TopicContentStatus(
             topic=t, name=tc.name, kcs=len(tc.kcs), items=len(tc.items),
             items_reviewed=sum(i.reviewed for i in tc.items), misconceptions=len(tc.misconceptions),
             misconceptions_reviewed=sum(m.reviewed for m in tc.misconceptions),
-            materials=list_materials(materials_dir(t))))
+            materials=list_materials(materials_dir(t)), rag_materials=indexed))
     return ContentStatus(serve_unreviewed=content.serve_unreviewed, topics=out)

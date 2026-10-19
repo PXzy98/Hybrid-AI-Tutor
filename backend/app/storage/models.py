@@ -48,6 +48,19 @@ class AuthSession(SQLModel, table=True):
     expires_at: datetime
 
 
+class SurveyResponse(SQLModel, table=True):
+    """Anonymous numeric ratings only; never store student IDs or prompt text."""
+
+    __tablename__ = "survey_response"
+
+    id: int | None = Field(default=None, primary_key=True)
+    topic: str = Field(index=True, max_length=64)
+    helpfulness: int = Field(ge=1, le=5)
+    material_relevance: int = Field(ge=1, le=5)
+    clarity: int = Field(ge=1, le=5)
+    source_confidence: int = Field(ge=1, le=5)
+
+
 class RequestLog(SQLModel, table=True):
     __tablename__ = "request_log"
 

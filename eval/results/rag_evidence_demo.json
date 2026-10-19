@@ -1,0 +1,60 @@
+﻿{
+  "demo": "ELG5902 course-specific RAG evidence",
+  "question": "What are the symptoms of asthma?",
+  "retriever": "medical_hybrid",
+  "retrieved": [
+    {
+      "evidence_id": "7e8994d203938c07",
+      "source_title": "Asthma",
+      "source_url": "https://medlineplus.gov/asthma.html",
+      "source_last_modified": "2024-01-24",
+      "corpus_fetched_at": "2026-10-06T15:05:33+00:00",
+      "score": 1.0,
+      "kc_ids": [
+        "AST.1"
+      ],
+      "level": "basic",
+      "text_excerpt": "What are the symptoms of asthma?\nThe symptoms of asthma include:\nChest tightness\nCoughing, especially at night or early morning\nShortness of breath\nWheezing, which causes a whistling sound when you breathe out\nThese symptoms can r"
+    },
+    {
+      "evidence_id": "4be1c63a5d8fab2c",
+      "source_title": "Asthma",
+      "source_url": "https://medlineplus.gov/asthma.html",
+      "source_last_modified": "2024-01-24",
+      "corpus_fetched_at": "2026-10-06T15:05:33+00:00",
+      "score": 0.798394,
+      "kc_ids": [
+        "AST.1"
+      ],
+      "level": "basic",
+      "text_excerpt": "What are the treatments for asthma?\nShort-term relief medicines, also called quick-relief medicines. They help prevent symptoms or relieve symptoms during an asthma attack. They include an inhaler to carry with you all the time. I"
+    },
+    {
+      "evidence_id": "457ad6c71f1c0185",
+      "source_title": "Asthma",
+      "source_url": "https://medlineplus.gov/asthma.html",
+      "source_last_modified": "2024-01-24",
+      "corpus_fetched_at": "2026-10-06T15:05:33+00:00",
+      "score": 0.76632,
+      "kc_ids": [
+        "AST.1"
+      ],
+      "level": "basic",
+      "text_excerpt": "What are the treatments for asthma?\nIf you have asthma, you will work with your health care provider to create a treatment plan. The plan will include ways to manage your asthma symptoms and prevent asthma attacks. It will include"
+    }
+  ],
+  "hypothetical_numeric_claim_check": {
+    "status": "numeric_evidence_missing",
+    "numbers_in_claim": [
+      "20%",
+      "40%"
+    ],
+    "candidate_evidence_ids": [],
+    "note": "No retrieved passage contains all claimed numeric tokens. Do not present this quantitative claim as evidence-grounded."
+  },
+  "pubmed": {
+    "status": "not_requested",
+    "note": "Not connected to automatic student/pipeline requests.",
+    "public_candidates": []
+  }
+}

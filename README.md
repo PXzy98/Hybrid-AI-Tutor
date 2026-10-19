@@ -1,3 +1,13 @@
+# Integrated main + RAG + semantic routing (v3)
+
+完整保留教师后台，合并真实医学 RAG 和 500 题 LR/SVM routing。
+Windows 首次运行请看 [开始使用.md](开始使用.md)，版本来源与限制见 [docs/INTEGRATION.md](docs/INTEGRATION.md)。
+安装：Python 3.12 运行 `setup_local.py`；启动：分别运行 `start_backend.ps1` 与 `start_frontend.ps1`。
+
+---
+
+以下为主分支原有项目说明：
+
 # Privacy-Aware Hybrid AI Tutor
 
 A health-education tutor (ELG 5902, Group 1). Students pick one of five topics (High Blood Pressure, Type 2 Diabetes, Asthma, Migraine, Pneumonia) and ask questions. The system removes private information locally, then routes each question to a local model (Ollama) or a cloud model. Answers are grounded in course material (RAG) and adapted to what the student already knows. The tutor tracks the student's mastery of each knowledge component and adapts the level, the material and the check questions. Learning preferences only change how the answer is presented. The learner profile never leaves the local network.

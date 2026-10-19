@@ -1,0 +1,32 @@
+[
+  {
+    "id": "hypertension",
+    "title": "High Blood Pressure",
+    "url": "https://medlineplus.gov/highbloodpressure.html",
+    "publisher": "MedlinePlus, U.S. National Library of Medicine"
+  },
+  {
+    "id": "type2_diabetes",
+    "title": "Type 2 Diabetes",
+    "url": "https://medlineplus.gov/diabetestype2.html",
+    "publisher": "MedlinePlus, U.S. National Library of Medicine"
+  },
+  {
+    "id": "asthma",
+    "title": "Asthma",
+    "url": "https://medlineplus.gov/asthma.html",
+    "publisher": "MedlinePlus, U.S. National Library of Medicine"
+  },
+  {
+    "id": "migraine",
+    "title": "Migraine",
+    "url": "https://medlineplus.gov/migraine.html",
+    "publisher": "MedlinePlus, U.S. National Library of Medicine"
+  },
+  {
+    "id": "pneumonia",
+    "title": "Pneumonia",
+    "url": "https://medlineplus.gov/pneumonia.html",
+    "publisher": "MedlinePlus, U.S. National Library of Medicine"
+  }
+]

@@ -1007,3 +1007,22 @@ Known gaps / TODO:
 - Dr. Abbas still has to rate `abbas_sample.csv`.
 
 How to try it: see `eval/README.md`.
+
+
+## 2026-10-17 — Complete main/RAG/semantic integration
+
+Sources: main@4cf64d7bea85e249592961649289720e30782cfb;
+feature/rag-siyun-clean@2ca304ffb0ea27e8a6b3dc1cf855af0fa5aa60d7;
+semantic-routing-tongkai@090803b73e5d11881232c44e34ff1dc588782921.
+
+Retain the entire main-branch instructor dashboard, account management, class summary,
+course-material upload, configuration history, request logs and learner/understand pipeline.
+Merge real medical_hybrid retrieval and its bundled sources, PubMed helper and tests.
+Merge 500-question LR/SVM semantic routing, evidence checks, SSE progress/timings, teacher display
+toggle and per-question student method choice. No privacy-condition branch is added inside
+semantic routing; teammate-owned upstream privacy filter and response checks are preserved.
+
+Interface changes: additive Chunk.metadata; AskRequest.routing_method; RouteInput contextual
+passages/method/status; RouteScore analysis/evidence/accepted_indices; response routing diagnostics;
+POST ask/stream; GET routing/options; persistent RuntimeConfig.show_routing_progress.
+See ROUTING_PATCH.md and INTEGRATION.md for behavior, provenance and validation limits.

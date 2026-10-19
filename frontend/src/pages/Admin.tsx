@@ -4,6 +4,7 @@ import ClassSummaryPage from "./admin/ClassSummary";
 import ContentPage from "./admin/Content";
 import LogsPage from "./admin/Logs";
 import SettingsPage from "./admin/Settings";
+import SurveyPage from "./admin/Survey";
 import StudentsPage from "./admin/Students";
 
 const TABS = [
@@ -12,6 +13,7 @@ const TABS = [
   { to: "settings", label: "Settings" },
   { to: "logs", label: "Logs" },
   { to: "content", label: "Content" },
+  { to: "survey", label: "Feedback" },
 ];
 
 const tabClass = ({ isActive }: { isActive: boolean }) =>
@@ -37,6 +39,7 @@ export default function Admin() {
         <Route path="settings" element={<SettingsPage />} />
         <Route path="logs" element={<LogsPage />} />
         <Route path="content" element={<ContentPage />} />
+        <Route path="survey" element={<SurveyPage />} />
         <Route path="*" element={<Navigate to="students" replace />} />
       </Routes>
     </div>

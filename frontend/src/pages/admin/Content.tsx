@@ -1,7 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, useState } from "react";
 
-import { admin } from "../../api/endpoints";
+import { admin, type ContentStatus } from "../../api/endpoints";
+
+type RagMaterial = NonNullable<ContentStatus["topics"][number]["rag_materials"]>[number];
 
 const kb = (n: number) => (n < 1024 * 1024 ? `${Math.ceil(n / 1024)} KB` : `${(n / 1024 / 1024).toFixed(1)} MB`);
 
@@ -29,11 +31,30 @@ function Upload({ topic }: { topic: string }) {
       <button type="submit" className="btn-secondary py-1" disabled={!file || up.isPending}>Upload</button>
       {up.isSuccess && (
         <span role="status" className="text-teal-800">
-          Uploaded{up.data.ingested ? " and indexed." : ". It will be indexed by the RAG pipeline."}
+          {up.data.ingested ? "Uploaded and searchable." : "File saved, but not searchable."}
+          {up.data.ingest_error && <span className="ml-1 text-amber-800">{up.data.ingest_error}</span>}
         </span>
       )}
       {up.isError && <span role="alert" className="text-rose-700">{(up.error as Error).message}</span>}
     </form>
+  );
+}
+
+function MaterialList({ materials, empty }: { materials: RagMaterial[]; empty: string }) {
+  if (!materials.length) return <p className="text-sm text-slate-600">{empty}</p>;
+  return (
+    <ul className="space-y-2 text-sm">
+      {materials.map((m) => (
+        <li key={m.source} className="break-words">
+          <span className="font-medium">{m.name}</span>
+          <span className={m.indexed ? "ml-2 text-teal-800" : "ml-2 text-amber-800"}>
+            {m.indexed ? `Searchable · ${m.passage_count} passages` : "Not searchable"}
+          </span>
+          {m.source.startsWith("https://") && <a href={m.source} target="_blank" rel="noreferrer" className="ml-2 underline">Source</a>}
+          {m.message && <p className="text-amber-800">{m.message}</p>}
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -59,13 +80,17 @@ export default function ContentPage() {
             <div><dt className="text-slate-600">Check questions reviewed</dt><dd>{t.items_reviewed} of {t.items}</dd></div>
             <div><dt className="text-slate-600">Corrections reviewed</dt><dd>{t.misconceptions_reviewed} of {t.misconceptions}</dd></div>
           </dl>
-          <h3 className="mt-4 text-sm font-semibold">Course materials</h3>
-          {t.materials.length === 0 ? (
+          <h3 className="mt-4 text-sm font-semibold">Built-in materials</h3>
+          <MaterialList materials={(t.rag_materials ?? []).filter((m) => m.origin === "builtin")} empty="No built-in materials are currently searchable." />
+          <h3 className="mt-4 text-sm font-semibold">Uploaded materials</h3>
+          {(t.rag_materials ?? []).some((m) => m.origin === "uploaded") ? (
+            <MaterialList materials={(t.rag_materials ?? []).filter((m) => m.origin === "uploaded")} empty="No uploads yet." />
+          ) : t.materials.length === 0 ? (
             <p className="text-sm text-slate-600">No uploads yet.</p>
           ) : (
             <ul className="text-sm">
               {t.materials.map((m) => (
-                <li key={m.name}>{m.name} <span className="text-slate-500">({kb(m.size_bytes)}, {new Date(m.uploaded_at).toLocaleDateString()})</span></li>
+                <li key={m.name}>{m.name} <span className="text-slate-500">({kb(m.size_bytes)}, {new Date(m.uploaded_at).toLocaleDateString()}) · Saved; search status unavailable</span></li>
               ))}
             </ul>
           )}
