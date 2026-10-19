@@ -1,25 +1,29 @@
 """Grounding (design §7.1 step 8): is the answer supported by the retrieved course material?
 
 Heuristic: an answer sentence counts as supported when at least 20% of its content words appear in one
-passage. If fewer than half of the sentences are supported, warn. Without passages there is nothing to
-check against, so the check passes with "no material". A reviewed misconception note appended by the
+passage. If fewer than half of the sentences are supported, warn. A missing source or unsupported
+numeric claim warns rather than being labelled as verified. A reviewed misconception note appended by the
 restore step (Step 12) is catalog text, not generated text, so it is not checked.
 """
+
 import re
 
 from app.core.registry import checkers
 from app.core.schemas import CheckResult, RequestContext
 from app.learner.misconceptions import NOTE_HEADER
+from app.rag.evidence import check_numeric_claim, evidence_from_chunks
 
 NAME = "grounding"
 SENTENCE_OVERLAP = 0.2
 SUPPORTED_SHARE = 0.5
 MIN_WORDS = 4  # very short sentences ("Good question!") are ignored
 WORD_RE = re.compile(r"[a-z]{3,}")
-STOPWORDS = set("""the and for are but not you your with this that from have has had was were will would can
+STOPWORDS = set(
+    """the and for are but not you your with this that from have has had was were will would can
 could should may might their there they them then than what when where which who why how all any some
 more most less much many also into onto over under about after before because while does did done its
-our out own same such too very just only both each few other these those here been being""".split())
+our out own same such too very just only both each few other these those here been being""".split()
+)
 
 
 def content_words(text: str) -> set[str]:
@@ -49,8 +53,17 @@ class GroundingChecker:
 
     def check(self, ctx: RequestContext) -> CheckResult:
         if not ctx.passages:
-            return CheckResult(name=NAME, status="pass", detail="no material")
+            return CheckResult(name=NAME, status="warn", detail="no material")
         generated = (ctx.answer or "").split(NOTE_HEADER)[0]
         share, n = supported_share(generated, [c.text for c in ctx.passages])
         detail = f"{share:.0%} of {n} sentences supported"
-        return CheckResult(name=NAME, status="pass" if share >= SUPPORTED_SHARE else "warn", detail=detail)
+        records = evidence_from_chunks(ctx.passages)
+        missing_numbers = sum(
+            check_numeric_claim(sentence, records).status == "numeric_evidence_missing"
+            for sentence in re.split(r"(?<=[.!?])\s+|\n+", generated)
+            if sentence.strip()
+        )
+        if missing_numbers:
+            detail += f"; {missing_numbers} sentence(s) have numeric claims absent from any single passage"
+        status = "pass" if share >= SUPPORTED_SHARE and not missing_numbers else "warn"
+        return CheckResult(name=NAME, status=status, detail=detail)

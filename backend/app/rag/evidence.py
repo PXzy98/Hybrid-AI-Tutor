@@ -3,10 +3,11 @@
 These helpers DO NOT prove clinical truth. A number being present in a source
 still requires comparing the population, outcome, timeframe and risk measure.
 """
+
 import json
 import re
 from dataclasses import asdict, dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from app.core.config import REPO_ROOT
 from app.core.schemas import Chunk
@@ -62,18 +63,27 @@ def evidence_from_chunks(chunks: list[Chunk], manifest: Path = _MANIFEST) -> lis
     evidence = []
     for chunk in chunks:
         source = metadata.get(chunk.source, {})
-        evidence.append(EvidenceRecord(
-            evidence_id=_chunk_id(chunk.topic, chunk.source, chunk.text),
-            topic=chunk.topic, text=chunk.text,
-            source_url=chunk.source,
-            source_title=source.get("title", "Unknown source"),
-            source_publisher=source.get("publisher", "Unknown publisher"),
-            source_last_modified=source.get("source_last_modified"),
-            corpus_fetched_at=source.get("fetched_at_utc"),
-            relevance_score=chunk.score,
-            suggested_kc_ids=tuple(chunk.kc_ids),
-            suggested_level=chunk.level,
-        ))
+        if chunk.source.startswith("course/"):
+            title = PurePosixPath(chunk.source).stem.replace("_", " ").replace("-", " ")
+            publisher = "Instructor upload (review status unverified)"
+        else:
+            title = source.get("title", "Unknown source")
+            publisher = source.get("publisher", "Unknown publisher")
+        evidence.append(
+            EvidenceRecord(
+                evidence_id=_chunk_id(chunk.topic, chunk.source, chunk.text),
+                topic=chunk.topic,
+                text=chunk.text,
+                source_url=chunk.source,
+                source_title=title,
+                source_publisher=publisher,
+                source_last_modified=source.get("source_last_modified"),
+                corpus_fetched_at=source.get("fetched_at_utc"),
+                relevance_score=chunk.score,
+                suggested_kc_ids=tuple(chunk.kc_ids),
+                suggested_level=chunk.level,
+            )
+        )
     return evidence
 
 
@@ -85,20 +95,22 @@ def check_numeric_claim(claim: str, evidence: list[EvidenceRecord]) -> NumericCl
     values = _numbers(claim)
     if not values:
         return NumericClaimCheck(
-            "not_a_numeric_claim", (), (),
+            "not_a_numeric_claim",
+            (),
+            (),
             "No numeric tokens detected; other factual claims still require verification.",
         )
-    candidates = [
-        record.evidence_id
-        for record in evidence
-        if values <= _numbers(record.text)
-    ]
+    candidates = [record.evidence_id for record in evidence if values <= _numbers(record.text)]
     if candidates:
         status = "numbers_present_context_unverified"
-        note = ("Same numeric tokens appear in a retrieved passage; verify study population, "
-                "denominator, endpoint, units, absolute/relative risk and publication context.")
+        note = (
+            "Same numeric tokens appear in a retrieved passage; verify study population, "
+            "denominator, endpoint, units, absolute/relative risk and publication context."
+        )
     else:
         status = "numeric_evidence_missing"
-        note = ("No retrieved passage contains all claimed numeric tokens. "
-                "Do not present this quantitative claim as evidence-grounded.")
+        note = (
+            "No retrieved passage contains all claimed numeric tokens. "
+            "Do not present this quantitative claim as evidence-grounded."
+        )
     return NumericClaimCheck(status, tuple(sorted(values)), tuple(candidates), note)

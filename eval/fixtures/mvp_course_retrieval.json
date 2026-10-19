@@ -1,0 +1,138 @@
+{
+  "dataset_id": "course_upload_mvp_fixture_v1",
+  "disclaimer": "Synthetic instructor-style documents for engineering evaluation only. Ten manually annotated one-relevant-passage questions; this is not an independent medical or clinical benchmark.",
+  "materials": [
+    {
+      "topic": "high_blood_pressure",
+      "filename": "cuff_workshop.txt",
+      "text": "Cuff skills workshop\n\nThe MapleCuff classroom station uses three sequential seated blood-pressure readings after a quiet rest. In this fictional exercise, learners record the final reading in their practice worksheet.\n\nThe station also asks students to note the cuff size and the arm position."
+    },
+    {
+      "topic": "high_blood_pressure",
+      "filename": "units_practice.txt",
+      "text": "Measurement units lecture\n\nThe BridgeGauge practice card asks learners to write pressure readings in millimetres of mercury, abbreviated mmHg. Its example uses two numbers separated by a slash.\n\nThis is a classroom notation exercise, not a patient diagnosis."
+    },
+    {
+      "topic": "asthma",
+      "filename": "trigger_diary.txt",
+      "text": "Respiratory symptom diary\n\nThe CedarDiary exercise asks learners to record a simulated pollen exposure alongside the date and any reported wheeze. The entries describe a fictional scenario, not a clinical finding.\n\nThe exercise distinguishes a potential trigger from a confirmed diagnosis."
+    },
+    {
+      "topic": "asthma",
+      "filename": "spacer_workshop.txt",
+      "text": "Device demonstration\n\nThe HarborSpacer classroom demonstration uses an empty training inhaler and a demonstration spacer to practise device handling. No medication is administered in the classroom scenario.\n\nThe worksheet records the student demonstration steps."
+    },
+    {
+      "topic": "type2_diabetes",
+      "filename": "food_log.txt",
+      "text": "Nutrition exercise\n\nThe OrchardPlate worksheet asks students to compare the carbohydrate information on two fictional meal labels. Learners record which label lists more carbohydrates per serving.\n\nThis is an educational calculation task rather than a treatment recommendation."
+    },
+    {
+      "topic": "type2_diabetes",
+      "filename": "glucose_graph.txt",
+      "text": "Graph interpretation exercise\n\nThe FinchGraph class example plots simulated glucose measurements against time on a labelled horizontal axis. Students identify the highest plotted value without diagnosing anyone.\n\nThe data is entirely synthetic."
+    },
+    {
+      "topic": "migraine",
+      "filename": "light_diary.txt",
+      "text": "Headache diary activity\n\nThe LanternLog simulated diary tracks the timing of bright-light exposure and headache descriptions across four invented school days. The class discusses the difference between a correlation and a proven cause.\n\nThe exercise is not a medical risk estimate."
+    },
+    {
+      "topic": "migraine",
+      "filename": "symptom_sort.txt",
+      "text": "Symptom categorization activity\n\nThe RiverCard exercise sorts fictional symptom cards into visual changes, sound sensitivity and other observations. Students explain why an observation alone is not a diagnosis.\n\nThese cards are for teaching only."
+    },
+    {
+      "topic": "pneumonia",
+      "filename": "case_sequence.txt",
+      "text": "Fictional case-note practice\n\nThe MeadowCase worksheet places a mock symptom report before a fictional imaging note in a classroom timeline. Students identify the order in which information was recorded.\n\nNo actual patient data is included."
+    },
+    {
+      "topic": "pneumonia",
+      "filename": "source_review.txt",
+      "text": "Source review workshop\n\nThe CompassSource exercise asks learners to check a source publication date before comparing two mock educational summaries about lung infection. Students label which summary was published more recently.\n\nIt is a provenance exercise, not clinical guidance."
+    }
+  ],
+  "cases": [
+    {
+      "id": "C01",
+      "topic": "high_blood_pressure",
+      "query": "How many seated measurements are practised at the classroom cuff station?",
+      "relevant_source": "course/high_blood_pressure/cuff_workshop.txt",
+      "relevant_anchor": "three sequential seated blood-pressure readings"
+    },
+    {
+      "id": "C02",
+      "topic": "high_blood_pressure",
+      "query": "Which pressure unit is written on the practice measurement card?",
+      "relevant_source": "course/high_blood_pressure/units_practice.txt",
+      "relevant_anchor": "millimetres of mercury, abbreviated mmHg"
+    },
+    {
+      "id": "C03",
+      "topic": "asthma",
+      "query": "What exposure is recorded together with wheeze in the simulated diary?",
+      "relevant_source": "course/asthma/trigger_diary.txt",
+      "relevant_anchor": "simulated pollen exposure alongside the date"
+    },
+    {
+      "id": "C04",
+      "topic": "asthma",
+      "query": "What equipment is used in the classroom device handling demonstration?",
+      "relevant_source": "course/asthma/spacer_workshop.txt",
+      "relevant_anchor": "empty training inhaler and a demonstration spacer"
+    },
+    {
+      "id": "C05",
+      "topic": "type2_diabetes",
+      "query": "What should students compare on the mock meal labels?",
+      "relevant_source": "course/type2_diabetes/food_log.txt",
+      "relevant_anchor": "carbohydrate information on two fictional meal labels"
+    },
+    {
+      "id": "C06",
+      "topic": "type2_diabetes",
+      "query": "What does the class plot on the horizontal axis when interpreting glucose readings?",
+      "relevant_source": "course/type2_diabetes/glucose_graph.txt",
+      "relevant_anchor": "simulated glucose measurements against time"
+    },
+    {
+      "id": "C07",
+      "topic": "migraine",
+      "query": "What does the simulated diary track alongside headaches over four school days?",
+      "relevant_source": "course/migraine/light_diary.txt",
+      "relevant_anchor": "timing of bright-light exposure and headache descriptions"
+    },
+    {
+      "id": "C08",
+      "topic": "migraine",
+      "query": "What categories are used for the fictional symptom cards?",
+      "relevant_source": "course/migraine/symptom_sort.txt",
+      "relevant_anchor": "visual changes, sound sensitivity and other observations"
+    },
+    {
+      "id": "C09",
+      "topic": "pneumonia",
+      "query": "In what order are the simulated report and imaging note arranged?",
+      "relevant_source": "course/pneumonia/case_sequence.txt",
+      "relevant_anchor": "mock symptom report before a fictional imaging note"
+    },
+    {
+      "id": "C10",
+      "topic": "pneumonia",
+      "query": "Which publication detail must students check in the educational source comparison?",
+      "relevant_source": "course/pneumonia/source_review.txt",
+      "relevant_anchor": "check a source publication date"
+    }
+  ],
+  "unrelated_queries": [
+    {
+      "topic": "asthma",
+      "query": "zxxqytrv blornxx qbbvzz"
+    },
+    {
+      "topic": "migraine",
+      "query": "zxxqytrv blornxx qbbvzz"
+    }
+  ]
+}

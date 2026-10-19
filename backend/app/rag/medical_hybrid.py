@@ -26,6 +26,9 @@ _HEADING = re.compile(r"^(?:what|who|why|how|when|where|which|can|does|do|are|is
 _SENTENCE = re.compile(r"(?<=[.!?])\s+(?=[A-Z0-9])")
 _WORD = re.compile(r"[a-z0-9]+")
 _MAX_CHARS = 750
+# A char-only match needs substantive raw cosine similarity: per-query max scaling
+# otherwise inflates accidental shared trigrams from nonsense/out-of-topic text.
+_CHAR_ONLY_MIN_COSINE = 0.18
 _STOP = ENGLISH_STOP_WORDS
 REVIEWED_TAGS_PATH = REPO_ROOT / "data" / "medical_rag" / "reviewed_tags.csv"
 
@@ -287,9 +290,14 @@ class MedicalHybridRetriever:
         word = cosine_similarity(ix.word.transform([query]), ix.word_matrix).ravel()
         char = cosine_similarity(ix.char.transform([query]), ix.char_matrix).ravel()
         bm25 = _bm25(query, ix)
-        # Scale each signal within the topic; preserve no-match abstention.
+        # Score with topic-relative scaling, but gate on unscaled lexical evidence.
+        # Without the gate an accidental 0.05 character cosine becomes a max-normalized
+        # 1.0, returning wholly irrelevant passages for out-of-vocabulary questions.
         scores = 0.45 * _scaled(word) + 0.20 * _scaled(char) + 0.35 * _scaled(bm25)
-        relevant = [i for i, s in enumerate(scores) if s >= 0.03]
+        relevant = [
+            i for i, s in enumerate(scores)
+            if s >= 0.03 and (word[i] > 0 or bm25[i] > 0 or char[i] >= _CHAR_ONLY_MIN_COSINE)
+        ]
         if not relevant:
             return []
 

@@ -1,0 +1,228 @@
+{
+  "dataset_id": "course_upload_mvp_fixture_v1",
+  "disclaimer": "Synthetic instructor-style documents for engineering evaluation only. Ten manually annotated one-relevant-passage questions; this is not an independent medical or clinical benchmark.",
+  "fixture_documents": 10,
+  "fixture_topics": 5,
+  "indexed_uploaded_passages": 10,
+  "metrics": {
+    "cases": 10,
+    "k": 4,
+    "precision_at_1": 1,
+    "precision_at_k": 0.25,
+    "recall_at_1": 1,
+    "recall_at_k": 1,
+    "mrr_at_k": 1.0,
+    "source_traceability": 1,
+    "mean_latency_ms": 2.546,
+    "p95_latency_ms": 4.342,
+    "rows": [
+      {
+        "id": "C01",
+        "topic": "high_blood_pressure",
+        "query": "How many seated measurements are practised at the classroom cuff station?",
+        "gold_source": "course/high_blood_pressure/cuff_workshop.txt",
+        "first_relevant_rank": 1,
+        "retrieved_sources": [
+          "course/high_blood_pressure/cuff_workshop.txt",
+          "course/high_blood_pressure/units_practice.txt",
+          "https://medlineplus.gov/highbloodpressure.html"
+        ],
+        "retrieved_count": 3,
+        "precision_at_1": 1,
+        "precision_at_k": 0.25,
+        "recall_at_1": 1,
+        "recall_at_k": 1,
+        "reciprocal_rank_at_k": 1.0,
+        "source_traceable": true,
+        "latency_ms": 2.678
+      },
+      {
+        "id": "C02",
+        "topic": "high_blood_pressure",
+        "query": "Which pressure unit is written on the practice measurement card?",
+        "gold_source": "course/high_blood_pressure/units_practice.txt",
+        "first_relevant_rank": 1,
+        "retrieved_sources": [
+          "course/high_blood_pressure/units_practice.txt",
+          "course/high_blood_pressure/cuff_workshop.txt",
+          "https://medlineplus.gov/highbloodpressure.html",
+          "https://medlineplus.gov/highbloodpressure.html"
+        ],
+        "retrieved_count": 4,
+        "precision_at_1": 1,
+        "precision_at_k": 0.25,
+        "recall_at_1": 1,
+        "recall_at_k": 1,
+        "reciprocal_rank_at_k": 1.0,
+        "source_traceable": true,
+        "latency_ms": 4.64
+      },
+      {
+        "id": "C03",
+        "topic": "asthma",
+        "query": "What exposure is recorded together with wheeze in the simulated diary?",
+        "gold_source": "course/asthma/trigger_diary.txt",
+        "first_relevant_rank": 1,
+        "retrieved_sources": [
+          "course/asthma/trigger_diary.txt"
+        ],
+        "retrieved_count": 1,
+        "precision_at_1": 1,
+        "precision_at_k": 0.25,
+        "recall_at_1": 1,
+        "recall_at_k": 1,
+        "reciprocal_rank_at_k": 1.0,
+        "source_traceable": true,
+        "latency_ms": 1.946
+      },
+      {
+        "id": "C04",
+        "topic": "asthma",
+        "query": "What equipment is used in the classroom device handling demonstration?",
+        "gold_source": "course/asthma/spacer_workshop.txt",
+        "first_relevant_rank": 1,
+        "retrieved_sources": [
+          "course/asthma/spacer_workshop.txt"
+        ],
+        "retrieved_count": 1,
+        "precision_at_1": 1,
+        "precision_at_k": 0.25,
+        "recall_at_1": 1,
+        "recall_at_k": 1,
+        "reciprocal_rank_at_k": 1.0,
+        "source_traceable": true,
+        "latency_ms": 1.793
+      },
+      {
+        "id": "C05",
+        "topic": "type2_diabetes",
+        "query": "What should students compare on the mock meal labels?",
+        "gold_source": "course/type2_diabetes/food_log.txt",
+        "first_relevant_rank": 1,
+        "retrieved_sources": [
+          "course/type2_diabetes/food_log.txt",
+          "course/type2_diabetes/glucose_graph.txt"
+        ],
+        "retrieved_count": 2,
+        "precision_at_1": 1,
+        "precision_at_k": 0.25,
+        "recall_at_1": 1,
+        "recall_at_k": 1,
+        "reciprocal_rank_at_k": 1.0,
+        "source_traceable": true,
+        "latency_ms": 1.888
+      },
+      {
+        "id": "C06",
+        "topic": "type2_diabetes",
+        "query": "What does the class plot on the horizontal axis when interpreting glucose readings?",
+        "gold_source": "course/type2_diabetes/glucose_graph.txt",
+        "first_relevant_rank": 1,
+        "retrieved_sources": [
+          "course/type2_diabetes/glucose_graph.txt",
+          "https://medlineplus.gov/diabetestype2.html",
+          "https://medlineplus.gov/diabetestype2.html",
+          "https://medlineplus.gov/diabetestype2.html"
+        ],
+        "retrieved_count": 4,
+        "precision_at_1": 1,
+        "precision_at_k": 0.25,
+        "recall_at_1": 1,
+        "recall_at_k": 1,
+        "reciprocal_rank_at_k": 1.0,
+        "source_traceable": true,
+        "latency_ms": 4.342
+      },
+      {
+        "id": "C07",
+        "topic": "migraine",
+        "query": "What does the simulated diary track alongside headaches over four school days?",
+        "gold_source": "course/migraine/light_diary.txt",
+        "first_relevant_rank": 1,
+        "retrieved_sources": [
+          "course/migraine/light_diary.txt",
+          "https://medlineplus.gov/migraine.html"
+        ],
+        "retrieved_count": 2,
+        "precision_at_1": 1,
+        "precision_at_k": 0.25,
+        "recall_at_1": 1,
+        "recall_at_k": 1,
+        "reciprocal_rank_at_k": 1.0,
+        "source_traceable": true,
+        "latency_ms": 2.155
+      },
+      {
+        "id": "C08",
+        "topic": "migraine",
+        "query": "What categories are used for the fictional symptom cards?",
+        "gold_source": "course/migraine/symptom_sort.txt",
+        "first_relevant_rank": 1,
+        "retrieved_sources": [
+          "course/migraine/symptom_sort.txt"
+        ],
+        "retrieved_count": 1,
+        "precision_at_1": 1,
+        "precision_at_k": 0.25,
+        "recall_at_1": 1,
+        "recall_at_k": 1,
+        "reciprocal_rank_at_k": 1.0,
+        "source_traceable": true,
+        "latency_ms": 1.857
+      },
+      {
+        "id": "C09",
+        "topic": "pneumonia",
+        "query": "In what order are the simulated report and imaging note arranged?",
+        "gold_source": "course/pneumonia/case_sequence.txt",
+        "first_relevant_rank": 1,
+        "retrieved_sources": [
+          "course/pneumonia/case_sequence.txt",
+          "https://medlineplus.gov/pneumonia.html"
+        ],
+        "retrieved_count": 2,
+        "precision_at_1": 1,
+        "precision_at_k": 0.25,
+        "recall_at_1": 1,
+        "recall_at_k": 1,
+        "reciprocal_rank_at_k": 1.0,
+        "source_traceable": true,
+        "latency_ms": 1.977
+      },
+      {
+        "id": "C10",
+        "topic": "pneumonia",
+        "query": "Which publication detail must students check in the educational source comparison?",
+        "gold_source": "course/pneumonia/source_review.txt",
+        "first_relevant_rank": 1,
+        "retrieved_sources": [
+          "course/pneumonia/source_review.txt",
+          "course/pneumonia/case_sequence.txt",
+          "https://medlineplus.gov/pneumonia.html"
+        ],
+        "retrieved_count": 3,
+        "precision_at_1": 1,
+        "precision_at_k": 0.25,
+        "recall_at_1": 1,
+        "recall_at_k": 1,
+        "reciprocal_rank_at_k": 1.0,
+        "source_traceable": true,
+        "latency_ms": 2.182
+      }
+    ]
+  },
+  "unrelated_queries": [
+    {
+      "topic": "asthma",
+      "query": "zxxqytrv blornxx qbbvzz",
+      "returned": 0,
+      "abstained": true
+    },
+    {
+      "topic": "migraine",
+      "query": "zxxqytrv blornxx qbbvzz",
+      "returned": 0,
+      "abstained": true
+    }
+  ]
+}
