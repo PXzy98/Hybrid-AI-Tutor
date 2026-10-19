@@ -37,8 +37,10 @@ rag:
 privacy:
   spacy_model: en_core_web_lg         # tests use en_core_web_sm
   score_threshold: 0.5                # phone numbers need a context word ("phone", "call"): 0.4 -> 0.75
-  entities: [PERSON, EMAIL_ADDRESS, PHONE_NUMBER, STUDENT_ID, GRADE, HEALTH_DETAIL]
+  entities: [PERSON, EMAIL_ADDRESS, PHONE_NUMBER, STUDENT_ID, GRADE, HEALTH_DETAIL,
+             POSTAL_CODE, HEALTH_CARD, ID_NUMBER, DATE_OF_BIRTH, ADDRESS]   # E6 A5; ages are not redacted
   local_only_types: [HEALTH_DETAIL]   # any of these -> cloud_safe = false
+  health_detail_policy: local_only    # local_only | generalize (rewrite as a hypothetical question for the cloud)
   allow_list: [Abbas]                 # course staff names, never redacted (titles like Dr./Prof. are ignored)
   log_raw_text: false                 # must stay false
 
@@ -70,7 +72,7 @@ auth:
 llm:
   local: { model: "qwen3.5:9b", think: false, temperature: 0.2, num_ctx: 8192, max_tokens: 1024, timeout_s: 60 }
   understand: { model: "qwen3.5:9b", think: false, format: json, timeout_s: 5 }
-  cloud: { timeout_s: 30, max_tokens: 800, fallback_to_local: true, history_turns: 0 }
+  cloud: { timeout_s: 30, max_tokens: 2000, fallback_to_local: true, history_turns: 0 }   # reasoning tokens count
 
 content:
   dir: content/topics

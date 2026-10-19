@@ -5,7 +5,13 @@ from app.core.services import build_services
 from app.llm.base import LLMError, LLMUnavailable
 from app.llm.cloud_guard import CloudClient
 from app.llm.fake import FakeLLMClient
-from app.pipeline.steps.generate import CLOUD_FALLBACK_WARNING, GenerateStep
+from app.pipeline.steps.generate import (
+    CLOUD_FALLBACK_WARNING,
+    CLOUD_MISSING_WARNING,
+    LOCAL_CAPABILITY_NOTE,
+    PRIVACY_BLOCK_WARNING,
+    GenerateStep,
+)
 from app.prompts import base_system, render_local
 
 RAW = "I'm Bob Ng. How does salt raise blood pressure?"
@@ -24,8 +30,9 @@ def make_ctx(target="local", learner=None) -> RequestContext:
 
 @pytest.fixture
 def services(use_config):
-    def _make(fallback=True):
-        s = build_services(use_config({"llm": {"cloud": {"fallback_to_local": fallback}}}))
+    def _make(fallback=True, policy="local_only"):
+        s = build_services(use_config({"llm": {"cloud": {"fallback_to_local": fallback}},
+                                       "privacy": {"health_detail_policy": policy}}))
         s.local_llm = FakeLLMClient("local answer", model="fake-local")
         return s
     return _make
@@ -77,7 +84,8 @@ async def test_cloud_failure_falls_back_to_local(services, failure):
         s.cloud_llm = CloudClient(FakeLLMClient(LLMUnavailable("down")))
     ctx = await GenerateStep(s).run(make_ctx("cloud"))
     assert ctx.answer == "local answer" and ctx.llm.fell_back is True and ctx.llm.backend == "local"
-    assert ctx.warnings == [CLOUD_FALLBACK_WARNING]
+    reason = CLOUD_FALLBACK_WARNING if failure == "error" else CLOUD_MISSING_WARNING
+    assert ctx.warnings == [reason, LOCAL_CAPABILITY_NOTE]  # why, and that the router expected the cloud
 
 
 async def test_no_fallback_when_disabled(services):
@@ -94,3 +102,59 @@ async def test_local_failure_propagates(services):
     s.local_llm = FakeLLMClient(LLMUnavailable("ollama down"))
     with pytest.raises(LLMUnavailable):
         await GenerateStep(s).run(make_ctx("local"))
+
+
+HEALTH = "I have asthma, can I still run?"
+
+
+def health_ctx() -> RequestContext:
+    ctx = make_ctx("cloud")
+    ctx.request = ctx.request.model_copy(update={"question": HEALTH})
+    ctx.pii = PIIResult(sanitized_text="I have <HEALTH_DETAIL_1>, can I still run?", is_sensitive=True,
+                        cloud_safe=False)
+    return ctx
+
+
+async def test_leak_guard_blocks_whatever_the_router(services):
+    """The guard no longer depends on routing.impl: a name the filter missed never leaves."""
+    s = services()
+    transport = FakeLLMClient("cloud answer", backend="cloud")
+    s.cloud_llm = CloudClient(transport)
+    ctx = make_ctx("cloud")
+    ctx.pii = PIIResult(sanitized_text="I'm Bob Ng. How does salt raise blood pressure?", is_sensitive=False)
+    ctx = await GenerateStep(s).run(ctx)
+    assert transport.calls == [] and ctx.cloud_request is None
+    assert ctx.answer == "local answer" and ctx.warnings == [PRIVACY_BLOCK_WARNING, LOCAL_CAPABILITY_NOTE]
+
+
+async def test_personal_health_stays_local_by_default(services):
+    s = services()
+    transport = FakeLLMClient("cloud answer", backend="cloud")
+    s.cloud_llm = CloudClient(transport)
+    ctx = await GenerateStep(s).run(health_ctx())
+    assert transport.calls == [] and ctx.answer == "local answer" and ctx.llm.fell_back is True
+    assert ctx.warnings[0] == PRIVACY_BLOCK_WARNING
+
+
+async def test_generalize_sends_only_the_checked_rewrite(services):
+    s = services(policy="generalize")
+    s.local_llm = FakeLLMClient(["Can a person with asthma run safely?", "local answer"])
+    transport = FakeLLMClient("cloud answer", backend="cloud")
+    s.cloud_llm = CloudClient(transport)
+    ctx = await GenerateStep(s).run(health_ctx())
+    assert ctx.answer == "cloud answer" and ctx.warnings == []
+    assert ctx.cloud_request.sanitized_question == "Can a person with asthma run safely?"
+    sent = transport.sent_text()
+    assert "I have" not in sent and "HEALTH_DETAIL" not in sent
+
+
+@pytest.mark.parametrize("rewrite", ["Can I run with my asthma?", "Is running safe with a peak flow of 300?",
+                                     "Can Bob Ng run with asthma?"])
+async def test_generalize_rejects_a_personal_rewrite(services, rewrite):
+    s = services(policy="generalize")
+    s.local_llm = FakeLLMClient([rewrite, "local answer"])
+    transport = FakeLLMClient("cloud answer", backend="cloud")
+    s.cloud_llm = CloudClient(transport)
+    ctx = await GenerateStep(s).run(health_ctx())
+    assert transport.calls == [] and ctx.answer == "local answer"
+    assert ctx.warnings[0] == PRIVACY_BLOCK_WARNING

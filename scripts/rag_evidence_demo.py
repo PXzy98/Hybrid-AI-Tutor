@@ -14,9 +14,9 @@ import httpx
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 
-from app.rag.evidence import check_numeric_claim, evidence_from_chunks
-from app.rag.medical_hybrid import MedicalHybridRetriever
-from app.rag.pubmed import PubMedEvidenceSearch
+from app.rag.evidence import check_numeric_claim, evidence_from_chunks  # noqa: E402
+from app.rag.medical_hybrid import MedicalHybridRetriever  # noqa: E402
+from app.rag.pubmed import PubMedEvidenceSearch  # noqa: E402
 
 
 def main():

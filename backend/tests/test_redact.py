@@ -14,3 +14,10 @@ def test_longest_value_first():
 
 def test_no_entities_is_identity():
     assert redact_known("plain text", []) == "plain text"
+
+
+def test_any_case_whole_words():
+    """The answer to "I have asthma" starts with "Asthma is…"; "Tom" must not touch "symptoms"."""
+    entities = [ent("asthma", "<HEALTH_DETAIL_1>"), ent("Tom", "<PERSON_1>")]
+    out = redact_known("Asthma is common. TOM, your symptoms of asthma…", entities)
+    assert out == "<HEALTH_DETAIL_1> is common. <PERSON_1>, your symptoms of <HEALTH_DETAIL_1>…"

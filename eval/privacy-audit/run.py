@@ -15,6 +15,7 @@ database (outside `account`) and the logs. Exit code 1 on any leak, so the run c
 """
 import argparse
 import json
+import os
 import sqlite3
 import sys
 from pathlib import Path
@@ -24,14 +25,31 @@ sys.path.insert(0, str(HERE.parent / "common"))
 sys.path.insert(0, str(HERE))
 
 import harness  # noqa: E402
-from audit import Ask, Finding, Secrets, analyze, storage_findings  # noqa: E402
+from audit import Ask, Finding, Secrets, analyze, contains, storage_findings  # noqa: E402
 
 E1_CASES = HERE.parent / "understand-tagging" / "cases.jsonl"
+E6_CASES = HERE.parent / "privacy-filter" / "cases.jsonl"
+E6_GROUPS = ("positive", "hard", "french", "multiturn")
 TARGETS = "fields outside the allow-list: 0 · profile or identity leak: 0 · PII leak ≤ 1% ideal / 5% marginal"
 
 
 def jsonl(path: Path) -> list[dict]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+
+
+def e6_questions(smoke: bool) -> list[dict]:
+    """E6 cases with PII, asked end to end. The student's own name is replaced by the persona's display name, as
+    in the app (identity terms come from the account); multi-turn messages are asked one by one."""
+    out = []
+    for c in jsonl(E6_CASES):
+        if c["group"] not in E6_GROUPS:
+            continue
+        text, planted = c["text"], [e["text"] for e in c["entities"]]
+        if c.get("self_name"):
+            text = text.replace(c["self_name"], "{display_name}")
+            planted = [v.replace(c["self_name"], "{display_name}") for v in planted]
+        out.append({"id": c["id"], "question": text, "planted": planted, "expect_local": c["personal_health"]})
+    return out[:6] if smoke else out
 
 
 def question_set(smoke: bool) -> list[dict]:
@@ -51,15 +69,22 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--smoke", action="store_true", help="fake local models, 2 personas, 6 questions")
     ap.add_argument("--real-cloud", action="store_true", help="send to the configured cloud provider")
+    ap.add_argument("--e6", action="store_true", help="ask the E6 privacy-filter cases (1 persona) instead")
     ap.add_argument("--out", type=Path, default=HERE / "results")
     a = ap.parse_args(argv)
+    if a.e6 and a.out == HERE / "results":
+        a.out = HERE / "results" / "e6"
+    if a.e6 and not a.smoke:
+        os.environ.setdefault("EVAL_SPACY_MODEL", "en_core_web_lg")  # the app's model; the harness defaults to sm
     a.out.mkdir(parents=True, exist_ok=True)
     log_path = a.out / "cloud_requests.jsonl"
     log_path.unlink(missing_ok=True)
-    env = {"ROUTING__STUB_SCORE": "1.0", "LLM__CLOUD__AUDIT_LOG": str(log_path),
+    # the stub router forces every question to the cloud route, so every payload is audited (semantic
+    # routing would keep most questions local and leave the cloud path untested)
+    env = {"ROUTING__IMPL": "stub", "ROUTING__STUB_SCORE": "1.0", "LLM__CLOUD__AUDIT_LOG": str(log_path),
            "LLM__CLOUD__AUDIT_ECHO": "false" if a.real_cloud else "true"}
-    personas = harness.PERSONAS[:2] if a.smoke else harness.PERSONAS
-    questions = question_set(a.smoke)
+    personas = harness.PERSONAS[:1] if a.e6 else harness.PERSONAS[:2] if a.smoke else harness.PERSONAS
+    questions = e6_questions(a.smoke) if a.e6 else question_set(a.smoke)
 
     asks: list[Ask] = []
     with harness.Harness(env, fake=a.smoke) as h:
@@ -67,21 +92,27 @@ def main(argv: list[str] | None = None) -> int:
         for p in personas:
             client, account = h.persona_client(p)
             accounts[p.key] = (client, account)
+        # typed values are checked against the rows each ask adds: course content and general answers to other
+        # questions contain words like "asthma" too, so a whole-database match would be meaningless
+        stored: list[str] = []
+        rows_before = set(db_dump(h).splitlines())
         for p in personas:
             client, _ = accounts[p.key]
             for q in questions:
                 text = fill(q["question"], p)
                 before = sum(1 for _ in log_path.open(encoding="utf-8")) if log_path.exists() else 0
                 r = client.post("/api/v1/ask", json={"topic": harness.TOPIC, "question": text})
+                rows_after = db_dump(h).splitlines()
+                stored.append("\n".join(line for line in rows_after if line not in rows_before))
+                rows_before = set(rows_after)
                 if r.status_code != 200:
-                    print(f"ask failed ({r.status_code}) for {p.key}/{q['id']}", file=sys.stderr)
+                    print(f"ask failed ({r.status_code}) for {p.key}/{q['id']}: {r.text[:200]}", file=sys.stderr)
                     return 2
                 after = sum(1 for _ in log_path.open(encoding="utf-8")) if log_path.exists() else 0
                 body = r.json()
                 asks.append(Ask(p.key, text, [fill(v, p) for v in q["planted"]], list(range(before, after)),
-                                body["route_target"], body["warnings"]))
+                                body["route_target"], body["warnings"], q.get("expect_local", False)))
         services = h.services
-        db_path = services.settings.database_url.removeprefix("sqlite:///")
         rows = services.accounts.list_students()
         identities = sorted({v for p in personas for v in (p.username, p.display_name, p.display_name.split()[-1])}
                             | {"eval.prof"})
@@ -90,12 +121,24 @@ def main(argv: list[str] | None = None) -> int:
                                                for t in (m.statement, m.correction)])
         records = jsonl(log_path) if log_path.exists() else []
         findings = analyze(records, asks, secrets, analyzer=_analyzer(services))
-        with sqlite3.connect(db_path) as con:
-            dump = "\n".join(line for line in con.iterdump() if 'INSERT INTO "account"' not in line)
-        planted = sorted({v for ask in asks for v in ask.planted})
-        findings += storage_findings(dump, "\n".join(h.log_lines), secrets, planted)
+        findings += [Finding("health", f"cloud#{x.record_ids[0]}", f"personal health question reached the cloud: "
+                             f"'{x.question[:60]}'") for x in asks if x.expect_local and x.record_ids]
+        findings += storage_findings(db_dump(h), "\n".join(h.log_lines), secrets, [])  # identities, everywhere
+        for ask, new_rows in zip(asks, stored, strict=True):
+            findings += [Finding("pii", "db", f"raw typed value stored '{v}' (ask: '{ask.question[:50]}')")
+                         for v in ask.planted if contains(new_rows, v)
+                         and not any(contains(v, i) or contains(i, v) for i in secrets.identities)]
+        log_text = "\n".join(h.log_lines)
+        findings += [Finding("pii", "log", f"raw typed value logged '{v}'")
+                     for v in sorted({v for ask in asks for v in ask.planted}) if contains(log_text, v)]
 
     return report(a, asks, records, findings)
+
+
+def db_dump(h) -> str:
+    db_path = h.services.settings.database_url.removeprefix("sqlite:///")
+    with sqlite3.connect(db_path) as con:
+        return "\n".join(line for line in con.iterdump() if 'INSERT INTO "account"' not in line)
 
 
 def _analyzer(services):
@@ -105,7 +148,7 @@ def _analyzer(services):
 
 
 def report(a, asks: list[Ask], records: list[dict], findings: list[Finding]) -> int:
-    by_kind = {k: [f for f in findings if f.kind == k] for k in ("field", "identity", "profile", "pii")}
+    by_kind = {k: [f for f in findings if f.kind == k] for k in ("field", "identity", "profile", "pii", "health")}
     cloud_pii = {f.where for f in by_kind["pii"] if f.where.startswith("cloud#")}
     pii_rate = len(cloud_pii) / len(records) if records else 0.0
     to_cloud = sum(1 for x in asks if x.record_ids)
@@ -126,6 +169,8 @@ def report(a, asks: list[Ask], records: list[dict], findings: list[Finding]) -> 
         f"| Identity leaks | {len(by_kind['identity'])} |",
         f"| Profile leaks | {len(by_kind['profile'])} |",
         f"| PII leaks in cloud requests | {len(cloud_pii)} ({pii_rate:.1%} of requests) |",
+        *([f"| Personal health questions that reached the cloud | {len(by_kind['health'])} of "
+           f"{sum(x.expect_local for x in asks)} |"] if any(x.expect_local for x in asks) else []),
         f"| Typed PII or identity stored in the DB or logs | "
         f"{sum(1 for f in findings if f.where in ('db', 'log'))} |",
         "",

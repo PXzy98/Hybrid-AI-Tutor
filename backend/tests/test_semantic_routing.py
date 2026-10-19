@@ -8,7 +8,8 @@ import pytest
 
 from app.core.config import REPO_ROOT, RoutingConfig
 from app.core.schemas import Chunk, PIIResult, RouteInput, SemanticAnalysis
-from app.routing.evidence import assess_evidence
+from app.pipeline.steps.generate import CLOUD_MISSING_WARNING, LOCAL_CAPABILITY_NOTE
+from app.routing.evidence import assess_evidence, select_passages
 from app.routing.semantic import SemanticRouter
 
 
@@ -259,7 +260,9 @@ def test_single_method_removal_updates_options_and_rejects_disabled_method(make_
         cm.__exit__(None, None, None)
 
 
-def test_cloud_unavailable_does_not_silently_answer_locally(make_client, monkeypatch):
+def test_cloud_unavailable_answers_locally_and_says_why(make_client, monkeypatch):
+    """Team decision (TODO 1.3): no 503 when the cloud is missing; the local model answers and the student is
+    told why, and that the router expected the cloud model to do better."""
     cm, api = semantic_api(make_client, monkeypatch)
     try:
         monkeypatch.setattr(
@@ -274,9 +277,9 @@ def test_cloud_unavailable_does_not_silently_answer_locally(make_client, monkeyp
                 "/api/v1/ask/stream", json={"topic": "high_blood_pressure", "question": "Complex case."}
             )
         )
-        assert any(k == "error" and v["step"] == "generate" for k, v in ev)
-        assert not any(k == "result" for k, _ in ev)
-        assert not api.local_llm.calls
+        reply = next(v for k, v in ev if k == "result")
+        assert reply["route_target"] == "local" and api.local_llm.calls
+        assert CLOUD_MISSING_WARNING in reply["warnings"] and LOCAL_CAPABILITY_NOTE in reply["warnings"]
     finally:
         cm.__exit__(None, None, None)
 
@@ -335,3 +338,42 @@ def test_sanitized_history_is_available_to_follow_up_routing():
     )
     assert "kidney disease" in route_input(ctx).contextual_question
     assert "Current question: Why?" in route_input(ctx).contextual_question
+
+
+def test_relevant_passages_reach_the_answer_even_without_full_qa_support(monkeypatch):
+    """Answerability decides the route; every relevant passage may still teach (not only the best one)."""
+    monkeypatch.setattr(
+        "app.routing.evidence.pair_scores",
+        lambda name, pairs, cfg: np.array(
+            [(0.9 if "pressure" in t else 0.05) if name == cfg.relevance_model else 0.2 for _, t in pairs]),
+    )
+    passages = [chunk(), chunk(text="Salt raises blood pressure."), chunk(text="Unrelated text about lungs.")]
+    x = input_for(passages=passages)
+    r = assess_evidence(x, analysis(), RoutingConfig())
+    assert r.checked and r.status == "insufficient" and r.accepted_indices == []  # routing is unchanged
+    assert [c.text for c in select_passages(x, r, RoutingConfig())] == [passages[0].text, passages[1].text]
+
+
+def test_missing_evidence_models_keep_the_retrieved_passages_unverified(monkeypatch, caplog):
+    def broken(name, pairs, cfg):
+        raise OSError("model files not found")
+
+    monkeypatch.setattr("app.routing.evidence.pair_scores", broken)
+    monkeypatch.setattr("app.routing.evidence._warned_unavailable", False)
+    off_topic = chunk(text="Pneumonia is a lung infection.")
+    off_topic.topic = "pneumonia"
+    draft = chunk(text="Unapproved draft.", metadata={"approved": False})
+    x = input_for(passages=[chunk(), draft, off_topic])
+    with caplog.at_level("WARNING", logger="app.routing"):
+        r = assess_evidence(x, analysis(), RoutingConfig())
+    assert not r.checked and "evidence models unavailable" in caplog.text  # not silent any more
+    kept = select_passages(x, r, RoutingConfig())
+    assert [c.text for c in kept] == [chunk().text]  # provenance and topic checks still apply
+    assert kept[0].metadata["evidence_check"] == "unverified"
+
+
+def test_sources_rejected_by_the_freshness_check_are_not_used_as_unverified():
+    a = analysis(requires_fresh_evidence=True)
+    x = input_for(passages=[chunk()])  # no verified_current metadata: fails the freshness check
+    r = assess_evidence(x, a, RoutingConfig())
+    assert r.checked and select_passages(x, r, RoutingConfig()) == []

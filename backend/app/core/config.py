@@ -40,8 +40,7 @@ class RoutingConfig(Section):
     threshold: float = Field(0.6, ge=0, le=1)
     force_local_if_not_cloud_safe: bool = True
     stub_score: float = Field(0.0, ge=0, le=1)
-    # TEAM INTEGRATION: semantic routing has no privacy gate. The existing upstream
-    # privacy_filter owns sanitization; teammate-owned privacy policies are separate.
+    # the router has no privacy branch: privacy rules apply at the cloud gate (generate step)
     show_progress: bool = True
     enabled_methods: list[Literal["lr", "svm"]] = ["lr", "svm"]
     default_method: Literal["lr", "svm"] = "lr"
@@ -78,9 +77,14 @@ class RagConfig(Section):
 class PrivacyConfig(Section):
     spacy_model: str = "en_core_web_lg"
     score_threshold: float = Field(0.5, ge=0, le=1)
-    entities: list[str] = ["PERSON", "EMAIL_ADDRESS", "PHONE_NUMBER", "STUDENT_ID", "GRADE", "HEALTH_DETAIL"]
+    entities: list[str] = ["PERSON", "EMAIL_ADDRESS", "PHONE_NUMBER", "STUDENT_ID", "GRADE", "HEALTH_DETAIL",
+                           "POSTAL_CODE", "HEALTH_CARD", "ID_NUMBER", "DATE_OF_BIRTH", "ADDRESS"]
     local_only_types: list[str] = ["HEALTH_DETAIL"]
+    # a question with a local-only finding (a personal health detail): answer it locally (default), or let the
+    # local model rewrite it as a general question about a hypothetical person and send only that rewrite
+    health_detail_policy: Literal["local_only", "generalize"] = "local_only"
     allow_list: list[str] = []  # course staff names etc. that must never be redacted
+    recognizers: list[str] | None = None  # custom recognizers to enable; None = all registered (E6 ablation)
     log_raw_text: Literal[False] = False  # privacy invariant 1: cannot be switched on
 
 
@@ -173,7 +177,7 @@ class UnderstandLLMConfig(Section):
 
 class CloudLLMConfig(Section):
     timeout_s: float = 30
-    max_tokens: int = 800
+    max_tokens: int = 2000  # reasoning models count their hidden reasoning too (DeepSeek: up to ~800)
     fallback_to_local: bool = True
     history_turns: int = Field(0, ge=0)
     audit_log: str | None = None  # E4: record every cloud request to this JSONL file (app/llm/audit.py)

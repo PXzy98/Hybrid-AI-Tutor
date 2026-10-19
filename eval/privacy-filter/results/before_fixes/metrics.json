@@ -1,0 +1,1023 @@
+{
+ "configs": {
+  "presidio_default": {
+   "per_type": {
+    "PERSON": [
+     75,
+     76
+    ],
+    "STUDENT_ID": [
+     0,
+     46
+    ],
+    "EMAIL_ADDRESS": [
+     30,
+     30
+    ],
+    "PHONE_NUMBER": [
+     7,
+     20
+    ],
+    "GRADE": [
+     0,
+     30
+    ],
+    "HEALTH_DETAIL": [
+     0,
+     46
+    ]
+   },
+   "recall_min": 0.0,
+   "leak_rate": 0.6057692307692307,
+   "leak_hard": 0.5666666666666667,
+   "leak_french": 0.6153846153846154,
+   "leak_multiturn": 0.46153846153846156,
+   "over_redaction": 0.07142857142857142,
+   "keep_broken": 8,
+   "health_sensitivity": 0.0,
+   "health_specificity": 1.0,
+   "restore_ok": 1.0,
+   "oos": {
+    "address": [
+     0,
+     2
+    ],
+    "date_of_birth": [
+     0,
+     2
+    ],
+    "health_card": [
+     1,
+     2
+    ],
+    "postal_code": [
+     1,
+     2
+    ],
+    "age": [
+     0,
+     2
+    ],
+    "sin": [
+     0,
+     1
+    ],
+    "workplace": [
+     0,
+     1
+    ],
+    "school": [
+     0,
+     1
+    ],
+    "social_handle": [
+     1,
+     1
+    ],
+    "url": [
+     0,
+     1
+    ],
+    "license_plate": [
+     0,
+     1
+    ],
+    "ip_address": [
+     0,
+     1
+    ],
+    "clinic_mrn": [
+     0,
+     1
+    ]
+   },
+   "oos_caught": 3,
+   "oos_total": 18,
+   "latency_p50_ms": 4.4721500016748905,
+   "latency_p95_ms": 6.509400031063706
+  },
+  "ours_sm": {
+   "per_type": {
+    "PERSON": [
+     64,
+     76
+    ],
+    "STUDENT_ID": [
+     46,
+     46
+    ],
+    "EMAIL_ADDRESS": [
+     30,
+     30
+    ],
+    "PHONE_NUMBER": [
+     20,
+     20
+    ],
+    "GRADE": [
+     29,
+     30
+    ],
+    "HEALTH_DETAIL": [
+     45,
+     46
+    ]
+   },
+   "recall_min": 0.8421052631578947,
+   "leak_rate": 0.0673076923076923,
+   "leak_hard": 0.4666666666666667,
+   "leak_french": 0.46153846153846156,
+   "leak_multiturn": 0.6923076923076923,
+   "over_redaction": 0.008928571428571428,
+   "keep_broken": 1,
+   "health_sensitivity": 0.8032786885245902,
+   "health_specificity": 0.9969230769230769,
+   "restore_ok": 1.0,
+   "oos": {
+    "address": [
+     0,
+     2
+    ],
+    "date_of_birth": [
+     0,
+     2
+    ],
+    "health_card": [
+     1,
+     2
+    ],
+    "postal_code": [
+     0,
+     2
+    ],
+    "age": [
+     0,
+     2
+    ],
+    "sin": [
+     0,
+     1
+    ],
+    "workplace": [
+     0,
+     1
+    ],
+    "school": [
+     0,
+     1
+    ],
+    "social_handle": [
+     0,
+     1
+    ],
+    "url": [
+     0,
+     1
+    ],
+    "license_plate": [
+     0,
+     1
+    ],
+    "ip_address": [
+     0,
+     1
+    ],
+    "clinic_mrn": [
+     0,
+     1
+    ]
+   },
+   "oos_caught": 1,
+   "oos_total": 18,
+   "latency_p50_ms": 4.179299983661622,
+   "latency_p95_ms": 6.395499978680164
+  },
+  "ours_lg": {
+   "per_type": {
+    "PERSON": [
+     75,
+     76
+    ],
+    "STUDENT_ID": [
+     46,
+     46
+    ],
+    "EMAIL_ADDRESS": [
+     30,
+     30
+    ],
+    "PHONE_NUMBER": [
+     20,
+     20
+    ],
+    "GRADE": [
+     29,
+     30
+    ],
+    "HEALTH_DETAIL": [
+     45,
+     46
+    ]
+   },
+   "recall_min": 0.9666666666666667,
+   "leak_rate": 0.014423076923076924,
+   "leak_hard": 0.43333333333333335,
+   "leak_french": 0.5384615384615384,
+   "leak_multiturn": 0.38461538461538464,
+   "over_redaction": 0.026785714285714284,
+   "keep_broken": 3,
+   "health_sensitivity": 0.8032786885245902,
+   "health_specificity": 0.9969230769230769,
+   "restore_ok": 1.0,
+   "oos": {
+    "address": [
+     0,
+     2
+    ],
+    "date_of_birth": [
+     0,
+     2
+    ],
+    "health_card": [
+     1,
+     2
+    ],
+    "postal_code": [
+     0,
+     2
+    ],
+    "age": [
+     0,
+     2
+    ],
+    "sin": [
+     0,
+     1
+    ],
+    "workplace": [
+     0,
+     1
+    ],
+    "school": [
+     0,
+     1
+    ],
+    "social_handle": [
+     0,
+     1
+    ],
+    "url": [
+     0,
+     1
+    ],
+    "license_plate": [
+     0,
+     1
+    ],
+    "ip_address": [
+     0,
+     1
+    ],
+    "clinic_mrn": [
+     0,
+     1
+    ]
+   },
+   "oos_caught": 1,
+   "oos_total": 18,
+   "latency_p50_ms": 4.421699995873496,
+   "latency_p95_ms": 6.026900024153292
+  },
+  "app_mvp": {
+   "per_type": {
+    "PERSON": [
+     76,
+     76
+    ],
+    "STUDENT_ID": [
+     46,
+     46
+    ],
+    "EMAIL_ADDRESS": [
+     30,
+     30
+    ],
+    "PHONE_NUMBER": [
+     20,
+     20
+    ],
+    "GRADE": [
+     29,
+     30
+    ],
+    "HEALTH_DETAIL": [
+     45,
+     46
+    ]
+   },
+   "recall_min": 0.9666666666666667,
+   "leak_rate": 0.009615384615384616,
+   "leak_hard": 0.3333333333333333,
+   "leak_french": 0.46153846153846156,
+   "leak_multiturn": 0.38461538461538464,
+   "over_redaction": 0.026785714285714284,
+   "keep_broken": 3,
+   "health_sensitivity": 0.8032786885245902,
+   "health_specificity": 0.9969230769230769,
+   "restore_ok": 1.0,
+   "oos": {
+    "address": [
+     0,
+     2
+    ],
+    "date_of_birth": [
+     0,
+     2
+    ],
+    "health_card": [
+     1,
+     2
+    ],
+    "postal_code": [
+     0,
+     2
+    ],
+    "age": [
+     0,
+     2
+    ],
+    "sin": [
+     0,
+     1
+    ],
+    "workplace": [
+     0,
+     1
+    ],
+    "school": [
+     0,
+     1
+    ],
+    "social_handle": [
+     0,
+     1
+    ],
+    "url": [
+     0,
+     1
+    ],
+    "license_plate": [
+     0,
+     1
+    ],
+    "ip_address": [
+     0,
+     1
+    ],
+    "clinic_mrn": [
+     0,
+     1
+    ]
+   },
+   "oos_caught": 1,
+   "oos_total": 18,
+   "latency_p50_ms": 4.323099972680211,
+   "latency_p95_ms": 5.765100009739399
+  },
+  "a5_rules": {
+   "per_type": {
+    "PERSON": [
+     76,
+     76
+    ],
+    "STUDENT_ID": [
+     46,
+     46
+    ],
+    "EMAIL_ADDRESS": [
+     30,
+     30
+    ],
+    "PHONE_NUMBER": [
+     20,
+     20
+    ],
+    "GRADE": [
+     29,
+     30
+    ],
+    "HEALTH_DETAIL": [
+     46,
+     46
+    ]
+   },
+   "recall_min": 0.9666666666666667,
+   "leak_rate": 0.004807692307692308,
+   "leak_hard": 0.3333333333333333,
+   "leak_french": 0.0,
+   "leak_multiturn": 0.3076923076923077,
+   "over_redaction": 0.026785714285714284,
+   "keep_broken": 3,
+   "health_sensitivity": 0.9180327868852459,
+   "health_specificity": 0.9969230769230769,
+   "restore_ok": 1.0,
+   "oos": {
+    "address": [
+     2,
+     2
+    ],
+    "date_of_birth": [
+     2,
+     2
+    ],
+    "health_card": [
+     2,
+     2
+    ],
+    "postal_code": [
+     2,
+     2
+    ],
+    "age": [
+     0,
+     2
+    ],
+    "sin": [
+     1,
+     1
+    ],
+    "workplace": [
+     0,
+     1
+    ],
+    "school": [
+     0,
+     1
+    ],
+    "social_handle": [
+     0,
+     1
+    ],
+    "url": [
+     0,
+     1
+    ],
+    "license_plate": [
+     0,
+     1
+    ],
+    "ip_address": [
+     0,
+     1
+    ],
+    "clinic_mrn": [
+     1,
+     1
+    ]
+   },
+   "oos_caught": 10,
+   "oos_total": 18,
+   "latency_p50_ms": 4.379350022645667,
+   "latency_p95_ms": 5.929899984039366
+  },
+  "a2_trf": {
+   "per_type": {
+    "PERSON": [
+     76,
+     76
+    ],
+    "STUDENT_ID": [
+     46,
+     46
+    ],
+    "EMAIL_ADDRESS": [
+     30,
+     30
+    ],
+    "PHONE_NUMBER": [
+     20,
+     20
+    ],
+    "GRADE": [
+     29,
+     30
+    ],
+    "HEALTH_DETAIL": [
+     45,
+     46
+    ]
+   },
+   "recall_min": 0.9666666666666667,
+   "leak_rate": 0.009615384615384616,
+   "leak_hard": 0.3333333333333333,
+   "leak_french": 0.5384615384615384,
+   "leak_multiturn": 0.38461538461538464,
+   "over_redaction": 0.026785714285714284,
+   "keep_broken": 3,
+   "health_sensitivity": 0.8032786885245902,
+   "health_specificity": 0.9969230769230769,
+   "restore_ok": 1.0,
+   "oos": {
+    "address": [
+     0,
+     2
+    ],
+    "date_of_birth": [
+     0,
+     2
+    ],
+    "health_card": [
+     1,
+     2
+    ],
+    "postal_code": [
+     0,
+     2
+    ],
+    "age": [
+     0,
+     2
+    ],
+    "sin": [
+     0,
+     1
+    ],
+    "workplace": [
+     0,
+     1
+    ],
+    "school": [
+     0,
+     1
+    ],
+    "social_handle": [
+     0,
+     1
+    ],
+    "url": [
+     0,
+     1
+    ],
+    "license_plate": [
+     0,
+     1
+    ],
+    "ip_address": [
+     0,
+     1
+    ],
+    "clinic_mrn": [
+     0,
+     1
+    ]
+   },
+   "oos_caught": 1,
+   "oos_total": 18,
+   "latency_p50_ms": 21.312300028512254,
+   "latency_p95_ms": 26.665299956221133
+  },
+  "a3_gliner_only": {
+   "per_type": {
+    "PERSON": [
+     76,
+     76
+    ],
+    "STUDENT_ID": [
+     38,
+     46
+    ],
+    "EMAIL_ADDRESS": [
+     30,
+     30
+    ],
+    "PHONE_NUMBER": [
+     15,
+     20
+    ],
+    "GRADE": [
+     0,
+     30
+    ],
+    "HEALTH_DETAIL": [
+     28,
+     46
+    ]
+   },
+   "recall_min": 0.0,
+   "leak_rate": 0.2932692307692308,
+   "leak_hard": 0.3,
+   "leak_french": 0.3076923076923077,
+   "leak_multiturn": 0.07692307692307693,
+   "over_redaction": 0.19642857142857142,
+   "keep_broken": 15,
+   "health_sensitivity": 0.5573770491803278,
+   "health_specificity": 0.8738461538461538,
+   "restore_ok": 1.0,
+   "oos": {
+    "address": [
+     2,
+     2
+    ],
+    "date_of_birth": [
+     2,
+     2
+    ],
+    "health_card": [
+     0,
+     2
+    ],
+    "postal_code": [
+     2,
+     2
+    ],
+    "age": [
+     0,
+     2
+    ],
+    "sin": [
+     1,
+     1
+    ],
+    "workplace": [
+     0,
+     1
+    ],
+    "school": [
+     0,
+     1
+    ],
+    "social_handle": [
+     1,
+     1
+    ],
+    "url": [
+     0,
+     1
+    ],
+    "license_plate": [
+     0,
+     1
+    ],
+    "ip_address": [
+     0,
+     1
+    ],
+    "clinic_mrn": [
+     0,
+     1
+    ]
+   },
+   "oos_caught": 8,
+   "oos_total": 18,
+   "latency_p50_ms": 80.74170001782477,
+   "latency_p95_ms": 87.81649998854846
+  },
+  "a3_rules_gliner": {
+   "per_type": {
+    "PERSON": [
+     76,
+     76
+    ],
+    "STUDENT_ID": [
+     46,
+     46
+    ],
+    "EMAIL_ADDRESS": [
+     30,
+     30
+    ],
+    "PHONE_NUMBER": [
+     20,
+     20
+    ],
+    "GRADE": [
+     29,
+     30
+    ],
+    "HEALTH_DETAIL": [
+     46,
+     46
+    ]
+   },
+   "recall_min": 0.9666666666666667,
+   "leak_rate": 0.004807692307692308,
+   "leak_hard": 0.16666666666666666,
+   "leak_french": 0.0,
+   "leak_multiturn": 0.07692307692307693,
+   "over_redaction": 0.22321428571428573,
+   "keep_broken": 18,
+   "health_sensitivity": 0.9508196721311475,
+   "health_specificity": 0.8738461538461538,
+   "restore_ok": 1.0,
+   "oos": {
+    "address": [
+     2,
+     2
+    ],
+    "date_of_birth": [
+     2,
+     2
+    ],
+    "health_card": [
+     2,
+     2
+    ],
+    "postal_code": [
+     2,
+     2
+    ],
+    "age": [
+     0,
+     2
+    ],
+    "sin": [
+     1,
+     1
+    ],
+    "workplace": [
+     0,
+     1
+    ],
+    "school": [
+     0,
+     1
+    ],
+    "social_handle": [
+     1,
+     1
+    ],
+    "url": [
+     0,
+     1
+    ],
+    "license_plate": [
+     0,
+     1
+    ],
+    "ip_address": [
+     0,
+     1
+    ],
+    "clinic_mrn": [
+     1,
+     1
+    ]
+   },
+   "oos_caught": 11,
+   "oos_total": 18,
+   "latency_p50_ms": 87.04104999196716,
+   "latency_p95_ms": 96.0518000065349
+  },
+  "a4_rules_llm": {
+   "per_type": {
+    "PERSON": [
+     76,
+     76
+    ],
+    "STUDENT_ID": [
+     46,
+     46
+    ],
+    "EMAIL_ADDRESS": [
+     30,
+     30
+    ],
+    "PHONE_NUMBER": [
+     20,
+     20
+    ],
+    "GRADE": [
+     29,
+     30
+    ],
+    "HEALTH_DETAIL": [
+     46,
+     46
+    ]
+   },
+   "recall_min": 0.9666666666666667,
+   "leak_rate": 0.004807692307692308,
+   "leak_hard": 0.1,
+   "leak_french": 0.0,
+   "leak_multiturn": 0.15384615384615385,
+   "over_redaction": 0.07142857142857142,
+   "keep_broken": 8,
+   "health_sensitivity": 0.9508196721311475,
+   "health_specificity": 0.9753846153846154,
+   "restore_ok": 1.0,
+   "oos": {
+    "address": [
+     2,
+     2
+    ],
+    "date_of_birth": [
+     2,
+     2
+    ],
+    "health_card": [
+     2,
+     2
+    ],
+    "postal_code": [
+     2,
+     2
+    ],
+    "age": [
+     0,
+     2
+    ],
+    "sin": [
+     1,
+     1
+    ],
+    "workplace": [
+     0,
+     1
+    ],
+    "school": [
+     0,
+     1
+    ],
+    "social_handle": [
+     1,
+     1
+    ],
+    "url": [
+     1,
+     1
+    ],
+    "license_plate": [
+     1,
+     1
+    ],
+    "ip_address": [
+     1,
+     1
+    ],
+    "clinic_mrn": [
+     1,
+     1
+    ]
+   },
+   "oos_caught": 14,
+   "oos_total": 18,
+   "latency_p50_ms": 288.0394500098191,
+   "latency_p95_ms": 827.2814999800175
+  }
+ },
+ "ablation": {
+  "\u2212 address": {
+   "leak_rate": 0.0,
+   "leak_hard": 0.0,
+   "leak_french": 0.0,
+   "over_redaction": 0.0,
+   "health_sensitivity": 0.0,
+   "health_specificity": 0.0,
+   "oos_caught": -2
+  },
+  "\u2212 date_of_birth": {
+   "leak_rate": 0.0,
+   "leak_hard": 0.0,
+   "leak_french": 0.0,
+   "over_redaction": 0.0,
+   "health_sensitivity": 0.0,
+   "health_specificity": 0.0,
+   "oos_caught": -2
+  },
+  "\u2212 fr_grade": {
+   "leak_rate": 0.0,
+   "leak_hard": 0.0,
+   "leak_french": 0.07692307692307693,
+   "over_redaction": 0.0,
+   "health_sensitivity": 0.0,
+   "health_specificity": 0.0,
+   "oos_caught": 0
+  },
+  "\u2212 fr_health": {
+   "leak_rate": 0.0,
+   "leak_hard": 0.0,
+   "leak_french": 0.38461538461538464,
+   "over_redaction": 0.0,
+   "health_sensitivity": -0.08196721311475408,
+   "health_specificity": 0.0,
+   "oos_caught": 0
+  },
+  "\u2212 fr_person": {
+   "leak_rate": 0.0,
+   "leak_hard": 0.0,
+   "leak_french": 0.0,
+   "over_redaction": 0.0,
+   "health_sensitivity": 0.0,
+   "health_specificity": 0.0,
+   "oos_caught": 0
+  },
+  "\u2212 grade": {
+   "leak_rate": 0.1394230769230769,
+   "leak_hard": 0.0,
+   "leak_french": 0.0,
+   "over_redaction": 0.0,
+   "health_sensitivity": 0.0,
+   "health_specificity": -0.03692307692307695,
+   "oos_caught": 0
+  },
+  "\u2212 health_card": {
+   "leak_rate": 0.0,
+   "leak_hard": 0.0,
+   "leak_french": 0.0,
+   "over_redaction": 0.0,
+   "health_sensitivity": 0.0,
+   "health_specificity": 0.0,
+   "oos_caught": -1
+  },
+  "\u2212 health_detail": {
+   "leak_rate": 0.21153846153846154,
+   "leak_hard": 0.10000000000000003,
+   "leak_french": 0.0,
+   "over_redaction": 0.0,
+   "health_sensitivity": -0.7540983606557378,
+   "health_specificity": 0.003076923076923088,
+   "oos_caught": 0
+  },
+  "\u2212 health_extra": {
+   "leak_rate": 0.004807692307692308,
+   "leak_hard": 0.0,
+   "leak_french": 0.0,
+   "over_redaction": 0.0,
+   "health_sensitivity": -0.032786885245901676,
+   "health_specificity": 0.0,
+   "oos_caught": 0
+  },
+  "\u2212 id_number": {
+   "leak_rate": 0.0,
+   "leak_hard": 0.0,
+   "leak_french": 0.0,
+   "over_redaction": 0.0,
+   "health_sensitivity": 0.0,
+   "health_specificity": 0.0,
+   "oos_caught": -2
+  },
+  "\u2212 phone_na": {
+   "leak_rate": 0.0625,
+   "leak_hard": 0.0,
+   "leak_french": 0.0,
+   "over_redaction": 0.0,
+   "health_sensitivity": 0.0,
+   "health_specificity": 0.0,
+   "oos_caught": 0
+  },
+  "\u2212 postal_code": {
+   "leak_rate": 0.0,
+   "leak_hard": 0.0,
+   "leak_french": 0.0,
+   "over_redaction": 0.0,
+   "health_sensitivity": 0.0,
+   "health_specificity": 0.0,
+   "oos_caught": -2
+  },
+  "\u2212 student_id": {
+   "leak_rate": 0.22115384615384615,
+   "leak_hard": 0.10000000000000003,
+   "leak_french": 0.23076923076923078,
+   "over_redaction": 0.0,
+   "health_sensitivity": 0.0,
+   "health_specificity": 0.0,
+   "oos_caught": 0
+  },
+  "\u2212 zh_person": {
+   "leak_rate": 0.0,
+   "leak_hard": 0.06666666666666671,
+   "leak_french": 0.0,
+   "over_redaction": 0.0,
+   "health_sensitivity": 0.0,
+   "health_specificity": 0.0,
+   "oos_caught": 0
+  },
+  "\u2212 identity terms": {
+   "leak_rate": 0.004807692307692308,
+   "leak_hard": 0.10000000000000003,
+   "leak_french": 0.0,
+   "over_redaction": 0.0,
+   "health_sensitivity": 0.0,
+   "health_specificity": 0.0,
+   "oos_caught": 0
+  },
+  "\u2212 person clean-up": {
+   "leak_rate": 0.0,
+   "leak_hard": 0.0,
+   "leak_french": 0.0,
+   "over_redaction": 0.026785714285714284,
+   "health_sensitivity": 0.0,
+   "health_specificity": 0.0,
+   "oos_caught": 1
+  },
+  "\u2212 staff allow-list": {
+   "leak_rate": 0.0,
+   "leak_hard": 0.0,
+   "leak_french": 0.0,
+   "over_redaction": 0.01785714285714286,
+   "health_sensitivity": 0.0,
+   "health_specificity": 0.0,
+   "oos_caught": 0
+  }
+ }
+}

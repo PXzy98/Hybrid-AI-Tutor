@@ -104,16 +104,17 @@ async def test_ollama_bad_replies(response, match):
 class FakeOpenAI:
     """Stands in for openai.AsyncOpenAI: records kwargs, returns a canned completion or raises."""
 
-    def __init__(self, reply="Cloud answer.", error=None):
+    def __init__(self, reply="Cloud answer.", error=None, finish_reason="stop"):
         self.kwargs = None
-        self.reply, self.error = reply, error
+        self.reply, self.error, self.finish_reason = reply, error, finish_reason
         self.chat = SimpleNamespace(completions=SimpleNamespace(create=self._create))
 
     async def _create(self, **kwargs):
         self.kwargs = kwargs
         if self.error:
             raise self.error
-        return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content=self.reply))],
+        return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content=self.reply),
+                                                        finish_reason=self.finish_reason)],
                                usage=SimpleNamespace(prompt_tokens=11, completion_tokens=22))
 
 
@@ -135,6 +136,17 @@ async def test_openai_compat_maps_errors():
     client = OpenAICompatClient("https://x", "k", "m", client=FakeOpenAI(reply=""))
     with pytest.raises(LLMError, match="empty"):
         await client.complete(MSGS)
+
+
+async def test_openai_compat_reasoning_used_the_whole_budget(caplog):
+    """deepseek-flash: hidden reasoning counts against max_tokens and can leave no answer text."""
+    client = OpenAICompatClient("https://x", "k", "m", client=FakeOpenAI(reply="", finish_reason="length"))
+    with pytest.raises(LLMError, match="cut off"):
+        await client.complete(MSGS)
+    half = FakeOpenAI(reply="Half an ans", finish_reason="length")
+    client = OpenAICompatClient("https://x", "k", "m", client=half)
+    res = await client.complete(MSGS)
+    assert res.text == "Half an ans" and "cut off" in caplog.text
 
 
 @pytest.mark.ollama
