@@ -15,6 +15,10 @@ export type Profile = Schemas["Profile"];
 export type Preferences = Schemas["Preferences"];
 export type FeedbackAction = Schemas["FeedbackBody"]["action"];
 
+export type SurveySubmission = Schemas["SurveySubmission"];
+export type SurveyTopicSummary = Schemas["SurveyTopicSummary"];
+export type SurveySummary = Schemas["SurveySummary"];
+
 export type StudentAccount = Schemas["StudentAccountOut"];
 export type CreatedStudent = Schemas["CreatedStudent"];
 export type TemporaryPassword = Schemas["TemporaryPassword"];
@@ -49,6 +53,7 @@ export const api = {
   profile: () => request<Profile>("GET", `${V1}/learner/me`),
   resetProfile: () => request<void>("DELETE", `${V1}/learner/me`),
   feedback: (action: FeedbackAction) => request<Preferences>("POST", `${V1}/learner/me/preferences`, { action }),
+  submitSurvey: (body: SurveySubmission) => request<{ saved: boolean }>("POST", `${V1}/survey`, body),
 };
 
 const ADMIN = `${V1}/admin`;
@@ -70,6 +75,7 @@ export const admin = {
   logs: (page: number, pageSize = 20) =>
     request<LogPage>("GET", `${ADMIN}/logs?page=${page}&page_size=${pageSize}`),
   content: () => request<ContentStatus>("GET", `${ADMIN}/content`),
+  surveySummary: () => request<SurveySummary>("GET", `${ADMIN}/survey-summary`),
   uploadMaterial: (topic: string, file: File, replace: boolean) => {
     const form = new FormData();
     form.append("file", file);

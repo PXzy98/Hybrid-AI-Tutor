@@ -404,6 +404,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/survey": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit Survey */
+        post: operations["submit_survey_api_v1_survey_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/survey-summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Survey Summary */
+        get: operations["survey_summary_api_v1_admin_survey_summary_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1176,6 +1210,48 @@ export interface components {
             created_at: string;
             /** Last Login At */
             last_login_at: string | null;
+        };
+        /** SurveyReceipt */
+        SurveyReceipt: {
+            /** Saved */
+            saved: boolean;
+        };
+        /** SurveySubmission */
+        SurveySubmission: {
+            /** Topic */
+            topic: string;
+            /** Helpfulness */
+            helpfulness: number;
+            /** Material Relevance */
+            material_relevance: number;
+            /** Clarity */
+            clarity: number;
+            /** Source Confidence */
+            source_confidence: number;
+        };
+        /** SurveySummary */
+        SurveySummary: {
+            /** Min Group Size */
+            min_group_size: number;
+            /** Topics */
+            topics: components["schemas"]["SurveyTopicSummary"][];
+        };
+        /** SurveyTopicSummary */
+        SurveyTopicSummary: {
+            /** Topic */
+            topic: string;
+            /** Count */
+            count: number;
+            /** Sufficient Sample */
+            sufficient_sample: boolean;
+            /** Mean Helpfulness */
+            mean_helpfulness?: number | null;
+            /** Mean Material Relevance */
+            mean_material_relevance?: number | null;
+            /** Mean Clarity */
+            mean_clarity?: number | null;
+            /** Mean Source Confidence */
+            mean_source_confidence?: number | null;
         };
         /** TemporaryPassword */
         TemporaryPassword: {
@@ -2070,6 +2146,59 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Health"];
+                };
+            };
+        };
+    };
+    submit_survey_api_v1_survey_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SurveySubmission"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SurveyReceipt"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    survey_summary_api_v1_admin_survey_summary_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SurveySummary"];
                 };
             };
         };

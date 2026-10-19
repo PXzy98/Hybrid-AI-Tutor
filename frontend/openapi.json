@@ -1011,6 +1011,68 @@
           }
         }
       }
+    },
+    "/api/v1/survey": {
+      "post": {
+        "tags": [
+          "survey"
+        ],
+        "summary": "Submit Survey",
+        "operationId": "submit_survey_api_v1_survey_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SurveySubmission"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SurveyReceipt"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/survey-summary": {
+      "get": {
+        "tags": [
+          "survey"
+        ],
+        "summary": "Survey Summary",
+        "operationId": "survey_summary_api_v1_admin_survey_summary_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SurveySummary"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2898,6 +2960,151 @@
           "last_login_at"
         ],
         "title": "StudentAccountOut"
+      },
+      "SurveyReceipt": {
+        "properties": {
+          "saved": {
+            "type": "boolean",
+            "title": "Saved"
+          }
+        },
+        "type": "object",
+        "required": [
+          "saved"
+        ],
+        "title": "SurveyReceipt"
+      },
+      "SurveySubmission": {
+        "properties": {
+          "topic": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Topic"
+          },
+          "helpfulness": {
+            "type": "integer",
+            "maximum": 5.0,
+            "minimum": 1.0,
+            "title": "Helpfulness"
+          },
+          "material_relevance": {
+            "type": "integer",
+            "maximum": 5.0,
+            "minimum": 1.0,
+            "title": "Material Relevance"
+          },
+          "clarity": {
+            "type": "integer",
+            "maximum": 5.0,
+            "minimum": 1.0,
+            "title": "Clarity"
+          },
+          "source_confidence": {
+            "type": "integer",
+            "maximum": 5.0,
+            "minimum": 1.0,
+            "title": "Source Confidence"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "topic",
+          "helpfulness",
+          "material_relevance",
+          "clarity",
+          "source_confidence"
+        ],
+        "title": "SurveySubmission"
+      },
+      "SurveySummary": {
+        "properties": {
+          "min_group_size": {
+            "type": "integer",
+            "title": "Min Group Size"
+          },
+          "topics": {
+            "items": {
+              "$ref": "#/components/schemas/SurveyTopicSummary"
+            },
+            "type": "array",
+            "title": "Topics"
+          }
+        },
+        "type": "object",
+        "required": [
+          "min_group_size",
+          "topics"
+        ],
+        "title": "SurveySummary"
+      },
+      "SurveyTopicSummary": {
+        "properties": {
+          "topic": {
+            "type": "string",
+            "title": "Topic"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          },
+          "sufficient_sample": {
+            "type": "boolean",
+            "title": "Sufficient Sample"
+          },
+          "mean_helpfulness": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mean Helpfulness"
+          },
+          "mean_material_relevance": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mean Material Relevance"
+          },
+          "mean_clarity": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mean Clarity"
+          },
+          "mean_source_confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mean Source Confidence"
+          }
+        },
+        "type": "object",
+        "required": [
+          "topic",
+          "count",
+          "sufficient_sample"
+        ],
+        "title": "SurveyTopicSummary"
       },
       "TemporaryPassword": {
         "properties": {

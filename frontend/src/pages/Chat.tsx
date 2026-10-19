@@ -5,6 +5,8 @@ import { Link } from "react-router-dom";
 import { api, type AskBody, type AskResponse, type FeedbackAction } from "../api/endpoints";
 import Band from "../components/Band";
 import CheckCard from "../components/CheckCard";
+import FeedbackSurvey from "../components/FeedbackSurvey";
+import { TRIAL_QUESTIONS } from "../components/surveyScenarios";
 import TopicPicker from "../components/TopicPicker";
 import RoutingProgress, { type RoutingTrace } from "../components/RoutingProgress";
 
@@ -125,9 +127,20 @@ export default function Chat() {
           ),
         )}
         {ask.isPending && <p className="text-sm text-slate-500">The tutor is thinking…</p>}
+        {lastTutor && (
+          <div className="self-start">
+            <FeedbackSurvey key={topic} topic={topic} />
+          </div>
+        )}
         <div ref={endRef} />
       </section>
 
+      {conversation.messages.length === 0 && TRIAL_QUESTIONS[topic] && (
+        <button type="button" className="btn-secondary self-start text-sm"
+                onClick={() => setQuestion(TRIAL_QUESTIONS[topic])}>
+          Try a sample question for this topic
+        </button>
+      )}
       <form onSubmit={send} className="sticky bottom-0 flex flex-col gap-2 border-t border-slate-200 bg-slate-50 pt-3">
         <div className="flex flex-wrap items-center gap-2 text-sm">
           <label htmlFor="routing-method" className="text-slate-700">Routing method</label>
