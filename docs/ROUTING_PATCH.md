@@ -10,11 +10,13 @@ Default pipeline:
 
 The answering Qwen model no longer acts as a routing or evidence judge. The existing `understand` step still uses it for learner/course tagging, independently of routing.
 
-Semantic runtime is local/offline: model preparation is an explicit command. Missing assets, incompatible classifier weights, overlong encoder inputs, unsupported domains and uncertain classification select Cloud with an explicit reason. A semantic Cloud decision never silently falls back to Local if Cloud is unavailable; the existing API error path is used.
+Semantic runtime is local/offline: model preparation is an explicit command. Missing assets, incompatible classifier weights, overlong encoder inputs, unsupported domains and uncertain classification select Cloud with an explicit reason. If the chosen cloud model is not configured, fails, or the privacy gate keeps the question local, the local model answers and the student is told why (team decision, 19 Oct 2026, PR #3); the fallback is visible, never silent, and `llm.cloud.fallback_to_local: false` restores the error path for routing experiments.
 
 ## Privacy integration boundary
 
-Requested scope: no privacy-condition branch inside semantic routing. `pii.cloud_safe` and `force_local_if_not_cloud_safe` do not change the semantic Local/Cloud decision. The existing upstream privacy filter, sanitized CloudRequest allow-list and post-response checkers remain owned by the teammate. Semantic generation does not repeat the legacy pre-send privacy routing guard. That integration point is marked `TEAM INTEGRATION` in code. The legacy stub router retains its original behavior for regression tests.
+Requested scope: no privacy-condition branch inside semantic routing. `pii.cloud_safe` and `force_local_if_not_cloud_safe` do not change the semantic Local/Cloud decision. The upstream privacy filter, the sanitized CloudRequest allow-list and the post-response checkers are owned by the privacy part.
+
+Updated 19 Oct 2026 (team decision, PR #3): the privacy rules apply at the **cloud gate** in the generate step, whichever router chose the cloud. The pre-send leak guard runs for semantic routing too, and a personal health detail (`cloud_safe = false`) follows `privacy.health_detail_policy`: `local_only` (default) answers locally with a notice, `generalize` sends only a checked hypothetical rewrite. The router itself still has no privacy branch. See `docs/report/privacy_subsystem.md` and `docs/隐私升级.md`.
 
 ## Methods and removal
 
@@ -55,7 +57,9 @@ Plain old-style chunks without metadata work for ordinary instructor-provided co
 
 RAG states distinguish `disabled`, `error`, `empty`, `returned` and `skipped`. Zero passages have zero support coverage. A question that needs evidence is never admitted to Local with zero evidence. A question that does not need external evidence can still use Local without RAG.
 
-Evidence verification uses MS MARCO relevance and a separate QNLI answerability model. Explicit subquestions are checked separately; all must pass. Only accepted passages reach prompts and displayed course sources. Missing evidence model assets, malformed/expired metadata, oversized verification inputs and scoring errors cannot become a pass.
+Evidence verification uses MS MARCO relevance and a separate QNLI answerability model. Explicit subquestions are checked separately; all must pass. Missing evidence model assets, malformed/expired metadata, oversized verification inputs and scoring errors cannot become a pass.
+
+Updated 19 Oct 2026 (PR #3): which passages reach the prompt and the displayed sources is decided separately from the routing decision (`select_passages`). If the evidence models ran, every passage the relevance model judged relevant is used (answerability stays a routing signal). If they were skipped, missing or failed, the retriever's results that pass the provenance and topic checks are used, tagged `evidence_check: unverified`; the server logs one warning and the student sees that the sources were not checked. Passages rejected by provenance or freshness checks are never used. Download the evidence models with `python -m app.routing.prepare`.
 
 QNLI is a domain-transfer support estimate, not proof of factual truth. It does not fully resolve source contradictions or every implicit subtask. Current thresholds need a representative medical/course evidence benchmark. A complex question still needs to pass the independent capability gate even when relevant evidence exists.
 

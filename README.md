@@ -1,7 +1,7 @@
 # Integrated main + RAG + semantic routing (v3)
 
 完整保留教师后台，合并真实医学 RAG 和 500 题 LR/SVM routing。
-Windows 首次运行请看 [开始使用.md](开始使用.md)，版本来源与限制见 [docs/INTEGRATION.md](docs/INTEGRATION.md)。
+Windows 首次运行请看 [开始使用.md](开始使用.md)（English: [GETTING_STARTED.md](GETTING_STARTED.md)），版本来源与限制见 [docs/INTEGRATION.md](docs/INTEGRATION.md)。
 安装：Python 3.12 运行 `setup_local.py`；启动：分别运行 `start_backend.ps1` 与 `start_frontend.ps1`。
 
 ---
@@ -17,6 +17,8 @@ A health-education tutor (ELG 5902, Group 1). Students pick one of five topics (
 - Progress log: [docs/IMPLEMENTATION_LOG.md](docs/IMPLEMENTATION_LOG.md)
 - For teammates (routing, RAG): [docs/INTERFACES.md](docs/INTERFACES.md)
 - MVP status: [docs/MVP_CHECKLIST.md](docs/MVP_CHECKLIST.md) · demo script: [docs/DEMO.md](docs/DEMO.md)
+- Privacy: [docs/report/privacy_subsystem.md](docs/report/privacy_subsystem.md) (evaluation, design, test results) · planned upgrades: [docs/隐私升级.md](docs/隐私升级.md)
+- Routing and RAG as integrated: [docs/ROUTING_PATCH.md](docs/ROUTING_PATCH.md), [docs/RAG_INTEGRATION.md](docs/RAG_INTEGRATION.md); differences from the design: [System_Design_v3.md §16](docs/System_Design_v3.md)
 
 ## Quick start (Docker)
 
@@ -33,6 +35,7 @@ docker compose up --build -d      # http://localhost:8080 (WEB_PORT changes the 
 - Log in as the instructor, choose a new password, then create students (API `/api/v1/admin/students` until the dashboard of Step 13). For a demo with three prepared students, see [docs/DEMO.md](docs/DEMO.md).
 - Any `config.yaml` value can be overridden in `.env` as `SECTION__FIELD`, e.g. `CONTENT__SERVE_UNREVIEWED=true` (needed while the course content is unreviewed) or `ROUTING__THRESHOLD=0.7`.
 - `docker compose down` stops the app; `docker compose down -v` also deletes all accounts and data.
+- Known gap: the image does not yet contain the routing and evidence models (see below). Without them the app still answers, but routing selects the cloud and course sources are marked "not checked".
 
 ## Repository layout
 
@@ -75,6 +78,28 @@ The server refuses to start without the spaCy model named in `config.yaml` (`pri
 ```
 
 For quick local development you can use the small model instead: set `PRIVACY__SPACY_MODEL=en_core_web_sm` in `.env`. Tests always use the small model.
+
+### Routing and evidence models
+
+The semantic router and the evidence check run locally and offline (`routing.local_files_only: true`). Download their models once (MiniLM sentence encoder and two cross-encoders, about 600 MB in the Hugging Face cache):
+
+```powershell
+cd backend; ..\.venv\Scripts\python -m app.routing.prepare
+```
+
+Without them the app still works: the router selects the cloud with the reason in its diagnostics, and the retrieved course passages are used but marked "not checked for relevance" (one warning in the server log).
+
+### Cloud model
+
+Any OpenAI-compatible API, set in `.env` (never commit keys):
+
+```
+CLOUD_BASE_URL=https://api.deepseek.com      # example: DeepSeek, tested Oct 19, 2026
+CLOUD_API_KEY=...
+CLOUD_MODEL=deepseek-flash
+```
+
+The cloud only receives the sanitized question, the topic, course passages and three coarse labels; questions with a personal health detail stay local (`privacy.health_detail_policy`). Without a key, or when the cloud fails, the local model answers and the student is told why. Reasoning models count their hidden reasoning against `llm.cloud.max_tokens` (2000). Check the provider's data location and retention with the client before a pilot (DeepSeek stores data in China): see [docs/隐私升级.md](docs/隐私升级.md).
 
 Run the app in development mode (two terminals):
 

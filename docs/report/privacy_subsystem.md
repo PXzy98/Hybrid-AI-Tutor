@@ -2,7 +2,9 @@
 
 Report section for Deliverable B (GNG/ELG 5902, Group 1). Covers B1–B4 for the privacy subsystem of the
 Privacy-Aware Hybrid AI Tutor. All test data is fictional. Numbers come from `eval/privacy-filter/` (E6) and
-`eval/privacy-audit/` (E4), run on 2026-10-19; see `eval/privacy-filter/README.md` to re-run them.
+`eval/privacy-audit/` (E4), run on 2026-10-19; see `eval/privacy-filter/README.md` to re-run them. The design
+in section 4 is the integrated system (semantic routing, medical RAG, cloud gate) as merged on 19 Oct 2026; the
+cloud model was tested with DeepSeek (`deepseek-flash`). Planned upgrades: `docs/隐私升级.md`.
 
 **Test sets.** E6 uses three sets, because a filter tuned on one set always looks better on that set:
 
@@ -214,7 +216,10 @@ with the answer to the original question (`results/utility.md`).
 - A hypothetical rewrite (“a person with asthma…”) keeps the quality (4.47) and contains no identifier; none of
   the 15 rewrites still contained PII according to our filter (whose health recall is limited, so a human
   check is needed). H2 is the strongest option if the client accepts de-identified health questions in the
-  cloud.
+  cloud. It is implemented behind `privacy.health_detail_policy: generalize` (off by default): the local model
+  writes the rewrite, which must pass the privacy filter again (no first person, no digits, no finding);
+  otherwise the question stays local. With the real local model, 2 of 4 sample rewrites passed and 2 were
+  rejected (a reading or a relative was still in them).
 - Surrogate names (H1) bring no gain over placeholders and confuse health questions; not pursued.
 
 ### 3.4 Client feedback to seek
@@ -227,6 +232,10 @@ with the answer to the original question (`results/utility.md`).
 3. Which additional types matter for this course: health card number, address, date of birth, postal code
    (now covered), ages, school or workplace (not covered)?
 4. Are the targets in Table 1 acceptable?
+5. Cloud provider and data location: the tests used DeepSeek, whose servers are in China according to its
+   privacy policy. Every cloud request carries the sanitized question, course passages and three coarse labels.
+   Is that acceptable, or should the pilot use a provider with Canadian or US data residency and zero data
+   retention, or the local model only? (The provider is configuration, no code change.)
 
 ---
 
@@ -245,11 +254,16 @@ with the answer to the original question (`results/utility.md`).
 | 1 | Detect | raw question, identity terms | findings (type, span, score) from spaCy NER, Presidio patterns and 14 custom recognizers | 2; on error → request stops (HTTP 503) |
 | 2 | Clean up | findings | filtered findings (threshold 0.5, person fixes, eponyms, allow-list; a PERSON span never hides a health detail; longer span, then higher score) | 3 |
 | 3 | Anonymize | question, findings | sanitized text with numbered placeholders; private mapping | 4; storage and logs receive the sanitized text only |
-| 4 | Local-only decision | findings | `cloud_safe` flag (false if a personal health detail is present) | Route step |
-| 5 | Pre-send leak guard | `CloudRequest` | send, or block → local answer + notice | Cloud client |
-| 6 | Restore + verify | answer, mapping | answer with original values; leak checkers; mapping cleared | Response to the student |
+| 4 | Local-only decision | findings | `cloud_safe` flag (false if a personal health detail is present) | Cloud gate (5); the router itself has no privacy branch |
+| 5 | Cloud gate (every router) | `CloudRequest`, `cloud_safe` | `cloud_safe = false`: `local_only` → local answer + notice, `generalize` → checked hypothetical rewrite; leak guard: any PII, `student_id`, item ID or misconception text → block → local answer + notice; no or failing cloud model → local answer + notice | Cloud client |
+| 6 | Restore + verify | answer, mapping | answer with original values; leak checkers; stored answer redacted (whole words, any case); mapping cleared | Response to the student |
 
-Code: `backend/app/privacy/` (analyzer, anonymizer, `recognizers/`), `backend/app/pipeline/steps/privacy_filter.py`,
+The router (semantic: MiniLM embedding, LR/SVM heads, cross-encoder evidence check) only decides local or cloud
+from capability and evidence; it sees the sanitized question. Whichever router chose the cloud, the request
+goes through the gate in the generate step.
+
+Code: `backend/app/privacy/` (analyzer, anonymizer, `generalize.py`, `recognizers/`),
+`backend/app/pipeline/steps/privacy_filter.py`, `backend/app/pipeline/steps/generate.py` (cloud gate),
 `backend/app/verify/leaks.py`, `backend/app/llm/cloud_guard.py`. Custom recognizers: `student_id`, `phone_na`,
 `grade`, `health_detail`, `health_extra`, `zh_person`, `postal_code`, `health_card`, `id_number`,
 `date_of_birth`, `address`, `fr_person`, `fr_health`, `fr_grade`.
@@ -269,7 +283,10 @@ Code: `backend/app/privacy/` (analyzer, anonymizer, `recognizers/`), `backend/ap
 
 Python, Presidio and spaCy (open source); the local GPU server for the local model; no paid service is needed
 for the filter. The large spaCy model (`en_core_web_lg`, ~400 MB) must be installed on the server. The
-evaluation also used GLiNER, the spaCy transformer model and Gemma 4 as a judge (evaluation only).
+evaluation also used GLiNER, the spaCy transformer model and Gemma 4 as a judge (evaluation only). Cloud model:
+any OpenAI-compatible API, configured in `.env` (`CLOUD_BASE_URL`, `CLOUD_API_KEY`, `CLOUD_MODEL`); tested with
+DeepSeek. Reasoning models count their hidden reasoning against the token limit, so `llm.cloud.max_tokens` is
+2000.
 
 ---
 
@@ -288,6 +305,7 @@ evaluation also used GLiNER, the spaCy transformer model and Gemma 4 as a judge 
 | M5 latency, median | ≤ 100 / ≤ 300 ms | 4 ms | **7 ms** | ideal |
 | M6 raw text off-site | no | no | no | met |
 | M7 end-to-end audit (E4 with the 274 labelled main-set questions through the API) | 0 | identity 0, profile 0, fields 0; PII in 15 of 217 cloud requests; 5 of 61 personal health questions in the cloud | – | identity/profile met; PII not met (the known misses) |
+| M7 with the real cloud model (E4 `--smoke --real-cloud`, DeepSeek, 2 personas × 6 questions forced to the cloud) | 0 | 12 cloud requests: fields 0, identity 0, profile 0, PII 0 | – | met |
 | M8 answer quality with placeholders | ≥ 4.5 / ≥ 4.0 | 4.37 (identifiers) | – | marginal |
 | Placeholder round trip | 100% | 100% | 100% | met |
 
@@ -321,6 +339,15 @@ any case. Remaining storage finding: when a personal health question stays local
 name the term on its own (“inhaler”, “150/95”) while the redacted span was longer (“my inhaler”, “my bp was
 150/95”). This stays inside the boundary but is linked to the student; open item for Beta.
 
+**Tests with a real cloud model (DeepSeek `deepseek-flash`, 19 Oct 2026).** Five fictional questions through the
+running app: a general question stayed local; three questions the router sent to the cloud were answered by
+DeepSeek in 8–12 s, and for the one that contained a name, a student number and an e-mail, the recorded request
+held only `<PERSON_1>`, `<STUDENT_ID_1>` and `<EMAIL_ADDRESS_1>`; a personal health question was never sent and
+was answered locally with the privacy notice. The tests found two defects, both fixed: the 800-token limit was
+used up by the model's hidden reasoning (answers cut off or empty, so the app fell back to local; now 2000), and
+the SDK client reused a connection pool across event loops (every second request failed in the audit harness;
+now one client per event loop).
+
 **Development history (for transparency).** A first version of the main set (140 cases) gave the MVP 1.2%
 leak. The 404-case set found new gaps (French health detail hidden by a PERSON span, a grade read as a blood
 pressure reading, Canadian identifiers), which were fixed (`results/before_fixes/` keeps the run before the
@@ -333,11 +360,15 @@ expected optimism of tuning on a set; v2 is the number to report.
 `eval/privacy-filter/spot_check.md`); all held-out labels were written by hand with 8 debatable cases listed in
 `holdout_review.md`. These checks were done by the coding assistant and are to be repeated by a team member.
 
-**Next steps (Beta)**
+**Next steps (Beta; details in `docs/隐私升级.md`)**
 
-1. Client decision on the residual risk (3.4); if needed, integrate C5 (Qwen pass on cloud-bound questions only)
-   and re-measure on a new held-out set.
-2. Multi-turn: run the filter on the last two student turns together, so “It's type 2 diabetes” keeps its
-   context.
-3. H2 hypothetical rewrite as an option behind a configuration flag, after client and ethics feedback.
-4. A held-out set written by people (classmates writing fictional questions) before the pilot.
+1. Client decision on the cloud provider and data location, and on the residual risk (3.4); if needed,
+   integrate C5 (Qwen pass on cloud-bound questions only) and re-measure on a new held-out set.
+2. Scan instructor uploads with the privacy filter: course passages are sent to the cloud unscanned, so a
+   material containing a real student or patient name would leave the boundary.
+3. Multi-turn: decide `cloud_safe` from the last one or two student turns together, so “It's type 2 diabetes”
+   keeps its context.
+4. Stored answers to local personal-health questions: also redact the condition words and readings inside a
+   longer health span.
+5. `generalize` (H2, implemented, off) only after client and ethics feedback.
+6. A held-out set written by people (classmates writing fictional questions) before the pilot.
