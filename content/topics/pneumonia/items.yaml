@@ -1,2 +1,191 @@
-# DRAFT — placeholder. No check questions yet.
-[]
+# DRAFT, UNREVIEWED. Obtain Lavin/Dr. Abbas medical review before real student use.
+- id: PNE.1-q1
+  kc: PNE.1
+  level: basic
+  stem: Which organ is mainly affected by pneumonia?
+  options:
+    A:
+      text: The throat alone, never the lungs
+      misconception: PNE.MC1
+    B: The stomach
+    C: The outer ear
+    D: The lungs
+  answer: D
+  explanation: Pneumonia is an infection in one or both lungs that affects air sacs.
+  reviewed_by: null
+- id: PNE.1-q2
+  kc: PNE.1
+  level: intermediate
+  stem: What may happen to lung air sacs during pneumonia?
+  options:
+    A: They may become inflamed and fill with fluid or pus
+    B: They cease to exist permanently
+    C: They produce hair
+    D: They transform into bone
+  answer: A
+  explanation: Pneumonia can cause air sac inflammation and fluid accumulation, which may impair breathing.
+  reviewed_by: null
+- id: PNE.1-q3
+  kc: PNE.1
+  level: advanced
+  stem: Why can pneumonia make breathing harder?
+  options:
+    A: The lungs stop needing oxygen
+    B: Inflammation and fluid in lung air sacs can interfere with gas exchange
+    C: Pneumonia changes only the colour of blood
+    D: Air sacs carry food to the stomach
+  answer: B
+  explanation: Inflamed or fluid-filled air sacs can make oxygen exchange more difficult.
+  reviewed_by: null
+- id: PNE.2-q1
+  kc: PNE.2
+  level: basic
+  stem: Which statement about pneumonia symptoms is accurate?
+  options:
+    A: Symptoms can never change with the cause
+    B: Symptoms only change a person's hair colour
+    C: Cough, fever or breathing difficulty may occur
+    D:
+      text: Every person with pneumonia has exactly the same symptoms
+      misconception: PNE.MC2
+  answer: C
+  explanation: Cough, fever, breathing difficulty and other symptoms may occur.
+  reviewed_by: null
+- id: PNE.2-q2
+  kc: PNE.2
+  level: intermediate
+  stem: Why can pneumonia symptoms look different between patients?
+  options:
+    A: All patients must have identical symptoms
+    B: Symptoms never depend on underlying health
+    C: Any cough alone proves pneumonia
+    D: Symptoms may vary with the cause, age and other health factors
+  answer: D
+  explanation: The presentation may differ among patients, so clinical context matters.
+  reviewed_by: null
+- id: PNE.2-q3
+  kc: PNE.2
+  level: advanced
+  stem: Why might a clinician examine someone with cough, fever and difficulty breathing?
+  options:
+    A: To assess potential causes and whether further investigation is needed
+    B: To diagnose pneumonia from favourite foods
+    C: To replace medical examination with a school quiz
+    D: Because these symptoms always rule out infection
+  answer: A
+  explanation: Clinical assessment helps distinguish causes and guide appropriate evaluation.
+  reviewed_by: null
+- id: PNE.3-q1
+  kc: PNE.3
+  level: basic
+  stem: Which statement about pneumonia causes is accurate?
+  options:
+    A: Only cold weather directly causes pneumonia
+    B: Bacteria and viruses are among the organisms that can cause pneumonia
+    C: Every pneumonia is caused by pollen
+    D:
+      text: Every pneumonia is bacterial and needs the same antibiotic
+      misconception: PNE.MC3
+  answer: B
+  explanation: Pneumonia may have different infectious causes, including bacterial and viral infections.
+  reviewed_by: null
+- id: PNE.3-q2
+  kc: PNE.3
+  level: intermediate
+  stem: Why does distinguishing the likely cause of pneumonia matter?
+  options:
+    A: It makes every antibiotic appropriate
+    B: The cause cannot influence treatment
+    C: Different causes may require different care decisions
+    D: The cause always changes a person's blood type
+  answer: C
+  explanation: Cause and clinical severity help guide assessment and care.
+  reviewed_by: null
+- id: PNE.3-q3
+  kc: PNE.3
+  level: advanced
+  stem: What can students correctly infer from a case description of cough and fever?
+  options:
+    A: No clinical review is necessary
+    B: The cause is definitely bacterial
+    C: The cause is definitely viral
+    D: Symptoms alone may not establish the exact organism or diagnosis
+  answer: D
+  explanation: Symptoms alone may not distinguish different infectious causes.
+  reviewed_by: null
+- id: PNE.4-q1
+  kc: PNE.4
+  level: basic
+  stem: What is a safe general approach to choosing treatment for possible pneumonia?
+  options:
+    A: Seek appropriate clinical assessment because treatment depends on cause and severity
+    B: Use someone else's prescription
+    C: Always choose identical antibiotics
+    D:
+      text: Select a medicine based only on a school multiple-choice test
+      misconception: PNE.MC4
+  answer: A
+  explanation: Treatment decisions must reflect a qualified healthcare professional's evaluation.
+  reviewed_by: null
+- id: PNE.4-q2
+  kc: PNE.4
+  level: intermediate
+  stem: Which worsening symptom should prompt timely medical attention?
+  options:
+    A: A different favourite song
+    B: Increasing difficulty breathing
+    C: A preference for a different study notebook
+    D: Changing a phone wallpaper
+  answer: B
+  explanation: Worsening breathing can be serious and should prompt timely medical attention.
+  reviewed_by: null
+- id: PNE.4-q3
+  kc: PNE.4
+  level: advanced
+  stem: Why is an educational question insufficient to prescribe pneumonia treatment?
+  options:
+    A: Medication choices depend only on classroom quiz scores
+    B: All pneumonias are harmless
+    C: The cause, severity, individual health conditions and clinical examination affect decisions
+    D: Every person has the same clinical circumstances
+  answer: C
+  explanation: Individual diagnosis and prescribing require clinical evaluation.
+  reviewed_by: null
+- id: PNE.5-q1
+  kc: PNE.5
+  level: basic
+  stem: Which action may help reduce some risks of pneumonia?
+  options:
+    A: Sharing personal medications
+    B: Assuming infection is unavoidable and doing nothing
+    C:
+      text: One preventive action can eliminate every pneumonia risk
+      misconception: PNE.MC5
+    D: Discussing recommended vaccinations and practising appropriate hygiene
+  answer: D
+  explanation: Vaccinations and hygiene can reduce some causes and transmission risks.
+  reviewed_by: null
+- id: PNE.5-q2
+  kc: PNE.5
+  level: intermediate
+  stem: Why might follow-up matter during recovery from pneumonia?
+  options:
+    A: Symptoms and recovery vary, and persistent or worsening problems need assessment
+    B: All people recover within the same exact time
+    C: Once fever ends, all complications are impossible
+    D: No one should discuss new symptoms
+  answer: A
+  explanation: Recovery can vary; persistent or worsening symptoms deserve follow-up.
+  reviewed_by: null
+- id: PNE.5-q3
+  kc: PNE.5
+  level: advanced
+  stem: Which statement best describes pneumonia prevention?
+  options:
+    A: Vaccination is irrelevant for all respiratory infections
+    B: A combination of appropriate preventive measures can reduce risk but cannot guarantee prevention
+    C: Every case is prevented by antibiotics
+    D: Only one measure is needed to eliminate every cause
+  answer: B
+  explanation: Prevention depends on cause and risk factors, and no single measure removes all risk.
+  reviewed_by: null

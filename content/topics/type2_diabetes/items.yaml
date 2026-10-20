@@ -1,2 +1,197 @@
-# DRAFT — placeholder. No check questions yet.
-[]
+# DRAFT, UNREVIEWED. Obtain Lavin/Dr. Abbas medical review before real student use.
+- id: T2D.1-q1
+  kc: T2D.1
+  level: basic
+  stem: Which statement about insulin is correct?
+  options:
+    A: Insulin helps glucose move from the blood into cells
+    B: Insulin is a hormone produced by the lungs
+    C: Insulin cannot affect blood glucose
+    D:
+      text: Insulin normally keeps glucose out of body cells
+      misconception: T2D.MC1
+  answer: A
+  explanation: Insulin helps blood glucose enter cells where it can be used for energy.
+  reviewed_by: null
+- id: T2D.1-q2
+  kc: T2D.1
+  level: intermediate
+  stem: Where does much of the body's glucose come from?
+  options:
+    A: The hair follicles
+    B: Food that is eaten
+    C: Bones alone
+    D: The air breathed in
+  answer: B
+  explanation: Glucose comes largely from the foods we eat.
+  reviewed_by: null
+- id: T2D.1-q3
+  kc: T2D.1
+  level: advanced
+  stem: Which description best fits high blood glucose?
+  options:
+    A: The body has stopped making energy completely
+    B: All glucose has disappeared from cells
+    C: Too much glucose remains in the bloodstream
+    D: The bloodstream contains no water
+  answer: C
+  explanation: When insulin is insufficient or less effective, blood glucose may remain high.
+  reviewed_by: null
+- id: T2D.2-q1
+  kc: T2D.2
+  level: basic
+  stem: What is insulin resistance?
+  options:
+    A: Having no blood glucose at all
+    B: A sudden infection of the pancreas
+    C:
+      text: The body produces no insulin at all
+      misconception: T2D.MC2
+    D: Cells not responding normally to insulin
+  answer: D
+  explanation: With insulin resistance, cells do not respond to insulin as effectively.
+  reviewed_by: null
+- id: T2D.2-q2
+  kc: T2D.2
+  level: intermediate
+  stem: What may happen when the body's insulin response becomes less effective?
+  options:
+    A: The pancreas may initially make more insulin
+    B: The lungs begin making insulin
+    C: Blood glucose can never rise
+    D: Insulin is no longer a hormone
+  answer: A
+  explanation: The body may compensate by making more insulin, but blood glucose can eventually rise.
+  reviewed_by: null
+- id: T2D.2-q3
+  kc: T2D.2
+  level: advanced
+  stem: Which statement about type 2 diabetes is most accurate?
+  options:
+    A: It always begins in childhood
+    B: It involves the body's difficulty using insulin effectively, sometimes with insufficient insulin
+      production
+    C: It is diagnosed by counting the number of meals eaten
+    D: It is always caused by eating one sugary food
+  answer: B
+  explanation: Type 2 diabetes often involves insulin resistance and reduced ability to maintain normal
+    glucose levels.
+  reviewed_by: null
+- id: T2D.3-q1
+  kc: T2D.3
+  level: basic
+  stem: Which statement about type 2 diabetes risk is accurate?
+  options:
+    A: Only one factor can ever affect risk
+    B:
+      text: Only people with a family history can develop type 2 diabetes
+      misconception: T2D.MC3
+    C: Family history can increase risk, but diabetes can also occur without it
+    D: Everyone has exactly the same risk
+  answer: C
+  explanation: Family history is one recognized risk factor, though it is not necessary for diabetes to
+    develop.
+  reviewed_by: null
+- id: T2D.3-q2
+  kc: T2D.3
+  level: intermediate
+  stem: Which is an example of a modifiable risk factor?
+  options:
+    A: Family history
+    B: Inherited genes
+    C: Date of birth
+    D: Physical activity level
+  answer: D
+  explanation: Activity levels can be modified, unlike age or inherited risk.
+  reviewed_by: null
+- id: T2D.3-q3
+  kc: T2D.3
+  level: advanced
+  stem: Why should a person with several risk factors ask about screening?
+  options:
+    A: To establish whether testing is appropriate even when symptoms are absent
+    B: Because a risk factor always means they have diabetes
+    C: Because screening replaces all follow-up care
+    D: Because they can determine diagnosis from family history alone
+  answer: A
+  explanation: Risk factors can guide a healthcare professional's decision about appropriate screening.
+  reviewed_by: null
+- id: T2D.4-q1
+  kc: T2D.4
+  level: basic
+  stem: Which statement about glucose monitoring is accurate?
+  options:
+    A:
+      text: Feeling well always means monitoring is unnecessary
+      misconception: T2D.MC4
+    B: Monitoring helps show glucose trends and support management discussions
+    C: Monitoring determines eye colour
+    D: One measurement replaces every clinical review
+  answer: B
+  explanation: Glucose measurements help individuals and care teams evaluate management over time.
+  reviewed_by: null
+- id: T2D.4-q2
+  kc: T2D.4
+  level: intermediate
+  stem: Which body systems can be affected by prolonged high blood glucose?
+  options:
+    A: Only the fingernails
+    B: Only the nose
+    C: Blood vessels, nerves, kidneys and eyes
+    D: No body systems
+  answer: C
+  explanation: Long-term high blood glucose can affect blood vessels, nerves and several organs.
+  reviewed_by: null
+- id: T2D.4-q3
+  kc: T2D.4
+  level: advanced
+  stem: Why might a clinician review a pattern of readings rather than only one number?
+  options:
+    A: All readings are identical throughout the day
+    B: One high number always confirms a complication
+    C: A reading cannot be affected by daily conditions
+    D: Trends over time provide more context than an isolated measurement
+  answer: D
+  explanation: Blood glucose changes over time; patterns can help guide clinical decisions.
+  reviewed_by: null
+- id: T2D.5-q1
+  kc: T2D.5
+  level: basic
+  stem: Which action supports safe diabetes self-management?
+  options:
+    A: Following an agreed care plan and discussing changes with the care team
+    B: Taking another person's prescription
+    C: Changing medicine doses based on an online quiz
+    D:
+      text: Stopping prescribed diabetes treatment as soon as symptoms improve
+      misconception: T2D.MC5
+  answer: A
+  explanation: Self-management includes following a personalized plan and reviewing changes with healthcare
+    professionals.
+  reviewed_by: null
+- id: T2D.5-q2
+  kc: T2D.5
+  level: intermediate
+  stem: Which approach is best for learning how lifestyle factors affect glucose?
+  options:
+    A: Change all medicines without discussion
+    B: Record relevant patterns and discuss them with the healthcare team
+    C: Assume everyone should follow the same plan
+    D: Ignore the effect of activity
+  answer: B
+  explanation: Tracking relevant patterns can inform individualized care conversations.
+  reviewed_by: null
+- id: T2D.5-q3
+  kc: T2D.5
+  level: advanced
+  stem: What should a student conclude from a fictional class case where glucose is repeatedly above a
+    prescribed target?
+  options:
+    A: A diagnosis and dose can be selected from the quiz alone
+    B: The record has no educational value
+    C: The pattern should be reviewed in the context of an individualized clinical care plan
+    D: The patient should skip every meal
+  answer: C
+  explanation: A pattern should be interpreted in a clinical context; education questions do not give
+    individual treatment directions.
+  reviewed_by: null

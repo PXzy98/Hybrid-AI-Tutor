@@ -1,10 +1,30 @@
-# DRAFT — placeholder skeleton. Real KCs (4–6), items and misconceptions are added later (Beta).
+# DRAFT; educational items pending Lavin/Dr. Abbas medical review.
 topic: pneumonia
-name: Pneumonia
-guideline: "TBD: guideline (to be chosen with Dr. Abbas)"
+name: "Pneumonia"
+guideline: "Draft educational reference: MedlinePlus, https://medlineplus.gov/pneumonia.html. Confirm clinical protocols, vaccination advice and student level with Lavin."
 kcs:
-  - id: PNA.1
-    name: "Placeholder: what Pneumonia is"
-    definition: "Placeholder KC so the topic loads. Replace with the reviewed KC map."
+  - id: PNE.1
+    name: "Pneumonia and the lungs"
+    definition: "An infection that can inflame the air sacs in the lungs and affect breathing."
     difficulty: basic
     prerequisites: []
+  - id: PNE.2
+    name: "Symptoms and patient assessment"
+    definition: "Common respiratory and systemic symptoms and the need for clinical assessment when appropriate."
+    difficulty: basic
+    prerequisites: [PNE.1]
+  - id: PNE.3
+    name: "Causes and spread"
+    definition: "Different infectious causes and the difference between a cause and a person's individual diagnosis."
+    difficulty: intermediate
+    prerequisites: [PNE.1]
+  - id: PNE.4
+    name: "Treatment decisions and warning symptoms"
+    definition: "The role of clinician assessment, cause-dependent treatment and recognition of worsening breathing."
+    difficulty: intermediate
+    prerequisites: [PNE.2, PNE.3]
+  - id: PNE.5
+    name: "Prevention and recovery"
+    definition: "General prevention measures, vaccination discussions, recovery and follow-up."
+    difficulty: advanced
+    prerequisites: [PNE.3, PNE.4]

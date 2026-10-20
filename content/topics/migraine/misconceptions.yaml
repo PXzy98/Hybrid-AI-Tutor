@@ -1,2 +1,26 @@
-# DRAFT — placeholder. No misconceptions yet.
-[]
+# UNREVIEWED misconception corrections; obtain medical review before publication.
+- id: MIG.MC1
+  kc: MIG.1
+  statement: "A migraine is always the same as a short, mild tension headache."
+  correction: "Migraine can involve more than head pain and can have distinctive symptoms such as nausea and sensitivity to light or sound."
+  reviewed_by: null
+- id: MIG.MC2
+  kc: MIG.2
+  statement: "Every person with migraine must experience aura."
+  correction: "Some people have migraine with aura, while others have migraine without aura."
+  reviewed_by: null
+- id: MIG.MC3
+  kc: MIG.3
+  statement: "A diary entry proves that one particular food caused a migraine."
+  correction: "A diary can identify possible patterns, but temporal association alone does not prove causation."
+  reviewed_by: null
+- id: MIG.MC4
+  kc: MIG.4
+  statement: "A sudden major change in a person's headache pattern never needs assessment."
+  correction: "A new, unusual, or markedly changing headache should be discussed with an appropriate healthcare professional; urgent symptoms require prompt attention."
+  reviewed_by: null
+- id: MIG.MC5
+  kc: MIG.5
+  statement: "The same treatment plan works for every person with migraine."
+  correction: "Migraine management is individualized and should be reviewed with a healthcare professional."
+  reviewed_by: null

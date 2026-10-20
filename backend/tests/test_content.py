@@ -170,7 +170,9 @@ def test_topics_endpoint_counts(api):
     topics = {t["id"]: t for t in api.client.get("/api/v1/topics").json()}
     assert topics["high_blood_pressure"] == {"id": "high_blood_pressure", "name": "High Blood Pressure",
                                              "kc_count": 6, "reviewed_item_count": 0}
-    assert topics["asthma"]["kc_count"] == 1
+    for topic in ("asthma", "type2_diabetes", "migraine", "pneumonia"):
+        assert topics[topic]["kc_count"] == 5
+        assert topics[topic]["reviewed_item_count"] == 0
 
 
 def test_review_export(tmp_path, monkeypatch):

@@ -1,2 +1,193 @@
-# DRAFT — placeholder. No check questions yet.
-[]
+# DRAFT, UNREVIEWED. Obtain Lavin/Dr. Abbas medical review before real student use.
+- id: AST.1-q1
+  kc: AST.1
+  level: basic
+  stem: What part of the body is mainly affected by asthma?
+  options:
+    A: The outer ear
+    B: The airways carrying air to and from the lungs
+    C:
+      text: The stomach rather than the airways
+      misconception: AST.MC1
+    D: The stomach lining
+  answer: B
+  explanation: Asthma is a chronic condition of the airways, which can become inflamed and narrowed.
+  reviewed_by: null
+- id: AST.1-q2
+  kc: AST.1
+  level: intermediate
+  stem: What may happen to the airways during asthma symptoms?
+  options:
+    A: They carry blood instead of air
+    B: They become rigid bone
+    C: They become inflamed and narrower
+    D: They disappear temporarily
+  answer: C
+  explanation: Airway inflammation and narrowing can make breathing more difficult.
+  reviewed_by: null
+- id: AST.1-q3
+  kc: AST.1
+  level: advanced
+  stem: Why can asthma cause difficulty breathing?
+  options:
+    A: The heart stops permanently
+    B: The body stops producing saliva
+    C: The throat turns into muscle
+    D: Airways can narrow and become inflamed
+  answer: D
+  explanation: Inflammation and narrowing of the airways can restrict airflow.
+  reviewed_by: null
+- id: AST.2-q1
+  kc: AST.2
+  level: basic
+  stem: Which statement about asthma symptoms is accurate?
+  options:
+    A: Asthma may cause wheezing, coughing or chest tightness
+    B: Everyone has exactly the same symptoms
+    C:
+      text: Wheezing is the only symptom asthma can cause
+      misconception: AST.MC2
+    D: Eye colour always changes with asthma
+  answer: A
+  explanation: Wheezing, coughing, chest tightness and shortness of breath are common asthma symptoms.
+  reviewed_by: null
+- id: AST.2-q2
+  kc: AST.2
+  level: intermediate
+  stem: What is meant by an asthma flare-up?
+  options:
+    A: A type of skin infection
+    B: A period when asthma symptoms become worse than usual
+    C: A routine change in hair colour
+    D: Proof that every medication has failed
+  answer: B
+  explanation: A flare-up is a worsening of asthma symptoms.
+  reviewed_by: null
+- id: AST.2-q3
+  kc: AST.2
+  level: advanced
+  stem: What should someone with rapidly worsening breathing symptoms do?
+  options:
+    A: Wait for a classroom assessment
+    B: Ignore the symptoms because all asthma symptoms are harmless
+    C: Follow their written action plan and seek urgent medical help when indicated
+    D: Select a medicine dose from an online quiz
+  answer: C
+  explanation: Urgent breathing difficulty needs appropriate medical attention following the individual's
+    action plan.
+  reviewed_by: null
+- id: AST.3-q1
+  kc: AST.3
+  level: basic
+  stem: Which statement about asthma triggers is correct?
+  options:
+    A:
+      text: Everyone with asthma has exactly the same triggers
+      misconception: AST.MC3
+    B: Triggers only occur indoors
+    C: Triggers never change across environments
+    D: Pollen may trigger asthma symptoms in some people
+  answer: D
+  explanation: Allergens such as pollen or dust mites are common triggers for some people.
+  reviewed_by: null
+- id: AST.3-q2
+  kc: AST.3
+  level: intermediate
+  stem: Why can an asthma trigger diary be useful?
+  options:
+    A: It shows patterns between exposures and symptoms to discuss with a clinician
+    B: It guarantees that no future symptoms will occur
+    C: It replaces all breathing tests
+    D: It establishes a diagnosis without a clinician
+  answer: A
+  explanation: A diary may reveal patterns, although it cannot by itself establish a cause or diagnosis.
+  reviewed_by: null
+- id: AST.3-q3
+  kc: AST.3
+  level: advanced
+  stem: Which statement about triggers is most accurate?
+  options:
+    A: Only one trigger can ever exist
+    B: Triggers vary between individuals, so patterns and environments matter
+    C: Asthma symptoms can never be triggered by exercise
+    D: Every person with asthma responds to identical triggers
+  answer: B
+  explanation: Different people can have different triggers, including allergens, irritants and exercise.
+  reviewed_by: null
+- id: AST.4-q1
+  kc: AST.4
+  level: basic
+  stem: Which statement about evaluating possible asthma is accurate?
+  options:
+    A: A classroom quiz alone confirms asthma
+    B:
+      text: A single symptom always confirms asthma by itself
+      misconception: AST.MC4
+    C: Clinicians consider symptom history and appropriate breathing tests
+    D: Shoe size is sufficient for diagnosis
+  answer: C
+  explanation: Symptoms over time and objective breathing assessments may help evaluate asthma.
+  reviewed_by: null
+- id: AST.4-q2
+  kc: AST.4
+  level: intermediate
+  stem: Why can recording symptom frequency be helpful?
+  options:
+    A: It proves the exact cause without a clinician
+    B: It prevents all flare-ups
+    C: It replaces every clinician visit
+    D: It informs discussion about asthma control over time
+  answer: D
+  explanation: Symptom patterns and frequency can help clinicians review control.
+  reviewed_by: null
+- id: AST.4-q3
+  kc: AST.4
+  level: advanced
+  stem: Why is one isolated symptom not enough to determine a diagnosis?
+  options:
+    A: Many different conditions can produce similar symptoms
+    B: Only wheezing counts as evidence
+    C: Symptoms are never relevant
+    D: A patient must always have every asthma symptom
+  answer: A
+  explanation: A healthcare professional considers patterns and appropriate tests because symptoms can
+    overlap across conditions.
+  reviewed_by: null
+- id: AST.5-q1
+  kc: AST.5
+  level: basic
+  stem: Which statement about an asthma action plan is correct?
+  options:
+    A:
+      text: Once symptoms improve, the agreed asthma action plan is unnecessary
+      misconception: AST.MC5
+    B: It gives individualized guidance about routine care and worsening symptoms
+    C: It is only useful after hospitalization
+    D: It is written by answering a classroom quiz
+  answer: B
+  explanation: An individualized plan helps the person recognize and respond to changes in asthma symptoms.
+  reviewed_by: null
+- id: AST.5-q2
+  kc: AST.5
+  level: intermediate
+  stem: Why may some asthma treatments be used regularly even when someone feels well?
+  options:
+    A: Only taking medicine during every school class works
+    B: Feeling well proves asthma cannot return
+    C: Some prescribed treatments help maintain control of airway inflammation
+    D: Regular treatment is never needed
+  answer: C
+  explanation: Long-term control treatment can be prescribed to reduce inflammation and prevent symptoms.
+  reviewed_by: null
+- id: AST.5-q3
+  kc: AST.5
+  level: advanced
+  stem: What is the safest general response before changing a prescribed asthma treatment?
+  options:
+    A: Use someone else's inhaler
+    B: Follow instructions from a social media poll
+    C: Stop all medications whenever symptoms improve
+    D: Discuss the change with the treating clinician and follow the action plan
+  answer: D
+  explanation: Prescribed treatment should be adjusted with appropriate clinical guidance.
+  reviewed_by: null
