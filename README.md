@@ -1,7 +1,7 @@
 # Integrated main + RAG + semantic routing (v3)
 
 完整保留教师后台，合并真实医学 RAG 和 500 题 LR/SVM routing。
-Windows 首次运行请看 [开始使用.md](开始使用.md)，版本来源与限制见 [docs/INTEGRATION.md](docs/INTEGRATION.md)。
+Windows 首次运行请看 [开始使用.md](开始使用.md)（English: [GETTING_STARTED.md](GETTING_STARTED.md)），版本来源与限制见 [docs/INTEGRATION.md](docs/INTEGRATION.md)。
 安装：Python 3.12 运行 `setup_local.py`；启动：分别运行 `start_backend.ps1` 与 `start_frontend.ps1`。
 
 ---
