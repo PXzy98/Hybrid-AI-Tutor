@@ -36,7 +36,7 @@ B4 原型用于验证关键假设、结果用"预期 vs 实际"表格，B5 Jira 
 ### 1.1 隐私（决定：隐私规则放在"发往云端的关口"，路由器不含隐私分支）
 - [x] 恢复语义路由下的发送前泄漏检查（删除 `generate.py` 中 `found = [] if semantic`）— Z（10/19，在 `feature/rag-siyun-mvp-validation`）
 - [x] 发送前检查增加"个人病情"规则：`local_only` 模式下原问题含 `HEALTH_DETAIL` → 不发云端，本地回答并提示 — Z
-- [x] 新配置 `privacy.health_detail_policy: local_only | generalize`，默认 `local_only` — Z
+- [x] 新配置 `privacy.health_detail_policy: local_only | generalize` — Z；10/20 教授同意后在 `config.yaml` 启用 `generalize`（代码默认仍是 `local_only`）
 - [x] `generalize` 模式：本地 Qwen 把问题改写成第三人称一般性问题（"一个有哮喘的人……"）— Z（`app/privacy/generalize.py`）
   - [x] 改写后再跑隐私过滤；检查无"第一人称 + 病情"、无具体读数/剂量/日期、无姓名；不通过 → 留本地
   - [x] "建议就医"仍按原始问题判断（`needs_referral` 看原始问题的识别结果，不受改写影响）

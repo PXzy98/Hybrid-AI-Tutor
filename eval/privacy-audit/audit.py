@@ -36,7 +36,8 @@ class Ask:
     record_ids: list[int] = field(default_factory=list)  # indexes into the records list
     route: str = ""
     warnings: list[str] = field(default_factory=list)
-    expect_local: bool = False  # E6: the question states a personal health detail, so it must never reach the cloud
+    expect_local: bool = False  # E6: the question states a personal health detail
+    planted_health: list[str] = field(default_factory=list)  # its health spans (allowed in a generalized rewrite)
 
 
 @dataclass

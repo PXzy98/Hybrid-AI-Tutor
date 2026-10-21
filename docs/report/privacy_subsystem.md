@@ -212,14 +212,11 @@ with the answer to the original question (`results/utility.md`).
 - Placeholders for names, IDs and contact details cost little (4.37, M8 marginal); no placeholder was left in
   an answer after restore.
 - Hiding the health detail itself makes the answer much worse (3.07): the cloud model no longer knows what
-  the question is about. This is why personal health questions stay local today instead of being masked.
+  the question is about. This is why personal health questions are never sent with the health detail masked.
 - A hypothetical rewrite (“a person with asthma…”) keeps the quality (4.47) and contains no identifier; none of
   the 15 rewrites still contained PII according to our filter (whose health recall is limited, so a human
-  check is needed). H2 is the strongest option if the client accepts de-identified health questions in the
-  cloud. It is implemented behind `privacy.health_detail_policy: generalize` (off by default): the local model
-  writes the rewrite, which must pass the privacy filter again (no first person, no digits, no finding);
-  otherwise the question stays local. With the real local model, 2 of 4 sample rewrites passed and 2 were
-  rejected (a reading or a relative was still in them).
+  check is needed). **H2 is enabled since 20 Oct 2026**, after the professor approved sending de-identified,
+  generalized health questions to the cloud (`privacy.health_detail_policy: generalize` in `config.yaml`).
 - Surrogate names (H1) bring no gain over placeholders and confuse health questions; not pursued.
 
 ### 3.4 Client feedback to seek
@@ -227,8 +224,8 @@ with the answer to the original question (`results/utility.md`).
 1. Residual risk: with the current rules about 1 in 5 freely written personal health questions (held-out
    test) is not recognised as personal and goes to the cloud **without** name or ID. Is that acceptable for
    the pilot, or should we add the LLM pass (C5, ~0.6 s more per cloud answer, 1 in 8)?
-2. Is sending a *de-identified hypothetical* version of a personal health question to the cloud acceptable
-   (H2), or must such questions always stay local?
+2. ~~Is sending a de-identified hypothetical version of a personal health question to the cloud acceptable
+   (H2)?~~ Answered: the professor approved it on 20 Oct 2026; H2 is enabled (3.3, 5).
 3. Which additional types matter for this course: health card number, address, date of birth, postal code
    (now covered), ages, school or workplace (not covered)?
 4. Are the targets in Table 1 acceptable?
@@ -255,7 +252,7 @@ with the answer to the original question (`results/utility.md`).
 | 2 | Clean up | findings | filtered findings (threshold 0.5, person fixes, eponyms, allow-list; a PERSON span never hides a health detail; longer span, then higher score) | 3 |
 | 3 | Anonymize | question, findings | sanitized text with numbered placeholders; private mapping | 4; storage and logs receive the sanitized text only |
 | 4 | Local-only decision | findings | `cloud_safe` flag (false if a personal health detail is present) | Cloud gate (5); the router itself has no privacy branch |
-| 5 | Cloud gate (every router) | `CloudRequest`, `cloud_safe` | `cloud_safe = false`: `local_only` → local answer + notice, `generalize` → checked hypothetical rewrite; leak guard: any PII, `student_id`, item ID or misconception text → block → local answer + notice; no or failing cloud model → local answer + notice | Cloud client |
+| 5 | Cloud gate (every router) | `CloudRequest`, `cloud_safe` | `cloud_safe = false`: `generalize` (enabled) → the local model rewrites the question as a general one; the rewrite is sent only if it has no first person, no specific number, no grade, no identifier of the original question and no filter finding, and the student is told; otherwise local answer + notice (`local_only` keeps every such question local); leak guard: any PII, `student_id`, item ID or misconception text → block → local answer + notice; no or failing cloud model → local answer + notice | Cloud client |
 | 6 | Restore + verify | answer, mapping | answer with original values; leak checkers; stored answer redacted (whole words, any case); mapping cleared | Response to the student |
 
 The router (semantic: MiniLM embedding, LR/SVM heads, cross-encoder evidence check) only decides local or cloud
@@ -304,7 +301,8 @@ DeepSeek. Reasoning models count their hidden reasoning against the token limit,
 | M4 sensitivity / specificity | ≥ 95% / ≥ 90% | 91.8% / 100% | **75.0% / 100%** | sensitivity not met |
 | M5 latency, median | ≤ 100 / ≤ 300 ms | 4 ms | **7 ms** | ideal |
 | M6 raw text off-site | no | no | no | met |
-| M7 end-to-end audit (E4 with the 274 labelled main-set questions through the API) | 0 | identity 0, profile 0, fields 0; PII in 15 of 217 cloud requests; 5 of 61 personal health questions in the cloud | – | identity/profile met; PII not met (the known misses) |
+| M7 end-to-end audit (E4 with the 274 labelled main-set questions through the API), `local_only` (19 Oct) | 0 | identity 0, profile 0, fields 0; PII in 15 of 217 cloud requests; 5 of 61 personal health questions in the cloud | – | identity/profile met; PII not met (the known misses) |
+| M7, same audit with `generalize` enabled (20 Oct) | 0 | identity 0, profile 0, fields 0; PII in 10 of 272 cloud requests (3.7%); of 61 personal health questions: 55 sent as a checked hypothetical rewrite, 2 kept local, 4 sent as written because the filter did not recognise them | – | identity/profile met; PII not met (the same known misses) |
 | M7 with the real cloud model (E4 `--smoke --real-cloud`, DeepSeek, 2 personas × 6 questions forced to the cloud) | 0 | 12 cloud requests: fields 0, identity 0, profile 0, PII 0 | – | met |
 | M8 answer quality with placeholders | ≥ 4.5 / ≥ 4.0 | 4.37 (identifiers) | – | marginal |
 | Placeholder round trip | 100% | 100% | 100% | met |
@@ -339,6 +337,21 @@ any case. Remaining storage finding: when a personal health question stays local
 name the term on its own (“inhaler”, “150/95”) while the redacted span was longer (“my inhaler”, “my bp was
 150/95”). This stays inside the boundary but is linked to the student; open item for Beta.
 
+**Hypothetical rewrite with the real local model (H2, 20 Oct 2026; `eval/privacy-filter/results/generalize.md`).**
+Every personal-health question of the main set (61) and of held-out v2 (80) was rewritten with Qwen and checked
+exactly as in the app. Main set: 60 of 61 rewrites passed and would go to the cloud; held-out v2: 69 to 73 of 80
+(86–91%, the local model is not fully deterministic); the others stay local. In the first run one passing
+rewrite still held a grade ("…a grade of B+…"), and Qwen once copied a student number (stopped by the number
+check). Two checks were added: a rewrite may not repeat any identifier found in the original question, and may
+not mention a grade or GPA; the number check now rejects specific values (readings such as 160/100, doses,
+durations, ages, dates, IDs) but allows numbers that are part of a name ("type 2 diabetes", "GLP-1"). After
+that, 0 identifiers were left in passing rewrites. Live through the app with DeepSeek: "I was diagnosed with
+asthma last week, can I still play soccer?" reached the cloud as "Can a person newly diagnosed with asthma still
+play soccer?", and the student saw the notice that the cloud received a general version of the question.
+Limits: the rewrite only applies to questions the filter recognises as personal health (about 3 in 4 freely
+worded ones, Table 2); some rewrites add details that were not in the question (for example a diabetes type),
+which can affect the answer's accuracy but not privacy; each rewrite adds one local model call (about 1–2 s).
+
 **Tests with a real cloud model (DeepSeek `deepseek-flash`, 19 Oct 2026).** Five fictional questions through the
 running app: a general question stayed local; three questions the router sent to the cloud were answered by
 DeepSeek in 8–12 s, and for the one that contained a name, a student number and an e-mail, the recorded request
@@ -370,5 +383,6 @@ expected optimism of tuning on a set; v2 is the number to report.
    keeps its context.
 4. Stored answers to local personal-health questions: also redact the condition words and readings inside a
    longer health span.
-5. `generalize` (H2, implemented, off) only after client and ethics feedback.
+5. H2 is enabled (20 Oct 2026): review a sample of real rewrites with the client, and reduce rewrites that add
+   details (prompt, or a check that every medical term of the rewrite appears in the question).
 6. A held-out set written by people (classmates writing fictional questions) before the pilot.
