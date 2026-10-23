@@ -151,7 +151,9 @@ def resolve_overlaps(findings: list[Finding], prefer: tuple[str, ...] = ()) -> l
 
     A PERSON span that overlaps a `prefer` finding (the local-only types) is dropped first: NER sometimes tags
     a whole clause such as "J'ai de l'asthme" as a person, which would otherwise hide the health detail from
-    the cloud_safe decision (found by E6). Pattern-based types keep the usual length rule.
+    the cloud_safe decision (found by E6). Pattern-based types keep the usual length rule, but a longer span
+    that swallows a `prefer` finding takes its type ("my astma and my grade is C" is a grade span holding a
+    health detail): the text stays redacted and the question still stays local (found by E6, G1-93).
     """
     pinned = [p for p in findings if p.type in prefer]
     findings = [f for f in findings
@@ -160,4 +162,9 @@ def resolve_overlaps(findings: list[Finding], prefer: tuple[str, ...] = ()) -> l
     for f in sorted(findings, key=lambda f: (-(f.end - f.start), -f.score, f.start)):
         if all(f.end <= k.start or f.start >= k.end for k in kept):
             kept.append(f)
+    for i, k in enumerate(kept):
+        if k.type not in prefer:
+            inner = next((p for p in pinned if k.start < p.end and p.start < k.end), None)
+            if inner:
+                kept[i] = Finding(inner.type, k.start, k.end, k.score)
     return sorted(kept, key=lambda f: f.start)

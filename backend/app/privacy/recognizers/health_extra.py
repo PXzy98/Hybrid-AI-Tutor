@@ -6,6 +6,9 @@
 - A possessive right before a condition or vital sign (found by the E6 held-out set): “my diabetes”, “my
   long-term diabetes”, “her asthma”, “my uncle's pneumonia”, “my blood pressure is spiking”. Not when the term
   names coursework: “my diabetes assignment”, “my blood pressure project”.
+- A first-person diagnosis or prescription without a named condition: “I was diagnosed last month”, “my mom
+  just got prescribed something”. Alone it says little, but it marks the session as personal health, so the
+  condition named in the next message is caught too (`app/privacy/session_health.py`).
 """
 import re
 
@@ -28,6 +31,10 @@ OWNED_RE = re.compile(
 READING_RE = re.compile(
     r"\b(?:my|mine)\b(?:\s+(?:bp|blood pressure|blood sugar|sugar|glucose|reading|pressure|peak flow))?\s+"
     r"(?:was|is|were|reads?|read)\s+(\d{2,3}(?:\s*(?:/|over)\s*\d{2,3})?)", re.I)
+DIAGNOSED_RE = re.compile(
+    r"\b(?:I|my\s+" + FAMILY + r")\b[^.?!\n]{0,25}?"
+    r"(?:\b(?:was|were|got|get|am|is|has been|have been)|'ve been|'s been|'m)\s+"
+    r"(?:just\s+|recently\s+|finally\s+|officially\s+)?(diagnosed|prescribed)\b", re.I)
 
 
 @pii_recognizers.register("health_extra")
@@ -43,4 +50,6 @@ class HealthExtraRecognizer(EntityRecognizer):
         out += [RecognizerResult("HEALTH_DETAIL", m.start(), m.end(), 0.7) for m in READING_RE.finditer(text)]
         out += [RecognizerResult("HEALTH_DETAIL", m.start(1), m.end(1), 0.7)
                 for m in POSSESSIVE_RE.finditer(text)]
+        out += [RecognizerResult("HEALTH_DETAIL", m.start(1), m.end(1), 0.7)
+                for m in DIAGNOSED_RE.finditer(text)]
         return out
