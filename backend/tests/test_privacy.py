@@ -6,7 +6,7 @@ import pytest
 from sqlmodel import Session, select
 
 from app.core.config import PrivacyConfig, get_settings
-from app.core.schemas import AskRequest, RequestContext
+from app.core.schemas import AskRequest, RequestContext, Turn
 from app.core.services import build_services
 from app.pipeline.steps.privacy_filter import PrivacyFilterStep
 from app.pipeline.steps.restore import RestoreStep
@@ -117,6 +117,24 @@ def test_health_cases_personal_vs_general(analyzer):
     ("My father is 67 years old.", []),
     ("I'm a 19 year old male student, my name is Tom Becker.", [("PERSON", "Tom Becker")]),
     ("I was born on March 3, 2001 and I'm a woman.", [("DATE_OF_BIRTH", "born on March 3, 2001")]),
+    # G1-93: split and misspelled student numbers, misspelled health terms, diagnoses without a term
+    ("student id 300/418/277", [("STUDENT_ID", "300/418/277")]),
+    ("My student number is 300.418.277.", [("STUDENT_ID", "300.418.277")]),
+    ("student number 3004 18277", [("STUDENT_ID", "3004 18277")]),
+    ("My studnet nmuber is 300 418 277", [("STUDENT_ID", "300 418 277")]),
+    ("stdnt # 300-418-277", [("STUDENT_ID", "300-418-277")]),
+    ("my student number is 3OO418277", [("STUDENT_ID", "3OO418277")]),
+    ("The room is 300 418 277.", []),  # split digits without a context word
+    ("I have asthama, can I still run?", [("HEALTH_DETAIL", "asthama")]),
+    ("I take metfromin twice a day.", [("HEALTH_DETAIL", "metfromin")]),
+    ("My diabetis is getting worse.", [("HEALTH_DETAIL", "diabetis")]),
+    ("What is asthama?", []),  # misspelled, but a general question
+    ("I'm studying hypertensoin for the quiz.", []),
+    ("I inhaled smoke at the campfire.", []),
+    ("I was diagnosed last month.", [("HEALTH_DETAIL", "diagnosed")]),
+    ("How is asthma diagnosed?", []),
+    # a grade span that swallows a health detail keeps the question local
+    ("I'm worried about my astma and my grade is C.", [("HEALTH_DETAIL", "my astma and my grade is C")]),
 ])
 def test_recognizers(analyzer, text, expected):
     assert find(analyzer, text) == expected
@@ -147,7 +165,8 @@ def test_person_never_hides_a_local_only_finding():
     assert [f.type for f in kept] == ["HEALTH_DETAIL"]
     kept = resolve_overlaps([Finding("GRADE", 0, 16, 0.7), Finding("HEALTH_DETAIL", 9, 16, 0.8)],
                             prefer=("HEALTH_DETAIL",))
-    assert [f.type for f in kept] == ["GRADE"]  # pattern types keep the length rule
+    # pattern types keep the length rule, but the span takes the local-only type (G1-93)
+    assert [(f.type, f.start, f.end) for f in kept] == [("HEALTH_DETAIL", 0, 16)]
 
 
 def test_anonymize_numbers_per_type_and_reuses_placeholders():
@@ -182,6 +201,33 @@ async def test_step_done_when_example(use_config):
     assert ctx.pii_mapping == {"<STUDENT_ID_1>": "300418277", "<HEALTH_DETAIL_1>": "asthma"}
     ctx = await RouteStep(services).run(ctx)
     assert ctx.target == "local" and "forced local: not cloud_safe" in ctx.route.reasons
+
+
+@pytest.mark.parametrize(("question", "cloud_safe", "sanitized"), [
+    ("It's type 2 diabetes, what should I eat?", False, "It's <HEALTH_DETAIL_1>, what should I eat?"),
+    ("Is it dangerous?", False, "Is it dangerous?"),  # refers back to the earlier detail
+    ("Can metfromin cause nausea?", False, "Can <HEALTH_DETAIL_1> cause <HEALTH_DETAIL_2>?"),
+    ("What does a normal ECG look like?", True, "What does a normal ECG look like?"),
+])
+async def test_health_detail_spread_over_two_messages(use_config, question, cloud_safe, sanitized):
+    """G1-93: after a personal health detail in the session, a follow-up stays off the cloud."""
+    services = build_services(use_config())
+    history = [Turn(role="student", text="I was <HEALTH_DETAIL_1> last month."),
+               Turn(role="tutor", text="ok")]
+    ctx = RequestContext(request_id="r", history=history,
+                         request=AskRequest(student_id="s", topic="type2_diabetes", question=question))
+    ctx = await PrivacyFilterStep(services).run(ctx)
+    assert ctx.pii.cloud_safe == cloud_safe
+    assert ctx.pii.sanitized_text == sanitized
+
+
+async def test_follow_up_without_health_history_is_unchanged(use_config):
+    services = build_services(use_config())
+    ctx = RequestContext(request_id="r", history=[Turn(role="student", text="What is <PERSON_1>'s rule?")],
+                         request=AskRequest(student_id="s", topic="type2_diabetes",
+                                            question="Is it dangerous?"))
+    ctx = await PrivacyFilterStep(services).run(ctx)
+    assert ctx.pii.cloud_safe and ctx.pii.entities == []
 
 
 async def test_clean_question_is_not_sensitive(use_config):
