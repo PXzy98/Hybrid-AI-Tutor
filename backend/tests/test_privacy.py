@@ -111,6 +111,12 @@ def test_health_cases_personal_vs_general(analyzer):
     ("I am struggling with the asthma section.", []),
     ("My grade is D+, sadly.", [("GRADE", "My grade is D+")]),
     ("My GPA is hovering around 3.2.", [("GRADE", "My GPA is hovering around 3.2")]),
+    # G1-95: age and sex change medical answers, so they are kept; names and an exact birth date are not
+    ("I'm a 54-year-old man, am I at risk of sleep apnea?", []),
+    ("As a woman over 50, should I worry about osteoporosis?", []),
+    ("My father is 67 years old.", []),
+    ("I'm a 19 year old male student, my name is Tom Becker.", [("PERSON", "Tom Becker")]),
+    ("I was born on March 3, 2001 and I'm a woman.", [("DATE_OF_BIRTH", "born on March 3, 2001")]),
     # G1-93: split and misspelled student numbers, misspelled health terms, diagnoses without a term
     ("student id 300/418/277", [("STUDENT_ID", "300/418/277")]),
     ("My student number is 300.418.277.", [("STUDENT_ID", "300.418.277")]),

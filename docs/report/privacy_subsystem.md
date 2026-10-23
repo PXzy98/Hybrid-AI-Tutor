@@ -230,7 +230,9 @@ with the answer to the original question (`results/utility.md`).
 2. Is sending a *de-identified hypothetical* version of a personal health question to the cloud acceptable
    (H2), or must such questions always stay local?
 3. Which additional types matter for this course: health card number, address, date of birth, postal code
-   (now covered), ages, school or workplace (not covered)?
+   (now covered), ages, school or workplace (not covered)? *Answered 20 Oct 2026 (Lavin Kazemi): age and
+   sex change medical answers (e.g. sleep apnea risk), so the filter keeps them; an exact date of birth stays
+   redacted. Covered by tests in `backend/tests/test_privacy.py` (G1-95).*
 4. Are the targets in Table 1 acceptable?
 5. Cloud provider and data location: the tests used DeepSeek, whose servers are in China according to its
    privacy policy. Every cloud request carries the sanitized question, course passages and three coarse labels.
