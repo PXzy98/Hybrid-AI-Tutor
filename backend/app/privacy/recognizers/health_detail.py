@@ -77,14 +77,15 @@ COURSEWORK_RE = re.compile(r"\b(?:mark|marks|grade|graded|score|scored|quiz|exam
                            r"essay|homework|project|GPA)\b", re.I)
 SENTENCE_RE = re.compile(r"[^.?!\n]+")
 
-# Misspelled conditions and medicines ("asthama", "diabetis", "metfromin"; found by E6). Only words of at least
-# five letters with the same first letter, at most one edit (two from nine letters on), and only where an exact
-# term would count: in an attributed window or after a possessive.
+# Misspelled conditions and medicines ("asthama", "diabetis", "metfromin"; found by E6). Only words of at
+# least five letters with the same first letter, at most one edit (two from nine letters on), and only where
+# an exact term would count: in an attributed window or after a possessive.
 FUZZY_TERMS = [
     "asthma", "diabetes", "diabetic", "hypertension", "migraine", "migraines", "pneumonia", "epilepsy",
     "epileptic", "seizures", "depression", "depressed", "anxiety", "arthritis", "hepatitis", "appendicitis",
     "allergy", "allergies", "allergic", "cancer", "tumour", "tumor", "insulin", "metformin", "lisinopril",
-    "amlodipine", "salbutamol", "albuterol", "ventolin", "sumatriptan", "ibuprofen", "acetaminophen", "tylenol",
+    "amlodipine", "salbutamol", "albuterol", "ventolin", "sumatriptan", "ibuprofen", "acetaminophen",
+    "tylenol",
     "prednisone", "montelukast", "amoxicillin", "azithromycin", "losartan", "ozempic", "semaglutide",
     "fluticasone", "budesonide", "inhaler", "inhalers", "antibiotics", "antidepressants", "headaches",
     "dizziness", "nausea", "wheezing", "pregnant", "pregnancy", "surgery", "infection",

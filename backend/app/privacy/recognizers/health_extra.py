@@ -6,9 +6,9 @@
 - A possessive right before a condition or vital sign (found by the E6 held-out set): “my diabetes”, “my
   long-term diabetes”, “her asthma”, “my uncle's pneumonia”, “my blood pressure is spiking”. Not when the term
   names coursework: “my diabetes assignment”, “my blood pressure project”.
-- A first-person diagnosis or prescription without a named condition: “I was diagnosed last month”, “my mom just
-  got prescribed something”. Alone it says little, but it marks the session as personal health, so the condition
-  named in the next message is caught too (`app/privacy/session_health.py`).
+- A first-person diagnosis or prescription without a named condition: “I was diagnosed last month”, “my mom
+  just got prescribed something”. Alone it says little, but it marks the session as personal health, so the
+  condition named in the next message is caught too (`app/privacy/session_health.py`).
 """
 import re
 

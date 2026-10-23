@@ -206,7 +206,8 @@ async def test_step_done_when_example(use_config):
 async def test_health_detail_spread_over_two_messages(use_config, question, cloud_safe, sanitized):
     """G1-93: after a personal health detail in the session, a follow-up stays off the cloud."""
     services = build_services(use_config())
-    history = [Turn(role="student", text="I was <HEALTH_DETAIL_1> last month."), Turn(role="tutor", text="ok")]
+    history = [Turn(role="student", text="I was <HEALTH_DETAIL_1> last month."),
+               Turn(role="tutor", text="ok")]
     ctx = RequestContext(request_id="r", history=history,
                          request=AskRequest(student_id="s", topic="type2_diabetes", question=question))
     ctx = await PrivacyFilterStep(services).run(ctx)
@@ -217,7 +218,8 @@ async def test_health_detail_spread_over_two_messages(use_config, question, clou
 async def test_follow_up_without_health_history_is_unchanged(use_config):
     services = build_services(use_config())
     ctx = RequestContext(request_id="r", history=[Turn(role="student", text="What is <PERSON_1>'s rule?")],
-                         request=AskRequest(student_id="s", topic="type2_diabetes", question="Is it dangerous?"))
+                         request=AskRequest(student_id="s", topic="type2_diabetes",
+                                            question="Is it dangerous?"))
     ctx = await PrivacyFilterStep(services).run(ctx)
     assert ctx.pii.cloud_safe and ctx.pii.entities == []
 

@@ -14,8 +14,8 @@ class PrivacyFilterStep(BaseStep):
     The placeholder -> value mapping lives only in the private attribute of the RequestContext.
     The student's own display name and username (from `account`, in memory only) are always redacted,
     even when the NER model misses them (found by the E4 privacy audit).
-    After a personal health detail earlier in the session, condition and medicine names count as personal and a
-    question that refers back to it stays local (`app/privacy/session_health.py`).
+    After a personal health detail earlier in the session, condition and medicine names count as personal
+    and a question that refers back to it stays local (`app/privacy/session_health.py`).
     """
 
     name = "privacy_filter"

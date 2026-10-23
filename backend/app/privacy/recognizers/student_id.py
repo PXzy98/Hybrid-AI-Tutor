@@ -45,7 +45,8 @@ class StudentIdRecognizer(PatternRecognizer):
 
     def _result(self, start: int, end: int, score: float, name: str, pattern: re.Pattern) -> RecognizerResult:
         # the context enhancer expects the explanation and metadata that pattern results carry
-        explanation = self.build_regex_explanation(self.name, name, pattern.pattern, score, None, pattern.flags)
+        explanation = self.build_regex_explanation(
+            self.name, name, pattern.pattern, score, None, pattern.flags)
         return RecognizerResult("STUDENT_ID", start, end, score, analysis_explanation=explanation,
                                 recognition_metadata={RecognizerResult.RECOGNIZER_NAME_KEY: self.name,
                                                       RecognizerResult.RECOGNIZER_IDENTIFIER_KEY: self.id})
