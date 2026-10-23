@@ -80,7 +80,8 @@ def validate(rc: RuntimeConfig) -> None:
         url = urlparse(rc.local_llm_url.strip())
         if url.scheme not in ("http", "https") or not url.hostname:
             raise InvalidConfig("the local model server must be an http(s) address, e.g. http://10.0.0.5:11434")
-    if rc.local_llm_model is not None and (not rc.local_llm_model.strip() or " " in rc.local_llm_model.strip()):
+    model = rc.local_llm_model
+    if model is not None and (not model.strip() or " " in model.strip()):
         raise InvalidConfig("the local model name must be one word, e.g. qwen3.5:9b")
 
 
@@ -108,7 +109,8 @@ def with_runtime(settings: Settings, rc: RuntimeConfig) -> Settings:
     if rc.local_llm_model is not None and rc.local_llm_model.strip() != settings.llm.local.model:
         model = rc.local_llm_model.strip()
         llm = settings.llm.model_dump()
-        if llm["understand"]["model"] == llm["local"]["model"]:  # the understand step follows the answer model
+        # the understand step follows the answer model
+        if llm["understand"]["model"] == llm["local"]["model"]:
             llm["understand"]["model"] = model
         llm["local"]["model"] = model
         update["llm"] = settings.llm.model_validate(llm)

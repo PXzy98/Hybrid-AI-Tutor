@@ -24,14 +24,16 @@ class ServerStatus(BaseModel):
     error: str | None = None
 
 
-async def check_server(url: str, model: str, transport: httpx.AsyncBaseTransport | None = None) -> ServerStatus:
+async def check_server(url: str, model: str,
+                       transport: httpx.AsyncBaseTransport | None = None) -> ServerStatus:
     base = url.strip().rstrip("/")
     t0 = perf_counter()
     try:
         async with httpx.AsyncClient(timeout=TIMEOUT_S, transport=transport) as client:
             r = await client.get(f"{base}/api/tags")
     except httpx.HTTPError as e:
-        return ServerStatus(reachable=False, model_available=False, error=f"not reachable: {type(e).__name__}")
+        return ServerStatus(reachable=False, model_available=False,
+                            error=f"not reachable: {type(e).__name__}")
     latency = round((perf_counter() - t0) * 1000)
     if r.status_code != 200:
         return ServerStatus(reachable=False, model_available=False, latency_ms=latency,

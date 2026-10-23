@@ -31,8 +31,8 @@ class Services:
     learner: LearnerModel
 
     def reconfigure(self, settings: Settings) -> None:
-        """Runtime config change (admin dashboard): new settings, a learner model built from them, and new local
-        LLM clients when the local model server or model changed.
+        """Runtime config change (admin dashboard): new settings, a learner model built from them, and new
+        local LLM clients when the local model server or model changed.
         The pipeline is rebuilt by the caller (app.admin.runtime_config.apply)."""
         before = self.settings
         self.settings = settings
