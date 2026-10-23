@@ -1044,5 +1044,11 @@ Known misses from E6 and the MVP report (5.4, root causes):
   question that refers back ("is it dangerous?") is not cloud-safe. Uses the history the API already passes in
   (`sessions.history_turns`); no schema or storage change.
 
-Tests: 20 new cases in `tests/test_privacy.py`. The final E6 numbers must come from a new held-out set written
-after these rules are frozen (v3), not from v2, which these rules were checked against.
+- `resolve_overlaps`: a longer pattern span that swallows a local-only finding takes its type ("my astma and
+  my grade is C"), so the text stays redacted and the question still stays local.
+
+Tests: 21 new cases in `tests/test_privacy.py`; full backend suite 527 passed.
+E6 `--fast` (measured only, rules not tuned on it): held-out v2 question-level leak 47.3% -> 45.2%, personal-health
+sensitivity 75.0% -> 77.5%, over-redaction still 0%; main set 0% leak, 95.1% sensitivity. v2 has few split or
+misspelled numbers, so the final numbers must come from a new held-out set written after these rules are frozen
+(v3).
