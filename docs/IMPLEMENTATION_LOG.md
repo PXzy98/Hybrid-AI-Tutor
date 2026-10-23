@@ -1045,3 +1045,11 @@ CI gains a `docker` job: compose build (with `en_core_web_sm`), start and wait f
 proxy, `prepare --check` inside the container, and the demo seed script end to end (no Ollama in CI).
 
 Not verified locally (no Docker on the development machine): the first CI run is the build test.
+
+First CI run: the image built, but the API stopped at startup: `data/medical_rag` (the bundled MedlinePlus
+sources for RAG) was excluded by `.dockerignore`, so the Docker setup on main could not start either. Fixed:
+- `data/medical_rag` is copied to `/app/data/medical_rag`, and the build now also loads the retriever.
+- The volume moves from `/app/data` to `/app/var`, holding only what the app writes: the database
+  (`DATABASE_URL=sqlite:////app/var/app.db`) and instructor uploads (`RAG__MATERIALS_DIR=/app/var/topics`).
+  Bundled sources and models stay in the image, so a rebuild is never hidden by an old volume. No existing
+  deployment is affected: the old image could not start.

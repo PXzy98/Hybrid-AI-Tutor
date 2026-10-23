@@ -1,4 +1,5 @@
-# Backend image. Build context: the repository root (it needs config.yaml, content/ and data/routing/models too).
+# Backend image. Build context: the repository root (it needs config.yaml, content/, data/routing/models and
+# data/medical_rag too).
 #   docker build -f backend/Dockerfile -t tutor-api .
 #   docker build -f backend/Dockerfile --build-arg SPACY_MODEL=en_core_web_sm -t tutor-api .   # smaller, for tests
 # The image carries every local model the app needs (spaCy, the routing encoder and LR/SVM weights, the two
@@ -16,9 +17,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     # the privacy filter refuses to start unless this model is installed, so image and config always match
     PRIVACY__SPACY_MODEL=${SPACY_MODEL} \
-    DATABASE_URL=sqlite:////app/data/app.db \
+    # what the app writes (database, instructor uploads) lives in /app/var, the only volume; what ships with the
+    # image (course sources in /app/data, models) stays outside it, so a rebuild is never hidden by an old volume
+    DATABASE_URL=sqlite:////app/var/app.db \
+    RAG__MATERIALS_DIR=/app/var/topics \
     HF_HOME=/opt/hf \
-    # outside /app/data: the data volume would otherwise hide newer weights after a rebuild
     ROUTING__MODEL_DIR=/app/models/routing
 
 # The repository layout is kept (/app/backend, /app/content, /app/config.yaml), so app.core.config finds
@@ -39,8 +42,10 @@ SentenceTransformer(sys.argv[1], device='cpu'); [CrossEncoder(m, device='cpu') f
     "${EMBEDDING_MODEL}" "${RELEVANCE_MODEL}" "${ANSWERABILITY_MODEL}" \
     && chmod -R a+rX /opt/hf
 
-# 3) trained routing weights, application code, configuration, course content and the demo seed script
+# 3) trained routing weights, the bundled medical sources (MedlinePlus pages for RAG), application code,
+#    configuration, course content and the demo seed script
 COPY data/routing/models /app/models/routing
+COPY data/medical_rag /app/data/medical_rag
 COPY backend/app backend/app
 COPY config.yaml ./config.yaml
 COPY content ./content
@@ -49,9 +54,12 @@ COPY scripts/demo_seed.py ./scripts/demo_seed.py
 # from here on nothing may be downloaded; fail the build if a configured model is not in the image
 ENV HF_HUB_OFFLINE=1 \
     TRANSFORMERS_OFFLINE=1
-RUN cd backend && python -m app.routing.prepare --check
+# and the retriever must load its bundled sources (a missing one stops the API at startup)
+RUN cd backend && python -m app.routing.prepare --check \
+    && python -c "from app.core.config import get_settings; from app.rag import load_retriever; \
+load_retriever(get_settings().rag.impl)"
 
-RUN useradd --create-home --uid 10001 tutor && mkdir -p /app/data && chown tutor /app/data
+RUN useradd --create-home --uid 10001 tutor && mkdir -p /app/var && chown tutor /app/var
 USER tutor
 WORKDIR /app/backend
 EXPOSE 8000

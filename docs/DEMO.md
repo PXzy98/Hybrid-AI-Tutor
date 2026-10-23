@@ -89,7 +89,7 @@ The request log keeps only sanitized text:
 .venv\Scripts\python -c "import sqlite3; c=sqlite3.connect('data/app.db'); [print(r) for r in c.execute('select target, sanitized_question from request_log order by id desc limit 3')]"
 ```
 
-(Docker: `docker compose exec api python -c "..."` with the path `/app/data/app.db`.)
+(Docker: `docker compose exec api python -c "..."` with the path `/app/var/app.db`.)
 
 ### If something goes wrong
 
