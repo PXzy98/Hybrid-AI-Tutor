@@ -38,7 +38,7 @@ privacy:
   spacy_model: en_core_web_lg         # tests use en_core_web_sm
   score_threshold: 0.5                # phone numbers need a context word ("phone", "call"): 0.4 -> 0.75
   entities: [PERSON, EMAIL_ADDRESS, PHONE_NUMBER, STUDENT_ID, GRADE, HEALTH_DETAIL,
-             POSTAL_CODE, HEALTH_CARD, ID_NUMBER, DATE_OF_BIRTH, ADDRESS]   # E6 A5; ages are not redacted
+             POSTAL_CODE, HEALTH_CARD, ID_NUMBER, DATE_OF_BIRTH, ADDRESS]   # E6 A5; age and sex are kept on purpose (they change medical answers, G1-95)
   local_only_types: [HEALTH_DETAIL]   # any of these -> cloud_safe = false
   health_detail_policy: local_only    # local_only | generalize (rewrite as a hypothetical question for the cloud)
   allow_list: [Abbas]                 # course staff names, never redacted (titles like Dr./Prof. are ignored)
