@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useId, useState } from "react";
 
 import { api, type CheckItem, type CheckResponse } from "../api/endpoints";
+import { useI18n } from "../i18n";
 import Band from "./Band";
 
 type Props = {
@@ -15,6 +16,7 @@ export default function CheckCard({ item, sessionId = "", onAnswered }: Props) {
   const [choice, setChoice] = useState<string | null>(null);
   const qc = useQueryClient();
   const id = useId();
+  const { t } = useI18n();
   const answer = useMutation({
     mutationFn: (c: string) => api.check(item.id, c, sessionId),
     onSuccess: (result) => {
@@ -35,7 +37,7 @@ export default function CheckCard({ item, sessionId = "", onAnswered }: Props) {
       aria-describedby={`${id}-hint`}
     >
       <fieldset disabled={!!result || answer.isPending}>
-        <legend className="mb-2 text-sm font-semibold text-teal-900">Check your understanding</legend>
+        <legend className="mb-2 text-sm font-semibold text-teal-900">{t("check.legend")}</legend>
         <p id={`${id}-stem`} className="mb-3 text-slate-900">{item.stem}</p>
         <div role="radiogroup" aria-labelledby={`${id}-stem`} className="space-y-2">
           {options.map(([key, text]) => {
@@ -64,11 +66,11 @@ export default function CheckCard({ item, sessionId = "", onAnswered }: Props) {
           })}
         </div>
       </fieldset>
-      <p id={`${id}-hint`} className="sr-only">Choose one answer, then check it.</p>
+      <p id={`${id}-hint`} className="sr-only">{t("check.hint")}</p>
 
       {!result && (
         <button type="submit" className="btn-primary mt-3" disabled={!choice || answer.isPending}>
-          {answer.isPending ? "Checking…" : "Check answer"}
+          {answer.isPending ? t("check.busy") : t("check.submit")}
         </button>
       )}
       {answer.isError && (
@@ -77,13 +79,13 @@ export default function CheckCard({ item, sessionId = "", onAnswered }: Props) {
       {result && (
         <div role="status" className="mt-3 space-y-2 text-sm">
           <p className={`font-semibold ${result.correct ? "text-emerald-800" : "text-rose-800"}`}>
-            {result.correct ? "Correct!" : `Not quite. The answer is ${result.correct_choice}.`}
+            {result.correct ? t("check.correct") : t("check.wrong", { choice: result.correct_choice })}
           </p>
           {result.explanation && <p className="text-slate-800">{result.explanation}</p>}
           <div className="flex flex-wrap items-center gap-2">
-            {result.kc_band && <Band band={result.kc_band} label="This topic part" />}
+            {result.kc_band && <Band band={result.kc_band} label={t("check.part")} />}
             {result.next_kc && (
-              <span className="text-slate-700">Suggested next: <strong>{result.next_kc.name}</strong></span>
+              <span className="text-slate-700">{t("chat.suggestedNext")} <strong>{result.next_kc.name}</strong></span>
             )}
           </div>
         </div>
