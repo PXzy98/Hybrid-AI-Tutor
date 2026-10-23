@@ -1026,3 +1026,22 @@ Interface changes: additive Chunk.metadata; AskRequest.routing_method; RouteInpu
 passages/method/status; RouteScore analysis/evidence/accepted_indices; response routing diagnostics;
 POST ask/stream; GET routing/options; persistent RuntimeConfig.show_routing_progress.
 See ROUTING_PATCH.md and INTEGRATION.md for behavior, provenance and validation limits.
+
+
+## 2026-10-22 — G1-56: the Docker image carries the routing and evidence models
+
+The API image now contains every local model the app uses, so the container answers offline and never
+downloads a model while a student asks:
+- CPU-only torch (the default wheel bundles CUDA that the encoders do not need).
+- The routing encoder (`all-MiniLM-L6-v2`) and both evidence cross-encoders are cached in `/opt/hf` at build
+  time (build args, defaults match `config.yaml`); `HF_HUB_OFFLINE=1` from then on.
+- The trained LR/SVM weights are copied from `data/routing/models` to `/app/models/routing`
+  (`ROUTING__MODEL_DIR`), outside the `/app/data` volume so a rebuild is not hidden by an old volume.
+- `python -m app.routing.prepare --check` (new) loads every configured asset without downloading and fails
+  the build, naming the missing model, if one is absent or the weights do not match the encoder.
+- `scripts/demo_seed.py` is in the image: `docker compose exec api python /app/scripts/demo_seed.py`.
+
+CI gains a `docker` job: compose build (with `en_core_web_sm`), start and wait for health through the web
+proxy, `prepare --check` inside the container, and the demo seed script end to end (no Ollama in CI).
+
+Not verified locally (no Docker on the development machine): the first CI run is the build test.
