@@ -1054,6 +1054,26 @@ misspelled numbers, so the final numbers must come from a new held-out set writt
 (v3).
 
 
+## 2026-10-22 — G1-111: English and French interface
+
+- Interface text moved to `frontend/src/i18n/en.ts` (source of every key) and `fr.ts` (typed `Messages`, so
+  tsc fails if a key is missing or extra). `t(key, vars)` fills `{name}` placeholders. No new dependency.
+- `I18nProvider` keeps the language in React state, saves only the language in `localStorage`
+  (`tutor.lang`), starts from the browser language, and sets `<html lang>`. Without a provider the
+  interface is English, so component tests are unchanged.
+- Language switch on the login page and in the page header. Dates use `en-CA` / `fr-CA`.
+- Covered: login, password change, chat (routing progress, check questions, feedback survey), onboarding,
+  "What I know", and every instructor dashboard tab (including the G1-94 server section; this branch is
+  stacked on `feature/g1-94-llm-server`).
+- Not translated: content from the server (topic and KC names, check questions, consent text, answers,
+  server error messages) and the sample questions. The French chat says to ask in English, because the
+  privacy filter (Presidio + `en_core_web_lg`) only recognizes English; a French question could let
+  personal details through. French questions need a French privacy model first.
+- The French text is a machine-assisted draft; it should be proofread by a French speaker (Siyun / client).
+- Tests: `src/test/I18n.test.tsx` (same keys and placeholders, nothing empty; switch and saved choice;
+  French chat note; French dashboard). 28 frontend tests pass; build passes.
+
+
 ## 2026-10-22 — G1-56: the Docker image carries the routing and evidence models
 
 The API image now contains every local model the app uses, so the container answers offline and never

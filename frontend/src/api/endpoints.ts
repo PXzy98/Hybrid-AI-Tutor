@@ -24,6 +24,7 @@ export type CreatedStudent = Schemas["CreatedStudent"];
 export type TemporaryPassword = Schemas["TemporaryPassword"];
 export type AdminConfig = Schemas["AdminConfig"];
 export type RuntimeConfig = Schemas["RuntimeConfig"];
+export type ServerStatus = Schemas["ServerStatus"];
 export type ClassSummary = Schemas["ClassSummary"];
 export type LogPage = Schemas["LogPage"];
 export type ContentStatus = Schemas["ContentStatus"];
@@ -71,6 +72,8 @@ export const admin = {
 
   config: () => request<AdminConfig>("GET", `${ADMIN}/config`),
   saveConfig: (values: RuntimeConfig) => request<AdminConfig>("PUT", `${ADMIN}/config`, values),
+  testLlmServer: (url: string, model: string) =>
+    request<ServerStatus>("POST", `${ADMIN}/llm-server/test`, { url, model }),
   classSummary: (topic: string) => request<ClassSummary>("GET", `${ADMIN}/class-summary?topic=${q(topic)}`),
   logs: (page: number, pageSize = 20) =>
     request<LogPage>("GET", `${ADMIN}/logs?page=${page}&page_size=${pageSize}`),

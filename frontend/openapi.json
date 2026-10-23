@@ -800,6 +800,48 @@
         }
       }
     },
+    "/api/v1/admin/llm-server/test": {
+      "post": {
+        "tags": [
+          "admin: dashboard"
+        ],
+        "summary": "Test Llm Server",
+        "description": "Is a local model server reachable, and does it have the model? Reads only its model list (G1-94).",
+        "operationId": "test_llm_server_api_v1_admin_llm_server_test_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServerTest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerStatus"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/admin/class-summary": {
       "get": {
         "tags": [
@@ -1746,6 +1788,19 @@
             "type": "array",
             "title": "Accepted Indices",
             "default": []
+          },
+          "relevant_indices": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Relevant Indices",
+            "default": []
+          },
+          "checked": {
+            "type": "boolean",
+            "title": "Checked",
+            "default": false
           },
           "coverage": {
             "type": "number",
@@ -2783,6 +2838,30 @@
           },
           "levels": {
             "$ref": "#/components/schemas/LevelsConfig"
+          },
+          "local_llm_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Local Llm Url"
+          },
+          "local_llm_model": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Local Llm Model"
           }
         },
         "additionalProperties": false,
@@ -2861,6 +2940,76 @@
           "method"
         ],
         "title": "SemanticAnalysis"
+      },
+      "ServerStatus": {
+        "properties": {
+          "reachable": {
+            "type": "boolean",
+            "title": "Reachable"
+          },
+          "model_available": {
+            "type": "boolean",
+            "title": "Model Available"
+          },
+          "models": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Models",
+            "default": []
+          },
+          "latency_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latency Ms"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reachable",
+          "model_available"
+        ],
+        "title": "ServerStatus"
+      },
+      "ServerTest": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Url"
+          },
+          "model": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Model"
+          }
+        },
+        "type": "object",
+        "required": [
+          "url",
+          "model"
+        ],
+        "title": "ServerTest"
       },
       "SessionHistory": {
         "properties": {

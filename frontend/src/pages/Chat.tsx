@@ -8,6 +8,7 @@ import CheckCard from "../components/CheckCard";
 import FeedbackSurvey from "../components/FeedbackSurvey";
 import { TRIAL_QUESTIONS } from "../components/surveyScenarios";
 import TopicPicker from "../components/TopicPicker";
+import { useI18n } from "../i18n";
 import RoutingProgress, { type RoutingTrace } from "../components/RoutingProgress";
 
 type Message =
@@ -18,15 +19,11 @@ type Message =
 
 type SendInput = { question: string; topic: string; sessionId: string; traceId: string; method: NonNullable<AskBody["routing_method"]> };
 
-const FEEDBACK: { action: FeedbackAction; label: string }[] = [
-  { action: "more_detail", label: "More detail" },
-  { action: "shorter", label: "Shorter" },
-  { action: "example_first", label: "Example first" },
-  { action: "concept_first", label: "Idea first" },
-];
+const FEEDBACK: FeedbackAction[] = ["more_detail", "shorter", "example_first", "concept_first"];
 
 export default function Chat() {
   const [topic, setTopic] = useState("high_blood_pressure");
+  const { t, lang } = useI18n();
   const [byTopic, setByTopic] = useState<Record<string, { sessionId: string; messages: Message[] }>>({});
   const [question, setQuestion] = useState("");
   const [method, setMethod] = useState<NonNullable<AskBody["routing_method"]>>("lr");
@@ -102,18 +99,24 @@ export default function Chat() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <TopicPicker value={topic} onChange={setTopic} />
-        {lastTutor?.reply.kc_level && <Band band={lastTutor.reply.kc_level} label="Explained at level" />}
+        {lastTutor?.reply.kc_level && <Band band={lastTutor.reply.kc_level} label={t("chat.levelLabel")} />}
       </div>
 
       {profile.data && !profile.data.personalized && (
         <p className="rounded-md border border-sky-200 bg-sky-50 px-4 py-2 text-sm text-sky-900">
-          Answers are not adapted to you yet. <Link to="/start" className="btn-link">Personalize your tutor</Link>
+          {t("chat.notPersonalized")} <Link to="/start" className="btn-link">{t("chat.personalizeLink")}</Link>
         </p>
       )}
 
-      <section aria-label="Conversation" aria-live="polite" className="flex min-h-[40vh] flex-col gap-4">
+      {lang !== "en" && (
+        <p role="note" className="rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900">
+          {t("chat.englishOnly")}
+        </p>
+      )}
+
+      <section aria-label={t("chat.conversation")} aria-live="polite" className="flex min-h-[40vh] flex-col gap-4">
         {conversation.messages.length === 0 && (
-          <p className="text-slate-500">Ask anything about this topic, for example “What do the two numbers in a blood pressure reading mean?”</p>
+          <p className="text-slate-500">{t("chat.empty")}</p>
         )}
         {conversation.messages.map((m, i) =>
           m.role === "student" ? (
@@ -126,7 +129,7 @@ export default function Chat() {
             <TutorMessage key={i} reply={m.reply} sessionId={conversation.sessionId} />
           ),
         )}
-        {ask.isPending && <p className="text-sm text-slate-500">The tutor is thinking…</p>}
+        {ask.isPending && <p className="text-sm text-slate-500">{t("chat.thinking")}</p>}
         {lastTutor && (
           <div className="self-start">
             <FeedbackSurvey key={topic} topic={topic} />
@@ -138,36 +141,36 @@ export default function Chat() {
       {conversation.messages.length === 0 && TRIAL_QUESTIONS[topic] && (
         <button type="button" className="btn-secondary self-start text-sm"
                 onClick={() => setQuestion(TRIAL_QUESTIONS[topic])}>
-          Try a sample question for this topic
+          {t("chat.sample")}
         </button>
       )}
       <form onSubmit={send} className="sticky bottom-0 flex flex-col gap-2 border-t border-slate-200 bg-slate-50 pt-3">
         <div className="flex flex-wrap items-center gap-2 text-sm">
-          <label htmlFor="routing-method" className="text-slate-700">Routing method</label>
+          <label htmlFor="routing-method" className="text-slate-700">{t("chat.method")}</label>
           <select id="routing-method" className="input max-w-72 py-1.5" value={method}
                   disabled={ask.isPending || !routingOptions.data || routingOptions.data.methods.length < 2}
                   onChange={(e) => setMethod(e.target.value as typeof method)}>
             {routingOptions.data?.methods.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
           </select>
-          {routingOptions.isError && <span role="alert" className="text-xs text-rose-700">Could not load routing options. Refresh and retry.</span>}
+          {routingOptions.isError && <span role="alert" className="text-xs text-rose-700">{t("chat.methodError")}</span>}
         </div>
-        <label htmlFor="question" className="sr-only">Your question</label>
+        <label htmlFor="question" className="sr-only">{t("chat.question")}</label>
         <div className="flex gap-2">
-          <textarea id="question" rows={2} className="input resize-y" placeholder="Type your question…" value={question}
+          <textarea id="question" rows={2} className="input resize-y" placeholder={t("chat.placeholder")} value={question}
                     onChange={(e) => setQuestion(e.target.value)}
                     onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) send(e); }} />
-          <button type="submit" className="btn-primary self-end" disabled={!question.trim() || ask.isPending || !routingOptions.data}>Send</button>
+          <button type="submit" className="btn-primary self-end" disabled={!question.trim() || ask.isPending || !routingOptions.data}>{t("chat.send")}</button>
         </div>
         {profile.data?.personalized && (
-          <div className="flex flex-wrap items-center gap-2 text-sm" role="group" aria-label="How should answers look?">
-            <span className="text-slate-600">Next answers:</span>
+          <div className="flex flex-wrap items-center gap-2 text-sm" role="group" aria-label={t("chat.feedbackGroup")}>
+            <span className="text-slate-600">{t("chat.nextAnswers")}</span>
             {FEEDBACK.map((f) => (
-              <button key={f.action} type="button" className="btn-secondary px-2.5 py-1 text-xs"
-                      onClick={() => feedback.mutate(f.action)} disabled={feedback.isPending}>
-                {f.label}
+              <button key={f} type="button" className="btn-secondary px-2.5 py-1 text-xs"
+                      onClick={() => feedback.mutate(f)} disabled={feedback.isPending}>
+                {t(`feedback.${f}`)}
               </button>
             ))}
-            {feedback.isSuccess && <span role="status" className="text-xs text-emerald-700">Saved.</span>}
+            {feedback.isSuccess && <span role="status" className="text-xs text-emerald-700">{t("chat.saved")}</span>}
           </div>
         )}
       </form>
@@ -176,6 +179,7 @@ export default function Chat() {
 }
 
 function TutorMessage({ reply, sessionId }: { reply: AskResponse; sessionId: string }) {
+  const { t } = useI18n();
   return (
     <article className="max-w-[90%] rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm">
       <p className="whitespace-pre-wrap text-slate-900">{reply.answer}</p>
@@ -186,14 +190,14 @@ function TutorMessage({ reply, sessionId }: { reply: AskResponse; sessionId: str
       )}
       {!!reply.sources?.length && (
         <div className="mt-3 text-xs text-slate-600">
-          <span className="font-medium">Sources: </span>
+          <span className="font-medium">{t("chat.sources")}</span>
           {reply.sources.map((s, i) => (
             <span key={s.source}>[{i + 1}] {s.title}{i < reply.sources!.length - 1 ? "; " : ""}</span>
           ))}
         </div>
       )}
       {reply.next_kc && (
-        <p className="mt-2 text-xs text-slate-600">Suggested next: <strong>{reply.next_kc.name}</strong></p>
+        <p className="mt-2 text-xs text-slate-600">{t("chat.suggestedNext")} <strong>{reply.next_kc.name}</strong></p>
       )}
       {reply.check_item && <CheckCard item={reply.check_item} sessionId={sessionId} />}
     </article>

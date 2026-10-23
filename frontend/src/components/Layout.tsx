@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 
 import { api, type Me } from "../api/endpoints";
 import { useResetSession } from "../auth";
+import { LanguageSwitch, useI18n } from "../i18n";
 import ErrorBoundary from "./ErrorBoundary";
 
 const navClass = ({ isActive }: { isActive: boolean }) =>
@@ -13,6 +14,7 @@ const navClass = ({ isActive }: { isActive: boolean }) =>
 export default function Layout({ me, children }: { me: Me; children: ReactNode }) {
   const navigate = useNavigate();
   const resetSession = useResetSession();
+  const { t } = useI18n();
 
   async function logout() {
     await api.logout().catch(() => undefined);
@@ -25,17 +27,18 @@ export default function Layout({ me, children }: { me: Me; children: ReactNode }
     <div className="flex min-h-screen flex-col">
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-2 px-4 py-3">
-          <span className="mr-4 font-semibold text-teal-800">Health Tutor</span>
+          <span className="mr-4 font-semibold text-teal-800">{t("app.name")}</span>
           {student && (
-            <nav aria-label="Main" className="flex gap-1">
-              <NavLink to="/chat" className={navClass}>Chat</NavLink>
-              <NavLink to="/me" className={navClass}>What I know</NavLink>
-              <NavLink to="/start" className={navClass}>Personalize</NavLink>
+            <nav aria-label={t("nav.main")} className="flex gap-1">
+              <NavLink to="/chat" className={navClass}>{t("nav.chat")}</NavLink>
+              <NavLink to="/me" className={navClass}>{t("nav.me")}</NavLink>
+              <NavLink to="/start" className={navClass}>{t("nav.start")}</NavLink>
             </nav>
           )}
           <div className="ml-auto flex items-center gap-3 text-sm text-slate-600">
+            <LanguageSwitch />
             <span>{me.display_name}</span>
-            <button type="button" className="btn-secondary py-1.5" onClick={logout}>Log out</button>
+            <button type="button" className="btn-secondary py-1.5" onClick={logout}>{t("nav.logout")}</button>
           </div>
         </div>
       </header>
@@ -43,7 +46,7 @@ export default function Layout({ me, children }: { me: Me; children: ReactNode }
         <ErrorBoundary>{children}</ErrorBoundary>
       </main>
       <footer role="note" className="border-t border-amber-200 bg-amber-50 py-2 text-center text-sm text-amber-900">
-        For learning only — not medical advice. For your own health, talk to a doctor, nurse or pharmacist.
+        {t("app.disclaimer")}
       </footer>
     </div>
   );
