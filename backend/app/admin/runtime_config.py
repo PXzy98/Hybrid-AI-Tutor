@@ -1,13 +1,16 @@
 """Runtime-editable config subset (design §9: admin config).
 
-The dashboard may change: the routing threshold, the enabled checkers, the knowledge model, weak evidence
-and the level thresholds. A change is validated, stored in `config_history`, and applied without a restart:
+The dashboard may change: the routing threshold, the enabled checkers, the knowledge model, weak evidence,
+the level thresholds, and the local model server (address and model name: the professor's own Ollama server,
+G1-94). A change is validated, stored in `config_history`, and applied without a restart:
 the settings object is replaced, and the learner model and the pipeline are rebuilt. The newest history row
 is applied again at startup, so a change survives a restart.
 
 The medical-safety and privacy checkers cannot be switched off from the dashboard (design §2: safety and
 privacy rules never depend on configuration).
 """
+
+from urllib.parse import urlparse
 
 from fastapi import FastAPI
 from pydantic import BaseModel, ConfigDict, Field
@@ -29,6 +32,9 @@ class RuntimeConfig(BaseModel):
     knowledge: str
     weak_evidence: bool
     levels: LevelsConfig
+    # None keeps the value from .env / config.yaml (history rows written before G1-94 have no such fields)
+    local_llm_url: str | None = Field(None, max_length=300)
+    local_llm_model: str | None = Field(None, max_length=100)
 
 
 class InvalidConfig(ValueError):
@@ -53,6 +59,8 @@ def current(settings: Settings) -> RuntimeConfig:
         knowledge=settings.learner.knowledge,
         weak_evidence=settings.learner.weak_evidence,
         levels=settings.learner.levels,
+        local_llm_url=settings.ollama_url,
+        local_llm_model=settings.llm.local.model,
     )
 
 
@@ -68,6 +76,12 @@ def validate(rc: RuntimeConfig) -> None:
         raise InvalidConfig(f"these checkers cannot be switched off: {', '.join(missing)}")
     if rc.knowledge not in available_knowledge_models():
         raise InvalidConfig(f"unknown knowledge model: {rc.knowledge}")
+    if rc.local_llm_url is not None:
+        url = urlparse(rc.local_llm_url.strip())
+        if url.scheme not in ("http", "https") or not url.hostname:
+            raise InvalidConfig("the local model server must be an http(s) address, e.g. http://10.0.0.5:11434")
+    if rc.local_llm_model is not None and (not rc.local_llm_model.strip() or " " in rc.local_llm_model.strip()):
+        raise InvalidConfig("the local model name must be one word, e.g. qwen3.5:9b")
 
 
 def with_runtime(settings: Settings, rc: RuntimeConfig) -> Settings:
@@ -88,7 +102,17 @@ def with_runtime(settings: Settings, rc: RuntimeConfig) -> Settings:
             "levels": rc.levels.model_dump(),
         }
     )
-    return settings.model_copy(update={"routing": routing, "verify": verify, "learner": learner})
+    update = {"routing": routing, "verify": verify, "learner": learner}
+    if rc.local_llm_url is not None:
+        update["ollama_url"] = rc.local_llm_url.strip().rstrip("/")
+    if rc.local_llm_model is not None and rc.local_llm_model.strip() != settings.llm.local.model:
+        model = rc.local_llm_model.strip()
+        llm = settings.llm.model_dump()
+        if llm["understand"]["model"] == llm["local"]["model"]:  # the understand step follows the answer model
+            llm["understand"]["model"] = model
+        llm["local"]["model"] = model
+        update["llm"] = settings.llm.model_validate(llm)
+    return settings.model_copy(update=update)
 
 
 def apply(app: FastAPI, rc: RuntimeConfig) -> None:
