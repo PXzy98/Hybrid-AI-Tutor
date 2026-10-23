@@ -49,7 +49,8 @@ sessions:
   history_turns: 6
 
 learner:
-  knowledge: bkt                      # bkt | rule
+  knowledge: bkt                      # bkt | rule. BKT stays the default although E2 favoured rule (G1-100,
+                                      # docs/review/BKT_KC_review.md); fit its parameters on real answers
   preference: simple                  # simple | ils (later)
   weak_evidence: false                # off in the MVP; Beta turns it on after E1
   levels: { basic_below: 0.40, advanced_above: 0.70, hysteresis: 0.05 }

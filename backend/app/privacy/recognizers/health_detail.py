@@ -77,6 +77,50 @@ COURSEWORK_RE = re.compile(r"\b(?:mark|marks|grade|graded|score|scored|quiz|exam
                            r"essay|homework|project|GPA)\b", re.I)
 SENTENCE_RE = re.compile(r"[^.?!\n]+")
 
+# Misspelled conditions and medicines ("asthama", "diabetis", "metfromin"; found by E6). Only words of at
+# least five letters with the same first letter, at most one edit (two from nine letters on), and only where
+# an exact term would count: in an attributed window or after a possessive.
+FUZZY_TERMS = [
+    "asthma", "diabetes", "diabetic", "hypertension", "migraine", "migraines", "pneumonia", "epilepsy",
+    "epileptic", "seizures", "depression", "depressed", "anxiety", "arthritis", "hepatitis", "appendicitis",
+    "allergy", "allergies", "allergic", "cancer", "tumour", "tumor", "insulin", "metformin", "lisinopril",
+    "amlodipine", "salbutamol", "albuterol", "ventolin", "sumatriptan", "ibuprofen", "acetaminophen",
+    "tylenol",
+    "prednisone", "montelukast", "amoxicillin", "azithromycin", "losartan", "ozempic", "semaglutide",
+    "fluticasone", "budesonide", "inhaler", "inhalers", "antibiotics", "antidepressants", "headaches",
+    "dizziness", "nausea", "wheezing", "pregnant", "pregnancy", "surgery", "infection",
+]
+WORD_RE = re.compile(r"\b[a-z]{5,}\b", re.I)
+POSSESSIVE_FUZZY_RE = re.compile(
+    r"\b(?:my|his|her|their|my\s+" + FAMILY + r"(?:'s|’s))\s+"
+    r"(?:(?:chronic|long-term|recent|severe|bad|new|latest|current|own)\s+)?([a-z]{5,})\b", re.I)
+
+
+def _edits(a: str, b: str, limit: int) -> int:
+    """Levenshtein distance, stopping early once it exceeds `limit`."""
+    if abs(len(a) - len(b)) > limit:
+        return limit + 1
+    prev = list(range(len(b) + 1))
+    for i, ca in enumerate(a, 1):
+        cur = [i]
+        for j, cb in enumerate(b, 1):
+            cur.append(min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (ca != cb)))
+        if min(cur) > limit:
+            return limit + 1
+        prev = cur
+    return prev[-1]
+
+
+def fuzzy_term(word: str) -> bool:
+    """True for a misspelling of a condition or medicine (not for the exact term, which TERM_RE handles)."""
+    w = word.lower()
+    for term in FUZZY_TERMS:
+        if w == term or w[0] != term[0]:
+            continue
+        if _edits(w, term, 2 if len(term) >= 9 else 1) <= (2 if len(term) >= 9 else 1):
+            return True
+    return False
+
 
 @pii_recognizers.register("health_detail")
 class HealthDetailRecognizer(EntityRecognizer):
@@ -98,6 +142,13 @@ class HealthDetailRecognizer(EntityRecognizer):
                     if BLOCKERS_RE.search(s, m.end(), t.start()) or COURSE_AFTER_RE.match(s, t.end()):
                         continue
                     spans.add((base + t.start(), base + t.end()))
+                for w in WORD_RE.finditer(s, m.end(), window_end):
+                    if (fuzzy_term(w.group()) and not BLOCKERS_RE.search(s, m.end(), w.start())
+                            and not COURSE_AFTER_RE.match(s, w.end())):
+                        spans.add((base + w.start(), base + w.end()))
+            for m in POSSESSIVE_FUZZY_RE.finditer(s):
+                if fuzzy_term(m.group(1)) and not COURSE_AFTER_RE.match(s, m.end(1)):
+                    spans.add((base + m.start(1), base + m.end(1)))
             for m in OWNED_RE.finditer(s):
                 spans.add((base + m.start(), base + m.end()))
             if FIRST_PERSON_RE.search(s) and not COURSEWORK_RE.search(s):
