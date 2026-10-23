@@ -1026,3 +1026,23 @@ Interface changes: additive Chunk.metadata; AskRequest.routing_method; RouteInpu
 passages/method/status; RouteScore analysis/evidence/accepted_indices; response routing diagnostics;
 POST ask/stream; GET routing/options; persistent RuntimeConfig.show_routing_progress.
 See ROUTING_PATCH.md and INTEGRATION.md for behavior, provenance and validation limits.
+
+
+## 2026-10-22 — G1-93: split and misspelled student numbers, misspelled health terms, multi-message health details
+
+Known misses from E6 and the MVP report (5.4, root causes):
+- `student_id.py`: nine digits split by spaces, dots, slashes or hyphens in any grouping ("300/418/277",
+  "3004 18277") count next to a context word; a misspelled or abbreviated "student number" right before the
+  digits ("studnet nmuber", "stdnt #", "stu no.") counts on its own (0.85); a letter O for a zero ("3OO418277").
+- `health_detail.py`: misspelled conditions and medicines ("asthama", "diabetis", "metfromin") are found only
+  where an exact term would count (attributed window or after a possessive): at most one edit, two from nine
+  letters on, same first letter.
+- `health_extra.py`: a first-person diagnosis or prescription without a named condition ("I was diagnosed last
+  month") is a health detail.
+- `app/privacy/session_health.py` + `privacy_filter` step: once a student turn of the session holds a
+  `<HEALTH_DETAIL_n>` placeholder, condition and medicine names in later questions are health details, and a
+  question that refers back ("is it dangerous?") is not cloud-safe. Uses the history the API already passes in
+  (`sessions.history_turns`); no schema or storage change.
+
+Tests: 20 new cases in `tests/test_privacy.py`. The final E6 numbers must come from a new held-out set written
+after these rules are frozen (v3), not from v2, which these rules were checked against.
