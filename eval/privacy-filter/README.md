@@ -11,6 +11,7 @@ which upgrade is worth it? All data is fictional.
 | `holdout.jsonl`, `holdout2.jsonl` | the same texts labelled by hand; v1 = dev, v2 = test (written after the rules were frozen); see `holdout_review.md` |
 | `run.py` | all configurations, metrics with Wilson intervals, ablation, misses → `results/<set>/report.md`, `metrics.json`, `predictions.jsonl`, SVG charts |
 | `exposure.py` | what would actually reach the cloud per configuration and set → `results/exposure.md` |
+| `generalize_eval.py` | the hypothetical rewrite (`privacy.health_detail_policy: generalize`) with the real local model, on every personal-health question of the main set and held-out v2: how many pass, identifiers left → `results/generalize.md` |
 | `utility.py` | answer quality after redaction (placeholders, surrogates, hypothetical rewrite), judged by a second model → `results/utility.md` |
 | `spot_check.md` | 50 random labels of the main set checked |
 

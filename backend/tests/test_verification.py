@@ -17,7 +17,7 @@ from app.core.services import build_services
 from app.llm.cloud_guard import CloudClient
 from app.llm.fake import FakeLLMClient
 from app.pipeline.runner import build_runner
-from app.pipeline.steps.generate import PRIVACY_BLOCK_WARNING, GenerateStep
+from app.pipeline.steps.generate import GENERALIZED_NOTE, PRIVACY_BLOCK_WARNING, GenerateStep
 from app.pipeline.steps.verify import REFERRAL, REPLACED_WARNING, SAFE_FALLBACK, VerifyStep
 from app.verify.checkers.grounding import GroundingChecker
 from app.verify.checkers.leaks import PiiLeakChecker, ProfileLeakChecker
@@ -231,3 +231,28 @@ def test_privacy_end_to_end_forced_cloud(make_client):
     for secret in ("300418277", "Hello Alice Tremblay"):
         assert secret not in dump, secret
     assert "Hello <PERSON_1>!" in dump  # the stored answer is the sanitized one
+
+
+def test_personal_health_question_reaches_the_cloud_only_as_a_general_question(make_client):
+    """health_detail_policy=generalize (approved 20 Oct 2026): the local model rewrites the question, the
+    rewrite passes the privacy filter again, and the cloud sees only the rewrite; the student is told."""
+    cfg = {"routing": {"stub_score": 1.0}, "privacy": {"health_detail_policy": "generalize"}}
+    with make_client(cfg) as client:
+        api = Api(client)
+        api.make_student("alice", "Alice Tremblay")
+        api.login("alice")
+        rewrite = "Is it safe for a person with high blood pressure who takes lisinopril to drink coffee?"
+        api.services.local_llm = FakeLLMClient([rewrite, "local answer"], model="fake-local")
+        transport = FakeLLMClient("Moderate coffee is usually fine; ask a clinician.", model="gpt-test",
+                                  backend="cloud")
+        api.services.cloud_llm = CloudClient(transport)
+        question = "I'm Alice Tremblay. I have high blood pressure and take lisinopril. Is coffee OK for me?"
+        body = client.post("/api/v1/ask", json={"topic": "high_blood_pressure", "question": question}).json()
+
+    assert body["route_target"] == "cloud" and body["model_used"] == "gpt-test"
+    assert GENERALIZED_NOTE in body["warnings"]
+    sent = transport.sent_text()
+    assert rewrite in sent
+    # (the system prompt itself names <PERSON_1> as an example placeholder)
+    for secret in ("Alice", "Tremblay", "I have", "for me", "<HEALTH_DETAIL_1>"):
+        assert secret not in sent, secret

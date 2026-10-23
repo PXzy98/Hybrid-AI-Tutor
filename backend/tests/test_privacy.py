@@ -165,8 +165,9 @@ def test_restore_tolerates_formatting_and_ignores_unknown(variant):
 
 
 async def test_step_done_when_example(use_config):
-    """'My student ID is 300418277 and I have asthma' -> local only, sanitized."""
-    services = build_services(use_config({"routing": {"stub_score": 1.0}}))
+    """'My student ID is 300418277 and I have asthma' -> local only (policy local_only), sanitized."""
+    services = build_services(use_config({"routing": {"stub_score": 1.0},
+                                          "privacy": {"health_detail_policy": "local_only"}}))
     ctx = RequestContext(request_id="r", request=AskRequest(
         student_id="s", topic="asthma", question="My student ID is 300418277 and I have asthma. What helps?"))
     ctx = await PrivacyFilterStep(services).run(ctx)

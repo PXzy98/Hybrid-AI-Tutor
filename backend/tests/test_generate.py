@@ -1,6 +1,6 @@
 import pytest
 
-from app.core.schemas import AskRequest, Chunk, LearnerContext, PIIResult, RequestContext, Turn
+from app.core.schemas import AskRequest, Chunk, LearnerContext, PIIEntity, PIIResult, RequestContext, Turn
 from app.core.services import build_services
 from app.llm.base import LLMError, LLMUnavailable
 from app.llm.cloud_guard import CloudClient
@@ -8,6 +8,7 @@ from app.llm.fake import FakeLLMClient
 from app.pipeline.steps.generate import (
     CLOUD_FALLBACK_WARNING,
     CLOUD_MISSING_WARNING,
+    GENERALIZED_NOTE,
     LOCAL_CAPABILITY_NOTE,
     PRIVACY_BLOCK_WARNING,
     GenerateStep,
@@ -142,14 +143,18 @@ async def test_generalize_sends_only_the_checked_rewrite(services):
     transport = FakeLLMClient("cloud answer", backend="cloud")
     s.cloud_llm = CloudClient(transport)
     ctx = await GenerateStep(s).run(health_ctx())
-    assert ctx.answer == "cloud answer" and ctx.warnings == []
+    assert ctx.answer == "cloud answer" and ctx.warnings == [GENERALIZED_NOTE]  # the student is told
     assert ctx.cloud_request.sanitized_question == "Can a person with asthma run safely?"
     sent = transport.sent_text()
     assert "I have" not in sent and "HEALTH_DETAIL" not in sent
 
 
-@pytest.mark.parametrize("rewrite", ["Can I run with my asthma?", "Is running safe with a peak flow of 300?",
-                                     "Can Bob Ng run with asthma?"])
+PERSONAL_REWRITES = ["Can I run with my asthma?", "Is running safe with a peak flow of 300?",
+                     "Can Bob Ng run with asthma?", "Is a reading of 160/100 concerning?",
+                     "Can someone take 2 puffs before running?", "Should a 72-year-old worry?"]
+
+
+@pytest.mark.parametrize("rewrite", PERSONAL_REWRITES)
 async def test_generalize_rejects_a_personal_rewrite(services, rewrite):
     s = services(policy="generalize")
     s.local_llm = FakeLLMClient([rewrite, "local answer"])
@@ -158,3 +163,28 @@ async def test_generalize_rejects_a_personal_rewrite(services, rewrite):
     ctx = await GenerateStep(s).run(health_ctx())
     assert transport.calls == [] and ctx.answer == "local answer"
     assert ctx.warnings[0] == PRIVACY_BLOCK_WARNING
+
+
+async def test_generalize_keeps_numbers_that_are_part_of_a_name(services):
+    """'type 2 diabetes', 'GLP-1', 'SGLT2' are names, not personal values (found with the real model)."""
+    s = services(policy="generalize")
+    rewrite = "For a person with type 2 diabetes, how do SGLT2 inhibitors compare with GLP-1 agonists?"
+    s.local_llm = FakeLLMClient([rewrite, "local answer"])
+    transport = FakeLLMClient("cloud answer", backend="cloud")
+    s.cloud_llm = CloudClient(transport)
+    ctx = await GenerateStep(s).run(health_ctx())
+    assert ctx.cloud_request.sanitized_question == rewrite and ctx.answer == "cloud answer"
+
+
+async def test_generalize_rejects_a_rewrite_that_repeats_an_identifier(services):
+    """A bare 'B+' is not a grade to the recognizer out of context; the original value is known, so it is
+    rejected anyway (E6 held-out case T067)."""
+    s = services(policy="generalize")
+    s.local_llm = FakeLLMClient(["Why might a person with spiky blood pressure get a B+?", "local answer"])
+    transport = FakeLLMClient("cloud answer", backend="cloud")
+    s.cloud_llm = CloudClient(transport)
+    ctx = health_ctx()
+    ctx.pii = ctx.pii.model_copy(update={"entities": [
+        PIIEntity(type="GRADE", text="B+", start=0, end=2, score=0.7, placeholder="<GRADE_1>")]})
+    ctx = await GenerateStep(s).run(ctx)
+    assert transport.calls == [] and ctx.warnings[0] == PRIVACY_BLOCK_WARNING

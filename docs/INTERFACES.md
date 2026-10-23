@@ -59,7 +59,7 @@ class PIIResult(BaseModel):
 - Synchronous, deterministic (same input → same score), under 1 s.
 - Never raise on unusual input, such as an empty question.
 - Use only the fields of `RouteInput`; it is all you get.
-- You do **not** need to handle `cloud_safe = False`. Decided 19 Oct 2026: the cloud gate in the generate step applies the privacy rules whichever router chose the cloud (`privacy.health_detail_policy`: `local_only` by default, `generalize` optional), runs the leak guard, and falls back to the local model with a notice. The stub router additionally keeps `routing.force_local_if_not_cloud_safe`.
+- You do **not** need to handle `cloud_safe = False`. Decided 19 Oct 2026: the cloud gate in the generate step applies the privacy rules whichever router chose the cloud (`privacy.health_detail_policy`: `generalize` in `config.yaml` since 20 Oct 2026, approved by the professor; `local_only` is the code default), runs the leak guard, and falls back to the local model with a notice. The stub router additionally keeps `routing.force_local_if_not_cloud_safe`.
 
 ---
 
