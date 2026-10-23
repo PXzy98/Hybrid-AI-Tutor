@@ -41,8 +41,8 @@ was tested in development mode with the local GPU server and DeepSeek as the clo
    curl http://localhost:8000/api/v1/health   # "cloud_enabled": true when a key is set, "routing_impl": "semantic"
    ```
 
-   Docker (`docker compose up --build -d`, http://localhost:8080) also works, but its image does not yet contain
-   the routing and evidence models: routing then selects the cloud and sources are marked "not checked".
+   Docker (`docker compose up --build -d`, http://localhost:8080) also works; the image contains the spaCy,
+   routing and evidence models, so steps 2 and 3 are not needed. Set `CONTENT__SERVE_UNREVIEWED=true` in `.env`.
 
 4. Open the web app and log in as `prof` with the initial password. The app asks you to choose a new password.
 
@@ -51,6 +51,7 @@ was tested in development mode with the local GPU server and DeepSeek as the clo
    ```powershell
    $env:DEMO_INSTRUCTOR_PASSWORD="<the new instructor password>"
    .venv\Scripts\python scripts\demo_seed.py --base-url http://localhost:8000
+   # Docker: docker compose exec -e DEMO_INSTRUCTOR_PASSWORD=<...> api python /app/scripts/demo_seed.py --base-url http://127.0.0.1:8000
    ```
 
    Expected output:
@@ -88,7 +89,7 @@ The request log keeps only sanitized text:
 .venv\Scripts\python -c "import sqlite3; c=sqlite3.connect('data/app.db'); [print(r) for r in c.execute('select target, sanitized_question from request_log order by id desc limit 3')]"
 ```
 
-(Docker: `docker compose exec api python -c "..."` with the path `/app/data/app.db`.)
+(Docker: `docker compose exec api python -c "..."` with the path `/app/var/app.db`.)
 
 ### If something goes wrong
 

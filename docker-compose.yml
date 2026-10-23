@@ -14,9 +14,11 @@ services:
       - path: .env
         required: false
     environment:
-      DATABASE_URL: sqlite:////app/data/app.db  # inside the named volume, whatever .env says
+      # database and instructor uploads inside the named volume, whatever .env says
+      DATABASE_URL: sqlite:////app/var/app.db
+      RAG__MATERIALS_DIR: /app/var/topics
     volumes:
-      - tutor-data:/app/data
+      - tutor-data:/app/var
     restart: unless-stopped
 
   web:

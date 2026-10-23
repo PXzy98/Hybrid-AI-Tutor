@@ -1072,3 +1072,30 @@ misspelled numbers, so the final numbers must come from a new held-out set writt
 - The French text is a machine-assisted draft; it should be proofread by a French speaker (Siyun / client).
 - Tests: `src/test/I18n.test.tsx` (same keys and placeholders, nothing empty; switch and saved choice;
   French chat note; French dashboard). 28 frontend tests pass; build passes.
+
+
+## 2026-10-22 — G1-56: the Docker image carries the routing and evidence models
+
+The API image now contains every local model the app uses, so the container answers offline and never
+downloads a model while a student asks:
+- CPU-only torch (the default wheel bundles CUDA that the encoders do not need).
+- The routing encoder (`all-MiniLM-L6-v2`) and both evidence cross-encoders are cached in `/opt/hf` at build
+  time (build args, defaults match `config.yaml`); `HF_HUB_OFFLINE=1` from then on.
+- The trained LR/SVM weights are copied from `data/routing/models` to `/app/models/routing`
+  (`ROUTING__MODEL_DIR`), outside the `/app/data` volume so a rebuild is not hidden by an old volume.
+- `python -m app.routing.prepare --check` (new) loads every configured asset without downloading and fails
+  the build, naming the missing model, if one is absent or the weights do not match the encoder.
+- `scripts/demo_seed.py` is in the image: `docker compose exec api python /app/scripts/demo_seed.py`.
+
+CI gains a `docker` job: compose build (with `en_core_web_sm`), start and wait for health through the web
+proxy, `prepare --check` inside the container, and the demo seed script end to end (no Ollama in CI).
+
+Not verified locally (no Docker on the development machine): the first CI run is the build test.
+
+First CI run: the image built, but the API stopped at startup: `data/medical_rag` (the bundled MedlinePlus
+sources for RAG) was excluded by `.dockerignore`, so the Docker setup on main could not start either. Fixed:
+- `data/medical_rag` is copied to `/app/data/medical_rag`, and the build now also loads the retriever.
+- The volume moves from `/app/data` to `/app/var`, holding only what the app writes: the database
+  (`DATABASE_URL=sqlite:////app/var/app.db`) and instructor uploads (`RAG__MATERIALS_DIR=/app/var/topics`).
+  Bundled sources and models stay in the image, so a rebuild is never hidden by an old volume. No existing
+  deployment is affected: the old image could not start.
