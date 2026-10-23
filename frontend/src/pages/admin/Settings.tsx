@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, useEffect, useState } from "react";
 
-import { admin, type RuntimeConfig } from "../../api/endpoints";
+import { admin, type RuntimeConfig, type ServerStatus } from "../../api/endpoints";
 
 const CHECKER_LABELS: Record<string, string> = {
   grounding: "Grounding (answer supported by the course material)",
@@ -29,9 +29,14 @@ export default function SettingsPage() {
   const cfg = useQuery({ queryKey: ["admin", "config"], queryFn: admin.config });
   const [v, setV] = useState<RuntimeConfig | null>(null);
   const [saved, setSaved] = useState(false);
+  const [server, setServer] = useState<ServerStatus | null>(null);
   useEffect(() => {
     if (cfg.data) setV(cfg.data.values);
   }, [cfg.data]);
+  const test = useMutation({
+    mutationFn: ({ url, model }: { url: string; model: string }) => admin.testLlmServer(url, model),
+    onSuccess: setServer,
+  });
   const save = useMutation({
     mutationFn: (values: RuntimeConfig) => admin.saveConfig(values),
     onSuccess: (data) => {
@@ -45,6 +50,7 @@ export default function SettingsPage() {
   const { options, history } = cfg.data;
   const set = (patch: Partial<RuntimeConfig>) => {
     setSaved(false);
+    if ("local_llm_url" in patch || "local_llm_model" in patch) setServer(null);
     setV({ ...v, ...patch });
   };
   const setLevel = (key: keyof RuntimeConfig["levels"], value: number) => set({ levels: { ...v.levels, [key]: value } });
@@ -70,6 +76,40 @@ export default function SettingsPage() {
             Show routing progress and timings in the student chat
           </label>
           <p className="text-xs text-slate-600">Applies to new questions. Turning this off also suppresses progress details in the API.</p>
+        </fieldset>
+
+        <fieldset className="space-y-3">
+          <legend className="font-semibold">Local model server</legend>
+          <p className="text-xs text-slate-600">
+            The Ollama server inside the university that answers locally (for example your own GPU server).
+            Questions with personal information never leave this server.
+          </p>
+          <div className="flex flex-wrap items-end gap-3">
+            <div>
+              <label className="label" htmlFor="llm-url">Server address</label>
+              <input id="llm-url" className="input w-72" placeholder="http://10.0.0.5:11434"
+                     value={v.local_llm_url ?? ""} onChange={(e) => set({ local_llm_url: e.target.value })} />
+            </div>
+            <div>
+              <label className="label" htmlFor="llm-model">Model</label>
+              <input id="llm-model" className="input w-48" placeholder="qwen3.5:9b"
+                     value={v.local_llm_model ?? ""} onChange={(e) => set({ local_llm_model: e.target.value })} />
+            </div>
+            <button type="button" className="btn-secondary" disabled={test.isPending || !v.local_llm_url || !v.local_llm_model}
+                    onClick={() => test.mutate({ url: v.local_llm_url ?? "", model: v.local_llm_model ?? "" })}>
+              {test.isPending ? "Testing…" : "Test connection"}
+            </button>
+          </div>
+          {server && (
+            <p role="status" className={`text-sm ${server.reachable && server.model_available ? "text-teal-800" : "text-rose-700"}`}>
+              {server.reachable && server.model_available
+                ? `Connected (${server.latency_ms} ms); the model is available.`
+                : server.error}
+              {server.reachable && !server.model_available && server.models.length > 0 &&
+                ` Models on this server: ${server.models.join(", ")}.`}
+            </p>
+          )}
+          {test.isError && <p role="alert" className="text-sm text-rose-700">{(test.error as Error).message}</p>}
         </fieldset>
 
         <fieldset className="space-y-2">
