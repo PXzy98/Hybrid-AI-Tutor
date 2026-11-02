@@ -45,9 +45,15 @@ WITH_RE = re.compile(r"(?i:bombed|aced|failed|passed|finished|did)\s+(?:the|my|t
 MY_VALUE_RE = re.compile(r"\b(?i:my|his|her|their)\s+(" + VALUE + r")", re.U)
 # a grade label with its value: "Score of 88%", "grade: B+", "grade 78". A bare number counts only from 40 to
 # 100 in a first-person message or next to a student number: "grade 3 hypertension" is a medical grading
-LABEL_VALUE_RE = re.compile(r"\b(?i:score|grade|mark|result)\s*(?i:of|is|was|=|:)?\s*"
-                            r"(" + VALUE + r"|\d{2,3})(?!\d)",
+# round 3: "asthma score is 45/F", "unit mark dropped to 58.0", "quiz is a solid C (72)", "grade is 78.5"
+# (not "test": "my blood test was 7.5%" is a health reading)
+SCORE_LETTER = r"\d{1,3}(?:\.\d)?\s?/\s?[A-F][+-]?(?![\w+-])"
+LABEL_VALUE_RE = re.compile(r"\b(?i:score|grade|mark|result|quiz|exam|midterm|final)\s*"
+                            r"(?i:of|is|was|=|:|dropped to|went (?:up|down) to|came (?:back|in) at|now)?\s*"
+                            r"(?i:(?:a|an|only|just|solid|weak|low|high|now)\s+){0,2}"
+                            r"(" + SCORE_LETTER + r"|" + VALUE + r"|\d{2,3}(?:\.\d+)?)(?!\d)",
                             re.U)
+UNIT_AFTER_RE = re.compile(r"\s?(?:mg|mcg|ml|mmol|units?|kg|lbs?|mmhg|bpm|°|c\b|f\b|degrees|%)", re.I)
 PERSONAL_RE = re.compile(r"\b(?:I|I'm|my|me)\b|\b\d{9}\b", re.I)
 SENTENCE_RE = re.compile(r"(?:[^.?!\n]|\.(?=\d))+(?:[.?!]+|$)")  # "2.8" does not end a sentence
 NEAR = 90  # characters from the grade word to the value
@@ -75,8 +81,10 @@ class GradeContextRecognizer(EntityRecognizer):
         if PERSONAL_RE.search(text):
             for m in LABEL_VALUE_RE.finditer(text):
                 v = m.group(1)
-                if not v.isdigit() or 40 <= int(v) <= 100:
-                    found.add((m.start(1), m.end(1)))
+                bare = re.fullmatch(r"\d{2,3}(?:\.\d+)?", v)
+                if bare and (not 40 <= float(v) <= 100 or UNIT_AFTER_RE.match(text, m.end(1))):
+                    continue  # "12.5 mmol/L", "150 mg" are readings and doses, not grades
+                found.add((m.start(1), m.end(1)))
         sentences = list(SENTENCE_RE.finditer(text))
         for i, sent in enumerate(sentences):
             prev = sentences[i - 1] if i else None

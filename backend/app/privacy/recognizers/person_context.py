@@ -27,6 +27,10 @@ MY_NAME_RE = re.compile(r"\b(?i:my name is|my name's|name's|name\s*:|call me|thi
 SIGNOFF_RE = re.compile(r"(?:^|[.!?)]\s*|\n\s*|\s)(?:[-–—~]+\s*|(?i:thanks|thank you|thx|cheers|best|regards|"
                         r"sincerely|cordially)\s*[,!.]?\s*[-–—]?\s*)" + NAME + r"\s*[.!]?\s*$", re.U)
 HERE_RE = re.compile(r"^\s*" + NAME + r"\s+here\b", re.U)
+# round 3: the same two places in lower case, "... is that okay? - marco silva", "chen wei here (300556123)"
+LOWER = r"([a-z][a-z'’-]+(?:\s+[a-z][a-z'’-]+)?)"
+LOWER_SIGNOFF_RE = re.compile(r"(?:[.!?)]\s*|\s)[-–—~]+\s*" + LOWER + r"\s*[.!]?\s*$", re.U)
+LOWER_HERE_RE = re.compile(r"^\s*(?:(?:hi|hey|hello|yo),?\s+)?" + LOWER + r"\s+here\b", re.U)
 # a name addressed at the start: "Zara, I'm totally lost", "Hey Marcus, my migraine ..." (staff on the
 # allow-list
 # stay). Not before a colon: "Group: Tom Becker", "Note: ..." are labels
@@ -45,7 +49,8 @@ september october november december today tomorrow yesterday week weekend mornin
 professor prof dr doctor nurse ta instructor teacher class course exam quiz midterm final lab assignment
 asthma diabetes migraine migraines pneumonia hypertension blood pressure covid flu canada ontario ottawa
 english french type tutor sir madam team everyone guys folks quick urgent help question
-ugh um uh oh hmm wow lol omg btw fyi so well wait oops yikes""".split())
+ugh um uh oh hmm wow lol omg btw fyi so well wait oops yikes pls plz thx ty asap idk tia anyone anybody
+everybody nevermind nvm sorry sry ok okay cool great again later soon now still""".split())
 NOT_NAME_NEXT = re.compile(r"\s+(?:is|are|was|were|has|have|had|and|or|says|said|told|asked|thinks|"
                            r"needs|wants|got|gets|prescribed|recommended|suggested|mentioned|explained|gave|"
                            r"thinks|thought|at|from|in|on)\b", re.I)
@@ -81,6 +86,10 @@ class PersonContextRecognizer(EntityRecognizer):
                     value = two[0]
                 if _is_name(value):
                     found.add((m.start(1), m.start(1) + len(value)))
+        for rx in (LOWER_SIGNOFF_RE, LOWER_HERE_RE):  # lower case: every word must pass the stop words
+            for m in rx.finditer(text):
+                if _is_name(m.group(1), strict=False):
+                    found.add((m.start(1), m.end(1)))
         for m in MY_NAME_RE.finditer(text):
             value = m.group(1)
             two = value.split()

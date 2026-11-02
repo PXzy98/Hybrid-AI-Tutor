@@ -109,6 +109,8 @@ READING_RE = re.compile(r"\b\d{2,3}\s*(?:/|over)\s*\d{2,3}\b", re.I)
 COURSEWORK_RE = re.compile(r"\b(?:mark|marks|grade|graded|score|scored|quiz|exam|midterm|final|assignment|"
                            r"essay|homework|project|GPA)\b", re.I)
 SENTENCE_RE = re.compile(r"[^.?!\n]+")
+BP_CONTEXT_RE = re.compile(
+    r"\b(?:bp|blood pressure|systolic|diastolic|measured|reading|readings|mmhg|pressure)\b", re.I)
 
 # Misspelled conditions and medicines ("asthama", "diabetis", "metfromin"; found by E6). Only words of at
 # least five letters with the same first letter, at most one edit (two from nine letters on), and only where
@@ -187,6 +189,8 @@ class HealthDetailRecognizer(EntityRecognizer):
             if FIRST_PERSON_RE.search(s) and not COURSEWORK_RE.search(s):
                 for m in READING_RE.finditer(s):
                     top, bottom = (int(x) for x in re.findall(r"\d+", m.group())[:2])
-                    if top > bottom:  # a blood pressure reading; "71/100" is a score
+                    # a blood pressure reading; "71/100" is a score, unless the message is about readings
+                    # ("I measured 14/90": a typo for 140/90)
+                    if top > bottom or BP_CONTEXT_RE.search(text):
                         spans.add((base + m.start(), base + m.end()))
         return [RecognizerResult("HEALTH_DETAIL", a, b, self.SCORE) for a, b in sorted(spans)]

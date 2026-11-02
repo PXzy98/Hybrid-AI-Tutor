@@ -319,6 +319,12 @@ BETA_PROTECTED = [
     ("name: tomas, cell 613-555-0101", ["tomas", "613-555-0101"]),
     ("please ask prof nguyen about the asthma slides", ["nguyen"]),
     ("text me at 555-0142 after class", ["555-0142"]),
+    # round 3: lower-case sign-offs and "x here", "subject score is X", a reading typo in a BP message
+    ("is 70% enough to pass the cardiology block? - nadia brooks", ["nadia brooks"]),
+    ("omar haddad here, can u resend the quiz link?", ["omar haddad"]),
+    ("my renal quiz score is 52/D, so worried", ["52/D"]),
+    ("pharm midterm mark went down to 61.5, my fault", ["61.5"]),
+    ("I measured my blood pressure at 13/85 this morning.", ["13/85"]),
 ]
 BETA_GENERAL = [
     "What GPA do I need for the nursing program? Is 3.0 enough?",
@@ -337,6 +343,9 @@ BETA_GENERAL = [
     "Explain Charcot triad in cholangitis.",
     "The room is 555-0142 on floor two.",
     "the doctor prescribed rest for the patient in the case study",
+    "what is the McBurney point?",
+    "any tips? - thanks",
+    "is a score of 15 on the GCS normal?",
 ]
 
 
