@@ -8,6 +8,8 @@ from sqlmodel import Session, select
 from app.core.config import PrivacyConfig, get_settings
 from app.core.schemas import AskRequest, RequestContext, Turn
 from app.core.services import build_services
+from app.llm.base import LLMError
+from app.llm.fake import FakeLLMClient
 from app.pipeline.steps.privacy_filter import PrivacyFilterStep
 from app.pipeline.steps.restore import RestoreStep
 from app.pipeline.steps.route import RouteStep
@@ -368,3 +370,30 @@ async def test_identified_health_topic_policy_is_off_by_default(use_config):
         question="My name is Lena Park, student 300418277. How does diabetes work?"))
     ctx = await PrivacyFilterStep(services).run(ctx)
     assert ctx.pii.cloud_safe
+
+
+@pytest.mark.parametrize(("reply", "question", "local", "called"), [
+    ('{"personal_health": true}', "Is a cough at night a sign of asthma?", True, True),
+    ('{"personal_health": false}', "What triggers asthma attacks?", False, True),
+    (LLMError("timeout"), "What triggers asthma attacks?", True, True),  # fails closed
+    ("not json", "What triggers asthma attacks?", True, True),
+    ('{"personal_health": true}', "When is the quiz due?", False, False),  # no health topic: no call
+])
+async def test_llm_check(use_config, reply, question, local, called):
+    """Beta option: the local model double-checks cloud-bound questions that mention a health topic."""
+    services = build_services(use_config({"privacy": {"llm_check": True}}))
+    services.understand_llm = FakeLLMClient(reply)
+    ctx = RequestContext(request_id="r",
+                         request=AskRequest(student_id="s", topic="asthma", question=question))
+    ctx = await PrivacyFilterStep(services).run(ctx)
+    assert ctx.pii.cloud_safe == (not local)
+    assert bool(services.understand_llm.calls) == called
+
+
+async def test_llm_check_sees_only_the_redacted_text(use_config):
+    services = build_services(use_config({"privacy": {"llm_check": True}}))
+    services.understand_llm = FakeLLMClient('{"personal_health": false}')
+    ctx = RequestContext(request_id="r", request=AskRequest(
+        student_id="s", topic="asthma", question="My student number is 300418277. What triggers asthma?"))
+    await PrivacyFilterStep(services).run(ctx)
+    assert "300418277" not in services.understand_llm.sent_text()

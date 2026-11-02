@@ -86,6 +86,9 @@ class PrivacyConfig(Section):
     # Beta: also keep local a question that identifies someone (name, student number, contact) AND mentions a
     # health topic, even if no personal health detail was found (app/privacy/policy.py; measured in E6)
     local_if_identified_health_topic: bool = False
+    # Beta: before a question with a health topic goes to the cloud, the local model checks the redacted text
+    # for a personal health detail the rules missed (app/privacy/llm_check.py; fails closed)
+    llm_check: bool = False
     allow_list: list[str] = []  # course staff names etc. that must never be redacted
     recognizers: list[str] | None = None  # custom recognizers to enable; None = all registered (E6 ablation)
     log_raw_text: Literal[False] = False  # privacy invariant 1: cannot be switched on

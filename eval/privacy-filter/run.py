@@ -150,14 +150,7 @@ class LocalLLM:
         return out
 
 
-CLASSIFY_PROMPT = """You check a student's message to a health-course tutor before it is sent to an external AI service.
-Names, numbers and contact details are already replaced by placeholders such as <PERSON_1>.
-Answer true if the message reveals a health condition, symptom, medicine, test result or reading of the student
-or of a specific real person they mention (a relative, friend, classmate or a named person), even in passing.
-Answer false if it is a general course question, a question about a hypothetical or textbook patient, or about
-health topics in general. Reply with JSON {"personal_health": true} or {"personal_health": false}.
-
-Message: """
+from app.privacy.llm_check import PROMPT as CLASSIFY_PROMPT  # noqa: E402  (same prompt as the app)
 
 
 class LocalLLMClassifier:
