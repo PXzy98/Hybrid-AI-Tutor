@@ -11,6 +11,12 @@ SPLIT_DIGITS = r"(?<![\d.,/-])\d(?:[ ./-]?\d){8}(?![\d]|[ ./-]\d)"
 FUZZY_CONTEXT = (r"\b(?:stu\w{0,6}|std\w{0,4})\b\s*(?:-\s*)?(?:id\b|i\.d\.|n\w{0,6}\b|no\b\.?|#)\s*"
                  r"(?:is\b|was\b|:|=|#)?\s*")
 FUZZY_CONTEXT_RE = re.compile(FUZZY_CONTEXT + r"(" + SPLIT_DIGITS + r")", re.I)
+# Beta: "my id is 3 0 0 4 1 8 2 7 7" (Presidio's context boost does not fire on "id"), "ID number:
+# 300-418-277"
+ID_CONTEXT_RE = re.compile(r"\b(?:id|i\.d\.|id number|student\s*(?:no\.?|num(?:ber)?|#)|number|no\.|#)\s*"
+                           r"(?:is\b|was\b|:|=|#)?\s*(" + SPLIT_DIGITS + r")", re.I)
+# split nine digits starting with 300 (the university's prefix) need no context word; a suffix like "-2" stays
+PREFIX_SPLIT_RE = re.compile(r"(?<![\d.,/-])3[ ./-]?0[ ./-]?0(?:[ ./-]?\d){6}(?!\d|[ ./]\d)")
 # a letter O typed for a zero: "3OO418277" (at most two)
 O_FOR_ZERO_RE = re.compile(r"(?<![\w.,/-])(?=(?:[^Oo\W]*[Oo]){1,2}[^Oo\W]*\b)[\dOo]{9}(?![\w]|[.,/-]\w)")
 
@@ -38,6 +44,10 @@ class StudentIdRecognizer(PatternRecognizer):
         results = list(super().analyze(text, entities, nlp_artifacts, regex_flags) or [])
         for m in FUZZY_CONTEXT_RE.finditer(text):
             results.append(self._result(m.start(1), m.end(1), 0.85, "misspelled context", FUZZY_CONTEXT_RE))
+        for m in ID_CONTEXT_RE.finditer(text):
+            results.append(self._result(m.start(1), m.end(1), 0.85, "id context", ID_CONTEXT_RE))
+        for m in PREFIX_SPLIT_RE.finditer(text):
+            results.append(self._result(m.start(), m.end(), 0.6, "300 prefix", PREFIX_SPLIT_RE))
         for m in O_FOR_ZERO_RE.finditer(text):
             if sum(c.isdigit() for c in m.group()) >= 7:
                 results.append(self._result(m.start(), m.end(), 0.6, "O for zero", O_FOR_ZERO_RE))

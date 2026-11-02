@@ -150,6 +150,56 @@ class LocalLLM:
         return out
 
 
+CLASSIFY_PROMPT = """You check a student's message to a health-course tutor before it is sent to an external AI service.
+Names, numbers and contact details are already replaced by placeholders such as <PERSON_1>.
+Answer true if the message reveals a health condition, symptom, medicine, test result or reading of the student
+or of a specific real person they mention (a relative, friend, classmate or a named person), even in passing.
+Answer false if it is a general course question, a question about a hypothetical or textbook patient, or about
+health topics in general. Reply with JSON {"personal_health": true} or {"personal_health": false}.
+
+Message: """
+
+
+class LocalLLMClassifier:
+    """Beta: a yes/no check by the local model, only for questions the rules would send to the cloud and that
+    mention a health topic (most cloud-bound questions are not checked, so most pay no latency)."""
+
+    def __init__(self):
+        import httpx
+        from app.core.config import get_settings
+        self.s, self.http = get_settings(), httpx.Client(timeout=120)
+
+    def __call__(self, text: str, findings: list[Finding]) -> bool:
+        from app.privacy.policy import TOPIC_RE
+        if any(f.type in LOCAL_ONLY for f in findings) or not TOPIC_RE.search(text):
+            return False
+        sanitized, _, _ = anonymize(text, findings)
+        schema = {"type": "object", "properties": {"personal_health": {"type": "boolean"}},
+                  "required": ["personal_health"]}
+        r = self.http.post(f"{self.s.ollama_url}/api/chat", json={
+            "model": self.s.llm.local.model, "stream": False, "think": False, "format": schema,
+            "options": {"temperature": 0, "num_ctx": 2048},
+            "messages": [{"role": "user", "content": CLASSIFY_PROMPT + sanitized}]})
+        try:
+            return bool(json.loads(r.json()["message"]["content"]).get("personal_health"))
+        except (ValueError, KeyError):
+            return True  # an unreadable answer keeps the question local (fail closed)
+
+
+class WithPolicy:
+    """A detector plus a routing rule that may keep a question local without a local-only finding."""
+
+    def __init__(self, detect, force_local):
+        self.detect, self.force_local = detect, force_local
+
+    def __call__(self, text, names):
+        return self.detect(text, names)
+
+
+GLINER_ID_LABELS = {k: v for k, v in GLINER_LABELS.items() if v in ("PERSON", "EMAIL_ADDRESS", "PHONE_NUMBER",
+                                                                      "STUDENT_ID", "ID_NUMBER")}
+
+
 def union(*parts: list[Finding]) -> list[Finding]:
     return resolve_overlaps([f for p in parts for f in p], prefer=tuple(LOCAL_ONLY))
 
@@ -173,13 +223,15 @@ def run_config(name, detect, cases):
     for c in cases:
         t0 = time.perf_counter()
         findings = detect(c["text"], names_of(c))
+        forced = bool(getattr(detect, "force_local", None) and detect.force_local(c["text"], findings))
         times.append((time.perf_counter() - t0) * 1000)
         sanitized, entities, mapping = anonymize(c["text"], findings)
         rows.append({
             "config": name, "id": c["id"], "group": c["group"], "variant": c["variant"], "text": c["text"],
             "entities": [{**e, "protected": protected(e, c["text"], findings)} for e in c["entities"]],
             "findings": [{"type": f.type, "text": c["text"][f.start:f.end]} for f in findings],
-            "predicted_health": any(f.type in LOCAL_ONLY for f in findings), "personal_health": c["personal_health"],
+            "predicted_health": forced or any(f.type in LOCAL_ONLY for f in findings),
+            "personal_health": c["personal_health"],
             "keep_ok": all(k in sanitized for k in c["keep"]), "restore_ok": restore(sanitized, mapping) == c["text"],
         })
     return {"rows": rows, "times": times}
@@ -265,6 +317,7 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--smoke", action="store_true")
     ap.add_argument("--fast", action="store_true", help="skip GLiNER, transformer and LLM configurations")
+    ap.add_argument("--beta", action="store_true", help="the Beta configurations only (rules, policy, LLM check)")
     ap.add_argument("--out", type=Path, default=HERE / "results")
     ap.add_argument("--cases", type=Path, default=HERE / "cases.jsonl", help="e.g. holdout.jsonl")
     a = ap.parse_args(argv)
@@ -275,6 +328,19 @@ def main(argv=None) -> int:
 
     if a.smoke:
         configs = {"ours_sm": Rules(cfg("en_core_web_sm", MVP_RECOGNIZERS), identity=False)}
+    elif a.beta:  # Beta upgrade: the rules plus each extra layer on its own and together
+        from app.privacy.policy import identified_health_topic
+        rules = a5()
+        configs = {"a5_rules": rules, "b1_policy": WithPolicy(rules, identified_health_topic)}
+        if not a.fast:
+            clf = LocalLLMClassifier()
+            configs["b2_llm_classify"] = WithPolicy(rules, clf)
+            configs["b3_policy_llm"] = WithPolicy(rules, lambda t, f: identified_health_topic(t, f) or clf(t, f))
+            llm = LocalLLM()
+            configs["a4_rules_llm"] = lambda t, n: (lambda first: union(first, llm(t, n, first)))(rules(t, n))
+            gl = Gliner()
+            gl_id = lambda t, n: [f for f in gl(t, n) if f.type in GLINER_ID_LABELS.values()]  # noqa: E731
+            configs["b4_gliner_ids"] = lambda t, n: union(rules(t, n), gl_id(t, n))
     else:
         configs = {
             "presidio_default": PresidioDefault("en_core_web_lg"),
@@ -299,7 +365,7 @@ def main(argv=None) -> int:
     m = {k: metrics(v) for k, v in results.items()}
 
     ablation = {}
-    if not a.smoke:
+    if not a.smoke and not a.beta:
         base = m["a5_rules"]
         variants = {f"− {r}": Rules(cfg("en_core_web_lg", [x for x in ALL if x != r], CORE_TYPES + NEW_TYPES)) for r in ALL}
         variants["− identity terms"] = Rules(cfg("en_core_web_lg", ALL, CORE_TYPES + NEW_TYPES), identity=False)

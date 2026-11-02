@@ -83,6 +83,9 @@ class PrivacyConfig(Section):
     # a question with a local-only finding (a personal health detail): answer it locally (default), or let the
     # local model rewrite it as a general question about a hypothetical person and send only that rewrite
     health_detail_policy: Literal["local_only", "generalize"] = "local_only"
+    # Beta: also keep local a question that identifies someone (name, student number, contact) AND mentions a
+    # health topic, even if no personal health detail was found (app/privacy/policy.py; measured in E6)
+    local_if_identified_health_topic: bool = False
     allow_list: list[str] = []  # course staff names etc. that must never be redacted
     recognizers: list[str] | None = None  # custom recognizers to enable; None = all registered (E6 ablation)
     log_raw_text: Literal[False] = False  # privacy invariant 1: cannot be switched on

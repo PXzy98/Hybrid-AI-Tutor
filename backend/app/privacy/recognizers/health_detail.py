@@ -39,8 +39,41 @@ TERMS = [
     r"(?:bp|blood pressure|breathing|heart|sugar) (?:issues|problems)", r"exacerbations?", r"chronic pain",
     r"short(?:ness)? (?:of )?breath(?: episodes)?",
     r"(?:blood pressure|bp)\s+(?:pills|meds|medication|medicine)",
+    # Beta: a general clinical vocabulary (symptoms by body part, common brand and generic medicines). Like
+    # every term above, these count only when attributed to someone, never on their own.
+    r"(?:head|chest|back|neck|shoulder|stomach|abdominal|joint|knee|ear|eye|leg|arm|muscle|nerve)\s?"
+    r"(?:pains?|aches?)",
+    r"(?:stomach|tummy|belly|ear|tooth)aches?", r"sore throat", r"runny nose", r"tremors?",
+    r"shak(?:y|iness)",
+    r"numbness", r"tingling", r"palpitations?", r"faint(?:ed|ing)?", r"blacked out", r"black(?:ed)?outs?",
+    r"blurr?y vision", r"vomit(?:ing|ed)?", r"diarrh(?:o)?ea", r"rash(?:es)?", r"swelling", r"swollen \w+",
+    r"insomnia", r"(?:sleep|sleeping) (?:issues|problems|trouble)", r"night sweats", r"weight (?:loss|gain)",
+    r"chills", r"cramps?", r"aura", r"light sensitivity", r"(?:low|high) oxygen(?: saturation| levels?)?",
+    r"puffer", r"amoxil", r"augmentin", r"advair", r"symbicort", r"flovent", r"pulmicort", r"singulair",
+    r"qvar",
+    r"januvia", r"jardiance", r"trulicity", r"lantus", r"humalog", r"novolog", r"glyburide", r"gliclazide",
+    r"imitrex", r"maxalt", r"topamax", r"topiramate", r"propranolol", r"metoprolol", r"atenolol", r"ramipril",
+    r"enalapril", r"norvasc", r"zestril", r"hctz", r"lipitor", r"crestor", r"atorvastatin", r"aspirin",
+    r"naproxen", r"aleve", r"motrin", r"excedrin", r"sertraline", r"zoloft", r"prozac", r"fluoxetine",
+    r"gabapentin", r"levothyroxine", r"synthroid", r"warfarin", r"eliquis", r"doxycycline", r"cipro",
+    r"levofloxacin", r"clarithromycin", r"penicillin", r"nebuli[sz]ers?", r"epipen", r"cpap",
 ]
-TERM_RE = re.compile(r"\b(?:" + "|".join(TERMS) + r")\b", re.I)
+# Beta: tests, readings and generic medicine words. Personal only when attributed ("my sugar levels", "I got
+# my
+# blood work back"); unlike TERMS they do not count on their own in a follow-up message ("What does a normal
+# ECG look like?" after a personal health turn is still a general question)
+CONTEXT_TERMS = [
+    r"(?:oxygen|o2) (?:saturation|levels?|sats)", r"(?:blood )?sugar (?:levels?|control|readings?|spikes?)",
+    r"glucose (?:levels?|readings?|spikes?)", r"(?:hb)?a1c", r"cholesterol",
+    r"(?:blood pressure|bp) readings?",
+    # "test results" alone may be an exam: only medical tests, or results that show a finding
+    r"(?:lab|blood ?work|blood test|x-ray|scan|mri|ct scan|medical|biopsy) results?",
+    r"test results? (?:show(?:s|ed|ing)?|came back|confirm(?:s|ed)?)", r"blood ?work", r"x-rays?",
+    r"mri", r"ct scan", r"biopsy", r"ecg", r"ekg", r"spirometry",
+    r"meds", r"medications?", r"prescriptions?", r"pills?", r"painkillers?",
+]
+TERM_RE = re.compile(r"\b(?:" + "|".join(TERMS + CONTEXT_TERMS) + r")\b", re.I)
+FOLLOW_UP_TERM_RE = re.compile(r"\b(?:" + "|".join(TERMS) + r")\b", re.I)
 
 # subject + attribution verb: "I have", "I'm", "I've been having", "my dad takes", "my father was diagnosed"
 ATTRIBUTION_RE = re.compile(

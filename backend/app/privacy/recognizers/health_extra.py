@@ -15,14 +15,14 @@ import re
 from presidio_analyzer import EntityRecognizer, RecognizerResult
 
 from app.core.registry import pii_recognizers
-from app.privacy.recognizers.health_detail import COURSE_AFTER_RE, FAMILY, TERMS
+from app.privacy.recognizers.health_detail import CONTEXT_TERMS, COURSE_AFTER_RE, FAMILY, TERMS
 
 VITALS = [r"blood pressure", r"bp", r"blood sugars?", r"sugars", r"glucose(?: levels?)?", r"glycemic levels",
           r"(?:\w+\s)?readings", r"(?:\w+\s)?numbers", r"(?:\w+\s)?symptoms", r"breathing", r"lungs"]
 POSSESSIVE_RE = re.compile(
     r"\b(?:my|his|her|their|my\s+" + FAMILY + r"(?:'s|’s))\s+"
     r"(?:(?:chronic|long-term|recent|severe|bad|new|latest|current|own)\s+)?"
-    r"(" + "|".join(TERMS + VITALS) + r")\b"
+    r"(" + "|".join(TERMS + CONTEXT_TERMS + VITALS) + r")\b"
     r"(?!" + COURSE_AFTER_RE.pattern + r")", re.I)
 
 OWNED_RE = re.compile(
