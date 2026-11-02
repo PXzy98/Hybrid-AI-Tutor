@@ -319,6 +319,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/llm-server/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Test Llm Server
+         * @description Is a local model server reachable, and does it have the model? Reads only its model list (G1-94).
+         */
+        post: operations["test_llm_server_api_v1_admin_llm_server_test_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/class-summary": {
         parameters: {
             query?: never;
@@ -714,6 +734,16 @@ export interface components {
              * @default []
              */
             accepted_indices: number[];
+            /**
+             * Relevant Indices
+             * @default []
+             */
+            relevant_indices: number[];
+            /**
+             * Checked
+             * @default false
+             */
+            checked: boolean;
             /**
              * Coverage
              * @default 0
@@ -1121,6 +1151,10 @@ export interface components {
             /** Weak Evidence */
             weak_evidence: boolean;
             levels: components["schemas"]["LevelsConfig"];
+            /** Local Llm Url */
+            local_llm_url?: string | null;
+            /** Local Llm Model */
+            local_llm_model?: string | null;
         };
         /** SemanticAnalysis */
         SemanticAnalysis: {
@@ -1171,6 +1205,29 @@ export interface components {
              * @default semantic models unavailable
              */
             reason: string;
+        };
+        /** ServerStatus */
+        ServerStatus: {
+            /** Reachable */
+            reachable: boolean;
+            /** Model Available */
+            model_available: boolean;
+            /**
+             * Models
+             * @default []
+             */
+            models: string[];
+            /** Latency Ms */
+            latency_ms?: number | null;
+            /** Error */
+            error?: string | null;
+        };
+        /** ServerTest */
+        ServerTest: {
+            /** Url */
+            url: string;
+            /** Model */
+            model: string;
         };
         /** SessionHistory */
         SessionHistory: {
@@ -1996,6 +2053,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdminConfig"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    test_llm_server_api_v1_admin_llm_server_test_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ServerTest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServerStatus"];
                 };
             };
             /** @description Validation Error */

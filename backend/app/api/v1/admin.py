@@ -9,6 +9,7 @@ from fastapi import APIRouter, HTTPException, Request, UploadFile, status
 from pydantic import BaseModel
 
 from app.admin import runtime_config
+from app.admin.llm_server import ServerStatus, ServerTest, check_server
 from app.admin.logs import LogPage, log_page
 from app.admin.materials import (
     MAX_BYTES,
@@ -72,6 +73,12 @@ def put_config(body: RuntimeConfig, user: Instructor, request: Request):
     except InvalidConfig as e:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(e)) from None
     return _admin_config(request.app.state.services)
+
+
+@router.post("/llm-server/test", response_model=ServerStatus)
+async def test_llm_server(body: ServerTest, _: Instructor):
+    """Is a local model server reachable, and does it have the model? Reads only its model list (G1-94)."""
+    return await check_server(body.url, body.model)
 
 
 @router.get("/class-summary", response_model=ClassSummary)

@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { api, type OnboardingResult } from "../api/endpoints";
 import Band from "../components/Band";
 import TopicPicker from "../components/TopicPicker";
+import { useI18n } from "../i18n";
 
 type Prefs = { sequencing?: "example_first" | "concept_first"; detail?: "concise" | "detailed" };
 
@@ -12,6 +13,7 @@ type Prefs = { sequencing?: "example_first" | "concept_first"; detail?: "concise
  * skipped. Nothing is stored without consent. */
 export default function Onboarding() {
   const [topic, setTopic] = useState("high_blood_pressure");
+  const { t } = useI18n();
   const info = useQuery({ queryKey: ["onboarding", topic], queryFn: () => api.onboardingInfo(topic) });
   const qc = useQueryClient();
   const [consent, setConsent] = useState<boolean | null>(null);
@@ -31,8 +33,8 @@ export default function Onboarding() {
   });
 
   if (submit.data) return <Done result={submit.data} />;
-  if (info.isLoading) return <p className="text-slate-600">Loading…</p>;
-  if (info.isError || !info.data) return <p role="alert" className="text-rose-700">Could not load onboarding.</p>;
+  if (info.isLoading) return <p className="text-slate-600">{t("app.loading")}</p>;
+  if (info.isError || !info.data) return <p role="alert" className="text-rose-700">{t("onb.loadError")}</p>;
   const data = info.data;
   const agreed = consent ?? data.consent_given ?? false;
 
@@ -46,27 +48,27 @@ export default function Onboarding() {
     >
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold">Personalize your tutor</h1>
-          <p className="text-sm text-slate-600">Each part is optional. You can change everything later.</p>
+          <h1 className="text-xl font-semibold">{t("onb.title")}</h1>
+          <p className="text-sm text-slate-600">{t("onb.intro")}</p>
         </div>
         <TopicPicker value={topic} onChange={(t) => { setTopic(t); setAnswers({}); }} />
       </div>
 
       <section className="card space-y-3" aria-labelledby="consent-title">
-        <h2 id="consent-title" className="font-semibold">1. Your learning profile</h2>
+        <h2 id="consent-title" className="font-semibold">{t("onb.consentTitle")}</h2>
         <p className="text-sm leading-relaxed text-slate-700">{data.consent_text}</p>
         <label className="flex items-start gap-2 text-sm">
           <input type="checkbox" className="mt-1 accent-teal-700" checked={agreed}
                  onChange={(e) => setConsent(e.target.checked)} />
-          <span>I agree that the tutor keeps a learning profile for me as described above.</span>
+          <span>{t("onb.consentAgree")}</span>
         </label>
       </section>
 
       <section className="card space-y-4" aria-labelledby="prefs-title">
         <div className="flex items-center justify-between">
-          <h2 id="prefs-title" className="font-semibold">2. How you like to learn</h2>
+          <h2 id="prefs-title" className="font-semibold">{t("onb.prefsTitle")}</h2>
           <button type="button" className="btn-link" onClick={() => setSkipPrefs(!skipPrefs)} aria-pressed={skipPrefs}>
-            {skipPrefs ? "Answer these" : "Skip"}
+            {skipPrefs ? t("onb.answer") : t("onb.skip")}
           </button>
         </div>
         {!skipPrefs && data.preference_questions.map((q) => (
@@ -88,14 +90,14 @@ export default function Onboarding() {
 
       <section className="card space-y-4" aria-labelledby="diag-title">
         <div className="flex items-center justify-between">
-          <h2 id="diag-title" className="font-semibold">3. Quick check of what you already know</h2>
+          <h2 id="diag-title" className="font-semibold">{t("onb.diagTitle")}</h2>
           <button type="button" className="btn-link" onClick={() => setSkipDiagnostic(!skipDiagnostic)}
                   aria-pressed={skipDiagnostic}>
-            {skipDiagnostic ? "Answer these" : "Skip"}
+            {skipDiagnostic ? t("onb.answer") : t("onb.skip")}
           </button>
         </div>
         {data.diagnostic.length === 0 && (
-          <p className="text-sm text-slate-600">No questions are available for this topic yet.</p>
+          <p className="text-sm text-slate-600">{t("onb.noItems")}</p>
         )}
         {!skipDiagnostic && data.diagnostic.map((item, n) => (
           <fieldset key={item.id} className="border-t border-slate-100 pt-3 first:border-0 first:pt-0">
@@ -113,28 +115,29 @@ export default function Onboarding() {
           </fieldset>
         ))}
         {!agreed && data.diagnostic.length > 0 && !skipDiagnostic && (
-          <p className="text-sm text-amber-800">Without consent your answers are not saved.</p>
+          <p className="text-sm text-amber-800">{t("onb.noConsent")}</p>
         )}
       </section>
 
       {submit.isError && <p role="alert" className="text-sm text-rose-700">{(submit.error as Error).message}</p>}
       <div className="flex gap-3">
         <button type="submit" className="btn-primary" disabled={submit.isPending}>
-          {submit.isPending ? "Saving…" : "Save and start"}
+          {submit.isPending ? t("onb.saving") : t("onb.save")}
         </button>
-        <Link to="/chat" className="btn-secondary">Skip all</Link>
+        <Link to="/chat" className="btn-secondary">{t("onb.skipAll")}</Link>
       </div>
     </form>
   );
 }
 
 function Done({ result }: { result: OnboardingResult }) {
+  const { t } = useI18n();
   return (
     <div className="card mx-auto max-w-2xl space-y-4" role="status">
-      <h1 className="text-xl font-semibold">{result.personalized ? "You're all set" : "Saved"}</h1>
+      <h1 className="text-xl font-semibold">{result.personalized ? t("onb.ready") : t("onb.saved")}</h1>
       {result.personalized ? (
         <>
-          <p className="text-sm text-slate-700">Here is where the tutor will start for each part of the topic:</p>
+          <p className="text-sm text-slate-700">{t("onb.startsAt")}</p>
           <ul className="space-y-1.5">
             {result.kcs?.map((k) => (
               <li key={k.kc_id} className="flex items-center justify-between gap-3 text-sm">
@@ -145,9 +148,9 @@ function Done({ result }: { result: OnboardingResult }) {
           </ul>
         </>
       ) : (
-        <p className="text-sm text-slate-700">The tutor will answer your questions without a learning profile.</p>
+        <p className="text-sm text-slate-700">{t("onb.noProfile")}</p>
       )}
-      <Link to="/chat" className="btn-primary">Start chatting</Link>
+      <Link to="/chat" className="btn-primary">{t("onb.startChat")}</Link>
     </div>
   );
 }

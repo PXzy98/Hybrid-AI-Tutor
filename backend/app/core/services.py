@@ -31,10 +31,16 @@ class Services:
     learner: LearnerModel
 
     def reconfigure(self, settings: Settings) -> None:
-        """Runtime config change (admin dashboard): new settings, and a learner model built from them.
+        """Runtime config change (admin dashboard): new settings, a learner model built from them, and new
+        local LLM clients when the local model server or model changed.
         The pipeline is rebuilt by the caller (app.admin.runtime_config.apply)."""
+        before = self.settings
         self.settings = settings
         self.router.cfg = settings.routing
+        if (before.ollama_url, before.llm.local, before.llm.understand) != (
+                settings.ollama_url, settings.llm.local, settings.llm.understand):
+            # local model server or model changed (G1-94): new local clients; the cloud client is kept
+            self.local_llm, _, self.understand_llm = build_llm_clients(settings)
         self.learner = build_learner_model(settings, self.engine, self.content)
 
 

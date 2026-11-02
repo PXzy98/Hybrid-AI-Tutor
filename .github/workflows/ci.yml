@@ -53,3 +53,42 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm test
+
+  docker:
+    # Builds both images as in production, then checks that the API runs offline with its routing and
+    # evidence models and that the demo seed script works inside the container (no Ollama in CI).
+    runs-on: ubuntu-latest
+    env:
+      SPACY_MODEL: en_core_web_sm  # smaller image; production builds en_core_web_lg
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test settings (CI-only values)
+        run: |
+          cat > .env <<'ENV'
+          INSTRUCTOR_USERNAME=prof
+          INSTRUCTOR_INITIAL_PASSWORD=ci-initial-password-only
+          CONTENT__SERVE_UNREVIEWED=true
+          OLLAMA_URL=http://127.0.0.1:9
+          ENV
+      - name: Build
+        run: docker compose build
+      - name: Start
+        run: docker compose up -d --wait --wait-timeout 180
+      - name: Health through the web proxy
+        run: |
+          curl -fsS http://localhost:8080/api/v1/health | tee health.json
+          grep -q '"routing_impl":"semantic"' health.json
+      - name: Models are in the image (offline)
+        run: docker compose exec -T api python -m app.routing.prepare --check
+      - name: Demo seed script
+        run: |
+          curl -fsS -c jar -H 'Content-Type: application/json' http://localhost:8080/api/v1/auth/login \
+            -d '{"username":"prof","password":"ci-initial-password-only"}' > /dev/null
+          curl -fsS -b jar -H 'Content-Type: application/json' http://localhost:8080/api/v1/auth/change-password \
+            -d '{"current_password":"ci-initial-password-only","new_password":"ci-changed-password-only"}' > /dev/null
+          docker compose exec -T -e DEMO_INSTRUCTOR_PASSWORD=ci-changed-password-only api \
+            python /app/scripts/demo_seed.py --base-url http://127.0.0.1:8000 | tee seed.txt
+          grep -q "demo.advanced" seed.txt
+      - name: Logs on failure
+        if: failure()
+        run: docker compose logs --no-color

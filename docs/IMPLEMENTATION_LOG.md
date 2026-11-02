@@ -1026,3 +1026,76 @@ Interface changes: additive Chunk.metadata; AskRequest.routing_method; RouteInpu
 passages/method/status; RouteScore analysis/evidence/accepted_indices; response routing diagnostics;
 POST ask/stream; GET routing/options; persistent RuntimeConfig.show_routing_progress.
 See ROUTING_PATCH.md and INTEGRATION.md for behavior, provenance and validation limits.
+
+
+## 2026-10-22 — G1-93: split and misspelled student numbers, misspelled health terms, multi-message health details
+
+Known misses from E6 and the MVP report (5.4, root causes):
+- `student_id.py`: nine digits split by spaces, dots, slashes or hyphens in any grouping ("300/418/277",
+  "3004 18277") count next to a context word; a misspelled or abbreviated "student number" right before the
+  digits ("studnet nmuber", "stdnt #", "stu no.") counts on its own (0.85); a letter O for a zero ("3OO418277").
+- `health_detail.py`: misspelled conditions and medicines ("asthama", "diabetis", "metfromin") are found only
+  where an exact term would count (attributed window or after a possessive): at most one edit, two from nine
+  letters on, same first letter.
+- `health_extra.py`: a first-person diagnosis or prescription without a named condition ("I was diagnosed last
+  month") is a health detail.
+- `app/privacy/session_health.py` + `privacy_filter` step: once a student turn of the session holds a
+  `<HEALTH_DETAIL_n>` placeholder, condition and medicine names in later questions are health details, and a
+  question that refers back ("is it dangerous?") is not cloud-safe. Uses the history the API already passes in
+  (`sessions.history_turns`); no schema or storage change.
+
+- `resolve_overlaps`: a longer pattern span that swallows a local-only finding takes its type ("my astma and
+  my grade is C"), so the text stays redacted and the question still stays local.
+
+Tests: 21 new cases in `tests/test_privacy.py`; full backend suite 527 passed.
+E6 `--fast` (measured only, rules not tuned on it): held-out v2 question-level leak 47.3% -> 45.2%, personal-health
+sensitivity 75.0% -> 77.5%, over-redaction still 0%; main set 0% leak, 95.1% sensitivity. v2 has few split or
+misspelled numbers, so the final numbers must come from a new held-out set written after these rules are frozen
+(v3).
+
+
+## 2026-10-22 — G1-111: English and French interface
+
+- Interface text moved to `frontend/src/i18n/en.ts` (source of every key) and `fr.ts` (typed `Messages`, so
+  tsc fails if a key is missing or extra). `t(key, vars)` fills `{name}` placeholders. No new dependency.
+- `I18nProvider` keeps the language in React state, saves only the language in `localStorage`
+  (`tutor.lang`), starts from the browser language, and sets `<html lang>`. Without a provider the
+  interface is English, so component tests are unchanged.
+- Language switch on the login page and in the page header. Dates use `en-CA` / `fr-CA`.
+- Covered: login, password change, chat (routing progress, check questions, feedback survey), onboarding,
+  "What I know", and every instructor dashboard tab (including the G1-94 server section; this branch is
+  stacked on `feature/g1-94-llm-server`).
+- Not translated: content from the server (topic and KC names, check questions, consent text, answers,
+  server error messages) and the sample questions. The French chat says to ask in English, because the
+  privacy filter (Presidio + `en_core_web_lg`) only recognizes English; a French question could let
+  personal details through. French questions need a French privacy model first.
+- The French text is a machine-assisted draft; it should be proofread by a French speaker (Siyun / client).
+- Tests: `src/test/I18n.test.tsx` (same keys and placeholders, nothing empty; switch and saved choice;
+  French chat note; French dashboard). 28 frontend tests pass; build passes.
+
+
+## 2026-10-22 — G1-56: the Docker image carries the routing and evidence models
+
+The API image now contains every local model the app uses, so the container answers offline and never
+downloads a model while a student asks:
+- CPU-only torch (the default wheel bundles CUDA that the encoders do not need).
+- The routing encoder (`all-MiniLM-L6-v2`) and both evidence cross-encoders are cached in `/opt/hf` at build
+  time (build args, defaults match `config.yaml`); `HF_HUB_OFFLINE=1` from then on.
+- The trained LR/SVM weights are copied from `data/routing/models` to `/app/models/routing`
+  (`ROUTING__MODEL_DIR`), outside the `/app/data` volume so a rebuild is not hidden by an old volume.
+- `python -m app.routing.prepare --check` (new) loads every configured asset without downloading and fails
+  the build, naming the missing model, if one is absent or the weights do not match the encoder.
+- `scripts/demo_seed.py` is in the image: `docker compose exec api python /app/scripts/demo_seed.py`.
+
+CI gains a `docker` job: compose build (with `en_core_web_sm`), start and wait for health through the web
+proxy, `prepare --check` inside the container, and the demo seed script end to end (no Ollama in CI).
+
+Not verified locally (no Docker on the development machine): the first CI run is the build test.
+
+First CI run: the image built, but the API stopped at startup: `data/medical_rag` (the bundled MedlinePlus
+sources for RAG) was excluded by `.dockerignore`, so the Docker setup on main could not start either. Fixed:
+- `data/medical_rag` is copied to `/app/data/medical_rag`, and the build now also loads the retriever.
+- The volume moves from `/app/data` to `/app/var`, holding only what the app writes: the database
+  (`DATABASE_URL=sqlite:////app/var/app.db`) and instructor uploads (`RAG__MATERIALS_DIR=/app/var/topics`).
+  Bundled sources and models stay in the image, so a rebuild is never hidden by an old volume. No existing
+  deployment is affected: the old image could not start.

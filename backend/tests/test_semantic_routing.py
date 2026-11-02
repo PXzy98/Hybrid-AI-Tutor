@@ -377,3 +377,21 @@ def test_sources_rejected_by_the_freshness_check_are_not_used_as_unverified():
     x = input_for(passages=[chunk()])  # no verified_current metadata: fails the freshness check
     r = assess_evidence(x, a, RoutingConfig())
     assert r.checked and select_passages(x, r, RoutingConfig()) == []
+
+
+def test_prepare_check_reports_every_missing_asset(monkeypatch, capsys):
+    """The Docker build runs `prepare --check` (G1-56): a missing model must fail it, by name."""
+    from app.routing import prepare
+
+    def missing(name, cache_dir, local_only):
+        assert local_only  # the check never downloads
+        if name == RoutingConfig().answerability_model:
+            raise OSError("not cached")
+
+    monkeypatch.setattr(prepare, "sentence_encoder", missing)
+    monkeypatch.setattr(prepare, "pair_encoder", missing)
+    assert prepare.check() == 1
+    err = capsys.readouterr().err
+    assert "qnli-electra-base" in err and "ms-marco" not in err
+    monkeypatch.setattr(prepare, "pair_encoder", lambda *a: None)
+    assert prepare.check() == 0  # the committed LR/SVM weights match the configured encoder

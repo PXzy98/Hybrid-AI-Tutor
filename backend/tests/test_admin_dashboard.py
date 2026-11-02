@@ -2,8 +2,10 @@
 import uuid
 from contextlib import ExitStack
 
+import httpx
 import pytest
 
+from app.admin.llm_server import check_server
 from app.admin.summary import suppress
 from app.core.schemas import Evidence
 from app.learner.knowledge.rule import RuleKnowledgeModel
@@ -76,7 +78,9 @@ def test_config_shows_the_runtime_subset(dash):
                            "checkers": ["grounding", "medical_safety", "pii_leak",
                                                                   "profile_leak"],
                            "knowledge": c["values"]["knowledge"], "weak_evidence": False,
-                           "levels": {"basic_below": 0.4, "advanced_above": 0.7, "hysteresis": 0.05}}
+                           "levels": {"basic_below": 0.4, "advanced_above": 0.7, "hysteresis": 0.05},
+                           "local_llm_url": c["values"]["local_llm_url"],
+                           "local_llm_model": c["values"]["local_llm_model"]}
     assert {"bkt", "rule"} <= set(c["options"]["knowledge_models"])
     assert c["options"]["required_checkers"] == ["medical_safety", "pii_leak", "profile_leak"]
     assert c["history"] == []
@@ -118,6 +122,69 @@ def test_history_is_recorded_and_survives_a_restart(dash, make_client):
     assert len(history) == 1 and history[0]["changed"] == ["routing_threshold"]
     with make_client({"content": {"serve_unreviewed": True}}) as client:  # same database, new process
         assert client.app.state.services.settings.routing.threshold == 0.75
+
+
+# ------------------------------------------------------------------------------ local model server (G1-94)
+def test_local_model_server_is_switched_live(dash):
+    api = dash()
+    old_local = api.services.local_llm
+    c = put_config(api, local_llm_url="http://10.0.0.5:11434/", local_llm_model="llama3.1:8b")
+    assert c["values"]["local_llm_url"] == "http://10.0.0.5:11434"
+    assert c["values"]["local_llm_model"] == "llama3.1:8b"
+    s = api.services
+    assert s.settings.ollama_url == "http://10.0.0.5:11434" and s.settings.llm.local.model == "llama3.1:8b"
+    assert s.local_llm is not old_local
+    assert s.local_llm.url == "http://10.0.0.5:11434/api/chat" and s.local_llm.model == "llama3.1:8b"
+    assert s.understand_llm.model == "llama3.1:8b"  # the understand step follows the answer model
+    assert set(config(api)["history"][0]["changed"]) == {"local_llm_model", "local_llm_url"}
+
+
+def test_other_changes_keep_the_local_clients(dash):
+    api = dash()
+    old_local = api.services.local_llm
+    put_config(api, routing_threshold=0.5)
+    assert api.services.local_llm is old_local
+
+
+def test_invalid_local_model_server_is_rejected(dash):
+    api = dash()
+    put_config(api, 422, local_llm_url="ftp://10.0.0.5")
+    put_config(api, 422, local_llm_url="not a url")
+    put_config(api, 422, local_llm_model="two words")
+    assert config(api)["history"] == []
+
+
+def _ollama(models: list[str], status: int = 200) -> httpx.MockTransport:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.path == "/api/tags"
+        return httpx.Response(status, json={"models": [{"name": m} for m in models]})
+    return httpx.MockTransport(handler)
+
+
+async def test_server_check_reports_reachability_and_the_model():
+    ok = await check_server("http://h:11434/", "qwen3.5:9b", _ollama(["qwen3.5:9b", "llama3.1:8b"]))
+    assert ok.reachable and ok.model_available and ok.models == ["qwen3.5:9b", "llama3.1:8b"] and not ok.error
+    latest = await check_server("http://h:11434", "mistral", _ollama(["mistral:latest"]))
+    assert latest.model_available
+    missing = await check_server("http://h:11434", "gemma4:e4b", _ollama(["qwen3.5:9b"]))
+    assert missing.reachable and not missing.model_available and "gemma4:e4b" in missing.error
+    broken = await check_server("http://h:11434", "qwen3.5:9b", _ollama([], status=404))
+    assert not broken.reachable and "HTTP 404" in broken.error
+
+    def refuse(request):
+        raise httpx.ConnectError("refused")
+    down = await check_server("http://h:11434", "qwen3.5:9b", httpx.MockTransport(refuse))
+    assert not down.reachable and "ConnectError" in down.error
+
+
+def test_server_check_endpoint(dash, monkeypatch):
+    api = dash()
+
+    async def fake(url, model):
+        return await check_server(url, model, _ollama(["qwen3.5:9b"]))
+    monkeypatch.setattr("app.api.v1.admin.check_server", fake)
+    r = api.client.post(f"{ADMIN}/llm-server/test", json={"url": "http://h:11434", "model": "qwen3.5:9b"})
+    assert r.status_code == 200 and r.json()["model_available"] is True
 
 
 # ------------------------------------------------------------------------------ class summary

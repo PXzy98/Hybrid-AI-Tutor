@@ -1,5 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
 
+import { useI18n } from "../i18n";
+
 type State = { failed: boolean };
 
 /** Shows a message instead of a blank page when a page crashes. */
@@ -15,13 +17,17 @@ export default class ErrorBoundary extends Component<{ children: ReactNode }, St
   }
 
   render() {
-    if (!this.state.failed) return this.props.children;
-    return (
-      <div role="alert" className="card mx-auto max-w-lg space-y-3">
-        <h1 className="text-lg font-semibold">Something went wrong on this page.</h1>
-        <p className="text-sm text-slate-700">Please reload the page. If it happens again, tell your instructor.</p>
-        <button type="button" className="btn-primary" onClick={() => window.location.reload()}>Reload</button>
-      </div>
-    );
+    return this.state.failed ? <Crashed /> : this.props.children;
   }
+}
+
+function Crashed() {
+  const { t } = useI18n();
+  return (
+    <div role="alert" className="card mx-auto max-w-lg space-y-3">
+      <h1 className="text-lg font-semibold">{t("error.title")}</h1>
+      <p className="text-sm text-slate-700">{t("error.body")}</p>
+      <button type="button" className="btn-primary" onClick={() => window.location.reload()}>{t("error.reload")}</button>
+    </div>
+  );
 }

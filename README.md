@@ -31,11 +31,11 @@ docker compose up --build -d      # http://localhost:8080 (WEB_PORT changes the 
 
 - `api`: FastAPI with the privacy filter and the learner model; SQLite lives in the `tutor-data` volume.
 - `web`: nginx serving the React app and proxying `/api` to `api`. The browser sees one origin.
-- The first build downloads the spaCy model `en_core_web_lg` (about 400 MB). `SPACY_MODEL=en_core_web_sm` gives a smaller image.
+- The first build downloads the spaCy model `en_core_web_lg` (about 400 MB) and the routing encoder and two evidence models (about 600 MB); the trained LR/SVM weights come from `data/routing/models`. The build fails if any configured model is missing (`python -m app.routing.prepare --check`), and the container never downloads a model at run time. `SPACY_MODEL=en_core_web_sm` gives a smaller image.
 - Log in as the instructor, choose a new password, then create students (API `/api/v1/admin/students` until the dashboard of Step 13). For a demo with three prepared students, see [docs/DEMO.md](docs/DEMO.md).
 - Any `config.yaml` value can be overridden in `.env` as `SECTION__FIELD`, e.g. `CONTENT__SERVE_UNREVIEWED=true` (needed while the course content is unreviewed) or `ROUTING__THRESHOLD=0.7`.
 - `docker compose down` stops the app; `docker compose down -v` also deletes all accounts and data.
-- Known gap: the image does not yet contain the routing and evidence models (see below). Without them the app still answers, but routing selects the cloud and course sources are marked "not checked".
+- Demo students inside the container: `docker compose exec -e DEMO_INSTRUCTOR_PASSWORD=<new password> api python /app/scripts/demo_seed.py --base-url http://127.0.0.1:8000` (see [docs/DEMO.md](docs/DEMO.md)).
 
 ## Repository layout
 

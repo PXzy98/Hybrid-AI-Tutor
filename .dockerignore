@@ -9,6 +9,8 @@
 frontend/dist
 frontend/tsconfig.tsbuildinfo
 data
+!data/routing/models
+!data/medical_rag
 eval
 docs
 .env

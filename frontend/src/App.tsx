@@ -3,6 +3,7 @@ import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 
 import { homeFor, useMe } from "./auth";
 import Layout from "./components/Layout";
+import { useI18n } from "./i18n";
 import Admin from "./pages/Admin";
 import ChangePassword from "./pages/ChangePassword";
 import Chat from "./pages/Chat";
@@ -16,8 +17,9 @@ type Role = "student" | "instructor";
 function Guard({ role, children }: { role?: Role; children: ReactNode }) {
   const { data: me, isLoading, isError } = useMe();
   const location = useLocation();
-  if (isLoading) return <p className="p-8 text-slate-600">Loading…</p>;
-  if (isError) return <p className="p-8 text-red-700">The server is not reachable. Please try again later.</p>;
+  const { t } = useI18n();
+  if (isLoading) return <p className="p-8 text-slate-600">{t("app.loading")}</p>;
+  if (isError) return <p className="p-8 text-red-700">{t("app.unreachable")}</p>;
   if (!me) return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   if (me.must_change_password && location.pathname !== "/change-password") {
     return <Navigate to="/change-password" replace />;
