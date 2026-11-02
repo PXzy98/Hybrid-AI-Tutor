@@ -17,6 +17,7 @@ which upgrade is worth it? All data is fictional.
 ```
 .venv\Scripts\python eval\privacy-filter\run.py                       # main set, all configurations (~10 min with Ollama)
 .venv\Scripts\python eval\privacy-filter\run.py --fast                # rules only, ~1 min
+.venv\Scripts\python eval\privacy-filter\run.py --beta --cases eval\privacy-filter\holdout4.jsonl --out eval\privacy-filter\results\beta_holdout4   # Beta configurations (results/beta.md)
 .venv\Scripts\python eval\privacy-filter\run.py --cases eval\privacy-filter\holdout2.jsonl --out eval\privacy-filter\results\holdout_test
 .venv\Scripts\python eval\privacy-filter\exposure.py
 .venv\Scripts\python eval\privacy-filter\utility.py                   # ~30 min, local model + judge

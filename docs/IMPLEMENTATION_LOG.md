@@ -1099,3 +1099,33 @@ sources for RAG) was excluded by `.dockerignore`, so the Docker setup on main co
   (`DATABASE_URL=sqlite:////app/var/app.db`) and instructor uploads (`RAG__MATERIALS_DIR=/app/var/topics`).
   Bundled sources and models stay in the image, so a rebuild is never hidden by an old volume. No existing
   deployment is affected: the old image could not start.
+
+
+## 2026-11-02 — Privacy filter Beta upgrade (G1-103)
+
+Rules (always on):
+- `health_context`: health details of someone else (a name from the NER model, a titled name, a relation);
+  the student's own condition without "I have / my" ("this awful migraine", "it could be the flu"); a
+  condition with the student as object ("the headache is killing me"); a condition's state ("my migraines are
+  acting up").
+- `health_detail`: a general symptom and medicine vocabulary; tests and readings (`CONTEXT_TERMS`) count only
+  when attributed, not as session follow-ups; a slash reading counts only if top > bottom (BP, not 71/100).
+- `grade_context`: grades across sentences, other people's grades, "a 41 on the midterm", "my C-",
+  "Score of 88%".
+- `person_context`: single names after a relation, sign-offs, vocatives, "x here", lower-case names after
+  "name:", "dr." or "prof."; `clean_person` keeps those and drops titles; eponym triads are not names.
+- `contact_extra`: obfuscated e-mails, phones without separators, spelled-out phones, local 7-digit numbers.
+- `student_id`: "my id is 3 0 0 ..." and split 9-digit numbers starting with 300.
+
+Options (off in `config.yaml`; when to turn them on: `eval/privacy-filter/results/beta.md`):
+- `privacy.llm_check`: at the cloud gate, the local model answers yes/no on the redacted text of a question
+  that mentions a health topic; yes or a failure keeps it local (`app/privacy/llm_check.py`). Recommended on
+  wherever Ollama runs (`PRIVACY__LLM_CHECK=true`).
+- `privacy.local_if_identified_health_topic`: a name or number together with a health topic stays local
+  (`app/privacy/policy.py`). Not recommended by default (large utility cost).
+
+Evaluation without over-fitting: rules developed on the main set and v1; two new held-out sets written by
+models not used before, hand-labelled and frozen before their only run (v3 after round 1, v4 after round 2).
+v4 (final): cloud exposure 22.8% (main before) -> 15.8% (rules) -> 2.7% (rules + LLM check); personal health
+kept local 75.6% -> 82.4% -> 99.2%; over-redaction 10% -> 5%. Details and known gaps:
+`eval/privacy-filter/results/beta.md`. Tests: 591 backend tests pass.

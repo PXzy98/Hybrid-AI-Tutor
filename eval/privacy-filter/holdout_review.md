@@ -61,3 +61,11 @@ was run on it:
   (e.g. GE034 "Check 300112994 for diabetes trends" labelled personal; GE097 "if she has hypertension" not
   personal; targets such as "he needs a 90% to pass" are not grades; staff names count as names).
 - The order of work: rules frozen on dev data → v3 generated and labelled → one run of every configuration.
+
+## v4 (round 2 of the Beta upgrade): the final test
+
+Round 2 fixed general gaps seen on v3 (so v3 is "seen" for round 2). After the round-2 rules were frozen, v4 was
+made the same way: gemma4:31b (seed 65) and qwen3.5:35b (seed 66), 102 each, hand-labelled in `labels4.txt`
+before any run, frozen in its own commit, then run once. 204 messages: 184 positive, 20 negative, 131 personal
+health. The qwen batch wrote 13 ten-digit "student numbers"; they are labelled as student numbers. Results:
+`results/beta.md`.
