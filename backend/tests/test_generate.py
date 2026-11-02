@@ -151,7 +151,22 @@ async def test_generalize_sends_only_the_checked_rewrite(services):
 
 PERSONAL_REWRITES = ["Can I run with my asthma?", "Is running safe with a peak flow of 300?",
                      "Can Bob Ng run with asthma?", "Is a reading of 160/100 concerning?",
-                     "Can someone take 2 puffs before running?", "Should a 72-year-old worry?"]
+                     "Can someone take 2 puffs before running?",
+                     # the age may stay, the duration may not
+                     "Should a 72-year-old worry 3 weeks after surgery?"]
+
+
+@pytest.mark.parametrize("rewrite", ["Can a 54-year-old man with asthma run safely?",
+                                     "Is running safe for a woman aged 60 with asthma?",
+                                     "Can a man in his 50s with asthma run safely?"])
+async def test_generalize_keeps_age_and_sex(services, rewrite):
+    """G1-95 (approved by the professor): age and sex change the medical answer, so the rewrite keeps them."""
+    s = services(policy="generalize")
+    s.local_llm = FakeLLMClient([rewrite, "local answer"])
+    transport = FakeLLMClient("cloud answer", backend="cloud")
+    s.cloud_llm = CloudClient(transport)
+    ctx = await GenerateStep(s).run(health_ctx())
+    assert ctx.cloud_request.sanitized_question == rewrite and ctx.answer == "cloud answer"
 
 
 @pytest.mark.parametrize("rewrite", PERSONAL_REWRITES)

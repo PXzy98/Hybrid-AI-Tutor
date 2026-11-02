@@ -6,7 +6,8 @@ that passes every check may go to the cloud. Anything else keeps the question lo
 
 E6 utility experiment (eval/privacy-filter/results/utility.md): placeholders over the health detail score 3.07
 of 5 against the original answer, the hypothetical rewrite 4.47. Enabled in config.yaml since 20 Oct 2026,
-after the professor approved sending de-identified, generalized health questions to the cloud.
+after the professor approved sending de-identified, generalized health questions to the cloud. Age and sex
+stay in the rewrite (G1-95, also approved: they change the medical answer and do not identify on their own).
 """
 import re
 
@@ -16,10 +17,12 @@ from app.privacy.analyzer import PIIAnalyzer
 PROMPT = (
     "Rewrite the student's message below as ONE general question about a hypothetical person, so that it "
     "says nothing about the student or anyone they know: no names, no 'I', 'my', 'me', no relatives, no "
-    "ages, dates, doses or other personal numbers. Describe readings in words instead of numbers (for "
-    "example 'a very high blood pressure reading'). Keep the medical topic, the names of conditions and "
-    "medicines (including numbers that are part of a name, such as 'type 2 diabetes' or 'GLP-1'), and "
-    "what the student wants to know. Reply with the rewritten question only.\n\nMessage: "
+    "dates, doses or other personal numbers. Describe readings in words instead of numbers (for example "
+    "'a very high blood pressure reading'). Keep the person's age and sex if the message gives them (for "
+    "example 'a 54-year-old man'), because they change the medical answer. Keep the medical topic, the "
+    "names of conditions and medicines (including numbers that are part of a name, such as 'type 2 "
+    "diabetes' or 'GLP-1'), and what the student wants to know. Reply with the rewritten question only."
+    "\n\nMessage: "
 )
 FIRST_PERSON_RE = re.compile(r"\b(?:I|I'm|I've|I'd|me|my|mine|we|our|us)\b", re.I)
 # A specific value that could belong to someone: a reading (160/100), a quantity with a unit (5 mg, 3 weeks,
@@ -39,6 +42,9 @@ NUMBER_RE = re.compile(
 GRADE_RE = re.compile(r"\b(?-i:[A-F])[+-]?\s+(?:grade|average)\b"  # the letter itself must be upper case
                       r"|\b(?:grade|mark)\s+(?:of\s+)?(?:an?\s+)?(?-i:[A-F])[+-]?(?![\w+-])"
                       r"|\bGPA\b|\bgrade point average\b", re.I)
+# age and sex stay (G1-95, approved by the professor): "a 54-year-old man", "a woman aged 60", "in her 50s"
+AGE_RE = re.compile(r"\b\d{1,3}[- ](?:years?|yrs?)[- ]old\b|\baged\s+\d{1,3}\b"
+                    r"|\bin\s+(?:his|her|their)\s+\d0s\b", re.I)
 MAX_CHARS = 300
 
 
@@ -58,7 +64,8 @@ async def generalize(question: str, llm: LLMClient, analyzer: PIIAnalyzer, names
     rewrite = lines[0] if lines else ""
     if not rewrite or len(rewrite) > MAX_CHARS:
         return None
-    if FIRST_PERSON_RE.search(rewrite) or NUMBER_RE.search(rewrite) or GRADE_RE.search(rewrite):
+    without_age = AGE_RE.sub("", rewrite)
+    if FIRST_PERSON_RE.search(rewrite) or NUMBER_RE.search(without_age) or GRADE_RE.search(rewrite):
         return None  # still personal, or a reading, dose, date, ID or grade
     if any(re.search(rf"(?<!\w){re.escape(v)}(?!\w)", rewrite, re.I) for v in known_values if v.strip()):
         return None  # repeats an identifier of the original question
