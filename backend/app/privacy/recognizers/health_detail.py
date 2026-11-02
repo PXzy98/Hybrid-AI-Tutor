@@ -112,7 +112,9 @@ SENTENCE_RE = re.compile(r"[^.?!\n]+")
 SCORE_CONTEXT_RE = re.compile(COURSEWORK_RE.pattern[:-3] + r"|lab|module|unit|test|points?|out of|course)\b",
                               re.I)
 BP_CONTEXT_RE = re.compile(
-    r"\b(?:bp|blood pressure|systolic|diastolic|measured|reading|readings|mmhg|pressure)\b", re.I)
+    r"\b(?:bp|blood pressure|systolic|diastolic|measured|reading|readings|mmhg|pressure|monitor|cuff|"
+    r"meter)\b", re.I)
+SCORE_WINDOW = 40  # characters around a reading in which a coursework word makes it a score
 
 # Misspelled conditions and medicines ("asthama", "diabetis", "metfromin"; found by E6). Only words of at
 # least five letters with the same first letter, at most one edit (two from nine letters on), and only where
@@ -190,8 +192,11 @@ class HealthDetailRecognizer(EntityRecognizer):
                 spans.add((base + m.start(), base + m.end()))
             if FIRST_PERSON_RE.search(s) and not COURSEWORK_RE.search(s):
                 for m in READING_RE.finditer(s):
-                    # any personal reading (blood pressure, "my vision is 20/40") is health, unless the
-                    # message is about coursework and not about readings: "my 71/100 from the lab" is a score
-                    if BP_CONTEXT_RE.search(text) or not SCORE_CONTEXT_RE.search(text):
+                    # any personal reading (blood pressure, "my vision is 20/40") is health, unless a
+                    # coursework word sits right next to this value: "my 71/100 from the lab" is a score.
+                    # Only the reading's own neighbourhood counts: in "My home monitor shows 150/95. Can I
+                    # still go to the lab?" the "lab" of the next sentence must not unprotect the reading
+                    near = s[max(0, m.start() - SCORE_WINDOW):m.end() + SCORE_WINDOW]
+                    if BP_CONTEXT_RE.search(s) or not SCORE_CONTEXT_RE.search(near):
                         spans.add((base + m.start(), base + m.end()))
         return [RecognizerResult("HEALTH_DETAIL", a, b, self.SCORE) for a, b in sorted(spans)]
