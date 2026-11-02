@@ -401,7 +401,7 @@ class CloudRequest(BaseModel):            # the ONLY type the cloud client accep
 - `CloudClient.complete()` accepts only `CloudRequest`. A unit test asserts that its signature does not change.
 - The `pii_leak` checker runs Presidio again on the serialized `CloudRequest`. The `profile_leak` checker fails if the payload contains a student ID, an item ID or a misconception statement.
 - In the end-to-end tests, every cloud request is intercepted and audited (§11, E4).
-- As built (19 Oct 2026): the generate step is the single cloud gate for every router. Before anything is sent it re-checks the `CloudRequest` (PII, `student_id`, item IDs, misconception text); a question with a personal health detail follows `privacy.health_detail_policy` (`local_only` by default, or a checked hypothetical rewrite with `generalize`). See `docs/report/privacy_subsystem.md`.
+- As built (19 Oct 2026): the generate step is the single cloud gate for every router. Before anything is sent it re-checks the `CloudRequest` (PII, `student_id`, item IDs, misconception text); a question with a personal health detail follows `privacy.health_detail_policy` (`generalize` since 20 Oct 2026, approved by the professor: a checked hypothetical rewrite, otherwise local; `local_only` keeps every such question local). See `docs/report/privacy_subsystem.md`.
 
 ### 8.3 Instructor view, accounts and student rights
 

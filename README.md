@@ -99,7 +99,7 @@ CLOUD_API_KEY=...
 CLOUD_MODEL=deepseek-flash
 ```
 
-The cloud only receives the sanitized question, the topic, course passages and three coarse labels; questions with a personal health detail stay local (`privacy.health_detail_policy`). Without a key, or when the cloud fails, the local model answers and the student is told why. Reasoning models count their hidden reasoning against `llm.cloud.max_tokens` (2000). Check the provider's data location and retention with the client before a pilot (DeepSeek stores data in China): see [docs/隐私升级.md](docs/隐私升级.md).
+The cloud only receives the sanitized question, the topic, course passages and three coarse labels; a question with a personal health detail reaches the cloud only as a general question rewritten by the local model ("Can a person with asthma play soccer?"), and stays local if the rewrite fails its checks (`privacy.health_detail_policy: generalize`, approved by the professor; `local_only` keeps all such questions local). Without a key, or when the cloud fails, the local model answers and the student is told why. Reasoning models count their hidden reasoning against `llm.cloud.max_tokens` (2000). Check the provider's data location and retention with the client before a pilot (DeepSeek stores data in China): see [docs/隐私升级.md](docs/隐私升级.md).
 
 Run the app in development mode (two terminals):
 

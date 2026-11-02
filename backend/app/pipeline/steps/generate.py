@@ -15,6 +15,8 @@ log = logging.getLogger("app.pipeline")
 CLOUD_FALLBACK_WARNING = "The cloud model was unavailable, so the local model answered."
 CLOUD_MISSING_WARNING = "No cloud model is connected, so the local model answered this question."
 PRIVACY_BLOCK_WARNING = "A privacy check kept this question on the local model."
+GENERALIZED_NOTE = ("For privacy, the cloud model received a general version of your question, without your "
+                    "personal health details.")
 LOCAL_CAPABILITY_NOTE = ("This question may be beyond what the local model does well; "
                          "please check the answer against the sources below.")
 
@@ -39,6 +41,8 @@ class GenerateStep(BaseStep):
         result = await self.produce(ctx)
         ctx.llm = result
         ctx.answer = result.text
+        if ctx.generalized_question and result.backend == "cloud" and GENERALIZED_NOTE not in ctx.warnings:
+            ctx.warnings.append(GENERALIZED_NOTE)  # tell the student what the cloud actually saw
         return ctx
 
     async def produce(self, ctx: RequestContext, *, safety_retry: bool = False) -> LLMResult:
@@ -91,8 +95,10 @@ class GenerateStep(BaseStep):
         rewrite = ctx.generalized_question  # a safety retry reuses the rewrite of the first attempt
         if rewrite is None:
             names, usernames = self.services.accounts.identity_terms(ctx.request.student_id)
+            local_only = set(self.services.settings.privacy.local_only_types)
+            known = [e.text for e in ctx.pii.entities if e.type not in local_only]
             rewrite = await generalize(ctx.request.question, self.services.local_llm, self.leaks.analyzer,
-                                       names, usernames)
+                                       names, usernames, known)
         if rewrite is None:
             return None
         ctx.generalized_question = rewrite

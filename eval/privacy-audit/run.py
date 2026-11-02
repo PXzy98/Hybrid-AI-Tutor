@@ -15,6 +15,7 @@ database (outside `account`) and the logs. Exit code 1 on any leak, so the run c
 """
 import argparse
 import json
+from dataclasses import replace
 import os
 import sqlite3
 import sys
@@ -45,10 +46,12 @@ def e6_questions(smoke: bool) -> list[dict]:
         if c["group"] not in E6_GROUPS:
             continue
         text, planted = c["text"], [e["text"] for e in c["entities"]]
+        health = [e["text"] for e in c["entities"] if e["type"] == "HEALTH_DETAIL"]
         if c.get("self_name"):
             text = text.replace(c["self_name"], "{display_name}")
             planted = [v.replace(c["self_name"], "{display_name}") for v in planted]
-        out.append({"id": c["id"], "question": text, "planted": planted, "expect_local": c["personal_health"]})
+        out.append({"id": c["id"], "question": text, "planted": planted, "expect_local": c["personal_health"],
+                    "planted_health": health})
     return out[:6] if smoke else out
 
 
@@ -111,7 +114,8 @@ def main(argv: list[str] | None = None) -> int:
                 after = sum(1 for _ in log_path.open(encoding="utf-8")) if log_path.exists() else 0
                 body = r.json()
                 asks.append(Ask(p.key, text, [fill(v, p) for v in q["planted"]], list(range(before, after)),
-                                body["route_target"], body["warnings"], q.get("expect_local", False)))
+                                body["route_target"], body["warnings"], q.get("expect_local", False),
+                                [fill(v, p) for v in q.get("planted_health", [])]))
         services = h.services
         rows = services.accounts.list_students()
         identities = sorted({v for p in personas for v in (p.username, p.display_name, p.display_name.split()[-1])}
@@ -120,9 +124,14 @@ def main(argv: list[str] | None = None) -> int:
                           misconception_texts=[t for m in services.content.all_misconceptions()
                                                for t in (m.statement, m.correction)])
         records = jsonl(log_path) if log_path.exists() else []
-        findings = analyze(records, asks, secrets, analyzer=_analyzer(services))
-        findings += [Finding("health", f"cloud#{x.record_ids[0]}", f"personal health question reached the cloud: "
-                             f"'{x.question[:60]}'") for x in asks if x.expect_local and x.record_ids]
+        generalize = services.settings.privacy.health_detail_policy == "generalize"
+        a.generalize = generalize
+        # generalize: a health question may reach the cloud as a hypothetical rewrite, which keeps the condition
+        # ("a person with asthma"); its health spans are then not a leak by themselves
+        cloud_asks = [replace(x, planted=[v for v in x.planted if v not in x.planted_health])
+                      if generalize and x.expect_local else x for x in asks]
+        findings = analyze(records, cloud_asks, secrets, analyzer=_analyzer(services))
+        findings += health_findings(asks, records, generalize)
         findings += storage_findings(db_dump(h), "\n".join(h.log_lines), secrets, [])  # identities, everywhere
         for ask, new_rows in zip(asks, stored, strict=True):
             findings += [Finding("pii", "db", f"raw typed value stored '{v}' (ask: '{ask.question[:50]}')")
@@ -133,6 +142,25 @@ def main(argv: list[str] | None = None) -> int:
                      for v in sorted({v for ask in asks for v in ask.planted}) if contains(log_text, v)]
 
     return report(a, asks, records, findings)
+
+
+def health_findings(asks: list[Ask], records: list[dict], generalize: bool) -> list[Finding]:
+    """local_only: a personal health question must not reach the cloud at all. generalize: it may, but only as a
+    general question: no first-person statement and no specific value (reading, dose, date) in what was sent."""
+    from app.privacy.generalize import FIRST_PERSON_RE, NUMBER_RE
+
+    out = []
+    for x in asks:
+        if not (x.expect_local and x.record_ids):
+            continue
+        sent = records[x.record_ids[0]].get("cloud_request", {}).get("sanitized_question", "")
+        if not generalize:
+            out.append(Finding("health", f"cloud#{x.record_ids[0]}",
+                               f"personal health question reached the cloud: '{x.question[:60]}'"))
+        elif FIRST_PERSON_RE.search(sent) or NUMBER_RE.search(sent):
+            out.append(Finding("health", f"cloud#{x.record_ids[0]}",
+                               f"personal health statement reached the cloud (not generalized): '{sent[:60]}'"))
+    return out
 
 
 def db_dump(h) -> str:
@@ -153,7 +181,10 @@ def report(a, asks: list[Ask], records: list[dict], findings: list[Finding]) -> 
     pii_rate = len(cloud_pii) / len(records) if records else 0.0
     to_cloud = sum(1 for x in asks if x.record_ids)
     kept_local = [x for x in asks if not x.record_ids]
-    blocked = [x for x in asks if any("privacy" in w.lower() for w in x.warnings)]
+    blocked = [x for x in asks if any("privacy check kept" in w.lower() for w in x.warnings)]
+    generalized = [x for x in asks if any("general version of your question" in w.lower() for w in x.warnings)]
+    health_rule = ("as a personal statement (policy: generalize)" if getattr(a, "generalize", False)
+                   else "(policy: local_only)")
     lines = [
         "# E4: privacy audit of cloud requests (design §11 E4)\n",
         f"{'Smoke run (fake local models). ' if a.smoke else ''}"
@@ -164,12 +195,13 @@ def report(a, asks: list[Ask], records: list[dict], findings: list[Finding]) -> 
         "| Result | Value |", "|---|---|",
         f"| Cloud requests recorded | {len(records)} (from {to_cloud} asks) |",
         f"| Asks kept local (not cloud-safe, or blocked by the pre-send guard) | {len(kept_local)} "
-        f"(guard warnings: {len(blocked)}) |",
+        f"(privacy notices: {len(blocked)}) |",
+        f"| Personal health questions sent as a checked hypothetical rewrite | {len(generalized)} |",
         f"| Fields outside the allow-list | {len(by_kind['field'])} |",
         f"| Identity leaks | {len(by_kind['identity'])} |",
         f"| Profile leaks | {len(by_kind['profile'])} |",
         f"| PII leaks in cloud requests | {len(cloud_pii)} ({pii_rate:.1%} of requests) |",
-        *([f"| Personal health questions that reached the cloud | {len(by_kind['health'])} of "
+        *([f"| Personal health questions that reached the cloud {health_rule} | {len(by_kind['health'])} of "
            f"{sum(x.expect_local for x in asks)} |"] if any(x.expect_local for x in asks) else []),
         f"| Typed PII or identity stored in the DB or logs | "
         f"{sum(1 for f in findings if f.where in ('db', 'log'))} |",
