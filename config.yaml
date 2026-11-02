@@ -41,6 +41,12 @@ privacy:
              POSTAL_CODE, HEALTH_CARD, ID_NUMBER, DATE_OF_BIRTH, ADDRESS]   # E6 A5; age and sex are kept on purpose (they change medical answers, G1-95)
   local_only_types: [HEALTH_DETAIL]   # any of these -> cloud_safe = false
   health_detail_policy: local_only    # local_only | generalize (rewrite as a hypothetical question for the cloud)
+  # Beta (E6 v3: cloud exposure 18% -> 4%): the local model double-checks cloud-bound questions that mention a
+  # health topic; recommended on wherever the local model runs (PRIVACY__LLM_CHECK=true). Off here so that
+  # tests and CI, which have no local model, are not kept local by the fail-closed check.
+  llm_check: false
+  # Beta: also keep local any question with a name/number AND a health topic (stricter, costs answer quality)
+  local_if_identified_health_topic: false
   allow_list: [Abbas]                 # course staff names, never redacted (titles like Dr./Prof. are ignored)
   log_raw_text: false                 # must stay false
 

@@ -3,8 +3,7 @@ from app.core.schemas import PIIResult, RequestContext
 from app.pipeline.base import BaseStep
 from app.privacy.analyzer import PIIAnalyzer, resolve_overlaps
 from app.privacy.anonymizer import anonymize
-from app.privacy.llm_check import reveals_personal_health
-from app.privacy.policy import TOPIC_RE, identified_health_topic
+from app.privacy.policy import identified_health_topic
 from app.privacy.session_health import follow_up_findings, had_personal_health, refers_back
 
 
@@ -44,9 +43,6 @@ class PrivacyFilterStep(BaseStep):
         if (cloud_safe and self.cfg.local_if_identified_health_topic
                 and identified_health_topic(question, findings)):
             cloud_safe = False  # a named or numbered person together with a health topic
-        if (cloud_safe and self.cfg.llm_check and TOPIC_RE.search(question)
-                and await reveals_personal_health(self.services.understand_llm, sanitized)):
-            cloud_safe = False  # the local model found a personal health detail the rules missed
         ctx.pii = PIIResult(
             entities=entities,
             is_sensitive=bool(entities) or not cloud_safe,

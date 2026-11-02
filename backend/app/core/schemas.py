@@ -46,6 +46,7 @@ class PIIResult(BaseModel):
     is_sensitive: bool = False
     cloud_safe: bool = True  # False -> the request must stay local
     sanitized_text: str
+    llm_checked: bool = False  # the local model's check (privacy.llm_check) ran once for this request
 
 
 # ------------------------------------------------------------------- RAG / routing

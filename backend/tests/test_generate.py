@@ -158,3 +158,48 @@ async def test_generalize_rejects_a_personal_rewrite(services, rewrite):
     ctx = await GenerateStep(s).run(health_ctx())
     assert transport.calls == [] and ctx.answer == "local answer"
     assert ctx.warnings[0] == PRIVACY_BLOCK_WARNING
+
+
+# ------------------------------------------------------------- privacy.llm_check (Beta) at the cloud gate
+def llm_check_ctx(question: str) -> RequestContext:
+    ctx = RequestContext(request_id="r", target="cloud",
+                         request=AskRequest(student_id="s1", topic="asthma", question=question))
+    ctx.pii = PIIResult(sanitized_text=question.replace("300418277", "<STUDENT_ID_1>"), cloud_safe=True)
+    return ctx
+
+
+@pytest.mark.parametrize(("reply", "question", "cloud", "called"), [
+    ('{"personal_health": true}', "Is a cough at night a sign of asthma?", False, True),
+    ('{"personal_health": false}', "What triggers asthma attacks?", True, True),
+    (LLMError("timeout"), "What triggers asthma attacks?", False, True),  # fails closed
+    ("not json", "What triggers asthma attacks?", False, True),
+    ('{"personal_health": true}', "When is the quiz due?", True, False),  # no health topic: no call
+])
+async def test_llm_check_at_the_cloud_gate(use_config, reply, question, cloud, called):
+    s = build_services(use_config({"privacy": {"llm_check": True}}))
+    s.local_llm = FakeLLMClient("local answer", model="fake-local")
+    s.understand_llm = FakeLLMClient(reply)
+    s.cloud_llm = CloudClient(FakeLLMClient("cloud answer", model="gpt-test", backend="cloud"))
+    ctx = await GenerateStep(s).run(llm_check_ctx(question))
+    assert (ctx.llm.backend == "cloud") == cloud
+    assert bool(s.understand_llm.calls) == called
+    if not cloud:
+        assert PRIVACY_BLOCK_WARNING in ctx.warnings and ctx.cloud_request is None
+
+
+async def test_llm_check_sees_only_the_redacted_text_and_runs_once(use_config):
+    s = build_services(use_config({"privacy": {"llm_check": True}}))
+    s.understand_llm = FakeLLMClient('{"personal_health": false}')
+    s.cloud_llm = CloudClient(FakeLLMClient("cloud answer", model="gpt-test", backend="cloud"))
+    step, ctx = GenerateStep(s), llm_check_ctx("My student number is 300418277. What triggers asthma?")
+    await step.produce(ctx)
+    await step.produce(ctx, safety_retry=True)
+    assert len(s.understand_llm.calls) == 1 and "300418277" not in s.understand_llm.sent_text()
+
+
+async def test_llm_check_is_off_by_default(services):
+    s = services()
+    s.understand_llm = FakeLLMClient('{"personal_health": true}')
+    s.cloud_llm = CloudClient(FakeLLMClient("cloud answer", model="gpt-test", backend="cloud"))
+    ctx = await GenerateStep(s).run(make_ctx("cloud"))
+    assert ctx.llm.backend == "cloud" and s.understand_llm.calls == []

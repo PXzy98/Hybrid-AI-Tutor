@@ -19,7 +19,7 @@ BARE_PHONE_RE = re.compile(r"\b" + PHONE_WORD + r"\b[^.?!\n\d]{0,20}(?<!\d)((?:\
 LOCAL_PHONE_RE = re.compile(r"\b(?:" + PHONE_WORD[3:-1] + r"|reach)\b[^.?!\n\d]{0,25}"
                             r"(?<![\d-])(\d{3}[-. ]\d{4})"
                             r"(?![\d-]|[ .]\d)", re.I)
-DIGIT_WORD =r"(?:zero|oh|one|two|three|four|five|six|seven|eight|nine)"
+DIGIT_WORD = r"(?:zero|oh|one|two|three|four|five|six|seven|eight|nine)"
 SPELLED_RE = re.compile(r"\b" + DIGIT_WORD + r"(?:[\s,-]+" + DIGIT_WORD + r"){6,}\b", re.I)
 
 
