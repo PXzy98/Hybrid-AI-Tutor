@@ -326,6 +326,7 @@ BETA_PROTECTED = [
     ("my renal quiz score is 52/D, so worried", ["52/D"]),
     ("pharm midterm mark went down to 61.5, my fault", ["61.5"]),
     ("I measured my blood pressure at 13/85 this morning.", ["13/85"]),
+    ("My vision is 20/40 in the left eye. Is that normal?", ["20/40"]),  # not only BP (code review)
 ]
 BETA_GENERAL = [
     "What GPA do I need for the nursing program? Is 3.0 enough?",
