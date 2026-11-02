@@ -42,3 +42,22 @@ Rule changes made from the v1 misses (all general, none names a specific test me
 condition or vital sign ("my diabetes", "her asthma", "my uncle's pneumonia", "my blood pressure is spiking"),
 she/he as subjects, more symptom and medicine words, a course-word guard after a term ("the asthma section"),
 letter grades and GPAs without "I got". After that the rules were frozen and v2 was generated.
+
+## v3 (Beta upgrade, 2026-11-02): a clean test set after v2 was used for analysis
+
+The misses on v2 were read while planning the Beta upgrade, so v2 is no longer a clean test. The rules of the
+Beta upgrade were then developed on the main set and v1 only, and a new set was made **before** any filter
+was run on it:
+
+| Set | File | Written by | Labelled by |
+|---|---|---|---|
+| v3 | `holdout3.jsonl` (raw: `holdout3a_raw.jsonl`, `holdout3b_raw.jsonl`; labels: `labels3.txt`) | gemma4:26b (seed 63) and qwen3.8:27b (seed 64), 102 each, same 11 scenarios | hand, before the first run (frozen in commit "held-out v3") |
+
+- Two generators that wrote none of the earlier data (qwen3.5 wrote the question bank, gemma4:e4b v1 and v2),
+  through Ollama's own API with thinking off (`make_holdout.py --native`).
+- 204 messages: 186 positive, 18 negative, 114 personal health. `label_holdout.py` checks that every labelled
+  value occurs verbatim in its message.
+- Same conventions as above. Debatable labels are listed at the top of each batch in `labels3.txt`
+  (e.g. GE034 "Check 300112994 for diabetes trends" labelled personal; GE097 "if she has hypertension" not
+  personal; targets such as "he needs a 90% to pass" are not grades; staff names count as names).
+- The order of work: rules frozen on dev data → v3 generated and labelled → one run of every configuration.

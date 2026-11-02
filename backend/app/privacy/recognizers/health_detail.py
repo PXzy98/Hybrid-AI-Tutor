@@ -186,5 +186,7 @@ class HealthDetailRecognizer(EntityRecognizer):
                 spans.add((base + m.start(), base + m.end()))
             if FIRST_PERSON_RE.search(s) and not COURSEWORK_RE.search(s):
                 for m in READING_RE.finditer(s):
-                    spans.add((base + m.start(), base + m.end()))
+                    top, bottom = (int(x) for x in re.findall(r"\d+", m.group())[:2])
+                    if top > bottom:  # a blood pressure reading; "71/100" is a score
+                        spans.add((base + m.start(), base + m.end()))
         return [RecognizerResult("HEALTH_DETAIL", a, b, self.SCORE) for a, b in sorted(spans)]

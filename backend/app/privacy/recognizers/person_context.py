@@ -20,7 +20,9 @@ REL_NAME_RE = re.compile(r"\b(?i:my|our|his|her|their)\s+(?i:" + RELATION + r")\
 INTRO_RE = re.compile(r"\b(?i:student|person|someone|guy|girl|kid|patient|classmate|friend)\s+"
                       r"(?i:named|called|like)\s+" + NAME, re.U)
 # not "I'm X": "I'm Canadian", "I'm Worried" would look like names; the NER model handles "I'm Diego Sanchez"
-MY_NAME_RE = re.compile(r"\b(?i:my name is|my name's|name's|call me|this is)\s+"
+# also lower-case names after a name label or an abbreviated title: "name: diego", "dr. smith", "prof khan"
+# (not "doctor"/"professor": "the doctor said" is not a name)
+MY_NAME_RE = re.compile(r"\b(?i:my name is|my name's|name's|name\s*:|call me|this is|dr\.?|prof\.?)\s+"
                         r"([A-Za-z][\w'’-]+(?:\s+[A-Za-z][\w'’-]+)?)", re.U)
 SIGNOFF_RE = re.compile(r"(?:^|[.!?)]\s*|\n\s*|\s)(?:[-–—~]+\s*|(?i:thanks|thank you|thx|cheers|best|regards|"
                         r"sincerely|cordially)\s*[,!.]?\s*[-–—]?\s*)" + NAME + r"\s*[.!]?\s*$", re.U)
@@ -45,7 +47,8 @@ asthma diabetes migraine migraines pneumonia hypertension blood pressure covid f
 english french type tutor sir madam team everyone guys folks quick urgent help question
 ugh um uh oh hmm wow lol omg btw fyi so well wait oops yikes""".split())
 NOT_NAME_NEXT = re.compile(r"\s+(?:is|are|was|were|has|have|had|and|or|says|said|told|asked|thinks|"
-                           r"needs|wants|got|gets)\b", re.I)
+                           r"needs|wants|got|gets|prescribed|recommended|suggested|mentioned|explained|gave|"
+                           r"thinks|thought|at|from|in|on)\b", re.I)
 
 
 def _is_name(value: str, strict: bool = True) -> bool:
@@ -83,10 +86,13 @@ class PersonContextRecognizer(EntityRecognizer):
             two = value.split()
             if two and two[0].lower() in COMMON:
                 continue  # "I'm a student", "this is the question"
-            if len(two) == 2 and two[1].lower() in COMMON:
-                value = two[0]
+            if len(two) == 2 and (two[1].lower() in COMMON or NOT_NAME_NEXT.match(" " + two[1])):
+                value = two[0]  # "dr. kim said" -> "kim"
+            if re.match(r"(?i)(?:dr|prof)\b", m.group(0)) or re.search(r"['’]s$", two[0]):
+                # after a title, one word: "Dr. Abbas's slides" -> "Abbas"
+                value = re.sub(r"['’]s$", "", two[0])
             # after "my name is" lower-case names count; after "I'm" only capitalised ones ("I'm tired")
-            strict = not re.match(r"(?i)my name|name's|call me", m.group(0).strip())
+            strict = not re.match(r"(?i)my name|name's|name\s*:|call me|dr\b|prof\b", m.group(0).strip())
             if _is_name(value, strict=strict):
                 found.add((m.start(1), m.start(1) + len(value)))
         return [RecognizerResult("PERSON", a, b, self.SCORE) for a, b in sorted(found)]

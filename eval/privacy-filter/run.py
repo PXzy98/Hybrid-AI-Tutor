@@ -118,6 +118,19 @@ LLM_TYPE = {"name": "PERSON", "id": "ID_NUMBER", "contact": "EMAIL_ADDRESS", "gr
             "health": "HEALTH_DETAIL", "other": "OTHER"}
 
 
+def post_chat(http, url, body, tries=3):
+    """POST to Ollama with retries; None if the server keeps failing (callers decide how to fail)."""
+    import httpx
+    for _ in range(tries):
+        try:
+            r = http.post(url, json=body)
+            r.raise_for_status()
+            return r
+        except httpx.HTTPError:
+            time.sleep(5)
+    return None
+
+
 class LocalLLM:
     """Second pass by the local model on the sanitized text (what would be cloud-bound)."""
 
@@ -131,13 +144,14 @@ class LocalLLM:
         schema = {"type": "object", "properties": {"items": {"type": "array", "items": {
             "type": "object", "properties": {"text": {"type": "string"}, "type": {"type": "string"}},
             "required": ["text", "type"]}}}, "required": ["items"]}
-        r = self.http.post(f"{self.s.ollama_url}/api/chat", json={
+        r = post_chat(self.http, f"{self.s.ollama_url}/api/chat", {
             "model": self.s.llm.local.model, "stream": False, "think": False, "format": schema,
             "options": {"temperature": 0, "num_ctx": self.s.llm.local.num_ctx},
             "messages": [{"role": "user", "content": LLM_PROMPT + sanitized}]})
         try:
             items = json.loads(r.json()["message"]["content"]).get("items", [])
-        except (ValueError, KeyError):
+        except (ValueError, KeyError, AttributeError):  # AttributeError: no response (post_chat gave up)
+            SCRATCH["llm_failures"] = SCRATCH.get("llm_failures", 0) + 1
             items = []
         out = []
         for it in items:
@@ -169,13 +183,14 @@ class LocalLLMClassifier:
         sanitized, _, _ = anonymize(text, findings)
         schema = {"type": "object", "properties": {"personal_health": {"type": "boolean"}},
                   "required": ["personal_health"]}
-        r = self.http.post(f"{self.s.ollama_url}/api/chat", json={
+        r = post_chat(self.http, f"{self.s.ollama_url}/api/chat", {
             "model": self.s.llm.local.model, "stream": False, "think": False, "format": schema,
             "options": {"temperature": 0, "num_ctx": 2048},
             "messages": [{"role": "user", "content": CLASSIFY_PROMPT + sanitized}]})
         try:
             return bool(json.loads(r.json()["message"]["content"]).get("personal_health"))
-        except (ValueError, KeyError):
+        except (ValueError, KeyError, AttributeError):  # AttributeError: no response (post_chat gave up)
+            SCRATCH["llm_failures"] = SCRATCH.get("llm_failures", 0) + 1
             return True  # an unreadable answer keeps the question local (fail closed)
 
 
@@ -356,6 +371,8 @@ def main(argv=None) -> int:
         results[name] = run_config(name, det, cases)
         print(f"{name}: {time.perf_counter() - t0:.0f} s", file=sys.stderr)
     m = {k: metrics(v) for k, v in results.items()}
+    if SCRATCH.get("llm_failures"):
+        print(f"local model calls that failed: {SCRATCH['llm_failures']}", file=sys.stderr)
 
     ablation = {}
     if not a.smoke and not a.beta:

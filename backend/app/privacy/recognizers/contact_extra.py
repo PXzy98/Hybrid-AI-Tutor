@@ -15,7 +15,11 @@ DOT = r"(?:\s*[\[({<]\s*dot\s*[\])}>]\s*|\s+(?:dot|DOT)\s+)"
 OBFUSCATED_EMAIL_RE = re.compile(r"\b[\w.+-]+" + AT + r"[\w-]+(?:" + DOT + r"[\w-]+)+\b")
 PHONE_WORD = r"(?:phone|call|cell|mobile|text|number|tel|reach me|contact)"
 BARE_PHONE_RE = re.compile(r"\b" + PHONE_WORD + r"\b[^.?!\n\d]{0,20}(?<!\d)((?:\+?1)?\d{10})(?!\d)", re.I)
-DIGIT_WORD = r"(?:zero|oh|one|two|three|four|five|six|seven|eight|nine)"
+# a local seven-digit number next to a phone word: "can i reach dr. smith at 555-0123", "text me: 555 0199"
+LOCAL_PHONE_RE = re.compile(r"\b(?:" + PHONE_WORD[3:-1] + r"|reach)\b[^.?!\n\d]{0,25}"
+                            r"(?<![\d-])(\d{3}[-. ]\d{4})"
+                            r"(?![\d-]|[ .]\d)", re.I)
+DIGIT_WORD =r"(?:zero|oh|one|two|three|four|five|six|seven|eight|nine)"
 SPELLED_RE = re.compile(r"\b" + DIGIT_WORD + r"(?:[\s,-]+" + DIGIT_WORD + r"){6,}\b", re.I)
 
 
@@ -33,4 +37,6 @@ class ContactExtraRecognizer(EntityRecognizer):
         out += [RecognizerResult("PHONE_NUMBER", m.start(1), m.end(1), 0.8)
                 for m in BARE_PHONE_RE.finditer(text)]
         out += [RecognizerResult("PHONE_NUMBER", m.start(), m.end(), 0.7) for m in SPELLED_RE.finditer(text)]
+        out += [RecognizerResult("PHONE_NUMBER", m.start(1), m.end(1), 0.7)
+                for m in LOCAL_PHONE_RE.finditer(text)]
         return out

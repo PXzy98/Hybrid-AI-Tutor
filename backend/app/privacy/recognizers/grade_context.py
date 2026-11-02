@@ -41,6 +41,14 @@ ON_WORK_BARE_RE = re.compile(r"\b(?i:a|an|was|is|got|scored|only|just)\s+(\d{1,3
 WITH_RE = re.compile(r"(?i:bombed|aced|failed|passed|finished|did)\s+(?:the|my|this|that)\s+(?:\w+\s+)?"
                      r"(?i:midterm|final|exam|quiz|test|assignment|essay|lab|paper|project)\s+(?i:with)\s+"
                      r"(?:(?i:a|an|only|just)\s+)?(" + VALUE + r"|\d{1,3})\b", re.U)
+# a value right after a possessive: "my 88/100 on the quiz", "improve my C-", "her 72%"
+MY_VALUE_RE = re.compile(r"\b(?i:my|his|her|their)\s+(" + VALUE + r")", re.U)
+# a grade label with its value: "Score of 88%", "grade: B+", "grade 78". A bare number counts only from 40 to
+# 100 in a first-person message or next to a student number: "grade 3 hypertension" is a medical grading
+LABEL_VALUE_RE = re.compile(r"\b(?i:score|grade|mark|result)\s*(?i:of|is|was|=|:)?\s*"
+                            r"(" + VALUE + r"|\d{2,3})(?!\d)",
+                            re.U)
+PERSONAL_RE = re.compile(r"\b(?:I|I'm|my|me)\b|\b\d{9}\b", re.I)
 SENTENCE_RE = re.compile(r"(?:[^.?!\n]|\.(?=\d))+(?:[.?!]+|$)")  # "2.8" does not end a sentence
 NEAR = 90  # characters from the grade word to the value
 OWN_GRADE_RE = re.compile(r"\b(?:(?i:my|his|her|their|our)|[A-Z][a-z]+(?:'s|’s))\s+(?:[\w-]+\s+){0,2}?"
@@ -62,6 +70,13 @@ class GradeContextRecognizer(EntityRecognizer):
         for rx in (SUBJECT_VALUE_RE, POSSESSIVE_GRADE_RE, ON_WORK_RE, ON_WORK_BARE_RE, WITH_RE):
             for m in rx.finditer(text):
                 found.add((m.start(1), m.end(1)))
+        for m in MY_VALUE_RE.finditer(text):
+            found.add((m.start(1), m.end(1)))
+        if PERSONAL_RE.search(text):
+            for m in LABEL_VALUE_RE.finditer(text):
+                v = m.group(1)
+                if not v.isdigit() or 40 <= int(v) <= 100:
+                    found.add((m.start(1), m.end(1)))
         sentences = list(SENTENCE_RE.finditer(text))
         for i, sent in enumerate(sentences):
             prev = sentences[i - 1] if i else None

@@ -314,6 +314,13 @@ BETA_PROTECTED = [
     ("Write to me: lee.wong AT gmail DOT com", ["lee.wong AT gmail DOT com"]),
     ("my number is six one three five five five zero one four two",
      ["six one three five five five zero one four two"]),
+    # round 2: bare grades, lower-case names after a label or title, local phone numbers
+    ("Could you look at my 71/100 from the lab?", ["71/100"]),
+    ("How do I raise my D+ before finals?", ["D+"]),
+    ("Result: 64% for student 300551234.", ["64%", "300551234"]),
+    ("name: tomas, cell 613-555-0101", ["tomas", "613-555-0101"]),
+    ("please ask prof nguyen about the asthma slides", ["nguyen"]),
+    ("text me at 555-0142 after class", ["555-0142"]),
 ]
 BETA_GENERAL = [
     "What GPA do I need for the nursing program? Is 3.0 enough?",
@@ -327,6 +334,11 @@ BETA_GENERAL = [
     "Can you explain this migraine case study from the lecture?",
     "Which medications lower blood pressure the fastest?",
     "Group: Tom Becker",  # only the name, not "Group"
+    "Is grade 3 hypertension an emergency?",
+    "What does a Glasgow score of 8 mean for a patient?",
+    "Explain Charcot triad in cholangitis.",
+    "The room is 555-0142 on floor two.",
+    "the doctor prescribed rest for the patient in the case study",
 ]
 
 
