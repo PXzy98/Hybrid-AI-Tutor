@@ -26,12 +26,22 @@ def make_ctx(cloud_safe=True, **kw) -> RequestContext:
     [(0.0, True, "local"), (0.6, True, "cloud"), (0.9, True, "cloud"), (0.9, False, "local")],
 )
 async def test_route_threshold_and_force_local(use_config, stub_score, cloud_safe, target):
-    services = build_services(use_config({"routing": {"stub_score": stub_score}}))
+    services = build_services(use_config({"routing": {"stub_score": stub_score},
+                                          "privacy": {"health_detail_policy": "local_only"}}))
     ctx = await RouteStep(services).run(make_ctx(cloud_safe=cloud_safe))
     assert ctx.target == target
     assert ctx.route.score == stub_score
     if not cloud_safe and stub_score >= 0.6:
         assert "forced local: not cloud_safe" in ctx.route.reasons
+
+
+async def test_generalize_lets_the_cloud_gate_decide(use_config):
+    """With health_detail_policy=generalize the stub router does not force local: the cloud gate rewrites the
+    question or keeps it local."""
+    services = build_services(use_config({"routing": {"stub_score": 0.9},
+                                          "privacy": {"health_detail_policy": "generalize"}}))
+    ctx = await RouteStep(services).run(make_ctx(cloud_safe=False))
+    assert ctx.target == "cloud"
 
 
 async def test_force_local_can_be_disabled(use_config):

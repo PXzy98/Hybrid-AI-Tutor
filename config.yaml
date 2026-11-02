@@ -40,7 +40,7 @@ privacy:
   entities: [PERSON, EMAIL_ADDRESS, PHONE_NUMBER, STUDENT_ID, GRADE, HEALTH_DETAIL,
              POSTAL_CODE, HEALTH_CARD, ID_NUMBER, DATE_OF_BIRTH, ADDRESS]   # E6 A5; age and sex are kept on purpose (they change medical answers, G1-95)
   local_only_types: [HEALTH_DETAIL]   # any of these -> cloud_safe = false
-  health_detail_policy: local_only    # local_only | generalize (rewrite as a hypothetical question for the cloud)
+  health_detail_policy: generalize    # local_only | generalize: hypothetical rewrite for the cloud (approved by the professor, 20 Oct 2026)
   # Beta (E6 v4: cloud exposure 15.8% -> 2.7%): the local model double-checks cloud-bound questions that mention a
   # health topic; recommended on wherever the local model runs (PRIVACY__LLM_CHECK=true). Off here so that
   # tests and CI, which have no local model, are not kept local by the fail-closed check.

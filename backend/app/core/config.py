@@ -80,8 +80,9 @@ class PrivacyConfig(Section):
     entities: list[str] = ["PERSON", "EMAIL_ADDRESS", "PHONE_NUMBER", "STUDENT_ID", "GRADE", "HEALTH_DETAIL",
                            "POSTAL_CODE", "HEALTH_CARD", "ID_NUMBER", "DATE_OF_BIRTH", "ADDRESS"]
     local_only_types: list[str] = ["HEALTH_DETAIL"]
-    # a question with a local-only finding (a personal health detail): answer it locally (default), or let the
-    # local model rewrite it as a general question about a hypothetical person and send only that rewrite
+    # a question with a local-only finding (a personal health detail): answer it locally (the code default, a
+    # safe fallback), or let the local model rewrite it as a general question about a hypothetical person and
+    # send only that rewrite (config.yaml: generalize since 20 Oct 2026, approved by the professor)
     health_detail_policy: Literal["local_only", "generalize"] = "local_only"
     # Beta: also keep local a question that identifies someone (name, student number, contact) AND mentions a
     # health topic, even if no personal health detail was found (app/privacy/policy.py; measured in E6)

@@ -101,7 +101,8 @@ def test_privacy_filter_failure_is_503_without_question(student_client, monkeypa
 def test_cloud_score_with_fixture_rag(make_client):
     from tests.conftest import Api
 
-    with make_client({"routing": {"stub_score": 1.0}, "rag": {"impl": "fixture"}}) as client:
+    with make_client({"routing": {"stub_score": 1.0}, "rag": {"impl": "fixture"},
+                      "privacy": {"health_detail_policy": "local_only"}}) as client:
         api = Api(client)
         api.make_student()
         api.login("alice")
