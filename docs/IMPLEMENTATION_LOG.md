@@ -1129,3 +1129,8 @@ models not used before, hand-labelled and frozen before their only run (v3 after
 v4 (final): cloud exposure 22.8% (main before) -> 15.8% (rules) -> 2.7% (rules + LLM check); personal health
 kept local 75.6% -> 82.4% -> 99.2%; over-redaction 10% -> 5%. Details and known gaps:
 `eval/privacy-filter/results/beta.md`. Tests: 591 backend tests pass.
+
+Round 3 (same day): lower-case sign-offs and "x here" names, "subject score is X" grades, more eponym nouns, a BP
+reading typo. Final test v5 (gemma4:12b + nemotron-cascade-2, labelled before its only run): cloud exposure 8.0%
+(main before) -> 6.1% (rules) -> 1.8% (rules + LLM check); personal health kept local 90.6% -> 92.9% -> 98.4%.
+No regression on the main set or v1-v4. 599 backend tests pass.

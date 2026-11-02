@@ -69,3 +69,9 @@ made the same way: gemma4:31b (seed 65) and qwen3.5:35b (seed 66), 102 each, han
 before any run, frozen in its own commit, then run once. 204 messages: 184 positive, 20 negative, 131 personal
 health. The qwen batch wrote 13 ten-digit "student numbers"; they are labelled as student numbers. Results:
 `results/beta.md`.
+
+## v5 (round 3 of the Beta upgrade): the final test
+
+Round 3 fixed general gaps seen on v4 (so v4 is "seen" for round 3). v5: gemma4:12b (seed 67) and
+nemotron-cascade-2 (seed 68), 102 + 100 messages, hand-labelled in `labels5.txt` before any run, frozen in its own
+commit, then run once. 202 messages: 163 positive, 39 negative, 127 personal health. Results: `results/beta.md`.

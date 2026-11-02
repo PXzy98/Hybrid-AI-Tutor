@@ -13,6 +13,7 @@ over-redaction of questions without PII.
 | v2 (102) | **seen**: its misses were read while planning | reported, not a clean test |
 | v3 (204, gemma4:26b + qwen3.8:27b) | clean test of round 1 | generated and hand-labelled after the round-1 rules were frozen, run once |
 | v4 (204, gemma4:31b + qwen3.5:35b) | clean test of round 2 | generated and hand-labelled after the round-2 rules were frozen, run once |
+| v5 (202, gemma4:12b + nemotron-cascade-2) | clean test of round 3 (final) | generated and hand-labelled after the round-3 rules were frozen, run once |
 
 Round 2 fixed general gaps seen on v3 (bare grades, lower-case names after a title or label, local phone
 numbers, eponym triads), so v3 is "seen" for round 2 and v4 is its test. Labels: `labels3.txt`, `labels4.txt`
@@ -30,7 +31,32 @@ numbers, eponym triads), so v3 is "seen" for round 2 and v4 is its test. Labels:
 - `a4_rules_llm`: + the local model listing leftover PII (extraction, every question).
 - `b4_gliner_ids`: + GLiNER restricted to names, numbers and contacts.
 
-## v4: clean test of round 2 (final)
+## v5: clean test of round 3 (final)
+
+Round 3 fixed general gaps seen on v4 (lower-case sign-offs and "x here", "subject score is X" grades, more
+eponym nouns, a BP reading typo), checked for regressions on the main set and v1-v4 (no set got worse). v5 was then
+written by gemma4:12b and nemotron-cascade-2, hand-labelled in `labels5.txt` and run once. v5 is easier than v4
+(the old filter already leaked less), so compare rows within the table, not across sets.
+
+| Configuration | Exposure: any PII | identifier | personal health | Personal health kept local | General left cloud-eligible | Over-redaction | p95 latency |
+|---|---|---|---|---|---|---|---|
+| main before Beta | 8.0% | 0.0% | 7.4% | 90.6% | 92.0% | 15.4% | ~10 ms |
+| **round-3 rules** (`a5_rules`) | 6.1% | 0.0% | 5.5% | 92.9% | 89.3% | 12.8% | 12 ms |
+| + policy (`b1`) | 3.7% | 0.0% | 3.1% | 96.1% | 53.3% | 12.8% | 11 ms |
+| **+ LLM check (`b2`)** | **1.8%** | 0.0% | **1.2%** | **98.4%** | 76.0% | 12.8% | 1.4 s |
+| + policy + LLM (`b3`) | 1.2% | 0.0% | 0.6% | 99.2% | 50.7% | 12.8% | 1.4 s |
+| + LLM extraction (`a4`) | 3.7% | 0.0% | 3.1% | 96.1% | 84.0% | 23.1% | 4.5 s (every question) |
+| + GLiNER ids (`b4`) | 6.1% | 0.0% | 5.5% | 92.9% | 89.3% | 43.6% | 107 ms |
+
+Round-3 rules on the seen sets (no regressions): v3 exposure 18.3% (round 1) -> 15.6%, over-redaction 11.1% -> 0%;
+v4 15.8% (round 2) -> 14.7%, over-redaction 5% -> 0%.
+
+Over-redaction left on v5 (5 of 39 negatives): questions about a hypothetical person whose vitals are named
+("a patient with pneumonia ... their oxygen levels", "someone has a migraine", "a patient with a blood pressure of
+150/95", "is 130 over 80 a good bp reading"), and "i got pneumonia vaccine". These over-redact (and keep the
+question local) but leak nothing. A rule for hypothetical subjects is the next step; it needs a v6 to measure.
+
+## v4: clean test of round 2
 
 | Configuration | Exposure: any PII | identifier | personal health | Personal health kept local | General left cloud-eligible | Over-redaction | p95 latency |
 |---|---|---|---|---|---|---|---|
