@@ -1,0 +1,263 @@
+{
+ "configs": {
+  "a5_rules": {
+   "per_type": {
+    "PERSON": [
+     50,
+     52
+    ],
+    "STUDENT_ID": [
+     45,
+     45
+    ],
+    "EMAIL_ADDRESS": [
+     10,
+     10
+    ],
+    "PHONE_NUMBER": [
+     16,
+     16
+    ],
+    "GRADE": [
+     9,
+     9
+    ],
+    "HEALTH_DETAIL": [
+     76,
+     82
+    ]
+   },
+   "recall_min": 0.926829268292683,
+   "leak_rate": 0.0898876404494382,
+   "leak_hard": 0,
+   "leak_french": 0,
+   "leak_multiturn": 0,
+   "over_redaction": 0.0,
+   "keep_broken": 0,
+   "health_sensitivity": 0.9516129032258065,
+   "health_specificity": 1.0,
+   "restore_ok": 1.0,
+   "oos": {},
+   "oos_caught": 0,
+   "oos_total": 0,
+   "latency_p50_ms": 7.5585999875329435,
+   "latency_p95_ms": 11.22159999795258
+  },
+  "b1_policy": {
+   "per_type": {
+    "PERSON": [
+     50,
+     52
+    ],
+    "STUDENT_ID": [
+     45,
+     45
+    ],
+    "EMAIL_ADDRESS": [
+     10,
+     10
+    ],
+    "PHONE_NUMBER": [
+     16,
+     16
+    ],
+    "GRADE": [
+     9,
+     9
+    ],
+    "HEALTH_DETAIL": [
+     76,
+     82
+    ]
+   },
+   "recall_min": 0.926829268292683,
+   "leak_rate": 0.0898876404494382,
+   "leak_hard": 0,
+   "leak_french": 0,
+   "leak_multiturn": 0,
+   "over_redaction": 0.0,
+   "keep_broken": 0,
+   "health_sensitivity": 1.0,
+   "health_specificity": 0.375,
+   "restore_ok": 1.0,
+   "oos": {},
+   "oos_caught": 0,
+   "oos_total": 0,
+   "latency_p50_ms": 7.350450003286824,
+   "latency_p95_ms": 8.976000011898577
+  },
+  "b2_llm_classify": {
+   "per_type": {
+    "PERSON": [
+     50,
+     52
+    ],
+    "STUDENT_ID": [
+     45,
+     45
+    ],
+    "EMAIL_ADDRESS": [
+     10,
+     10
+    ],
+    "PHONE_NUMBER": [
+     16,
+     16
+    ],
+    "GRADE": [
+     9,
+     9
+    ],
+    "HEALTH_DETAIL": [
+     76,
+     82
+    ]
+   },
+   "recall_min": 0.926829268292683,
+   "leak_rate": 0.0898876404494382,
+   "leak_hard": 0,
+   "leak_french": 0,
+   "leak_multiturn": 0,
+   "over_redaction": 0.0,
+   "keep_broken": 0,
+   "health_sensitivity": 1.0,
+   "health_specificity": 0.8,
+   "restore_ok": 1.0,
+   "oos": {},
+   "oos_caught": 0,
+   "oos_total": 0,
+   "latency_p50_ms": 8.716049997019581,
+   "latency_p95_ms": 1436.9555999874137
+  },
+  "b3_policy_llm": {
+   "per_type": {
+    "PERSON": [
+     50,
+     52
+    ],
+    "STUDENT_ID": [
+     45,
+     45
+    ],
+    "EMAIL_ADDRESS": [
+     10,
+     10
+    ],
+    "PHONE_NUMBER": [
+     16,
+     16
+    ],
+    "GRADE": [
+     9,
+     9
+    ],
+    "HEALTH_DETAIL": [
+     76,
+     82
+    ]
+   },
+   "recall_min": 0.926829268292683,
+   "leak_rate": 0.0898876404494382,
+   "leak_hard": 0,
+   "leak_french": 0,
+   "leak_multiturn": 0,
+   "over_redaction": 0.0,
+   "keep_broken": 0,
+   "health_sensitivity": 1.0,
+   "health_specificity": 0.375,
+   "restore_ok": 1.0,
+   "oos": {},
+   "oos_caught": 0,
+   "oos_total": 0,
+   "latency_p50_ms": 7.597899995744228,
+   "latency_p95_ms": 1430.4374000057578
+  },
+  "a4_rules_llm": {
+   "per_type": {
+    "PERSON": [
+     51,
+     52
+    ],
+    "STUDENT_ID": [
+     45,
+     45
+    ],
+    "EMAIL_ADDRESS": [
+     10,
+     10
+    ],
+    "PHONE_NUMBER": [
+     16,
+     16
+    ],
+    "GRADE": [
+     9,
+     9
+    ],
+    "HEALTH_DETAIL": [
+     78,
+     82
+    ]
+   },
+   "recall_min": 0.9512195121951219,
+   "leak_rate": 0.056179775280898875,
+   "leak_hard": 0,
+   "leak_french": 0,
+   "leak_multiturn": 0,
+   "over_redaction": 0.07692307692307693,
+   "keep_broken": 0,
+   "health_sensitivity": 0.967741935483871,
+   "health_specificity": 0.975,
+   "restore_ok": 1.0,
+   "oos": {},
+   "oos_caught": 0,
+   "oos_total": 0,
+   "latency_p50_ms": 2023.9055999991251,
+   "latency_p95_ms": 2891.76630001748
+  },
+  "b4_gliner_ids": {
+   "per_type": {
+    "PERSON": [
+     52,
+     52
+    ],
+    "STUDENT_ID": [
+     45,
+     45
+    ],
+    "EMAIL_ADDRESS": [
+     10,
+     10
+    ],
+    "PHONE_NUMBER": [
+     16,
+     16
+    ],
+    "GRADE": [
+     9,
+     9
+    ],
+    "HEALTH_DETAIL": [
+     77,
+     82
+    ]
+   },
+   "recall_min": 0.9390243902439024,
+   "leak_rate": 0.056179775280898875,
+   "leak_hard": 0,
+   "leak_french": 0,
+   "leak_multiturn": 0,
+   "over_redaction": 0.23076923076923078,
+   "keep_broken": 0,
+   "health_sensitivity": 0.9516129032258065,
+   "health_specificity": 1.0,
+   "restore_ok": 1.0,
+   "oos": {},
+   "oos_caught": 0,
+   "oos_total": 0,
+   "latency_p50_ms": 90.47799999825656,
+   "latency_p95_ms": 105.89949999121018
+  }
+ },
+ "ablation": {}
+}

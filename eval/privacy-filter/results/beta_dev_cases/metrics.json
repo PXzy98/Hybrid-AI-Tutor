@@ -1,0 +1,581 @@
+{
+ "configs": {
+  "a5_rules": {
+   "per_type": {
+    "PERSON": [
+     76,
+     76
+    ],
+    "STUDENT_ID": [
+     46,
+     46
+    ],
+    "EMAIL_ADDRESS": [
+     30,
+     30
+    ],
+    "PHONE_NUMBER": [
+     20,
+     20
+    ],
+    "GRADE": [
+     30,
+     30
+    ],
+    "HEALTH_DETAIL": [
+     46,
+     46
+    ]
+   },
+   "recall_min": 1.0,
+   "leak_rate": 0.0,
+   "leak_hard": 0.06666666666666667,
+   "leak_french": 0.0,
+   "leak_multiturn": 0.15384615384615385,
+   "over_redaction": 0.0,
+   "keep_broken": 0,
+   "health_sensitivity": 0.9508196721311475,
+   "health_specificity": 0.9969230769230769,
+   "restore_ok": 1.0,
+   "oos": {
+    "address": [
+     2,
+     2
+    ],
+    "date_of_birth": [
+     2,
+     2
+    ],
+    "health_card": [
+     2,
+     2
+    ],
+    "postal_code": [
+     2,
+     2
+    ],
+    "age": [
+     0,
+     2
+    ],
+    "sin": [
+     1,
+     1
+    ],
+    "workplace": [
+     0,
+     1
+    ],
+    "school": [
+     0,
+     1
+    ],
+    "social_handle": [
+     0,
+     1
+    ],
+    "url": [
+     0,
+     1
+    ],
+    "license_plate": [
+     0,
+     1
+    ],
+    "ip_address": [
+     0,
+     1
+    ],
+    "clinic_mrn": [
+     1,
+     1
+    ]
+   },
+   "oos_caught": 10,
+   "oos_total": 18,
+   "latency_p50_ms": 4.910949995974079,
+   "latency_p95_ms": 6.906599999638274
+  },
+  "b1_policy": {
+   "per_type": {
+    "PERSON": [
+     76,
+     76
+    ],
+    "STUDENT_ID": [
+     46,
+     46
+    ],
+    "EMAIL_ADDRESS": [
+     30,
+     30
+    ],
+    "PHONE_NUMBER": [
+     20,
+     20
+    ],
+    "GRADE": [
+     30,
+     30
+    ],
+    "HEALTH_DETAIL": [
+     46,
+     46
+    ]
+   },
+   "recall_min": 1.0,
+   "leak_rate": 0.0,
+   "leak_hard": 0.06666666666666667,
+   "leak_french": 0.0,
+   "leak_multiturn": 0.15384615384615385,
+   "over_redaction": 0.0,
+   "keep_broken": 0,
+   "health_sensitivity": 0.9508196721311475,
+   "health_specificity": 0.7476923076923077,
+   "restore_ok": 1.0,
+   "oos": {
+    "address": [
+     2,
+     2
+    ],
+    "date_of_birth": [
+     2,
+     2
+    ],
+    "health_card": [
+     2,
+     2
+    ],
+    "postal_code": [
+     2,
+     2
+    ],
+    "age": [
+     0,
+     2
+    ],
+    "sin": [
+     1,
+     1
+    ],
+    "workplace": [
+     0,
+     1
+    ],
+    "school": [
+     0,
+     1
+    ],
+    "social_handle": [
+     0,
+     1
+    ],
+    "url": [
+     0,
+     1
+    ],
+    "license_plate": [
+     0,
+     1
+    ],
+    "ip_address": [
+     0,
+     1
+    ],
+    "clinic_mrn": [
+     1,
+     1
+    ]
+   },
+   "oos_caught": 10,
+   "oos_total": 18,
+   "latency_p50_ms": 4.677599994465709,
+   "latency_p95_ms": 6.38279999839142
+  },
+  "b2_llm_classify": {
+   "per_type": {
+    "PERSON": [
+     76,
+     76
+    ],
+    "STUDENT_ID": [
+     46,
+     46
+    ],
+    "EMAIL_ADDRESS": [
+     30,
+     30
+    ],
+    "PHONE_NUMBER": [
+     20,
+     20
+    ],
+    "GRADE": [
+     30,
+     30
+    ],
+    "HEALTH_DETAIL": [
+     46,
+     46
+    ]
+   },
+   "recall_min": 1.0,
+   "leak_rate": 0.0,
+   "leak_hard": 0.06666666666666667,
+   "leak_french": 0.0,
+   "leak_multiturn": 0.15384615384615385,
+   "over_redaction": 0.0,
+   "keep_broken": 0,
+   "health_sensitivity": 0.9836065573770492,
+   "health_specificity": 0.9784615384615385,
+   "restore_ok": 1.0,
+   "oos": {
+    "address": [
+     2,
+     2
+    ],
+    "date_of_birth": [
+     2,
+     2
+    ],
+    "health_card": [
+     2,
+     2
+    ],
+    "postal_code": [
+     2,
+     2
+    ],
+    "age": [
+     0,
+     2
+    ],
+    "sin": [
+     1,
+     1
+    ],
+    "workplace": [
+     0,
+     1
+    ],
+    "school": [
+     0,
+     1
+    ],
+    "social_handle": [
+     0,
+     1
+    ],
+    "url": [
+     0,
+     1
+    ],
+    "license_plate": [
+     0,
+     1
+    ],
+    "ip_address": [
+     0,
+     1
+    ],
+    "clinic_mrn": [
+     1,
+     1
+    ]
+   },
+   "oos_caught": 10,
+   "oos_total": 18,
+   "latency_p50_ms": 6.371199997374788,
+   "latency_p95_ms": 1437.8691999881994
+  },
+  "b3_policy_llm": {
+   "per_type": {
+    "PERSON": [
+     76,
+     76
+    ],
+    "STUDENT_ID": [
+     46,
+     46
+    ],
+    "EMAIL_ADDRESS": [
+     30,
+     30
+    ],
+    "PHONE_NUMBER": [
+     20,
+     20
+    ],
+    "GRADE": [
+     30,
+     30
+    ],
+    "HEALTH_DETAIL": [
+     46,
+     46
+    ]
+   },
+   "recall_min": 1.0,
+   "leak_rate": 0.0,
+   "leak_hard": 0.06666666666666667,
+   "leak_french": 0.0,
+   "leak_multiturn": 0.15384615384615385,
+   "over_redaction": 0.0,
+   "keep_broken": 0,
+   "health_sensitivity": 0.9836065573770492,
+   "health_specificity": 0.7476923076923077,
+   "restore_ok": 1.0,
+   "oos": {
+    "address": [
+     2,
+     2
+    ],
+    "date_of_birth": [
+     2,
+     2
+    ],
+    "health_card": [
+     2,
+     2
+    ],
+    "postal_code": [
+     2,
+     2
+    ],
+    "age": [
+     0,
+     2
+    ],
+    "sin": [
+     1,
+     1
+    ],
+    "workplace": [
+     0,
+     1
+    ],
+    "school": [
+     0,
+     1
+    ],
+    "social_handle": [
+     0,
+     1
+    ],
+    "url": [
+     0,
+     1
+    ],
+    "license_plate": [
+     0,
+     1
+    ],
+    "ip_address": [
+     0,
+     1
+    ],
+    "clinic_mrn": [
+     1,
+     1
+    ]
+   },
+   "oos_caught": 10,
+   "oos_total": 18,
+   "latency_p50_ms": 5.256650008959696,
+   "latency_p95_ms": 1248.3704999904148
+  },
+  "a4_rules_llm": {
+   "per_type": {
+    "PERSON": [
+     76,
+     76
+    ],
+    "STUDENT_ID": [
+     46,
+     46
+    ],
+    "EMAIL_ADDRESS": [
+     30,
+     30
+    ],
+    "PHONE_NUMBER": [
+     20,
+     20
+    ],
+    "GRADE": [
+     30,
+     30
+    ],
+    "HEALTH_DETAIL": [
+     46,
+     46
+    ]
+   },
+   "recall_min": 1.0,
+   "leak_rate": 0.0,
+   "leak_hard": 0.06666666666666667,
+   "leak_french": 0.0,
+   "leak_multiturn": 0.07692307692307693,
+   "over_redaction": 0.03571428571428571,
+   "keep_broken": 4,
+   "health_sensitivity": 0.9672131147540983,
+   "health_specificity": 0.9784615384615385,
+   "restore_ok": 1.0,
+   "oos": {
+    "address": [
+     2,
+     2
+    ],
+    "date_of_birth": [
+     2,
+     2
+    ],
+    "health_card": [
+     2,
+     2
+    ],
+    "postal_code": [
+     2,
+     2
+    ],
+    "age": [
+     0,
+     2
+    ],
+    "sin": [
+     1,
+     1
+    ],
+    "workplace": [
+     0,
+     1
+    ],
+    "school": [
+     0,
+     1
+    ],
+    "social_handle": [
+     1,
+     1
+    ],
+    "url": [
+     1,
+     1
+    ],
+    "license_plate": [
+     1,
+     1
+    ],
+    "ip_address": [
+     1,
+     1
+    ],
+    "clinic_mrn": [
+     1,
+     1
+    ]
+   },
+   "oos_caught": 14,
+   "oos_total": 18,
+   "latency_p50_ms": 1448.127800002112,
+   "latency_p95_ms": 2423.1524000060745
+  },
+  "b4_gliner_ids": {
+   "per_type": {
+    "PERSON": [
+     76,
+     76
+    ],
+    "STUDENT_ID": [
+     46,
+     46
+    ],
+    "EMAIL_ADDRESS": [
+     30,
+     30
+    ],
+    "PHONE_NUMBER": [
+     20,
+     20
+    ],
+    "GRADE": [
+     30,
+     30
+    ],
+    "HEALTH_DETAIL": [
+     46,
+     46
+    ]
+   },
+   "recall_min": 1.0,
+   "leak_rate": 0.0,
+   "leak_hard": 0.03333333333333333,
+   "leak_french": 0.0,
+   "leak_multiturn": 0.07692307692307693,
+   "over_redaction": 0.044642857142857144,
+   "keep_broken": 4,
+   "health_sensitivity": 0.9508196721311475,
+   "health_specificity": 0.9969230769230769,
+   "restore_ok": 1.0,
+   "oos": {
+    "address": [
+     2,
+     2
+    ],
+    "date_of_birth": [
+     2,
+     2
+    ],
+    "health_card": [
+     2,
+     2
+    ],
+    "postal_code": [
+     2,
+     2
+    ],
+    "age": [
+     0,
+     2
+    ],
+    "sin": [
+     1,
+     1
+    ],
+    "workplace": [
+     0,
+     1
+    ],
+    "school": [
+     0,
+     1
+    ],
+    "social_handle": [
+     1,
+     1
+    ],
+    "url": [
+     0,
+     1
+    ],
+    "license_plate": [
+     0,
+     1
+    ],
+    "ip_address": [
+     0,
+     1
+    ],
+    "clinic_mrn": [
+     1,
+     1
+    ]
+   },
+   "oos_caught": 11,
+   "oos_total": 18,
+   "latency_p50_ms": 78.36235000286251,
+   "latency_p95_ms": 92.5328999874182
+  }
+ },
+ "ablation": {}
+}

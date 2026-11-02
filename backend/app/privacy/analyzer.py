@@ -100,12 +100,18 @@ class PIIAnalyzer:
 
 _EPONYM_NOUNS = {"score", "scores", "kappa", "test", "index", "coefficient", "theorem", "rule", "law",
                  "method", "distribution", "correlation", "criterion", "criteria", "curve", "plot", "disease",
-                 "syndrome", "sign", "scale", "equation", "formula", "algorithm", "statistic", "ratio",
+                 "syndrome", "sign", "scale", "triad", "tetrad", "pentad", "procedure", "equation", "formula",
+                 "algorithm", "statistic", "ratio",
                  "classification",
                  "unit", "units", "optimizer", "optimiser", "j", "estimator", "model", "network", "loss",
-                 "thyroiditis", "effect", "principle", "reflex", "maneuver", "manoeuvre", "phenomenon"}  # E6
+                 "thyroiditis", "effect", "principle", "reflex", "maneuver", "manoeuvre", "phenomenon",
+                 "point", "triangle", "node", "nodes", "canal", "duct", "loop", "space"}  # E6
 _NEXT_WORD = re.compile(r"(?:'s|’s|')?\s+([A-Za-z]+)")
 _NAME_WORD = re.compile(r"[A-ZÀ-ÖØ-Ý][\w'’-]+")
+_HERE_AFTER = re.compile(r"\s+here\b", re.I)
+_DASH_BEFORE = re.compile(r"[-–—~]\s*$")
+_TITLE_LEAD = re.compile(r"(?i)(?:dr|prof|professor|mr|mrs|ms)\.?\s+")
+_NAME_LABEL = re.compile(r"(?i)\b(?:my name is|my name's|name's|name\s*:|call me|dr\.?|prof\.?)\s*$")
 # French function words that English NER sometimes glues to a name or tags as one ("J'ai de l'asthme")
 _FR_LEAD = re.compile(r"(?i)(?:je m['’]appelle|j['’]ai(?:\s+(?:de|du|des|eu)(?:\s+l['’])?)?|je suis|c['’]est|"
                       r"je|mon|ma|mes|qu['’]est-ce que|l['’])\s*")
@@ -136,7 +142,15 @@ def clean_person(text: str, f: Finding) -> Finding | None:
     if any("一" <= ch <= "鿿" for ch in value):
         return f  # Chinese names (zh_person recognizer): the Latin-script rules below do not apply
     words = value.split()
-    if not any(_NAME_WORD.fullmatch(w.removesuffix("'s").removesuffix("’s")) for w in words):
+    title = _TITLE_LEAD.match(value)  # "prof nguyen" tagged as one span: keep the name, drop the title
+    if title and value[title.end():].strip():
+        f = Finding(f.type, f.start + title.end(), f.end, f.score)
+        value = value[title.end():]
+        words = value.split()
+    # "name: diego", "dr. smith", a sign-off "- marco silva", "chen wei here": lower case is still a name
+    labelled = (title or _NAME_LABEL.search(text, 0, f.start) or _HERE_AFTER.match(text, f.end)
+                or (_DASH_BEFORE.search(text, 0, f.start) and not text[f.end:].strip(" .!")))
+    if not labelled and not any(_NAME_WORD.fullmatch(w.removesuffix("'s").removesuffix("’s")) for w in words):
         return None  # symbols or lower-case words: "FN=", "−"
     if any(len(w) >= 2 and w.isupper() and w.isalpha() for w in words):
         return None

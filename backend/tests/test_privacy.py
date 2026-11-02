@@ -124,7 +124,10 @@ def test_health_cases_personal_vs_general(analyzer):
     ("My studnet nmuber is 300 418 277", [("STUDENT_ID", "300 418 277")]),
     ("stdnt # 300-418-277", [("STUDENT_ID", "300-418-277")]),
     ("my student number is 3OO418277", [("STUDENT_ID", "3OO418277")]),
-    ("The room is 300 418 277.", []),  # split digits without a context word
+    ("The room is 400 418 277.", []),  # split digits without a context word
+    # Beta: nine split digits starting with 300 are the university's student-number format, even without a
+    # context word ("300 418 277 - can you explain the DASH diet?" reached the cloud in E6)
+    ("300 418 277 - can you explain the DASH diet?", [("STUDENT_ID", "300 418 277")]),
     ("I have asthama, can I still run?", [("HEALTH_DETAIL", "asthama")]),
     ("I take metfromin twice a day.", [("HEALTH_DETAIL", "metfromin")]),
     ("My diabetis is getting worse.", [("HEALTH_DETAIL", "diabetis")]),
@@ -282,3 +285,108 @@ def test_ask_redacts_the_students_own_name_and_username(api):
         stored = [row.sanitized_question for row in db.exec(select(RequestLog))]
     assert stored and "bergeron" not in stored[0].lower() and "p.intermediate" not in stored[0]
     assert "<PERSON_1>" in stored[0] and "<USERNAME_1>" in stored[0]
+
+
+# ---------------------------------------------------------------- Beta upgrade (made-up sentences, not E6
+# cases)
+BETA_PROTECTED = [
+    # someone else's health, named or described
+    ("My neighbour Mrs. Okafor has diabetes and takes insulin.", ["Okafor", "diabetes", "insulin"]),
+    ("My friend Priya keeps getting chest pains after the gym, should she worry?", ["Priya", "chest pains"]),
+    ("Dev's grandma was hospitalized with pneumonia last week.", ["Dev", "pneumonia"]),
+    ("My roommate, Tariq, has asthma.", ["Tariq", "asthma"]),
+    # the student's own condition without "I have" / "my"
+    ("Because of this awful migraine I could not study, what is the deadline?", ["migraine"]),
+    ("The headache is killing me, can I get an extension?", ["headache"]),
+    ("I feel awful today. I think it could be the flu.", ["the flu"]),
+    ("Ugh, my migraines are acting up again before the exam.", ["migraines"]),
+    ("I scored a 64% on the quiz and my sugar levels are all over the place.", ["64%", "sugar levels"]),
+    # grades in context, other people's grades
+    ("Can we talk about my GPA? It is only a 2.6 right now.", ["2.6"]),
+    ("His grade is 71%.", ["71%"]),
+    ("It was 52 percent on the midterm, is that a fail?", ["52 percent"]),
+    # names and contact details the NER model or the patterns miss
+    ("Thanks for the help! - Noor K.", ["Noor K."]),
+    ("Hey Farid, can you check my reading list?", ["Farid"]),
+    ("my id is 3 0 0 5 2 1 9 8 4, what is a stroke?", ["3 0 0 5 2 1 9 8 4"]),
+    ("Text me at 6475550199 about the lab.", ["6475550199"]),
+    ("Write to me: lee.wong AT gmail DOT com", ["lee.wong AT gmail DOT com"]),
+    ("my number is six one three five five five zero one four two",
+     ["six one three five five five zero one four two"]),
+    # round 2: bare grades, lower-case names after a label or title, local phone numbers
+    ("Could you look at my 71/100 from the lab?", ["71/100"]),
+    ("How do I raise my D+ before finals?", ["D+"]),
+    ("Result: 64% for student 300551234.", ["64%", "300551234"]),
+    ("name: tomas, cell 613-555-0101", ["tomas", "613-555-0101"]),
+    ("please ask prof nguyen about the asthma slides", ["nguyen"]),
+    ("text me at 555-0142 after class", ["555-0142"]),
+    # round 3: lower-case sign-offs and "x here", "subject score is X", a reading typo in a BP message
+    ("is 70% enough to pass the cardiology block? - nadia brooks", ["nadia brooks"]),
+    ("omar haddad here, can u resend the quiz link?", ["omar haddad"]),
+    ("my renal quiz score is 52/D, so worried", ["52/D"]),
+    ("pharm midterm mark went down to 61.5, my fault", ["61.5"]),
+    ("I measured my blood pressure at 13/85 this morning.", ["13/85"]),
+]
+BETA_GENERAL = [
+    "What GPA do I need for the nursing program? Is 3.0 enough?",
+    "The quiz says the answer is B, but I think it is C. Why?",
+    "Is question 12 on the quiz about asthma?",
+    "Explain Cushing's syndrome and its effect on glucose levels.",
+    "Is Parkinson's disease related to blood pressure?",
+    "What does a bad migraine aura look like?",
+    "I have a question. A severe asthma attack, what happens next?",
+    "Why is blood pressure back to normal after exercise?",
+    "Can you explain this migraine case study from the lecture?",
+    "Which medications lower blood pressure the fastest?",
+    "Group: Tom Becker",  # only the name, not "Group"
+    "Is grade 3 hypertension an emergency?",
+    "What does a Glasgow score of 8 mean for a patient?",
+    "Explain Charcot triad in cholangitis.",
+    "The room is 555-0142 on floor two.",
+    "the doctor prescribed rest for the patient in the case study",
+    "what is the McBurney point?",
+    "any tips? - thanks",
+    "is a score of 15 on the GCS normal?",
+]
+
+
+@pytest.mark.parametrize(("text", "values"), BETA_PROTECTED)
+def test_beta_details_are_redacted(analyzer, text, values):
+    found = analyzer.analyze(text)
+    for value in values:
+        start = text.index(value)
+        covered = sum(max(0, min(f.end, start + len(value)) - max(f.start, start)) for f in found)
+        assert covered >= 0.8 * len(value), (value, find(analyzer, text))
+
+
+@pytest.mark.parametrize("text", BETA_GENERAL)
+def test_beta_general_questions_untouched(analyzer, text):
+    found = find(analyzer, text)
+    if text.startswith("Group:"):
+        assert ("PERSON", "Group") not in found
+    else:
+        assert found == []
+
+
+@pytest.mark.parametrize(("question", "local"), [
+    ("My name is Lena Park, student 300418277. How does diabetes affect the kidney?", True),
+    ("Call me at 613-555-0148: is high blood pressure genetic?", True),
+    ("How does diabetes affect the kidney?", False),  # no identifier
+    ("I'm Lena Park, when is the quiz?", False),  # no health topic
+])
+async def test_identified_health_topic_policy(use_config, question, local):
+    """Beta option: a question that identifies someone and mentions a health topic stays local."""
+    services = build_services(use_config({"privacy": {"local_if_identified_health_topic": True}}))
+    ctx = RequestContext(request_id="r", request=AskRequest(student_id="s", topic="type2_diabetes",
+                                                            question=question))
+    ctx = await PrivacyFilterStep(services).run(ctx)
+    assert ctx.pii.cloud_safe == (not local)
+
+
+async def test_identified_health_topic_policy_is_off_by_default(use_config):
+    services = build_services(use_config())
+    ctx = RequestContext(request_id="r", request=AskRequest(
+        student_id="s", topic="type2_diabetes",
+        question="My name is Lena Park, student 300418277. How does diabetes work?"))
+    ctx = await PrivacyFilterStep(services).run(ctx)
+    assert ctx.pii.cloud_safe

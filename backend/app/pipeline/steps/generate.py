@@ -7,6 +7,8 @@ from app.llm.cloud_guard import build_cloud_request
 from app.pipeline.base import BaseStep
 from app.privacy.analyzer import PIIAnalyzer
 from app.privacy.generalize import generalize
+from app.privacy.llm_check import reveals_personal_health
+from app.privacy.policy import TOPIC_RE
 from app.prompts import render_local
 from app.verify.leaks import CloudLeakGuard
 
@@ -88,6 +90,8 @@ class GenerateStep(BaseStep):
     async def _cloud_request(self, ctx: RequestContext) -> CloudRequest | None:
         """The CloudRequest to send, or None if the question must stay local (personal health detail)."""
         req = build_cloud_request(ctx)
+        if ctx.pii.cloud_safe and await self._llm_flags_health(ctx):
+            ctx.pii = ctx.pii.model_copy(update={"cloud_safe": False})
         if ctx.pii.cloud_safe:
             return req
         if self.services.settings.privacy.health_detail_policy != "generalize":
@@ -103,6 +107,21 @@ class GenerateStep(BaseStep):
             return None
         ctx.generalized_question = rewrite
         return req.model_copy(update={"sanitized_question": rewrite})
+
+    async def _llm_flags_health(self, ctx: RequestContext) -> bool:
+        """privacy.llm_check: the local model double-checks a cloud-bound question about a health topic.
+
+        Here rather than in the privacy filter, so only questions really going to the cloud pay the latency;
+        once per request (a safety retry reuses the answer).
+        """
+        if (not self.services.settings.privacy.llm_check or ctx.pii.llm_checked
+                or not TOPIC_RE.search(ctx.request.question)):
+            return False
+        ctx.pii = ctx.pii.model_copy(update={"llm_checked": True})
+        flagged = await reveals_personal_health(self.services.understand_llm, ctx.pii.sanitized_text)
+        if flagged:
+            log.info("local model check kept a question off the cloud, request=%s", ctx.request_id)
+        return flagged
 
     async def _fallback(self, ctx: RequestContext, safety_retry: bool, reason: str) -> LLMResult:
         log.info("routed to cloud, answered locally (%s), request=%s", reason, ctx.request_id)

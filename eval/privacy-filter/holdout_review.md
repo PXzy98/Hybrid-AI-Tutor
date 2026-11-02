@@ -42,3 +42,36 @@ Rule changes made from the v1 misses (all general, none names a specific test me
 condition or vital sign ("my diabetes", "her asthma", "my uncle's pneumonia", "my blood pressure is spiking"),
 she/he as subjects, more symptom and medicine words, a course-word guard after a term ("the asthma section"),
 letter grades and GPAs without "I got". After that the rules were frozen and v2 was generated.
+
+## v3 (Beta upgrade, 2026-11-02): a clean test set after v2 was used for analysis
+
+The misses on v2 were read while planning the Beta upgrade, so v2 is no longer a clean test. The rules of the
+Beta upgrade were then developed on the main set and v1 only, and a new set was made **before** any filter
+was run on it:
+
+| Set | File | Written by | Labelled by |
+|---|---|---|---|
+| v3 | `holdout3.jsonl` (raw: `holdout3a_raw.jsonl`, `holdout3b_raw.jsonl`; labels: `labels3.txt`) | gemma4:26b (seed 63) and qwen3.8:27b (seed 64), 102 each, same 11 scenarios | hand, before the first run (frozen in commit "held-out v3") |
+
+- Two generators that wrote none of the earlier data (qwen3.5 wrote the question bank, gemma4:e4b v1 and v2),
+  through Ollama's own API with thinking off (`make_holdout.py --native`).
+- 204 messages: 186 positive, 18 negative, 114 personal health. `label_holdout.py` checks that every labelled
+  value occurs verbatim in its message.
+- Same conventions as above. Debatable labels are listed at the top of each batch in `labels3.txt`
+  (e.g. GE034 "Check 300112994 for diabetes trends" labelled personal; GE097 "if she has hypertension" not
+  personal; targets such as "he needs a 90% to pass" are not grades; staff names count as names).
+- The order of work: rules frozen on dev data → v3 generated and labelled → one run of every configuration.
+
+## v4 (round 2 of the Beta upgrade): the final test
+
+Round 2 fixed general gaps seen on v3 (so v3 is "seen" for round 2). After the round-2 rules were frozen, v4 was
+made the same way: gemma4:31b (seed 65) and qwen3.5:35b (seed 66), 102 each, hand-labelled in `labels4.txt`
+before any run, frozen in its own commit, then run once. 204 messages: 184 positive, 20 negative, 131 personal
+health. The qwen batch wrote 13 ten-digit "student numbers"; they are labelled as student numbers. Results:
+`results/beta.md`.
+
+## v5 (round 3 of the Beta upgrade): the final test
+
+Round 3 fixed general gaps seen on v4 (so v4 is "seen" for round 3). v5: gemma4:12b (seed 67) and
+nemotron-cascade-2 (seed 68), 102 + 100 messages, hand-labelled in `labels5.txt` before any run, frozen in its own
+commit, then run once. 202 messages: 163 positive, 39 negative, 127 personal health. Results: `results/beta.md`.

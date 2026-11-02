@@ -51,7 +51,15 @@ FORMAT = ('Write {n} messages. {spec} Reply with JSON only: {{"items": [{{"text"
           '"personal_health": true|false}}]}}.')
 
 
-def generate(http, url, model, n, spec, seed=61):
+def generate(http, url, model, n, spec, seed=61, native=False):
+    if native:  # v3: Ollama's own API, so thinking can be switched off and the context made large enough
+        r = http.post(f"{url}/api/chat", json={
+            "model": model, "stream": False, "think": False, "format": "json",
+            "options": {"temperature": 0.9, "seed": seed, "num_ctx": 8192, "num_predict": 6000},
+            "messages": [{"role": "user", "content": COMMON + FORMAT.format(n=n, spec=spec)}]})
+        text = r.json().get("message", {}).get("content") or "{}"
+        m = re.search(r"\{.*\}", text, re.S)
+        return json.loads(m.group(0)).get("items", []) if m else []
     r = http.post(f"{url}/v1/chat/completions", json={
         "model": model, "temperature": 0.9, "seed": seed, "max_tokens": 6000,
         "response_format": {"type": "json_object"},
@@ -65,18 +73,19 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", default="gemma4:e4b")
     ap.add_argument("--seed", type=int, default=61)
+    ap.add_argument("--native", action="store_true", help="v3: Ollama API with thinking off")
     ap.add_argument("--out", default="holdout_raw.jsonl", help="v1 (dev): holdout_raw.jsonl, v2 (test): holdout2_raw.jsonl")
     a = ap.parse_args(argv)
     url = get_settings().ollama_url.rstrip("/")
     http = httpx.Client(timeout=600)
     out, seen = [], set()
     for group, variant, n, spec in SCENARIOS:
-        items = generate(http, url, a.model, n, spec, a.seed)
+        items = generate(http, url, a.model, n, spec, a.seed, a.native)
         for it in items:
             if not it.get("text") or it["text"] in seen:
                 continue
             seen.add(it["text"])
-            out.append({"raw_id": f"{'S' if a.seed != 61 else 'R'}{len(out) + 1:03d}", "asked_for": f"{group}/{variant}", "text": it["text"],
+            out.append({"raw_id": f"{a.model.split(':')[0][:2].upper() if a.native else ('S' if a.seed != 61 else 'R')}{len(out) + 1:03d}", "asked_for": f"{group}/{variant}", "text": it["text"],
                         "generator_labels": it.get("entities", []),
                         "generator_personal_health": it.get("personal_health")})
         print(f"{group}/{variant}: {len(items)} generated", file=sys.stderr)

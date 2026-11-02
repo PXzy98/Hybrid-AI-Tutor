@@ -10,7 +10,7 @@ import re
 
 from app.core.schemas import Turn
 from app.privacy.analyzer import Finding
-from app.privacy.recognizers.health_detail import COURSE_AFTER_RE, TERM_RE, WORD_RE, fuzzy_term
+from app.privacy.recognizers.health_detail import COURSE_AFTER_RE, FOLLOW_UP_TERM_RE, WORD_RE, fuzzy_term
 
 HEALTH_PLACEHOLDER_RE = re.compile(r"<HEALTH_DETAIL_\d+>", re.I)
 REFERS_BACK_RE = re.compile(
@@ -29,7 +29,7 @@ def follow_up_findings(text: str) -> list[Finding]:
     """Condition and medicine names in a follow-up question, exact or misspelled, outside coursework
     phrases."""
     found = [Finding("HEALTH_DETAIL", m.start(), m.end(), SCORE)
-             for m in TERM_RE.finditer(text) if not COURSE_AFTER_RE.match(text, m.end())]
+             for m in FOLLOW_UP_TERM_RE.finditer(text) if not COURSE_AFTER_RE.match(text, m.end())]
     found += [Finding("HEALTH_DETAIL", m.start(), m.end(), SCORE)
               for m in WORD_RE.finditer(text)
               if fuzzy_term(m.group()) and not COURSE_AFTER_RE.match(text, m.end())]
