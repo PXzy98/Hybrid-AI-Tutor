@@ -44,7 +44,12 @@ def _decode(data: bytes) -> str:
         raise DocumentError("Save text or HTML files as UTF-8 or UTF-16 and upload again.") from error
 
 
-def extract_text(path: Path) -> str:
+def extract_text(path: Path, *, preserve_pdf_pages: bool = False) -> str:
+    """Extract readable text. An optional form-feed separates PDF pages for citation metadata.
+
+    The default is unchanged for administrative validation and other callers.
+    Page separators are never indexed as text by the medical retriever.
+    """
     if path.suffix.lower() not in SUFFIXES:
         raise DocumentError("This file type is not supported for retrieval.")
     if path.stat().st_size > MAX_FILE_BYTES:
@@ -65,8 +70,8 @@ def extract_text(path: Path) -> str:
                 count += len(text)
                 if count > MAX_TEXT_CHARS:
                     raise DocumentError("Split documents with more than 500,000 extracted characters.")
-                parts.append(text)
-            text = "\n".join(parts)
+                parts.append(text.replace("\f", " "))
+            text = ("\f" if preserve_pdf_pages else "\n").join(parts)
         elif suffix == ".docx":
             from docx import Document
 
@@ -74,7 +79,9 @@ def extract_text(path: Path) -> str:
                 if sum(i.file_size for i in archive.infolist()) > 64 * 1024 * 1024:
                     raise DocumentError("The unpacked Word document is too large.")
             document = Document(path)
-            parts = [p.text for p in document.paragraphs]
+            # Preserve Word heading styles so the course chunker can split sections.
+            parts = [("# " if p.style and p.style.name.lower().startswith("heading") else "") + p.text
+                     for p in document.paragraphs]
             parts.extend("\t".join(cell.text for cell in row.cells)
                          for table in document.tables for row in table.rows)
             text = "\n".join(parts)
@@ -93,9 +100,10 @@ def extract_text(path: Path) -> str:
         raise DocumentError("This document could not be read. Check the file and upload it again.") from error
     if "\0" in text:
         raise DocumentError("The document contains binary data instead of readable text.")
-    text = text.strip()
-    if not text:
+    # Do not strip leading form-feeds: an initially blank PDF page must not shift citations.
+    text = text.strip(" \r\n\t") if preserve_pdf_pages and path.suffix.lower() == ".pdf" else text.strip()
+    if not text.replace("\f", "").strip():
         raise DocumentError("No readable text was found. Scanned PDFs require OCR before uploading.")
-    if len(text) > MAX_TEXT_CHARS:
+    if len(text.replace("\f", "")) > MAX_TEXT_CHARS:
         raise DocumentError("Split documents with more than 500,000 extracted characters.")
     return text
