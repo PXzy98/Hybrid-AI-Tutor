@@ -6,6 +6,9 @@ This file is the **single entry point** for the v4 work: background, rules that 
 architecture, which files each task touches, when a task is done, and how to test. With a task ID (for
 example `Z4`) you can start.
 
+A Chinese companion for the team: [v4-implementation-guide_zh.md](v4-implementation-guide_zh.md) (the English
+file is the one agents follow, rule 14).
+
 Design documents that are part of this guide:
 - [design/course-structure.md](design/course-structure.md): what a course is, accounts and roles,
   enrollment, learner data scope, settings per course, database, migration (task Z1, decided).
@@ -99,10 +102,13 @@ Read before changing code. A PR that breaks any of these is not merged.
     smoke tests, frontend build and tests, Docker build.
 13. **Privacy constants are not configuration**: `log_raw_text`, the required checkers and recognizer
     internals stay in code or in the privacy profiles.
-14. **No Chinese in code or Markdown.** Code, comments, identifiers, test data written in code, commit
-    messages, PR descriptions and every `.md` file are in English. French is allowed only for French UI
-    strings (`frontend/src/i18n/fr.ts`) and French test text for French recognizers. Files that still contain
-    Chinese today are cleaned up by Z15 and T14; `docs/history/` is frozen and exempt.
+14. **No Chinese in code or in Markdown outside `docs/`.** Code, comments, identifiers, test data written
+    in code, commit messages, PR descriptions and every `.md` file outside `docs/` are in English. French is
+    allowed only for French UI strings (`frontend/src/i18n/fr.ts`) and French test text for French
+    recognizers. **`docs/` is exempt**: it may hold Chinese companion files named `<name>_zh.md` for the
+    team. The English file is the one agents follow; whoever changes an English document updates its
+    `_zh` companion in the same PR, or adds a line at the top of the companion saying it is out of date.
+    Remaining Chinese outside `docs/` is cleaned up by Z15 and T14.
 15. **API v2 only** (design/api-v2.md): `/api/v1` is frozen; new endpoints and fields go to `/api/v2`.
     Within v2 only additive changes; a breaking change needs `/api/v3`, decided by Z.
 
@@ -113,7 +119,7 @@ Read before changing code. A PR that breaks any of these is not merged.
 | Part | Location | Notes |
 |---|---|---|
 | Config | `config.yaml`, `backend/app/core/config.py` | pydantic settings; env vars `SECTION__FIELD` override the yaml |
-| Services | `backend/app/core/services.py` | `build_services()`; `reconfigure()` replaces global objects (changes in v4, section 4.4) |
+| Services | `backend/app/core/services.py` | `build_services()`; `reconfigure()` replaces global objects (removed in v4, section 4.4) |
 | Registries | `backend/app/core/registry.py` | routers, retrievers, knowledge models, checkers, pipeline steps are registered by name and selected by config |
 | Pipeline | `backend/app/pipeline/runner.py`, `steps/*.py` | step list in `config.yaml` `pipeline`; one shared `RequestContext` (`core/schemas.py`) |
 | Privacy | `backend/app/privacy/` (`analyzer.py`, `recognizers/`, `generalize.py`, `llm_check.py`, `policy.py`, `session_health.py`) | Presidio + spaCy `en_core_web_lg` + custom recognizers |
@@ -202,12 +208,21 @@ api / worker ──► external model APIs (cloud model, an instructor's own Ope
 | 1. code constants | safety invariants (`log_raw_text=false`, required checkers, recognizer internals) | code only |
 | 2. `config.yaml` | defaults and **hard caps** (new `limits` section, below) | whoever deploys |
 | 3. env / `.env` / Docker secrets | database URL, API keys, session secret | whoever deploys |
-| 4. `system_settings` table | default model connections, enabled course types, checkers, level thresholds | admin (web) |
-| 5. `course_settings` table | fields listed in course-structure.md section 6, all nullable | course instructor (web) |
+| 4. `system_settings` table | default model connections, enabled course types, optional checkers, weak evidence, level thresholds | admin (web) |
+| 5. `course_settings` table | fields listed in course-structure.md section 6.4, all nullable | course instructor (web) |
 
 **Rule**: read values only through `effective_settings(course_id)`; the API layer puts the result on
 `RequestContext.settings` and steps read only that. Look from layer 5 upwards for the first value that is
 set, then clip to the layer-2 hard cap; layer 1 cannot be overridden.
+
+**How it stays cheap and stable** (details in course-structure.md section 6):
+- run-time settings are values only; implementation choices (knowledge model, router, pipeline steps) stay
+  in `config.yaml`, so nothing is rebuilt at run time and `services.reconfigure` is removed;
+- each table row has a `version`; writes use optimistic locking (409 on conflict), one transaction, a
+  `config_history` row and an audit row; history can be restored;
+- reads are one primary-key query per request plus a per-process cache keyed by the versions, so every
+  process sees a change on its next request without timers or messages;
+- the request (or job) keeps one snapshot from start to end.
 
 **Usage limits**: config only for now; the `usage_*` course fields stay null and are not exposed. Counters
 are stored per student + course + day from the start.
@@ -409,7 +424,7 @@ data); users build against the fakes without waiting for the real implementation
 | Z2 | 9B vs 27B: 27B through OpenRouter, same course questions, both with RAG; vLLM machine size and cost | S4–S5 | independent | new `eval/model-compare/` | comparison report |
 | Z3 | PostgreSQL + Alembic; Postgres test fixture and CI service; drop SQLite | S5 | Z1 | `backend/app/storage/`, new `backend/alembic/`, `.github/workflows/ci.yml` | CI runs on Postgres |
 | Z4 | Course catalog: tables of course-structure.md section 10; KCs, items, misconceptions from YAML into the database; v3 migration script (section 11); remove `serve_unreviewed` and `reviewed_by` | S5 | Z3 | `storage/models.py`, `core/topics.py`, `learner/content.py`, `scripts/` | existing tests pass against the migrated "General Medical Knowledge" course |
-| Z5 | Settings layers + `effective_settings()` + `limits` (table in 4.4); replace `runtime_config.py` and `services.reconfigure`; steps read `ctx.settings` | S5 | Z3 | `core/config.py`, `core/services.py`, `admin/runtime_config.py`, `pipeline/steps/*`, `config.yaml` | no direct reads of these constants; two courses do not affect each other |
+| Z5 | Settings layers (course-structure.md section 6): `system_settings`, `course_settings` with versions, optimistic locking, history and restore, version-keyed cache, `effective_settings()`, `limits` (table in 4.4); migrate the newest v3 `config_history` row; remove `runtime_config.py` rebuilds and `services.reconfigure`; steps read `ctx.settings` | S5 | Z3 | `core/config.py`, `core/services.py`, `admin/runtime_config.py`, `pipeline/steps/*`, `config.yaml` | no direct reads of these constants; two courses do not affect each other |
 | Z6 | Model gateway: connection registry, trust levels, instructor OpenAI-compatible APIs, encrypted API keys, SSRF protection, queueing and timeouts, token streaming; vLLM load test | S5–S6 | Z5 | `backend/app/llm/` (new `gateway.py`), `admin/llm_server.py` | internal addresses rejected; external connections never get original text (tests); load test report |
 | Z7 | Privacy profile framework: base layer + profile files + recognizer registration; profile selected by course type | S5 | Z5 | `backend/app/privacy/` (new `profiles/`) | a new profile needs one config file; E6 not worse |
 | Z8 | Docker Compose skeleton: proxy (Caddy), api, worker, db; two networks | S5 | — | `docker-compose.yml`, new `deploy/Caddyfile` | one command starts everything locally |
@@ -419,7 +434,7 @@ data); users build against the fakes without waiting for the real implementation
 | Z12 | Instructor AI tier 4: local vs cloud evaluation | S7 | Z6, S4 | new `backend/app/instructor_ai/eval/` | per-module report for a course |
 | Z13 | Deploy the whole stack to the test host; monitoring (app `/metrics`, vLLM metrics, Grafana, alerts); CI scans (`pip-audit`, `npm audit`, `bandit`, image scan) | S7 | Z8 | `docker-compose.yml`, `deploy/`, `.github/workflows/ci.yml` | the client and Lavin can try it; metrics visible |
 | Z14 | Deployment and operations manual, handover documents, load test | S8 | — | `docs/` | a newcomer can deploy from it |
-| Z15 | Remove Chinese from code (rule 14): `privacy/recognizers/zh_person.py` and Chinese patterns in `privacy/analyzer.py`, `recognizers/grade.py`, `recognizers/student_id.py`; Chinese in `tests/test_local_setup.py`; Chinese text in `eval/privacy-filter/make_cases.py` and `eval/model-boundary-test/` scripts and docs; re-run E6 | S5 | — | listed files | `git grep` finds no Chinese outside `docs/history/` and data files; E6 not worse on English sets |
+| Z15 | Remove Chinese from code (rule 14): `privacy/recognizers/zh_person.py` and Chinese patterns in `privacy/analyzer.py`, `recognizers/grade.py`, `recognizers/student_id.py`; Chinese in `tests/test_local_setup.py`; Chinese text in `eval/privacy-filter/make_cases.py`, the `eval/model-boundary-test/` scripts and its two Markdown files; re-run E6 | S5 | — | listed files | `git grep` finds no Chinese outside `docs/` and data files; E6 not worse on English sets |
 
 **If behind, postpone in this order**: Z12 → Grafana and alerts in Z13 → `login_identity`.
 
@@ -459,7 +474,7 @@ data); users build against the fakes without waiting for the real implementation
 | T11 | Renaming (once the name is chosen); accessibility self-check (keyboard, screen reader, contrast, zoom) | S7 | name | `frontend/` | checklist |
 | T12 | Student manual, instructor manual (including the TA note in course-structure.md 3.4); routing, frontend and web search handover | S8 | — | `docs/` | a new instructor can use it |
 | T13 | Web search (G1-92) + evaluation (G1-106): search API, allow-list, cleaning, results as passages for generation; query only from `search_query()`; outbound calls only through the single outbound helper | S7 | Z11, Z6 | new `backend/app/websearch/`, `config.yaml` pipeline | E4 audit: no personal data in search requests; evaluation report |
-| T14 | Remove Chinese from Markdown and frontend (rule 14): rewrite `TODO.md` in English from section 7; remove the Chinese copy of `GETTING_STARTED.md` in the repository root (`GETTING_STARTED.md` stays); Chinese parts of `README.md`, `GETTING_STARTED.md`, `docs/System_Design_v3.md`, `docs/IMPLEMENTATION_LOG.md`, `docs/ROUTING_PATCH.md`, `docs/report/privacy_subsystem.md`; Chinese strings in `frontend/src/test/Routing.test.tsx` | S5 | — | listed files | `git grep` finds no Chinese in these files |
+| T14 | Remove Chinese from Markdown outside `docs/` and from the frontend (rule 14): rewrite `TODO.md` in English from section 7; move the Chinese copy of `GETTING_STARTED.md` from the repository root to `docs/GETTING_STARTED_zh.md` and fix its links; remove the Chinese lines of `README.md` and `GETTING_STARTED.md`; Chinese strings in `frontend/src/test/Routing.test.tsx` | S5 | — | listed files | `git grep` finds no Chinese outside `docs/` (except data files) |
 
 ### 7.4 Frontend stack (T)
 
@@ -593,7 +608,7 @@ data); users build against the fakes without waiting for the real implementation
 | Instructor AI | all four tiers |
 | Knowledge model | course-level layered model; rule model only as fallback |
 | Web search | owned by T, following rule 6 |
-| Language | no Chinese in code or Markdown (rule 14) |
+| Language | no Chinese in code or in Markdown outside `docs/`; Chinese companions `*_zh.md` allowed in `docs/` (rule 14) |
 | Future maintainers | the student team that takes over the project |
 
 **Open**:

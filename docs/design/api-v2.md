@@ -60,7 +60,8 @@ logged in. Owner = component owner who implements it.
 |---|---|---|
 | `GET /admin/instructors`, `POST /admin/instructors` | A | list, create instructor accounts |
 | `PATCH /admin/instructors/{account_id}`, `POST /admin/instructors/{account_id}/reset-password` | A | deactivate, change role, reset |
-| `GET /admin/settings`, `PUT /admin/settings` | A | system settings |
+| `GET /admin/settings`, `PUT /admin/settings` | A | system settings; `PUT` sends the `version` it read, 409 if it changed (course-structure 6.2) |
+| `GET /admin/settings/history`, `POST /admin/settings/restore/{history_id}` | A | change history and undo |
 | `GET /admin/model-endpoints`, `POST /admin/model-endpoints`, `PATCH .../{endpoint_id}`, `POST .../{endpoint_id}/test` | A | system model connections (Z6) |
 
 ### 3.3 Courses, members, settings (owner Z)
@@ -73,7 +74,8 @@ logged in. Owner = component owner who implements it.
 | `POST /courses/{course_id}/end-term` | I | export then delete student data (course-structure 3.5) |
 | `GET /courses/{course_id}/exports/{export_id}` | I | download the export |
 | `POST /courses/{course_id}/archive` | I | archive |
-| `GET /courses/{course_id}/settings`, `PUT /courses/{course_id}/settings` | I | course settings (course-structure 6) |
+| `GET /courses/{course_id}/settings`, `PUT /courses/{course_id}/settings` | I | course settings (course-structure 6); `PUT` sends the `version` it read, 409 if it changed |
+| `GET /courses/{course_id}/settings/history`, `POST /courses/{course_id}/settings/restore/{history_id}` | I | change history and undo |
 | `GET/POST/PATCH /courses/{course_id}/model-endpoints[/{endpoint_id}]`, `POST .../test` | I | course model connections (Z6) |
 | `GET /courses/{course_id}/members` | I | members (students and instructors) |
 | `POST /courses/{course_id}/members/import` | I | CSV import, returns the import report |
