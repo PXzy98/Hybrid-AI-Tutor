@@ -86,12 +86,16 @@ def _prepare(body: AskBody, user, services) -> RequestContext:
 
 
 def _sources(ctx: RequestContext) -> list[Source]:
-    seen: dict[str, Source] = {}
+    seen: dict[tuple[str, int | None], Source] = {}
     for c in ctx.passages:
-        if c.source not in seen:
-            seen[c.source] = Source(
-                title=PurePosixPath(c.source).stem.replace("_", " "), source=c.source, kc_ids=c.kc_ids
-            )
+        raw_page = c.metadata.get("page")
+        page = raw_page if isinstance(raw_page, int) and raw_page > 0 else None
+        key = (c.source, page)
+        if key not in seen:
+            title = PurePosixPath(c.source).stem.replace("_", " ")
+            if page is not None:
+                title += f" (page {page})"
+            seen[key] = Source(title=title, source=c.source, kc_ids=c.kc_ids)
     return list(seen.values())
 
 

@@ -23,6 +23,11 @@ from app.rag.documents import SUFFIXES, DocumentError, extract_text
 from app.rag.medical_tfidf import RAW_DIR, TOPIC_FILES, _assign_tags, _document, _kc_definitions
 
 _HEADING = re.compile(r"^(?:what|who|why|how|when|where|which|can|does|do|are|is|should)\b.{0,115}\?$", re.I)
+# Real lectures use chapter, numbered or Markdown titles rather than question headings.
+_COURSE_HEADING = re.compile(
+    r"^(?:#{1,6}\s+\S.{0,115}|(?:chapter|lecture|unit|module|section)\s+\d+\b.{0,105}|"
+    r"\d+(?:\.\d+){0,3}[.)]?\s+[A-Z][^.!?]{1,100})$", re.I,
+)
 _SENTENCE = re.compile(r"(?<=[.!?])\s+(?=[A-Z0-9])")
 _WORD = re.compile(r"[a-z0-9]+")
 _MAX_CHARS = 750
@@ -33,8 +38,8 @@ _STOP = ENGLISH_STOP_WORDS
 REVIEWED_TAGS_PATH = REPO_ROOT / "data" / "medical_rag" / "reviewed_tags.csv"
 
 
-def _segments(body: str) -> list[tuple[str, list[str]]]:
-    """Split source document into headed sections; preserve short bullet/list lines."""
+def _segments(body: str, *, course_headings: bool = False) -> list[tuple[str, list[str]]]:
+    """Split into headed sections, also recognizing lecture headings for uploads."""
     sections: list[tuple[str, list[str]]] = []
     heading = "Overview"
     items: list[str] = []
@@ -42,10 +47,10 @@ def _segments(body: str) -> list[tuple[str, list[str]]]:
         line = " ".join(raw.split())
         if not line:
             continue
-        if _HEADING.fullmatch(line):
+        if _HEADING.fullmatch(line) or (course_headings and _COURSE_HEADING.fullmatch(line)):
             if items:
                 sections.append((heading, items))
-            heading, items = line, []
+            heading, items = line.lstrip("# "), []
             continue
         if len(line) <= 400:
             items.append(line)
@@ -230,25 +235,30 @@ class MedicalHybridRetriever:
                 row = {"name": path.name, "origin": "uploaded", "source": source,
                        "indexed": False, "passage_count": 0, "message": None}
                 try:
-                    body = extract_text(path)
+                    pdf = path.suffix.lower() == ".pdf"
+                    body = extract_text(path, preserve_pdf_pages=pdf)
                     if total + len(body) > 2_000_000:
                         raise DocumentError("This topic exceeds the two-million-character text budget.")
-                    # Bound long unpunctuated paragraphs without truncating their final constraints.
-                    texts = [chunk for title, lines in _segments(body)
-                             for chunk in _chunk_section(
-                                 title, [part for line in lines for part in textwrap.wrap(
-                                     line, width=650, break_long_words=True, break_on_hyphens=False,
-                                 )], min_chars=1,
-                             )]
-                    if not texts:
-                        texts = [body]
-                    tags = _assign_tags(texts, topic)
+                    # Keep PDF pages separate so a returned passage can identify its page.
+                    pages = body.split("\f") if pdf else [body]
+                    entries: list[tuple[str, int | None]] = []
+                    for page_number, page_text in enumerate(pages, 1):
+                        # Bound long paragraphs without truncating trailing constraints.
+                        for title, lines in _segments(page_text, course_headings=True):
+                            wrapped = [part for line in lines for part in textwrap.wrap(
+                                line, width=650, break_long_words=True, break_on_hyphens=False,
+                            )]
+                            entries.extend((text, page_number if pdf else None)
+                                           for text in _chunk_section(title, wrapped, min_chars=1))
+                    if not entries:
+                        raise DocumentError("No readable passages were extracted from this document.")
+                    tags = _assign_tags([text for text, _ in entries], topic)
                     passages.extend(Chunk(
                         text=text, source=source, topic=topic, score=0, kc_ids=list(ids), level=level,
-                        metadata={"origin": "uploaded"},
-                    ) for text, (ids, level) in zip(texts, tags, strict=True))
+                        metadata={"origin": "uploaded", **({"page": page} if page is not None else {})},
+                    ) for (text, page), (ids, level) in zip(entries, tags, strict=True))
                     total += len(body)
-                    row.update(indexed=True, passage_count=len(texts))
+                    row.update(indexed=True, passage_count=len(entries))
                 except DocumentError as error:
                     row["message"] = str(error)
                 except Exception:

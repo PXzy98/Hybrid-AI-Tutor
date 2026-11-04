@@ -192,7 +192,7 @@ function TutorMessage({ reply, sessionId }: { reply: AskResponse; sessionId: str
         <div className="mt-3 text-xs text-slate-600">
           <span className="font-medium">{t("chat.sources")}</span>
           {reply.sources.map((s, i) => (
-            <span key={s.source}>[{i + 1}] {s.title}{i < reply.sources!.length - 1 ? "; " : ""}</span>
+            <span key={`${s.source}:${s.title}`}>[{i + 1}] {s.title}{i < reply.sources!.length - 1 ? "; " : ""}</span>
           ))}
         </div>
       )}
