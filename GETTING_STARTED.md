@@ -101,13 +101,13 @@ Do not run the previous version's `apply_test_push_routing.py` again; it was for
 
 ## 5. Validation and scope
 
-See `docs/INTEGRATION.md` and `docs/VALIDATION_V3.md`.
+See `docs/history/INTEGRATION.md` and `docs/history/VALIDATION_V3.md`.
 With the material-sync patch installed, the instructor dashboard shows built-in materials and uploaded materials
 separately, with their retrieval status.
 Uploaded files are added automatically to the retrieval for their topic, and are loaded again after a restart;
 materials uploaded earlier do not need to be uploaded again.
 Supported: TXT, Markdown, HTML, DOCX, and PDF with a text layer; scanned PDFs need OCR first.
-Details: `docs/MATERIALS_SYNC.md`.
+Details: `docs/history/MATERIALS_SYNC.md`.
 The semantic evidence judgement still makes mistakes; the 500 questions carry prototype policy labels and do not
 yet represent an assessment of the actual Qwen capability.
 This package contains no real passwords, API keys, database, virtual environments, `node_modules` or downloaded

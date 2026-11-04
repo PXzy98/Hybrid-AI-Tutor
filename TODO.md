@@ -1,6 +1,6 @@
 # TODO
 
-更新：2026-10-22（MVP 已于 10/21 提交）· 与 MVP 报告表 6.1、Jira 项目 G1 对齐 · 背景见 [docs/DISCUSSION_NOTES.md](docs/DISCUSSION_NOTES.md)、[docs/隐私升级.md](docs/隐私升级.md)。
+更新：2026-10-22（MVP 已于 10/21 提交）· 与 MVP 报告表 6.1、Jira 项目 G1 对齐 · 背景见 [docs/history/DISCUSSION_NOTES.md](docs/history/DISCUSSION_NOTES.md)、[docs/history/隐私升级.md](docs/history/隐私升级.md)。
 负责人：Z = Zhenyan，T = Tongkai，S = Siyun（以 Jira 为准）。
 截止（syllabus）：Peer feedback 11/4（个人）· **Beta 11/11** · Reflection #2 伦理 11/18（个人）· 视频 11/25 · Design Day 12/3 · Final 报告 12/13 · 客户 / 技术顾问评价 12/14。
 
@@ -33,7 +33,7 @@
   - [x] "建议就医"仍按原始问题判断（`needs_referral` 看原始问题的识别结果，不受改写影响）
 - [ ] 新增发送后的病情泄露检查 — Z
 - [ ] 存储前也替换病情片段里的病情词 / 读数（"inhaler"、"150/95"；E4 `--e6` 发现）— Z
-- [ ] 老师上传资料用隐私过滤扫描（`docs/隐私升级.md` §2）— Z
+- [ ] 老师上传资料用隐私过滤扫描（`docs/history/隐私升级.md` §2）— Z
 
 ### 部署与教师面板（Z）
 - [ ] 教师面板输入服务器地址和模型名，连接教授自己的 LLM 服务器作为本地模型；带"测试连接"（10/20 顾问确认本地模型跑在学校服务器上）— G1-94

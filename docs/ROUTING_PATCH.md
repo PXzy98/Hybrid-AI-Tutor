@@ -16,7 +16,7 @@ Semantic runtime is local/offline: model preparation is an explicit command. Mis
 
 Requested scope: no privacy-condition branch inside semantic routing. `pii.cloud_safe` and `force_local_if_not_cloud_safe` do not change the semantic Local/Cloud decision. The upstream privacy filter, the sanitized CloudRequest allow-list and the post-response checkers are owned by the privacy part.
 
-Updated 19 Oct 2026 (team decision, PR #3): the privacy rules apply at the **cloud gate** in the generate step, whichever router chose the cloud. The pre-send leak guard runs for semantic routing too, and a personal health detail (`cloud_safe = false`) follows `privacy.health_detail_policy`: `local_only` answers locally with a notice, `generalize` sends only a checked hypothetical rewrite (enabled in `config.yaml` on 20 Oct 2026 after the professor's approval; a rewrite that fails its checks stays local). The router itself still has no privacy branch. See `docs/report/privacy_subsystem.md` and `docs/隐私升级.md`.
+Updated 19 Oct 2026 (team decision, PR #3): the privacy rules apply at the **cloud gate** in the generate step, whichever router chose the cloud. The pre-send leak guard runs for semantic routing too, and a personal health detail (`cloud_safe = false`) follows `privacy.health_detail_policy`: `local_only` answers locally with a notice, `generalize` sends only a checked hypothetical rewrite (enabled in `config.yaml` on 20 Oct 2026 after the professor's approval; a rewrite that fails its checks stays local). The router itself still has no privacy branch. See `docs/report/privacy_subsystem.md` and `docs/history/隐私升级.md`.
 
 ## Methods and removal
 
@@ -53,7 +53,7 @@ Chunk(
 
 Plain old-style chunks without metadata work for ordinary instructor-provided course material. This trusts the course Retriever's provenance contract; it does not infer source authority from text. Freshness-dependent questions additionally require a recent `verified_at` and `verified_current=True`. A publication date alone does not prove a source is current.
 
-`rag.impl: medical_hybrid` is enabled. Siyun's BM25 + word/character TF-IDF retrieval and bundled five-topic snapshots are retained. The materials-sync patch indexes instructor uploads alongside the snapshots and displays their status in the Content page. Its optional PubMed helper is not automatically invoked by student requests. See `docs/MATERIALS_SYNC.md` for formats and limits.
+`rag.impl: medical_hybrid` is enabled. Siyun's BM25 + word/character TF-IDF retrieval and bundled five-topic snapshots are retained. The materials-sync patch indexes instructor uploads alongside the snapshots and displays their status in the Content page. Its optional PubMed helper is not automatically invoked by student requests. See `docs/history/MATERIALS_SYNC.md` for formats and limits.
 
 RAG states distinguish `disabled`, `error`, `empty`, `returned` and `skipped`. Zero passages have zero support coverage. A question that needs evidence is never admitted to Local with zero evidence. A question that does not need external evidence can still use Local without RAG.
 
@@ -99,7 +99,7 @@ The patch uses the existing configured OpenAI-compatible Cloud client. It does n
 
 This v3 retains the entire latest-main instructor dashboard (students, class summary, settings, logs,
 content), learner/understand implementation and existing privacy module. It supersedes the earlier
-RAG-based v2 whose instructor page had only settings. See INTEGRATION.md for exact source commits.
+RAG-based v2 whose instructor page had only settings. See history/INTEGRATION.md for exact source commits.
 
 The real-model smoke report contains both successful and failed decisions. Some relevant passages
 are rejected by the current cross-encoder thresholds; an explicit diabetes course-source request is
