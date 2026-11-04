@@ -652,7 +652,7 @@ The v2 privacy and end-to-end tests (detection recall, leakage, semantic preserv
 - ☐ Inform the professor of the deletion rule: a deleted student's data is purged, and request logs are kept anonymized (§8.3).
 - ☐ Whether the client wants the full ILS questionnaire.
 - ☑ `cloud_safe = false`: decided Oct 19. Enforced at the cloud gate for every router (`local_only` default, `generalize` optional); the router has no privacy branch. Still open: whether the route score uses `level`.
-- ☐ Cloud provider and model, and who pays. Tested with DeepSeek (Oct 19); its data location (China) needs the client's approval (`docs/隐私升级.md` §1).
+- ☐ Cloud provider and model, and who pays. Tested with DeepSeek (Oct 19); its data location (China) needs the client's approval (`docs/history/隐私升级.md` §1).
 - ☑ Student login: decided Oct 12. The instructor creates student accounts, students log in with a password, and identity is kept apart from the profile (§7.5).
 
 ## 16. As built (19 Oct 2026): differences from this design
@@ -663,7 +663,7 @@ differently. Architecture figure: `docs/diagrams/architecture-v3.png` (v3.1).
 | Area | Design (this document) | As built |
 |---|---|---|
 | Routing | Black-box `route_score()` vs threshold (stub until Tongkai's router) | Semantic router: MiniLM embedding, LR/SVM heads (cloud need, evidence, freshness), cross-encoder evidence check (`docs/ROUTING_PATCH.md`); new step `analyze_route`; `/ask/stream` sends progress events; the student can pick LR or SVM |
-| Retrieval | TF-IDF over course chunks tagged with KC and level | Medical hybrid retrieval (BM25 + word/char TF-IDF), MedlinePlus pages for the five topics plus instructor uploads (PDF, DOCX, HTML, TXT, MD) indexed on upload (`docs/RAG_INTEGRATION.md`, `docs/RAG_MVP_VALIDATION.md`) |
+| Retrieval | TF-IDF over course chunks tagged with KC and level | Medical hybrid retrieval (BM25 + word/char TF-IDF), MedlinePlus pages for the five topics plus instructor uploads (PDF, DOCX, HTML, TXT, MD) indexed on upload (`docs/history/RAG_INTEGRATION.md`, `docs/history/RAG_MVP_VALIDATION.md`) |
 | Passages for the answer | Retrieved passages | Chosen separately from routing: relevant passages when the evidence models ran, retrieved passages marked unverified otherwise |
 | Privacy enforcement | `cloud_safe = false` forces local in the route step; pre-send guard | One cloud gate in the generate step for every router: health policy (`local_only` / `generalize`), leak guard, local fallback with a notice; 14 custom recognizers (`docs/report/privacy_subsystem.md`) |
 | Cloud model | Provider to be decided | Any OpenAI-compatible API in `.env`; tested with DeepSeek `deepseek-flash`; `max_tokens: 2000` for reasoning models |

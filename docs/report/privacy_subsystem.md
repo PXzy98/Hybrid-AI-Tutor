@@ -4,7 +4,7 @@ Report section for Deliverable B (GNG/ELG 5902, Group 1). Covers B1–B4 for the
 Privacy-Aware Hybrid AI Tutor. All test data is fictional. Numbers come from `eval/privacy-filter/` (E6) and
 `eval/privacy-audit/` (E4), run on 2026-10-19; see `eval/privacy-filter/README.md` to re-run them. The design
 in section 4 is the integrated system (semantic routing, medical RAG, cloud gate) as merged on 19 Oct 2026; the
-cloud model was tested with DeepSeek (`deepseek-flash`). Planned upgrades: `docs/隐私升级.md`.
+cloud model was tested with DeepSeek (`deepseek-flash`). Planned upgrades: `docs/history/隐私升级.md`.
 
 **Test sets.** E6 uses three sets, because a filter tuned on one set always looks better on that set:
 
@@ -375,7 +375,7 @@ expected optimism of tuning on a set; v2 is the number to report.
 `eval/privacy-filter/spot_check.md`); all held-out labels were written by hand with 8 debatable cases listed in
 `holdout_review.md`. These checks were done by the coding assistant and are to be repeated by a team member.
 
-**Next steps (Beta; details in `docs/隐私升级.md`)**
+**Next steps (Beta; details in `docs/history/隐私升级.md`)**
 
 1. Client decision on the cloud provider and data location, and on the residual risk (3.4); if needed,
    integrate C5 (Qwen pass on cloud-bound questions only) and re-measure on a new held-out set.

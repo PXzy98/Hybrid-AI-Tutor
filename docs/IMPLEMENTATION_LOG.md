@@ -1,6 +1,6 @@
 # Implementation Log
 
-One entry per step of [IMPLEMENTATION_PROMPTS.md](IMPLEMENTATION_PROMPTS.md). Each new agent session reads this file first.
+One entry per step of [history/IMPLEMENTATION_PROMPTS.md](history/IMPLEMENTATION_PROMPTS.md). Each new agent session reads this file first.
 
 ## Step 0 — Repository bootstrap (2026-10-12)
 
@@ -169,7 +169,7 @@ Done:
   3. the student gets 403 on admin;
   4. delete the student → the student's cookie returns 401 → the list is empty.
 
-Files: `backend/app/auth/*`, `backend/app/api/v1/{auth,admin_students,ask,sessions,topics,__init__}.py`, `backend/app/storage/models.py`, `backend/app/sessions/{interface,sqlite}.py`, `backend/app/pipeline/steps/record.py`, `backend/app/core/{config,services}.py`, `backend/app/main.py`, `config.yaml`, `.env.example`, `backend/pyproject.toml`, `backend/tests/{conftest,test_api,test_auth,test_admin_students}.py`, `README.md`, `docs/System_Design_v3.md`, `docs/IMPLEMENTATION_PROMPTS.md`, `docs/diagrams/architecture-v3.*`.
+Files: `backend/app/auth/*`, `backend/app/api/v1/{auth,admin_students,ask,sessions,topics,__init__}.py`, `backend/app/storage/models.py`, `backend/app/sessions/{interface,sqlite}.py`, `backend/app/pipeline/steps/record.py`, `backend/app/core/{config,services}.py`, `backend/app/main.py`, `config.yaml`, `.env.example`, `backend/pyproject.toml`, `backend/tests/{conftest,test_api,test_auth,test_admin_students}.py`, `README.md`, `docs/System_Design_v3.md`, `docs/history/IMPLEMENTATION_PROMPTS.md`, `docs/diagrams/architecture-v3.*`.
 
 Decisions:
 - **Server-side sessions, not JWT.** Deactivating, resetting or deleting a student must log them out immediately.
@@ -644,7 +644,7 @@ Done:
   4. a privacy question (name, student number, health detail) → local;
   5. what was stored (a `docker compose exec` one-liner);
   6. local vs cloud via `ROUTING__STUB_SCORE`.
-- `docs/MVP_CHECKLIST.md`: the 16 MVP deliverables of design §12 with their code, tests and status. 12 are ✅. 4 are 🟡 because of open items outside the code: the cloud provider, the content review, and the real router and RAG from teammates.
+- `docs/history/MVP_CHECKLIST.md`: the 16 MVP deliverables of design §12 with their code, tests and status. 12 are ✅. 4 are 🟡 because of open items outside the code: the cloud provider, the content review, and the real router and RAG from teammates.
 - README: Docker quick start, `SECTION__FIELD` overrides, and development mode with two terminals. `.env.example`: Compose variables and override examples (with the warning to use `SPACY_MODEL`, not `PRIVACY__SPACY_MODEL`, with Docker).
 
 Verification (Done when):
@@ -1025,7 +1025,7 @@ semantic routing; teammate-owned upstream privacy filter and response checks are
 Interface changes: additive Chunk.metadata; AskRequest.routing_method; RouteInput contextual
 passages/method/status; RouteScore analysis/evidence/accepted_indices; response routing diagnostics;
 POST ask/stream; GET routing/options; persistent RuntimeConfig.show_routing_progress.
-See ROUTING_PATCH.md and INTEGRATION.md for behavior, provenance and validation limits.
+See ROUTING_PATCH.md and history/INTEGRATION.md for behavior, provenance and validation limits.
 
 
 ## 2026-10-22 — G1-93: split and misspelled student numbers, misspelled health terms, multi-message health details

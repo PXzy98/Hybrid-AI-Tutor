@@ -1,6 +1,6 @@
 # Interfaces for teammates (routing and RAG)
 
-> Status 19 Oct 2026: both components are integrated (semantic router `routing.impl: semantic`, medical RAG `rag.impl: medical_hybrid`). This page describes the plug-in contract, which is unchanged; as-built details are in [ROUTING_PATCH.md](ROUTING_PATCH.md), [RAG_INTEGRATION.md](RAG_INTEGRATION.md) and [System_Design_v3.md §16](System_Design_v3.md).
+> Status 19 Oct 2026: both components are integrated (semantic router `routing.impl: semantic`, medical RAG `rag.impl: medical_hybrid`). This page describes the plug-in contract, which is unchanged; as-built details are in [ROUTING_PATCH.md](ROUTING_PATCH.md), [history/RAG_INTEGRATION.md](history/RAG_INTEGRATION.md) and [System_Design_v3.md §16](System_Design_v3.md).
 
 For **Tongkai** (routing score) and **Siyun** (RAG retrieval). This document covers what your code receives, what it must return, and how it plugs in. You do not need to touch the pipeline or any other code.
 
