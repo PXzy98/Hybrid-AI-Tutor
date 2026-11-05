@@ -124,3 +124,10 @@ absent from this worktree and only fake LLMs in automated tests:
 
 Review and merge individual task branches before using their code in the production
 v4 stack. This combined branch is for regression review only.
+
+## Unified personal-branch continuation (2026-11-05)
+
+At the user's request, the latest S7/S8/S9/S11 offline cores are maintained together on
+`feature/siyun-v4-integration-20261105`; no other development branches or `main` were changed.
+See `docs/SIYUN_UNIFIED_BRANCH_STATUS_2026-11-05.md` for the current consolidated
+status and final 749/749 backend regression results. No PR was opened.
