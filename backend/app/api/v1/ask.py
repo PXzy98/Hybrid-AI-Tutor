@@ -86,17 +86,24 @@ def _prepare(body: AskBody, user, services) -> RequestContext:
 
 
 def _sources(ctx: RequestContext) -> list[Source]:
-    seen: dict[tuple[str, int | None], Source] = {}
+    """One source per numbered prompt passage; never collapse duplicate file/page citations."""
+    seen: dict[tuple[str, int | None, int | None], int] = {}
+    out: list[Source] = []
     for c in ctx.passages:
-        raw_page = c.metadata.get("page")
-        page = raw_page if isinstance(raw_page, int) and raw_page > 0 else None
-        key = (c.source, page)
-        if key not in seen:
-            title = PurePosixPath(c.source).stem.replace("_", " ")
-            if page is not None:
-                title += f" (page {page})"
-            seen[key] = Source(title=title, source=c.source, kc_ids=c.kc_ids)
-    return list(seen.values())
+        raw_page, raw_slide = c.metadata.get("page"), c.metadata.get("slide")
+        page = raw_page if type(raw_page) is int and raw_page > 0 else None
+        slide = raw_slide if type(raw_slide) is int and raw_slide > 0 else None
+        key = (c.source, page, slide)
+        seen[key] = seen.get(key, 0) + 1
+        title = PurePosixPath(c.source).stem.replace("_", " ")
+        if page is not None:
+            title += f" (page {page})"
+        elif slide is not None:
+            title += f" (slide {slide})"
+        if seen[key] > 1:
+            title += f" (excerpt {seen[key]})"
+        out.append(Source(title=title, source=c.source, kc_ids=c.kc_ids))
+    return out
 
 
 def _response(ctx: RequestContext) -> AskResponse:
