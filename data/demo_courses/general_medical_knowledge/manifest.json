@@ -1,0 +1,56 @@
+{
+  "course_code": "MED 0000",
+  "course_title": "General Medical Knowledge",
+  "type": "fictional_software_demo",
+  "review_status": "unreviewed",
+  "is_official_course": false,
+  "source_permissions_verified": false,
+  "documents": [
+    "course_outline.md",
+    "project_requirements.md",
+    "templates/concept_summary.md",
+    "templates/source_check.md"
+  ],
+  "modules": [
+    {
+      "module_order": 1,
+      "module_code": "high_blood_pressure",
+      "title": "High Blood Pressure",
+      "demo_note": "modules/01_high_blood_pressure.md",
+      "bundled_reference": "../../medical_rag/raw/hypertension.txt",
+      "medical_review": "unreviewed"
+    },
+    {
+      "module_order": 2,
+      "module_code": "asthma",
+      "title": "Asthma",
+      "demo_note": "modules/02_asthma.md",
+      "bundled_reference": "../../medical_rag/raw/asthma.txt",
+      "medical_review": "unreviewed"
+    },
+    {
+      "module_order": 3,
+      "module_code": "type2_diabetes",
+      "title": "Type 2 Diabetes",
+      "demo_note": "modules/03_type2_diabetes.md",
+      "bundled_reference": "../../medical_rag/raw/type2_diabetes.txt",
+      "medical_review": "unreviewed"
+    },
+    {
+      "module_order": 4,
+      "module_code": "migraine",
+      "title": "Migraine",
+      "demo_note": "modules/04_migraine.md",
+      "bundled_reference": "../../medical_rag/raw/migraine.txt",
+      "medical_review": "unreviewed"
+    },
+    {
+      "module_order": 5,
+      "module_code": "pneumonia",
+      "title": "Pneumonia",
+      "demo_note": "modules/05_pneumonia.md",
+      "bundled_reference": "../../medical_rag/raw/pneumonia.txt",
+      "medical_review": "unreviewed"
+    }
+  ]
+}
