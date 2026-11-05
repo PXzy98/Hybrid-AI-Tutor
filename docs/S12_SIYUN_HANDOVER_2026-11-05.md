@@ -63,7 +63,14 @@ npm run build
 npm test
 ```
 
-The last **pre-S4** integration pass: 661 passed, 1 deselected in BKT mode, and 661 passed, 1 deselected in rule mode. S4 standalone tests: 7 passed; S5 content tests: 4 passed. Full test results for the complete post-S5 integration branch must be recorded after a fresh run, not extrapolated by adding counts.
+**Final integrated branch verification (after S4 + S5 + S12, 2026-11-05):**
+- BKT: **672 passed, 1 deselected**; exit 0.
+- Rule learner: **672 passed, 1 deselected**; exit 0.
+- Ruff: **all checks passed**; exit 0.
+- Frontend production build: **passed**; exit 0.
+- Frontend unit tests: **28 passed (8 files)**; exit 0.
+- S4+S5 local smoke test: fictional medical demo documents were indexed as a course, and the outline, project requirements, migraine and pneumonia module notes were retrieved from the expected scope. Cross-course leakage test passed, with a local fake scanner used for **fictional fixtures only**.
+- All automated tests use fake LLMs where a model is needed. No live Ollama/cloud inference, clinical validation, official ELG 5902 lecture access or production v4 database integration was verified.
 
 ## Ownership and next decisions
 
