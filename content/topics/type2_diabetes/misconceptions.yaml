@@ -1,2 +1,26 @@
-# DRAFT — placeholder. No misconceptions yet.
-[]
+# DRAFT, UNREVIEWED misconception statements and corrections; do not mark reviewed_by without advisor approval.
+- id: T2D.MC1
+  kc: T2D.1
+  statement: "Insulin normally raises blood sugar by keeping glucose out of cells."
+  correction: "Insulin helps glucose enter cells and generally lowers the amount of glucose remaining in blood."
+  reviewed_by: null
+- id: T2D.MC2
+  kc: T2D.2
+  statement: "Insulin resistance means the body has no insulin at all."
+  correction: "In insulin resistance, cells respond less well to insulin; the body may still produce insulin."
+  reviewed_by: null
+- id: T2D.MC3
+  kc: T2D.3
+  statement: "Only people with a family history can develop type 2 diabetes."
+  correction: "Family history can raise risk, but it is not required for type 2 diabetes to develop."
+  reviewed_by: null
+- id: T2D.MC4
+  kc: T2D.4
+  statement: "Feeling well proves that blood glucose is within the target range."
+  correction: "High blood glucose can occur without noticeable symptoms; monitoring and professional guidance matter."
+  reviewed_by: null
+- id: T2D.MC5
+  kc: T2D.5
+  statement: "A person should change or stop prescribed diabetes treatment as soon as symptoms improve."
+  correction: "Changes to prescribed diabetes care should be discussed with the treating healthcare professional."
+  reviewed_by: null
