@@ -87,3 +87,40 @@ npm test
 - Retrieval relevance scores are not medical-correctness probabilities.
 - Original demo materials and the Lavin revisions are *not* an approved clinical curriculum.
 - Do not publish measured student-learning gains without real student evaluation and consent.
+
+## Follow-up implementation addendum (2026-11-05)
+
+After the original handover, three **offline-only, independently reviewed task cores** were added
+on individual branches from `main` and merged into this personal integration worktree:
+
+| Task | Task branch | Commit | Verified standalone behavior | Still blocked |
+|---|---|---|---|---|
+| S6 | `feature/s6-instructor-draft-core` | `9447f95` | Trusted-local gateway interface, grounded project/proposal/FAQ draft, course and citation checks; 8 tests | Z6 gateway, Z4 draft storage, Z9/Z10 authorized v2 workflow, production S4 |
+| S9 | `feature/s9-visibility-core` | `808aee0` | Mode B, opt-out, acknowledgement, `visible_since`, course/student isolation and mandatory audit callback; 14 tests | Z4 learner tables, Z10 course permissions, persistent audit and learning plan |
+| S10 | `feature/s10-class-insights-core` | `f9e6988` | Course-only KC/misconception counts and small-cohort suppression, without raw student question text; 12 tests | S8 course learner signals, Z4 DB, authorized v2 endpoint |
+
+The standalone branches have been pushed to GitHub; they remain separate review units.
+The integration branch is **not** a substitute for individual PR review and does not
+publish any AI drafts or medical questions. No production permissions are bypassed,
+and no real student data or live model API was used.
+
+S1–S5 and Lavin review status remain as documented above. S8 and S11 still require
+the explicitly listed platform and real-data prerequisites. Do not mark S6/S9/S10
+production-ready merely because their standalone tests pass.
+
+## Final combined regression (2026-11-05, after S6 + S9 + S10)
+
+Checked on `feature/siyun-v4-integration-20261105` with the developer `.env`
+absent from this worktree and only fake LLMs in automated tests:
+
+- Backend default/BKT: **706 passed, 1 deselected**, exit 0.
+- Backend rule mode: **706 passed, 1 deselected**, exit 0.
+- Ruff on `backend/` and `scripts/`: **all checks passed**.
+- Frontend production build: **passed**.
+- Frontend unit tests: **28 passed in 8 files**, exit 0.
+- The new S6, S9 and S10 tests contributed **34** test cases.
+- The tests do not establish real gateway execution, Z4/Z10/Z11 integrations,
+  real-course quality, live student privacy approval or public-facing deployment.
+
+Review and merge individual task branches before using their code in the production
+v4 stack. This combined branch is for regression review only.
