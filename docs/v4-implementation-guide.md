@@ -584,6 +584,13 @@ data); users build against the fakes without waiting for the real implementation
   ```
 
   The model URL is set in `.env` (see `.env.example`).
+- **Models for development**: every developer uses **his own** OpenAI-compatible API (local Ollama,
+  OpenRouter or another provider), configured only in his own `.env`. The team's GPU server is not
+  reachable from outside. Rules:
+  - never commit a key or paste it into an issue, a PR, a log or a test;
+  - send only fictional test data to a hosted API, never real student data;
+  - unit tests and CI never call a real model (they use `backend/app/llm/fake.py`); a test that needs a
+    real model belongs under `eval/` and is skipped when no key is configured.
 
 ### 8.3 Test requirements
 - **New endpoints**: normal flow + access tests (another course's instructor, another student, logged out).
