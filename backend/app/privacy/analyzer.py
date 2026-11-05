@@ -139,7 +139,7 @@ def clean_person(text: str, f: Finding) -> Finding | None:
         if not value:
             return None
         f = Finding(f.type, f.start, f.start + len(value), f.score)
-    if any("一" <= ch <= "鿿" for ch in value):
+    if any("\u4e00" <= ch <= "\u9fff" for ch in value):
         return f  # Chinese names (zh_person recognizer): the Latin-script rules below do not apply
     words = value.split()
     title = _TITLE_LEAD.match(value)  # "prof nguyen" tagged as one span: keep the name, drop the title

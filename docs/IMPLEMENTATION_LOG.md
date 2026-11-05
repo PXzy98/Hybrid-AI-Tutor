@@ -266,13 +266,13 @@ Done:
     - `clean_person()`, which fixes common English-NER mistakes: cut at the first digit ("Tom Becker 300477120"); drop spans without a capitalised name word ("FN=", "−") and spans containing an all-caps acronym ("DICOM metadata"); drop eponyms followed by a statistics, unit or disease noun ("Cohen's kappa", "Brier score", "Hounsfield units"). Chinese names skip these Latin-script rules;
     - overlap resolution: longer span first, then higher score.
 - Recognizers in `privacy/recognizers/` (auto-registered):
-  - `student_id`: 9 digits (0.6; context words such as "student", "id", 学号 raise it). The spaced form 3-3-3 counts only with context.
-  - `grade`: "I got 58/100", "I got an A-", "my GPA dropped to 2.9", "I failed the midterm", "61 分". Letter grades are case-sensitive, so "I got a lot" does not match.
+  - `student_id`: 9 digits (0.6; context words such as "student", "id", and "student number" raise it). The spaced 3-3-3 form counts only with context.
+  - `grade`: "I got 58/100", "I got an A-", "my GPA dropped to 2.9", "I failed the midterm", and numeric grade suffix U+5206. Letter grades are case-sensitive.
   - `health_detail`: a custom recognizer. A condition, symptom or medicine term counts only when it is
     - attributed to the student or a relative (subject + verb within the sentence, with "blocker" words such as about/question/studying/exam in between cancelling the match), or
     - owned ("my inhaler", "my therapist", "my pills"), or
     - a BP-style reading in a first-person sentence.
-  - `zh_person`: Chinese self-introductions (我是/我叫 + 2–4 characters).
+  - `zh_person`: localized self-introduction patterns with two to four CJK characters.
   - `phone_na`: North-American numbers **with separators** (0.6). Presidio's phone recognizer needs a context word and missed "Call me at …".
 - `privacy/anonymizer.py`: `anonymize()` gives numbered placeholders per type (`<PERSON_1>`); the same value (case and whitespace-insensitive) always gets the same placeholder. `restore()` tolerates `<person_1>`, `< PERSON_1 >` and `[PERSON_1]`, and leaves unknown placeholders alone.
 - Steps:
@@ -297,7 +297,7 @@ Decisions:
 - HEALTH_DETAIL redacts the **term** ("asthma", "my inhaler"), not the whole clause, so the sanitized question keeps its structure.
 - A first-person how-to such as "How do I use an inhaler?" counts as personal ("I use … inhaler") and stays local. This is deliberately conservative: a false positive only costs the cloud route; a false negative would leak.
 - Repeated values reuse one placeholder; the first spelling is restored.
-- The file-writing tool turns `一-鿿` into the literal characters; `zh_person.py` keeps them in a named `CJK` constant with a comment.
+  - Chinese-name recognizer source uses Unicode escapes for the U+4E00-U+9FFF ideograph range, keeping the repository text English-only.
 
 Interface changes:
 - New registry `pii_recognizers` in `core/registry.py`. A new PII type is one file with `@pii_recognizers.register(...)`, plus its entity name in `privacy.entities`.
@@ -305,7 +305,7 @@ Interface changes:
 
 Known gaps / TODO:
 - `record` replaces every occurrence of a detected value in the answer, so a stored answer also loses general uses of the word ("<HEALTH_DETAIL_1> inhalers contain…"). This is privacy-safe but lowers the quality of the history. A per-entity approach could replace only the student's own phrasing.
-- Chinese coverage is limited to self-introductions, student numbers and "分" grades; there is no Chinese NER.
+  - Language-specific coverage remains limited to self-introductions, student IDs, and localized score suffixes; there is no full Chinese-language NER.
 - The MVP does not detect addresses, MRNs, ages, financial or academic situations, or accommodations (all labelled in the bench set). The routing owner may want `local_only` heuristics for them.
 - `en_core_web_lg` must be installed before running the server with the default config.
 - In this run qwen3.5:9b took about 9.9 s for a long, safety-heavy answer (2.4–3.2 s in Step 3).

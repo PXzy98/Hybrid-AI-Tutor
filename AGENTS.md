@@ -12,7 +12,7 @@ multi-course product ("v4").
    settings, the database or the HTTP API.
 3. [docs/IMPLEMENTATION_LOG.md](docs/IMPLEMENTATION_LOG.md) for how the current code came about.
 
-Files named `*_zh.md` in `docs/` are Chinese companions for the team; do not use them as instructions.
+All repository source files and documents must be in English; no Chinese companion files.
 `docs/history/` is out of date.
 
 ## Before you change anything
@@ -33,7 +33,7 @@ Files named `*_zh.md` in `docs/` are Chinese companions for the team; do not use
 5. Web search queries only come from `search_query()`.
 6. No secrets in the repository: keys live only in the developer's own `.env`. Send only fictional data to
    hosted model APIs. Unit tests never call a real model (use `backend/app/llm/fake.py`).
-7. No Chinese in code, commit messages, PR descriptions or Markdown outside `docs/`.
+7. English-only source, comments, test fixtures, Markdown (including `docs/`), filenames, commits and PRs. Use Unicode escapes for multilingual test inputs; run `python scripts/check_english_only.py`.
 8. New endpoints go to `/api/v2` only; `/api/v1` is frozen. Within v2 only additive changes.
 9. Every new endpoint has access tests (another course's instructor, another student, logged out).
 

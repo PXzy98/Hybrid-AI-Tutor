@@ -1,141 +1,148 @@
-# TODO
+# Project TODO (historical v3 backlog)
 
-更新：2026-10-22（MVP 已于 10/21 提交）· 与 MVP 报告表 6.1、Jira 项目 G1 对齐 · 背景见 [docs/history/DISCUSSION_NOTES.md](docs/history/DISCUSSION_NOTES.md)、[docs/history/隐私升级.md](docs/history/隐私升级.md)。
-负责人：Z = Zhenyan，T = Tongkai，S = Siyun（以 Jira 为准）。
-截止（syllabus）：Peer feedback 11/4（个人）· **Beta 11/11** · Reflection #2 伦理 11/18（个人）· 视频 11/25 · Design Day 12/3 · Final 报告 12/13 · 客户 / 技术顾问评价 12/14。
+**Updated:** October 22, 2026, after the October 21 MVP submission. This is the
+historical G1/Jira backlog, not the authoritative v4 implementation plan.
+For current roles, dependencies, milestones and acceptance criteria, use
+[the English v4 implementation guide](docs/v4-implementation-guide.md).
 
----
+**Owners:** Z = Zhenyan, T = Tongkai, S = Siyun; Jira controls assignment.
+**Milestones:** November 4 peer feedback, November 11 Beta, November 18 ethics
+reflection, November 25 video, December 3 Design Day, December 13 final report,
+December 14 client/advisor evaluation.
 
-## 0. MVP 收尾
+## 0. MVP follow-up
 
-### 0.1 演示文稿
-- [x] 第 14 页与报告统一（保留 BKT、LLM 地址设置；删掉 "Turn on the hypothetical rewrite"）— T（最终版已改）
-- [ ] 最后一页加 AI 使用声明（Claude；路由流程图用了 ChatGPT）— Z
+- [x] T: align presentation slide 14 with the report; retain BKT and model settings;
+  remove the unnecessary hypothetical-rewrite switch.
+- [ ] Z: add the generative-AI usage disclosure to the final slide.
+- [ ] Z: fill Sprint 3 dates, task dependencies, sprint milestones, and Jira
+  permissions for two TAs and the professor.
+- [ ] Z: create Sprint 3a/3b if needed; close the duplicate dashboard task G1-4.
+- [ ] Owners: review G1-57, G1-59, G1-61, G1-63, G1-64 and close fixed bugs.
 
-### 0.2 Jira（作业 B5 要求，尚未做）
-- [ ] 所有 Sprint 3 任务填开始 / 截止日期；子任务表单加 Start date / Due date 字段 — Z
-- [ ] 加依赖（blocks）：例如 G1-92 → G1-106、G1-96 收到答卷 → 建测试档案、G1-56 → Beta 演示 — Z
-- [ ] 里程碑：Beta 11/11、视频 11/25、Design Day 12/3、Final 12/13 — Z
-- [ ] 建 Sprint 3a / 3b（现在只用标签 `sprint-3a` / `sprint-3b` 标出）— Z
-- [ ] 给两位 TA 和老师开 Jira 权限 — Z
-- [ ] 关闭 G1-4（"create dashboard"，与已完成的教师面板重复）— Z
-- [ ] 核实旧 bug：G1-57、G1-59、G1-61、G1-63、G1-64（修好的关掉，没修好的放进 Sprint）— 各负责人
+## 1. Sprint 3a (October 21-28)
 
----
+### Privacy — Z
 
-## 1. Sprint 3a（10/21–10/28）
+- [x] G1-93: detect spaced or malformed student IDs and health details split over turns.
+- [x] G1-95: retain age and sex when needed for educational medical context.
+- [x] G1-109: merge configurable hypothetical health-question generalization with
+  post-rewrite privacy checks and original-question medical referral rules.
+- [ ] Add post-generation health-detail leakage detection.
+- [ ] Scrub medical terms and readings before storage (E4/E6 finding).
+- [ ] Scan instructor-uploaded documents before indexing.
 
-### 隐私（Z）
-- [x] 学号拼错、加空格或斜杠（"300 123 456"），以及病情分两条消息说 — G1-93
-- [x] 年龄、性别不过滤（会影响医学回答），加测试并写进设计说明 — G1-95
-- [x] 合并分支 `feature/enable-generalize`：`config.yaml` 启用假设性改写 `generalize`（10/20 教授同意），改写保留年龄、性别 — G1-109
-  - [x] 改写后再跑隐私过滤；检查无"第一人称 + 病情"、无具体读数/剂量/日期、无姓名；不通过 → 留本地
-  - [x] "建议就医"仍按原始问题判断（`needs_referral` 看原始问题的识别结果，不受改写影响）
-- [ ] 新增发送后的病情泄露检查 — Z
-- [ ] 存储前也替换病情片段里的病情词 / 读数（"inhaler"、"150/95"；E4 `--e6` 发现）— Z
-- [ ] 老师上传资料用隐私过滤扫描（`docs/history/隐私升级.md` §2）— Z
+### Deployment, operations and learner model — Z
 
-### 部署与教师面板（Z）
-- [ ] 教师面板输入服务器地址和模型名，连接教授自己的 LLM 服务器作为本地模型；带"测试连接"（10/20 顾问确认本地模型跑在学校服务器上）— G1-94
-- [ ] Docker Compose、CI、演示种子脚本；镜像里带上路由和证据模型 — G1-56
+- [ ] G1-94: instructor-configurable school-hosted local LLM server, model and
+  a "Test connection" control.
+- [ ] G1-56: Docker Compose, CI, demo seed script and packaged routing/evidence models.
+- [ ] G1-100: review BKT/KC design and retain the rule learner as a fallback.
+- [ ] Confirm cloud provider, data residency and cost limits with the client.
 
-### 学习者模型（Z）
-- [ ] 保留 BKT 为默认（有文献依据、有真实数据后可拟合，规则模型作备用）；和客户、顾问复审 BKT 与 KC 设计 — G1-100
+### Routing and web evidence — T
 
-### 路由（T）
-- [ ] 给需要最新信息的云端回答加 web search：只发清洗后的一般化查询；来源限可信域名；不用云端模型自带的搜索 — G1-92
-- [ ] 找出最终路由一致率 82.9% 的根本原因 — G1-99
-- [ ] 对话上下文影响路由决策的 bug（含长对话截断）— G1-74（子任务 G1-75、G1-76）
+- [ ] G1-92: approved-domain search for current information, using only sanitized queries.
+- [ ] G1-99: explain the observed 82.9% routing agreement.
+- [ ] G1-74/75/76: fix conversational routing and long-history truncation.
 
-### 检索与回答校验（S）
-- [ ] 把学习者问卷发给 Lavin，请她作为测试学生填写，并据此建测试档案 — G1-96
-- [ ] 加入讲义和 PDF；优化分块和 KC 过滤；对照 M6（≥ 85% / ≥ 70%）重测 Recall@1 — G1-97
-- [ ] 改进无依据内容的检测 — G1-98
-- [ ] 和客户确认检索目标 M6（报告定为 Recall@1 ≥ 85% / ≥ 70%，MVP 实测 75%）— G1-112
-- [ ] 协调 Lavin 和 Abbas 医生的医学内容审核（`docs/review/high_blood_pressure_review.csv`）— G1-102
+### Retrieval and medical content — S
 
-### 其他
-- [ ] 起一个简单、对医学生友好的项目名 — Z（G1-101）
-- [ ] 10/27 例会 — S（G1-69）
-- [ ] 客户确认云端服务商和数据存放地（DeepSeek 在中国）、消费上限 — Z
+- [ ] G1-96: invite Lavin to answer the synthetic student questionnaire.
+- [ ] G1-97: ingest approved PDF/lecture materials, improve chunks and KC filters,
+  and reassess the provisional M6 Recall@1 thresholds (85% ideal, 70% marginal).
+- [ ] G1-98: strengthen unsupported-answer detection.
+- [ ] G1-112: confirm retrieval-quality thresholds with the client.
+- [ ] G1-102: coordinate Lavin and Dr. Abbas medical-content review.
+- [ ] G1-69: October 27 progress meeting.
 
----
+### General
 
-## 2. Sprint 3b（10/29–11/4）
-- [ ] Beta 隐私评估（E6 留出集、E4 审计、面板流程），协调 Beta 演示 — Z（G1-103）
-- [ ] Beta 代码审查，CI 通过 — Z（G1-107）
-- [ ] Beta RAG 和回答校验评估（Recall@K、Precision@K、有无依据、延迟）— S（G1-104）
-- [ ] Beta 路由和学习者模型评估（M7–M10）— T（G1-105）
-- [ ] web search 评估（来源、E4 审计无问题原文、延迟和成本）— T（G1-106）
-- [ ] 非医学问题识别 — T（G1-77，子任务 G1-78–80）
-- [ ] Beta 报告和演示 — T（G1-108）
-- [ ] 教师面板设置本地 / 云端模型的思考开关和长度上限（`think`、`max_tokens`；推理 token 计入上限，过低会截断回答）— Z（G1-110）
-- [ ] 学生端和教师面板的英法双语界面（例如 react-i18next）— S（G1-111）
-- [ ] 补测报告里定了目标但没测的指标：M11 整题回答时间（≤ 6 s / ≤ 8 s）、M12 云端比例和成本、M13 学生评分（需要邀请真实学生）— 待分配，建议并入 G1-103 至 G1-105
+- [ ] G1-101: choose a student-friendly project name.
 
----
+## 2. Sprint 3b (October 29-November 4)
 
-## 3. Sprint 4–6 与之后（报告表 6.1）
-- Sprint 4（11/4–11/10）：认证、账号、教师面板最终检查 — Z；上传、索引、替换、重启后保留 — S；端到端评估路由、延迟、本地 / 云端回答质量（E5）— T
-- Sprint 5（11/11–11/17）：最终代码审查、隐私 / UI / 部署材料 — Z；RAG 和回答质量评估 — S；路由逻辑复查、语料与索引审核 — T
-- Sprint 6（11/18–11/24）：交付客户、Design Day、最终报告、产品手册 — 全员
-- [ ] 评估稠密向量检索，与现有混合检索比较（Hit@1、Hit@4、MRR@4、延迟、内存），决定保留、替换或组合 — S（G1-113，Sprint 4）
-- [ ] 另外四个主题的 KC、选择题、误解清单 + Abbas 审核 — S（G1-47）
-- [ ] 内容审核页面（Abbas 在网页上逐条审核）— Z（G1-46）
-- [ ] 隐私升级 §3–§5：多轮追问、本地 LLM 二次检查（C5）— Z
-- [ ] E1 测试集扩到 120–150 条（五个主题）— Z
-- [ ] E3：Abbas 医生对 30 组样本评分（`eval/personalization/results/abbas_sample.csv`）— Z 联系
-- [ ] 云端费用控制：每学生提问频率限制 + 每日云端调用上限 — Z
-- [ ] 回答流式输出（逐字显示）— Z/T
-- [ ] 删除已上传资料 — S
-- [ ] Alembic 数据库迁移、Playwright 端到端测试、课程结束批量删除学生数据的脚本 — Z
+- [ ] Z / G1-103: Beta E6 held-out privacy evaluation, E4 audit and dashboard workflow.
+- [ ] Z / G1-107: Beta code review and CI.
+- [ ] S / G1-104: evaluate RAG groundedness, Recall@K, Precision@K and latency.
+- [ ] T / G1-105: routing and learner model evaluation (M7-M10).
+- [ ] T / G1-106: test web source quality, privacy, latency and costs.
+- [ ] T / G1-77-80: distinguish non-medical/logistics questions.
+- [ ] T / G1-108: Beta report and demo.
+- [ ] Z / G1-110: model reasoning controls and token budgets.
+- [ ] G1-111: English/French UI localization; ownership follows updated v4 guide.
+- [ ] Assign M11 answer latency, M12 cloud-use/cost, and M13 student ratings.
 
----
+## 3. Sprints 4-6 and later
 
-## 4. 技术债（集成审查遗留，10/19；部分可能已在 PR #3 中解决，动手前先核实）
+- Sprint 4 (Nov 4-10): Z validates accounts and instructor settings; S validates
+  upload, replacement, indexing and restart persistence; T validates routing,
+  end-to-end latency and local/cloud answer quality (E5).
+- Sprint 5 (Nov 11-17): Z reviews code, privacy, UI and deployment;
+  S evaluates retrieval/answers; T reviews routing logic and source corpora.
+- Sprint 6 (Nov 18-24): team prepares client delivery, Design Day, report and manual.
 
-### 隐私与审计
-- [ ] 发送后的病情泄露检查 — Z
-- [ ] 确认 `CloudRequest` 没有混入历史发言或路由诊断 — Z
-- [ ] `conftest.py` 不再强制 stub 路由；隐私测试在 stub 和 semantic 下各跑一遍；测试不受本地 `.env` 影响 — Z/T
-- [ ] 端到端测试："病情问题 + 语义路由判云端" — Z
-- [ ] E4 增加走语义路由的一轮；检查 SSE 进度事件不含问题或资料原文 — Z
-- [ ] E3/E4 在 CI 中无模型资产、无云端 key 时不失败 — Z/T
-- [ ] 预先存在的 19 个测试失败（内容未审核相关）— 另开任务
+### Additional Jira items
 
-### 路由与可用性
-- [ ] `analyze_route` 出错改为跳过（`on_error: skip`），不终止请求 — T
-- [ ] 检索总是执行；云端请求也带上已通过验证的课程资料 — T/S
-- [ ] 重依赖（sklearn、torch、transformers）用到时才导入；stub 配置下不装也能启动 — S/T
-- [ ] SSE 增加 `fallback` 事件 — Z/T
+- [ ] S / G1-113: compare dense retrieval with hybrid retrieval on Hit@1/4,
+  MRR@4, latency and memory use.
+- [ ] S / G1-47: remaining four medical topics' KCs, check items and misconceptions,
+  subject to Dr. Abbas review.
+- [ ] Z / G1-46: online clinician content review.
+- [ ] Z: multistep privacy upgrades, local LLM verification (C5), E1 dataset expansion,
+  Dr. Abbas E3 evaluations and per-student cloud usage limits.
+- [ ] Z/T: token streaming and safe status handling.
+- [ ] S: delete or replace uploaded materials and update the search index.
+- [ ] Z: Alembic migrations, Playwright end-to-end tests and end-of-course data deletion.
 
-### 需要讨论后决定
-- [ ] 路由器回到"只打分、系统按阈值决策"，还是保留直接给 `target`？— Z/T
-- [ ] 学生自选 LR/SVM → 改为教师设置或仅实验用 — T
-- [ ] 进度面板默认关闭或只显示简化阶段 — T
-- [ ] 流式接口是否推送回答本身；学习记录更新移出流 — T/Z
-- [ ] 检索查询是否拼接历史发言 — S
-- [ ] understand（Qwen）与 analyze_route（MiniLM）两次问题分析是否合并 — Z/T
-- [ ] understand 步骤是否换成 `gemma4:e4b`（E1：更快更准，多占显存）— Z
-- [ ] 是否开启弱证据（E2：对 rule 有帮助）— Z
+## 4. Integration technical debt (October 19 review)
 
-### 已知 Bug（Jira）
-- [ ] G1-58 医疗安全检查误拦一般性问题（"医生怎么诊断高血压"）— T
-- [ ] G1-60 模型重新加载后首个请求在 understand 步骤超时 → 启动预热 + Ollama `keep_alive` — Z
+### Privacy/security
 
-### 代码库清理
-- [ ] 删除交接文件：`restore_git.ps1`、`BASE_VERSIONS.json`、`setup_local.py`、`start_*.ps1` — T
-- [ ] `.env.example` 改回通用值（OLLAMA_URL、模型名）— T
-- [ ] 新分支名不用中文 — 全员
+- [ ] Z: post-generation health leak checks; confirm CloudRequest excludes
+  history and routing internals.
+- [ ] Z/T: test both stub and semantic routing without dependence on developer .env.
+- [ ] Z: end-to-end private-medical-question + cloud routing test.
+- [ ] Z: semantic E4 audit and SSE source-text exposure checks.
+- [ ] Z/T: E3/E4 CI should tolerate unavailable models/cloud credentials.
+- [ ] Check 19 historical failures related to unreviewed content; assign separately.
 
----
+### Routing and resilience
 
-## 已完成（摘要）
-- MVP 报告、演示、讲稿（10/21 提交）；报告含生成式 AI 使用声明
-- 隐私：E6 测试集与留出集、对比测试和加权评分（C4+A5 3.75）、14 个自定义识别器、云端关口、本地回退、假设性改写代码（`app/privacy/generalize.py`）— G1-81 至 G1-88
-- 客户与顾问反馈（10/13、10/20）：教师只看主题汇总；去身份的健康问题可上云；本地模型部署在学校服务器；保留年龄和性别 — G1-84
-- 语义路由（MiniLM + LR/SVM + 交叉编码器证据检查）并入 main — G1-70 至 G1-73
-- 混合检索（BM25 + TF-IDF）、教师上传即索引 — G1-89、G1-45、G1-62
-- 学习者模型：理解步骤（E1 92%）、BKT 与规则模型（E2）、个性化（E3 85%）、误解追踪、"What I know" 页面 — G1-14、G1-36 至 G1-38、G1-54、G1-55
-- 教师面板：班级汇总、无学生 ID 的日志、运行时设置、评分问卷 — G1-19、G1-51 至 G1-53、G1-90
-- DeepSeek 实测（E4 `--real-cloud` 0 泄漏）
+- [ ] T: make analyze_route failure skippable without failing the whole request.
+- [ ] S/T: retrieve evidence regardless of routing decision; deliver verified
+  course passages through either route.
+- [ ] S/T: lazy-load sklearn/torch/transformers when applicable.
+- [ ] Z/T: publish explicit SSE fallback events.
+
+### Open design decisions
+
+- Should the router supply scores or pick targets? (Z/T)
+- Should students select LR/SVM or should it be instructor-controlled? (T)
+- Should the routing progress panel show simplified stages only? (T)
+- Should answer text stream, and should learner writes happen outside streams? (T/Z)
+- Should retrieval queries incorporate history? (S)
+- Can the Qwen understanding and MiniLM routing stages be consolidated? (Z/T)
+- Should the understanding model change after E1 results? (Z)
+- Is weak evidence useful for each learner model? (Z)
+
+### Known Jira bugs
+
+- [ ] T / G1-58: medical-safety checker incorrectly blocks some general questions.
+- [ ] Z / G1-60: first request after model reload times out; consider warm-up
+  and Ollama keep-alive.
+
+### Repository housekeeping
+
+- [ ] T: remove obsolete ZIP handover scripts and machine-specific environment values
+  after verifying their users no longer need them.
+- [ ] All: keep file names, branch names, documentation and comments in English.
+
+## 5. Historical completed work
+
+The October 21 MVP report, presentation and speaker notes were submitted.
+Existing work includes E6 privacy evaluations, semantic routing, hybrid medical
+retrieval, BKT and rule-based learner models, personalization, teacher dashboard
+and an E4 live-cloud audit. These historical claims are not a substitute for
+current v4 production verification; see the English implementation guide and
+Siyun's latest handoff for the present state.

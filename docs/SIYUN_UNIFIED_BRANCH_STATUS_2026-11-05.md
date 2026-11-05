@@ -66,8 +66,7 @@ Z4/Z6/Z10/Z11 production interfaces or real medical-content approvals exist.
 ## Teammate contract and latest verified state
 
 See `docs/SIYUN_TEAM_HANDOFF_Z_T_2026-11-05.md` for all integration requests
-addressed to Zhenyan and Tongkai, and its `_zh.md` companion for the Chinese
-summary. The latest full default+rule regression on this personal branch is
+addressed to Zhenyan and Tongkai, and the English-only handoff notes for team coordination. The latest full default+rule regression on this personal branch is
 **766 passed (1 deselected) in each backend mode**, with Ruff, frontend build,
 and **28 frontend tests** passing. Real course API, DB, model gateway and external
 clinical/source approval remain pending their respective owners.

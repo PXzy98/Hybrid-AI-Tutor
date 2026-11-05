@@ -1,18 +1,19 @@
 # Integrated main + RAG + semantic routing (v3)
 
-完整保留教师后台，合并真实医学 RAG 和 500 题 LR/SVM routing。
-Windows 首次运行请看 [开始使用.md](开始使用.md)（English: [GETTING_STARTED.md](GETTING_STARTED.md)），版本来源与限制见 [docs/history/INTEGRATION.md](docs/history/INTEGRATION.md)。
-安装：Python 3.12 运行 `setup_local.py`；启动：分别运行 `start_backend.ps1` 与 `start_frontend.ps1`。
+This v3 integration retains the instructor dashboard and combines real medical RAG with LR/SVM semantic routing trained on 500 questions.
+For first-time Windows setup, see [GETTING_STARTED.md](GETTING_STARTED.md). For source history and limitations, see [docs/history/INTEGRATION.md](docs/history/INTEGRATION.md).
+Install with Python 3.12 and `setup_local.py`; run `start_backend.ps1` and `start_frontend.ps1` to start the services.
 
 ---
 
-以下为主分支原有项目说明：
+The original main-branch project overview follows.
 
 # Privacy-Aware Hybrid AI Tutor
 
 A health-education tutor (ELG 5902, Group 1). Students pick one of five topics (High Blood Pressure, Type 2 Diabetes, Asthma, Migraine, Pneumonia) and ask questions. The system removes private information locally, then routes each question to a local model (Ollama) or a cloud model. Answers are grounded in course material (RAG) and adapted to what the student already knows. The tutor tracks the student's mastery of each knowledge component and adapts the level, the material and the check questions. Learning preferences only change how the answer is presented. The learner profile never leaves the local network.
 
-- **Next version (v4), start here**: [docs/v4-implementation-guide.md](docs/v4-implementation-guide.md) (rules, target architecture, owners, tasks)
+- **Next version (v4), start here**: [docs/v4-implementation-guide.md](docs/v4-implementation-guide.md)
+- Repository language: English only, including code, docs, comments and test data. Run `python scripts/check_english_only.py` (see [language policy](docs/REPOSITORY_LANGUAGE_POLICY.md)). (rules, target architecture, owners, tasks)
 - Design (v3, as built): [docs/System_Design_v3.md](docs/System_Design_v3.md) (diagrams in [docs/diagrams/](docs/diagrams/))
 - Progress log: [docs/IMPLEMENTATION_LOG.md](docs/IMPLEMENTATION_LOG.md)
 - For teammates (routing, RAG): [docs/INTERFACES.md](docs/INTERFACES.md)
@@ -100,7 +101,7 @@ CLOUD_API_KEY=...
 CLOUD_MODEL=deepseek-flash
 ```
 
-The cloud only receives the sanitized question, the topic, course passages and three coarse labels; a question with a personal health detail reaches the cloud only as a general question rewritten by the local model ("Can a person with asthma play soccer?"), and stays local if the rewrite fails its checks (`privacy.health_detail_policy: generalize`, approved by the professor; `local_only` keeps all such questions local). Without a key, or when the cloud fails, the local model answers and the student is told why. Reasoning models count their hidden reasoning against `llm.cloud.max_tokens` (2000). Check the provider's data location and retention with the client before a pilot (DeepSeek stores data in China): see [docs/history/隐私升级.md](docs/history/隐私升级.md).
+The cloud only receives the sanitized question, the topic, course passages and three coarse labels; a question with a personal health detail reaches the cloud only as a general question rewritten by the local model ("Can a person with asthma play soccer?"), and stays local if the rewrite fails its checks (`privacy.health_detail_policy: generalize`, approved by the professor; `local_only` keeps all such questions local). Without a key, or when the cloud fails, the local model answers and the student is told why. Reasoning models count their hidden reasoning against `llm.cloud.max_tokens` (2000). Check the provider's data location and retention with the client before a pilot (DeepSeek stores data in China): see [docs/history/PRIVACY_UPGRADE_PLAN.md](docs/history/PRIVACY_UPGRADE_PLAN.md).
 
 Run the app in development mode (two terminals):
 

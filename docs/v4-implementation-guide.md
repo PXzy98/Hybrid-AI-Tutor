@@ -6,8 +6,7 @@ This file is the **single entry point** for the v4 work: background, rules that 
 architecture, which files each task touches, when a task is done, and how to test. With a task ID (for
 example `Z4`) you can start.
 
-A Chinese companion for the team: [v4-implementation-guide_zh.md](v4-implementation-guide_zh.md) (the English
-file is the one agents follow, rule 14).
+All implementation work and team documentation use English, as required by rule 14.
 
 Design documents that are part of this guide:
 - [design/course-structure.md](design/course-structure.md): what a course is, accounts and roles,
@@ -102,13 +101,14 @@ Read before changing code. A PR that breaks any of these is not merged.
     smoke tests, frontend build and tests, Docker build.
 13. **Privacy constants are not configuration**: `log_raw_text`, the required checkers and recognizer
     internals stay in code or in the privacy profiles.
-14. **No Chinese in code or in Markdown outside `docs/`.** Code, comments, identifiers, test data written
-    in code, commit messages, PR descriptions and every `.md` file outside `docs/` are in English. French is
-    allowed only for French UI strings (`frontend/src/i18n/fr.ts`) and French test text for French
-    recognizers. **`docs/` is exempt**: it may hold Chinese companion files named `<name>_zh.md` for the
-    team. The English file is the one agents follow; whoever changes an English document updates its
-    `_zh` companion in the same PR, or adds a line at the top of the companion saying it is out of date.
-    Remaining Chinese outside `docs/` is cleaned up by Z15 and T14.
+14. **English-only repository text.** Source code, comments, identifiers, Markdown (including
+    `docs/`), test files, tracked fixtures, commit messages and PR descriptions must not contain
+    literal Chinese/CJK characters. Project documentation and developer-facing text use English.
+    French remains permitted for French UI strings (`frontend/src/i18n/fr.ts`) and
+    language-specific French test fixtures. Chinese-language functional/privacy scenarios may
+    be retained as Unicode escape sequences to preserve their runtime behavior.
+    Do not add Chinese companion documentation or Chinese-named paths. Validate changes using
+    `python scripts/check_english_only.py`; this supersedes the former `docs/` exemption.
 15. **API v2 only** (design/api-v2.md): `/api/v1` is frozen; new endpoints and fields go to `/api/v2`.
     Within v2 only additive changes; a breaking change needs `/api/v3`, decided by Z.
 
@@ -476,7 +476,7 @@ data); users build against the fakes without waiting for the real implementation
 | T11 | Renaming (once the name is chosen); accessibility self-check (keyboard, screen reader, contrast, zoom) | S7 | name | `frontend/` | checklist |
 | T12 | Student manual, instructor manual (including the TA note in course-structure.md 3.4); routing, frontend and web search handover | S8 | — | `docs/` | a new instructor can use it |
 | T13 | Web search (G1-92) + evaluation (G1-106): search API, allow-list, cleaning, results as passages for generation; query only from `search_query()`; outbound calls only through the single outbound helper | S7 | Z11, Z6 | new `backend/app/websearch/`, `config.yaml` pipeline | E4 audit: no personal data in search requests; evaluation report |
-| T14 | Remove Chinese from Markdown outside `docs/` and from the frontend (rule 14): rewrite `TODO.md` in English from section 7; move the Chinese copy of `GETTING_STARTED.md` from the repository root to `docs/GETTING_STARTED_zh.md` and fix its links; remove the Chinese lines of `README.md` and `GETTING_STARTED.md`; Chinese strings in `frontend/src/test/Routing.test.tsx` | S5 | — | listed files | `git grep` finds no Chinese outside `docs/` (except data files) |
+| T14 | Enforce English-only repository text (rule 14): keep setup, README and backlog in English; remove redundant translated copies; represent multilingual test strings with Unicode escapes and run the language checker | S5 | ? | documentation, test fixtures, `scripts/check_english_only.py` | all tracked text and filenames pass the repository language check |
 
 ### 7.4 Frontend stack (T)
 
@@ -618,7 +618,7 @@ data); users build against the fakes without waiting for the real implementation
 | Instructor AI | all four tiers |
 | Knowledge model | course-level layered model; rule model only as fallback |
 | Web search | owned by T, following rule 6 |
-| Language | no Chinese in code or in Markdown outside `docs/`; Chinese companions `*_zh.md` allowed in `docs/` (rule 14) |
+| Language | English-only source, Markdown, tracked fixtures and filenames across the whole repository; multilingual runtime fixtures use Unicode escapes (rule 14) |
 | Future maintainers | the student team that takes over the project |
 
 **Open**:

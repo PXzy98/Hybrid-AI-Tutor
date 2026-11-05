@@ -20,7 +20,9 @@ _warned_unavailable = False
 
 def question_units(question: str) -> list[str]:
     parts = re.split(
-        r"(?<=[?？;；])\s*|\n+|\band\s+(?=(?:why|how|what|which|explain)\b)", question.strip(), flags=re.I
+        r"(?<=[?\uff1f;\uff1b])\s*|\n+|\band\s+(?=(?:why|how|what|which|explain)\b)",
+        question.strip(),
+        flags=re.I,
     )
     return [p.strip() for p in parts if p.strip()] or [question]
 

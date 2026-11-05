@@ -18,7 +18,7 @@ def setup_module_object():
 
 def test_env_values_round_trip_without_shell_interpolation():
     setup = setup_module_object()
-    password = 'Strong"pass\\word$123汉字'
+    password = 'Strong"pass\\word$123\u6c49\u5b57'
     values = dotenv_values(stream=io.StringIO(setup.env_text("teacher", password, "qwen3.5:9b-q4_K_M")))
     assert values["INSTRUCTOR_INITIAL_PASSWORD"] == password
     assert values["OLLAMA_URL"] == "http://127.0.0.1:11434"

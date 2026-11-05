@@ -1,7 +1,7 @@
 # Fully integrated version v3
 
-English version of [开始使用.md](开始使用.md). Two statements were updated on 19 Oct 2026 to match the current
-code; they are marked *(updated)*.
+English setup guide for the v3 integration. Two statements were updated
+on October 19, 2026, to match the current code and are marked *(updated)*.
 
 This project combines: the full instructor dashboard from the main branch, Siyun's real medical RAG, and our
 semantic routing. The original three classification labels, the evidence check, the LR/SVM weights trained on
