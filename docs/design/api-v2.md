@@ -35,6 +35,7 @@ component owner who implements it. Data model and rules: [course-structure.md](c
 | Uploads | `multipart/form-data`; limits from `limits.uploads`. |
 | Streams | Server-sent events, `text/event-stream`, events `progress`, `token`, `final`, `error`. |
 | Rate limits | 429 with `code: usage_limit` and `retry_after_seconds`. |
+| Settings lock | 423 with `code: settings_applying` while a settings change is being applied (course-structure 6.5). |
 
 ## 3. Endpoints
 
@@ -62,6 +63,7 @@ logged in. Owner = component owner who implements it.
 | `PATCH /admin/instructors/{account_id}`, `POST /admin/instructors/{account_id}/reset-password` | A | deactivate, change role, reset |
 | `GET /admin/settings`, `PUT /admin/settings` | A | system settings; `PUT` sends the `version` it read, 409 if it changed (course-structure 6.2) |
 | `GET /admin/settings/history`, `POST /admin/settings/restore/{history_id}` | A | change history and undo |
+| `GET /admin/settings/apply-status` | A | `apply_state`, target version, per-process progress and errors (course-structure 6.5); the page polls it while `applying` |
 | `GET /admin/model-endpoints`, `POST /admin/model-endpoints`, `PATCH .../{endpoint_id}`, `POST .../{endpoint_id}/test` | A | system model connections (Z6) |
 
 ### 3.3 Courses, members, settings (owner Z)

@@ -184,7 +184,10 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 **取值规则**：只通过 `effective_settings(course_id)` 取值；API 层把结果放进 `RequestContext.settings`，各步骤只读这一份。从第 5 层往上找第一个有值的层，再按第 2 层的硬上限截断；第 1 层不能被覆盖。
 
 **怎样做到又省又稳**（详见 course-structure.md 第 6 节）：
-- **运行时的设置只有"值"**：用哪个知识模型、哪个路由、哪些处理步骤这类实现选择，都留在 `config.yaml`。运行时不重建任何对象，`services.reconfigure` 删掉。
+- **设置页面上的任何设置都不用重启**：
+  - 改"值"（阈值、课程类型等），下一个请求就生效；
+  - 改"组件"（知识模型、可选检查项、默认路由方法、默认模型连接），每个进程在后台建好新组件再切换过去；在所有进程都换好之前，这行设置是锁定的（返回 423，保存按钮不可点），失败或超时会自动回滚；
+  - `services.reconfigure` 删掉。
 - **写入**：每张表的每行都有 `version`；写入时检查版本，被别人改过就返回 409，避免互相覆盖。写入在一个事务里完成，同时写一条 `config_history` 和一条审计记录；历史可以恢复。
 - **读取**：每个请求只做一次主键查询，再加一个按版本号做键的进程内缓存。所以每个进程在下一次请求时就能看到修改，不需要定时器，进程之间也不用互发消息。
 - **快照**：一个请求（或一个后台任务）从开始到结束都用同一份设置快照。
@@ -375,7 +378,7 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | Z2 | 9B vs 27B：27B 走 OpenRouter，同一批课程问题、都带 RAG；给出 vLLM 机器规格和费用 | S4–S5 | 独立 | 新的 `eval/model-compare/` | 对比报告 |
 | Z3 | PostgreSQL + Alembic；Postgres 测试夹具和 CI 服务；去掉 SQLite | S5 | Z1 | `backend/app/storage/`、新的 `backend/alembic/`、`.github/workflows/ci.yml` | CI 在 Postgres 上跑 |
 | Z4 | 课程目录：course-structure.md 第 10 节的表；知识点、检测题、误解从 YAML 进数据库；v3 迁移脚本（第 11 节）；删除 `serve_unreviewed` 和 `reviewed_by` | S5 | Z3 | `storage/models.py`、`core/topics.py`、`learner/content.py`、`scripts/` | 现有测试在迁移后的"General Medical Knowledge"课程上通过 |
-| Z5 | 设置分层（course-structure.md 第 6 节）：带版本的 `system_settings`、`course_settings`，版本检查、历史和恢复、按版本的缓存、`effective_settings()`、`limits`（4.4 的表）；迁移 v3 最新一条 `config_history`；删除 `runtime_config.py` 的重建和 `services.reconfigure`；各步骤读 `ctx.settings` | S5 | Z3 | `core/config.py`、`core/services.py`、`admin/runtime_config.py`、`pipeline/steps/*`、`config.yaml` | 不再直接读这些常量；两门课互不影响 |
+| Z5 | 设置分层（course-structure.md 第 6 节）：带版本的 `system_settings`、`course_settings`，版本检查、历史和恢复、按版本的缓存、`effective_settings()`、`limits`（4.4 的表）；迁移 v3 最新一条 `config_history`；组件的在线切换，包括应用状态、锁定和回滚（第 6.5 节），以及 `process_status` 心跳；删除 `services.reconfigure`；各步骤读 `ctx.settings` | S5 | Z3 | `core/config.py`、`core/services.py`、`admin/runtime_config.py`、`pipeline/steps/*`、`config.yaml` | 不再直接读这些常量；两门课互不影响 |
 | Z6 | 模型网关：连接注册表、可信级别、教师的 OpenAI 兼容 API、API key 加密、防 SSRF、排队和超时、按 token 流式输出；vLLM 压测 | S5–S6 | Z5 | `backend/app/llm/`（新的 `gateway.py`）、`admin/llm_server.py` | 内部地址被拒绝；外部连接收不到原文（有测试）；压测报告 |
 | Z7 | 隐私档案框架：基础层 + 档案配置文件 + 识别器注册；按课程类型选档案 | S5 | Z5 | `backend/app/privacy/`（新的 `profiles/`） | 加新档案只需一个配置文件；E6 不变差 |
 | Z8 | Docker Compose 骨架：proxy（Caddy）、api、worker、db；两个网络 | S5 | — | `docker-compose.yml`、新的 `deploy/Caddyfile` | 本地一条命令起全套 |

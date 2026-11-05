@@ -216,8 +216,10 @@ api / worker ──► external model APIs (cloud model, an instructor's own Ope
 set, then clip to the layer-2 hard cap; layer 1 cannot be overridden.
 
 **How it stays cheap and stable** (details in course-structure.md section 6):
-- run-time settings are values only; implementation choices (knowledge model, router, pipeline steps) stay
-  in `config.yaml`, so nothing is rebuilt at run time and `services.reconfigure` is removed;
+- no setting on a settings page needs a restart: value changes apply on the next request; component
+  changes (knowledge model, optional checkers, default routing method, default model endpoints) are built
+  in the background in every process and swapped in, and the row stays locked (423) until every process
+  runs the new version or the change is rolled back; `services.reconfigure` is removed;
 - each table row has a `version`; writes use optimistic locking (409 on conflict), one transaction, a
   `config_history` row and an audit row; history can be restored;
 - reads are one primary-key query per request plus a per-process cache keyed by the versions, so every
@@ -424,7 +426,7 @@ data); users build against the fakes without waiting for the real implementation
 | Z2 | 9B vs 27B: 27B through OpenRouter, same course questions, both with RAG; vLLM machine size and cost | S4–S5 | independent | new `eval/model-compare/` | comparison report |
 | Z3 | PostgreSQL + Alembic; Postgres test fixture and CI service; drop SQLite | S5 | Z1 | `backend/app/storage/`, new `backend/alembic/`, `.github/workflows/ci.yml` | CI runs on Postgres |
 | Z4 | Course catalog: tables of course-structure.md section 10; KCs, items, misconceptions from YAML into the database; v3 migration script (section 11); remove `serve_unreviewed` and `reviewed_by` | S5 | Z3 | `storage/models.py`, `core/topics.py`, `learner/content.py`, `scripts/` | existing tests pass against the migrated "General Medical Knowledge" course |
-| Z5 | Settings layers (course-structure.md section 6): `system_settings`, `course_settings` with versions, optimistic locking, history and restore, version-keyed cache, `effective_settings()`, `limits` (table in 4.4); migrate the newest v3 `config_history` row; remove `runtime_config.py` rebuilds and `services.reconfigure`; steps read `ctx.settings` | S5 | Z3 | `core/config.py`, `core/services.py`, `admin/runtime_config.py`, `pipeline/steps/*`, `config.yaml` | no direct reads of these constants; two courses do not affect each other |
+| Z5 | Settings layers (course-structure.md section 6): `system_settings`, `course_settings` with versions, optimistic locking, history and restore, version-keyed cache, `effective_settings()`, `limits` (table in 4.4); migrate the newest v3 `config_history` row; live component switch with apply state, lock and rollback (section 6.5) and `process_status` heartbeats; remove `services.reconfigure`; steps read `ctx.settings` | S5 | Z3 | `core/config.py`, `core/services.py`, `admin/runtime_config.py`, `pipeline/steps/*`, `config.yaml` | no direct reads of these constants; two courses do not affect each other |
 | Z6 | Model gateway: connection registry, trust levels, instructor OpenAI-compatible APIs, encrypted API keys, SSRF protection, queueing and timeouts, token streaming; vLLM load test | S5–S6 | Z5 | `backend/app/llm/` (new `gateway.py`), `admin/llm_server.py` | internal addresses rejected; external connections never get original text (tests); load test report |
 | Z7 | Privacy profile framework: base layer + profile files + recognizer registration; profile selected by course type | S5 | Z5 | `backend/app/privacy/` (new `profiles/`) | a new profile needs one config file; E6 not worse |
 | Z8 | Docker Compose skeleton: proxy (Caddy), api, worker, db; two networks | S5 | — | `docker-compose.yml`, new `deploy/Caddyfile` | one command starts everything locally |
