@@ -19,3 +19,12 @@ source and anchor and `negative=true`.
 **This has not produced measured real-course quality results.** Only fictional
 two-course engineering tests are used. S11 still needs Gita's permission for ELG5902
 teaching materials, approved real course indexes, and independent expert labels.
+
+## Metric extension
+
+The current evaluator also returns `recall_at_1`, `precision_at_1`,
+`precision_at_k`, and `source_traceability`. Precision@K uses a
+fixed K denominator, de-duplicates identical retrieved passages, and
+the evaluator refuses a passage not present in the active course index.
+A score of 1 for source traceability proves indexed provenance only,
+not factual correctness or medical approval.

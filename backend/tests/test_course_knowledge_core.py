@@ -99,3 +99,35 @@ def test_student_independence_and_probability_bounds():
     assert 0 < first.kcs["KC-A"].probability < 1
     assert -4 <= first.ability <= 4
     assert model.progress(second, "KC-A").probability == 0.2
+
+
+@pytest.mark.parametrize("sequence", [
+    [("diagnostic", True), ("strong", False), ("strong", True)],
+    [("strong", False), ("strong", False), ("diagnostic", True)],
+    [("weak", None), ("strong", True), ("strong", True)],
+])
+def test_s8_raw_bkt_matches_v3_update_equations(sequence):
+    from app.learner.knowledge.bkt_math import learn, posterior, weak_update
+
+    model = _core()
+    state = model.initial(42, "fake-student")
+    expected = 0.2
+    for kind, correct in sequence:
+        state = model.update(state, _event(kind=kind, correct=correct))
+        if kind == "weak":
+            expected = weak_update(expected, 0.3, 0.6)
+        else:
+            expected = posterior(expected, correct, 0.1, 0.25)
+            if kind == "strong":
+                expected = learn(expected, 0.1)
+        # v4 uses six-decimal persisted KC states; v3's pure math is otherwise identical.
+        expected = round(expected, 6)
+        assert model.progress(state, "KC-A").probability == pytest.approx(expected, abs=1e-6)
+
+
+def test_cross_course_learner_update_never_changes_existing_state():
+    model = _core()
+    existing = model.initial(42, "fake-student")
+    with pytest.raises(CourseKnowledgeError):
+        model.update(existing, _event(cid=43))
+    assert existing.kcs == {} and existing.ability == 0.0

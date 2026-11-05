@@ -98,6 +98,11 @@ def evaluate_two_course_rag(
 
     hit1 = 0
     total_recall = 0.0
+    recall1 = 0.0
+    precision1 = 0.0
+    precisionk = 0.0
+    traceable = 0
+    retrieved_total = 0
     mrr = 0.0
     negatives = 0
     abstained = 0
@@ -122,8 +127,16 @@ def evaluate_two_course_rag(
         start = perf_counter()
         retrieved = retriever.retrieve(course_id, first.module_id, first.question, k)
         times.append(1000 * (perf_counter() - start))
-        if any(p.metadata.get("course_id") != course_id for p in retrieved):
-            raise EvaluationError("Retriever returned cross-course evidence.")
+        indexed = index_cache[course_id]
+        for passage in retrieved:
+            if passage.metadata.get("course_id") != course_id:
+                raise EvaluationError("Retriever returned cross-course evidence.")
+            if not any(p.source == passage.source and p.text == passage.text
+                       and p.metadata.get("module_id") == passage.metadata.get("module_id")
+                       for p in indexed):
+                raise EvaluationError("Retriever returned a passage absent from the active index.")
+        traceable += len(retrieved)
+        retrieved_total += len(retrieved)
         if first.negative:
             negatives += 1
             abstained += not retrieved
@@ -132,10 +145,19 @@ def evaluate_two_course_rag(
                  if any(chunk.source == source and anchor in chunk.text
                         for source, anchor in gold)]
         hit1 += bool(ranks and ranks[0] == 1)
+        recall1 += sum(
+            any(p.source == source and anchor in p.text for p in retrieved[:1])
+            for source, anchor in gold
+        ) / len(gold)
         total_recall += sum(
             any(p.source == source and anchor in p.text for p in retrieved)
             for source, anchor in gold
         ) / len(gold)
+        precision1 += bool(ranks and ranks[0] == 1)
+        # Use k (not returned-count) as denominator as in the original MVP metric plan.
+        # Repeated occurrences of the same passage do not count as distinct relevant hits.
+        distinct_relevant = {(p.source, p.text) for i, p in enumerate(retrieved, 1) if i in ranks}
+        precisionk += len(distinct_relevant) / k
         mrr += 1 / min(ranks) if ranks else 0
 
     positives = len(grouped) - negatives
@@ -147,8 +169,12 @@ def evaluate_two_course_rag(
         "negative_cases": negatives,
         "k": k,
         "hit_at_1": round(hit1 / positives, 4) if positives else None,
+        "recall_at_1": round(recall1 / positives, 4) if positives else None,
         "recall_at_k": round(total_recall / positives, 4) if positives else None,
+        "precision_at_1": round(precision1 / positives, 4) if positives else None,
+        "precision_at_k": round(precisionk / positives, 4) if positives else None,
         "mrr_at_k": round(mrr / positives, 4) if positives else None,
+        "source_traceability": round(traceable / retrieved_total, 4) if retrieved_total else None,
         "negative_abstention": round(abstained / negatives, 4) if negatives else None,
         "mean_latency_ms": round(sum(times) / len(times), 3),
         "p95_latency_ms": round(durations[ceil(0.95 * len(durations)) - 1], 3),

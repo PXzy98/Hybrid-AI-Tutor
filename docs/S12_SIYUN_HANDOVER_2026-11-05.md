@@ -131,3 +131,17 @@ At the user's request, the latest S7/S8/S9/S11 offline cores are maintained toge
 `feature/siyun-v4-integration-20261105`; no other development branches or `main` were changed.
 See `docs/SIYUN_UNIFIED_BRANCH_STATUS_2026-11-05.md` for the current consolidated
 status and final 749/749 backend regression results. No PR was opened.
+
+## Updated teammate handoff and final regression (2026-11-05)
+
+- English Z/T contract: `docs/SIYUN_TEAM_HANDOFF_Z_T_2026-11-05.md`.
+- Chinese summary: `docs/SIYUN_TEAM_HANDOFF_Z_T_2026-11-05_zh.md`.
+- New Z11 scanner adapter: `backend/app/rag/privacy_adapter.py`.
+- Added Z1 gateway contract tests and S4–S11 fictional cross-component smoke test.
+- S11 precision/recall and active-index provenance checks expanded.
+- BKT default: **766 passed, 1 deselected**.
+- Rule mode: **766 passed, 1 deselected**.
+- Ruff and frontend build: **pass**; frontend: **28 passed**.
+- Existing E2 simulated learner smoke across five topics is documented at
+  `docs/S8_E2_SIMULATED_SMOKE_2026-11-05.md`; it is not a real learner study.
+- Work remains on the single personal branch. No changes to the team's `main`.

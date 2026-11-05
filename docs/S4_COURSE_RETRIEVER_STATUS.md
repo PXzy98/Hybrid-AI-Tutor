@@ -35,3 +35,11 @@ Test backend/tests/test_course_index_core.py with a fictional two-course fixture
 - invalid course and module identifiers.
 
 The real end-to-end multi-course API test is blocked until Z4, Z9 and Z11 exist. This implementation does **not** claim that milestone is complete.
+
+## Privacy scanner bridge (2026-11-05)
+
+`backend/app/rag/privacy_adapter.py` now wraps Z1
+`ScanResult(scanned, findings)` as the strict Boolean callback S4 expects.
+It rejects `scanned=False`, any sensitive findings, scanner exceptions or
+malformed responses. Z11 must implement the real scanner; the Z1 stub still
+blocks all real indexing, as intended.
