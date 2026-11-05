@@ -4,7 +4,7 @@ import zipfile
 from html.parser import HTMLParser
 from pathlib import Path
 
-SUFFIXES = {".md", ".txt", ".pdf", ".html", ".htm", ".docx"}
+SUFFIXES = {".md", ".txt", ".pdf", ".html", ".htm", ".docx", ".pptx"}
 MAX_FILE_BYTES = 20 * 1024 * 1024
 MAX_TEXT_CHARS = 500_000
 MAX_PDF_PAGES = 250
@@ -44,7 +44,49 @@ def _decode(data: bytes) -> str:
         raise DocumentError("Save text or HTML files as UTF-8 or UTF-16 and upload again.") from error
 
 
-def extract_text(path: Path, *, preserve_pdf_pages: bool = False) -> str:
+MAX_PPTX_SLIDES = 250
+MAX_UNPACKED_BYTES = 64 * 1024 * 1024
+
+
+def _slides_text(path: Path, *, numbered: bool) -> str:
+    from pptx import Presentation
+
+    # Reject archive bombs before the PowerPoint library parses its ZIP contents.
+    with zipfile.ZipFile(path) as archive:
+        members = archive.infolist()
+        if len(members) > 10_000 or sum(member.file_size for member in members) > MAX_UNPACKED_BYTES:
+            raise DocumentError("The unpacked PowerPoint presentation is too large.")
+    deck = Presentation(path)
+    if len(deck.slides) > MAX_PPTX_SLIDES:
+        raise DocumentError("Split PowerPoint decks into at most 250 slides.")
+    slides = []
+    for slide in deck.slides:
+        title = slide.shapes.title
+        heading = title.text.strip() if title is not None else ""
+        lines = []
+        for shape in slide.shapes:
+            if title is not None and shape.shape_id == title.shape_id:
+                continue
+            if shape.has_text_frame:
+                lines.extend(p.text.strip() for p in shape.text_frame.paragraphs if p.text.strip())
+            if shape.has_table:
+                for row in shape.table.rows:
+                    cells = [" ".join(cell.text.split()) for cell in row.cells]
+                    if any(cells):
+                        lines.append(" | ".join(cells))
+        if slide.has_notes_slide and slide.notes_slide.notes_text_frame is not None:
+            notes = slide.notes_slide.notes_text_frame.text.strip()
+            if notes:
+                lines.append("Speaker notes: " + notes)
+        # Preserve blank slides so their physical number does not shift citations.
+        slides.append("\n".join(["# " + (heading or "Untitled slide")] + lines) if lines else "")
+    if not any(slide.strip() for slide in slides):
+        raise DocumentError("No readable text was found. Image-only slides need text or speaker notes.")
+    return ("\f" if numbered else "\n").join(slides)
+
+
+def extract_text(path: Path, *, preserve_pdf_pages: bool = False,
+                 preserve_slide_numbers: bool = False) -> str:
     """Extract readable text. An optional form-feed separates PDF pages for citation metadata.
 
     The default is unchanged for administrative validation and other callers.
@@ -72,6 +114,8 @@ def extract_text(path: Path, *, preserve_pdf_pages: bool = False) -> str:
                     raise DocumentError("Split documents with more than 500,000 extracted characters.")
                 parts.append(text.replace("\f", " "))
             text = ("\f" if preserve_pdf_pages else "\n").join(parts)
+        elif suffix == ".pptx":
+            text = _slides_text(path, numbered=preserve_slide_numbers)
         elif suffix == ".docx":
             from docx import Document
 
@@ -100,8 +144,11 @@ def extract_text(path: Path, *, preserve_pdf_pages: bool = False) -> str:
         raise DocumentError("This document could not be read. Check the file and upload it again.") from error
     if "\0" in text:
         raise DocumentError("The document contains binary data instead of readable text.")
-    # Do not strip leading form-feeds: an initially blank PDF page must not shift citations.
-    text = text.strip(" \r\n\t") if preserve_pdf_pages and path.suffix.lower() == ".pdf" else text.strip()
+    # Keep leading form-feeds: blank first pages/slides must not shift source numbers.
+    numbered = (preserve_pdf_pages and path.suffix.lower() == ".pdf") or (
+        preserve_slide_numbers and path.suffix.lower() == ".pptx"
+    )
+    text = text.strip(" \r\n\t") if numbered else text.strip()
     if not text.replace("\f", "").strip():
         raise DocumentError("No readable text was found. Scanned PDFs require OCR before uploading.")
     if len(text.replace("\f", "")) > MAX_TEXT_CHARS:

@@ -9,6 +9,16 @@
 - MedlinePlus built-in passages and existing per-topic source IDs are unchanged. No embedding or external network request is needed for retrieval.
 - The lightweight grounding checker continues to warn about missing evidence, low lexical support, and unsupported numeric claims. Its PASS is **not** a medical approval.
 
+## PowerPoint lecture uploads (S2)
+
+- Accept `.pptx` files (up to 20 MB compressed, 64 MB unpacked, 250 slides).
+- Extract searchable slide-body text, tables and speaker notes **locally**, without a network request.
+- Treat each slide as a separate source boundary. Blank/image-only slides retain their position, so citations refer to the original slide number.
+- Every PowerPoint chunk carries `metadata.slide` (a positive integer); PDF chunks continue to use `metadata.page`.
+- Reject presentations containing images but no readable text or speaker notes with an explicit indexing error; OCR is not automatic.
+- The student-facing `slide N` label requires the S3 citation-source fix (separate task PR), plus the v4 frontend localization work owned by Tongkai. No new v1 fields or endpoints are added here.
+- Tested with fictional three-slide presentations, including notes, a table, blank slides, image-only rejection and an actual teacher upload request. This verifies extraction/retrieval, not real medical content.
+
 ## Instructor workflow
 
 1. Use the instructor **Content** tab to select a medical topic, upload a lecture note or PDF, and confirm it shows **Searchable**.

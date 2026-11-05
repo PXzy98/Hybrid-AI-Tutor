@@ -20,7 +20,7 @@ from app.rag.documents import DocumentError
 
 log = logging.getLogger("app.admin")
 
-ALLOWED_SUFFIXES = {".md", ".txt", ".pdf", ".html", ".htm", ".docx"}
+ALLOWED_SUFFIXES = {".md", ".txt", ".pdf", ".html", ".htm", ".docx", ".pptx"}
 MAX_BYTES = 20 * 1024 * 1024
 SAFE_NAME_RE = re.compile(r"[^A-Za-z0-9._-]+")
 
