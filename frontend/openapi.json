@@ -2933,6 +2933,15 @@
             "type": "string",
             "title": "Reason",
             "default": "semantic models unavailable"
+          },
+          "question_kind": {
+            "type": "string",
+            "enum": [
+              "concept",
+              "logistics"
+            ],
+            "title": "Question Kind",
+            "default": "concept"
           }
         },
         "type": "object",

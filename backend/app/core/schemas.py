@@ -95,6 +95,8 @@ class SemanticAnalysis(BaseModel):
     reliable: bool = False
     label_origin: str = "unavailable"
     reason: str = "semantic models unavailable"
+    # v4 (task T5): course logistics (deadlines, grading) skip personalization and prefer the syllabus
+    question_kind: Literal["concept", "logistics"] = "concept"
 
 
 class EvidenceAssessment(BaseModel):
@@ -275,6 +277,65 @@ class AskResponse(BaseModel):
     routing_progress: list[RoutingProgress] = []
 
 
+# ---------------------------------------------------------------- v4 course scope (course-structure.md)
+CourseType = Literal["medical_science", "life_science", "ece", "general"]
+VisibilityMode = Literal["A", "B"]
+
+
+class CourseRef(BaseModel):
+    """The course of a request: what pipeline steps may know about it (no member or identity data)."""
+
+    model_config = ConfigDict(frozen=True)
+
+    id: int
+    code: str
+    title: str
+    course_type: CourseType = "general"
+
+
+class EffectiveSettings(BaseModel):
+    """Settings of one course for one request, after merging course, system and config values
+    (course-structure.md section 6). Built once per request and never changed during it."""
+
+    model_config = ConfigDict(frozen=True)
+
+    course_id: int
+    course_version: int = 0
+    system_version: int = 0
+    # values
+    course_type: CourseType = "general"
+    visibility_mode: VisibilityMode = "A"
+    local_only: bool = False
+    routing_preference: Literal["default", "prefer_local", "prefer_cloud"] = "default"
+    routing_threshold: float = Field(0.6, ge=0, le=1)
+    show_routing_progress: bool = True
+    weak_evidence: bool = False
+    level_basic_below: float = 0.40
+    level_advanced_above: float = 0.70
+    level_hysteresis: float = 0.05
+    usage_questions_per_minute: int | None = None
+    usage_questions_per_day: int | None = None
+    usage_cloud_calls_per_day: int | None = None
+    # components (switched live in every process, course-structure.md section 6.5)
+    knowledge_model: str = "bkt"
+    default_routing_method: Literal["lr", "svm"] = "lr"
+    checkers: tuple[str, ...] = ("grounding", "medical_safety", "pii_leak", "profile_leak")
+    local_endpoint_id: int | None = None
+    cloud_endpoint_id: int | None = None
+
+
+class PrivacyProfile(BaseModel):
+    """What the privacy filter does for one course type (guide section 4.7)."""
+
+    model_config = ConfigDict(frozen=True)
+
+    name: CourseType
+    recognizers: tuple[str, ...] = ()  # names of the extra recognizers on top of the base layer
+    health_detail_policy: Literal["local_only", "generalize"] = "local_only"
+    checkers: tuple[str, ...] = ()  # extra checkers this profile turns on, e.g. medical_safety
+    medical_disclaimer: bool = False
+
+
 class RequestContext(BaseModel):
     """The one object every pipeline step reads and writes."""
 
@@ -299,6 +360,11 @@ class RequestContext(BaseModel):
     retrieval_status: str = "unknown"
     routing_progress: list[RoutingProgress] = []
     show_routing_progress: bool = False
+    # v4 course scope; set by the API layer (task Z1). None while the v1 API serves the request.
+    course: CourseRef | None = None
+    module_id: int | None = None
+    settings: EffectiveSettings | None = None
+    profile: PrivacyProfile | None = None
     _progress_sink: Any = PrivateAttr(default=None)
     _request_started: float = PrivateAttr(default_factory=perf_counter)
 
