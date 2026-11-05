@@ -1205,6 +1205,12 @@ export interface components {
              * @default semantic models unavailable
              */
             reason: string;
+            /**
+             * Question Kind
+             * @default concept
+             * @enum {string}
+             */
+            question_kind: "concept" | "logistics";
         };
         /** ServerStatus */
         ServerStatus: {

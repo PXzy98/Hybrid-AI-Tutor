@@ -7,8 +7,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.admin.runtime_config import restore_latest
 from app.api.v1 import api_router
+from app.api.v2 import api_router_v2
+from app.api.v2.errors import usage_limit_handler
 from app.core.services import build_services
 from app.pipeline.runner import build_runner
+from app.platform.usage import UsageLimitExceeded
 
 DEV_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"]  # Vite dev server
 
@@ -36,6 +39,8 @@ def create_app() -> FastAPI:
     app.add_middleware(CORSMiddleware, allow_origins=DEV_ORIGINS, allow_credentials=True,  # session cookie
                        allow_methods=["*"], allow_headers=["*"])
     app.include_router(api_router)
+    app.include_router(api_router_v2)  # docs/design/api-v2.md; /api/v1 is frozen
+    app.add_exception_handler(UsageLimitExceeded, usage_limit_handler)
     return app
 
 
