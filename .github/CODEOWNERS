@@ -1,0 +1,34 @@
+# Component owners (docs/v4-implementation-guide.md section 5). The last matching line wins.
+# PXzy98 = Zhenyan Xing (Z), TSYYY233 = Siyun Tan (S), nylxyqs = Tongkai Liu (T).
+
+# Z: platform, privacy, LLM deployment and testing, Docker deployment, and everything not listed below
+*                                   @PXzy98
+
+# S: retrieval and course content, instructor AI tiers 1-3, learner
+/backend/app/rag/                   @TSYYY233
+/backend/app/learner/               @TSYYY233
+/backend/app/instructor_ai/         @TSYYY233
+/data/medical_rag/                  @TSYYY233
+/eval/course_rag_benchmark.py       @TSYYY233
+/eval/fixtures/                     @TSYYY233
+/eval/learner-sim/                  @TSYYY233
+/docs/RAG_COURSE_BETA.md            @TSYYY233
+
+# Z again: instructor AI tier 4 (local vs cloud evaluation)
+/backend/app/instructor_ai/eval/    @PXzy98
+
+# T: routing and web search, frontend and UX, demo material and user documentation
+/backend/app/routing/               @nylxyqs
+/backend/app/websearch/             @nylxyqs
+/data/routing/                      @nylxyqs
+/frontend/                          @nylxyqs
+/scripts/demo_seed.py               @nylxyqs
+/docs/ROUTING_PATCH.md              @nylxyqs
+/docs/manuals/                      @nylxyqs
+
+# Shared contract files: changes need Z's review as well
+/frontend/openapi.json              @nylxyqs @PXzy98
+/backend/app/core/schemas.py        @PXzy98
+/docs/v4-implementation-guide.md    @PXzy98
+/docs/design/                       @PXzy98
+/.github/                           @PXzy98
