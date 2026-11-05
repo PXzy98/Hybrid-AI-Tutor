@@ -28,28 +28,28 @@
 - id: AST.1-q3
   kc: AST.1
   level: advanced
-  stem: Why can asthma cause difficulty breathing?
+  stem: "Why can asthma cause difficulty breathing?"
   options:
-    A: The heart stops permanently
-    B: The body stops producing saliva
-    C: The throat turns into muscle
-    D: Airways can narrow and become inflamed
+    A: "Inflammation affects only the air sacs, without narrowing the airways"
+    B: "Breathlessness occurs only because oxygen delivery in the blood stops completely"
+    C: "The airways widen during an attack, making it harder to breathe out"
+    D: "Airways can narrow and become inflamed"
   answer: D
-  explanation: Inflammation and narrowing of the airways can restrict airflow.
+  explanation: "Inflammation and narrowing of the airways can restrict airflow."
   reviewed_by: null
 - id: AST.2-q1
   kc: AST.2
   level: basic
-  stem: Which statement about asthma symptoms is accurate?
+  stem: "Which statement about asthma symptoms is accurate?"
   options:
-    A: Asthma may cause wheezing, coughing or chest tightness
-    B: Everyone has exactly the same symptoms
+    A: "Asthma may cause wheezing, coughing or chest tightness"
+    B: "Everyone has exactly the same symptoms"
     C:
-      text: Wheezing is the only symptom asthma can cause
-      misconception: AST.MC2
-    D: Eye colour always changes with asthma
+      text: "Wheezing is the only symptom asthma can cause"
+      misconception: "AST.MC2"
+    D: "Asthma causes coughing only and never wheezing"
   answer: A
-  explanation: Wheezing, coughing, chest tightness and shortness of breath are common asthma symptoms.
+  explanation: "Wheezing, coughing, chest tightness and shortness of breath are common asthma symptoms."
   reviewed_by: null
 - id: AST.2-q2
   kc: AST.2
@@ -117,16 +117,16 @@
 - id: AST.4-q1
   kc: AST.4
   level: basic
-  stem: Which statement about evaluating possible asthma is accurate?
+  stem: "Which statement about evaluating possible asthma is accurate?"
   options:
-    A: A classroom quiz alone confirms asthma
+    A: "Wheezing reported at a single visit is sufficient to confirm asthma"
     B:
-      text: A single symptom always confirms asthma by itself
-      misconception: AST.MC4
-    C: Clinicians consider symptom history and appropriate breathing tests
-    D: Shoe size is sufficient for diagnosis
+      text: "Symptoms triggered by exercise alone distinguish asthma from every other cause of breathlessness"
+      misconception: "AST.MC4"
+    C: "Clinicians consider symptom history and appropriate breathing tests"
+    D: "One normal breathing test always rules out asthma"
   answer: C
-  explanation: Symptoms over time and objective breathing assessments may help evaluate asthma.
+  explanation: "Symptoms over time and objective breathing assessments may help evaluate asthma."
   reviewed_by: null
 - id: AST.4-q2
   kc: AST.4
@@ -143,15 +143,14 @@
 - id: AST.4-q3
   kc: AST.4
   level: advanced
-  stem: Why is one isolated symptom not enough to determine a diagnosis?
+  stem: "Why is one isolated symptom not enough to determine a diagnosis?"
   options:
-    A: Many different conditions can produce similar symptoms
-    B: Only wheezing counts as evidence
-    C: Symptoms are never relevant
-    D: A patient must always have every asthma symptom
+    A: "Many different conditions can produce similar symptoms"
+    B: "A normal breathing test on one occasion rules out asthma in every person"
+    C: "Wheezing on examination confirms asthma without considering other causes"
+    D: "Allergic triggers alone are enough to confirm an asthma diagnosis"
   answer: A
-  explanation: A healthcare professional considers patterns and appropriate tests because symptoms can
-    overlap across conditions.
+  explanation: "A healthcare professional considers patterns and appropriate tests because symptoms can overlap across conditions."
   reviewed_by: null
 - id: AST.5-q1
   kc: AST.5
@@ -182,12 +181,12 @@
 - id: AST.5-q3
   kc: AST.5
   level: advanced
-  stem: What is the safest general response before changing a prescribed asthma treatment?
+  stem: "What is the safest general response before changing a prescribed asthma treatment?"
   options:
-    A: Use someone else's inhaler
-    B: Follow instructions from a social media poll
-    C: Stop all medications whenever symptoms improve
-    D: Discuss the change with the treating clinician and follow the action plan
+    A: "Stop daily controller treatment after several symptom-free days without discussing the plan"
+    B: "Increase the prescribed dose on any bad day without checking the action plan"
+    C: "Replace all long-term prescribed treatment with a reliever inhaler"
+    D: "Discuss the change with the treating clinician and follow the action plan"
   answer: D
-  explanation: Prescribed treatment should be adjusted with appropriate clinical guidance.
+  explanation: "Prescribed treatment should be adjusted with appropriate clinical guidance."
   reviewed_by: null

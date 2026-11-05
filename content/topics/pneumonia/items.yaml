@@ -28,14 +28,14 @@
 - id: PNE.1-q3
   kc: PNE.1
   level: advanced
-  stem: Why can pneumonia make breathing harder?
+  stem: "Why can pneumonia make breathing harder?"
   options:
-    A: The lungs stop needing oxygen
-    B: Inflammation and fluid in lung air sacs can interfere with gas exchange
-    C: Pneumonia changes only the colour of blood
-    D: Air sacs carry food to the stomach
+    A: "Pneumonia mainly narrows the bronchi without affecting the air sacs"
+    B: "Inflammation and fluid in lung air sacs can interfere with gas exchange"
+    C: "The infection changes breathing rate but does not influence oxygen transfer"
+    D: "Only the throat becomes inflamed while the lung air sacs stay unaffected"
   answer: B
-  explanation: Inflamed or fluid-filled air sacs can make oxygen exchange more difficult.
+  explanation: "Inflamed or fluid-filled air sacs can make oxygen exchange more difficult."
   reviewed_by: null
 - id: PNE.2-q1
   kc: PNE.2
@@ -66,14 +66,14 @@
 - id: PNE.2-q3
   kc: PNE.2
   level: advanced
-  stem: Why might a clinician examine someone with cough, fever and difficulty breathing?
+  stem: "Why might a clinician examine someone with cough, fever and difficulty breathing?"
   options:
-    A: To assess potential causes and whether further investigation is needed
-    B: To diagnose pneumonia from favourite foods
-    C: To replace medical examination with a school quiz
-    D: Because these symptoms always rule out infection
+    A: "To assess potential causes and whether further investigation is needed"
+    B: "Cough, fever and difficulty breathing confirm pneumonia without further assessment"
+    C: "These symptoms reliably identify a bacterial rather than viral infection"
+    D: "A normal temperature at examination rules out pneumonia"
   answer: A
-  explanation: Clinical assessment helps distinguish causes and guide appropriate evaluation.
+  explanation: "Clinical assessment helps distinguish causes and guide appropriate evaluation."
   reviewed_by: null
 - id: PNE.3-q1
   kc: PNE.3
@@ -104,14 +104,14 @@
 - id: PNE.3-q3
   kc: PNE.3
   level: advanced
-  stem: What can students correctly infer from a case description of cough and fever?
+  stem: "Which of the following is a recognized bacterial cause of pneumonia?"
   options:
-    A: No clinical review is necessary
-    B: The cause is definitely bacterial
-    C: The cause is definitely viral
-    D: Symptoms alone may not establish the exact organism or diagnosis
-  answer: D
-  explanation: Symptoms alone may not distinguish different infectious causes.
+    A: "Respiratory syncytial virus (RSV)"
+    B: "Influenza A virus"
+    C: "Streptococcus pneumoniae"
+    D: "SARS-CoV-2"
+  answer: C
+  explanation: "Streptococcus pneumoniae is a bacterium that can cause pneumonia. RSV, influenza and SARS-CoV-2 are viruses that can also cause pneumonia."
   reviewed_by: null
 - id: PNE.4-q1
   kc: PNE.4
@@ -130,26 +130,26 @@
 - id: PNE.4-q2
   kc: PNE.4
   level: intermediate
-  stem: Which worsening symptom should prompt timely medical attention?
+  stem: "Which of the following changes in someone with suspected pneumonia warrants prompt medical assessment?"
   options:
-    A: A different favourite song
-    B: Increasing difficulty breathing
-    C: A preference for a different study notebook
-    D: Changing a phone wallpaper
-  answer: B
-  explanation: Worsening breathing can be serious and should prompt timely medical attention.
+    A: "Increasing difficulty breathing"
+    B: "New confusion"
+    C: "New or worsening chest pain"
+    D: "All of the above"
+  answer: D
+  explanation: "Worsening breathlessness, new confusion and new or worsening chest pain can all be warning signs that call for prompt clinical assessment."
   reviewed_by: null
 - id: PNE.4-q3
   kc: PNE.4
   level: advanced
-  stem: Why is an educational question insufficient to prescribe pneumonia treatment?
+  stem: "Why can a short symptom-based classroom quiz not determine a patient's pneumonia treatment?"
   options:
-    A: Medication choices depend only on classroom quiz scores
-    B: All pneumonias are harmless
-    C: The cause, severity, individual health conditions and clinical examination affect decisions
-    D: Every person has the same clinical circumstances
+    A: "A symptom score alone identifies whether the cause is bacterial or viral"
+    B: "Antibiotics are appropriate for every person with cough and fever"
+    C: "The cause, severity, individual health conditions and clinical examination affect decisions"
+    D: "The same medicine and dose will work for all patients with pneumonia"
   answer: C
-  explanation: Individual diagnosis and prescribing require clinical evaluation.
+  explanation: "Individual diagnosis and prescribing require clinical evaluation."
   reviewed_by: null
 - id: PNE.5-q1
   kc: PNE.5
@@ -180,12 +180,12 @@
 - id: PNE.5-q3
   kc: PNE.5
   level: advanced
-  stem: Which statement best describes pneumonia prevention?
+  stem: "Which statement best describes pneumonia prevention?"
   options:
-    A: Vaccination is irrelevant for all respiratory infections
-    B: A combination of appropriate preventive measures can reduce risk but cannot guarantee prevention
-    C: Every case is prevented by antibiotics
-    D: Only one measure is needed to eliminate every cause
+    A: "Vaccination by itself removes the need for any other preventive measure"
+    B: "A combination of appropriate preventive measures can reduce risk but cannot guarantee prevention"
+    C: "Preventive antibiotics are needed for everyone to avoid viral pneumonia"
+    D: "Hand hygiene alone prevents pneumonia from every possible cause"
   answer: B
-  explanation: Prevention depends on cause and risk factors, and no single measure removes all risk.
+  explanation: "Prevention depends on cause and risk factors, and no single measure removes all risk."
   reviewed_by: null

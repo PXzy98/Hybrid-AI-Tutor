@@ -28,14 +28,14 @@
 - id: T2D.1-q3
   kc: T2D.1
   level: advanced
-  stem: Which description best fits high blood glucose?
+  stem: "After a meal, blood glucose rises. Which sequence best describes how insulin helps bring it back toward the usual range?"
   options:
-    A: The body has stopped making energy completely
-    B: All glucose has disappeared from cells
-    C: Too much glucose remains in the bloodstream
-    D: The bloodstream contains no water
+    A: "The pancreas releases glucagon, which directly moves glucose from the blood into muscle cells"
+    B: "Insulin prevents glucose uptake by muscle and fat cells to keep blood glucose stable"
+    C: "The pancreas releases insulin, which helps insulin-responsive cells take up glucose from the blood"
+    D: "The pancreas stops releasing insulin so glucose can enter cells without hormonal signalling"
   answer: C
-  explanation: When insulin is insufficient or less effective, blood glucose may remain high.
+  explanation: "After a meal, a rise in blood glucose stimulates insulin release from pancreatic beta cells. Insulin helps insulin-responsive tissues take up glucose, supporting blood glucose regulation."
   reviewed_by: null
 - id: T2D.2-q1
   kc: T2D.2
@@ -66,16 +66,14 @@
 - id: T2D.2-q3
   kc: T2D.2
   level: advanced
-  stem: Which statement about type 2 diabetes is most accurate?
+  stem: "Which statement about type 2 diabetes is most accurate?"
   options:
-    A: It always begins in childhood
-    B: It involves the body's difficulty using insulin effectively, sometimes with insufficient insulin
-      production
-    C: It is diagnosed by counting the number of meals eaten
-    D: It is always caused by eating one sugary food
+    A: "Type 2 diabetes requires complete loss of insulin secretion at the time of diagnosis"
+    B: "It involves the body's difficulty using insulin effectively, sometimes with insufficient insulin production"
+    C: "Type 2 diabetes occurs only because of dietary sugar, without a problem in insulin action"
+    D: "In type 2 diabetes, cells always remain fully sensitive to insulin"
   answer: B
-  explanation: Type 2 diabetes often involves insulin resistance and reduced ability to maintain normal
-    glucose levels.
+  explanation: "Type 2 diabetes often involves insulin resistance and reduced ability to maintain normal glucose levels."
   reviewed_by: null
 - id: T2D.3-q1
   kc: T2D.3
@@ -95,26 +93,26 @@
 - id: T2D.3-q2
   kc: T2D.3
   level: intermediate
-  stem: Which is an example of a modifiable risk factor?
+  stem: "A person has a family history of type 2 diabetes and low physical activity. Which statement is most appropriate?"
   options:
-    A: Family history
-    B: Inherited genes
-    C: Date of birth
-    D: Physical activity level
+    A: "Having affected relatives means changes in activity cannot reduce diabetes risk"
+    B: "Increasing activity changes the genes inherited from the family"
+    C: "If symptoms are absent, the person has no relevant risk factors"
+    D: "Regular physical activity may reduce risk even though family history cannot be changed"
   answer: D
-  explanation: Activity levels can be modified, unlike age or inherited risk.
+  explanation: "Family history is a nonmodifiable risk factor, while physical activity is modifiable and can help reduce type 2 diabetes risk."
   reviewed_by: null
 - id: T2D.3-q3
   kc: T2D.3
   level: advanced
-  stem: Why should a person with several risk factors ask about screening?
+  stem: "Why should a person with several risk factors ask about screening?"
   options:
-    A: To establish whether testing is appropriate even when symptoms are absent
-    B: Because a risk factor always means they have diabetes
-    C: Because screening replaces all follow-up care
-    D: Because they can determine diagnosis from family history alone
+    A: "To establish whether testing is appropriate even when symptoms are absent"
+    B: "People who feel well do not need screening even when they have several risk factors"
+    C: "A family history is enough to confirm diabetes without a test"
+    D: "Risk factors identify an appropriate medication before a diagnosis is made"
   answer: A
-  explanation: Risk factors can guide a healthcare professional's decision about appropriate screening.
+  explanation: "Risk factors can guide a healthcare professional's decision about appropriate screening."
   reviewed_by: null
 - id: T2D.4-q1
   kc: T2D.4
@@ -133,14 +131,14 @@
 - id: T2D.4-q2
   kc: T2D.4
   level: intermediate
-  stem: Which body systems can be affected by prolonged high blood glucose?
+  stem: "Which list best reflects the range of body systems that long-term high blood glucose can affect?"
   options:
-    A: Only the fingernails
-    B: Only the nose
-    C: Blood vessels, nerves, kidneys and eyes
-    D: No body systems
-  answer: C
-  explanation: Long-term high blood glucose can affect blood vessels, nerves and several organs.
+    A: "Blood vessels"
+    B: "Blood vessels and nerves"
+    C: "Blood vessels and kidneys"
+    D: "Blood vessels, nerves, kidneys and eyes"
+  answer: D
+  explanation: "Over time, high blood glucose can damage blood vessels and nerves and contribute to complications affecting the kidneys and eyes, among other organs."
   reviewed_by: null
 - id: T2D.4-q3
   kc: T2D.4
@@ -184,14 +182,12 @@
 - id: T2D.5-q3
   kc: T2D.5
   level: advanced
-  stem: What should a student conclude from a fictional class case where glucose is repeatedly above a
-    prescribed target?
+  stem: "What should a student conclude from a fictional class case where glucose is repeatedly above a prescribed target?"
   options:
-    A: A diagnosis and dose can be selected from the quiz alone
-    B: The record has no educational value
-    C: The pattern should be reviewed in the context of an individualized clinical care plan
-    D: The patient should skip every meal
+    A: "The repeated readings alone determine exactly how the prescribed dose should be changed"
+    B: "Any above-target reading proves a complication without further assessment"
+    C: "The pattern should be reviewed in the context of an individualized clinical care plan"
+    D: "One later reading within target makes the earlier pattern irrelevant"
   answer: C
-  explanation: A pattern should be interpreted in a clinical context; education questions do not give
-    individual treatment directions.
+  explanation: "A pattern should be interpreted in a clinical context; education questions do not give individual treatment directions."
   reviewed_by: null
