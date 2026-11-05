@@ -37,9 +37,10 @@ class FakeGateway:
     async def complete(self, role: EndpointRole, messages: list[Message], *, settings: EffectiveSettings,
                        trust_required: TrustRequired, json_schema: dict | None = None,
                        stream: bool = False) -> LLMResult | AsyncIterator[str]:
-        if trust_required == "trusted_local" and role not in self.trusted:
+        external = role not in self.trusted  # decided by the connection's trust level, never by the role name
+        if trust_required == "trusted_local" and external:
             raise TrustViolation(f"'{role}' is not a trusted local connection")
-        if role == "cloud" and settings.local_only:
+        if external and settings.local_only:
             raise LLMUnavailable("this course uses the local model only")
         client = self.clients.get(role)
         if client is None:

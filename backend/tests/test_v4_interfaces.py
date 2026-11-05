@@ -87,12 +87,23 @@ def test_gateway_never_sends_trusted_content_to_an_external_model():
     assert result.text == "local"
 
 
-def test_gateway_respects_a_local_only_course():
-    gateway = FakeGateway({"cloud": FakeLLMClient("cloud", backend="cloud")})
+@pytest.mark.parametrize("role", ["cloud", "judge"])
+def test_a_local_only_course_never_reaches_an_external_connection(role):
+    external = FakeLLMClient("external", backend="cloud")
+    gateway = FakeGateway({"local": FakeLLMClient("local"), role: external})
     eff = effective_settings(1, Settings()).model_copy(update={"local_only": True})
     with pytest.raises(LLMUnavailable):
-        asyncio.run(gateway.complete("cloud", [{"role": "user", "content": "x"}], settings=eff,
+        asyncio.run(gateway.complete(role, [{"role": "user", "content": "x"}], settings=eff,
                                      trust_required="external_ok"))
+    assert external.calls == []
+
+
+def test_a_trusted_judge_may_serve_a_local_only_course():
+    gateway = FakeGateway({"judge": FakeLLMClient("judged")}, trusted=frozenset({"local", "judge"}))
+    eff = effective_settings(1, Settings()).model_copy(update={"local_only": True})
+    result = asyncio.run(gateway.complete("judge", [{"role": "user", "content": "x"}], settings=eff,
+                                          trust_required="external_ok"))
+    assert result.text == "judged"
 
 
 def test_gateway_streams_tokens():
