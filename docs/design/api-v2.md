@@ -25,7 +25,7 @@ component owner who implements it. Data model and rules: [course-structure.md](c
 | Topic | Rule |
 |---|---|
 | Authentication | Same server-side session cookie as v1 (`HttpOnly`, `Secure` in production, `SameSite=Lax`). |
-| CSRF | Every state-changing request (POST, PUT, PATCH, DELETE) sends header `X-CSRF-Token` with the value from `GET /api/v2/auth/csrf` (Z10). |
+| CSRF | Every state-changing request (POST, PUT, PATCH, DELETE), including the public `login` and `join`, sends header `X-CSRF-Token` with the value from `GET /api/v2/auth/csrf` (Z10). That endpoint is **public**: without a session it sets a short-lived anonymous CSRF cookie and returns the matching token (double-submit). Login issues a new token bound to the new session, and logout clears it. |
 | Course scope | Course-scoped endpoints are under `/api/v2/courses/{course_id}/...`; access is checked by `require_course_role` before anything else. A course the caller cannot see returns **404**, not 403. |
 | IDs | Integers for database objects; `student_id` stays a UUID string and is the only student identifier in learner endpoints. |
 | Errors | `{"detail": "<human-readable English>", "code": "<machine_code>"}`; codes are listed in `backend/app/api/v2/errors.py`. |
@@ -50,8 +50,8 @@ logged in. Owner = component owner who implements it.
 | `POST /auth/logout` | any | end session |
 | `GET /auth/me` | any | account, system role, memberships |
 | `POST /auth/change-password` | any | ends all other sessions |
-| `GET /auth/csrf` | any | CSRF token |
-| `POST /auth/join` | public | activate with invitation code + e-mail + display name + password (course-structure 3.3) |
+| `GET /auth/csrf` | public | CSRF token (anonymous before login, bound to the session after) |
+| `POST /auth/join` | public or logged in | new student: invitation code + e-mail + display name + password creates the account and activates all his pending memberships; logged-in student: invitation code only, activates that course's pending membership (course-structure 3.3) |
 | `GET /me/preferences`, `PUT /me/preferences` | S | global learning preferences |
 | `GET /me/consent`, `PUT /me/consent` | S | global consent |
 

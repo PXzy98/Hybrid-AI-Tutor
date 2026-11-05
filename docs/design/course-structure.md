@@ -113,10 +113,18 @@ privacy profile), visibility mode, status (`active`, `archived`).
    disallowed e-mail, duplicates).
 4. **Invitation code**: each course has one code (random, about 10 characters, can be rotated, has an
    expiry date; `course_invite`). The instructor shares it with the class (for example on Brightspace).
-5. **Activation**: on the join page the student enters the code, his uOttawa e-mail, a display name and a
-   new password. It succeeds only if a `pending` membership with that e-mail exists in that course. The
-   account is created (username = e-mail prefix) and the membership becomes `active`.
-6. A student who is in two courses has one account and two memberships.
+5. **Activation of a new student** (no account with that e-mail yet): on the join page the student enters
+   the code, his uOttawa e-mail, a display name and a new password. It succeeds only if a `pending`
+   membership with that e-mail exists in that course. In one transaction the account is created (username =
+   e-mail prefix) and **every** `pending` membership with that e-mail, in any course, is linked to the new
+   account and becomes `active`.
+6. **Student who already has an account**: memberships imported while he had an account are already
+   `active` (step 2). A `pending` membership can only remain if it was imported before his account existed;
+   step 5 activates it together with the first one. If one is still left (for example the e-mail was
+   corrected later), the student **logs in** and enters that course's code on the join page; the pending
+   membership with his account's e-mail becomes `active`. No second account is created and the password
+   does not change. The join endpoint never creates an account for an e-mail that already has one.
+7. A student who is in two courses has one account and two memberships.
 
 **Known risk**: the system cannot check that the person who activates really owns the e-mail (there is no
 e-mail sending). Mitigations: only e-mails on the imported roster can activate; the code is shared only with
@@ -132,9 +140,12 @@ changed after the term; a TA sees everything the instructor sees (including indi
 ### 3.5 End of term
 
 `POST .../courses/{course_id}/end-term` (instructor):
-1. Builds an export (ZIP of CSV/JSON): the class summary, and, only in visibility mode B, the per-student
-   data of students who did not opt out. The instructor downloads it; the file is kept for a limited time
-   (`limits.courses.export_retention_hours`) and then deleted.
+1. Builds an export (ZIP of CSV/JSON): the class summary, and, only in visibility mode B, per-student data
+   under **exactly the same conditions as the individual overview** (section 4.5, guide rule 9): the student
+   acknowledged mode B (`visible_since` is set), did not opt out, and only records created after
+   `visible_since` are included. The export calls the same function as the overview
+   (`profile_for_instructor`), so the two can never differ. The instructor downloads it; the file is kept for
+   a limited time (`limits.courses.export_retention_hours`) and then deleted.
 2. Deletes, for that course: all student memberships, learner state, evidence, misconceptions, plans,
    conversations, request logs, usage counters and survey responses.
 3. Keeps: the course, modules, KCs, items, misconceptions, materials, index, settings and instructor

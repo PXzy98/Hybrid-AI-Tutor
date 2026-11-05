@@ -520,7 +520,8 @@ data); users build against the fakes without waiting for the real implementation
   - the effect on privacy or permissions ("none" if none).
 - **Commit messages** follow the current style: `<scope>: <what>`, e.g. `privacy: ...`, `feat(rag): ...`,
   `docs: ...`. English only (rule 14).
-- **Before merging**: CI green and reviewed by at least one person besides the owner.
+- **Before merging**: CI green and every review comment resolved (both enforced on `main`). A review by
+  another member is welcome but not required.
 
 ### 8.2 Running and testing
 - **Install** (first time):
