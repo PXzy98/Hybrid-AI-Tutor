@@ -2,7 +2,7 @@
 import pytest
 
 from app.privacy.profiles import ScanFinding, ScanResult, privacy_profile
-from app.rag.course_retriever import CourseRetriever
+from app.rag.course_retriever import IndexedCourseRetriever
 from app.rag.documents import DocumentError
 from app.rag.privacy_adapter import privacy_scan_callback
 
@@ -18,7 +18,7 @@ def test_z1_scanner_stub_cannot_publish(tmp_path):
     cb = privacy_scan_callback(privacy_profile("ece"))
     assert not cb("fictional document")
     with pytest.raises(DocumentError, match="Privacy scan rejected"):
-        CourseRetriever(tmp_path, scan=cb).rebuild(101)
+        IndexedCourseRetriever(tmp_path, scan=cb).rebuild(101)
     assert not (tmp_path / "courses" / "101" / "index" / "current.json").exists()
 
 
@@ -48,6 +48,6 @@ def test_explicit_completed_clean_scan_allows_fictional_index(tmp_path):
         privacy_profile("general"),
         scanner=lambda text, profile: ScanResult(scanned=True),
     )
-    rag = CourseRetriever(tmp_path, scan=cb)
+    rag = IndexedCourseRetriever(tmp_path, scan=cb)
     assert rag.rebuild(101) == 1
     assert rag.retrieve(101, None, "Quartzzyme", 4)

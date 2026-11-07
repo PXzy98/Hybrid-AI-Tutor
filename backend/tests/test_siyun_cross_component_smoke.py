@@ -18,7 +18,7 @@ from app.learner.visibility_policy import (
     VisibilityState,
     instructor_visible_signals,
 )
-from app.rag.course_retriever import CourseRetriever
+from app.rag.course_retriever import IndexedCourseRetriever
 from app.rag.evaluation import GoldLabel, evaluate_two_course_rag
 
 
@@ -59,7 +59,7 @@ def _prepare(tmp_path):
         path.write_text(text, encoding="utf-8")
 
     # A permissive scanner is injected ONLY in this fictional unit-test fixture.
-    rag = CourseRetriever(tmp_path, scan=lambda _: True)
+    rag = IndexedCourseRetriever(tmp_path, scan=lambda _: True)
     assert rag.rebuild(101) == 1
     assert rag.rebuild(202) == 1
     return rag

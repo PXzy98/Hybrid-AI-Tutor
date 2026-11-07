@@ -2,6 +2,12 @@
 
 This is not an API or upload handler. Callers must authorize course/module membership.
 Without an explicitly provided document scanner, publishing an index fails closed.
+Implements the `app.rag.course.CourseRetriever` protocol.
+
+Old index versions hold the text of every file that was indexed at the time, so they are deleted:
+`rebuild` keeps only the new version and the one still in use, `prune` (called after the database
+`index_version` is updated) keeps only the version in use, and `delete_index` removes everything
+(a deleted course, the end of term).
 """
 import asyncio
 import json
@@ -40,7 +46,7 @@ class _Snapshot:
     char_matrix: object = None
 
 
-class CourseRetriever:
+class IndexedCourseRetriever:
     """Standalone v4 per-course index core behind the Z-owned upload and job interfaces.
 
     The object never reads accounts, class membership or learner data. The API layer must
@@ -53,7 +59,13 @@ class CourseRetriever:
         self.scan = scan
         self.index_version = index_version
         self._cache: dict[int, _Snapshot] = {}
-        self._lock = RLock()
+        self._locks: dict[int, RLock] = {}
+        self._locks_guard = RLock()
+
+    def _lock(self, course_id: int) -> RLock:
+        # One lock per course: rebuilding one course never blocks retrieval in another.
+        with self._locks_guard:
+            return self._locks.setdefault(course_id, RLock())
 
     def _folder(self, course_id: int) -> Path:
         if type(course_id) is not int or course_id <= 0:
@@ -140,11 +152,14 @@ class CourseRetriever:
         the database version only *after* this method returns successfully.
         """
         base = self._folder(course_id) / "index"
-        with self._lock:
-            passages = self._passages(course_id)  # fails closed before publishing
-            if not passages:
-                raise DocumentError("No searchable, scan-approved materials were found for this course.")
-            version = self._manifest_version(course_id) + 1
+        # Extract and scan outside the lock: retrieval in this course keeps using the old version meanwhile.
+        passages = self._passages(course_id)  # fails closed before publishing
+        if not passages:
+            raise DocumentError("No searchable, scan-approved materials were found for this course.")
+        with self._lock(course_id):
+            active = self._current_version(course_id)
+            # Higher than every version on disk and in the database, so no version in use is overwritten.
+            version = max([self._manifest_version(course_id), active, *self._versions_on_disk(course_id)]) + 1
             base.mkdir(parents=True, exist_ok=True)
             staging = Path(tempfile.mkdtemp(dir=base, prefix=".build-"))
             try:
@@ -152,10 +167,7 @@ class CourseRetriever:
                     json.dumps([p.model_dump() for p in passages], ensure_ascii=False),
                     encoding="utf-8",
                 )
-                target = base / f"v{version}"
-                if target.exists():
-                    shutil.rmtree(target)  # an incomplete prior publication, never the active version
-                os.replace(staging, target)
+                os.replace(staging, base / f"v{version}")
                 pointer = base / f".current-{version}.json"
                 pointer.write_text(json.dumps({"index_version": version}), encoding="utf-8")
                 os.replace(pointer, base / "current.json")
@@ -163,7 +175,37 @@ class CourseRetriever:
                 if staging.exists():
                     shutil.rmtree(staging)
             self._cache.pop(course_id, None)
+            # Without a database signal the new version is in use at once; otherwise keep the active one
+            # until the caller updates the database and calls prune().
+            self._delete_versions(course_id, keep={version, self._current_version(course_id)})
             return version
+
+    def _versions_on_disk(self, course_id: int) -> list[int]:
+        base = self._folder(course_id) / "index"
+        if not base.is_dir():
+            return []
+        return [int(d.name[1:]) for d in base.iterdir()
+                if d.is_dir() and d.name.startswith("v") and d.name[1:].isdecimal()]
+
+    def _delete_versions(self, course_id: int, *, keep: set[int]) -> None:
+        base = self._folder(course_id) / "index"
+        for version in self._versions_on_disk(course_id):
+            if version not in keep:
+                shutil.rmtree(base / f"v{version}", ignore_errors=True)
+        if base.is_dir():
+            for leftover in base.glob(".build-*"):
+                shutil.rmtree(leftover, ignore_errors=True)
+
+    def prune(self, course_id: int) -> None:
+        """Delete every index version except the one in use (after the database version was updated)."""
+        with self._lock(course_id):
+            self._delete_versions(course_id, keep={self._current_version(course_id)})
+
+    def delete_index(self, course_id: int) -> None:
+        """Delete all indexed text of a course (course deleted, end of term); uploads are not touched."""
+        with self._lock(course_id):
+            shutil.rmtree(self._folder(course_id) / "index", ignore_errors=True)
+            self._cache.pop(course_id, None)
 
     async def rebuild_in_worker(self, course_id: int) -> int:
         """Allow the Z4 job worker to build without blocking FastAPI's event loop."""
@@ -193,14 +235,14 @@ class CourseRetriever:
         self._cache[course_id] = result
         return result
 
-    def retrieve(self, course_id: int, module_id: int | None, query: str, k: int) -> list[Chunk]:
+    def retrieve(self, course_id: int, module_id: int | None, query: str, k: int = 4) -> list[Chunk]:
         """Retrieve only from this course and, when selected, the active module + course-level files."""
         if k <= 0 or not query.strip():
             return []
         if module_id is not None and (type(module_id) is not int or module_id <= 0):
             return []
         try:
-            with self._lock:
+            with self._lock(course_id):
                 snap = self._snapshot(course_id)
                 if not snap.passages or snap.word is None or snap.char is None:
                     return []

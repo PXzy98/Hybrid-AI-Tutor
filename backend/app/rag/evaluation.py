@@ -12,7 +12,7 @@ from pathlib import Path
 from time import perf_counter
 
 from app.core.schemas import Chunk
-from app.rag.course_retriever import CourseRetriever
+from app.rag.course import CourseRetriever
 
 
 class EvaluationError(ValueError):

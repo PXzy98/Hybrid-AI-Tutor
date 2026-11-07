@@ -3,7 +3,7 @@ import csv
 
 import pytest
 
-from app.rag.course_retriever import CourseRetriever
+from app.rag.course_retriever import IndexedCourseRetriever
 from app.rag.evaluation import EvaluationError, evaluate_two_course_rag, load_labels
 
 
@@ -15,7 +15,7 @@ def _setup(tmp_path):
             "# Fictional syllabus\n" + label + " is part of the invented coursework.",
             encoding="utf-8",
         )
-    retriever = CourseRetriever(tmp_path, scan=lambda _: True)
+    retriever = IndexedCourseRetriever(tmp_path, scan=lambda _: True)
     retriever.rebuild(101)
     retriever.rebuild(202)
     return retriever

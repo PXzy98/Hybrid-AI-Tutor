@@ -3,7 +3,7 @@ import argparse
 import json
 from pathlib import Path
 
-from app.rag.course_retriever import CourseRetriever
+from app.rag.course_retriever import IndexedCourseRetriever
 from app.rag.evaluation import evaluate_two_course_rag, load_labels
 
 
@@ -15,7 +15,7 @@ def main():
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     result = evaluate_two_course_rag(
-        retriever=CourseRetriever(args.index_root), index_root=args.index_root,
+        retriever=IndexedCourseRetriever(args.index_root), index_root=args.index_root,
         labels=load_labels(args.labels), k=args.k,
     )
     if args.output:
