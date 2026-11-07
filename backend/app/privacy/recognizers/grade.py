@@ -8,7 +8,8 @@ _SCORE = r"(?:\d{1,3}(?:\.\d+)?\s?(?:/\s?\d{1,3}|%|percent)|(?-i:[ABCDF][+-]?)(?
 
 @pii_recognizers.register("grade")
 class GradeRecognizer(PatternRecognizer):
-    """A student's own results: "I got 58/100", "my GPA dropped to 2.9", "I failed the midterm", "61 分"."""
+    """A student's own results: "I got 58/100", "my GPA dropped to 2.9", "I failed the midterm", and a
+    number followed by the Chinese word for "points"."""
 
     def __init__(self) -> None:
         super().__init__(

@@ -24,5 +24,5 @@ Effect on privacy (what can reach a model, what is stored) and on permissions (w
 - [ ] No secrets, no real student data, no question text in logs or tests
 - [ ] Privacy rule changes: full E6 re-run, results not worse (attach the summary)
 - [ ] API changed: `frontend/openapi.json` and `frontend/src/api/schema.d.ts` regenerated and committed
-- [ ] No Chinese in code, commit messages or Markdown outside `docs/`
+- [ ] Chinese only in code or test data that handle Chinese input, English behaviour unchanged; no Chinese in comments, commit messages or Markdown outside `docs/`
 - [ ] An English document in `docs/` changed: its `_zh.md` companion is updated or marked out of date

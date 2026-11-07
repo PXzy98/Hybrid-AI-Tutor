@@ -1,6 +1,8 @@
-"""Chinese self-introductions ("我是李明轩", "我叫王芳").
+"""Chinese self-introductions: "I am" or "my name is" in Chinese, followed by a two- to
+four-character name.
 
-spaCy's English model does not find Chinese names.
+spaCy's English model does not find Chinese names. Only Chinese text can match, so English input is
+unaffected.
 """
 import re
 
