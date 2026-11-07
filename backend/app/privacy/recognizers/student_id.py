@@ -37,7 +37,7 @@ class StudentIdRecognizer(PatternRecognizer):
                 Pattern("nine digits", r"(?<![\d.,/-])\d{9}(?![\d.,/-]?\d)", 0.6),
                 Pattern("split nine digits", SPLIT_DIGITS, 0.3),
             ],
-            context=["student", "id", "number", "student number", "student id", "\u5b66\u53f7"],
+            context=["student", "id", "number", "student number", "student id", "学号"],
         )
 
     def analyze(self, text, entities, nlp_artifacts=None, regex_flags=None):

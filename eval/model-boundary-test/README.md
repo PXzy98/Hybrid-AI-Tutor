@@ -1,41 +1,33 @@
-# Local model capability boundary benchmark
+# model-boundary-test
 
-This historical benchmark studies which kinds of educational questions different
-sizes of **locally hosted** LLMs can answer reliably. It is not the v4 production
-course retrieval or privacy evaluation.
+测试本地小模型的能力边界：不同大小的模型，在什么类型、什么难度的问题上还能答对。完整计划见 **TEST_PLAN.md**。
 
-## Quick start
-
-On the GPU server, configure Ollama to listen on the intended trusted interface,
-then install the test models:
+## 快速开始
 
 ```bash
-bash pull_models.sh
+# 在服务器 192.168.2.25 上（需要 OLLAMA_HOST=0.0.0.0:11434）
+bash pull_models.sh            # Windows 服务器：.\pull_models.ps1
+
+# 在自己的电脑上
+pip install -r requirements.txt
+python bench.py --models qwen3.5:4b --limit 5 --out results/smoke.jsonl     # 冒烟测试
+python bench.py --models qwen3.5:2b qwen3.5:4b qwen3.5:9b gemma4:e4b gemma4:12b gemma4:26b qwen3.5:27b
+python bench.py --models qwen3.5:4b qwen3.5:9b qwen3.5:27b --think on       # thinking 对比
+python grade.py              # 自动判分；开放题写入 results/manual_review.csv，人工填 1/0 后再运行一次
+python report.py             # 输出 results/report.md 和 results/boundary_heatmap.png
 ```
 
-On Windows, use `pull_models.ps1`. From the developer workstation:
+- 服务器地址可以用 `--host` 参数修改，或者设置环境变量 `OLLAMA_URL`。
+- 程序中断后直接重新运行，已完成的题目会自动跳过。
+- 开放题也可以用评委模型判分：`python grade.py --judge-model gpt-4o`（需要 `OPENAI_API_KEY`），或者用本地模型：`--judge-model qwen3.5:27b --base-url http://192.168.2.25:11434/v1`。
 
-```bash
-python bench.py --models qwen3.5:4b --limit 5 --out results/smoke.jsonl
-python bench.py --models qwen3.5:4b qwen3.5:9b qwen3.5:27b --think on
-python grade.py
-python report.py
-```
+## 文件
 
-The smoke test checks basic execution. The full run tests model sizes, formats,
-reasoning, answer quality and latency. See [TEST_PLAN.md](TEST_PLAN.md)
-for the experimental design, thresholds and review procedures.
-
-## Result interpretation
-
-- The benchmark includes several dimensions of educational difficulty.
-- Multiple-choice, numeric, short and format-rule items can be graded
-  automatically; open items require independent manual or model-assisted
-  review.
-- A model passing a narrow benchmark cell is not sufficient evidence that
-  it is safe for clinical decisions or for unrestricted student-facing use.
-- Chinese-language benchmark cases are historical internationalization
-  test fixtures; their source files use Unicode escape notation to satisfy
-  the repository's English-only source-text policy while preserving the
-  original runtime input.
-- Scores should be reported with versioned model configurations and caveats.
+| 文件 | 作用 |
+|---|---|
+| `data/boundary_set.jsonl` | 110 道测试题（5 个维度 × 4 个难度 × 5 题，另加 10 道中英对照题） |
+| `data/boundary_set_review.csv` | 同一份题目的表格版，方便组员检查 |
+| `bench.py` | 向 Ollama 提问，记录答案、延迟、tok/s 和 GPU 占用 |
+| `grade.py` | 自动判分（选择题、数值题、简答题、格式规则）+ 开放题判分 |
+| `report.py` | 生成边界表、热力图、中英对比和错题列表 |
+| `pull_models.sh` / `.ps1` | 拉取模型；加参数 `all` 会同时拉取选测模型 |

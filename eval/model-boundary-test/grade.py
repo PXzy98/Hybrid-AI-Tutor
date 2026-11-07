@@ -15,7 +15,7 @@ import requests
 
 # ------------------------------------------------------------------ helpers
 THINK_RE = re.compile(r"<think>.*?</think>", re.S | re.I)
-FINAL_RE = re.compile(r"(?:final\s+answer|answer|\u7b54\u6848)\s*[:\uff1a]\s*(.+)", re.I)
+FINAL_RE = re.compile(r"(?:final\s+answer|answer|答案)\s*[:：]\s*(.+)", re.I)
 NUM_RE = re.compile(r"-?\d[\d,]*\.?\d*(?:e-?\d+)?|-?\.\d+")
 
 
@@ -104,11 +104,11 @@ def words(s):
 
 def sentences(s):
     s = re.sub(r"\b(e\.g|i\.e|etc|vs|Dr|Prof)\.", r"\1", s)
-    return [x for x in re.split(r"(?<=[.!?\u3002\uff01\uff1f])\s*", s.strip()) if x.strip()]
+    return [x for x in re.split(r"(?<=[.!?。！？])\s*", s.strip()) if x.strip()]
 
 
 def is_cjk(c):
-    return "\u4e00" <= c <= "\u9fff"
+    return "一" <= c <= "鿿"
 
 
 def bullet_lines(s):
@@ -116,7 +116,7 @@ def bullet_lines(s):
 
 
 def numbered_lines(s):
-    return [l for l in s.splitlines() if re.match(r"^\s*(\d+[.)\u3001\uff0e]|[\u4e00\u4e8c\u4e09\u56db\u4e94\u516d\u4e03\u516b\u4e5d\u5341][\u3001.\uff0e])\s*\S", l)]
+    return [l for l in s.splitlines() if re.match(r"^\s*(\d+[.)、．]|[一二三四五六七八九十][、.．])\s*\S", l)]
 
 
 def grade_rule(t, text):
@@ -137,7 +137,7 @@ def grade_rule(t, text):
         fails.append(f"{len(sentences(body))} sentences")
     if "sentence_count" in r and len(sentences(body)) != r["sentence_count"]:
         fails.append(f"{len(sentences(body))} sentences != {r['sentence_count']}")
-    if "min_commas" in r and body.count(",") + body.count("\uff0c") < r["min_commas"]:
+    if "min_commas" in r and body.count(",") + body.count("，") < r["min_commas"]:
         fails.append("too few commas")
     if "max_lines" in r and len([l for l in body.splitlines() if l.strip()]) > r["max_lines"]:
         fails.append("too many lines")

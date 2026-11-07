@@ -1,4 +1,4 @@
-"""Chinese self-introductions ("\u6211\u662f\u674e\u660e\u8f69", "\u6211\u53eb\u738b\u82b3").
+"""Chinese self-introductions ("我是李明轩", "我叫王芳").
 
 spaCy's English model does not find Chinese names.
 """
@@ -8,12 +8,8 @@ from presidio_analyzer import EntityRecognizer, RecognizerResult
 
 from app.core.registry import pii_recognizers
 
-CJK = "\u4e00-\u9fff"  # CJK Unified Ideographs
-INTRO_RE = re.compile(
-    r"(?:\u6211\u662f|\u6211\u53eb|\u6211\u7684\u540d\u5b57\u662f|\u6211\u540d\u53eb)"
-    + r"\s*([" + CJK + r"]{2,4})"
-    + r"(?=[\uff0c,\u3002.\s\uff08(]|$)"
-)
+CJK = "一-鿿"  # CJK Unified Ideographs
+INTRO_RE = re.compile(r"(?:我是|我叫|我的名字是|我名叫)\s*([" + CJK + r"]{2,4})(?=[，,。.\s（(]|$)")
 
 
 @pii_recognizers.register("zh_person")

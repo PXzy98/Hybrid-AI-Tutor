@@ -135,7 +135,7 @@ status and final 749/749 backend regression results. No PR was opened.
 ## Updated teammate handoff and final regression (2026-11-05)
 
 - English Z/T contract: `docs/SIYUN_TEAM_HANDOFF_Z_T_2026-11-05.md`.
-- Teammate handoff documentation is English-only; no translated companion is maintained.
+- Chinese summary: `docs/SIYUN_TEAM_HANDOFF_Z_T_2026-11-05_zh.md`.
 - New Z11 scanner adapter: `backend/app/rag/privacy_adapter.py`.
 - Added Z1 gateway contract tests and S4–S11 fictional cross-component smoke test.
 - S11 precision/recall and active-index provenance checks expanded.
@@ -145,17 +145,3 @@ status and final 749/749 backend regression results. No PR was opened.
 - Existing E2 simulated learner smoke across five topics is documented at
   `docs/S8_E2_SIMULATED_SMOKE_2026-11-05.md`; it is not a real learner study.
 - Work remains on the single personal branch. No changes to the team's `main`.
-
-## English-only source and handoff cleanup (2026-11-05)
-
-All active repository text, including `docs/`, now follows an English-only
-source policy. The historical translated Siyun handoff and redundant translated
-documents were removed. `docs/REPOSITORY_LANGUAGE_POLICY.md` describes
-retained multilingual test coverage through Unicode escapes.
-`docs/ENGLISH_ONLY_AUDIT_2026-11-05.md` records the conversion and checks.
-The authoritative Zhenyan/Tongkai handoff is
-`docs/SIYUN_TEAM_HANDOFF_Z_T_2026-11-05.md` only.
-
-Final automated verification: default BKT **767 passed, 1 deselected**;
-Rule **767 passed, 1 deselected**; Ruff and frontend build passed;
-frontend **28 tests passed**. The repository language check passed.

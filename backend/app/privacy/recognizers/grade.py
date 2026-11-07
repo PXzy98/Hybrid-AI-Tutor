@@ -8,7 +8,7 @@ _SCORE = r"(?:\d{1,3}(?:\.\d+)?\s?(?:/\s?\d{1,3}|%|percent)|(?-i:[ABCDF][+-]?)(?
 
 @pii_recognizers.register("grade")
 class GradeRecognizer(PatternRecognizer):
-    """Recognize a student's grades, GPA and numeric score suffixes."""
+    """A student's own results: "I got 58/100", "my GPA dropped to 2.9", "I failed the midterm", "61 分"."""
 
     def __init__(self) -> None:
         super().__init__(
@@ -35,6 +35,6 @@ class GradeRecognizer(PatternRecognizer):
                 Pattern("gpa value",
                         r"(?i)\b(?:[0-4]\.\d{1,2}\s?c?gpa\b|"
                         r"c?gpa\s+(?:is|of|was|=|:)?\s*(?:\w+\s+){0,2}?[0-4]\.\d{1,2}\b)", 0.7),
-                Pattern("zh score", r"\d{1,3}(?:\.\d+)?\s?\u5206", 0.6),
+                Pattern("zh score", r"\d{1,3}(?:\.\d+)?\s?分", 0.6),
             ],
         )

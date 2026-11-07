@@ -14,4 +14,4 @@ Documents kept for the record. They describe earlier stages of the project (step
 | `RAG_MVP_VALIDATION.md` | Developer checklist for the RAG MVP | `../RAG_COURSE_BETA.md` |
 | `MVP_CHECKLIST.md` | MVP deliverables and status (due 21 Oct) | `../v4-implementation-guide.md` |
 | `DISCUSSION_NOTES.md` | 19 Oct review of the integration branches and web search research | `../v4-implementation-guide.md`, `../WEBSEARCH_OPTIONS.md` |
-| `PRIVACY_UPGRADE_PLAN.md` | Privacy upgrade plan (19 Oct); the Beta upgrades are done (`../report/privacy_subsystem.md`) | `../v4-implementation-guide.md` §4.7 |
+| `隐私升级.md` | Privacy upgrade plan (19 Oct); the Beta upgrades are done (`../report/privacy_subsystem.md`) | `../v4-implementation-guide.md` §4.7 |

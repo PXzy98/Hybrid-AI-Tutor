@@ -31,7 +31,7 @@ afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 describe("SSE client", () => {
   it("parses split UTF-8, CRLF frames, progress and a final result", async () => {
     const text = ': heartbeat\r\n\r\nevent: progress\r\ndata: {"stage":"embedding","status":"running","elapsed_ms":1}\r\n\r\n'
-      + `event: result\r\ndata: ${JSON.stringify({ ...reply, answer: "\u56de\u7b54\u6b63\u5e38" })}\r\n\r\nevent: done\r\ndata: {}\r\n\r\n`;
+      + `event: result\r\ndata: ${JSON.stringify({ ...reply, answer: "回答正常" })}\r\n\r\nevent: done\r\ndata: {}\r\n\r\n`;
     const bytes = new TextEncoder().encode(text);
     vi.stubGlobal("fetch", vi.fn(async () => new Response(new ReadableStream({ start(controller) {
       for (let i = 0; i < bytes.length; i += 7) controller.enqueue(bytes.slice(i, i + 7));
@@ -39,7 +39,7 @@ describe("SSE client", () => {
     } }))));
     const events: RoutingEvent[] = [];
     const result = await askStream({ ...askDefaults, topic: "asthma", question: "What is asthma?", routing_method: "svm" }, (e) => events.push(e));
-    expect(result.answer).toBe("\u56de\u7b54\u6b63\u5e38");
+    expect(result.answer).toBe("回答正常");
     expect(events.map((e) => e.type)).toEqual(["progress", "result"]);
   });
   it("reports an interrupted stream without inventing an answer", async () => {

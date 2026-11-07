@@ -652,7 +652,7 @@ The v2 privacy and end-to-end tests (detection recall, leakage, semantic preserv
 - ☐ Inform the professor of the deletion rule: a deleted student's data is purged, and request logs are kept anonymized (§8.3).
 - ☐ Whether the client wants the full ILS questionnaire.
 - ☑ `cloud_safe = false`: decided Oct 19. Enforced at the cloud gate for every router (`local_only` default, `generalize` optional); the router has no privacy branch. Still open: whether the route score uses `level`.
-- ☐ Cloud provider and model, and who pays. Tested with DeepSeek (Oct 19); its data location (China) needs the client's approval (`docs/history/PRIVACY_UPGRADE_PLAN.md` §1).
+- ☐ Cloud provider and model, and who pays. Tested with DeepSeek (Oct 19); its data location (China) needs the client's approval (`docs/history/隐私升级.md` §1).
 - ☑ Student login: decided Oct 12. The instructor creates student accounts, students log in with a password, and identity is kept apart from the profile (§7.5).
 
 ## 16. As built (19 Oct 2026): differences from this design

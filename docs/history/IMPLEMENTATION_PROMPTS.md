@@ -1,16 +1,16 @@
 # Implementation Prompts: Privacy-Aware Hybrid AI Tutor (v3)
 
-> **Usage (internal agent workflow)**
-> In a new agent conversation, submit only the task prompt below and replace N with the next step number:
+> **用法（给你自己看的）**
+> 每次开一个新的 agent 会话，只发这一句（把 N 换成步骤号）：
 >
 > ```
 > Read docs/IMPLEMENTATION_PROMPTS.md. Follow "Global rules" and do Step N only. Stop when Step N's "Done when" checks pass and report back.
 > ```
 >
-> - Execute steps in order: 0, 1, 2, 2b (accounts, added October 12), 3 through 10 (October 21 MVP), then 11 through 14 (November 11 Beta).
-> - After each step, update `docs/IMPLEMENTATION_LOG.md` so another session can resume from a verified record.
-> - Run the required tests after each step before starting the next.
-> - Under that historical workflow, Routing (Tongkai) and RAG (Siyun) provided interfaces/stubs only. The v4 guide now supersedes that role description.
+> - 按顺序做：Step 0 → 1 → 2 → **2b（账户，10/12 新增）** → 3 → … → 10 是 MVP（10/21），Step 11 → 14 是 Beta（11/11）。
+> - 每一步结束后，agent 会更新 `docs/IMPLEMENTATION_LOG.md`。下一个会话靠这个文件了解上一步做了什么，所以每步都可以开新会话。
+> - 每一步做完先自己运行一遍，再进入下一步。
+> - 路由（Tongkai）和 RAG（Siyun）只做接口和 stub，不实现内部逻辑。
 
 ---
 
