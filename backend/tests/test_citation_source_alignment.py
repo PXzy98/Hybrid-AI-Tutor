@@ -27,6 +27,10 @@ def test_duplicate_page_passages_keep_all_citation_numbers_and_unique_titles():
         "lecture (page 2)", "lecture (page 2) (excerpt 2)", "deck (slide 3)", "asthma",
     ]
     assert len({(s.source, s.title) for s in sources}) == len(sources)
+    # S1: the position is also returned as numbers for the frontend to translate
+    assert [(s.name, s.page, s.slide, s.excerpt) for s in sources] == [
+        ("lecture", 2, None, None), ("lecture", 2, None, 2), ("deck", None, 3, None), ("asthma", None, None, None),
+    ]
     prompt = material_block([c.text for c in chunks])
     for n, chunk in enumerate(chunks, 1):
         assert f"[{n}] {chunk.text}" in prompt

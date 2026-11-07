@@ -95,14 +95,17 @@ def _sources(ctx: RequestContext) -> list[Source]:
         slide = raw_slide if type(raw_slide) is int and raw_slide > 0 else None
         key = (c.source, page, slide)
         seen[key] = seen.get(key, 0) + 1
-        title = PurePosixPath(c.source).stem.replace("_", " ")
+        name = PurePosixPath(c.source).stem.replace("_", " ")
+        title = name
         if page is not None:
             title += f" (page {page})"
         elif slide is not None:
             title += f" (slide {slide})"
-        if seen[key] > 1:
-            title += f" (excerpt {seen[key]})"
-        out.append(Source(title=title, source=c.source, kc_ids=c.kc_ids))
+        excerpt = seen[key] if seen[key] > 1 else None
+        if excerpt is not None:
+            title += f" (excerpt {excerpt})"
+        out.append(Source(title=title, source=c.source, kc_ids=c.kc_ids, name=name, page=page,
+                          slide=slide if page is None else None, excerpt=excerpt))
     return out
 
 

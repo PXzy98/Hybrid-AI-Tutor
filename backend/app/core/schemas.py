@@ -254,9 +254,14 @@ class CloudRequest(BaseModel):
 
 # --------------------------------------------------------------------------- answer
 class Source(BaseModel):
-    title: str
+    title: str  # English display text, kept for existing clients: "lecture (page 2) (excerpt 2)"
     source: str
     kc_ids: list[str] = []
+    # Task S1: the position as numbers, so the frontend can translate "page" and "slide" itself.
+    name: str = ""  # the file name part of `title`, without the position
+    page: int | None = None
+    slide: int | None = None
+    excerpt: int | None = None  # 2, 3, ... for further passages from the same file position
 
 
 class AskResponse(BaseModel):

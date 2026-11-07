@@ -1253,6 +1253,17 @@ export interface components {
              * @default []
              */
             kc_ids: string[];
+            /**
+             * Name
+             * @default
+             */
+            name: string;
+            /** Page */
+            page?: number | null;
+            /** Slide */
+            slide?: number | null;
+            /** Excerpt */
+            excerpt?: number | null;
         };
         /** StudentAccountOut */
         StudentAccountOut: {
