@@ -9,6 +9,16 @@
 - MedlinePlus built-in passages and existing per-topic source IDs are unchanged. No embedding or external network request is needed for retrieval.
 - The lightweight grounding checker continues to warn about missing evidence, low lexical support, and unsupported numeric claims. Its PASS is **not** a medical approval.
 
+## PowerPoint lecture uploads (S2)
+
+- Accept `.pptx` files (up to 20 MB compressed, 64 MB unpacked, 250 slides).
+- Extract searchable slide-body text, tables and speaker notes **locally**, without a network request.
+- Treat each slide as a separate source boundary. Blank/image-only slides retain their position, so citations refer to the original slide number.
+- Every PowerPoint chunk carries `metadata.slide` (a positive integer); PDF chunks continue to use `metadata.page`.
+- Reject presentations containing images but no readable text or speaker notes with an explicit indexing error; OCR is not automatic.
+- The student-facing `slide N` label requires the S3 citation-source fix (separate task PR), plus the v4 frontend localization work owned by Tongkai. No new v1 fields or endpoints are added here.
+- Tested with fictional three-slide presentations, including notes, a table, blank slides, image-only rejection and an actual teacher upload request. This verifies extraction/retrieval, not real medical content.
+
 ## Instructor workflow
 
 1. Use the instructor **Content** tab to select a medical topic, upload a lecture note or PDF, and confirm it shows **Searchable**.
@@ -36,10 +46,11 @@ Example command from project root (PowerShell):
 
 ```powershell
 $env:PYTHONPATH = "$PWD\backend"
-& "F:\5902\.venv\Scripts\python.exe" eval\course_rag_benchmark.py `
-    --materials-dir "F:\5902_main_latest\data\topics" `
-    --labels "F:\5902_personal\course_rag_gold.csv" `
-    --output "F:\5902_personal\course_rag_beta_results.json" `
+# Run from the repository root; prepare a private, independently labelled CSV first.
+& .\.venv\Scripts\python.exe eval\course_rag_benchmark.py `
+    --materials-dir .\data\topics `
+    --labels .\eval-out\course_rag_gold.csv `
+    --output .\eval-out\course_rag_beta_results.json `
     --marginal 0.70 --ideal 0.85
 ```
 
@@ -52,13 +63,13 @@ For repeatability: keep the gold CSV read-only, include difficult paraphrased qu
 ## Testing
 
 ```powershell
-cd F:\5902_main_latest\backend
-& "F:\5902\.venv\Scripts\python.exe" -m pytest -q tests\test_course_rag_beta.py tests\test_material_sync.py tests\test_rag_mvp_validation.py
-& "F:\5902\.venv\Scripts\python.exe" -m ruff check .
+cd backend
+python -m pytest -q tests/test_course_rag_beta.py tests/test_material_sync.py tests/test_rag_mvp_validation.py
+python -m ruff check . ../scripts
 ```
 
 The above checks are engineering tests built on fictional fixtures, including a two-page PDF. They do not replace independent medical review or real-student pilot testing.
 
 ## Medical advisor / BKT questionnaire — reserved, not started
 
-**Waiting for Lavin's review and response.** No questionnaire answers have been entered as student data, no review fields have been marked approved, and no BKT parameters have been fitted from an advisor's answers. The separate draft questionnaire branch `feature/bkt-questionnaire-siyun-review` remains intact in `F:\5902`. Once feedback arrives, triage comments and approve medical content before any simulated-student diagnostic; a subject-matter expert's simulation is only a functional test, not a representative student performance sample.
+Lavin responded on November 5, 2026: she did not find medical inaccuracies in the original questions, but advised more plausible distractors and stronger difficulty differences. A revised **84-question draft** and her comments are staged separately on branch `feature/s7-lavin-draft-content`, awaiting her second review and the Z4 content-migration interface. Every updated question remains unreviewed; no simulated student answers or BKT fitting have been recorded. An advisor's simulated student response would only test functionality, not generalize to a real student population.
