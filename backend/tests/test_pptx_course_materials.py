@@ -137,3 +137,19 @@ def test_upload_accepts_pptx_and_survives_retriever_restart(tmp_path):
     restarted = MedicalHybridRetriever(tmp_path)
     found = [x for x in restarted.retrieve("Zephyrlens", "asthma") if "Zephyrlens" in x.text]
     assert found and found[0].metadata["slide"] == 2
+
+
+def test_title_only_and_grouped_text_slides_are_read(tmp_path):
+    from pptx.util import Inches
+
+    p = Presentation()
+    divider = p.slides.add_slide(p.slide_layouts[5])
+    divider.shapes.title.text = "Week 3: Quartzzyme sampling"
+    grouped = p.slides.add_slide(p.slide_layouts[6])
+    box = grouped.shapes.add_group_shape().shapes.add_textbox(Inches(1), Inches(1), Inches(4), Inches(1))
+    box.text_frame.text = "Zephyrlens rate is twice the fictional bandwidth."
+    path = tmp_path / "grouped.pptx"
+    p.save(path)
+    slides = extract_text(path, preserve_slide_numbers=True).split("\f")
+    assert slides == ["# Week 3: Quartzzyme sampling",
+                      "# Untitled slide\nZephyrlens rate is twice the fictional bandwidth."]

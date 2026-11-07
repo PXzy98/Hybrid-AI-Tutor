@@ -48,6 +48,17 @@ MAX_PPTX_SLIDES = 250
 MAX_UNPACKED_BYTES = 64 * 1024 * 1024
 
 
+def _shapes(shapes):
+    """Every shape of a slide, including the shapes inside groups."""
+    from pptx.enum.shapes import MSO_SHAPE_TYPE
+
+    for shape in shapes:
+        if shape.shape_type == MSO_SHAPE_TYPE.GROUP:
+            yield from _shapes(shape.shapes)
+        else:
+            yield shape
+
+
 def _slides_text(path: Path, *, numbered: bool) -> str:
     from pptx import Presentation
 
@@ -64,12 +75,12 @@ def _slides_text(path: Path, *, numbered: bool) -> str:
         title = slide.shapes.title
         heading = title.text.strip() if title is not None else ""
         lines = []
-        for shape in slide.shapes:
+        for shape in _shapes(slide.shapes):
             if title is not None and shape.shape_id == title.shape_id:
                 continue
             if shape.has_text_frame:
                 lines.extend(p.text.strip() for p in shape.text_frame.paragraphs if p.text.strip())
-            if shape.has_table:
+            if getattr(shape, "has_table", False):
                 for row in shape.table.rows:
                     cells = [" ".join(cell.text.split()) for cell in row.cells]
                     if any(cells):
@@ -78,8 +89,9 @@ def _slides_text(path: Path, *, numbered: bool) -> str:
             notes = slide.notes_slide.notes_text_frame.text.strip()
             if notes:
                 lines.append("Speaker notes: " + notes)
-        # Preserve blank slides so their physical number does not shift citations.
-        slides.append("\n".join(["# " + (heading or "Untitled slide")] + lines) if lines else "")
+        # Preserve blank slides so their physical number does not shift citations; a title-only slide
+        # (a section divider) keeps its title.
+        slides.append("\n".join(["# " + (heading or "Untitled slide")] + lines) if lines or heading else "")
     if not any(slide.strip() for slide in slides):
         raise DocumentError("No readable text was found. Image-only slides need text or speaker notes.")
     return ("\f" if numbered else "\n").join(slides)
