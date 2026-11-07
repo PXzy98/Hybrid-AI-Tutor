@@ -43,14 +43,18 @@
 - id: HBP.1-q4
   kc: HBP.1
   level: advanced
-  stem: "A person's top number is usually in the normal range, but their bottom number is repeatedly raised. Which general statement is most accurate?"
+  stem: "A person has repeated normal systolic readings but consistently raised diastolic readings using a suitable technique. What is the best interpretation?"
   options:
-    A: {text: "It does not matter, because only the top number counts", misconception: HBP.MC4}
-    B: "It proves that the blood pressure monitor is broken"
-    C: {text: "It means the heart stops for too long between beats", misconception: HBP.MC5}
-    D: "A raised bottom number can still be a concern and is worth discussing with a clinician"
+    A:
+      text: "Normal systolic readings rule out hypertension even if diastolic pressure remains high"
+      misconception: "HBP.MC4"
+    B: "Raised diastolic readings by themselves prove that the monitor is faulty"
+    C:
+      text: "A high bottom number reflects a longer pause between heartbeats rather than raised arterial pressure"
+      misconception: "HBP.MC5"
+    D: "This may indicate isolated diastolic hypertension and warrants clinical review"
   answer: D
-  explanation: "Both numbers are used to judge blood pressure; either one can be raised."
+  explanation: "Persistently raised diastolic pressure can be important even when systolic pressure is normal. A clinician can confirm the pattern using appropriate repeat or out-of-office measurements and the relevant guideline."
   reviewed_by: null
 
 # ------------------------------------------------- HBP.2 Classification and diagnosis
@@ -131,24 +135,30 @@
 - id: HBP.3-q3
   kc: HBP.3
   level: intermediate
-  stem: "Which risk factor for high blood pressure cannot be changed by lifestyle?"
+  stem: "Which pair contains two risk factors for high blood pressure that can both be modified?"
   options:
-    A: "Alcohol use"
-    B: "Salt intake"
-    C: "Family history"
-    D: "Physical activity"
+    A: "Age and physical activity level"
+    B: "Family history and high sodium intake"
+    C: "High sodium intake and low physical activity"
+    D: "Age and family history"
   answer: C
-  explanation: "Family history and age cannot be changed; diet, activity, weight and alcohol can."
+  explanation: "Sodium intake and physical activity can both be changed. Age and family history cannot be modified."
   reviewed_by: null
 - id: HBP.3-q4
   kc: HBP.3
   level: advanced
   stem: "Why can someone who feels well and is not stressed still have high blood pressure?"
   options:
-    A: {text: "Because stress is the only cause, so they must be stressed without knowing it", misconception: HBP.MC7}
+    A:
+      text: "Stress must be present for high blood pressure, even when the person does not notice it"
+      misconception: "HBP.MC7"
     B: "Because long-term factors such as family history, diet and weight also raise blood pressure, and it usually causes no symptoms"
-    C: {text: "Because high blood pressure is caused only by old age", misconception: HBP.MC6}
-    D: {text: "They cannot: feeling well shows that blood pressure is normal", misconception: HBP.MC3}
+    C:
+      text: "High blood pressure is unlikely in younger adults, even when repeated measurements are raised"
+      misconception: "HBP.MC6"
+    D:
+      text: "An absence of headaches rules out high blood pressure"
+      misconception: "HBP.MC3"
   answer: B
   explanation: "High blood pressure has many contributing factors and is often silent, so how a person feels says little about it."
   reviewed_by: null
@@ -195,9 +205,11 @@
   level: advanced
   stem: "Which organs can be affected by long-term high blood pressure?"
   options:
-    A: "Only the skin"
-    B: {text: "Only the heart", misconception: HBP.MC10}
-    C: "Only the lungs"
+    A: "Heart and kidneys, but not the brain or eyes"
+    B:
+      text: "Only the heart; repeated high pressure does not damage other organs"
+      misconception: "HBP.MC10"
+    C: "Heart, brain and kidneys, but not the eyes"
     D: "The heart, brain, kidneys and eyes"
   answer: D
   explanation: "Damage to blood vessels can lead to heart disease, stroke, kidney disease and changes in the eyes."
@@ -296,9 +308,11 @@
   stem: "Someone notices a possible side effect from their blood pressure medicine. What is the safest general step?"
   options:
     A: "Contact a doctor, nurse or pharmacist to discuss it rather than stopping on their own"
-    B: "Take a double dose to make up for it"
-    C: {text: "Stop the medicine immediately without telling anyone", misconception: HBP.MC2}
-    D: "Switch to a family member's medicine"
+    B: "Stop the medicine until the suspected side effect goes away, then restart it independently"
+    C:
+      text: "Stop the medicine when readings are normal rather than discussing the possible side effect"
+      misconception: "HBP.MC2"
+    D: "Switch to another medicine in the same class based only on online advice"
   answer: A
   explanation: "A clinician can check whether it is a side effect and adjust treatment safely."
   reviewed_by: null

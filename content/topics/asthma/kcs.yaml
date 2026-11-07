@@ -1,10 +1,30 @@
-# DRAFT — placeholder skeleton. Real KCs (4–6), items and misconceptions are added later (Beta).
+# DRAFT educational KC map; medical review required before real students.
 topic: asthma
-name: Asthma
-guideline: "TBD: guideline (to be chosen with Dr. Abbas)"
+name: "Asthma"
+guideline: "Draft educational reference: MedlinePlus, https://medlineplus.gov/asthma.html. Clinical assessment/treatment guidance to be confirmed by Lavin."
 kcs:
   - id: AST.1
-    name: "Placeholder: what Asthma is"
-    definition: "Placeholder KC so the topic loads. Replace with the reviewed KC map."
+    name: "Airways and asthma basics"
+    definition: "Chronic inflammation and narrowing of airways, and how this affects breathing."
     difficulty: basic
     prerequisites: []
+  - id: AST.2
+    name: "Symptoms and flare-ups"
+    definition: "Wheezing, coughing, chest tightness and shortness of breath, and recognizing worsening symptoms."
+    difficulty: basic
+    prerequisites: [AST.1]
+  - id: AST.3
+    name: "Triggers and symptom patterns"
+    definition: "Environmental or activity-related triggers, individual differences and symptom diaries."
+    difficulty: intermediate
+    prerequisites: [AST.1]
+  - id: AST.4
+    name: "Clinical assessment and monitoring"
+    definition: "The role of symptom history and breathing tests in clinical evaluation; tracking changes over time."
+    difficulty: intermediate
+    prerequisites: [AST.2]
+  - id: AST.5
+    name: "General control and action planning"
+    definition: "Differences between routine control and short-term symptom relief; following an individual asthma action plan."
+    difficulty: advanced
+    prerequisites: [AST.2, AST.3]

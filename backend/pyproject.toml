@@ -23,6 +23,7 @@ dependencies = [
     "python-multipart>=0.0.9",  # file uploads (admin: course materials)
     "pypdf>=5",  # text PDFs uploaded as course material (no OCR)
     "python-docx>=1.1",  # local extraction of Word paragraphs and tables
+    "python-pptx>=1.0,<2",  # local extraction of PowerPoint slides, tables and speaker notes
     "psycopg[binary]>=3.2,<4",  # PostgreSQL driver (task Z3)
     "alembic>=1.13,<2",  # schema migrations (backend/alembic/)
     "numpy>=1.26",

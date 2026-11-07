@@ -1,10 +1,30 @@
-# DRAFT — placeholder skeleton. Real KCs (4–6), items and misconceptions are added later (Beta).
+# DRAFT educational KC map; medical content requires review by Lavin / Dr. Abbas before real students.
 topic: type2_diabetes
-name: Type 2 Diabetes
-guideline: "TBD: guideline (to be chosen with Dr. Abbas)"
+name: "Type 2 Diabetes"
+guideline: "Draft educational reference: MedlinePlus, https://medlineplus.gov/diabetestype2.html. Course-specific guideline and teaching level to be confirmed with Lavin."
 kcs:
   - id: T2D.1
-    name: "Placeholder: what Type 2 Diabetes is"
-    definition: "Placeholder KC so the topic loads. Replace with the reviewed KC map."
+    name: "Glucose and insulin basics"
+    definition: "Glucose as an energy source; the role of insulin in helping glucose enter body cells."
     difficulty: basic
     prerequisites: []
+  - id: T2D.2
+    name: "Insulin resistance and type 2 diabetes"
+    definition: "Cells' reduced response to insulin, compensatory insulin production and rising blood glucose."
+    difficulty: basic
+    prerequisites: [T2D.1]
+  - id: T2D.3
+    name: "Risk factors and prevention"
+    definition: "Family history, physical activity and other modifiable and non-modifiable risk factors."
+    difficulty: intermediate
+    prerequisites: [T2D.1]
+  - id: T2D.4
+    name: "Monitoring and complications"
+    definition: "Why glucose is monitored and why long-term high blood glucose can affect organs."
+    difficulty: intermediate
+    prerequisites: [T2D.2]
+  - id: T2D.5
+    name: "Self-management and professional follow-up"
+    definition: "Everyday self-management, following an individualized care plan and checking treatment changes with a care team."
+    difficulty: advanced
+    prerequisites: [T2D.2, T2D.3]
