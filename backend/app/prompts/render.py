@@ -58,6 +58,7 @@ def system_prompt(level: Level | None = None, sequencing: Sequencing | None = No
 
 
 def material_block(passages: list[str]) -> str:
+    """Number every passage; the API Sources list must retain this exact order and length."""
     if not passages:
         return "Course material: none was found for this question."
     return "Course material:\n" + "\n\n".join(f"[{i}] {p.strip()}" for i, p in enumerate(passages, 1))
