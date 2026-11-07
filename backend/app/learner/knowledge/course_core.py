@@ -1,10 +1,16 @@
-"""Offline course-level knowledge state with BKT and course ability.
+"""Offline course-level knowledge state: course ability, KC-level BKT, prerequisite propagation.
+
+The three layers of guide 4.10:
+- one ability value per student and course, updated online after each graded answer (Elo/IRT-like);
+- KC-level BKT; a KC the student has not been observed on starts from a prior shifted by the ability,
+  so a strong student starts higher on a new KC and a weak one lower (`ability_weight` 0 = plain BKT);
+- weak prerequisites lower the effective mastery of the KCs that depend on them.
 
 S8 computational core only. The course catalog, evidence persistence, role checks,
 and v2 API are supplied by the Z-owned platform. Never stores question text.
 """
 from dataclasses import dataclass, field
-from math import exp, isfinite
+from math import exp, isfinite, log
 from typing import Literal
 
 from app.learner.knowledge.bkt_math import learn, posterior, weak_update
@@ -46,13 +52,17 @@ class CourseKnowledgeCore:
 
     def __init__(self, prerequisites: dict[str, list[str]], *, prior: float = 0.2,
                  learn_rate: float = 0.1, slip: float = 0.1, guess: float = 0.25,
-                 ability_gain: float = 0.3) -> None:
+                 ability_gain: float = 0.3, ability_weight: float = 0.5,
+                 weak_likelihood: tuple[float, float] = (0.3, 0.6)) -> None:
         if not prerequisites or any(not isinstance(k, str) or not k for k in prerequisites):
             raise CourseKnowledgeError("The course must define named KCs.")
         if any(not 0 < x < 1 for x in (prior, slip, guess)):
             raise CourseKnowledgeError("Invalid BKT probabilities.")
-        if not (0 <= learn_rate <= 1 and 0 < ability_gain <= 1):
+        if not (0 <= learn_rate <= 1 and 0 < ability_gain <= 1 and 0 <= ability_weight <= 1):
             raise CourseKnowledgeError("Invalid model learning rates.")
+        if any(not 0 < x < 1 for x in weak_likelihood):
+            raise CourseKnowledgeError("Invalid weak-evidence likelihoods.")
+        self.ability_weight, self.weak_likelihood = ability_weight, weak_likelihood
         self.graph = {kc: tuple(deps) for kc, deps in prerequisites.items()}
         self.prior, self.learn_rate = prior, learn_rate
         self.slip, self.guess, self.ability_gain = slip, guess, ability_gain
@@ -75,6 +85,23 @@ class CourseKnowledgeCore:
         for kc in self.graph:
             visit(kc)
 
+    @classmethod
+    def from_settings(cls, prerequisites: dict[str, list[str]], settings) -> "CourseKnowledgeCore":
+        """Use the deployment's BKT parameters (`learner.bkt_defaults`, `learner.weak_likelihood`)."""
+        b, w = settings.learner.bkt_defaults, settings.learner.weak_likelihood
+        return cls(prerequisites, prior=b.p_init, learn_rate=b.learn, slip=b.slip, guess=b.guess,
+                   weak_likelihood=(w.given_mastered, w.given_not_mastered))
+
+    def prior_for(self, ability: float) -> float:
+        """The starting mastery of an unobserved KC: the prior's log-odds shifted by the ability."""
+        logit = log(self.prior / (1 - self.prior)) + self.ability_weight * ability
+        return round(1 / (1 + exp(-logit)), 6)
+
+    def predict_correct(self, state: CourseKnowledgeState, kc_id: str) -> float:
+        """P(correct answer) on an item of this KC, from the effective mastery (with prerequisites)."""
+        m = self.effective_mastery(state)[kc_id]
+        return round(m * (1 - self.slip) + (1 - m) * self.guess, 6)
+
     def initial(self, course_id: int, student_id: str) -> CourseKnowledgeState:
         if type(course_id) is not int or course_id <= 0 or not student_id:
             raise CourseKnowledgeError("A valid course and student are required.")
@@ -83,7 +110,7 @@ class CourseKnowledgeCore:
     def progress(self, state: CourseKnowledgeState, kc_id: str) -> KCProgress:
         if kc_id not in self.graph:
             raise CourseKnowledgeError("Unknown knowledge component.")
-        return state.kcs.get(kc_id, KCProgress(self.prior))
+        return state.kcs.get(kc_id) or KCProgress(self.prior_for(state.ability))
 
     def effective_mastery(self, state: CourseKnowledgeState) -> dict[str, float]:
         """Lower apparent mastery when prerequisites are weak, preserving raw BKT state."""
@@ -120,7 +147,7 @@ class CourseKnowledgeCore:
 
         old = self.progress(state, event.kc_id)
         if event.kind == "weak":
-            p = weak_update(old.probability, 0.3, 0.6)
+            p = weak_update(old.probability, *self.weak_likelihood)
             n, ability = old.observations, state.ability
         else:
             p = posterior(old.probability, event.correct, self.slip, self.guess)

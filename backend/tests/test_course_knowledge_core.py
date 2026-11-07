@@ -131,3 +131,29 @@ def test_cross_course_learner_update_never_changes_existing_state():
     with pytest.raises(CourseKnowledgeError):
         model.update(existing, _event(cid=43))
     assert existing.kcs == {} and existing.ability == 0.0
+
+
+def test_course_ability_sets_the_start_of_unobserved_kcs():
+    model = _core()
+    state = model.initial(42, "fake-student")
+    for _ in range(5):
+        state = model.update(state, _event(kc="KC-A", correct=True))
+    assert state.ability > 0
+    assert model.progress(state, "KC-B").probability > model.prior  # a new KC starts above the prior
+    weak = model.initial(42, "another-fake")
+    for _ in range(5):
+        weak = model.update(weak, _event(student="another-fake", kc="KC-A", correct=False))
+    assert model.progress(weak, "KC-B").probability < model.prior
+    plain = CourseKnowledgeCore({"KC-A": [], "KC-B": []}, ability_weight=0.0)
+    assert plain.progress(state, "KC-B").probability == plain.prior
+
+
+def test_parameters_come_from_settings_and_predictions_are_probabilities():
+    from app.core.config import Settings
+
+    settings = Settings()
+    model = CourseKnowledgeCore.from_settings({"KC-A": []}, settings)
+    assert model.prior == settings.learner.bkt_defaults.p_init
+    assert model.slip == settings.learner.bkt_defaults.slip
+    p = model.predict_correct(model.initial(42, "fake-student"), "KC-A")
+    assert model.guess < p < 1 - model.slip
