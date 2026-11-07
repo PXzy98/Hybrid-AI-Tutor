@@ -3,7 +3,13 @@
 Only checks authored demo documents. Official ELG 5902 materials need permission first.
 """
 import json
+import shutil
 from pathlib import Path
+
+import pytest
+
+from app.rag.course_retriever import IndexedCourseRetriever
+from app.rag.demo_courses import DemoCourseError, stage_demo_course
 
 ROOT = Path(__file__).resolve().parents[2]
 BASE = ROOT / "data" / "demo_courses" / "general_medical_knowledge"
@@ -71,3 +77,28 @@ def test_course_scaffolding_is_not_conflated_with_medical_signoff():
     assert "84-item draft MCQ bank" in text
     assert "unapproved" in text.lower()
     assert "not" in (BASE / "README.md").read_text(encoding="utf-8").lower()
+
+
+def test_demo_course_is_indexed_and_course_documents_are_retrieved(tmp_path):
+    """S4/S5 done-when: the syllabus and project requirements are retrieved; modules stay separate."""
+    copied = stage_demo_course(BASE, tmp_path, 1)
+    assert len(copied) == len(_manifest()["documents"]) + 2 * len(_manifest()["modules"])
+    rag = IndexedCourseRetriever(tmp_path, scan=lambda _: True)  # fictional pack; real scan is Z11
+    assert rag.rebuild(1) == 1
+    deliverables = rag.retrieve(1, None, "What are the deliverables of the project brief?")
+    assert deliverables and deliverables[0].source.endswith("_course/project_requirements.md")
+    outline = rag.retrieve(1, None, "Which modules does the course outline list?")
+    assert any(p.source.endswith("_course/course_outline.md") for p in outline)
+    asthma = rag.retrieve(1, 2, "airway inflammation wheezing inhaler")
+    assert asthma and {p.metadata["module_id"] for p in asthma} <= {None, 2}
+    assert any(p.source.endswith("/2/reading_asthma.txt") for p in asthma)
+
+
+def test_staging_refuses_files_outside_the_pack(tmp_path):
+    pack = tmp_path / "pack"
+    shutil.copytree(BASE, pack)
+    manifest = json.loads((pack / "manifest.json").read_text(encoding="utf-8"))
+    manifest["documents"].append("../../../secret.md")
+    (pack / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    with pytest.raises(DemoCourseError):
+        stage_demo_course(pack, tmp_path / "out", 1, data_root=tmp_path)
