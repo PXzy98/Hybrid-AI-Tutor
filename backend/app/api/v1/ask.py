@@ -2,7 +2,6 @@ import asyncio
 import contextlib
 import json
 import uuid
-from pathlib import PurePosixPath
 from typing import Literal
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException
@@ -13,6 +12,7 @@ from app.api.deps import RunnerDep, ServicesDep
 from app.auth.deps import Student
 from app.core.schemas import AskRequest, AskResponse, RequestContext, Source
 from app.pipeline.runner import PipelineError
+from app.rag.sources import source_positions
 from app.routing.methods import METHOD_LABELS
 
 router = APIRouter()
@@ -86,17 +86,9 @@ def _prepare(body: AskBody, user, services) -> RequestContext:
 
 
 def _sources(ctx: RequestContext) -> list[Source]:
-    seen: dict[tuple[str, int | None], Source] = {}
-    for c in ctx.passages:
-        raw_page = c.metadata.get("page")
-        page = raw_page if isinstance(raw_page, int) and raw_page > 0 else None
-        key = (c.source, page)
-        if key not in seen:
-            title = PurePosixPath(c.source).stem.replace("_", " ")
-            if page is not None:
-                title += f" (page {page})"
-            seen[key] = Source(title=title, source=c.source, kc_ids=c.kc_ids)
-    return list(seen.values())
+    """One source per numbered prompt passage; never collapse duplicate file/page citations."""
+    return [Source(title=pos.english_title(), source=pos.source, kc_ids=list(pos.kc_ids))
+            for pos in source_positions(ctx.passages)]
 
 
 def _response(ctx: RequestContext) -> AskResponse:
