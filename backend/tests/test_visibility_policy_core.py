@@ -83,3 +83,31 @@ def test_no_question_text_can_enter_signal_data():
     with pytest.raises(TypeError):
         LearnerSignal(course_id=100, student_id="fictional-a", created_at=START,
                       kc_id="KC-fake", p_mastery=0.8, question="a private question")
+
+
+def test_every_overview_part_uses_the_same_gate():
+    from app.learner.visibility_policy import (
+        ActivityRecord,
+        CheckAnswerRecord,
+        MisconceptionRecord,
+        instructor_visible_records,
+    )
+
+    before, after = START - timedelta(days=1), START + timedelta(hours=1)
+    records = [
+        CheckAnswerRecord(100, "fictional-a", before, "KC-1-q1", True),
+        CheckAnswerRecord(100, "fictional-a", after, "KC-1-q2", False),
+        MisconceptionRecord(100, "fictional-a", after, "MC-1", False),
+        ActivityRecord(100, "fictional-a", after, "session"),
+    ]
+    audits = []
+    shown = instructor_visible_records(state=_state(), records=records, authorized_instructor=True,
+                                       audit_view=lambda *a: audits.append(a) or True)
+    assert shown == tuple(records[1:]) and audits == [(100, "fictional-a")]
+    for state in (_state(mode="A"), _state(hidden_from_instructor=True), _state(visible_since=None)):
+        with pytest.raises(VisibilityDenied):
+            instructor_visible_records(state=state, records=records, authorized_instructor=True,
+                                       audit_view=lambda *_: True)
+    with pytest.raises(VisibilityDenied):  # another student's record
+        instructor_visible_records(state=_state(), records=[ActivityRecord(100, "other", after, "check")],
+                                   authorized_instructor=True, audit_view=lambda *_: True)
