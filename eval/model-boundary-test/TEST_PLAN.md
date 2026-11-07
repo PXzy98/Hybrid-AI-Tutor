@@ -1,119 +1,130 @@
-# 本地小模型能力边界测试计划
+# Capability boundary test plan for small local models
 
-**项目**：Privacy-Aware Hybrid AI Tutor（ELG 5902, Group 1）
-**本轮范围**：不测 RAG，也不测 PII 处理。只测一个问题：**不同大小的本地模型，在什么类型、什么难度的问题上还能答对？**
-**硬件**：Ollama 服务器 `192.168.2.25`，RTX 2080 Ti 22GB
+**Project**: Privacy-Aware Hybrid AI Tutor (ELG 5902, Group 1)
+**Scope of this round**: no RAG and no PII handling. Only one question: **which types and difficulty levels of
+questions can local models of different sizes still answer correctly?**
+**Hardware**: Ollama server `192.168.2.25`, RTX 2080 Ti 22GB
 
 ---
 
-## 1. 要回答的问题
+## 1. Questions to answer
 
-1. 每个模型在每类问题上能做到第几级难度（"边界"）？
-2. 模型变大以后，哪类问题提升最明显，哪类问题一直做不好？
-3. thinking 模式能把边界往上推多少？代价是多少延迟？
-4. 中文提问会不会降低正确率？
-5. 小模型能不能稳定地按格式输出（例如 JSON）？这决定了它能不能用来做 router 或分类器。
+1. Up to which difficulty level (the "boundary") does each model reach for each question type?
+2. As models get larger, which question types improve most, and which stay poor?
+3. How far does thinking mode push the boundary up, and at what latency cost?
+4. Does asking in Chinese lower accuracy?
+5. Can small models reliably follow an output format (for example JSON)? This decides whether they can serve
+   as a router or classifier.
 
-这些结果会直接用于路由规则：**超出本地模型边界的题型，就交给云端处理。**
+The results feed directly into the routing rules: **question types beyond the local model's boundary go to the
+cloud.**
 
-## 2. 测试集设计（`data/boundary_set.jsonl`，110 题）
+## 2. Test set design (`data/boundary_set.jsonl`, 110 questions)
 
-5 个维度 × 4 个难度 × 每格 5 题 = 100 题，另外加 10 道中英对照题。题目内容都是医疗 AI / 健康信息学方向。
+5 dimensions × 4 levels × 5 questions per cell = 100 questions, plus 10 Chinese/English paired questions. All
+questions are about medical AI / health informatics.
 
-| 维度 | L1 | L2 | L3 | L4 |
+| Dimension | L1 | L2 | L3 | L4 |
 |---|---|---|---|---|
-| **Knowledge 知识** | 常见术语（CT、EHR） | 课程标准概念（FHIR、ICD-10、k-fold） | 具体细节（HU 值、DICOM tag、LOINC） | 冷门事实 + **虚假前提陷阱**（不存在的论文或标准，测试会不会编造） |
-| **Concept 概念** | 定义 | 两个概念的比较 | 应用到具体场景 | 常见误解（AUC 的含义、类别权重对校准的影响） |
-| **Calculation 计算** | 一个公式 | 两步计算 | 多步计算（Bayes、kappa、似然比） | 长链条计算（连续两次检测、样本量、成本） |
-| **Applied reasoning 应用推理** | 明显的错误 | 数据泄露、过拟合 | 领域偏移、时间泄露、亚组差异 | 隐蔽泄露、容量约束、Simpson 悖论、开放式设计 |
-| **Instruction following 指令遵循** | 单一约束（一句话、只回答 Yes） | 结构约束（3 个要点、字数限制） | 多重约束、**JSON 输出**、router 式分类 | 苏格拉底式辅导（不能直接给答案）、拒绝作弊、严格格式 |
+| **Knowledge** | common terms (CT, EHR) | standard course concepts (FHIR, ICD-10, k-fold) | specific details (HU values, DICOM tags, LOINC) | obscure facts + **false-premise traps** (papers or standards that do not exist, to test whether the model makes things up) |
+| **Concept** | definitions | comparing two concepts | applying to a concrete case | common misconceptions (what AUC means, how class weights affect calibration) |
+| **Calculation** | one formula | two steps | several steps (Bayes, kappa, likelihood ratios) | long chains (two tests in a row, sample size, cost) |
+| **Applied reasoning** | obvious errors | data leakage, overfitting | domain shift, temporal leakage, subgroup differences | hidden leakage, capacity constraints, Simpson's paradox, open design |
+| **Instruction following** | one constraint (one sentence, answer only Yes) | structure constraints (3 bullet points, word limit) | several constraints, **JSON output**, router-style classification | Socratic tutoring (must not give the answer), refusing to help cheat, strict formats |
 
-**判分方式**（110 题中有 104 题可以自动判分）：
+**Grading** (104 of the 110 questions are graded automatically):
 
-| 题型 | 数量 | 判分 |
+| Type | Count | Grading |
 |---|---|---|
-| 选择题 `mcq` | 55 | 读取最后一行 `ANSWER: X`，选项位置已打乱 |
-| 数值题 `numeric` | 25 | 允许误差（大多为 ±2%），也接受百分数写法 |
-| 简答题 `short` | 5 | 关键词匹配 |
-| 规则题 `rule` | 19 | 用程序检查格式（字数、句数、要点数、JSON、语言等） |
-| 开放题 `open` | 6 | 用 LLM 评委打分，或者人工判（每个模型只有 6 题，人工判大约 5 分钟） |
+| Multiple choice `mcq` | 55 | reads the last line `ANSWER: X`; option positions are shuffled |
+| Numeric `numeric` | 25 | with a tolerance (mostly ±2%); percentages are accepted |
+| Short answer `short` | 5 | keyword matching |
+| Rule `rule` | 19 | the format is checked by code (words, sentences, bullet points, JSON, language, ...) |
+| Open `open` | 6 | scored by an LLM judge or by hand (only 6 questions per model, about 5 minutes by hand) |
 
-另外，每格只有 5 题，所以"80% 通过"就是 5 题答对 4 题，单次结果有一定随机性。做法见第 5 节的第 3 轮。
+Each cell has only 5 questions, so "80% passed" means 4 of 5 correct and a single run has some randomness. See
+round 3 in section 5.
 
-## 3. Ollama 需要准备的模型
+## 3. Models to prepare in Ollama
 
-模型信息来自 ollama.com（2026 年 10 月）。显存大小是默认 Q4 量化下的下载大小，实际运行时还要加上 KV cache。本轮没有 RAG，`num_ctx=4096` 就够了。
+Model information from ollama.com (October 2026). Sizes are the download sizes at the default Q4 quantization;
+the KV cache comes on top at run time. Without RAG in this round, `num_ctx=4096` is enough.
 
-### 必测（主阶梯）
+### Required (main ladder)
 
-同一家族（Qwen3.5）的不同大小，可以单独看出"模型大小"的影响；再加一个家族（Gemma 4）做交叉验证。
+Different sizes of one family (Qwen3.5) show the effect of model size alone; a second family (Gemma 4) cross-checks.
 
-| 模型 | 参数量 | 大约大小 | 在 22GB 上 | 作用 |
+| Model | Parameters | Approx. size | On 22GB | Role |
 |---|---|---|---|---|
-| `qwen3.5:2b` | 2B | ~2.7 GB | ✅ 轻松 | 很小的模型，可能用于 router |
-| `qwen3.5:4b` | 4B | ~3.4 GB | ✅ 轻松 | 小模型 |
-| `qwen3.5:9b` | 9B | ~6.6 GB | ✅ 轻松 | 中等模型，可能是默认本地模型 |
-| `qwen3.5:27b` | 27B dense | ~17 GB | ✅ 可以 | 这张卡能跑的最大 dense 模型 |
-| `gemma4:e4b` | 4.5B 有效参数 | ~7–9.5 GB | ✅ 轻松 | 跨家族对照：小模型 |
-| `gemma4:12b` | 12B | ~8 GB | ✅ 轻松 | 跨家族对照：中等模型 |
-| `gemma4:26b` | 25B MoE（激活约 3.8B） | ~16–19 GB | ✅ 可以 | **重点**：MoE 模型，速度接近小模型，质量可能接近大模型 |
+| `qwen3.5:2b` | 2B | ~2.7 GB | ✅ easy | very small model, possible router |
+| `qwen3.5:4b` | 4B | ~3.4 GB | ✅ easy | small model |
+| `qwen3.5:9b` | 9B | ~6.6 GB | ✅ easy | medium model, possible default local model |
+| `qwen3.5:27b` | 27B dense | ~17 GB | ✅ fits | the largest dense model this card can run |
+| `gemma4:e4b` | 4.5B effective | ~7–9.5 GB | ✅ easy | cross-family check: small model |
+| `gemma4:12b` | 12B | ~8 GB | ✅ easy | cross-family check: medium model |
+| `gemma4:26b` | 25B MoE (about 3.8B active) | ~16–19 GB | ✅ fits | **key**: MoE model, speed close to a small model, quality possibly close to a large one |
 
-磁盘需要大约 65 GB。
+About 65 GB of disk is needed.
 
-### 选测（有时间再做）
+### Optional (if time allows)
 
-| 模型 | 说明 |
+| Model | Note |
 |---|---|
-| `qwen3.5:0.8b` | 确定能力下限，大约 1 GB |
-| `gemma4:e2b` | Gemma 最小的版本 |
-| `gemma4:31b` | 31B dense，19–20 GB，很紧张。如果 `ollama ps` 显示不是 100% GPU，就不用继续测 |
-| `qwen3.8:27b` | Ollama 上最新的 Qwen 27B。和 qwen3.5:27b 对比，可以看出新一代模型提升了多少 |
-| `qwen3.5:35b` | 35B-A3B MoE，大约 22 GB，**一定会有一部分跑在 CPU 上**。只用来参考质量，速度数据不能作为结论 |
+| `qwen3.5:0.8b` | finds the lower bound, about 1 GB |
+| `gemma4:e2b` | the smallest Gemma |
+| `gemma4:31b` | 31B dense, 19–20 GB, very tight. If `ollama ps` does not show 100% GPU, do not continue |
+| `qwen3.8:27b` | the newest Qwen 27B on Ollama. Compared with qwen3.5:27b it shows how much the new generation improved |
+| `qwen3.5:35b` | 35B-A3B MoE, about 22 GB, **part of it always runs on the CPU**. Only a quality reference; its speed is not a result |
 
-拉取模型：运行 `pull_models.sh`（Linux）或 `pull_models.ps1`（Windows），在服务器上执行。
+Pull the models with `pull_models.sh` (Linux) or `pull_models.ps1` (Windows), run on the server.
 
-## 4. 测试设置
+## 4. Test settings
 
-| 设置 | 值 | 原因 |
+| Setting | Value | Reason |
 |---|---|---|
-| temperature | 0（第 3 轮用 0.6） | 结果可以复现 |
-| num_ctx | 4096 | 不测 RAG，题目都很短 |
-| 最大输出 | 2048 tokens（thinking 模式下 8192） | 防止小模型陷入无限循环；超出上限的次数会被记录 |
-| thinking | 默认关闭，第 2 轮单独测 | 分别看模型本身的能力和 thinking 带来的提升 |
-| system prompt | 要求最后一行写 `ANSWER: ...` | 方便自动判分；格式出错本身也是一个指标 |
+| temperature | 0 (0.6 in round 3) | reproducible results |
+| num_ctx | 4096 | no RAG, the questions are short |
+| max output | 2048 tokens (8192 with thinking) | stops small models from looping forever; hitting the limit is recorded |
+| thinking | off by default, tested separately in round 2 | separates the model's own ability from what thinking adds |
+| system prompt | asks for a last line `ANSWER: ...` | easy automatic grading; a wrong format is itself a metric |
 
-## 5. 执行步骤
+## 5. Steps
 
-| 轮次 | 内容 | 命令 | 预计时间 |
+| Round | Content | Command | Expected time |
 |---|---|---|---|
-| 0 | 冒烟测试 | `python bench.py --models qwen3.5:4b --limit 5 --out results/smoke.jsonl` | 2 分钟 |
-| 1 | **全部必测模型，thinking 关闭** | `python bench.py --models qwen3.5:2b qwen3.5:4b qwen3.5:9b gemma4:e4b gemma4:12b gemma4:26b qwen3.5:27b` | 2–3 小时，27B 最慢 |
-| 2 | thinking 的效果 | `python bench.py --models qwen3.5:4b qwen3.5:9b qwen3.5:27b --think on` | 3–6 小时，可以放在晚上跑 |
-| 3 | 边界附近的稳定性 | 对第 1 轮中处在边界附近（60–80%）的模型运行：`--repeats 3 --temperature 0.6` | 看需要 |
-| 4 | 判分和报告 | `python grade.py`，把 `results/manual_review.csv` 的 6 道开放题判完，然后 `python report.py` | 30 分钟 |
+| 0 | smoke test | `python bench.py --models qwen3.5:4b --limit 5 --out results/smoke.jsonl` | 2 minutes |
+| 1 | **all required models, thinking off** | `python bench.py --models qwen3.5:2b qwen3.5:4b qwen3.5:9b gemma4:e4b gemma4:12b gemma4:26b qwen3.5:27b` | 2–3 hours, 27B is slowest |
+| 2 | effect of thinking | `python bench.py --models qwen3.5:4b qwen3.5:9b qwen3.5:27b --think on` | 3–6 hours, can run overnight |
+| 3 | stability near the boundary | for models near the boundary (60–80%) in round 1: `--repeats 3 --temperature 0.6` | as needed |
+| 4 | grading and report | `python grade.py`, grade the 6 open questions in `results/manual_review.csv`, then `python report.py` | 30 minutes |
 
-## 6. 怎么判断"边界"
+## 6. How the "boundary" is decided
 
-- **每格通过标准**：正确率 ≥ 80%（可以用 `--pass` 调整）。
-- **边界**：从 L1 开始连续通过的最高等级。例如 L1、L2 通过，L3 没过，边界就是 L2。
-- **还要看的指标**：
-  - `format_ok`：能不能按要求输出 `ANSWER:` 行。如果这个值低，说明这个模型不适合做需要结构化输出的工作（比如 router）。
-  - `hit_max_tokens`：输出达到上限的次数。次数多说明模型陷入了循环，常见于小模型开 thinking 的情况。
-  - Knowledge L4 的虚假前提题：答错说明模型会**编造内容**。对教学用途来说，这是很严重的问题。
-  - 中英对照题的正确率差异。
+- **Pass per cell**: accuracy ≥ 80% (adjustable with `--pass`).
+- **Boundary**: the highest level passed continuously from L1. For example, if L1 and L2 pass and L3 does not,
+  the boundary is L2.
+- **Other metrics**:
+  - `format_ok`: whether the model writes the `ANSWER:` line as asked. A low value means the model is not
+    suited to work that needs structured output (such as a router).
+  - `hit_max_tokens`: how often the output hit the limit. Many hits mean the model looped, common for small
+    models with thinking on.
+  - The false-premise questions of Knowledge L4: a wrong answer means the model **makes things up**. For
+    teaching this is a serious problem.
+  - The accuracy difference on the Chinese/English paired questions.
 
-## 7. 结论怎么用到项目里
+## 7. How the results are used in the project
 
-| 结果 | 对设计的影响 |
+| Result | Effect on the design |
 |---|---|
-| 某模型在 Calculation 上的边界是 L2 | 多步计算题（L3 及以上）路由到云端 |
-| 2B/4B 模型在 Instruction following L3（JSON、分类）上能通过 | 可以用这个小模型做 router，满足 ≤0.5 秒的延迟目标 |
-| MoE 模型（gemma4:26b）的边界和 27B dense 差不多，但速度快很多 | 选它作为默认本地模型 |
-| 所有本地模型都没通过 Knowledge L4 的虚假前提题 | 必须靠 RAG 和回答验证模块来控制编造，这也说明下一轮 RAG 测试的必要性 |
-| 中文正确率明显更低 | 中文问题优先走云端，或者选中文能力更强的模型 |
+| A model's Calculation boundary is L2 | multi-step calculations (L3 and above) are routed to the cloud |
+| A 2B/4B model passes Instruction following L3 (JSON, classification) | that small model can serve as the router and meet the ≤0.5 s latency target |
+| The MoE model (gemma4:26b) has about the same boundary as the 27B dense model but is much faster | choose it as the default local model |
+| No local model passes the false-premise questions of Knowledge L4 | made-up content must be controlled by RAG and the answer verification module, which also shows why the next round tests RAG |
+| Accuracy is clearly lower in Chinese | Chinese questions go to the cloud first, or choose a model better at Chinese |
 
-## 8. 下一步（本轮之后）
+## 8. Next steps (after this round)
 
-1. 用同样的方法加入 RAG 测试，看给了课件以后边界能提高多少。
-2. 把 PII 题（上一版测试集里有）加进来，测试"敏感但复杂"的问题在本地能做到什么程度。
-3. 等 Dr. Abbas 提供课程材料后，把合成题换成真实的课程题目。
+1. Add RAG with the same method and see how much the boundary rises once course material is given.
+2. Add the PII questions (in the previous version of the test set) to test how far "sensitive but complex"
+   questions can be handled locally.
+3. Once Dr. Abbas provides course material, replace the synthetic questions with real course questions.
