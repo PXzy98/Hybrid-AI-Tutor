@@ -1,7 +1,6 @@
 # Siyun ELG5902 v4 — unified personal branch status (2026-11-05)
 
 Current single development destination: `feature/siyun-v4-integration-20261105`.
-All changes in this development session are made in `F:\5902_v4_integration`.
 Team `main` and the earlier task branches are not modified. No PR is created.
 This is the user's personal integration branch, not a production release.
 
@@ -38,10 +37,10 @@ The earlier S6, S9 visibility and S10 implementations remain in the same branch.
 
 From `backend/` without an external developer `.env`:
 ```powershell
-& "F:\5902\.venv\Scripts\python.exe" -m pytest -q
+..\.venv\Scripts\python -m pytest -q
 $env:TEST_LEARNER_KNOWLEDGE = "rule"
-& "F:\5902\.venv\Scripts\python.exe" -m pytest -q
-& "F:\5902\.venv\Scripts\python.exe" -m ruff check . ../scripts
+..\.venv\Scripts\python -m pytest -q
+..\.venv\Scripts\python -m ruff check . ../scripts
 ```
 
 From `frontend/`: `npm run build`, `npm test -- --run`.

@@ -85,7 +85,11 @@ def _indexed_passages(root: Path, course_id: int) -> list[Chunk]:
 def evaluate_two_course_rag(
     *, retriever: CourseRetriever, index_root: Path, labels: list[GoldLabel], k: int = 4,
 ) -> dict:
-    """Compute Hit@1, Recall@K, MRR@K, abstention and latency over two or more courses."""
+    """Compute Hit@1, Recall@K, MRR@K, abstention and latency over two or more courses.
+
+    `precision_at_1` equals `hit_at_1` by definition; it is kept for the MVP metric set.
+    `source_traceability` is the share of returned passages found in the active course index.
+    """
     if type(k) is not int or not 1 <= k <= 20:
         raise EvaluationError("Invalid retrieval cutoff.")
     if len({label.course_id for label in labels}) < 2:
@@ -131,11 +135,11 @@ def evaluate_two_course_rag(
         for passage in retrieved:
             if passage.metadata.get("course_id") != course_id:
                 raise EvaluationError("Retriever returned cross-course evidence.")
-            if not any(p.source == passage.source and p.text == passage.text
-                       and p.metadata.get("module_id") == passage.metadata.get("module_id")
-                       for p in indexed):
-                raise EvaluationError("Retriever returned a passage absent from the active index.")
-        traceable += len(retrieved)
+            # A passage that is not in the active index (invented or stale) is counted, not fatal,
+            # so source_traceability measures it; a cross-course passage above stays fatal.
+            traceable += any(p.source == passage.source and p.text == passage.text
+                             and p.metadata.get("module_id") == passage.metadata.get("module_id")
+                             for p in indexed)
         retrieved_total += len(retrieved)
         if first.negative:
             negatives += 1

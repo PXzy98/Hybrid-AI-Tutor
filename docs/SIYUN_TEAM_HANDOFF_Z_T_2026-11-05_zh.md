@@ -3,7 +3,6 @@
 **日期：** 2026-11-05
 **唯一交付分支：** `feature/siyun-v4-integration-20261105`
 **仓库：** https://github.com/PXzy98/Hybrid-AI-Tutor
-**本机：** `F:\5902_v4_integration`
 
 **英文技术合同及完整验收标准：** [SIYUN_TEAM_HANDOFF_Z_T_2026-11-05.md](SIYUN_TEAM_HANDOFF_Z_T_2026-11-05.md)。请 Zhenyan 和 Tongkai 以英文版接口签名、具体任务和测试标准为准。
 

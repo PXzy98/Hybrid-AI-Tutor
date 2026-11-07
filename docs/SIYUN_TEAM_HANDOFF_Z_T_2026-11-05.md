@@ -3,7 +3,6 @@
 **Owner:** Siyun Tan (S)
 **Repository:** https://github.com/PXzy98/Hybrid-AI-Tutor
 **Personal delivery branch:** `feature/siyun-v4-integration-20261105`
-**Local workspace:** `F:\5902_v4_integration`
 **Primary specifications:** `AGENTS.md`, `docs/v4-implementation-guide.md` (sections 2, 5–8),
 `docs/design/course-structure.md`, `docs/design/api-v2.md`.
 
@@ -200,12 +199,12 @@ course-level S8 learning gains or calibrated BKT/Elo parameters.
 ### Local verification commands
 
 ```powershell
-cd F:\5902_v4_integration\backend
-& F:\5902\.venv\Scripts\python.exe -m pytest -q
+cd backend
+..\.venv\Scripts\python -m pytest -q
 $env:TEST_LEARNER_KNOWLEDGE='rule'
-& F:\5902\.venv\Scripts\python.exe -m pytest -q
+..\.venv\Scripts\python -m pytest -q
 Remove-Item Env:TEST_LEARNER_KNOWLEDGE -ErrorAction SilentlyContinue
-& F:\5902\.venv\Scripts\python.exe -m ruff check . ../scripts
+..\.venv\Scripts\python -m ruff check . ../scripts
 cd ..\frontend
 npm run build
 npm test -- --run

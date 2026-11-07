@@ -9,8 +9,7 @@ labels. Only aggregate metrics are output, never the input questions.
 
 Usage from repository root with a private, instructor-authored CSV (not committed):
 ```powershell
-$env:PYTHONPATH = "$PWD\backend"
-& "F:\5902\.venv\Scripts\python.exe" eval\course_rag_v4.py --index-root data --labels <approved-labels.csv> --k 4
+.venv\Scripts\python eval\course_rag_v4.py --index-root data --labels <approved-labels.csv> --k 4
 ```
 The CSV columns are `id,course_id,module_id,question,gold_source,gold_anchor,negative`.
 Repeat `id` for multiple independent gold chunks. Negative examples have empty
@@ -24,7 +23,9 @@ teaching materials, approved real course indexes, and independent expert labels.
 
 The current evaluator also returns `recall_at_1`, `precision_at_1`,
 `precision_at_k`, and `source_traceability`. Precision@K uses a
-fixed K denominator, de-duplicates identical retrieved passages, and
-the evaluator refuses a passage not present in the active course index.
+fixed K denominator and de-duplicates identical retrieved passages.
+`precision_at_1` equals `hit_at_1` by definition (kept for the MVP metric set).
+`source_traceability` is the share of returned passages found in the active
+course index; a cross-course passage still stops the evaluation.
 A score of 1 for source traceability proves indexed provenance only,
 not factual correctness or medical approval.

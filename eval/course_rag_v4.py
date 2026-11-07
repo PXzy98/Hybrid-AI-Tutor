@@ -1,10 +1,13 @@
 """Run two-course, independently labelled RAG evaluation (no query text in output)."""
 import argparse
 import json
+import sys
 from pathlib import Path
 
-from app.rag.course_retriever import IndexedCourseRetriever
-from app.rag.evaluation import evaluate_two_course_rag, load_labels
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
+
+from app.rag.course_retriever import IndexedCourseRetriever  # noqa: E402
+from app.rag.evaluation import evaluate_two_course_rag, load_labels  # noqa: E402
 
 
 def main():

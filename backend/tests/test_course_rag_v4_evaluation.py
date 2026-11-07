@@ -112,7 +112,7 @@ def test_full_mvp_metric_set_and_fixed_k_precision(tmp_path):
     )
     assert metrics["recall_at_1"] == 1
     assert metrics["recall_at_k"] == 1
-    assert metrics["precision_at_1"] == 1
+    assert metrics["precision_at_1"] == metrics["hit_at_1"] == 1
     assert metrics["precision_at_k"] == 0.25  # 1 labelled passage in 4 slots
     assert metrics["source_traceability"] == 1
 
@@ -128,7 +128,8 @@ def test_retriever_must_not_invent_sources(tmp_path):
             return [p.model_copy(update={"source": "course/101/forged/private.txt"})
                     for p in result]
 
-    with pytest.raises(EvaluationError, match="absent from the active index"):
-        evaluate_two_course_rag(
-            retriever=ForgedRetriever(), index_root=tmp_path, labels=load_labels(path),
-        )
+    metrics = evaluate_two_course_rag(
+        retriever=ForgedRetriever(), index_root=tmp_path, labels=load_labels(path),
+    )
+    assert metrics["source_traceability"] == 0  # every returned passage was invented
+    assert metrics["hit_at_1"] == 0
