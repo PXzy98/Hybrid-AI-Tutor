@@ -84,7 +84,8 @@ _A = "http://schemas.openxmlformats.org/drawingml/2006/main"
 
 def _smartart_text(shape, slide_part) -> list[str]:
     """Text of a SmartArt diagram, read from its data part (python-pptx has no SmartArt API)."""
-    if shape.shape_type is None or not hasattr(shape, "_element"):
+    # python-pptx reports a SmartArt graphic frame with shape_type None, so only the XML decides.
+    if not hasattr(shape, "_element"):
         return []
     rel_ids = shape._element.findall(f".//{{{_DGM}}}relIds")
     if not rel_ids:
