@@ -82,6 +82,11 @@ def _indexed_passages(root: Path, course_id: int) -> list[Chunk]:
     return passages
 
 
+def _identity(chunk: Chunk) -> tuple:
+    """A passage of the active index: same source, text and module."""
+    return chunk.source, chunk.text, chunk.metadata.get("module_id")
+
+
 def evaluate_two_course_rag(
     *, retriever: CourseRetriever, index_root: Path, labels: list[GoldLabel], k: int = 4,
 ) -> dict:
@@ -121,6 +126,9 @@ def evaluate_two_course_rag(
         gold = {(r.source, r.anchor) for r in group if not r.negative}
         if len(gold) != len(group) and not first.negative:
             raise EvaluationError("Duplicate gold evidence labels.")
+        # Resolve each label to its one indexed passage; relevance is that passage's identity, so a
+        # stale or modified passage that merely contains the anchor text is not counted as relevant.
+        gold_ids: set[tuple] = set()
         for source, anchor in gold:
             matches = [p for p in index_cache[course_id]
                        if p.source == source and anchor in p.text
@@ -128,6 +136,7 @@ def evaluate_two_course_rag(
                             in (None, first.module_id))]
             if len(matches) != 1:
                 raise EvaluationError("Gold anchor must match exactly one indexed passage.")
+            gold_ids.add(_identity(matches[0]))
         start = perf_counter()
         retrieved = retriever.retrieve(course_id, first.module_id, first.question, k)
         times.append(1000 * (perf_counter() - start))
@@ -145,18 +154,11 @@ def evaluate_two_course_rag(
             negatives += 1
             abstained += not retrieved
             continue
-        ranks = [i for i, chunk in enumerate(retrieved, 1)
-                 if any(chunk.source == source and anchor in chunk.text
-                        for source, anchor in gold)]
+        ids = [_identity(chunk) for chunk in retrieved]
+        ranks = [i for i, ident in enumerate(ids, 1) if ident in gold_ids]
         hit1 += bool(ranks and ranks[0] == 1)
-        recall1 += sum(
-            any(p.source == source and anchor in p.text for p in retrieved[:1])
-            for source, anchor in gold
-        ) / len(gold)
-        total_recall += sum(
-            any(p.source == source and anchor in p.text for p in retrieved)
-            for source, anchor in gold
-        ) / len(gold)
+        recall1 += len(gold_ids & set(ids[:1])) / len(gold_ids)
+        total_recall += len(gold_ids & set(ids)) / len(gold_ids)
         precision1 += bool(ranks and ranks[0] == 1)
         # Use k (not returned-count) as denominator as in the original MVP metric plan.
         # Repeated occurrences of the same passage do not count as distinct relevant hits.

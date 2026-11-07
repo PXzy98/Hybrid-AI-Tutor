@@ -133,3 +133,19 @@ def test_retriever_must_not_invent_sources(tmp_path):
     )
     assert metrics["source_traceability"] == 0  # every returned passage was invented
     assert metrics["hit_at_1"] == 0
+
+
+def test_a_modified_passage_containing_the_anchor_is_not_relevant(tmp_path):
+    retriever = _setup(tmp_path)
+    path = tmp_path / "labels.csv"
+    _csv(path, _rows())
+
+    class StaleRetriever:
+        def retrieve(self, course_id, module_id, query, k):
+            return [p.model_copy(update={"text": p.text + " (stale copy)"})
+                    for p in retriever.retrieve(course_id, module_id, query, k)]
+
+    metrics = evaluate_two_course_rag(retriever=StaleRetriever(), index_root=tmp_path,
+                                      labels=load_labels(path))
+    assert metrics["source_traceability"] == 0
+    assert metrics["hit_at_1"] == metrics["recall_at_k"] == metrics["mrr_at_k"] == 0
