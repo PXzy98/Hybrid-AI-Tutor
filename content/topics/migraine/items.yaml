@@ -1,2 +1,193 @@
-# DRAFT — placeholder. No check questions yet.
-[]
+# DRAFT, UNREVIEWED. Obtain Lavin/Dr. Abbas medical review before real student use.
+- id: MIG.1-q1
+  kc: MIG.1
+  level: basic
+  stem: Which statement best describes migraine?
+  options:
+    A: It only affects the jaw joint
+    B:
+      text: Migraine is always the same as a short, mild tension headache
+      misconception: MIG.MC1
+    C: It is a headache disorder that may include nausea and sensitivity to light or sound
+    D: It is caused only by a head injury
+  answer: C
+  explanation: Migraine is a neurological headache disorder with associated symptoms that differ by person.
+  reviewed_by: null
+- id: MIG.1-q2
+  kc: MIG.1
+  level: intermediate
+  stem: "Which symptom pattern is more characteristic of migraine than uncomplicated tension-type headache?"
+  options:
+    A: "Bilateral pressure-like pain without nausea or light sensitivity"
+    B: "Mild scalp tightness without associated sensory symptoms"
+    C: "A non-pulsating headache without nausea or sensory sensitivity"
+    D: "Headache accompanied by nausea and sensitivity to light"
+  answer: D
+  explanation: "Nausea and sensitivity to light are common migraine-associated symptoms. Pressure-like pain without these features is more typical of a tension-type headache, although patterns can overlap."
+  reviewed_by: null
+- id: MIG.1-q3
+  kc: MIG.1
+  level: advanced
+  stem: "Why is it inaccurate to judge migraine only by how much head pain a person reports?"
+  options:
+    A: "Migraine can have associated symptoms and variable patterns"
+    B: "Pain intensity alone reliably distinguishes migraine from tension-type headache"
+    C: "Migraine can be recognized only when headache pain is severe and one-sided"
+    D: "Associated symptoms such as nausea or light sensitivity add nothing to assessment"
+  answer: A
+  explanation: "Migraine experiences vary, and related symptoms may be important."
+  reviewed_by: null
+- id: MIG.2-q1
+  kc: MIG.2
+  level: basic
+  stem: Which statement about migraine aura is correct?
+  options:
+    A:
+      text: Every person with migraine must experience aura
+      misconception: MIG.MC2
+    B: Some migraines include temporary neurological symptoms called aura
+    C: Aura is a type of skin infection
+    D: Aura is the name of a pain medicine
+  answer: B
+  explanation: Aura may involve temporary visual or other neurological symptoms before or during some
+    migraines.
+  reviewed_by: null
+- id: MIG.2-q2
+  kc: MIG.2
+  level: intermediate
+  stem: "A student describes gradually spreading zigzag lights that lasted about 20 minutes and then resolved before a headache. Which statement is most appropriate?"
+  options:
+    A: "Visual aura can occur only after the headache has ended"
+    B: "That description proves migraine with aura and excludes other causes"
+    C: "This could fit visual aura, but new or unusual symptoms still need clinical assessment"
+    D: "Aura must cause permanent visual loss rather than temporary symptoms"
+  answer: C
+  explanation: "Temporary, spreading visual symptoms can be consistent with migraine aura. A description alone does not establish a diagnosis or rule out other causes, especially when the symptoms are new or unusual."
+  reviewed_by: null
+- id: MIG.2-q3
+  kc: MIG.2
+  level: advanced
+  stem: "Why should someone discuss new visual or neurological symptoms with a clinician?"
+  options:
+    A: "Any brief visual symptom can be assumed to be familiar aura if the person has had headaches before"
+    B: "Flashing lights alone exclude other neurological causes"
+    C: "New speech or sensory symptoms never require assessment if they resolve"
+    D: "Similar symptoms can have more than one cause and may need assessment"
+  answer: D
+  explanation: "New or unusual neurological symptoms should not be assumed to be migraine without appropriate evaluation."
+  reviewed_by: null
+- id: MIG.3-q1
+  kc: MIG.3
+  level: basic
+  stem: What is one purpose of a headache diary?
+  options:
+    A: To record possible patterns, timing and symptoms
+    B: To replace professional assessment
+    C: To guarantee that migraines stop
+    D:
+      text: To prove a specific food caused every headache
+      misconception: MIG.MC3
+  answer: A
+  explanation: A diary can help describe patterns for discussion with a care team, but does not prove
+    cause.
+  reviewed_by: null
+- id: MIG.3-q2
+  kc: MIG.3
+  level: intermediate
+  stem: Which statement about migraine triggers is most accurate?
+  options:
+    A: Triggers cannot vary by context
+    B: Possible triggers differ across people, and patterns may be worth discussing
+    C: A single event proves a trigger for life
+    D: Everyone has identical triggers
+  answer: B
+  explanation: Triggers and symptom patterns vary between people.
+  reviewed_by: null
+- id: MIG.3-q3
+  kc: MIG.3
+  level: advanced
+  stem: "Why should a student avoid claiming a trigger from one diary entry?"
+  options:
+    A: "A headache after one late night confirms that sleep loss is the trigger"
+    B: "A diary entry proves causation whenever symptoms follow a suspected trigger"
+    C: "One event cannot establish causality, even if symptoms happened afterward"
+    D: "Keeping a diary automatically removes other possible contributing factors"
+  answer: C
+  explanation: "An isolated association is not enough to establish a cause."
+  reviewed_by: null
+- id: MIG.4-q1
+  kc: MIG.4
+  level: basic
+  stem: Which statement about changing headache symptoms is most appropriate?
+  options:
+    A:
+      text: A sudden major change in headache pattern never needs assessment
+      misconception: MIG.MC4
+    B: Every headache has one identical cause
+    C: A school quiz always establishes the cause
+    D: A new or noticeably changing headache pattern deserves clinical assessment
+  answer: D
+  explanation: New, unusual or changing headaches may need clinical assessment.
+  reviewed_by: null
+- id: MIG.4-q2
+  kc: MIG.4
+  level: intermediate
+  stem: Why does a clinician ask about the timing and associated symptoms of headache?
+  options:
+    A: To distinguish possible causes and understand a person's pattern
+    B: To determine hair colour
+    C: To avoid asking about symptoms
+    D: To replace any appropriate examination
+  answer: A
+  explanation: History and associated symptoms help clinical assessment.
+  reviewed_by: null
+- id: MIG.4-q3
+  kc: MIG.4
+  level: advanced
+  stem: "What is the safest response to a sudden severe headache with unusual neurological symptoms?"
+  options:
+    A: "A past history of migraine makes urgent evaluation unnecessary for any future headache"
+    B: "Seek urgent medical assessment rather than self-diagnosing from a quiz"
+    C: "Wait for usual headache medicine to work before seeking care for new neurological symptoms"
+    D: "Identify a trigger in a headache diary before deciding whether new neurological symptoms require assessment"
+  answer: B
+  explanation: "Sudden severe or unusual neurological symptoms require prompt professional assessment."
+  reviewed_by: null
+- id: MIG.5-q1
+  kc: MIG.5
+  level: basic
+  stem: What is a sound general approach to migraine management?
+  options:
+    A: Change medication whenever an online quiz says so
+    B:
+      text: The same migraine treatment plan works for every person
+      misconception: MIG.MC5
+    C: Follow an individualized care plan developed with a healthcare professional
+    D: Assume one strategy works for everybody
+  answer: C
+  explanation: Management is individual and may include symptom strategies, prevention and clinician follow-up.
+  reviewed_by: null
+- id: MIG.5-q2
+  kc: MIG.5
+  level: intermediate
+  stem: "How can a headache diary assist follow-up care?"
+  options:
+    A: "By establishing the diagnosis without any professional assessment"
+    B: "By showing frequency but not helping evaluate response to treatment"
+    C: "By replacing medical follow-up if the symptoms seem stable"
+    D: "By comparing headache frequency and response to the agreed plan over time"
+  answer: D
+  explanation: "Patterns can be discussed with a healthcare professional to review the plan."
+  reviewed_by: null
+- id: MIG.5-q3
+  kc: MIG.5
+  level: advanced
+  stem: "A person taking a prescribed daily migraine preventive medicine has fewer headaches but bothersome side effects. What is the best next step?"
+  options:
+    A: "Review benefits, side effects and possible adjustments with the prescribing clinician"
+    B: "Reduce the preventive dose independently and mention it at a later visit"
+    C: "Take the preventive only on headache days despite the daily prescription"
+    D: "Stop it because fewer headaches prove the preventive is no longer needed"
+  answer: A
+  explanation: "A clinician should review the benefits and adverse effects of preventive treatment before changes are made. Preventive medicines often follow a schedule different from acute headache treatments."
+  reviewed_by: null

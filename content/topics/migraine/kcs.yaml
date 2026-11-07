@@ -1,10 +1,30 @@
-# DRAFT — placeholder skeleton. Real KCs (4–6), items and misconceptions are added later (Beta).
+# DRAFT; educational items pending Lavin/Dr. Abbas medical review.
 topic: migraine
-name: Migraine
-guideline: "TBD: guideline (to be chosen with Dr. Abbas)"
+name: "Migraine"
+guideline: "Draft educational reference: MedlinePlus, https://medlineplus.gov/migraine.html. Review scope, clinical red flags and teaching level with Lavin."
 kcs:
   - id: MIG.1
-    name: "Placeholder: what Migraine is"
-    definition: "Placeholder KC so the topic loads. Replace with the reviewed KC map."
+    name: "Migraine features"
+    definition: "Migraine as a neurological headache disorder; common features and differences in symptom patterns."
     difficulty: basic
     prerequisites: []
+  - id: MIG.2
+    name: "Aura and accompanying symptoms"
+    definition: "Recognizing aura, light/sound sensitivity and nausea as possible but not universal features."
+    difficulty: basic
+    prerequisites: [MIG.1]
+  - id: MIG.3
+    name: "Triggers and symptom diaries"
+    definition: "Individual trigger patterns and recording symptoms without assuming causation."
+    difficulty: intermediate
+    prerequisites: [MIG.1]
+  - id: MIG.4
+    name: "Clinical evaluation and warning changes"
+    definition: "The value of professional assessment for new, unusual or changing headaches."
+    difficulty: intermediate
+    prerequisites: [MIG.1, MIG.2]
+  - id: MIG.5
+    name: "General management and self-care planning"
+    definition: "Working with a healthcare professional on prevention, symptom management and appropriate follow-up."
+    difficulty: advanced
+    prerequisites: [MIG.3, MIG.4]

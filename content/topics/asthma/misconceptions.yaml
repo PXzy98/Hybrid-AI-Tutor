@@ -1,2 +1,26 @@
-# DRAFT — placeholder. No misconceptions yet.
-[]
+# DRAFT, UNREVIEWED misconception catalog; no clinical approval represented.
+- id: AST.MC1
+  kc: AST.1
+  statement: "Asthma affects the stomach rather than the airways."
+  correction: "Asthma is a long-term condition involving inflammation and narrowing of the airways."
+  reviewed_by: null
+- id: AST.MC2
+  kc: AST.2
+  statement: "Wheezing is the only possible asthma symptom."
+  correction: "Asthma may involve coughing, chest tightness, shortness of breath and wheezing; symptoms vary."
+  reviewed_by: null
+- id: AST.MC3
+  kc: AST.3
+  statement: "Everyone with asthma has exactly the same triggers."
+  correction: "Asthma triggers can differ between people; tracking personal patterns can help identify them."
+  reviewed_by: null
+- id: AST.MC4
+  kc: AST.4
+  statement: "Asthma can always be confirmed from a single symptom alone."
+  correction: "A healthcare professional considers symptom patterns and may use breathing tests to assess asthma."
+  reviewed_by: null
+- id: AST.MC5
+  kc: AST.5
+  statement: "If symptoms improve, the individual asthma action plan is no longer needed."
+  correction: "Ongoing management and treatment changes should follow the individual's agreed asthma action plan and clinical advice."
+  reviewed_by: null

@@ -1,2 +1,26 @@
-# DRAFT — placeholder. No misconceptions yet.
-[]
+# UNREVIEWED misconception corrections; no expert medical approval represented.
+- id: PNE.MC1
+  kc: PNE.1
+  statement: "Pneumonia affects only the throat, not the lungs."
+  correction: "Pneumonia is a lung infection that may inflame and fill air sacs with fluid or pus."
+  reviewed_by: null
+- id: PNE.MC2
+  kc: PNE.2
+  statement: "Pneumonia always causes exactly the same symptoms in every person."
+  correction: "Symptoms can vary with the person and cause; cough, fever and breathing difficulty are possible."
+  reviewed_by: null
+- id: PNE.MC3
+  kc: PNE.3
+  statement: "Every pneumonia infection is caused by bacteria and always needs the same antibiotic."
+  correction: "Different organisms, including bacteria and viruses, can cause pneumonia; treatment depends on a clinical assessment."
+  reviewed_by: null
+- id: PNE.MC4
+  kc: PNE.4
+  statement: "Every person with pneumonia should choose medicine from an online questionnaire."
+  correction: "Assessment and treatment choices should be made by a healthcare professional, especially with worsening breathing."
+  reviewed_by: null
+- id: PNE.MC5
+  kc: PNE.5
+  statement: "Pneumonia prevention consists of one measure that eliminates all risk."
+  correction: "Prevention can involve recommended vaccinations, hygiene and other individual risk-reduction measures; no single measure prevents every infection."
+  reviewed_by: null

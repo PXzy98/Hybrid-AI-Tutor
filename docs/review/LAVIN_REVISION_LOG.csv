@@ -1,0 +1,31 @@
+﻿file,id,kc,level,reason,original_answer,revised_answer,reviewer_comment
+asthma_review.csv,AST.1-q3,AST.1,advanced,Advanced item: replace obviously nonsensical alternatives with respiratory-mechanism misconceptions,D,D,
+asthma_review.csv,AST.2-q1,AST.2,basic,Lavin: replace irrelevant eye-colour distractor with a plausible cough-only misconception,A,A,Coughing only would be a better option than eye colour change.
+asthma_review.csv,AST.4-q1,AST.4,basic,Lavin: replace shoe-size distractor with realistic errors about assessment,C,C,The question is labelled as basic and I understand the response should be easy but shoe size as an answer is something you wouldn’t see in a real course setting.
+asthma_review.csv,AST.4-q3,AST.4,advanced,Advanced item: make the distractors about real diagnostic reasoning,A,A,
+asthma_review.csv,AST.5-q3,AST.5,advanced,Advanced item: replace joke distractors with plausible but unsafe self-management mistakes,D,D,
+high_blood_pressure_review.csv,HBP.1-q4,HBP.1,advanced,Lavin: increase advanced-level interpretation of a persistently high diastolic reading,D,D,The question itself is fine but the answers are really basic for an advanced level question - might be more useful in determining someones level of understanding if there is an answer that reflects what high diastolic pressure can be indicative of.
+high_blood_pressure_review.csv,HBP.3-q3,HBP.3,intermediate,Lavin: replace an obvious single-factor classification with a paired-risk reasoning item,C,C,Feels basic as opposed to intermediate because you don’t necessarily need to know anything about hypertension to know family history and age cannot be changed.
+high_blood_pressure_review.csv,HBP.3-q4,HBP.3,advanced,Advanced item: remove obviously unrelated distractors,B,B,
+high_blood_pressure_review.csv,HBP.4-q4,HBP.4,advanced,Advanced item: use plausible but incomplete lists of affected organs,D,D,
+high_blood_pressure_review.csv,HBP.6-q4,HBP.6,advanced,Advanced item: make the incorrect alternatives specific self-adjustment errors,A,A,
+migraine_review.csv,MIG.1-q2,MIG.1,intermediate,Lavin: replace hair-colour/fingerprint/ankle distractors with a meaningful migraine-versus-tension comparison,D,D,The level of difficulty for this question could be improved by having less obviously incorrect answers.
+migraine_review.csv,MIG.1-q3,MIG.1,advanced,Advanced item: compare migraine features and associated symptoms,A,A,
+migraine_review.csv,MIG.2-q2,MIG.2,intermediate,Lavin: remove the near-duplicate aura definition and assess interpretation of a short case,C,C,This question and the previous question are almost identical
+migraine_review.csv,MIG.2-q3,MIG.2,advanced,Advanced item: make diagnostic uncertainty and warning signs the competing choices,D,D,
+migraine_review.csv,MIG.3-q3,MIG.3,advanced,Advanced item: use misleading interpretations of a diary instead of irrelevant handwriting,C,C,
+migraine_review.csv,MIG.4-q3,MIG.4,advanced,Advanced item: address the common mistake of attributing a new red flag to familiar migraine,B,B,
+migraine_review.csv,MIG.5-q2,MIG.5,intermediate,Intermediate item: strengthen contrast with advanced management question,D,D,
+migraine_review.csv,MIG.5-q3,MIG.5,advanced,Lavin: use a realistic medication decision and plausible but incorrect management options,A,A,Again the question itself is fine but for a question marked as advanced the answers make this a very easy question to answer.
+pneumonia_review.csv,PNE.1-q3,PNE.1,advanced,Advanced item: distinguish alveolar gas exchange from upper-airway explanations,B,B,
+pneumonia_review.csv,PNE.2-q3,PNE.2,advanced,Advanced item: more plausible differential-diagnosis errors,A,A,
+pneumonia_review.csv,PNE.3-q3,PNE.3,advanced,Lavin: test identification of a pneumonia-causing bacterial pathogen rather than a generic disclaimer,D,C,Not sure if this is what you were intending with this questionnaire but a potential advanced question could be to identify a pneumonia causing pathogen (like streptococcus pneumoniae or rsv) - might be a better advanced level question.
+pneumonia_review.csv,PNE.4-q2,PNE.4,intermediate,Lavin: use an all-of-the-above single-best-answer format for several genuine warning signs,B,D,This is a good question to have multiple correct answers that give “all of the above” or “none of the above” a lot of my professors loved those kinds of questions and would be more useful than obvious incorrect choices that don’t really test your knowledge.
+pneumonia_review.csv,PNE.4-q3,PNE.4,advanced,Lavin: clarify what “educational question” means and use clinical-decision distractors,C,C,What does educational question mean here?
+pneumonia_review.csv,PNE.5-q3,PNE.5,advanced,Advanced item: test limits of combined prevention rather than absurd claims,B,B,
+type2_diabetes_review.csv,T2D.1-q3,T2D.1,advanced,Lavin: replace an advanced item that only asked for the definition of high glucose with a mechanism-based scenario,C,C,This is a very basic question.
+type2_diabetes_review.csv,T2D.2-q3,T2D.2,advanced,Advanced item: test mechanisms rather than obviously irrelevant options,B,B,
+type2_diabetes_review.csv,T2D.3-q2,T2D.3,intermediate,Lavin: make the intermediate question specifically about diabetes and apply risk reasoning to a case,D,D,Not directly a diabetes related question and again for an intermediate level question is pretty basic.
+type2_diabetes_review.csv,T2D.3-q3,T2D.3,advanced,"Advanced item: test the difference between risk, screening and diagnosis",A,A,
+type2_diabetes_review.csv,T2D.4-q2,T2D.4,intermediate,Lavin: use several plausible incomplete organ-system lists as alternatives,C,D,"This question might be improved by having the answers be “A) blood vessels, B) blood vessels and nerves, C) blood vessels and kidneys D) blood vessels nerves, kidneys, and eyes” I know my profs loved doing that."
+type2_diabetes_review.csv,T2D.5-q3,T2D.5,advanced,Advanced item: replace absurd alternatives with plausible misinterpretations of monitoring,C,C,
