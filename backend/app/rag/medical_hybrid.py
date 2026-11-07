@@ -61,6 +61,18 @@ def _segments(body: str, *, course_headings: bool = False) -> list[tuple[str, li
     return sections
 
 
+def _slide_sections(body: str) -> list[tuple[str, list[str]]]:
+    """Sections of one extracted slide; a title-only slide (a section divider) is kept as its own passage."""
+    sections = _segments(body, course_headings=True)
+    if sections:
+        return sections
+    lines = [" ".join(line.split()) for line in body.splitlines() if line.strip()]
+    if len(lines) == 1 and lines[0].startswith("# "):
+        title = lines[0].lstrip("# ")
+        return [(title, [title])]
+    return []
+
+
 def _chunk_section(heading: str, items: list[str], min_chars: int = 45) -> list[str]:
     """Pack lines by characters, retaining section headings and one-line overlap."""
     output = []
@@ -235,27 +247,34 @@ class MedicalHybridRetriever:
                 row = {"name": path.name, "origin": "uploaded", "source": source,
                        "indexed": False, "passage_count": 0, "message": None}
                 try:
-                    pdf = path.suffix.lower() == ".pdf"
-                    body = extract_text(path, preserve_pdf_pages=pdf)
+                    suffix = path.suffix.lower()
+                    pdf, pptx = suffix == ".pdf", suffix == ".pptx"
+                    body = extract_text(path, preserve_pdf_pages=pdf, preserve_slide_numbers=pptx)
                     if total + len(body) > 2_000_000:
                         raise DocumentError("This topic exceeds the two-million-character text budget.")
-                    # Keep PDF pages separate so a returned passage can identify its page.
-                    pages = body.split("\f") if pdf else [body]
+                    # Each PDF page or PowerPoint slide has stable, distinct source metadata.
+                    pages = body.split("\f") if (pdf or pptx) else [body]
                     entries: list[tuple[str, int | None]] = []
                     for page_number, page_text in enumerate(pages, 1):
                         # Bound long paragraphs without truncating trailing constraints.
-                        for title, lines in _segments(page_text, course_headings=True):
+                        sections = (_slide_sections(page_text) if pptx
+                                    else _segments(page_text, course_headings=True))
+                        for title, lines in sections:
                             wrapped = [part for line in lines for part in textwrap.wrap(
                                 line, width=650, break_long_words=True, break_on_hyphens=False,
                             )]
-                            entries.extend((text, page_number if pdf else None)
+                            entries.extend((text, page_number if (pdf or pptx) else None)
                                            for text in _chunk_section(title, wrapped, min_chars=1))
                     if not entries:
                         raise DocumentError("No readable passages were extracted from this document.")
                     tags = _assign_tags([text for text, _ in entries], topic)
                     passages.extend(Chunk(
                         text=text, source=source, topic=topic, score=0, kc_ids=list(ids), level=level,
-                        metadata={"origin": "uploaded", **({"page": page} if page is not None else {})},
+                        metadata={
+                            "origin": "uploaded",
+                            **({"page": page} if pdf and page is not None else {}),
+                            **({"slide": page} if pptx and page is not None else {}),
+                        },
                     ) for (text, page), (ids, level) in zip(entries, tags, strict=True))
                     total += len(body)
                     row.update(indexed=True, passage_count=len(entries))
