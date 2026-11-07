@@ -13,13 +13,6 @@ def utcnow() -> datetime:
     return datetime.now(UTC)
 
 
-def as_utc(dt: datetime | None) -> datetime | None:
-    """Timestamps are stored as timestamptz; a naive value (from older code paths) is taken as UTC."""
-    if dt is None or dt.tzinfo is not None:
-        return dt
-    return dt.replace(tzinfo=UTC)
-
-
 def _ts(**kwargs):
     """A timezone-aware timestamp column (PostgreSQL timestamptz)."""
     return Field(sa_type=DateTime(timezone=True), **kwargs)

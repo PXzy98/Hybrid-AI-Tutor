@@ -5,7 +5,7 @@ from datetime import timedelta
 
 from sqlmodel import Session, delete, select
 
-from app.storage.models import Account, AuthSession, as_utc, utcnow
+from app.storage.models import Account, AuthSession, utcnow
 
 
 def token_hash(token: str) -> str:
@@ -26,7 +26,7 @@ def resolve(db: Session, token: str | None) -> tuple[Account, AuthSession] | Non
     row = db.exec(select(AuthSession).where(AuthSession.token_hash == token_hash(token))).first()
     if row is None:
         return None
-    if as_utc(row.expires_at) <= utcnow():
+    if row.expires_at <= utcnow():
         db.delete(row)
         db.commit()
         return None

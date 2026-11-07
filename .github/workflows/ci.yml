@@ -37,6 +37,10 @@ jobs:
           python -m spacy download en_core_web_sm
       - name: Lint
         run: python -m ruff check . ../scripts
+      - name: Migrations upgrade an empty database
+        run: |
+          psql -h localhost -U postgres -c "CREATE DATABASE migration_check"
+          DATABASE_URL=postgresql+psycopg://postgres@localhost:5432/migration_check python -m alembic upgrade head
       - name: Test
         run: python -m pytest -q
       - name: Test with the rule knowledge model (swap check)
