@@ -165,3 +165,28 @@ def test_course_passages_carry_kc_tags_from_the_catalog(tmp_path):
     rag.rebuild(101)
     hit = rag.retrieve(101, 7, "Zephyrlens")[0]
     assert (hit.kc_ids, hit.level) == (["KC-7"], "basic") and calls[0] == (101, 7)
+
+
+def test_deleting_the_last_material_publishes_an_empty_version(tmp_path):
+    last = _material(tmp_path, 101, "_course", "syllabus.md", "# Policy\nQuartzzyme is a demo-only token.")
+    rag = IndexedCourseRetriever(tmp_path, scan=lambda _: True)
+    assert rag.rebuild(101) == 1 and rag.retrieve(101, None, "Quartzzyme")
+    last.unlink()
+    assert rag.rebuild(101) == 2
+    assert rag.retrieve(101, None, "Quartzzyme") == []
+    assert "Quartzzyme" not in _indexed_text(tmp_path, 101)
+
+
+def test_title_only_slides_are_course_passages(tmp_path):
+    from pptx import Presentation
+
+    deck = Presentation()
+    for title in ("Week 3: Quartzzyme sampling", "Week 4: Zephyrlens filters"):
+        deck.slides.add_slide(deck.slide_layouts[5]).shapes.title.text = title
+    path = tmp_path / "courses" / "101" / "materials" / "7" / "dividers.pptx"
+    path.parent.mkdir(parents=True)
+    deck.save(path)
+    rag = IndexedCourseRetriever(tmp_path, scan=lambda _: True)
+    rag.rebuild(101)
+    hit = rag.retrieve(101, 7, "Zephyrlens filters")[0]
+    assert "Zephyrlens" in hit.text and hit.metadata["slide"] == 2

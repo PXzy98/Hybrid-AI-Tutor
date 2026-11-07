@@ -25,7 +25,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 from app.core.schemas import Chunk
 from app.rag.documents import SUFFIXES, DocumentError, extract_text
-from app.rag.medical_hybrid import _chunk_section, _segments
+from app.rag.medical_hybrid import _chunk_section, _segments, _slide_sections
 
 MAX_COURSE_CHARS = 2_000_000
 MAX_FILES = 500
@@ -133,7 +133,8 @@ class IndexedCourseRetriever:
                 raise DocumentError("The course exceeds the two-million-character text budget.")
             sections = content.split("\f") if pdf or pptx else [content]
             for number, body in enumerate(sections, 1):
-                for heading, sentences in _segments(body, course_headings=True):
+                sections = _slide_sections(body) if pptx else _segments(body, course_headings=True)
+                for heading, sentences in sections:
                     wrapped = [line for sentence in sentences for line in textwrap.wrap(
                         sentence, width=650, break_long_words=True, break_on_hyphens=False,
                     )]
@@ -162,8 +163,8 @@ class IndexedCourseRetriever:
         base = self._folder(course_id) / "index"
         # Extract and scan outside the lock: retrieval in this course keeps using the old version meanwhile.
         passages = self._passages(course_id)  # fails closed before publishing
-        if not passages:
-            raise DocumentError("No searchable, scan-approved materials were found for this course.")
+        # No materials left (the last one was deleted) still publishes a new, empty version, so readers
+        # drop the old text and prune() can delete it (course-structure.md F2).
         with self._lock(course_id):
             active = self._current_version(course_id)
             # Higher than every version on disk and in the database, so no version in use is overwritten.
