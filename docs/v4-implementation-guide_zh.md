@@ -49,7 +49,7 @@
 **示例课程**："General Medical Knowledge"（v3 的 5 个主题作为 5 个模块，再补齐整门课的资料）和 **ELG 5902**（工程课，用来验证其他学科也能用）。
 
 **现阶段不做**：
-- 中文相关的开发（规则 14）；
+- 中文界面，以及"兼容中文输入"以外的中文功能（规则 14）；
 - 研究伦理审批（按教授的要求推进）；
 - 数据库备份和硬盘加密；
 - 云端服务商比较（以后用 GPT、Claude 或 Cohere，由客户决定）。
@@ -78,11 +78,13 @@
 11. **每个组件只有一个负责人**（第 5 节）；不改别人组件的代码。
 12. **CI 必须通过**：后端测试（跑两遍：默认 BKT 和 `TEST_LEARNER_KNOWLEDGE=rule`）、ruff、评估的冒烟测试、前端构建和测试、Docker 构建。
 13. **隐私相关的固定值不进配置**：`log_raw_text`、必须开的检查项、识别器内部参数，留在代码或隐私档案里。
-14. **代码里、以及 `docs/` 以外的 Markdown 里不能有中文。**
-    - **必须用英文的**：代码、注释、标识符、写在代码里的测试数据、提交信息、PR 描述，以及 `docs/` 以外的所有 `.md` 文件。
+14. **只有功能代码为了兼容中文输入时才能出现中文；注释里永远不能有中文。**
+    - **允许**：功能代码为了处理中文输入而需要的中文字面量（例如 `privacy/recognizers/zh_person.py` 里的规则、`recognizers/student_id.py` 的上下文词、`routing/evidence.py` 里的全角标点），以及测试这些功能用的中文测试输入和评估数据。直接写中文字符，不要写成 `\u` 转义。
+    - **不能影响英文**：中文规则只能匹配中文文本。新增或修改中文规则的 PR，要说明英文测试和英文 E6 结果没有变化。
+    - **必须用英文的**：注释和 docstring（中文规则用英文描述，例如"中文自我介绍后面跟名字"）、标识符、日志和报错信息、提交信息、PR 描述，以及 `docs/` 以外的所有 `.md` 文件。
     - **可以用法语的**：只有法语界面文字（`frontend/src/i18n/fr.ts`）和法语识别器的法语测试文本。
     - **`docs/` 不受此限**：可以放给组员看的中文对照文件，命名为 `<文件名>_zh.md`。agent 以英文文件为准；修改英文文档的人，要在同一个 PR 里同步修改对应的 `_zh` 文件，或者在 `_zh` 文件顶部注明"已过时"。
-    - **清理**：`docs/` 以外现有的中文由 Z15 和 T14 清理。
+    - **清理**：注释里和 `docs/` 以外 Markdown 里的中文由 Z15 和 T14 清理。
 15. **只在 API v2 上开发**（design/api-v2.md）：`/api/v1` 已冻结，新接口和新字段都放进 `/api/v2`。v2 里只允许增加；不兼容的修改要开 `/api/v3`，由 Z 决定。
 
 ---
@@ -388,7 +390,7 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | Z12 | 教师端 AI 第四档：本地 vs 云端评估 | S7 | Z6、S4 | 新的 `backend/app/instructor_ai/eval/` | 能对一门课出按模块的报告 |
 | Z13 | 整套部署到测试主机；监控（应用 `/metrics`、vLLM 指标、Grafana、告警）；CI 扫描（`pip-audit`、`npm audit`、`bandit`、镜像扫描） | S7 | Z8 | `docker-compose.yml`、`deploy/`、`.github/workflows/ci.yml` | 客户和 Lavin 能试用；能看到指标 |
 | Z14 | 部署和运维手册、交接文档、压测 | S8 | — | `docs/` | 新人照着能部署 |
-| Z15 | 清除代码里的中文（规则 14）：`privacy/recognizers/zh_person.py`，以及 `privacy/analyzer.py`、`recognizers/grade.py`、`recognizers/student_id.py` 里的中文规则；`tests/test_local_setup.py` 里的中文；`eval/privacy-filter/make_cases.py`、`eval/model-boundary-test/` 的脚本和两份 Markdown 里的中文；重跑 E6 | S5 | — | 上述文件 | `git grep` 在 `docs/` 和数据文件以外找不到中文；英文测试集上 E6 不变差 |
+| Z15 | Z 代码的规则 14：`privacy/recognizers/zh_person.py` 和 `recognizers/grade.py` 的 docstring 改成英文（中文规则保留）；补测试，证明中文规则不改变英文输入的结果；`eval/model-boundary-test/` 的 `README.md` 和 `TEST_PLAN.md` 改成英文；重跑 E6 | S5 | — | 上述文件 | 注释、docstring 和 `docs/` 以外的 Markdown 里没有中文；英文测试和英文 E6 结果不变 |
 
 **落后时按这个顺序往后推**：Z12 → Z13 里的 Grafana 和告警 → `login_identity`。
 
@@ -428,7 +430,7 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | T11 | 改名（定名后）；无障碍自查（键盘、屏幕阅读器、对比度、放大） | S7 | 定名 | `frontend/` | 自查清单 |
 | T12 | 学生使用手册、教师使用手册（含 course-structure.md 3.4 关于助教的说明）；路由、前端、网络搜索的交接文档 | S8 | — | `docs/` | 新教师照着能用 |
 | T13 | 网络搜索（G1-92）+ 评估（G1-106）：搜索 API、白名单、清洗结果、作为资料交给生成步骤；查询只用 `search_query()`；出网只走统一的出网函数 | S7 | Z11、Z6 | 新的 `backend/app/websearch/`、`config.yaml` 的 pipeline | E4 审计：搜索请求里没有个人信息；评估报告 |
-| T14 | 清除 `docs/` 以外 Markdown 和前端里的中文（规则 14）：按第 7 节用英文重写 `TODO.md`；把仓库根目录的中文版入门文档挪到 `docs/GETTING_STARTED_zh.md` 并修好链接；删掉 `README.md`、`GETTING_STARTED.md` 里的中文行；`frontend/src/test/Routing.test.tsx` 里的中文 | S5 | — | 上述文件 | `git grep` 在 `docs/` 以外（数据文件除外）找不到中文 |
+| T14 | 清除 `docs/` 以外 Markdown 里的中文（规则 14）：按第 7 节用英文重写 `TODO.md`；把仓库根目录的中文版入门文档挪到 `docs/GETTING_STARTED_zh.md` 并修好链接；删掉 `README.md`、`GETTING_STARTED.md` 里的中文行。`frontend/src/test/Routing.test.tsx` 里的中文测试文本保留（它测试的是中文输入） | S5 | — | 上述文件 | `docs/` 以外的 Markdown 里没有中文 |
 
 ### 7.4 前端技术栈（T）
 
@@ -555,7 +557,7 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | 教师端 AI | 四档都做 |
 | 知识模型 | 课程级分层模型；规则模型只兜底 |
 | 网络搜索 | 归 T，按规则 6 做 |
-| 语言 | 代码里、`docs/` 以外的 Markdown 里不能有中文；`docs/` 里可以有 `*_zh.md` 中文对照（规则 14） |
+| 语言 | 只有处理中文输入的功能代码和测试数据可以有中文，且不能改变英文的行为；注释和 `docs/` 以外的 Markdown 里不能有中文；`docs/` 里可以有 `*_zh.md` 中文对照（规则 14） |
 | 以后的维护者 | 接手这个项目的学生团队 |
 
 **待决定**：
@@ -564,4 +566,4 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 - ELG 5902 材料的使用许可（Gita 教授）；
 - 本学期的交付范围（和 Ismaeel 教授、Abbas 教授确认）。
 
-**现阶段不做**：中文、伦理审批、备份和硬盘加密、云端服务商比较。
+**现阶段不做**：中文界面、伦理审批、备份和硬盘加密、云端服务商比较。
