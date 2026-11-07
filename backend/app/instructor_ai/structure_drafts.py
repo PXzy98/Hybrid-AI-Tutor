@@ -8,7 +8,16 @@ import random
 from collections.abc import Sequence
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, StrictInt, TypeAdapter, ValidationError, field_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    StrictInt,
+    TypeAdapter,
+    ValidationError,
+    create_model,
+    field_validator,
+)
 
 from app.core.schemas import Chunk
 from app.instructor_ai.drafts import (
@@ -117,18 +126,20 @@ async def generate_structure_draft(
             raise DraftError("Evidence source is missing.")
         materials.append({"number": i, "source": chunk.source, "text": chunk.text})
 
+    request = {"task": _GUIDANCE[kind], "evidence": materials}
+    if known_kc_names:
+        # The model must pick its KC references from the course's accepted KCs (checked afterwards).
+        request["accepted_kc_names"] = list(known_kc_names)
+        request["kc_rule"] = ("Refer to knowledge components only by names from accepted_kc_names"
+                              + (" or by KCs drafted in this answer." if kind == "kcs" else "."))
     messages = [
         {"role": "system", "content": _SYSTEM},
-        {"role": "user", "content": json.dumps({
-            "task": _GUIDANCE[kind], "evidence": materials,
-        }, ensure_ascii=False)},
+        {"role": "user", "content": json.dumps(request, ensure_ascii=False)},
     ]
     schema = TypeAdapter(list[_ITEM_TYPES[kind]])
     response = await gateway.complete(
         "local", messages, settings=settings, trust_required="trusted_local",
-        json_schema={"type": "object", "properties": {"items": schema.json_schema()},
-                     "required": ["items"], "additionalProperties": False},
-        stream=False,
+        json_schema=response_schema(kind), stream=False,
     )
     try:
         payload = parse_model_json(response.text)
@@ -153,6 +164,13 @@ async def generate_structure_draft(
         course_id=course_id, kind=kind, items=items,
         cited_sources=[materials[number - 1]["source"] for number in sorted(cited)],
     )
+
+
+def response_schema(kind: StructureKind) -> dict:
+    """JSON schema of the whole answer {"items": [...]}, with its definitions at the document root."""
+    envelope = create_model(f"{kind}_draft_response", __config__=ConfigDict(extra="forbid"),
+                            items=(list[_ITEM_TYPES[kind]], Field(min_length=1, max_length=12)))
+    return envelope.model_json_schema()
 
 
 def _check_kc_references(kind: str, items: list, known: Sequence[str]) -> None:

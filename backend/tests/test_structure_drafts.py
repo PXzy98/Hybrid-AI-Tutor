@@ -124,3 +124,37 @@ async def test_check_item_options_are_shuffled_and_the_answer_follows():
                                             gateway=FakeGateway(items), settings=None)
     assert all(item.options[item.correct_index] == "Example A" for item in result.items)
     assert len({item.correct_index for item in result.items}) > 1
+
+
+def _resolve(schema: dict, node):
+    """Follow every $ref from the document root; fails if a reference does not resolve."""
+    if isinstance(node, dict):
+        if "$ref" in node:
+            target = schema
+            for part in node["$ref"].removeprefix("#/").split("/"):
+                target = target[part]
+        for value in node.values():
+            _resolve(schema, value)
+    elif isinstance(node, list):
+        for value in node:
+            _resolve(schema, value)
+
+
+@pytest.mark.parametrize("kind", ["kcs", "check_items", "misconceptions"])
+def test_output_schema_is_the_whole_answer_with_resolvable_references(kind):
+    from app.instructor_ai.structure_drafts import response_schema
+
+    schema = response_schema(kind)
+    assert schema["required"] == ["items"] and schema["additionalProperties"] is False
+    assert "$defs" in schema and "$defs" not in schema["properties"]["items"]
+    _resolve(schema, schema)
+
+
+@pytest.mark.asyncio
+async def test_accepted_kc_names_are_given_to_the_model():
+    gateway = FakeGateway([_item("check_items")])
+    await generate_structure_draft(course_id=101, kind="check_items", passages=[_chunk()], gateway=gateway,
+                                   settings=None, known_kc_names=["Quartzzyme Overview", "Zephyrlens Basics"])
+    request = json.loads(gateway.calls[0][3][1]["content"])
+    assert request["accepted_kc_names"] == ["Quartzzyme Overview", "Zephyrlens Basics"]
+    assert "accepted_kc_names" in request["kc_rule"]
