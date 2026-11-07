@@ -198,3 +198,58 @@ def test_smartart_text_is_read_from_the_diagram_data_part():
     shape = type("Shape", (), {"shape_type": 6, "_element": frame})()
     part = type("Part", (), {"related_part": lambda self, rid: type("P", (), {"blob": data})()})()
     assert _smartart_text(shape, part) == ["Quartzzyme step", "Zephyrlens step"]
+
+
+def _deck_with_smartart(path: Path) -> Path:
+    """A saved deck whose slide holds a real SmartArt graphic frame linked to a diagram data part."""
+    from lxml import etree
+    from pptx.opc.package import Part
+    from pptx.opc.packuri import PackURI
+
+    p = Presentation()
+    slide = p.slides.add_slide(p.slide_layouts[5])
+    slide.shapes.title.text = "Fictional process"
+    data = (b'<dgm:dataModel xmlns:dgm="http://schemas.openxmlformats.org/drawingml/2006/diagram" '
+            b'xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><dgm:ptLst>'
+            b'<dgm:pt modelId="1"><dgm:t><a:bodyPr/><a:p><a:r><a:t>Quartzzyme intake</a:t></a:r></a:p>'
+            b'</dgm:t>'
+            b'</dgm:pt><dgm:pt modelId="2"><dgm:t><a:bodyPr/><a:p><a:r><a:t>Zephyrlens review</a:t></a:r>'
+            b'</a:p></dgm:t></dgm:pt></dgm:ptLst></dgm:dataModel>')
+    part = Part(PackURI("/ppt/diagrams/data1.xml"),
+                "application/vnd.openxmlformats-officedocument.drawingml.diagramData+xml",
+                p.part.package, data)
+    rid = slide.part.relate_to(
+        part, "http://schemas.openxmlformats.org/officeDocument/2006/relationships/diagramData")
+    frame = etree.fromstring(
+        '<p:graphicFrame xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" '
+        'xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" '
+        'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+        '<p:nvGraphicFramePr><p:cNvPr id="10" name="Diagram 1"/><p:cNvGraphicFramePr/><p:nvPr/>'
+        '</p:nvGraphicFramePr><p:xfrm><a:off x="0" y="0"/><a:ext cx="100" cy="100"/></p:xfrm>'
+        '<a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/diagram">'
+        '<dgm:relIds xmlns:dgm="http://schemas.openxmlformats.org/drawingml/2006/diagram" '
+        f'r:dm="{rid}" r:lo="{rid}" r:qs="{rid}" r:cs="{rid}"/></a:graphicData></a:graphic></p:graphicFrame>')
+    slide.shapes._spTree.append(frame)
+    p.save(path)
+    return path
+
+
+def test_real_smartart_frame_is_read_although_python_pptx_gives_no_shape_type(tmp_path):
+    path = _deck_with_smartart(tmp_path / "smartart.pptx")
+    deck = Presentation(path)
+    assert [s.shape_type for s in deck.slides[0].shapes if s.name == "Diagram 1"] == [None]
+    text = extract_text(path, preserve_slide_numbers=True)
+    assert "Quartzzyme intake" in text and "Zephyrlens review" in text
+
+
+def test_title_only_slides_are_indexed_as_passages(tmp_path):
+    p = Presentation()
+    for title in ("Week 3: Quartzzyme sampling", "Week 4: Zephyrlens filters"):
+        p.slides.add_slide(p.slide_layouts[5]).shapes.title.text = title
+    path = tmp_path / "asthma" / "dividers.pptx"
+    path.parent.mkdir(parents=True)
+    p.save(path)
+    rag = MedicalHybridRetriever(tmp_path)
+    rag.ingest("asthma", str(path))
+    found = [x for x in rag.retrieve("Zephyrlens filters", "asthma") if "Zephyrlens" in x.text]
+    assert found and found[0].metadata["slide"] == 2

@@ -61,6 +61,18 @@ def _segments(body: str, *, course_headings: bool = False) -> list[tuple[str, li
     return sections
 
 
+def _slide_sections(body: str) -> list[tuple[str, list[str]]]:
+    """Sections of one extracted slide; a title-only slide (a section divider) is kept as its own passage."""
+    sections = _segments(body, course_headings=True)
+    if sections:
+        return sections
+    lines = [" ".join(line.split()) for line in body.splitlines() if line.strip()]
+    if len(lines) == 1 and lines[0].startswith("# "):
+        title = lines[0].lstrip("# ")
+        return [(title, [title])]
+    return []
+
+
 def _chunk_section(heading: str, items: list[str], min_chars: int = 45) -> list[str]:
     """Pack lines by characters, retaining section headings and one-line overlap."""
     output = []
@@ -245,7 +257,9 @@ class MedicalHybridRetriever:
                     entries: list[tuple[str, int | None]] = []
                     for page_number, page_text in enumerate(pages, 1):
                         # Bound long paragraphs without truncating trailing constraints.
-                        for title, lines in _segments(page_text, course_headings=True):
+                        sections = (_slide_sections(page_text) if pptx
+                                    else _segments(page_text, course_headings=True))
+                        for title, lines in sections:
                             wrapped = [part for line in lines for part in textwrap.wrap(
                                 line, width=650, break_long_words=True, break_on_hyphens=False,
                             )]
