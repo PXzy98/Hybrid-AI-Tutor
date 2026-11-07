@@ -1,7 +1,8 @@
 """Shared by the E3 and E4 harnesses: an in-process app, an instructor, and personas set up through the API.
 
-The app runs in-process (FastAPI TestClient) against its own temporary database, so the harnesses never
-touch data/app.db. Configuration goes through SECTION__FIELD environment variables, exactly as an operator
+The app runs in-process (FastAPI TestClient) against its own temporary PostgreSQL database (created on
+the server of TEST_DATABASE_URL and dropped afterwards), so the harnesses never touch the application
+database. Configuration goes through SECTION__FIELD environment variables, exactly as an operator
 would set them. `fake=True` (smoke mode, CI) replaces the local models by scripted fakes; otherwise the real
 Ollama server from OLLAMA_URL / .env is used.
 """
@@ -84,7 +85,6 @@ class Harness:
     def __init__(self, env: dict[str, str] | None = None, fake: bool = True) -> None:
         self.tmp = Path(tempfile.mkdtemp(prefix="tutor-eval-"))
         self.env = {
-            "DATABASE_URL": f"sqlite:///{(self.tmp / 'eval.db').as_posix()}",
             "CONTENT__SERVE_UNREVIEWED": "true",
             "PRIVACY__SPACY_MODEL": os.environ.get("EVAL_SPACY_MODEL", "en_core_web_sm"),
             "INSTRUCTOR_USERNAME": "", "INSTRUCTOR_INITIAL_PASSWORD": "",
@@ -96,6 +96,10 @@ class Harness:
         self.log_lines: list[str] = []
 
     def __enter__(self) -> "Harness":
+        from app.storage.testing import temporary_database
+
+        self._database = temporary_database()
+        self.env["DATABASE_URL"] = self._database.__enter__()
         for k, v in self.env.items():
             self._saved[k] = os.environ.get(k)
             os.environ[k] = v
@@ -122,6 +126,8 @@ class Harness:
 
     def __exit__(self, *exc) -> None:
         self.client.__exit__(*exc)
+        self.services.engine.dispose()
+        self._database.__exit__(None, None, None)
         logging.getLogger().removeHandler(self._log_handler)
         for k, v in self._saved.items():
             if v is None:

@@ -96,7 +96,7 @@ class PrivacyConfig(Section):
 
 
 class SessionsConfig(Section):
-    store: str = "sqlite"
+    store: str = "database"
     history_turns: int = Field(6, ge=0)
 
 
@@ -237,10 +237,14 @@ class Settings(BaseSettings):
     cloud_model: str | None = None
     instructor_username: str | None = None
     instructor_initial_password: SecretStr | None = None
-    database_url: str = f"sqlite:///{(REPO_ROOT / 'data' / 'app.db').as_posix()}"
+    # PostgreSQL URL without the password (libpq reads PGPASSWORD); required, see docs/DATABASE.md
+    database_url: str | None = None
+    database_pooled: bool = True  # False: one connection per use (tests and short-lived tools)
+    pgpassword: SecretStr | None = None  # PGPASSWORD: the database password, kept out of DATABASE_URL
 
     @field_validator(
-        "cloud_api_key", "cloud_model", "instructor_username", "instructor_initial_password", mode="before"
+        "cloud_api_key", "cloud_model", "instructor_username", "instructor_initial_password", "pgpassword",
+        mode="before",
     )
     @classmethod
     def _empty_is_none(cls, v):
@@ -248,10 +252,8 @@ class Settings(BaseSettings):
 
     @field_validator("database_url", mode="before")
     @classmethod
-    def _empty_db_is_default(cls, v):
-        if isinstance(v, str) and not v.strip():
-            return f"sqlite:///{(REPO_ROOT / 'data' / 'app.db').as_posix()}"
-        return v
+    def _empty_db_is_none(cls, v):
+        return None if isinstance(v, str) and not v.strip() else v
 
     @property
     def cloud_enabled(self) -> bool:

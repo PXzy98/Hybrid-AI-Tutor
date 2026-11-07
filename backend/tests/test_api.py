@@ -1,7 +1,6 @@
-import sqlite3
-
 from app.core.config import get_settings
 from app.export_openapi import main as export_openapi
+from app.storage.testing import dump_rows, table_rows
 
 PII_QUESTION = "My name is Alice Tremblay, student 300418277. Why is salt bad for blood pressure?"
 
@@ -12,15 +11,11 @@ def ask(client, **kw):
 
 
 def db_dump() -> str:
-    path = get_settings().database_url.removeprefix("sqlite:///")
-    with sqlite3.connect(path) as con:
-        return "\n".join(con.iterdump())
+    return dump_rows(get_settings().database_url)
 
 
 def table_dump(table: str) -> str:
-    path = get_settings().database_url.removeprefix("sqlite:///")
-    with sqlite3.connect(path) as con:
-        return "\n".join(map(str, con.execute(f"SELECT * FROM {table}").fetchall()))  # noqa: S608
+    return "\n".join(map(str, table_rows(get_settings().database_url, table)))
 
 
 def test_ask_runs_every_step(student_client):

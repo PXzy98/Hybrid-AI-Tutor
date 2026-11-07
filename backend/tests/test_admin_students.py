@@ -1,19 +1,20 @@
-import sqlite3
-
 import pytest
-from sqlalchemy import Column, Integer, String, Table
+from sqlalchemy import Column, Integer, String, Table, text
 from sqlmodel import SQLModel
 
 from app.core.config import get_settings
+from app.storage.db import make_engine
 from tests.conftest import PASSWORD
 
 STUDENTS = "/api/v1/admin/students"
 
 
 def rows(table: str, where: str = "") -> list:
-    path = get_settings().database_url.removeprefix("sqlite:///")
-    with sqlite3.connect(path) as con:
-        return con.execute(f"SELECT * FROM {table} {where}").fetchall()  # noqa: S608
+    engine = make_engine(get_settings().database_url, pooled=False)
+    with engine.connect() as con:
+        out = [tuple(r) for r in con.execute(text(f"SELECT * FROM {table} {where}"))]  # noqa: S608
+    engine.dispose()
+    return out
 
 
 def test_instructor_creates_a_student_who_must_change_password(instructor_client, api):
@@ -103,6 +104,9 @@ def extra_student_table():
     table = Table("future_learner_table", SQLModel.metadata, Column("id", Integer, primary_key=True),
                   Column("student_id", String, index=True), extend_existing=True)
     yield table
+    engine = make_engine(get_settings().database_url, pooled=False)
+    table.drop(engine, checkfirst=True)  # the shared test database outlives this test
+    engine.dispose()
     SQLModel.metadata.remove(table)
 
 

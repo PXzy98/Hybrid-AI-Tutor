@@ -17,7 +17,6 @@ import argparse
 import json
 from dataclasses import replace
 import os
-import sqlite3
 import sys
 from pathlib import Path
 
@@ -164,9 +163,10 @@ def health_findings(asks: list[Ask], records: list[dict], generalize: bool) -> l
 
 
 def db_dump(h) -> str:
-    db_path = h.services.settings.database_url.removeprefix("sqlite:///")
-    with sqlite3.connect(db_path) as con:
-        return "\n".join(line for line in con.iterdump() if 'INSERT INTO "account"' not in line)
+    """Every stored row except the account table (identities live there by design)."""
+    from app.storage.testing import dump_rows
+
+    return dump_rows(h.services.settings.database_url, exclude=("account",))
 
 
 def _analyzer(services):

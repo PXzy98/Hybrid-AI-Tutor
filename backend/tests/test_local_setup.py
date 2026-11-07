@@ -24,6 +24,8 @@ def test_env_values_round_trip_without_shell_interpolation():
     assert values["OLLAMA_URL"] == "http://127.0.0.1:11434"
     assert values["LLM__LOCAL__MODEL"] == values["LLM__UNDERSTAND__MODEL"] == "qwen3.5:9b-q4_K_M"
     assert values["ROUTING__IMPL"] == "semantic" and values["RAG__IMPL"] == "medical_hybrid"
+    assert values["DATABASE_URL"] == "postgresql+psycopg://tutor@127.0.0.1:5432/tutor"  # no password inside
+    assert len(values["PGPASSWORD"]) >= 24 and values["PGPASSWORD"] == values["POSTGRES_PASSWORD"]
 
 
 @pytest.mark.parametrize("username,password", [

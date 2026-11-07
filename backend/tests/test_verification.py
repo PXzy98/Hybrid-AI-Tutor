@@ -1,5 +1,4 @@
 """Step 8: checkers, the verify step (regenerate -> fallback), the pre-send leak guard, privacy end to end."""
-import sqlite3
 
 import pytest
 
@@ -225,9 +224,9 @@ def test_privacy_end_to_end_forced_cloud(make_client):
     assert body["answer"].endswith(misconception.correction)
     assert "concept first" not in sent and "Teaching level for this student" in sent  # labels only
 
-    path = get_settings().database_url.removeprefix("sqlite:///")
-    with sqlite3.connect(path) as con:
-        dump = "\n".join(con.iterdump())
+    from app.storage.testing import dump_rows
+
+    dump = dump_rows(get_settings().database_url)
     for secret in ("300418277", "Hello Alice Tremblay"):
         assert secret not in dump, secret
     assert "Hello <PERSON_1>!" in dump  # the stored answer is the sanitized one

@@ -4,6 +4,22 @@
 # Settings come from .env (see .env.example); SECTION__FIELD variables override config.yaml values,
 # e.g. CONTENT__SERVE_UNREVIEWED=true for the demo (docs/DEMO.md).
 services:
+  db:
+    # PostgreSQL (task Z3). The password comes from POSTGRES_PASSWORD in .env; the data lives in db-data.
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: tutor
+      POSTGRES_DB: tutor
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tutor -d tutor"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
   api:
     build:
       context: .
@@ -14,9 +30,14 @@ services:
       - path: .env
         required: false
     environment:
-      # database and instructor uploads inside the named volume, whatever .env says
-      DATABASE_URL: sqlite:////app/var/app.db
+      # the db service; the password is passed as PGPASSWORD, never inside the URL
+      DATABASE_URL: postgresql+psycopg://tutor@db:5432/tutor
+      PGPASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      # instructor uploads inside the named volume, whatever .env says
       RAG__MATERIALS_DIR: /app/var/topics
+    depends_on:
+      db:
+        condition: service_healthy
     volumes:
       - tutor-data:/app/var
     restart: unless-stopped
@@ -32,3 +53,4 @@ services:
 
 volumes:
   tutor-data:
+  db-data:

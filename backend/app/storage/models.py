@@ -5,7 +5,7 @@ hashes exist only in `account` (privacy invariant 6); every other table uses the
 """
 from datetime import UTC, datetime
 
-from sqlalchemy import JSON, Column
+from sqlalchemy import JSON, Column, DateTime
 from sqlmodel import Field, SQLModel
 
 
@@ -14,10 +14,15 @@ def utcnow() -> datetime:
 
 
 def as_utc(dt: datetime | None) -> datetime | None:
-    """SQLite returns naive datetimes; everything is stored in UTC."""
+    """Timestamps are stored as timestamptz; a naive value (from older code paths) is taken as UTC."""
     if dt is None or dt.tzinfo is not None:
         return dt
     return dt.replace(tzinfo=UTC)
+
+
+def _ts(**kwargs):
+    """A timezone-aware timestamp column (PostgreSQL timestamptz)."""
+    return Field(sa_type=DateTime(timezone=True), **kwargs)
 
 
 class Account(SQLModel, table=True):
@@ -32,9 +37,9 @@ class Account(SQLModel, table=True):
     active: bool = True
     must_change_password: bool = True
     failed_logins: int = 0
-    locked_until: datetime | None = None
-    created_at: datetime = Field(default_factory=utcnow)
-    last_login_at: datetime | None = None
+    locked_until: datetime | None = _ts(default=None)
+    created_at: datetime = _ts(default_factory=utcnow)
+    last_login_at: datetime | None = _ts(default=None)
 
 
 class AuthSession(SQLModel, table=True):
@@ -44,8 +49,8 @@ class AuthSession(SQLModel, table=True):
     # SHA-256 of the cookie token; the token itself is never stored
     token_hash: str = Field(unique=True, index=True)
     account_id: int = Field(foreign_key="account.id", index=True)
-    created_at: datetime = Field(default_factory=utcnow)
-    expires_at: datetime
+    created_at: datetime = _ts(default_factory=utcnow)
+    expires_at: datetime = _ts()
 
 
 class SurveyResponse(SQLModel, table=True):
@@ -66,7 +71,7 @@ class RequestLog(SQLModel, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     request_id: str = Field(index=True)
-    created_at: datetime = Field(default_factory=utcnow)
+    created_at: datetime = _ts(default_factory=utcnow)
     session_id: str = Field(index=True)
     student_id: str = Field(index=True)  # pseudonymous; "deleted" after the account is deleted
     topic: str
@@ -89,7 +94,7 @@ class SessionTurn(SQLModel, table=True):
     student_id: str = Field(index=True)  # owner of the session
     role: str
     text: str  # sanitized
-    created_at: datetime = Field(default_factory=utcnow)
+    created_at: datetime = _ts(default_factory=utcnow)
 
 
 # ---------------------------------------------------------------------- learner model (design §5, §9)
@@ -103,7 +108,7 @@ class LearnerKcState(SQLModel, table=True):
     p_mastery: float
     level: str  # basic | intermediate | advanced (with hysteresis)
     n_obs: int = 0  # graded answers (check + diagnostic)
-    last_seen: datetime | None = None
+    last_seen: datetime | None = _ts(default=None)
 
 
 class LearnerTopicLevel(SQLModel, table=True):
@@ -115,7 +120,7 @@ class LearnerTopicLevel(SQLModel, table=True):
     student_id: str = Field(index=True)
     topic: str
     level: str
-    updated_at: datetime = Field(default_factory=utcnow)
+    updated_at: datetime = _ts(default_factory=utcnow)
 
 
 class LearnerPreference(SQLModel, table=True):
@@ -127,7 +132,7 @@ class LearnerPreference(SQLModel, table=True):
     detail: str = "concise"
     source: str = "default"
     implicit: dict = Field(default_factory=dict, sa_column=Column(JSON))  # streak counters per dimension
-    updated_at: datetime = Field(default_factory=utcnow)
+    updated_at: datetime = _ts(default_factory=utcnow)
 
 
 class EvidenceLog(SQLModel, table=True):
@@ -143,7 +148,7 @@ class EvidenceLog(SQLModel, table=True):
     signal: str | None = None  # confusion | misconception
     misconception_id: str | None = None
     weight: float = 1.0  # likelihood ratio of a weak signal; 1.0 for graded answers
-    created_at: datetime = Field(default_factory=utcnow)
+    created_at: datetime = _ts(default_factory=utcnow)
 
 
 class Consent(SQLModel, table=True):
@@ -152,8 +157,8 @@ class Consent(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     student_id: str = Field(unique=True, index=True)
     given: bool
-    created_at: datetime = Field(default_factory=utcnow)
-    updated_at: datetime = Field(default_factory=utcnow)
+    created_at: datetime = _ts(default_factory=utcnow)
+    updated_at: datetime = _ts(default_factory=utcnow)
 
 
 class LearnerMisconception(SQLModel, table=True):
@@ -167,7 +172,7 @@ class LearnerMisconception(SQLModel, table=True):
     kc_id: str
     status: str  # suspected | confirmed | resolved
     evidence_count: int = 0  # signals since the misconception was last opened
-    updated_at: datetime = Field(default_factory=utcnow)
+    updated_at: datetime = _ts(default_factory=utcnow)
 
 
 class ConfigHistory(SQLModel, table=True):
@@ -176,7 +181,7 @@ class ConfigHistory(SQLModel, table=True):
     __tablename__ = "config_history"
 
     id: int | None = Field(default=None, primary_key=True)
-    changed_at: datetime = Field(default_factory=utcnow)
+    changed_at: datetime = _ts(default_factory=utcnow)
     account_id: int | None = None  # the instructor (no username here: identity stays in `account`)
     values: dict = Field(default_factory=dict, sa_column=Column(JSON))  # the full editable subset after
     previous: dict = Field(default_factory=dict, sa_column=Column(JSON))  # ... and before the change
