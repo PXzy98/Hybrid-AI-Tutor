@@ -4,13 +4,14 @@ No persistence, student release, or publication. Z4/Z6 must provide authorized
 course content, an enforced local gateway and draft/accepted database transitions.
 """
 import json
+import random
 from collections.abc import Sequence
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, TypeAdapter, ValidationError, field_validator
 
 from app.core.schemas import Chunk
-from app.instructor_ai.drafts import DraftError, DraftGateway
+from app.instructor_ai.drafts import DraftError, DraftGateway, parse_model_json
 
 StructureKind = Literal["kcs", "check_items", "misconceptions"]
 
@@ -89,9 +90,14 @@ class StructureDraft(BaseModel):
 
 async def generate_structure_draft(
     *, course_id: int, kind: StructureKind, passages: Sequence[Chunk],
-    gateway: DraftGateway, settings: object,
+    gateway: DraftGateway, settings: object, known_kc_names: Sequence[str] = (),
 ) -> StructureDraft:
-    """Generate only unpublished drafts; the caller must provide scanned course evidence."""
+    """Generate only unpublished drafts; the caller must provide scanned course evidence.
+
+    `known_kc_names` are the course's accepted KCs. Every KC an item refers to must be one of them
+    or, for KC drafts, another KC of the same draft. Check-item options are shuffled so the correct
+    answer is not always where the model tends to put it.
+    """
     if type(course_id) is not int or course_id <= 0 or kind not in _ITEM_TYPES:
         raise DraftError("Invalid course or draft kind.")
     if not 1 <= len(passages) <= 8:
@@ -114,14 +120,17 @@ async def generate_structure_draft(
             "task": _GUIDANCE[kind], "evidence": materials,
         }, ensure_ascii=False)},
     ]
+    schema = TypeAdapter(list[_ITEM_TYPES[kind]])
     response = await gateway.complete(
-        "local", messages, settings=settings, trust_required="trusted_local", stream=False,
+        "local", messages, settings=settings, trust_required="trusted_local",
+        json_schema={"type": "object", "properties": {"items": schema.json_schema()},
+                     "required": ["items"], "additionalProperties": False},
+        stream=False,
     )
     try:
-        payload = json.loads(response.text)
+        payload = parse_model_json(response.text)
         if not isinstance(payload, dict) or set(payload) != {"items"}:
             raise ValueError("Unexpected model structure")
-        schema = TypeAdapter(list[_ITEM_TYPES[kind]])
         items = schema.validate_python(payload["items"])
         if not 1 <= len(items) <= 12:
             raise ValueError("Unexpected number of items")
@@ -134,7 +143,38 @@ async def generate_structure_draft(
                 raise DraftError("Draft citation is not present in course evidence.")
             cited.add(number)
 
+    _check_kc_references(kind, items, known_kc_names)
+    if kind == "check_items":
+        items = [_shuffled(item) for item in items]
     return StructureDraft(
         course_id=course_id, kind=kind, items=items,
         cited_sources=[materials[number - 1]["source"] for number in sorted(cited)],
     )
+
+
+def _check_kc_references(kind: str, items: list, known: Sequence[str]) -> None:
+    known_names = {name.casefold() for name in known}
+    if kind == "kcs":
+        drafted = {item.name.casefold() for item in items}
+        if len(drafted) != len(items):
+            raise DraftError("The draft repeats a knowledge component.")
+        for item in items:
+            for name in item.prerequisite_names:
+                if name.casefold() == item.name.casefold():
+                    raise DraftError("A knowledge component cannot be its own prerequisite.")
+                if name.casefold() not in drafted | known_names:
+                    raise DraftError("A prerequisite refers to an unknown knowledge component.")
+        return
+    if not known_names:
+        return  # nothing accepted yet: the instructor links the KCs when accepting the draft
+    names = [n for item in items for n in (item.kc_names if kind == "check_items" else [item.kc_name])]
+    if any(name.casefold() not in known_names for name in names):
+        raise DraftError("A draft item refers to an unknown knowledge component.")
+
+
+def _shuffled(item: CheckItemDraft) -> CheckItemDraft:
+    """Shuffle the options reproducibly (same question, same order), keeping the correct one marked."""
+    order = list(range(4))
+    random.Random(item.question).shuffle(order)
+    return item.model_copy(update={"options": [item.options[i] for i in order],
+                                   "correct_index": order.index(item.correct_index)})

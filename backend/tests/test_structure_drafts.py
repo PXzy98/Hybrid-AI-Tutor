@@ -13,7 +13,8 @@ class FakeGateway:
         self.items = items
         self.calls = []
 
-    async def complete(self, role, messages, *, settings, trust_required, stream=False):
+    async def complete(self, role, messages, *, settings, trust_required, json_schema=None,
+                       stream=False):
         self.calls.append((role, trust_required, stream, messages))
         return type("Response", (), {"text": json.dumps({"items": self.items})})()
 
@@ -97,3 +98,29 @@ async def test_invalid_draft_kind_rejected():
         await generate_structure_draft(course_id=101, kind="student_marks",
                                        passages=[_chunk()], gateway=FakeGateway([]),
                                        settings=None)
+
+
+@pytest.mark.asyncio
+async def test_unknown_prerequisite_and_unknown_kc_are_rejected():
+    kc = dict(_item("kcs"), prerequisite_names=["Nonexistent KC"])
+    with pytest.raises(DraftError, match="unknown"):
+        await generate_structure_draft(course_id=101, kind="kcs", passages=[_chunk()],
+                                       gateway=FakeGateway([kc]), settings=None)
+    with pytest.raises(DraftError, match="unknown"):
+        await generate_structure_draft(course_id=101, kind="check_items", passages=[_chunk()],
+                                       gateway=FakeGateway([_item("check_items")]), settings=None,
+                                       known_kc_names=["Another KC"])
+    ok = await generate_structure_draft(course_id=101, kind="check_items", passages=[_chunk()],
+                                        gateway=FakeGateway([_item("check_items")]), settings=None,
+                                        known_kc_names=["quartzzyme overview"])
+    assert ok.items
+
+
+@pytest.mark.asyncio
+async def test_check_item_options_are_shuffled_and_the_answer_follows():
+    items = [dict(_item("check_items"), question=f"Which imaginary property {n} describes Quartzzyme?")
+             for n in range(12)]
+    result = await generate_structure_draft(course_id=101, kind="check_items", passages=[_chunk()],
+                                            gateway=FakeGateway(items), settings=None)
+    assert all(item.options[item.correct_index] == "Example A" for item in result.items)
+    assert len({item.correct_index for item in result.items}) > 1

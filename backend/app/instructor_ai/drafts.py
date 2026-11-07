@@ -5,6 +5,7 @@ supply only course-scoped, privacy-scanned retrieval passages and effective sett
 The production gateway, course roles, jobs, and draft storage are provided by Z.
 """
 import json
+import re
 from collections.abc import Sequence
 from typing import Literal, Protocol
 
@@ -38,9 +39,32 @@ class ModelResult(Protocol):
 
 
 class DraftGateway(Protocol):
+    """The part of `app.llm.gateway.ModelGateway` the draft cores use."""
+
     async def complete(self, role: str, messages: list[dict[str, str]], *,
-                       settings: object, trust_required: str,
+                       settings: object, trust_required: str, json_schema: dict | None = None,
                        stream: bool = False) -> ModelResult: ...
+
+
+_THINK = re.compile(r"<think>.*?</think>", re.S | re.I)
+_FENCE = re.compile(r"^```(?:json)?\s*(.*?)\s*```$", re.S | re.I)
+
+
+def parse_model_json(text: str) -> object:
+    """Parse a JSON answer of a local model, tolerating a reasoning block and a ```json fence.
+
+    Raises ValueError when no JSON object remains; nothing of the text is echoed.
+    """
+    body = _THINK.sub("", text or "").strip()
+    fenced = _FENCE.match(body)
+    if fenced:
+        body = fenced.group(1)
+    if not body.startswith("{"):
+        start, end = body.find("{"), body.rfind("}")
+        if start < 0 or end <= start:
+            raise ValueError("no JSON object in the model answer")
+        body = body[start:end + 1]
+    return json.loads(body)
 
 
 class _Generated(BaseModel):
@@ -102,10 +126,10 @@ async def generate_tier1_draft(
         }, ensure_ascii=False)},
     ]
     # Never send unreviewed full-course documents to an external provider here.
-    result = await gateway.complete("local", messages, settings=settings,
-                                    trust_required="trusted_local", stream=False)
+    result = await gateway.complete("local", messages, settings=settings, trust_required="trusted_local",
+                                    json_schema=_Generated.model_json_schema(), stream=False)
     try:
-        generated = _Generated.model_validate_json(result.text)
+        generated = _Generated.model_validate(parse_model_json(result.text))
     except (ValidationError, ValueError, TypeError) as exc:
         raise DraftError("The model did not produce a valid draft.") from exc
 

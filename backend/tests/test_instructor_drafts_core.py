@@ -13,7 +13,8 @@ class StubGateway:
                                "citations": [1]}
         self.calls = []
 
-    async def complete(self, role, messages, *, settings, trust_required, stream=False):
+    async def complete(self, role, messages, *, settings, trust_required, json_schema=None,
+                       stream=False):
         self.calls.append((role, messages, settings, trust_required, stream))
         return type("Response", (), {"text": json.dumps(self.reply)})()
 
@@ -86,3 +87,29 @@ async def test_nonsense_kind_fails_closed():
         await generate_tier1_draft(course_id=101, kind="grade_student",
                                    passages=[_chunk()], gateway=gateway, settings=None)
     assert not gateway.calls
+
+
+@pytest.mark.parametrize("text", [
+    '{"title": "T", "body": "B", "citations": [1]}',
+    '<think>checking the passages</think>\n```json\n{"title": "T", "body": "B", "citations": [1]}\n```',
+    'Here is the draft:\n{"title": "T", "body": "B", "citations": [1]}',
+])
+def test_local_model_answers_with_reasoning_or_fences_are_parsed(text):
+    from app.instructor_ai.drafts import parse_model_json
+
+    assert parse_model_json(text) == {"title": "T", "body": "B", "citations": [1]}
+
+
+@pytest.mark.asyncio
+async def test_the_gateway_receives_the_output_schema():
+    gateway = StubGateway()
+    seen = {}
+    original = gateway.complete
+
+    async def complete(role, messages, **kw):
+        seen.update(kw)
+        return await original(role, messages, **kw)
+
+    gateway.complete = complete
+    await generate_tier1_draft(course_id=101, kind="faq", passages=[_chunk()], gateway=gateway, settings=None)
+    assert set(seen["json_schema"]["properties"]) == {"title", "body", "citations"}
