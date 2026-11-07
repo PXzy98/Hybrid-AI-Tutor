@@ -22,7 +22,7 @@ class DemoCourseError(ValueError):
 def _inside(path: Path, root: Path) -> Path:
     resolved = path.resolve()
     if not resolved.is_relative_to(root.resolve()) or not resolved.is_file():
-        raise DemoCourseError(f"Missing or out-of-pack file: {path.name}")
+        raise DemoCourseError("A file listed in the manifest is missing or outside the pack.")
     return resolved
 
 

@@ -113,7 +113,7 @@ class IndexedCourseRetriever:
             raise DocumentError("Course material indexing requires the document privacy scanner.")
         passages: list[Chunk] = []
         total = 0
-        for module_id, path in self._materials(course_id):
+        for position, (module_id, path) in enumerate(self._materials(course_id), 1):
             suffix = path.suffix.lower()
             pdf, pptx = suffix == ".pdf", suffix == ".pptx"
             # PowerPoint support is supplied by S2; do not require it for existing text uploads.
@@ -122,7 +122,9 @@ class IndexedCourseRetriever:
             )
             # Scan before writing *any* extracted text to persistent index storage.
             if self.scan(content) is not True:
-                raise DocumentError(f"Privacy scan rejected course material: {path.name}")
+                # Rule 1: no file name in the message (a name like "roster_<student>.pdf" is personal data).
+                where = "course-level material" if module_id is None else f"module {module_id}"
+                raise DocumentError(f"Privacy scan rejected course material: document {position} ({where}).")
             total += len(content.replace("\f", ""))
             if total > MAX_COURSE_CHARS:
                 raise DocumentError("The course exceeds the two-million-character text budget.")

@@ -72,8 +72,10 @@ def test_rejected_replacement_cannot_publish_new_index(tmp_path):
     rag = IndexedCourseRetriever(tmp_path, scan=scan)
     assert rag.rebuild(101) == 1
     path.write_text("# Private Data\nPrivateRoster contains a simulated roster entry.", encoding="utf-8")
-    with pytest.raises(DocumentError, match="Privacy scan rejected"):
+    with pytest.raises(DocumentError, match="Privacy scan rejected") as rejected:
         rag.rebuild(101)
+    assert "safe.md" not in str(rejected.value)  # rule 1: no file name in error messages
+    assert "document 1 (course-level material)" in str(rejected.value)
     assert rag._manifest_version(101) == 1
     assert not (tmp_path / "courses" / "101" / "index" / "v2").exists()
     assert not any("PrivateRoster" in x.text for x in rag.retrieve(101, None, "PrivateRoster", 4))
