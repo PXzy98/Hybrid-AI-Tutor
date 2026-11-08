@@ -44,13 +44,23 @@ class Services:
         self.learner = build_learner_model(settings, self.engine, self.content)
 
 
+def load_demo_content(engine, settings: Settings) -> ContentStore:
+    """The demo course from the catalog, created from the YAML seed on first start (task Z4)."""
+    from app.catalog import ensure_demo_course, load_course_content
+    from app.learner.content import load_yaml_topics
+
+    status = "active" if settings.content.seed_status == "active" else None
+    course_id = ensure_demo_course(engine, load_yaml_topics(settings.content_dir()), status)
+    return load_course_content(engine, course_id)
+
+
 def build_services(settings: Settings | None = None) -> Services:
     settings = settings or get_settings()
     password = settings.pgpassword.get_secret_value() if settings.pgpassword else None
     engine = make_engine(settings.database_url, pooled=settings.database_pooled, password=password)
     init_db(engine)
     local_llm, cloud_llm, understand_llm = build_llm_clients(settings)
-    content = ContentStore(settings.content_dir(), settings.content.serve_unreviewed)  # validated here
+    content = load_demo_content(engine, settings)  # validated here
     return Services(
         settings=settings,
         engine=engine,

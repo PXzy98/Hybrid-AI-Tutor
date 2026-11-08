@@ -34,6 +34,16 @@ def _write_config(path: Path, overrides: dict) -> None:
     path.write_text(yaml.safe_dump(_deep_merge(_deep_merge(base, TEST_BASE), overrides)), encoding="utf-8")
 
 
+@pytest.fixture(scope="session", autouse=True)
+def _no_dotenv():
+    """No test reads the developer's .env, not even module- or session-scoped fixtures."""
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setitem(Settings.model_config, "env_file", None)
+        get_settings.cache_clear()
+        yield
+    get_settings.cache_clear()
+
+
 @pytest.fixture(scope="session")
 def _test_database():
     """One temporary PostgreSQL database for the run (TEST_DATABASE_URL), created with the current schema

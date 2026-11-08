@@ -19,7 +19,7 @@ HBP = CONTENT / "high_blood_pressure"
 
 @pytest.fixture(scope="module")
 def store() -> ContentStore:
-    return ContentStore(CONTENT, serve_unreviewed=True)
+    return ContentStore.from_yaml(CONTENT, "active")
 
 
 # ------------------------------------------------------------------------- real content
@@ -57,10 +57,10 @@ def test_hbp_files_follow_the_authoring_rules():
 
 
 def test_unreviewed_items_are_not_served_by_default():
-    strict, dev = ContentStore(CONTENT), ContentStore(CONTENT, serve_unreviewed=True)
+    strict, dev = ContentStore.from_yaml(CONTENT), ContentStore.from_yaml(CONTENT, "active")
     assert strict.items("HBP.1") == [] and len(dev.items("HBP.1")) == 4
-    assert strict.reviewed_item_count("high_blood_pressure") == 0
-    assert len(strict.items("HBP.1", reviewed_only=False)) == 4
+    assert strict.active_item_count("high_blood_pressure") == 0
+    assert len(strict.items("HBP.1", include_unpublished=True)) == 4
 
 
 def test_public_item_hides_key_and_tags(store):
@@ -100,7 +100,7 @@ def valid():
 
 def test_valid_fixture_loads(tmp_path):
     write_topic(tmp_path, *valid())
-    assert ContentStore(tmp_path).kcs("topic_a")[1].prerequisites == ["A.1"]
+    assert ContentStore.from_yaml(tmp_path).kcs("topic_a")[1].prerequisites == ["A.1"]
 
 
 def _break(kind):
@@ -145,7 +145,7 @@ def _break(kind):
 def test_each_validation_rule(tmp_path, kind, message):
     write_topic(tmp_path, *_break(kind))
     with pytest.raises(ContentError) as e:
-        ContentStore(tmp_path)
+        ContentStore.from_yaml(tmp_path)
     assert message in str(e.value)
 
 

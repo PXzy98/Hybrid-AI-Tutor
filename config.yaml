@@ -83,7 +83,7 @@ llm:
 
 content:
   dir: content/topics
-  serve_unreviewed: false             # true only in development
+  seed_status: draft                  # status of unreviewed seed items; active only for demos
 
 courses:
   default:

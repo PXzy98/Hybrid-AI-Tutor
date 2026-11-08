@@ -210,7 +210,7 @@ def run(base: Settings, content: ContentStore, topic: str, cfg: RunConfig, stude
 
 
 def load_content(base: Settings) -> ContentStore:
-    return ContentStore(base.content_dir(), serve_unreviewed=True)  # simulation only: all items usable
+    return ContentStore.from_yaml(base.content_dir(), "active")  # simulation only: all items usable
 
 
 def simulated_topics(content: ContentStore) -> list[str]:

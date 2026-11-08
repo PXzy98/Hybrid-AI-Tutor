@@ -18,13 +18,14 @@ TOPICS = ("type2_diabetes", "asthma", "migraine", "pneumonia")
 
 @pytest.mark.parametrize("topic", TOPICS)
 def test_new_topic_content_has_five_kcs_and_three_questions_per_kc(topic):
-    store = ContentStore(CONTENT, serve_unreviewed=True)
+    store = ContentStore.from_yaml(CONTENT, "active")
     tc = store.topic(topic)
     assert len(tc.kcs) == 5
     assert len(tc.items) == 15
     assert len(tc.misconceptions) == 5
-    assert all(item.reviewed_by is None for item in tc.items)
-    assert all(mc.reviewed_by is None for mc in tc.misconceptions)
+    seed = ContentStore.from_yaml(CONTENT).topic(topic)  # statuses as imported: unreviewed -> draft
+    assert all(item.status == "draft" for item in seed.items)
+    assert all(mc.status == "draft" for mc in seed.misconceptions)
     assert len(diagnostic_items(store, topic)) == 5
     assert [item.kc for item in diagnostic_items(store, topic)] == topological(store, topic)
     assert all(item.level == "basic" for item in diagnostic_items(store, topic))
@@ -48,7 +49,7 @@ def test_new_topic_content_has_five_kcs_and_three_questions_per_kc(topic):
 
 @pytest.mark.parametrize("topic", TOPICS)
 def test_student_onboarding_bkt_updates_on_correct_diagnostic_answers(make_client, topic):
-    with make_client({"content": {"serve_unreviewed": True}, "learner": {"knowledge": "bkt"}}) as client:
+    with make_client({"content": {"seed_status": "active"}, "learner": {"knowledge": "bkt"}}) as client:
         api = Api(client)
         student = api.make_student()
         api.login("alice")
@@ -107,7 +108,7 @@ def test_student_onboarding_bkt_updates_on_correct_diagnostic_answers(make_clien
 
 @pytest.mark.parametrize("topic", TOPICS)
 def test_wrong_prerequisite_blocks_dependent_diagnostic_kcs(make_client, topic):
-    with make_client({"content": {"serve_unreviewed": True}, "learner": {"knowledge": "bkt"}}) as client:
+    with make_client({"content": {"seed_status": "active"}, "learner": {"knowledge": "bkt"}}) as client:
         api = Api(client)
         api.make_student()
         api.login("alice")
@@ -130,13 +131,13 @@ def test_wrong_prerequisite_blocks_dependent_diagnostic_kcs(make_client, topic):
 
 @pytest.mark.parametrize("topic", TOPICS)
 def test_unreviewed_drafts_never_served_or_accepted_by_default(make_client, topic):
-    with make_client({"content": {"serve_unreviewed": False}}) as client:
+    with make_client({"content": {"seed_status": "draft"}}) as client:
         api = Api(client)
         student = api.make_student()
         api.login("alice")
         questions = client.get("/api/v1/onboarding", params={"topic": topic}).json()["diagnostic"]
         assert questions == []
-        item = ContentStore(CONTENT, serve_unreviewed=True).topic(topic).items[0]
+        item = ContentStore.from_yaml(CONTENT, "active").topic(topic).items[0]
         response = client.post(
             "/api/v1/onboarding",
             json={

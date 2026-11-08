@@ -112,9 +112,7 @@ class LearnerModel:
         by_kc: dict[str, tuple] = {}
         for item_id, choice in answers:
             item = self.content.item(item_id)
-            if item is None or self.content.topic_of(item.kc) != topic or (
-                not item.reviewed and not self.content.serve_unreviewed
-            ):
+            if item is None or self.content.topic_of(item.kc) != topic or not item.active:
                 raise ValueError(f"unknown or unapproved item for this topic: {item_id}")
             by_kc.setdefault(item.kc, (item, grade(item, choice)))
         assessed: dict[str, bool] = {}

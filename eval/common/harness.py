@@ -85,7 +85,7 @@ class Harness:
     def __init__(self, env: dict[str, str] | None = None, fake: bool = True) -> None:
         self.tmp = Path(tempfile.mkdtemp(prefix="tutor-eval-"))
         self.env = {
-            "CONTENT__SERVE_UNREVIEWED": "true",
+            "CONTENT__SEED_STATUS": "active",
             "PRIVACY__SPACY_MODEL": os.environ.get("EVAL_SPACY_MODEL", "en_core_web_sm"),
             "INSTRUCTOR_USERNAME": "", "INSTRUCTOR_INITIAL_PASSWORD": "",
             **({"OLLAMA_URL": "http://127.0.0.1:9"} if fake else {}),

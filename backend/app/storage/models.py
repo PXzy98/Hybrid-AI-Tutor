@@ -5,7 +5,7 @@ hashes exist only in `account` (privacy invariant 6); every other table uses the
 """
 from datetime import UTC, datetime
 
-from sqlalchemy import JSON, Column, DateTime
+from sqlalchemy import JSON, Column, DateTime, ForeignKey, UniqueConstraint
 from sqlmodel import Field, SQLModel
 
 
@@ -178,3 +178,150 @@ class ConfigHistory(SQLModel, table=True):
     account_id: int | None = None  # the instructor (no username here: identity stays in `account`)
     values: dict = Field(default_factory=dict, sa_column=Column(JSON))  # the full editable subset after
     previous: dict = Field(default_factory=dict, sa_column=Column(JSON))  # ... and before the change
+
+
+# ------------------------------------------------------------- course catalog (task Z4, design §2, §5, §10)
+# Content status: `draft` is invisible to students (unreviewed or AI-proposed), `active` is published,
+# `retired` stays for history and learner state but is not used for new questions.
+class Course(SQLModel, table=True):
+    __tablename__ = "course"
+
+    id: int | None = Field(default=None, primary_key=True)
+    code: str = Field(unique=True, index=True)  # e.g. "MED 0000"
+    title: str
+    term_label: str = ""  # free text for display, e.g. "Winter 2027"
+    course_type: str = "general"  # selects the privacy profile
+    visibility_mode: str = "A"  # A | B (design §4.5)
+    status: str = "active"  # active | archived
+    created_at: datetime = _ts(default_factory=utcnow)
+
+
+class Module(SQLModel, table=True):
+    __tablename__ = "module"
+    __table_args__ = (UniqueConstraint("course_id", "code"),)
+
+    id: int | None = Field(default=None, primary_key=True)
+    course_id: int = Field(sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=False,
+                                            index=True))
+    code: str  # the v3 topic, e.g. "high_blood_pressure"
+    title: str
+    position: int = 0
+    guideline: str = ""
+
+
+class Kc(SQLModel, table=True):
+    __tablename__ = "kc"
+    __table_args__ = (UniqueConstraint("course_id", "code"),)
+
+    id: int | None = Field(default=None, primary_key=True)
+    course_id: int = Field(sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=False,
+                                            index=True))
+    module_id: int | None = Field(default=None, sa_column=Column(ForeignKey("module.id", ondelete="SET NULL"),
+                                                                 index=True))
+    code: str  # e.g. "HBP.1"; unique within the course
+    name: str
+    definition: str = ""
+    difficulty: str  # basic | intermediate | advanced
+    status: str = "draft"
+
+
+class KcPrerequisite(SQLModel, table=True):
+    """Prerequisite edges; both KCs belong to the same course (checked by the importer)."""
+
+    __tablename__ = "kc_prerequisite"
+
+    kc_id: int = Field(sa_column=Column(ForeignKey("kc.id", ondelete="CASCADE"), primary_key=True))
+    prerequisite_id: int = Field(sa_column=Column(ForeignKey("kc.id", ondelete="CASCADE"), primary_key=True))
+
+
+class CatalogMisconception(SQLModel, table=True):
+    __tablename__ = "misconception"
+    __table_args__ = (UniqueConstraint("course_id", "code"),)
+
+    id: int | None = Field(default=None, primary_key=True)
+    course_id: int = Field(sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=False,
+                                            index=True))
+    kc_id: int = Field(sa_column=Column(ForeignKey("kc.id", ondelete="CASCADE"), nullable=False, index=True))
+    code: str  # e.g. "HBP.MC1"
+    statement: str
+    correction: str
+    status: str = "draft"
+
+
+class CheckItem(SQLModel, table=True):
+    __tablename__ = "check_item"
+    __table_args__ = (UniqueConstraint("course_id", "code"),)
+
+    id: int | None = Field(default=None, primary_key=True)
+    course_id: int = Field(sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=False,
+                                            index=True))
+    kc_id: int = Field(sa_column=Column(ForeignKey("kc.id", ondelete="CASCADE"), nullable=False, index=True))
+    code: str  # e.g. "HBP.1-q4"
+    level: str
+    stem: str
+    # {"A": {"text": ..., "misconception": "HBP.MC4" | null}, ...}; misconceptions by code
+    options: dict = Field(default_factory=dict, sa_column=Column(JSON, nullable=False))
+    answer: str  # A | B | C | D
+    explanation: str = ""
+    status: str = "draft"
+
+
+class Material(SQLModel, table=True):
+    """An uploaded course file (design §7); the text lives in the on-disk index, not here."""
+
+    __tablename__ = "material"
+
+    id: int | None = Field(default=None, primary_key=True)
+    course_id: int = Field(sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=False,
+                                            index=True))
+    module_id: int | None = Field(default=None, sa_column=Column(ForeignKey("module.id", ondelete="CASCADE"),
+                                                                 index=True))
+    filename: str
+    size_bytes: int = 0
+    sha256: str = ""
+    scan_status: str = "pending"  # pending | accepted | rejected
+    uploaded_at: datetime = _ts(default_factory=utcnow)
+
+
+class IndexVersion(SQLModel, table=True):
+    """The authoritative index version per course (IndexedCourseRetriever's `index_version`)."""
+
+    __tablename__ = "index_version"
+
+    course_id: int = Field(sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), primary_key=True))
+    version: int = 0
+    built_at: datetime | None = _ts(default=None)
+
+
+class CourseMember(SQLModel, table=True):
+    """Membership (design §3.3, §4.5): an account, or a pending e-mail from a CSV import."""
+
+    __tablename__ = "course_member"
+    __table_args__ = (UniqueConstraint("course_id", "account_id"), UniqueConstraint("course_id", "email"))
+
+    id: int | None = Field(default=None, primary_key=True)
+    course_id: int = Field(sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=False,
+                                            index=True))
+    account_id: int | None = Field(
+        default=None, sa_column=Column(ForeignKey("account.id", ondelete="CASCADE"), index=True))
+    email: str | None = None  # pending invitation by e-mail (lower-case)
+    role: str  # instructor | student
+    status: str = "pending"  # pending | active
+    hidden_from_instructor: bool = False
+    visible_since: datetime | None = _ts(default=None)
+    visibility_ack_at: datetime | None = _ts(default=None)
+    created_at: datetime = _ts(default_factory=utcnow)
+
+
+class CourseInvite(SQLModel, table=True):
+    __tablename__ = "course_invite"
+
+    id: int | None = Field(default=None, primary_key=True)
+    course_id: int = Field(sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=False,
+                                            index=True))
+    code_hash: str = Field(unique=True, index=True)  # SHA-256 of the invitation code; the code is not stored
+    role: str = "student"
+    expires_at: datetime | None = _ts(default=None)
+    max_uses: int | None = None
+    uses: int = 0
+    created_at: datetime = _ts(default_factory=utcnow)

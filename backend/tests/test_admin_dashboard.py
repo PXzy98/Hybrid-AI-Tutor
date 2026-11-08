@@ -22,7 +22,7 @@ def dash(make_client, tmp_path):
     """`dash(overrides)`: the app with an instructor (logged in) and a student account."""
     with ExitStack() as stack:
         def _make(overrides: dict | None = None) -> Api:
-            cfg = {"content": {"serve_unreviewed": True},
+            cfg = {"content": {"seed_status": "active"},
                    "rag": {"materials_dir": str(tmp_path / "materials")}, **(overrides or {})}
             api = Api(stack.enter_context(make_client(cfg)))
             api.make_student("alice")
@@ -120,7 +120,7 @@ def test_history_is_recorded_and_survives_a_restart(dash, make_client):
     put_config(api, routing_threshold=0.75)  # no change: no new history row
     history = config(api)["history"]
     assert len(history) == 1 and history[0]["changed"] == ["routing_threshold"]
-    with make_client({"content": {"serve_unreviewed": True}}) as client:  # same database, new process
+    with make_client({"content": {"seed_status": "active"}}) as client:  # same database, new process
         assert client.app.state.services.settings.routing.threshold == 0.75
 
 
@@ -277,8 +277,9 @@ def test_upload_is_stored_and_listed(dash, tmp_path):
     status = api.client.get(f"{ADMIN}/content").json()
     hbp = next(t for t in status["topics"] if t["topic"] == HBP)
     assert [m["name"] for m in hbp["materials"]] == ["notes.md"]
-    assert (hbp["kcs"], hbp["items"], hbp["items_reviewed"], hbp["misconceptions"]) == (6, 24, 0, 12)
-    assert status["serve_unreviewed"] is True
+    # items_reviewed (API v1 name) counts published items: the demo seed here is imported as active
+    assert (hbp["kcs"], hbp["items"], hbp["items_reviewed"], hbp["misconceptions"]) == (6, 24, 24, 12)
+    assert status["serve_unreviewed"] is False  # API v1 field, always false since Z4
 
 
 def test_upload_rules(dash, tmp_path):

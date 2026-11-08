@@ -11,7 +11,7 @@ class AttachCheckStep(BaseStep):
     KC: the first KC of the question (understand step, Step 11), else the recommended next KC, else the
     topic's KC with the lowest mastery (the first KC when unpersonalized).
     Item: see learner.checks.choose_item (prefers items that target the student's open misconceptions).
-    Only items the content store may serve are used (content.serve_unreviewed).
+    Only active (published) items are used.
     """
 
     name = "attach_check"

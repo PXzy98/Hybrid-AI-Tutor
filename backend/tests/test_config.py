@@ -34,10 +34,10 @@ def test_env_overrides_yaml(use_config, monkeypatch):
 
 def test_nested_env_overrides_one_yaml_value(use_config, monkeypatch):
     monkeypatch.setenv("PRIVACY__SPACY_MODEL", "en_core_web_md")
-    monkeypatch.setenv("CONTENT__SERVE_UNREVIEWED", "true")
+    monkeypatch.setenv("CONTENT__SEED_STATUS", "active")
     monkeypatch.setenv("ROUTING__STUB_SCORE", "0.9")
     s = use_config()
-    assert s.privacy.spacy_model == "en_core_web_md" and s.content.serve_unreviewed is True
+    assert s.privacy.spacy_model == "en_core_web_md" and s.content.seed_status == "active"
     assert s.routing.stub_score == 0.9
     assert s.privacy.allow_list == ["Abbas"] and s.routing.threshold == 0.6  # siblings keep their yaml values
 
@@ -67,3 +67,12 @@ def test_missing_config_file_is_a_clear_error(monkeypatch, tmp_path):
     monkeypatch.setenv("APP_CONFIG", str(tmp_path / "nope.yaml"))
     with pytest.raises(FileNotFoundError, match="config file not found"):
         get_settings()
+
+
+def test_the_removed_serve_unreviewed_setting_explains_what_to_do(use_config, monkeypatch):
+    import pytest
+    from pydantic import ValidationError
+
+    monkeypatch.setenv("CONTENT__SERVE_UNREVIEWED", "true")
+    with pytest.raises(ValidationError, match="CONTENT__SEED_STATUS=active"):
+        use_config()
