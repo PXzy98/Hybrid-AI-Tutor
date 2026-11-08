@@ -8,7 +8,7 @@
 """
 from collections.abc import Sequence
 
-from sqlalchemy import Engine
+from sqlalchemy import Engine, text
 from sqlmodel import Session, select
 
 from app.learner.content import KC as ContentKc
@@ -22,6 +22,8 @@ from app.learner.content import (
     validate,
 )
 from app.storage.models import CatalogMisconception, CheckItem, Course, Kc, KcPrerequisite, Module
+
+_SEED_LOCK = 590_202  # pg_advisory_xact_lock key for creating the demo course
 
 DEMO_COURSE = {"code": "MED 0000", "title": "General Medical Knowledge", "course_type": "medical_science",
                "visibility_mode": "A"}
@@ -100,6 +102,13 @@ def load_course_content(engine: Engine, course_id: int) -> ContentStore:
                         .order_by(CheckItem.id)).all()
         mcs = db.exec(select(CatalogMisconception).where(CatalogMisconception.course_id == course_id)
                       .order_by(CatalogMisconception.id)).all()
+    loaded_mcs = {m.code for m in mcs if m.kc_id in codes}  # misconceptions of retired KCs are left out
+
+    def options(raw: dict) -> dict:
+        """Drop tags that point at a misconception of a retired KC, so the remaining content stays valid."""
+        return {key: {**o, "misconception": o.get("misconception") if o.get("misconception") in loaded_mcs
+                      else None} for key, o in raw.items()}
+
     topics = []
     for module in modules:
         module_kcs = [k for k in kcs if k.module_id == module.id]
@@ -108,7 +117,7 @@ def load_course_content(engine: Engine, course_id: int) -> ContentStore:
             topic=module.code, name=module.title, guideline=module.guideline,
             kcs=[ContentKc(id=k.code, name=k.name, definition=k.definition, difficulty=k.difficulty,
                            prerequisites=sorted(prereqs.get(k.id, []))) for k in module_kcs],
-            items=[Item(id=i.code, kc=codes[i.kc_id], level=i.level, stem=i.stem, options=i.options,
+            items=[Item(id=i.code, kc=codes[i.kc_id], level=i.level, stem=i.stem, options=options(i.options),
                         answer=i.answer, explanation=i.explanation, status=i.status)
                    for i in items if i.kc_id in ids],
             misconceptions=[Misconception(id=m.code, kc=codes[m.kc_id], statement=m.statement,
@@ -121,6 +130,8 @@ def load_course_content(engine: Engine, course_id: int) -> ContentStore:
 def ensure_demo_course(engine: Engine, topics: Sequence[TopicContent], status: ContentStatus | None) -> int:
     """The demo course's ID; created and filled from the YAML seed when the catalog has no course yet."""
     with Session(engine) as db:
+        # Parallel API workers on a new database: one creates the course, the others wait and then find it.
+        db.exec(text("SELECT pg_advisory_xact_lock(:k)").bindparams(k=_SEED_LOCK))
         existing = db.exec(select(Course).where(Course.code == DEMO_COURSE["code"])).first()
         if existing is not None:
             return existing.id

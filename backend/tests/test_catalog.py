@@ -81,3 +81,38 @@ def test_import_refuses_a_course_with_content_and_deleting_a_course_removes_its_
         db.commit()
         for table in (Module, Kc, CheckItem, CatalogMisconception):
             assert db.exec(select(table).where(table.course_id == other.id)).all() == []
+
+
+def test_retiring_a_kc_keeps_the_rest_of_the_course_loadable(use_config):
+    services = build_services(use_config())
+    with Session(services.engine) as db:
+        hbp1 = db.exec(select(Kc).where(Kc.code == "HBP.1")).one()
+        hbp1.status = "retired"
+        db.add(hbp1)
+        db.commit()
+    store = load_course_content(services.engine, services.content.course_id)
+    assert store.kc("HBP.1") is None and store.misconception("HBP.MC3") is None
+    tags = {o.misconception for i in store.items("HBP.2", include_unpublished=True)
+            for o in i.options.values()}
+    assert "HBP.MC3" not in tags  # the retired KC's misconception is no longer tagged
+    build_services(use_config())  # and the app still starts
+
+
+def test_parallel_first_starts_create_the_demo_course_once(use_config):
+    from concurrent.futures import ThreadPoolExecutor
+
+    from app.catalog import ensure_demo_course
+    from app.storage.db import make_engine
+
+    settings = use_config()
+    engine = make_engine(settings.database_url)
+    from app.storage.db import init_db
+
+    init_db(engine)
+    topics = load_yaml_topics(CONTENT)
+    with ThreadPoolExecutor(4) as pool:
+        ids = list(pool.map(lambda _: ensure_demo_course(engine, topics, None), range(4)))
+    assert len(set(ids)) == 1
+    with Session(engine) as db:
+        assert len(db.exec(select(Course)).all()) == 1
+    engine.dispose()
