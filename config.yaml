@@ -93,10 +93,15 @@ limits:
     invite_code_length: 10
     invite_expiry_days: 120      # a course invitation code expires after this; rotate it to get a new one
     join_attempts_per_hour: 20   # POST /api/v2/auth/join, per client address
+    login_failures_per_hour: 30  # failed logins per client address (v1 and v2); then 429 for the hour
     max_roster_rows: 2000
     max_roster_bytes: 1000000
   content:
     max_import_bytes: 5000000    # content ZIP (YAML seed layout) for POST .../content/import
+  usage:                         # per student and course; course settings can only lower them
+    questions_per_minute: 6
+    questions_per_day: 200
+    cloud_calls_per_day: 50
 
 content:
   dir: content/topics

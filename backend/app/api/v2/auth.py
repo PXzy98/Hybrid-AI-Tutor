@@ -1,11 +1,10 @@
 """Auth and account (api-v2.md 3.1; task Z9): login by username or e-mail, the caller's memberships, and
 joining a course with its invitation code (course-structure.md 3.3).
 
-CSRF tokens (`GET /auth/csrf`, header `X-CSRF-Token`) come with task Z10.
+CSRF (task Z10): `GET /auth/csrf` gives the token for `X-CSRF-Token` (app.auth.csrf); `login` and `join`
+return the new session's token in the `X-CSRF-Token` response header. Failed logins and join attempts are
+limited per client address; `logout-all` ends every session of the account.
 """
-import threading
-import time
-from collections import deque
 from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Request, Response, status
@@ -14,6 +13,8 @@ from sqlmodel import Session, col, select
 
 from app.api.deps import ServicesDep
 from app.api.v2.errors import ErrorCode, error
+from app.auth import csrf, ratelimit
+from app.auth import sessions as auth_sessions
 from app.auth.deps import CurrentUserDep
 from app.auth.service import AccountLocked, InvalidCredentials, PasswordPolicyError
 from app.storage.models import Account, Course, CourseMember
@@ -79,6 +80,10 @@ def _me(services, account_id: int) -> MeOut:
                      must_change_password=account.must_change_password, memberships=memberships)
 
 
+class CsrfOut(BaseModel):
+    csrf_token: str  # send it as the X-CSRF-Token header of every POST, PUT, PATCH and DELETE
+
+
 def _login(services, response: Response, username: str, password: str):
     cfg = services.settings.auth
     try:
@@ -90,12 +95,36 @@ def _login(services, response: Response, username: str, password: str):
                             "too many failed attempts; try again later") from None
     response.set_cookie(cfg.cookie_name, token, max_age=int(cfg.session_ttl_hours * 3600), httponly=True,
                         samesite="lax", secure=cfg.cookie_secure, path="/")
+    response.headers[csrf.HEADER] = csrf.session_token(token)  # the new session's CSRF token
+    response.delete_cookie(csrf.ANON_COOKIE, path="/")
     return account
 
 
-@router.post("/login", response_model=MeOut, operation_id="auth_login")
-def login(body: LoginIn, response: Response, services: ServicesDep):
-    account = _login(services, response, body.username, body.password)
+@router.get("/csrf", response_model=CsrfOut, operation_id="auth_csrf")
+def get_csrf(request: Request, response: Response, services: ServicesDep):
+    """Public. With a session: its token. Without: a short-lived anonymous token (also set as a cookie)."""
+    token = csrf.expected_token(request, services.settings.auth.cookie_name)
+    if token is None:
+        token = csrf.new_anonymous_token()
+        response.set_cookie(csrf.ANON_COOKIE, token, max_age=csrf.ANON_MAX_AGE, httponly=False,
+                            samesite="lax", secure=services.settings.auth.cookie_secure, path="/")
+    return CsrfOut(csrf_token=token)
+
+
+@router.post("/login", response_model=MeOut, operation_id="auth_login",
+             responses={429: {"description": "too many failed attempts"}})
+def login(body: LoginIn, request: Request, response: Response, services: ServicesDep):
+    window, client = ratelimit.login_failures(request, services), ratelimit.client_address(request)
+    wait = window.wait(client)
+    if wait:
+        return error(429, ErrorCode.usage_limit, "Too many failed logins. Try again later.",
+                     retry_after_seconds=wait)
+    try:
+        account = _login(services, response, body.username, body.password)
+    except HTTPException as e:
+        if e.status_code == status.HTTP_401_UNAUTHORIZED:
+            window.add(client)
+        raise
     return _me(services, account.id)
 
 
@@ -104,6 +133,16 @@ def logout(request: Request, response: Response, services: ServicesDep):
     cfg = services.settings.auth
     services.accounts.logout(request.cookies.get(cfg.cookie_name))
     response.delete_cookie(cfg.cookie_name, path="/")
+    response.delete_cookie(csrf.ANON_COOKIE, path="/")
+
+
+@router.post("/logout-all", status_code=status.HTTP_204_NO_CONTENT, operation_id="auth_logout_all")
+def logout_all(user: CurrentUserDep, response: Response, services: ServicesDep):
+    """End every session of the account, on every device (this one included)."""
+    with Session(services.engine) as db:
+        auth_sessions.revoke_all(db, user.account_id)
+        db.commit()
+    response.delete_cookie(services.settings.auth.cookie_name, path="/")
 
 
 @router.get("/me", response_model=MeOut, operation_id="auth_me")
@@ -124,40 +163,6 @@ def change_password(body: ChangePasswordIn, user: CurrentUserDep, services: Serv
     return _me(services, user.account_id)
 
 
-class AttemptWindow:
-    """Attempts per client address in the last hour, in this process (activation is rate-limited,
-    course-structure.md 3.3). Behind the proxy the address comes from X-Forwarded-For (uvicorn
-    --proxy-headers)."""
-
-    def __init__(self, per_hour: int) -> None:
-        self.per_hour = per_hour
-        self._seen: dict[str, deque] = {}
-        self._lock = threading.Lock()
-
-    def allow(self, key: str) -> int:
-        """0 if allowed (and counted), else the seconds until the next attempt is allowed."""
-        now = time.monotonic()
-        with self._lock:
-            q = self._seen.setdefault(key, deque())
-            while q and q[0] <= now - 3600:
-                q.popleft()
-            if len(q) >= self.per_hour:
-                return max(1, int(q[0] + 3600 - now) + 1)
-            q.append(now)
-            if len(self._seen) > 10_000:  # forget idle addresses
-                for k in [k for k, v in self._seen.items() if not v]:
-                    del self._seen[k]
-            return 0
-
-
-def _join_window(request: Request, services) -> AttemptWindow:
-    window = getattr(request.app.state, "join_attempts", None)
-    if window is None:
-        window = request.app.state.join_attempts = AttemptWindow(
-            services.settings.limits.accounts.join_attempts_per_hour)
-    return window
-
-
 @router.post("/join", response_model=JoinOut, operation_id="auth_join",
              responses={400: {"description": "invalid code, or the e-mail is not on the course list"},
                         429: {"description": "too many attempts"}})
@@ -166,8 +171,9 @@ def join(body: JoinIn, request: Request, response: Response, services: ServicesD
     membership with the account's e-mail becomes active. Not logged in: a new account is created for an
     e-mail on the course list, every pending membership of that e-mail becomes active, and the new account
     is logged in."""
-    client = request.client.host if request.client else "unknown"
-    wait = _join_window(request, services).allow(client)
+    joins = ratelimit.window(request.app.state, "join_attempts",
+                             services.settings.limits.accounts.join_attempts_per_hour)
+    wait = joins.allow(ratelimit.client_address(request))
     if wait:
         return error(429, ErrorCode.usage_limit, "Too many attempts. Try again later.",
                      retry_after_seconds=wait)

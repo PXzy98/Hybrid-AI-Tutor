@@ -10,7 +10,7 @@ from sqlmodel import Session
 
 from app.catalog import course_topics, load_course_content
 from app.storage.models import CourseMember
-from tests.conftest import PASSWORD
+from tests.conftest import PASSWORD, csrf_client
 
 V2 = "/api/v2"
 OPTIONS = {"A": {"text": "Right"}, "B": {"text": "Wrong one", "misconception": "BP.MC1"},
@@ -18,7 +18,7 @@ OPTIONS = {"A": {"text": "Right"}, "B": {"text": "Wrong one", "misconception": "
 
 
 def _login(app, username: str) -> TestClient:
-    c = TestClient(app)
+    c = csrf_client(app)
     assert c.post(f"{V2}/auth/login", json={"username": username, "password": PASSWORD}).status_code == 200
     return c
 
@@ -60,7 +60,7 @@ def _build(prof: TestClient, url: str) -> dict:
 def test_content_endpoints_belong_to_the_course_instructors(world):
     built = _build(world["prof"], world["url"])
     url, app = world["url"], world["app"]
-    other, alice, anon = _login(app, "other"), _login(app, "alice"), TestClient(app)
+    other, alice, anon = _login(app, "other"), _login(app, "alice"), csrf_client(app)
     paths = ["kcs", f"kcs/{built['a']['id']}", "check-items", "misconceptions", "content/export"]
     for path in paths:
         assert other.get(f"{url}/{path}").status_code == 404, path
@@ -208,12 +208,12 @@ def test_every_content_endpoint_refuses_other_instructors_students_and_anonymous
         ("get", "content/export", {}),
     ]
     clients = {"other instructor": (_login(app, "other"), 404), "student": (_login(app, "alice"), 404),
-               "logged out": (TestClient(app), 401)}
+               "logged out": (csrf_client(app), 401)}
     for who, (client, expected) in clients.items():
         for method, path, kwargs in calls:
             r = getattr(client, method)(f"{url}/{path}", **kwargs)
             assert r.status_code == expected, (who, method, path, r.status_code)
-    assert TestClient(app).get(f"{url}/modules").status_code == 401
+    assert csrf_client(app).get(f"{url}/modules").status_code == 401
     assert world["prof"].get(f"{url}/check-items/{item}").json()["status"] == "draft"  # nothing changed
 
 
