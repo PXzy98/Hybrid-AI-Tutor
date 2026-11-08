@@ -1516,9 +1516,10 @@ export interface components {
             title: string;
             /**
              * Course Type
-             * @enum {string}
+             * @example medical_science
+             * @example ece
              */
-            course_type: "medical_science" | "life_science" | "ece" | "general";
+            course_type: string;
             /**
              * Term Label
              * @default
@@ -1537,9 +1538,10 @@ export interface components {
             term_label: string;
             /**
              * Course Type
-             * @enum {string}
+             * @example medical_science
+             * @example ece
              */
-            course_type: "medical_science" | "life_science" | "ece" | "general";
+            course_type: string;
             /**
              * Visibility Mode
              * @enum {string}
@@ -1577,7 +1579,7 @@ export interface components {
         /** CourseValues */
         CourseValues: {
             /** Course Type */
-            course_type?: ("medical_science" | "life_science" | "ece" | "general") | null;
+            course_type?: string | null;
             /** Visibility Mode */
             visibility_mode?: ("A" | "B") | null;
             /** Local Only */
@@ -2858,7 +2860,7 @@ export interface components {
             /** Local Llm Model */
             local_llm_model?: string | null;
             /** Enabled Course Types */
-            enabled_course_types?: ("medical_science" | "life_science" | "ece" | "general")[] | null;
+            enabled_course_types?: string[] | null;
             /** Default Local Endpoint Id */
             default_local_endpoint_id?: number | null;
             /** Default Cloud Endpoint Id */
