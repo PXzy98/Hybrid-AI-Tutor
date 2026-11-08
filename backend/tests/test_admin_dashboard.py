@@ -121,7 +121,7 @@ def test_history_is_recorded_and_survives_a_restart(dash, make_client):
     history = config(api)["history"]
     assert len(history) == 1 and history[0]["changed"] == ["routing_threshold"]
     with make_client({"content": {"seed_status": "active"}}) as client:  # same database, new process
-        assert client.app.state.services.settings.routing.threshold == 0.75
+        assert client.app.state.services.effective().routing_threshold == 0.75  # a course setting
 
 
 # ------------------------------------------------------------------------------ local model server (G1-94)

@@ -176,6 +176,9 @@ class ConfigHistory(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     changed_at: datetime = _ts(default_factory=utcnow)
     account_id: int | None = None  # the instructor (no username here: identity stays in `account`)
+    scope: str = "system"  # system | course (task Z5); v3 rows are "system" in the v1 dashboard format
+    course_id: int | None = None
+    version: int | None = None  # the settings version this change produced
     values: dict = Field(default_factory=dict, sa_column=Column(JSON))  # the full editable subset after
     previous: dict = Field(default_factory=dict, sa_column=Column(JSON))  # ... and before the change
 
@@ -325,3 +328,72 @@ class CourseInvite(SQLModel, table=True):
     max_uses: int | None = None
     uses: int = 0
     created_at: datetime = _ts(default_factory=utcnow)
+
+
+# ------------------------------------------------------------------- settings layers (task Z5, design §6)
+# Every field is nullable: null means "use the next layer" (course -> system -> config.yaml).
+class _SettingsMeta(SQLModel):
+    version: int = 1
+    updated_at: datetime = _ts(default_factory=utcnow)
+    updated_by: int | None = None  # account id
+    apply_state: str = "applied"  # applied | applying | failed (design §6.5)
+    apply_target_version: int | None = None
+    apply_started_at: datetime | None = _ts(default=None)
+    apply_error: str | None = None
+
+
+class SystemSettings(_SettingsMeta, table=True):
+    __tablename__ = "system_settings"
+
+    id: int = Field(default=1, primary_key=True)  # exactly one row
+    checkers: list | None = Field(default=None, sa_column=Column(JSON))  # optional ones; required are added
+    weak_evidence: bool | None = None
+    level_basic_below: float | None = None
+    level_advanced_above: float | None = None
+    level_hysteresis: float | None = None
+    knowledge_model: str | None = None  # component
+    default_routing_method: str | None = None  # component
+    local_llm_url: str | None = None  # component; replaced by model endpoints in Z6
+    local_llm_model: str | None = None  # component
+    enabled_course_types: list | None = Field(default=None, sa_column=Column(JSON))
+    previous_values: dict | None = Field(default=None, sa_column=Column(JSON))  # for a rollback (§6.5)
+
+
+class CourseSettings(_SettingsMeta, table=True):
+    __tablename__ = "course_settings"
+
+    course_id: int = Field(sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), primary_key=True))
+    course_type: str | None = None
+    visibility_mode: str | None = None
+    local_only: bool | None = None
+    routing_preference: str | None = None
+    routing_threshold: float | None = None
+    show_routing_progress: bool | None = None
+    usage_questions_per_minute: int | None = None
+    usage_questions_per_day: int | None = None
+    usage_cloud_calls_per_day: int | None = None
+
+
+class ProcessStatus(SQLModel, table=True):
+    """Heartbeat of every api/worker process (design §6.5): which component version it runs."""
+
+    __tablename__ = "process_status"
+
+    process_id: str = Field(primary_key=True)
+    kind: str = "api"
+    last_seen: datetime = _ts(default_factory=utcnow)
+    component_version: int = 0
+    error: str | None = None
+
+
+class AuditLog(SQLModel, table=True):
+    """Who did what to which object; IDs and field names only, never student text."""
+
+    __tablename__ = "audit_log"
+
+    id: int | None = Field(default=None, primary_key=True)
+    created_at: datetime = _ts(default_factory=utcnow)
+    account_id: int | None = Field(default=None, index=True)
+    action: str  # e.g. settings.system.update, settings.course.restore
+    target: str  # e.g. "system", "course:7"
+    details: dict = Field(default_factory=dict, sa_column=Column(JSON))

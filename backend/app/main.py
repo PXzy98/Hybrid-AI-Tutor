@@ -5,12 +5,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.admin.runtime_config import restore_latest
 from app.api.v1 import api_router
 from app.api.v2 import api_router_v2
 from app.api.v2.errors import usage_limit_handler
 from app.core.services import build_services
-from app.pipeline.runner import build_runner
 from app.platform.usage import UsageLimitExceeded
 
 DEV_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"]  # Vite dev server
@@ -21,11 +19,11 @@ async def lifespan(app: FastAPI):
     services = build_services()
     services.accounts.bootstrap_instructor()
     app.state.services = services
-    app.state.runner = build_runner(services)
-    if restore_latest(app):  # the newest dashboard change survives a restart
-        logging.getLogger("app").info("runtime config restored from config_history")
-    logging.getLogger("app").info("pipeline: %s", " -> ".join(app.state.runner.step_names))
+    services.component_manager.sync()  # heartbeat; finishes a change that was applying when it started
+    services.component_manager.start()  # live component switch (course-structure.md section 6.5)
+    logging.getLogger("app").info("pipeline: %s", " -> ".join(services.components.runner.step_names))
     yield
+    services.component_manager.stop()
     services.engine.dispose()
 
 

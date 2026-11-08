@@ -3,6 +3,7 @@ import asyncio
 from app.core.registry import steps
 from app.core.schemas import RequestContext
 from app.pipeline.base import BaseStep
+from app.pipeline.settings_view import routing_threshold
 from app.pipeline.steps.analyze_route import route_input
 
 
@@ -18,7 +19,7 @@ class RetrieveStep(BaseStep):
             raise RuntimeError("retrieve needs the privacy filter result")
         cfg = self.services.settings
         if cfg.routing.impl == "semantic" and ctx.semantic_analysis is not None:
-            if not self.services.router.capable(ctx.semantic_analysis, cfg.routing.threshold):
+            if not self.services.router.capable(ctx.semantic_analysis, routing_threshold(ctx, self.services)):
                 ctx.retrieval_status = "skipped"
                 await ctx.report("retrieval", "skipped", "Capability gate selected Cloud before retrieval.")
                 return ctx

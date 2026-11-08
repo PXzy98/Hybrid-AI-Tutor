@@ -5,11 +5,14 @@ from sqlalchemy import Engine
 
 from app.auth.service import AccountService
 from app.core.config import Settings, get_settings
+from app.core.schemas import EffectiveSettings
 from app.learner.content import ContentStore
-from app.learner.facade import LearnerModel, build_learner_model
+from app.learner.facade import LearnerModel
 from app.llm.base import LLMClient
 from app.llm.cloud_guard import CloudClient
 from app.llm.factory import build_llm_clients
+from app.platform.components import ComponentManager, Components
+from app.platform.settings import SettingsService, configure, migrate_v1_history
 from app.rag import Retriever, load_retriever
 from app.routing import RouteScorer, load_router
 from app.sessions import SessionStore, load_session_store
@@ -18,30 +21,52 @@ from app.storage.db import init_db, make_engine
 
 @dataclass
 class Services:
-    settings: Settings
+    """Deploy-time objects plus the current component set (settings, learner model, local model clients,
+    pipeline runner), which `app.platform.components` switches live when the system settings change."""
+
     engine: Engine
     router: RouteScorer
     retriever: Retriever
     sessions: SessionStore
     accounts: AccountService
-    local_llm: LLMClient
     cloud_llm: CloudClient
-    understand_llm: LLMClient
     content: ContentStore
-    learner: LearnerModel
+    settings_service: SettingsService
+    components: Components | None = None
+    component_manager: ComponentManager | None = None
 
-    def reconfigure(self, settings: Settings) -> None:
-        """Runtime config change (admin dashboard): new settings, a learner model built from them, and new
-        local LLM clients when the local model server or model changed.
-        The pipeline is rebuilt by the caller (app.admin.runtime_config.apply)."""
-        before = self.settings
-        self.settings = settings
-        self.router.cfg = settings.routing
-        if (before.ollama_url, before.llm.local, before.llm.understand) != (
-                settings.ollama_url, settings.llm.local, settings.llm.understand):
-            # local model server or model changed (G1-94): new local clients; the cloud client is kept
-            self.local_llm, _, self.understand_llm = build_llm_clients(settings)
-        self.learner = build_learner_model(settings, self.engine, self.content)
+    # the current component set; one reference, swapped as a whole
+    @property
+    def settings(self) -> Settings:
+        return self.components.settings
+
+    @settings.setter
+    def settings(self, settings: Settings) -> None:  # evaluation harnesses swap the settings of the set
+        self.components.settings = settings
+
+    @property
+    def learner(self) -> LearnerModel:
+        return self.components.learner
+
+    @property
+    def local_llm(self) -> LLMClient:
+        return self.components.local_llm
+
+    @local_llm.setter
+    def local_llm(self, client: LLMClient) -> None:  # tests and evaluation harnesses use fakes
+        self.components.local_llm = client
+
+    @property
+    def understand_llm(self) -> LLMClient:
+        return self.components.understand_llm
+
+    @understand_llm.setter
+    def understand_llm(self, client: LLMClient) -> None:
+        self.components.understand_llm = client
+
+    def effective(self, course_id: int | None = None) -> EffectiveSettings:
+        """The request's settings snapshot (the demo course until requests carry a course)."""
+        return self.settings_service.effective(course_id or self.content.course_id)
 
 
 def load_demo_content(engine, settings: Settings) -> ContentStore:
@@ -59,18 +84,21 @@ def build_services(settings: Settings | None = None) -> Services:
     password = settings.pgpassword.get_secret_value() if settings.pgpassword else None
     engine = make_engine(settings.database_url, pooled=settings.database_pooled, password=password)
     init_db(engine)
-    local_llm, cloud_llm, understand_llm = build_llm_clients(settings)
+    _, cloud_llm, _ = build_llm_clients(settings)
     content = load_demo_content(engine, settings)  # validated here
-    return Services(
-        settings=settings,
+    settings_service = SettingsService(engine, settings)
+    configure(settings_service)
+    migrate_v1_history(settings_service, content.course_id)
+    services = Services(
         engine=engine,
         router=load_router(settings.routing.impl),
         retriever=load_retriever(settings.rag.impl),
         sessions=load_session_store(settings.sessions.store, engine),
         accounts=AccountService(engine, settings),
-        local_llm=local_llm,
         cloud_llm=cloud_llm,
-        understand_llm=understand_llm,
         content=content,
-        learner=build_learner_model(settings, engine, content),
+        settings_service=settings_service,
     )
+    services.component_manager = ComponentManager(services, settings)
+    services.components = services.component_manager.initial()
+    return services

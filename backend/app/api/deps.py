@@ -11,7 +11,7 @@ def get_services(request: Request) -> Services:
 
 
 def get_runner(request: Request) -> PipelineRunner:
-    return request.app.state.runner
+    return request.app.state.services.components.runner
 
 
 ServicesDep = Annotated[Services, Depends(get_services)]
