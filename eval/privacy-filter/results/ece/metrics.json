@@ -1,0 +1,53 @@
+{
+  "general": {
+    "positive": 20,
+    "negative": 25,
+    "leak_rate": 0.45,
+    "over_redaction": 0.0,
+    "keep_terms_lost": 1,
+    "recall_by_type": {
+      "EMAIL_ADDRESS": 1.0,
+      "INTERNAL_ADDRESS": 0.0,
+      "PERSON": 1.0,
+      "REPO_URL": 0.0,
+      "SECRET": 1.0,
+      "STUDENT_ID": 1.0
+    },
+    "misses": [
+      "ECE010 INTERNAL_ADDRESS",
+      "ECE010 INTERNAL_ADDRESS",
+      "ECE011 INTERNAL_ADDRESS",
+      "ECE011 INTERNAL_ADDRESS",
+      "ECE012 INTERNAL_ADDRESS",
+      "ECE013 INTERNAL_ADDRESS",
+      "ECE014 INTERNAL_ADDRESS",
+      "ECE015 REPO_URL",
+      "ECE016 REPO_URL",
+      "ECE017 REPO_URL",
+      "ECE020 INTERNAL_ADDRESS",
+      "ECE020 REPO_URL"
+    ],
+    "false_findings": [
+      "ECE013 keep \"Docker\""
+    ]
+  },
+  "ece": {
+    "positive": 20,
+    "negative": 25,
+    "leak_rate": 0.0,
+    "over_redaction": 0.0,
+    "keep_terms_lost": 1,
+    "recall_by_type": {
+      "EMAIL_ADDRESS": 1.0,
+      "INTERNAL_ADDRESS": 1.0,
+      "PERSON": 1.0,
+      "REPO_URL": 1.0,
+      "SECRET": 1.0,
+      "STUDENT_ID": 1.0
+    },
+    "misses": [],
+    "false_findings": [
+      "ECE013 keep \"Docker\""
+    ]
+  }
+}

@@ -118,10 +118,11 @@ def test_gateway_streams_tokens():
     assert asyncio.run(collect()).split() == ["one", "two"]
 
 
-def test_privacy_stand_ins_are_safe():
+def test_privacy_interfaces_are_safe():
     ctx = RequestContext(request_id="r", request=AskRequest(student_id="s", topic="t", question="I am Ann"))
     assert search_query(ctx) is None  # no query, so no web search
-    assert scan_document("Ann Lee 300123456", privacy_profile("general")).scanned is False  # never "clean"
+    scan = scan_document("Ann Lee 300123456", privacy_profile("general"))  # Z11: really scanned
+    assert scan.scanned is True and "STUDENT_ID" in scan.blocking
     medical = privacy_profile("medical_science")
     assert "medical_safety" in medical.checkers and medical.medical_disclaimer
     assert privacy_profile("ece").checkers == ()
