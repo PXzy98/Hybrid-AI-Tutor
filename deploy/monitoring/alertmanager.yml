@@ -1,0 +1,8 @@
+# Alertmanager (task Z13). No notification channel is chosen yet: alerts are visible in Alertmanager and
+# Prometheus only. To be notified, add a receiver (e-mail, Teams, ...) here; see deploy/README.md.
+route:
+  receiver: course-team
+  group_by: [alertname]
+  repeat_interval: 4h
+receivers:
+  - name: course-team

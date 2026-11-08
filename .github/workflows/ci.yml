@@ -99,6 +99,13 @@ jobs:
           OLLAMA_URL=http://127.0.0.1:9
           POSTGRES_PASSWORD=ci-only-db-password
           ENV
+      - name: Monitoring files (task Z13; promtool, amtool, compose profile)
+        run: |
+          docker compose --profile monitoring config -q
+          docker run --rm -v "$PWD/deploy/monitoring:/etc/prometheus:ro" --entrypoint promtool \
+            prom/prometheus:v2.55.1 check config /etc/prometheus/prometheus.yml
+          docker run --rm -v "$PWD/deploy/monitoring:/m:ro" --entrypoint amtool \
+            prom/alertmanager:v0.27.0 check-config /m/alertmanager.yml
       - name: Build
         run: docker compose build
       - name: Image scan (Trivy; HIGH and CRITICAL with a fix, report only, task Z13)

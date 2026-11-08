@@ -100,7 +100,7 @@ overwritten by a deploy: a new `config.yaml` default applies only where nothing 
 | A settings change being applied | `GET /api/v2/admin/settings/apply-status`: state, target version, live processes and their versions. A change not applied everywhere within `limits.settings.apply_timeout_seconds` is rolled back by itself |
 | Logs | `docker compose logs api worker`. They never contain question text (`privacy.log_raw_text` cannot be switched on) |
 
-Grafana dashboards, alerts and vLLM metrics are not set up yet (section 9).
+Prometheus, alert rules and Grafana are ready to start (`--profile monitoring`, deploy/README.md); vLLM is scraped once its address is in `deploy/monitoring/targets/vllm.yml`. No alert receiver is chosen yet.
 
 ## 7. Routine tasks and incidents
 
@@ -130,5 +130,5 @@ Grafana dashboards, alerts and vLLM metrics are not set up yet (section 9).
 | End of term and its export | student data of a finished course cannot be exported and deleted through the API yet; do not archive by deleting rows by hand | Z9 (needs per-course learner data, S) |
 | Usage limits enforced on questions | counters and limits exist; the ask endpoints do not call them yet | v2 ask |
 | Frontend for API v2 | the current frontend uses API v1 and the demo course; course management is API-only for now | T6, T7 |
-| Grafana, alerts, vLLM metrics, deployment on the test host | monitoring is the `/metrics` endpoint and the health checks | Z13 part 2 |
+| Deployment on the test host; an alert receiver; the vLLM address for scraping | the monitoring stack is ready but not started anywhere yet | Z13 part 2 |
 | Measured capacity on the real vLLM server | sizing is not confirmed; `eval/load-test/run.py` is ready | Z6 load test |
