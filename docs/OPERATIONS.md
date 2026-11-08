@@ -2,7 +2,7 @@
 
 For whoever deploys and runs the tutor. It links to the detailed documents instead of repeating them:
 [deploy/README.md](../deploy/README.md) (containers, proxy, metrics, CI scans), [DATABASE.md](DATABASE.md),
-[MODEL_CONNECTIONS.md](MODEL_CONNECTIONS.md), [PRIVACY_PROFILES.md](PRIVACY_PROFILES.md). Status:
+[MODEL_CONNECTIONS.md](MODEL_CONNECTIONS.md), [PRIVACY_PROFILES.md](PRIVACY_PROFILES.md); the state of the work and the open tasks: [HANDOVER.md](HANDOVER.md). Status:
 2026-11-08; the last section lists what is not built yet.
 
 ## 1. What runs
