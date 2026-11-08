@@ -309,7 +309,7 @@ class CourseMember(SQLModel, table=True):
                                             index=True))
     account_id: int | None = Field(
         default=None, sa_column=Column(ForeignKey("account.id", ondelete="CASCADE"), index=True))
-    email: str | None = None  # pending invitation by e-mail (lower-case)
+    email: str | None = None  # only while pending (no account yet); cleared when the account is linked
     role: str  # instructor | student
     status: str = "pending"  # pending | active
     hidden_from_instructor: bool = False
@@ -450,5 +450,6 @@ class LoginIdentity(SQLModel, table=True):
     account_id: int = Field(sa_column=Column(ForeignKey("account.id", ondelete="CASCADE"), nullable=False,
                                              index=True))
     provider: str = "password"
-    subject: str  # the username for `password`; the provider's subject ID later
+    # `account:<id>` for `password`; the provider's opaque subject ID later (never identity text)
+    subject: str
     created_at: datetime = _ts(default_factory=utcnow)

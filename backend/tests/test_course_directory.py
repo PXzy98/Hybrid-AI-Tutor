@@ -62,10 +62,11 @@ def test_new_accounts_have_an_email_a_password_identity_and_the_demo_membership(
     with Session(services.engine) as db:
         assert db.get(Account, alice.id).email == "alice@demo.invalid"
         identity = db.exec(select(LoginIdentity).where(LoginIdentity.account_id == alice.id)).one()
-        assert (identity.provider, identity.subject) == ("password", "alice")
+        assert (identity.provider, identity.subject) == ("password", f"account:{alice.id}")  # no username
         member = db.exec(select(CourseMember).where(CourseMember.account_id == alice.id)).one()
         demo = services.content.course_id
         assert (member.course_id, member.role, member.status) == (demo, "student", "active")
+        assert member.email is None  # identity data only in `account` (privacy invariant 6)
 
 
 def test_an_admin_uses_the_instructor_pages_of_api_v1(make_client):

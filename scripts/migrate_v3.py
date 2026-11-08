@@ -43,10 +43,10 @@ COPIED = ["account", "learner_preference", "consent", "learner_kc_state", "learn
 
 V4_ACCOUNT_STEPS = (  # the same steps as Alembic revision 0005 (course-structure.md 3.1 and 11)
     "UPDATE account SET email = username || '@demo.invalid' WHERE email IS NULL",
-    "INSERT INTO login_identity (account_id, provider, subject, created_at) SELECT id, 'password', username, "
-    "now() FROM account WHERE id NOT IN (SELECT account_id FROM login_identity)",
+    "INSERT INTO login_identity (account_id, provider, subject, created_at) SELECT id, 'password', "
+    "'account:' || id, now() FROM account WHERE id NOT IN (SELECT account_id FROM login_identity)",
     "INSERT INTO course_member (course_id, account_id, email, role, status, hidden_from_instructor, "
-    "created_at) SELECT c.id, a.id, a.email, a.role, 'active', false, now() FROM account a "
+    "created_at) SELECT c.id, a.id, NULL, a.role, 'active', false, now() FROM account a "
     "JOIN course c ON c.code = 'MED 0000' WHERE a.role IN ('student', 'instructor') "
     "AND NOT EXISTS (SELECT 1 FROM course_member m WHERE m.course_id = c.id AND m.account_id = a.id)",
     "UPDATE account SET role = 'admin' WHERE id = (SELECT min(id) FROM account WHERE role = 'instructor') "

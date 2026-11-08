@@ -93,10 +93,12 @@ class AccountService:
         )
         db.add(account)
         db.flush()
-        db.add(LoginIdentity(account_id=account.id, provider="password", subject=username))
+        # identity data stays in `account` only (privacy invariant 6): the password identity's subject is the
+        # account ID, and a membership with an account keeps no e-mail (only pending invitations do)
+        db.add(LoginIdentity(account_id=account.id, provider="password", subject=f"account:{account.id}"))
         if self.default_course_id is not None and role in ("student", "instructor"):
-            db.add(CourseMember(course_id=self.default_course_id, account_id=account.id, email=email,
-                                role=role, status="active"))
+            db.add(CourseMember(course_id=self.default_course_id, account_id=account.id, role=role,
+                                status="active"))
         db.commit()
         db.refresh(account)
         return account
