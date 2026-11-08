@@ -33,8 +33,9 @@ profiles. Any change to a profile's recognizers re-runs E6 (rule 5).
 
 ## Document scanning, web search queries, consent text (task Z11)
 
-- `scan_document(text, profile)` runs the profile's analyzer over an uploaded document (in pieces of about
-  20,000 characters, cut at line breaks) and returns entity types and counts, never the matched text.
+- `scan_document(text, profile)` runs the profile's analyzer over an uploaded document (in windows of 20,000
+  characters that overlap by 4,000, so a value at a window edge is also seen whole; overlapping findings of a
+  type count once) and returns entity types and counts, never the matched text.
   `ScanResult.blocking` lists the found types that are student data (`BLOCKING_TYPES`: student IDs, grades,
   ID and health-card numbers, dates of birth, credentials, personal health details). Names, e-mail addresses
   and phone numbers are reported but do not block, because course documents name their staff and authors.

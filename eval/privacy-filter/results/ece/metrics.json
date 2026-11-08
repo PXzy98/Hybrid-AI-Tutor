@@ -1,8 +1,8 @@
 {
   "general": {
-    "positive": 20,
+    "positive": 22,
     "negative": 25,
-    "leak_rate": 0.45,
+    "leak_rate": 0.4090909090909091,
     "over_redaction": 0.0,
     "keep_terms_lost": 1,
     "recall_by_type": {
@@ -32,7 +32,7 @@
     ]
   },
   "ece": {
-    "positive": 20,
+    "positive": 22,
     "negative": 25,
     "leak_rate": 0.0,
     "over_redaction": 0.0,

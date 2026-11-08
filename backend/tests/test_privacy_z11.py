@@ -114,3 +114,23 @@ def test_consent_text_per_course_type():
     from app.api.v1.onboarding import CONSENT_TEXT
 
     assert CONSENT_TEXT == CONSENT_BASE  # API v1 keeps the same reviewed text
+
+
+@pytest.mark.parametrize(("text", "value"), [
+    ('config = {"password": "Lab4Pass!2026", "port": 1883}', "Lab4Pass!2026"),
+    ("settings = {'api_key': 'FAKE-9f8e7d6c5b4a3210'}", "FAKE-9f8e7d6c5b4a3210"),
+    ('{"access_token":"FAKEtoken0000abc"}', "FAKEtoken0000abc"),
+])
+def test_credentials_with_quoted_names_are_found(text, value):
+    assert value in _found("general", text).get("SECRET", [])
+
+
+def test_a_value_on_an_exact_piece_boundary_is_found_once():
+    from app.privacy.profiles import SCAN_CHUNK_CHARS
+
+    text = " " * (SCAN_CHUNK_CHARS - 12) + "student 300418277 done"  # the number straddles the first edge
+    result = scan_document(text, privacy_profile("general"))
+    assert dict((f.type, f.count) for f in result.findings).get("STUDENT_ID") == 1
+    overlap = " " * (SCAN_CHUNK_CHARS - 2000) + "student 300418277 " + " " * 30_000  # inside the overlap
+    assert dict((f.type, f.count) for f in scan_document(overlap, privacy_profile("general")).findings) \
+        .get("STUDENT_ID") == 1

@@ -31,10 +31,12 @@ SECRET_PATTERNS = [
     Pattern("json web token", JWT, 0.9),
     Pattern("private key", PRIVATE_KEY, 0.95),
 ]
-# "password: hunter22", "api_key = 'abc...'", "my token is X1y2z3...": the value only
+# "password: hunter22", "api_key = 'abc...'", "my token is X1y2z3...": the value only. A closing quote may
+# follow the name, as in {"password": "..."} (JSON) and {'api_key': '...'} (Python).
 _SECRET_NAMES = (r"pass(?:word|wd|phrase)?|pwd|api[_ -]?key|secret(?:[_ -]?key)?|access[_ -]?token"
                  r"|auth[_ -]?token|token")
-ASSIGNED_SECRET_RE = re.compile(rf"\b(?:{_SECRET_NAMES})\s*(?:is\s*|[:=]\s*)[\"']?([^\s\"',;]{{6,}})", re.I)
+ASSIGNED_SECRET_RE = re.compile(
+    rf"\b(?:{_SECRET_NAMES})[\"']?\s*(?:is\s*|[:=]\s*)[\"']?([^\s\"',;}}]{{6,}})", re.I)
 # words that follow "token" or "password" in course prose, not values
 _NOT_VALUES = {"expired", "invalid", "required", "missing", "rotation", "hashing", "hashed", "storage",
                "generation", "validation", "strength", "manager", "managers", "policy", "policies", "reset"}

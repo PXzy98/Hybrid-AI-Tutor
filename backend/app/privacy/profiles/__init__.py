@@ -80,6 +80,9 @@ def privacy_profile(course_type: str) -> PrivacyProfile:
 BLOCKING_TYPES = frozenset({"STUDENT_ID", "GRADE", "HEALTH_CARD", "ID_NUMBER", "DATE_OF_BIRTH", "SECRET",
                             "HEALTH_DETAIL"})
 SCAN_CHUNK_CHARS = 20_000  # the analyzer runs on pieces of this size (spaCy and the regexes stay fast)
+# consecutive pieces overlap by this much, so a value at a piece boundary is also seen whole (a 4096-bit
+# private key in PEM form is about 3,300 characters)
+SCAN_OVERLAP_CHARS = 4_000
 
 
 @dataclass(frozen=True)
@@ -109,25 +112,35 @@ def _scanner(profile_name: str, recognizers: tuple[str, ...]):
     return PIIAnalyzer(base.model_copy(update={"recognizers": names}))
 
 
-def _pieces(text: str, size: int = SCAN_CHUNK_CHARS):
-    """Pieces of about `size` characters, cut at a line break where possible (no entity is cut in two)."""
+def _windows(text: str, size: int = SCAN_CHUNK_CHARS, overlap: int = SCAN_OVERLAP_CHARS):
+    """(offset, piece) windows of `size` characters; each starts `size - overlap` after the previous one."""
+    step = max(1, size - overlap)
     start = 0
-    while start < len(text):
-        end = min(len(text), start + size)
-        if end < len(text):
-            cut = text.rfind("\n", start + size // 2, end)
-            end = cut + 1 if cut > 0 else end
-        yield text[start:end]
-        start = end
+    while True:
+        yield start, text[start:start + size]
+        if start + size >= len(text):
+            return
+        start += step
 
 
 def scan_document(text: str, profile: PrivacyProfile) -> ScanResult:
-    """Personal data found in an uploaded document (types and counts only), with the course's profile."""
+    """Personal data found in an uploaded document (types and counts only), with the course's profile.
+
+    Findings are collected over overlapping windows in document positions; overlapping findings of the same
+    type are one finding, so a value cut at a window edge, and also found whole in the next window, counts
+    once."""
     analyzer = _scanner(profile.name, tuple(profile.recognizers))
-    counts: dict[str, int] = {}
-    for piece in _pieces(text or ""):
+    spans: dict[str, list[tuple[int, int]]] = {}
+    for offset, piece in _windows(text or ""):
         for f in analyzer.analyze(piece):
-            counts[f.type] = counts.get(f.type, 0) + 1
+            spans.setdefault(f.type, []).append((offset + f.start, offset + f.end))
+    counts: dict[str, int] = {}
+    for kind, found in spans.items():
+        merged_end = -1
+        for start, end in sorted(found):
+            if start >= merged_end:  # not overlapping the previous finding: a new one
+                counts[kind] = counts.get(kind, 0) + 1
+            merged_end = max(merged_end, end)
     return ScanResult(scanned=True, findings=tuple(ScanFinding(t, n) for t, n in sorted(counts.items())))
 
 
