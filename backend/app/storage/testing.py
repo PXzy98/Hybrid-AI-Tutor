@@ -22,17 +22,18 @@ TEST_URL_ENV = "TEST_DATABASE_URL"
 DOTENV = Path(__file__).resolve().parents[3] / ".env"
 
 
-def load_test_env() -> None:
+def load_test_env(environ=None) -> None:
     """Take TEST_DATABASE_URL and PGPASSWORD from the repository's .env when they are not in the environment
     (the .env that setup_local.py writes); libpq then reads PGPASSWORD for every test connection."""
+    environ = os.environ if environ is None else environ
     if not DOTENV.is_file():
         return
     from dotenv import dotenv_values
 
     values = dotenv_values(DOTENV)
     for name in (TEST_URL_ENV, "PGPASSWORD"):
-        if not os.environ.get(name) and values.get(name):
-            os.environ[name] = values[name]
+        if not environ.get(name) and values.get(name):
+            environ[name] = values[name]
 
 
 def admin_url() -> str:

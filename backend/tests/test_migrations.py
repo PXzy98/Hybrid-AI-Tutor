@@ -49,11 +49,10 @@ def test_test_settings_come_from_dotenv_unless_set_in_the_environment(tmp_path, 
     env.write_text("TEST_DATABASE_URL=postgresql://tutor@127.0.0.1:5432/tutor\nPGPASSWORD=from-dotenv\n",
                    encoding="utf-8")
     monkeypatch.setattr(testing, "DOTENV", env)
-    monkeypatch.delenv("TEST_DATABASE_URL", raising=False)
-    monkeypatch.delenv("PGPASSWORD", raising=False)
-    assert testing.admin_url() == "postgresql+psycopg://tutor@127.0.0.1:5432/tutor"
-    import os
-
-    assert os.environ["PGPASSWORD"] == "from-dotenv"
-    monkeypatch.setenv("TEST_DATABASE_URL", "postgresql://other@db/x")
-    assert testing.admin_url() == "postgresql+psycopg://other@db/x"  # the environment wins
+    environ = {}  # a fake environment: the real one keeps the test server's password
+    testing.load_test_env(environ)
+    assert environ == {"TEST_DATABASE_URL": "postgresql://tutor@127.0.0.1:5432/tutor",
+                       "PGPASSWORD": "from-dotenv"}
+    environ = {"TEST_DATABASE_URL": "postgresql://other@db/x", "PGPASSWORD": "from-env"}
+    testing.load_test_env(environ)
+    assert environ == {"TEST_DATABASE_URL": "postgresql://other@db/x", "PGPASSWORD": "from-env"}  # env wins
