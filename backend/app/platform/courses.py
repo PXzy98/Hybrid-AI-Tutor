@@ -155,7 +155,8 @@ class CourseService:
         code, title = code.strip(), title.strip()
         if not code or not title:
             raise CourseError("a course needs a code and a title")
-        enabled = self._enabled_course_types() or list(COURSE_TYPES)
+        enabled = self._enabled_course_types()
+        enabled = list(COURSE_TYPES) if enabled is None else enabled  # [] disables every type
         if course_type not in enabled:
             raise CourseError(f"course type {course_type!r} is not enabled on this system")
         with self._db() as db:

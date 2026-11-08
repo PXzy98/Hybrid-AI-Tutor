@@ -81,8 +81,14 @@ def test_a_course_type_disabled_by_the_admin_cannot_be_created(world):
     _, version, _ = world.services.settings_service.system_values()
     world.services.settings_service.save_system({"enabled_course_types": ["medical_science"]},
                                                 expected_version=version, account_id=None)
-    r = world.client("prof").post(f"{V2}/courses", json={"code": "E 1", "title": "E", "course_type": "ece"})
+    prof = world.client("prof")
+    r = prof.post(f"{V2}/courses", json={"code": "E 1", "title": "E", "course_type": "ece"})
     assert r.status_code == 422 and r.json()["code"] == "invalid"
+    _, version, _ = world.services.settings_service.system_values()
+    world.services.settings_service.save_system({"enabled_course_types": []}, expected_version=version,
+                                                account_id=None)
+    r = prof.post(f"{V2}/courses", json={"code": "M 1", "title": "M", "course_type": "medical_science"})
+    assert r.status_code == 422  # an empty list disables every type
 
 
 def test_roster_import_report_and_nothing_but_the_email_is_stored(world):
