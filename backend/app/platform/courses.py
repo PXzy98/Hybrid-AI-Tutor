@@ -21,7 +21,7 @@ from sqlmodel import Session, col, delete, select
 from app.auth.service import AccountService, PasswordPolicyError
 from app.catalog import create_course
 from app.core.config import AccountLimits
-from app.platform.settings import COURSE_TYPES
+from app.platform.settings import course_types
 from app.storage.models import Account, Course, CourseInvite, CourseMember, utcnow
 
 EMAIL_RE = re.compile(r"^[a-z0-9._%+'-]+@[a-z0-9.-]+\.[a-z]{2,}$")
@@ -156,7 +156,7 @@ class CourseService:
         if not code or not title:
             raise CourseError("a course needs a code and a title")
         enabled = self._enabled_course_types()
-        enabled = list(COURSE_TYPES) if enabled is None else enabled  # [] disables every type
+        enabled = course_types() if enabled is None else enabled  # [] disables every type
         if course_type not in enabled:
             raise CourseError(f"course type {course_type!r} is not enabled on this system")
         with self._db() as db:

@@ -4595,13 +4595,13 @@
           },
           "course_type": {
             "type": "string",
-            "enum": [
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Course Type",
+            "examples": [
               "medical_science",
-              "life_science",
-              "ece",
-              "general"
-            ],
-            "title": "Course Type"
+              "ece"
+            ]
           },
           "term_label": {
             "type": "string",
@@ -4638,13 +4638,13 @@
           },
           "course_type": {
             "type": "string",
-            "enum": [
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Course Type",
+            "examples": [
               "medical_science",
-              "life_science",
-              "ece",
-              "general"
-            ],
-            "title": "Course Type"
+              "ece"
+            ]
           },
           "visibility_mode": {
             "type": "string",
@@ -4775,11 +4775,11 @@
             "anyOf": [
               {
                 "type": "string",
-                "enum": [
+                "maxLength": 64,
+                "minLength": 1,
+                "examples": [
                   "medical_science",
-                  "life_science",
-                  "ece",
-                  "general"
+                  "ece"
                 ]
               },
               {
@@ -8475,11 +8475,11 @@
               {
                 "items": {
                   "type": "string",
-                  "enum": [
+                  "maxLength": 64,
+                  "minLength": 1,
+                  "examples": [
                     "medical_science",
-                    "life_science",
-                    "ece",
-                    "general"
+                    "ece"
                   ]
                 },
                 "type": "array"
