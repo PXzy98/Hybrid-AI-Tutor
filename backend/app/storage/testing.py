@@ -75,7 +75,8 @@ def truncate_all(url: str) -> None:
     with engine.begin() as conn:
         conn.execute(text("SET LOCAL lock_timeout = '10s'"))
         for table in reversed(SQLModel.metadata.sorted_tables):  # children before parents
-            conn.execute(text(f'DELETE FROM "{table.name}"'))  # noqa: S608
+            # table names come from the schema (SQLModel metadata), never from input
+            conn.execute(text(f'DELETE FROM "{table.name}"'))  # noqa: S608  # nosec B608
             if "id" in table.c:
                 sequence = f"pg_get_serial_sequence('\"{table.name}\"', 'id')"
                 conn.execute(text(f"SELECT setval({sequence}, 1, false)"))
@@ -89,7 +90,9 @@ def table_rows(url: str, table: str, where: str = "", params: dict | None = None
     keys = ", ".join(f'"{c.name}"' for c in SQLModel.metadata.tables[table].primary_key.columns)
     engine = make_engine(url, pooled=False)
     with engine.connect() as conn:
-        rows = conn.execute(text(f'SELECT * FROM "{table}" {where} ORDER BY {keys}'), params or {})  # noqa: S608
+        # test helper: the table, condition and keys are written by the tests; values go in as parameters
+        sql = f'SELECT * FROM "{table}" {where} ORDER BY {keys}'  # noqa: S608  # nosec B608
+        rows = conn.execute(text(sql), params or {})
         out = [dict(r._mapping) for r in rows]
     engine.dispose()
     return out

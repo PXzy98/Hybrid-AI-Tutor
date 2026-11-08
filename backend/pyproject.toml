@@ -27,6 +27,7 @@ dependencies = [
     "psycopg[binary]>=3.2,<4",  # PostgreSQL driver (task Z3)
     "alembic>=1.13,<2",  # schema migrations (backend/alembic/)
     "cryptography>=42",  # encrypted API keys of model connections (task Z6)
+    "prometheus-client>=0.20,<1",  # GET /metrics for Prometheus (task Z13)
     "numpy>=1.26",
     "scikit-learn>=1.5,<2",  # training LR/SVM; portable NPZ weights at runtime
     "sentence-transformers>=3,<6",

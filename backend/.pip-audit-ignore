@@ -1,0 +1,14 @@
+# Known advisories that CI's pip-audit step ignores (task Z13). Every other advisory fails the build.
+# One ID per line; the reason and the plan next to it. Review this list whenever a dependency changes.
+#
+# transformers 4.57.x: fixed only in 5.x. pyproject pins transformers<5 for sentence-transformers (the routing
+# encoder, T's component). At request time the app loads only the encoders named in config.yaml, from the
+# local cache (local_files_only, trust_remote_code=False), never a model or tokenizer chosen by a user, which
+# these advisories need. The download in `app.routing.prepare` is not pinned to a revision (bandit B615, in
+# .bandit-baseline.json). Plan: pin the revisions and move to transformers 5 together with T.
+PYSEC-2025-217
+PYSEC-2026-2288
+PYSEC-2026-2289
+PYSEC-2026-2290
+PYSEC-2026-3929
+PYSEC-2026-4174
