@@ -278,3 +278,27 @@ def test_login_by_email_and_admin_sees_every_course(world):
     assert root.get(f"{V2}/auth/me").json()["system_role"] == "admin"
     assert root.post(f"{V2}/auth/logout").status_code == 204
     assert root.get(f"{V2}/auth/me").status_code == 401
+
+
+def test_a_new_profile_file_is_a_course_type_of_the_api(world, tmp_path, monkeypatch):
+    """Z7 + Z9: the course types are the privacy profile files; the API takes a new one without a change."""
+    from app.privacy import profiles
+
+    for name in ("base", "general", "medical_science", "ece", "life_science"):
+        (tmp_path / f"{name}.yaml").write_text((profiles.PROFILE_DIR / f"{name}.yaml").read_text("utf-8"),
+                                               encoding="utf-8")
+    (tmp_path / "law.yaml").write_text("extends: base\nrecognizers: []\n", encoding="utf-8")
+    monkeypatch.setattr(profiles, "PROFILE_DIR", tmp_path)
+    profiles._raw.cache_clear()
+    profiles.privacy_profile.cache_clear()
+    try:
+        world.accounts.create_instructor("prof", PASSWORD, must_change=False)
+        prof = world.client("prof")
+        r = prof.post(f"{V2}/courses", json={"code": "LAW 1", "title": "Law", "course_type": "law"})
+        assert r.status_code == 201 and r.json()["course_type"] == "law"
+        assert prof.get(f"{V2}/courses/{r.json()['id']}").json()["course_type"] == "law"
+        bad = prof.post(f"{V2}/courses", json={"code": "X 1", "title": "X", "course_type": "astrology"})
+        assert bad.status_code == 422
+    finally:
+        profiles._raw.cache_clear()
+        profiles.privacy_profile.cache_clear()

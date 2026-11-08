@@ -17,7 +17,9 @@ router = APIRouter(tags=["courses"])
 Creator = Annotated[CurrentUser, Depends(require_system_role("admin", "instructor"))]
 CourseInstructor = Annotated[CourseAccess, Depends(require_course_role("instructor"))]
 CourseMemberAccess = Annotated[CourseAccess, Depends(require_course_role("instructor", "student"))]
-CourseTypeName = Literal["medical_science", "life_science", "ece", "general"]
+# a privacy profile name (app/privacy/profiles/*.yaml, task Z7): checked by the service, not by the schema,
+# so a new profile file is a new course type without an API change
+CourseTypeName = Annotated[str, Field(min_length=1, max_length=64, examples=["medical_science", "ece"])]
 
 
 class CourseOut(BaseModel):

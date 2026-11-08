@@ -21,7 +21,8 @@ from app.storage.models import ConfigHistory, ProcessStatus, SystemSettings, utc
 router = APIRouter(tags=["settings"])
 Admin = Annotated[CurrentUser, Depends(require_system_role("admin"))]
 CourseInstructor = Annotated[CourseAccess, Depends(require_course_role("instructor"))]
-CourseType = Literal["medical_science", "life_science", "ece", "general"]
+# a privacy profile name (task Z7); validated against the profile files by the settings service
+CourseType = Annotated[str, Field(min_length=1, max_length=64, examples=["medical_science", "ece"])]
 
 
 class SystemValues(BaseModel):
