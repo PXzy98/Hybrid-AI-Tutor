@@ -1,0 +1,4 @@
+# Electrical and computer engineering: keys, tokens, repository URLs, internal IPs, ...: task Z11.
+# Circuit and signal values (V, mA, kOhm, Hz, dB) are not personal readings, so no medical rules here.
+extends: base
+recognizers: []

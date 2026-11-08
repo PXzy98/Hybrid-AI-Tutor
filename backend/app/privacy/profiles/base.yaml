@@ -1,0 +1,23 @@
+# Base layer of every course (guide 4.7): personal data a student may write in any subject.
+# Profiles add recognizers and policies on top of it (`extends: base`). Recognizer names are those of
+# app/privacy/recognizers (registry `pii_recognizers`); Presidio's own recognizers (names, e-mails, phone
+# numbers, ...) always run.
+recognizers:
+  - student_id
+  - grade
+  - grade_context
+  - person_context
+  - zh_person
+  - fr_person
+  - fr_grade
+  - phone_na
+  - contact_extra
+  - address
+  - postal_code
+  - date_of_birth
+  - id_number
+  - health_card
+  - health_detail   # the light personal-health detector ("I was sick, can I get an extension?")
+health_detail_policy: local_only   # a personal health detail never leaves the local model
+checkers: []
+medical_disclaimer: false
