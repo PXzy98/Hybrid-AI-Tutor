@@ -105,6 +105,7 @@ def build_services(settings: Settings | None = None) -> Services:
     secret = settings.settings_encryption_key.get_secret_value() if settings.settings_encryption_key else None
     check_keys_readable(engine, secret)  # stored API keys need SETTINGS_ENCRYPTION_KEY (design 6.3)
     services.gateway = Gateway(services)
+    services.accounts.default_course_id = content.course_id  # API v1 = the demo course
     services.component_manager = ComponentManager(services, settings)
     services.components = services.component_manager.initial()
     return services

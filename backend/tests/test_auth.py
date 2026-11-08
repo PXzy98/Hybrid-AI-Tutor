@@ -127,7 +127,8 @@ def test_instructor_bootstrap_from_env(make_client, monkeypatch):
                             "must_change_password": True}
     with make_client() as client:  # second start: no duplicate
         with Session(client.app.state.services.engine) as db:
-            assert len(db.exec(select(Account).where(Account.role == "instructor")).all()) == 1
+            # the first account is the admin (Z9); API v1 shows it as an instructor
+            assert len(db.exec(select(Account).where(Account.role == "admin")).all()) == 1
 
 
 def test_cli_set_password_recovers_a_locked_instructor(use_config, monkeypatch):

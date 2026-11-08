@@ -9,6 +9,7 @@ from app.api.v1 import api_router
 from app.api.v2 import api_router_v2
 from app.api.v2.errors import usage_limit_handler
 from app.core.services import build_services
+from app.platform.access import DbCourseDirectory
 from app.platform.usage import UsageLimitExceeded
 
 DEV_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"]  # Vite dev server
@@ -19,6 +20,7 @@ async def lifespan(app: FastAPI):
     services = build_services()
     services.accounts.bootstrap_instructor()
     app.state.services = services
+    app.state.course_directory = DbCourseDirectory(services.engine)  # require_course_role (Z9)
     services.component_manager.sync()  # heartbeat; finishes a change that was applying when it started
     services.component_manager.start()  # live component switch (course-structure.md section 6.5)
     logging.getLogger("app").info("pipeline: %s", " -> ".join(services.components.runner.step_names))

@@ -66,6 +66,8 @@ def test_v3_data_moves_into_the_demo_course_and_a_second_run_is_refused(tmp_path
             assert (course.code, course.title) == ("MED 0000", "General Medical Knowledge")
             assert {i.status for i in db.exec(select(CheckItem)).all()} == {"draft"}
             assert db.get(Account, 7).student_id == "sid-7"
+            assert db.get(Account, 7).email == "fictional.student@demo.invalid"
+            assert db.get(Account, 9).role == "admin"  # the v3 instructor (section 11 step 3)
             state = db.exec(select(LearnerKcState)).one()
             assert state.last_seen.tzinfo is not None and state.last_seen.hour == 12  # stored as UTC
             assert db.exec(select(EvidenceLog)).one().item_id == "HBP.1-q1"

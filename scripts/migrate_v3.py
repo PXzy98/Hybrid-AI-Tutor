@@ -5,7 +5,8 @@ course-structure.md section 11:
    v3 topics as modules, in the v3 order;
 2. import content/topics/*/ into its KCs, items and misconceptions (codes unchanged; unreviewed rows
    as draft);
-3. copy the accounts;
+3. copy the accounts (e-mail <username>@demo.invalid, password identity, demo-course membership;
+   the v3 instructor becomes the admin);
 4. copy learner state, evidence, misconceptions, consent and preferences;
 5. copy request logs, survey responses and conversation turns;
 6. course materials and the index are registered later (they need the privacy scanner of task Z11);
@@ -38,6 +39,19 @@ from app.storage.models import Account, Course  # noqa: E402
 COPIED = ["account", "learner_preference", "consent", "learner_kc_state", "learner_topic_level",
           "evidence_log", "learner_misconception", "request_log", "session_turn", "survey_response",
           "config_history"]
+
+
+V4_ACCOUNT_STEPS = (  # the same steps as Alembic revision 0005 (course-structure.md 3.1 and 11)
+    "UPDATE account SET email = username || '@demo.invalid' WHERE email IS NULL",
+    "INSERT INTO login_identity (account_id, provider, subject, created_at) SELECT id, 'password', username, "
+    "now() FROM account WHERE id NOT IN (SELECT account_id FROM login_identity)",
+    "INSERT INTO course_member (course_id, account_id, email, role, status, hidden_from_instructor, "
+    "created_at) SELECT c.id, a.id, a.email, a.role, 'active', false, now() FROM account a "
+    "JOIN course c ON c.code = 'MED 0000' WHERE a.role IN ('student', 'instructor') "
+    "AND NOT EXISTS (SELECT 1 FROM course_member m WHERE m.course_id = c.id AND m.account_id = a.id)",
+    "UPDATE account SET role = 'admin' WHERE id = (SELECT min(id) FROM account WHERE role = 'instructor') "
+    "AND NOT EXISTS (SELECT 1 FROM account WHERE role = 'admin')",
+)
 
 
 class MigrationError(RuntimeError):
@@ -81,6 +95,9 @@ def migrate(source: Path, target_engine, *, seed_status: str | None = None) -> d
                     conn.execute(text(f"SELECT setval(pg_get_serial_sequence('\"{name}\"', 'id'), "
                                       f"(SELECT COALESCE(MAX(id), 1) FROM \"{name}\"))"))
             counts[name] = len(rows)
+        # v3 accounts: e-mail, password identity, demo-course membership; the v3 instructor is the admin
+        for statement in V4_ACCOUNT_STEPS:
+            conn.execute(text(statement))
         db.commit()
     src.dispose()
     return counts

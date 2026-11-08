@@ -12,12 +12,12 @@ from app.auth import passwords
 from app.auth import sessions as auth_sessions
 from app.auth.purge import purge_student
 from app.core.config import Settings
-from app.storage.models import Account, utcnow
+from app.storage.models import Account, CourseMember, LoginIdentity, utcnow
 
 log = logging.getLogger("app.auth")
 
 USERNAME_RE = re.compile(r"^[a-z0-9._-]{3,32}$")
-Role = Literal["student", "instructor"]
+Role = Literal["student", "instructor", "admin"]
 
 
 class AccountError(Exception):
@@ -60,6 +60,8 @@ class AccountService:
         self.engine = engine
         self.cfg = settings.auth
         self.settings = settings
+        # API v1 serves the demo course: accounts created through it become members there (set at startup)
+        self.default_course_id: int | None = None
 
     def _db(self) -> Session:
         return Session(self.engine, expire_on_commit=False)
@@ -73,12 +75,16 @@ class AccountService:
 
     # ------------------------------------------------------------------ create
     def _create(self, db: Session, username: str, display_name: str, role: Role, password: str,
-                must_change: bool) -> Account:
+                must_change: bool, email: str | None = None) -> Account:
         username = normalize_username(username)
         if db.exec(select(Account).where(Account.username == username)).first():
             raise UsernameTaken(username)
+        email = (email or f"{username}@demo.invalid").strip().lower()
+        if db.exec(select(Account).where(Account.email == email)).first():
+            raise UsernameTaken(email)
         account = Account(
             username=username,
+            email=email,
             display_name=display_name.strip() or username,
             role=role,
             password_hash=passwords.hash_password(password),
@@ -86,6 +92,11 @@ class AccountService:
             must_change_password=must_change,
         )
         db.add(account)
+        db.flush()
+        db.add(LoginIdentity(account_id=account.id, provider="password", subject=username))
+        if self.default_course_id is not None and role in ("student", "instructor"):
+            db.add(CourseMember(course_id=self.default_course_id, account_id=account.id, email=email,
+                                role=role, status="active"))
         db.commit()
         db.refresh(account)
         return account
@@ -101,18 +112,24 @@ class AccountService:
         with self._db() as db:
             return self._create(db, username, username, "instructor", password, must_change)
 
-    def bootstrap_instructor(self) -> bool:
-        """Create the first instructor from .env if no instructor exists. Returns True if created."""
+    def create_admin(self, username: str, password: str, must_change: bool = True) -> Account:
+        self.check_password_policy(password, username)
         with self._db() as db:
-            if db.exec(select(Account).where(Account.role == "instructor")).first():
+            return self._create(db, username, username, "admin", password, must_change)
+
+    def bootstrap_instructor(self) -> bool:
+        """Create the first account from .env (an admin: the person who deploys the system) when no admin or
+        instructor exists. Returns True if created."""
+        with self._db() as db:
+            if db.exec(select(Account).where(col(Account.role).in_(["instructor", "admin"]))).first():
                 return False
         s = self.settings
         if not (s.instructor_username and s.instructor_initial_password):
             log.warning("no instructor account: set INSTRUCTOR_USERNAME and INSTRUCTOR_INITIAL_PASSWORD "
                         "in .env or run `python -m app.auth.cli create-instructor <username>`")
             return False
-        self.create_instructor(s.instructor_username, s.instructor_initial_password.get_secret_value())
-        log.info("created the first instructor account from .env (password change required at first login)")
+        self.create_admin(s.instructor_username, s.instructor_initial_password.get_secret_value())
+        log.info("created the first account (admin) from .env (password change required at first login)")
         return True
 
     # ------------------------------------------------------------------- login

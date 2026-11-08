@@ -23,8 +23,10 @@ class Account(SQLModel, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     username: str = Field(unique=True, index=True)  # lower-case
+    # lower-case (task Z9); accounts from before have <username>@demo.invalid
+    email: str | None = Field(default=None, unique=True, index=True)
     display_name: str
-    role: str  # student | instructor
+    role: str  # system role: admin | instructor | student (course-structure.md 3.1)
     password_hash: str
     student_id: str | None = Field(default=None, unique=True, index=True)  # random UUID; None for instructors
     active: bool = True
@@ -434,3 +436,19 @@ class ModelEndpoint(SQLModel, table=True):
     updated_at: datetime = _ts(default_factory=utcnow)
     updated_by: int | None = None
     last_test_ok_at: datetime | None = _ts(default=None)
+
+
+
+class LoginIdentity(SQLModel, table=True):
+    """How an account signs in (course-structure.md 3.1): `password` now; Microsoft Entra ID or Brightspace
+    LTI later, without changing other tables."""
+
+    __tablename__ = "login_identity"
+    __table_args__ = (UniqueConstraint("provider", "subject"),)
+
+    id: int | None = Field(default=None, primary_key=True)
+    account_id: int = Field(sa_column=Column(ForeignKey("account.id", ondelete="CASCADE"), nullable=False,
+                                             index=True))
+    provider: str = "password"
+    subject: str  # the username for `password`; the provider's subject ID later
+    created_at: datetime = _ts(default_factory=utcnow)
