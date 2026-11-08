@@ -46,7 +46,7 @@ logged in. Owner = component owner who implements it.
 
 | Method and path | Who | Purpose |
 |---|---|---|
-| `POST /auth/login` | public | username or e-mail + password |
+| `POST /auth/login` | public | username or e-mail (field `username`) + password |
 | `POST /auth/logout` | any | end session |
 | `GET /auth/me` | any | account, system role, memberships |
 | `POST /auth/change-password` | any | ends all other sessions |
@@ -84,7 +84,7 @@ logged in. Owner = component owner who implements it.
 | `POST /courses/{course_id}/members/instructors` | I | add a co-instructor by e-mail |
 | `DELETE /courses/{course_id}/members/{member_id}` | I | remove a member |
 | `POST /courses/{course_id}/members/{member_id}/reset-password` | I | temporary password for a student |
-| `GET /courses/{course_id}/invite`, `POST /courses/{course_id}/invite/rotate` | I | invitation code |
+| `GET /courses/{course_id}/invite`, `POST /courses/{course_id}/invite/rotate` | I | invitation code: `GET` shows its expiry and use count; `rotate` returns a new code, the only time it is shown (stored as a hash) |
 | `GET /courses/{course_id}/usage` | I | usage summary of the course |
 | `GET /courses/{course_id}/logs` | I | sanitized request logs |
 | `GET /courses/{course_id}/audit` | I | audit log of the course |

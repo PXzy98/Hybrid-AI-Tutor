@@ -55,6 +55,17 @@ def normalize_username(username: str) -> str:
     return u
 
 
+def username_for_email(db: Session, email: str) -> str:
+    """The e-mail prefix as a username; `-2`, `-3`, ... when it is taken (course-structure.md 3.1)."""
+    base = re.sub(r"[^a-z0-9._-]", "", email.split("@", 1)[0].lower())[:29]
+    base = base.ljust(3, "0")  # usernames have at least 3 characters
+    candidate, n = base, 1
+    while db.exec(select(Account).where(Account.username == candidate)).first() is not None:
+        n += 1
+        candidate = f"{base}-{n}"
+    return normalize_username(candidate)
+
+
 class AccountService:
     def __init__(self, engine: Engine, settings: Settings) -> None:
         self.engine = engine
@@ -75,7 +86,8 @@ class AccountService:
 
     # ------------------------------------------------------------------ create
     def _create(self, db: Session, username: str, display_name: str, role: Role, password: str,
-                must_change: bool, email: str | None = None) -> Account:
+                must_change: bool, email: str | None = None, demo_member: bool = True,
+                commit: bool = True) -> Account:
         username = normalize_username(username)
         if db.exec(select(Account).where(Account.username == username)).first():
             raise UsernameTaken(username)
@@ -96,12 +108,21 @@ class AccountService:
         # identity data stays in `account` only (privacy invariant 6): the password identity's subject is the
         # account ID, and a membership with an account keeps no e-mail (only pending invitations do)
         db.add(LoginIdentity(account_id=account.id, provider="password", subject=f"account:{account.id}"))
-        if self.default_course_id is not None and role in ("student", "instructor"):
+        if demo_member and self.default_course_id is not None and role in ("student", "instructor"):
             db.add(CourseMember(course_id=self.default_course_id, account_id=account.id, role=role,
                                 status="active"))
-        db.commit()
-        db.refresh(account)
+        if commit:
+            db.commit()
+            db.refresh(account)
         return account
+
+    def create_joined_student(self, db: Session, email: str, display_name: str, password: str) -> Account:
+        """A student who activates his account with an invitation code (course-structure.md 3.3 step 5):
+        username = e-mail prefix (numeric suffix on a collision), no demo membership. Caller commits."""
+        username = username_for_email(db, email)
+        self.check_password_policy(password, username)
+        return self._create(db, username, display_name, "student", password, must_change=False, email=email,
+                            demo_member=False, commit=False)
 
     def create_student(self, username: str, display_name: str) -> tuple[Account, str]:
         """New student with a one-time temporary password (returned once, must be changed at first login)."""
@@ -137,13 +158,17 @@ class AccountService:
     # ------------------------------------------------------------------- login
     def login(self, username: str, password: str) -> tuple[Account, str]:
         """Check credentials and open a session. Returns the account and the cookie token."""
-        try:
-            username = normalize_username(username)
-        except InvalidUsername:
-            passwords.burn_time(password)
-            raise InvalidCredentials() from None
+        login_name = username.strip().lower()
+        if "@" in login_name:  # API v2: username or e-mail
+            where = Account.email == login_name
+        else:
+            try:
+                where = Account.username == normalize_username(login_name)
+            except InvalidUsername:
+                passwords.burn_time(password)
+                raise InvalidCredentials() from None
         with self._db() as db:
-            account = db.exec(select(Account).where(Account.username == username)).first()
+            account = db.exec(select(Account).where(where)).first()
             if account is None or not account.active:
                 passwords.burn_time(password)
                 raise InvalidCredentials()

@@ -7,9 +7,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1 import api_router
 from app.api.v2 import api_router_v2
-from app.api.v2.errors import usage_limit_handler
+from app.api.v2.errors import course_error_handler, usage_limit_handler
 from app.core.services import build_services
 from app.platform.access import DbCourseDirectory
+from app.platform.courses import CourseError
 from app.platform.usage import UsageLimitExceeded
 
 DEV_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"]  # Vite dev server
@@ -41,6 +42,7 @@ def create_app() -> FastAPI:
     app.include_router(api_router)
     app.include_router(api_router_v2)  # docs/design/api-v2.md; /api/v1 is frozen
     app.add_exception_handler(UsageLimitExceeded, usage_limit_handler)
+    app.add_exception_handler(CourseError, course_error_handler)
     return app
 
 

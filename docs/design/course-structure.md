@@ -113,6 +113,9 @@ privacy profile), visibility mode, status (`active`, `archived`).
    disallowed e-mail, duplicates).
 4. **Invitation code**: each course has one code (random, about 10 characters, can be rotated, has an
    expiry date; `course_invite`). The instructor shares it with the class (for example on Brightspace).
+   Defaults (Z9): 10 characters without look-alike characters, valid 120 days
+   (`limits.accounts.invite_code_length`, `invite_expiry_days`). Only its hash is stored, so the code is
+   shown once, when it is created; an instructor who lost it rotates it.
 5. **Activation of a new student** (no account with that e-mail yet): on the join page the student enters
    the code, his uOttawa e-mail, a display name and a new password. It succeeds only if a `pending`
    membership with that e-mail exists in that course. In one transaction the account is created (username =
@@ -497,6 +500,5 @@ container handle this easily; on-disk indexes for 2–5 courses fit in memory wh
 | Item | Owner | When |
 |---|---|---|
 | Course code of the demo course (`MED 0000` is a placeholder) | Z | with Z4 |
-| Invitation code length and expiry default | Z | Z9 |
 | Export file format details | S (learner data) with Z | S9 |
 | Ability storage (section 4.3) | S | S8 |
