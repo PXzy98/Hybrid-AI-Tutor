@@ -1,9 +1,39 @@
-# Privacy-Aware Hybrid AI Tutor: one command to run the app.
-#   docker compose up --build            -> http://localhost:8080
-# Ollama runs on the GPU server (OLLAMA_URL in .env); it is not part of this file.
+# Privacy-Aware Hybrid AI Tutor: one command to run the whole system (task Z8; guide 4.2).
+#   docker compose up --build            -> http://localhost:8080  (local: plain HTTP)
+# Production: SITE_ADDRESS=<domain>, HTTP_PORT=80, HTTPS_PORT=443 in .env, then
+#   docker compose -f docker-compose.yml up -d --build
+# (only this file: docker-compose.override.yml is the local-development extra that exposes the database).
+#
+# The local model (vLLM or Ollama) is deployed separately and reached by URL (OLLAMA_URL / model connections).
 # Settings come from .env (see .env.example); SECTION__FIELD variables override config.yaml values,
-# e.g. CONTENT__SEED_STATUS=active for a demo (imports the unreviewed demo content as published when the
-# database is first created; docs/DATABASE.md).
+# e.g. CONTENT__SEED_STATUS=active for a demo (docs/DATABASE.md).
+#
+# Networks: `public` (proxy, api, worker) and `internal` (internal: true; db, api, worker). The database is on
+# the internal network only, so it is not reachable from outside the stack; only the proxy publishes ports.
+
+x-app: &app
+  build:
+    context: .
+    dockerfile: backend/Dockerfile
+    args:
+      SPACY_MODEL: ${SPACY_MODEL:-en_core_web_lg}
+  env_file:
+    - path: .env
+      required: false
+  environment:
+    # the db service; the password is passed as PGPASSWORD, never inside the URL
+    DATABASE_URL: postgresql+psycopg://tutor@db:5432/tutor
+    PGPASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    # instructor uploads inside the named volume, whatever .env says
+    RAG__MATERIALS_DIR: /app/var/topics
+  depends_on:
+    db:
+      condition: service_healthy
+  volumes:
+    - tutor-data:/app/var
+  networks: [public, internal]
+  restart: unless-stopped
+
 services:
   db:
     # PostgreSQL (task Z3). The password comes from POSTGRES_PASSWORD in .env; the data lives in db-data.
@@ -14,9 +44,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
     volumes:
       - db-data:/var/lib/postgresql/data
-    # reachable from this machine only (a backend or tests run on the host); never from the network
-    ports:
-      - "127.0.0.1:${DB_PORT:-5432}:5432"
+    networks: [internal]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U tutor -d tutor"]
       interval: 5s
@@ -25,36 +53,48 @@ services:
     restart: unless-stopped
 
   api:
-    build:
-      context: .
-      dockerfile: backend/Dockerfile
-      args:
-        SPACY_MODEL: ${SPACY_MODEL:-en_core_web_lg}
-    env_file:
-      - path: .env
-        required: false
-    environment:
-      # the db service; the password is passed as PGPASSWORD, never inside the URL
-      DATABASE_URL: postgresql+psycopg://tutor@db:5432/tutor
-      PGPASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
-      # instructor uploads inside the named volume, whatever .env says
-      RAG__MATERIALS_DIR: /app/var/topics
+    <<: *app
+
+  worker:
+    # background jobs (index rebuilds, instructor AI, evaluations, usage reset) and the live settings switch
+    <<: *app
+    command: ["python", "-m", "app.worker"]
+    healthcheck:
+      test: ["CMD", "python", "-m", "app.worker", "--check"]
+      interval: 15s
+      timeout: 10s
+      start_period: 120s
+      retries: 3
     depends_on:
       db:
         condition: service_healthy
-    volumes:
-      - tutor-data:/app/var
-    restart: unless-stopped
+      api:
+        condition: service_healthy  # the api applies the database migrations first
 
-  web:
-    build: ./frontend
+  proxy:
+    # Caddy: serves the frontend and forwards /api to the api service; HTTPS with a domain (deploy/Caddyfile)
+    build:
+      context: .
+      dockerfile: deploy/proxy.Dockerfile
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-:80}
     ports:
-      - "${WEB_PORT:-8080}:80"
+      - "${HTTP_PORT:-${WEB_PORT:-8080}}:80"  # WEB_PORT: the name used before Z8
+      - "${HTTPS_PORT:-8443}:443"
+    volumes:
+      - caddy-data:/data  # certificates
+    networks: [public]
     depends_on:
       api:
         condition: service_healthy
     restart: unless-stopped
 
+networks:
+  public: {}
+  internal:
+    internal: true
+
 volumes:
   tutor-data:
   db-data:
+  caddy-data:

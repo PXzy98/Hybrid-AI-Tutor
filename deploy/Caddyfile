@@ -1,0 +1,48 @@
+# Reverse proxy and web server (task Z8; guide 4.2). One origin for the browser: the single-page app and /api are
+# served from the same host, so the httpOnly session cookie works without CORS.
+#
+# SITE_ADDRESS: ":80" (default) serves plain HTTP for local use; a domain name (e.g. tutor.example.edu) makes
+# Caddy obtain and renew a certificate automatically and redirect HTTP to HTTPS.
+{
+	admin off
+}
+
+{$SITE_ADDRESS::80} {
+	encode zstd gzip
+
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy same-origin
+		X-Frame-Options DENY
+		-Server
+	}
+
+	# API -> FastAPI. Answers from the local model can take a while; routing progress is streamed (SSE).
+	handle /api/* {
+		request_body {
+			max_size 25MB
+		}
+		reverse_proxy api:8000 {
+			flush_interval -1
+			transport http {
+				read_timeout 180s
+				write_timeout 180s
+			}
+		}
+	}
+
+	# hashed build assets can be cached for a long time
+	handle /assets/* {
+		root * /srv
+		header Cache-Control "public, max-age=2592000, immutable"
+		file_server
+	}
+
+	# client-side routes (/chat, /me, ...) all load the single-page app
+	handle {
+		root * /srv
+		header Cache-Control no-cache
+		try_files {path} /index.html
+		file_server
+	}
+}
