@@ -181,3 +181,93 @@ def test_import_reads_only_the_seed_files_and_rejects_bad_content(world):
     assert r.json() == {"modules": 1, "kcs": 1, "items": 1, "misconceptions": 0}
     item = prof.get(f"{url}/check-items").json()[0]
     assert item["status"] == "active"  # the instructor's own file is published (decision E)
+
+
+def test_every_content_endpoint_refuses_other_instructors_students_and_anonymous_callers(world):
+    built = _build(world["prof"], world["url"])
+    url, app = world["url"], world["app"]
+    m, kc, item, mc = built["module"]["id"], built["a"]["id"], built["item"]["id"], built["mc"]["id"]
+    zip_file = {"file": ("c.zip", b"PK", "application/zip")}
+    calls = [
+        ("post", "modules", {"json": {"code": "x", "title": "X"}}),
+        ("patch", f"modules/{m}", {"json": {"title": "X"}}),
+        ("delete", f"modules/{m}", {}),
+        ("post", "modules/reorder", {"json": {"module_ids": [m]}}),
+        ("get", "kcs", {}), ("get", f"kcs/{kc}", {}),
+        ("post", "kcs", {"json": {"module_id": m, "code": "Z.1", "name": "Z", "difficulty": "basic"}}),
+        ("patch", f"kcs/{kc}", {"json": {"status": "retired"}}),
+        ("get", "check-items", {}), ("get", f"check-items/{item}", {}),
+        ("post", "check-items", {"json": {"kc_id": kc, "code": "Z.1-q", "level": "basic", "stem": "S?",
+                                          "options": OPTIONS, "answer": "A"}}),
+        ("patch", f"check-items/{item}", {"json": {"status": "active"}}),
+        ("get", "misconceptions", {}), ("get", f"misconceptions/{mc}", {}),
+        ("post", "misconceptions", {"json": {"kc_id": kc, "code": "Z.MC", "statement": "s",
+                                             "correction": "c"}}),
+        ("patch", f"misconceptions/{mc}", {"json": {"statement": "changed"}}),
+        ("post", "content/import", {"files": zip_file}),
+        ("get", "content/export", {}),
+    ]
+    clients = {"other instructor": (_login(app, "other"), 404), "student": (_login(app, "alice"), 404),
+               "logged out": (TestClient(app), 401)}
+    for who, (client, expected) in clients.items():
+        for method, path, kwargs in calls:
+            r = getattr(client, method)(f"{url}/{path}", **kwargs)
+            assert r.status_code == expected, (who, method, path, r.status_code)
+    assert TestClient(app).get(f"{url}/modules").status_code == 401
+    assert world["prof"].get(f"{url}/check-items/{item}").json()["status"] == "draft"  # nothing changed
+
+
+def test_duplicate_codes_are_conflicts_not_server_errors(world):
+    prof, url = world["prof"], world["url"]
+    built = _build(prof, url)
+    assert prof.post(f"{url}/modules", json={"code": "blood_pressure", "title": "Again"}).status_code == 409
+    item = {"kc_id": built["b"]["id"], "code": "BP.2-q1", "level": "basic", "stem": "S?", "options": OPTIONS,
+            "answer": "A"}
+    assert prof.post(f"{url}/check-items", json=item).status_code == 409
+    mc = {"kc_id": built["b"]["id"], "code": "BP.MC1", "statement": "s", "correction": "c"}
+    assert prof.post(f"{url}/misconceptions", json=mc).status_code == 409
+
+
+def test_an_export_with_an_empty_module_imports_in_the_same_order(world):
+    prof, url = world["prof"], world["url"]
+    _build(prof, url)
+    first = prof.post(f"{url}/modules", json={"code": "intro", "title": "Intro"}).json()
+    modules = [m["id"] for m in prof.get(f"{url}/modules").json()]
+    order = [first["id"]] + [i for i in modules if i != first["id"]]
+    prof.post(f"{url}/modules/reorder", json={"module_ids": order})
+    exported = prof.get(f"{url}/content/export").content
+    body = {"code": "ELG 2", "title": "Copy", "course_type": "ece"}
+    copy = prof.post(f"{V2}/courses", json=body).json()["id"]
+    zip_file = {"file": ("c.zip", exported, "application/zip")}
+    r = prof.post(f"{V2}/courses/{copy}/content/import", files=zip_file)
+    assert r.status_code == 200, r.text
+    assert r.json()["modules"] == 2
+    assert [m["code"] for m in prof.get(f"{V2}/courses/{copy}/modules").json()] == ["intro", "blood_pressure"]
+
+
+def test_edits_of_the_served_course_reach_the_running_tutor(make_client):
+    with make_client({"content": {"seed_status": "active"}}) as client:
+        services = client.app.state.services
+        services.accounts.create_instructor("prof", PASSWORD, must_change=False)  # demo course instructor
+        prof = _login(client.app, "prof")
+        demo = services.content.course_id
+        items = prof.get(f"{V2}/courses/{demo}/check-items").json()
+        target = next(i for i in items if i["status"] == "active")
+        assert services.content.item(target["code"]).active
+        r = prof.patch(f"{V2}/courses/{demo}/check-items/{target['id']}", json={"status": "retired"})
+        assert r.status_code == 200
+        assert not services.content.item(target["code"]).active  # this process: at once
+        assert services.learner.content is services.content  # the learner model uses the new content
+        assert services.components.runner is not None
+        with Session(services.engine) as db:  # another process's edit: picked up by the next sync
+            from app.storage.models import CheckItem, Course
+
+            row = db.get(CheckItem, target["id"])
+            row.status = "active"
+            db.add(row)
+            course = db.get(Course, demo)
+            course.content_version += 1
+            db.add(course)
+            db.commit()
+        services.component_manager.sync()
+        assert services.content.item(target["code"]).active

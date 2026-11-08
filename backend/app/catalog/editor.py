@@ -18,6 +18,7 @@ from dataclasses import dataclass
 
 import yaml
 from pydantic import ValidationError
+from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, col, delete, func, select
 
@@ -64,9 +65,16 @@ def _check(db: Session, course_id: int) -> None:
         raise CatalogError("invalid content:\n" + "\n".join(problems))
 
 
-def _commit(db: Session, course_id: int) -> None:
-    _check(db, course_id)
+def _bump(db: Session, course_id: int) -> None:
+    """A new content version: running processes reload the course content (app.platform.components)."""
+    db.exec(text("UPDATE course SET content_version = content_version + 1 WHERE id = :c")
+            .bindparams(c=course_id))
+
+
+def _commit_checked(db: Session, course_id: int) -> None:
     try:
+        _check(db, course_id)  # its flush raises IntegrityError for a duplicate code
+        _bump(db, course_id)
         db.commit()
     except IntegrityError:
         db.rollback()
@@ -87,8 +95,17 @@ def _tags_known(db: Session, course_id: int, options: dict) -> None:
 
 
 class CatalogEditor:
-    def __init__(self, engine) -> None:
+    def __init__(self, engine, on_change=None) -> None:
         self.engine = engine
+        self._on_change = on_change  # called after every committed change (reload the content at once)
+
+    def _changed(self) -> None:
+        if self._on_change is not None:
+            self._on_change()
+
+    def _commit(self, db: Session, course_id: int) -> None:
+        _commit_checked(db, course_id)
+        self._changed()
 
     def _db(self) -> Session:
         return Session(self.engine, expire_on_commit=False)
@@ -105,7 +122,7 @@ class CatalogEditor:
             module = Module(course_id=course_id, code=code.strip(), title=title.strip(), guideline=guideline,
                             position=(last + 1) if last is not None else 0)
             db.add(module)
-            _commit(db, course_id)
+            self._commit(db, course_id)
             return module
 
     def update_module(self, course_id: int, module_id: int, changes: dict) -> Module:
@@ -115,7 +132,7 @@ class CatalogEditor:
                 if name in changes:
                     setattr(module, name, changes[name].strip() if name == "title" else changes[name])
             db.add(module)
-            _commit(db, course_id)
+            self._commit(db, course_id)
             return module
 
     def delete_module(self, course_id: int, module_id: int) -> None:
@@ -127,7 +144,9 @@ class CatalogEditor:
             if db.exec(select(Material.id).where(Material.module_id == module_id)).first() is not None:
                 raise CatalogConflict("the module has materials; delete them first")
             db.delete(module)
+            _bump(db, course_id)
             db.commit()
+        self._changed()
 
     def reorder_modules(self, course_id: int, module_ids: list[int]) -> list[Module]:
         with self._db() as db:
@@ -137,7 +156,9 @@ class CatalogEditor:
             for position, module_id in enumerate(module_ids):
                 modules[module_id].position = position
                 db.add(modules[module_id])
+            _bump(db, course_id)
             db.commit()
+        self._changed()
         return self.modules(course_id)
 
     # -------------------------------------------------------------------------------------------- KCs
@@ -179,7 +200,7 @@ class CatalogEditor:
             except IntegrityError:
                 raise CatalogConflict("the code is already used in this course") from None
             self._set_prerequisites(db, course_id, kc, list(prerequisite_ids))
-            _commit(db, course_id)
+            self._commit(db, course_id)
             kc_id = kc.id
         return self.kc(course_id, kc_id)
 
@@ -195,7 +216,7 @@ class CatalogEditor:
             db.add(kc)
             if "prerequisite_ids" in changes:
                 self._set_prerequisites(db, course_id, kc, changes["prerequisite_ids"])
-            _commit(db, course_id)
+            self._commit(db, course_id)
         return self.kc(course_id, kc_id)
 
     # ----------------------------------------------------------------------------------- check items
@@ -212,7 +233,7 @@ class CatalogEditor:
             _tags_known(db, course_id, values["options"])
             item = CheckItem(course_id=course_id, **{**values, "code": values["code"].strip()})
             db.add(item)
-            _commit(db, course_id)
+            self._commit(db, course_id)
             return item
 
     def update_item(self, course_id: int, item_id: int, changes: dict) -> CheckItem:
@@ -226,7 +247,7 @@ class CatalogEditor:
                 if name != "code":
                     setattr(item, name, value)
             db.add(item)
-            _commit(db, course_id)
+            self._commit(db, course_id)
             return item
 
     # -------------------------------------------------------------------------------- misconceptions
@@ -241,7 +262,7 @@ class CatalogEditor:
             _get(db, Kc, course_id, values["kc_id"], "KC")
             row = CatalogMisconception(course_id=course_id, **{**values, "code": values["code"].strip()})
             db.add(row)
-            _commit(db, course_id)
+            self._commit(db, course_id)
             return row
 
     def update_misconception(self, course_id: int, misconception_id: int,
@@ -254,7 +275,7 @@ class CatalogEditor:
                 if name != "code":
                     setattr(row, name, value)
             db.add(row)
-            _commit(db, course_id)
+            self._commit(db, course_id)
             return row
 
     # ----------------------------------------------------------------------------- YAML import/export
@@ -281,7 +302,7 @@ class CatalogEditor:
             for m in modules:
                 own = [k for k in kcs if k.module_id == m.id]
                 ids = {k.id for k in own}
-                kc_doc = {"topic": m.code, "name": m.title, "guideline": m.guideline,
+                kc_doc = {"topic": m.code, "name": m.title, "guideline": m.guideline, "position": m.position,
                           "kcs": [{"id": k.code, "name": k.name, "definition": k.definition,
                                    "difficulty": k.difficulty, "prerequisites": sorted(prereqs.get(k.id, [])),
                                    **({"status": k.status} if k.status != "active" else {})} for k in own]}
@@ -295,15 +316,24 @@ class CatalogEditor:
         return buffer.getvalue()
 
     def import_zip(self, course_id: int, data: bytes, *, max_bytes: int) -> ImportCounts:
-        """The seed layout into a course without content; one module per folder, in folder-name order."""
+        """The seed layout into a course without content; one module per folder, ordered by the exported
+        `position` (folder name otherwise). A module without KCs (exported before its first KC) is kept."""
         folders = _read_zip(data, max_bytes)
         topics: list[TopicContent] = []
         retired: set[str] = set()
-        for name in sorted(folders):
-            files = folders[name]
+        docs = {}
+        for name, files in folders.items():
             kc_doc = files.get("kcs.yaml") or {}
             if not isinstance(kc_doc, dict):
                 raise CatalogError(f"{name}/kcs.yaml must be a mapping")
+            docs[name] = kc_doc
+
+        def order(name: str):
+            position = docs[name].get("position")
+            return (position if isinstance(position, int) else 1_000_000, name)
+
+        for name in sorted(folders, key=order):
+            files, kc_doc = folders[name], docs[name]
             kcs = []
             for k in kc_doc.get("kcs") or []:
                 k = dict(k)
@@ -320,14 +350,31 @@ class CatalogEditor:
                 raise CatalogError(f"{name}: invalid format\n{e}") from None
         if not topics:
             raise CatalogError("the ZIP has no module folder with a kcs.yaml")
+        filled = [tp for tp in topics if tp.kcs]
+        if len({tp.topic for tp in topics}) != len(topics):
+            raise CatalogError("two folders use the same module code")
         with self._db() as db:
             if db.exec(select(Module.id).where(Module.course_id == course_id)).first() is not None:
                 raise CatalogConflict("the course already has modules; import into a course without content")
-            counts = import_topics(db, course_id, topics)
+            empty = {"modules": 0, "kcs": 0, "items": 0, "misconceptions": 0}
+            counts = import_topics(db, course_id, filled) if filled else empty
+            for tp in topics:
+                if not tp.kcs:
+                    db.add(Module(course_id=course_id, code=tp.topic, title=tp.name, guideline=tp.guideline))
+                    counts["modules"] += 1
+            db.flush()
+            modules = {m.code: m for m in db.exec(select(Module).where(Module.course_id == course_id)).all()}
+            for position, tp in enumerate(topics):  # the file's order, empty modules included
+                modules[tp.topic].position = position
+                db.add(modules[tp.topic])
             for kc in db.exec(select(Kc).where(Kc.course_id == course_id, col(Kc.code).in_(retired))).all():
                 kc.status = "retired"
                 db.add(kc)
-            db.commit()
+            try:
+                _commit_checked(db, course_id)
+            except CatalogConflict:
+                raise CatalogConflict("a code is used twice in the file") from None
+        self._changed()
         return ImportCounts(**counts)
 
 
