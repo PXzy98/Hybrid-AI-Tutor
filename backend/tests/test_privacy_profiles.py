@@ -22,7 +22,10 @@ def profile_dir(tmp_path, monkeypatch):
 
 def test_the_medical_profile_is_the_v3_behaviour_and_others_build_on_the_base_layer():
     medical = profiles.privacy_profile("medical_science")
-    assert sorted(medical.recognizers) == sorted(custom_recognizer_names())  # E6 / demo course unchanged
+    ece_only = {"internal_address", "repo_url"}  # task Z11: lab addresses and repositories
+    # E6 / demo course unchanged: every recognizer but the ECE-only ones
+    assert sorted(medical.recognizers) == sorted(set(custom_recognizer_names()) - ece_only)
+    assert ece_only <= set(profiles.privacy_profile("ece").recognizers)
     assert (medical.health_detail_policy, medical.checkers, medical.medical_disclaimer) == (
         "generalize", ("medical_safety",), True)
     for name in ("general", "ece", "life_science"):

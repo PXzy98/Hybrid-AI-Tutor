@@ -17,6 +17,7 @@ recognizers:
   - date_of_birth
   - id_number
   - health_card
+  - secret_token    # API keys, tokens, private keys, assigned passwords (task Z11)
   - health_detail   # the light personal-health detector ("I was sick, can I get an extension?")
 health_detail_policy: local_only   # a personal health detail never leaves the local model
 checkers: []

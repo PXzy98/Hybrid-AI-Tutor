@@ -7,16 +7,18 @@ from app.rag.documents import DocumentError
 from app.rag.privacy_adapter import privacy_scan_callback
 
 
-def _material(root):
+def _material(root, text="Quartzzyme is an imaginary course policy."):
     path = root / "courses" / "101" / "materials" / "_course" / "demo.md"
     path.parent.mkdir(parents=True)
-    path.write_text("Quartzzyme is an imaginary course policy.", encoding="utf-8")
+    path.write_text(text, encoding="utf-8")
 
 
-def test_z1_scanner_stub_cannot_publish(tmp_path):
-    _material(tmp_path)
+def test_a_document_with_student_data_cannot_publish(tmp_path):
+    # Z11: scan_document really scans, so a clean document passes and one with a student number does not
+    _material(tmp_path, "Quartzzyme results: student 300418277 scored 87% on the imaginary quiz.")
     cb = privacy_scan_callback(privacy_profile("ece"))
-    assert not cb("fictional document")
+    assert cb("fictional document")
+    assert not cb("student 300418277 scored 87% on the quiz")
     with pytest.raises(DocumentError, match="Privacy scan rejected"):
         IndexedCourseRetriever(tmp_path, scan=cb).rebuild(101)
     assert not (tmp_path / "courses" / "101" / "index" / "current.json").exists()
