@@ -12,12 +12,12 @@ from app.auth import passwords
 from app.auth import sessions as auth_sessions
 from app.auth.purge import purge_student
 from app.core.config import Settings
-from app.storage.models import Account, utcnow
+from app.storage.models import Account, CourseMember, LoginIdentity, utcnow
 
 log = logging.getLogger("app.auth")
 
 USERNAME_RE = re.compile(r"^[a-z0-9._-]{3,32}$")
-Role = Literal["student", "instructor"]
+Role = Literal["student", "instructor", "admin"]
 
 
 class AccountError(Exception):
@@ -55,11 +55,24 @@ def normalize_username(username: str) -> str:
     return u
 
 
+def username_for_email(db: Session, email: str) -> str:
+    """The e-mail prefix as a username; `-2`, `-3`, ... when it is taken (course-structure.md 3.1)."""
+    base = re.sub(r"[^a-z0-9._-]", "", email.split("@", 1)[0].lower())[:29]
+    base = base.ljust(3, "0")  # usernames have at least 3 characters
+    candidate, n = base, 1
+    while db.exec(select(Account).where(Account.username == candidate)).first() is not None:
+        n += 1
+        candidate = f"{base}-{n}"
+    return normalize_username(candidate)
+
+
 class AccountService:
     def __init__(self, engine: Engine, settings: Settings) -> None:
         self.engine = engine
         self.cfg = settings.auth
         self.settings = settings
+        # API v1 serves the demo course: accounts created through it become members there (set at startup)
+        self.default_course_id: int | None = None
 
     def _db(self) -> Session:
         return Session(self.engine, expire_on_commit=False)
@@ -73,12 +86,17 @@ class AccountService:
 
     # ------------------------------------------------------------------ create
     def _create(self, db: Session, username: str, display_name: str, role: Role, password: str,
-                must_change: bool) -> Account:
+                must_change: bool, email: str | None = None, demo_member: bool = True,
+                commit: bool = True) -> Account:
         username = normalize_username(username)
         if db.exec(select(Account).where(Account.username == username)).first():
             raise UsernameTaken(username)
+        email = (email or f"{username}@demo.invalid").strip().lower()
+        if db.exec(select(Account).where(Account.email == email)).first():
+            raise UsernameTaken(email)
         account = Account(
             username=username,
+            email=email,
             display_name=display_name.strip() or username,
             role=role,
             password_hash=passwords.hash_password(password),
@@ -86,9 +104,25 @@ class AccountService:
             must_change_password=must_change,
         )
         db.add(account)
-        db.commit()
-        db.refresh(account)
+        db.flush()
+        # identity data stays in `account` only (privacy invariant 6): the password identity's subject is the
+        # account ID, and a membership with an account keeps no e-mail (only pending invitations do)
+        db.add(LoginIdentity(account_id=account.id, provider="password", subject=f"account:{account.id}"))
+        if demo_member and self.default_course_id is not None and role in ("student", "instructor"):
+            db.add(CourseMember(course_id=self.default_course_id, account_id=account.id, role=role,
+                                status="active"))
+        if commit:
+            db.commit()
+            db.refresh(account)
         return account
+
+    def create_joined_student(self, db: Session, email: str, display_name: str, password: str) -> Account:
+        """A student who activates his account with an invitation code (course-structure.md 3.3 step 5):
+        username = e-mail prefix (numeric suffix on a collision), no demo membership. Caller commits."""
+        username = username_for_email(db, email)
+        self.check_password_policy(password, username)
+        return self._create(db, username, display_name, "student", password, must_change=False, email=email,
+                            demo_member=False, commit=False)
 
     def create_student(self, username: str, display_name: str) -> tuple[Account, str]:
         """New student with a one-time temporary password (returned once, must be changed at first login)."""
@@ -101,30 +135,40 @@ class AccountService:
         with self._db() as db:
             return self._create(db, username, username, "instructor", password, must_change)
 
-    def bootstrap_instructor(self) -> bool:
-        """Create the first instructor from .env if no instructor exists. Returns True if created."""
+    def create_admin(self, username: str, password: str, must_change: bool = True) -> Account:
+        self.check_password_policy(password, username)
         with self._db() as db:
-            if db.exec(select(Account).where(Account.role == "instructor")).first():
+            return self._create(db, username, username, "admin", password, must_change)
+
+    def bootstrap_instructor(self) -> bool:
+        """Create the first account from .env (an admin: the person who deploys the system) when no admin or
+        instructor exists. Returns True if created."""
+        with self._db() as db:
+            if db.exec(select(Account).where(col(Account.role).in_(["instructor", "admin"]))).first():
                 return False
         s = self.settings
         if not (s.instructor_username and s.instructor_initial_password):
             log.warning("no instructor account: set INSTRUCTOR_USERNAME and INSTRUCTOR_INITIAL_PASSWORD "
                         "in .env or run `python -m app.auth.cli create-instructor <username>`")
             return False
-        self.create_instructor(s.instructor_username, s.instructor_initial_password.get_secret_value())
-        log.info("created the first instructor account from .env (password change required at first login)")
+        self.create_admin(s.instructor_username, s.instructor_initial_password.get_secret_value())
+        log.info("created the first account (admin) from .env (password change required at first login)")
         return True
 
     # ------------------------------------------------------------------- login
     def login(self, username: str, password: str) -> tuple[Account, str]:
         """Check credentials and open a session. Returns the account and the cookie token."""
-        try:
-            username = normalize_username(username)
-        except InvalidUsername:
-            passwords.burn_time(password)
-            raise InvalidCredentials() from None
+        login_name = username.strip().lower()
+        if "@" in login_name:  # API v2: username or e-mail
+            where = Account.email == login_name
+        else:
+            try:
+                where = Account.username == normalize_username(login_name)
+            except InvalidUsername:
+                passwords.burn_time(password)
+                raise InvalidCredentials() from None
         with self._db() as db:
-            account = db.exec(select(Account).where(Account.username == username)).first()
+            account = db.exec(select(Account).where(where)).first()
             if account is None or not account.active:
                 passwords.burn_time(password)
                 raise InvalidCredentials()
@@ -189,6 +233,64 @@ class AccountService:
             auth_sessions.revoke_all(db, account.id)
             db.commit()
             return account
+
+    # ------------------------------------------------------ admin: instructor accounts (Z9)
+    def list_staff(self) -> list[Account]:
+        with self._db() as db:
+            return list(db.exec(select(Account).where(col(Account.role).in_(["instructor", "admin"]))
+                                .order_by(col(Account.username))).all())
+
+    def create_staff(self, email: str, display_name: str, role: Role = "instructor") -> tuple[Account, str]:
+        """An instructor (or admin) account by e-mail, username = e-mail prefix, with a one-time temporary
+        password that must be changed at the first login. Returns the account and the password."""
+        email = email.strip().lower()
+        if not re.match(r"^[a-z0-9._%+'-]+@[a-z0-9.-]+\.[a-z]{2,}$", email):
+            raise AccountError("not a valid e-mail address")
+        temp = passwords.temporary_password()
+        with self._db() as db:
+            if db.exec(select(Account).where(Account.email == email)).first() is not None:
+                raise UsernameTaken(email)
+            account = self._create(db, username_for_email(db, email), display_name, role, temp,
+                                   must_change=True, email=email, demo_member=False)
+        return account, temp
+
+    def update_staff(self, account_id: int, *, acting_account_id: int, active: bool | None = None,
+                     role: Role | None = None, display_name: str | None = None) -> Account:
+        """Deactivate, reactivate, or change between instructor and admin. Nobody changes their own role
+        or deactivates themselves, so there is always an admin left."""
+        with self._db() as db:
+            account = self._get(db, account_id)
+            if account.role not in ("instructor", "admin"):
+                raise AccountNotFound(account_id)
+            if account_id == acting_account_id and (active is False or (role and role != account.role)):
+                raise AccountError("you cannot deactivate yourself or change your own role")
+            if role is not None:
+                if role not in ("instructor", "admin"):
+                    raise AccountError("role must be instructor or admin")
+                account.role = role
+            if display_name is not None:
+                account.display_name = display_name.strip() or account.username
+            if active is not None:
+                account.active = active
+                if not active:
+                    auth_sessions.revoke_all(db, account.id)
+            db.add(account)
+            db.commit()
+            return account
+
+    def reset_staff_password(self, account_id: int) -> str:
+        temp = passwords.temporary_password()
+        with self._db() as db:
+            account = self._get(db, account_id)
+            if account.role not in ("instructor", "admin"):
+                raise AccountNotFound(account_id)
+            account.password_hash = passwords.hash_password(temp)
+            account.must_change_password = True
+            account.failed_logins, account.locked_until = 0, None
+            db.add(account)
+            auth_sessions.revoke_all(db, account.id)
+            db.commit()
+        return temp
 
     # ------------------------------------------------- instructor: student accounts
     def _get(self, db: Session, account_id: int, role: Role | None = None) -> Account:

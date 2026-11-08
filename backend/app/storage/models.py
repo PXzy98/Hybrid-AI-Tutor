@@ -23,8 +23,10 @@ class Account(SQLModel, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     username: str = Field(unique=True, index=True)  # lower-case
+    # lower-case (task Z9); accounts from before have <username>@demo.invalid
+    email: str | None = Field(default=None, unique=True, index=True)
     display_name: str
-    role: str  # student | instructor
+    role: str  # system role: admin | instructor | student (course-structure.md 3.1)
     password_hash: str
     student_id: str | None = Field(default=None, unique=True, index=True)  # random UUID; None for instructors
     active: bool = True
@@ -197,6 +199,8 @@ class Course(SQLModel, table=True):
     visibility_mode: str = "A"  # A | B (design §4.5)
     status: str = "active"  # active | archived
     created_at: datetime = _ts(default_factory=utcnow)
+    # incremented by every content edit; processes reload the content when it changes (task Z9)
+    content_version: int = Field(default=0, sa_column_kwargs={"server_default": "0"})
 
 
 class Module(SQLModel, table=True):
@@ -307,7 +311,7 @@ class CourseMember(SQLModel, table=True):
                                             index=True))
     account_id: int | None = Field(
         default=None, sa_column=Column(ForeignKey("account.id", ondelete="CASCADE"), index=True))
-    email: str | None = None  # pending invitation by e-mail (lower-case)
+    email: str | None = None  # only while pending (no account yet); cleared when the account is linked
     role: str  # instructor | student
     status: str = "pending"  # pending | active
     hidden_from_instructor: bool = False
@@ -434,3 +438,20 @@ class ModelEndpoint(SQLModel, table=True):
     updated_at: datetime = _ts(default_factory=utcnow)
     updated_by: int | None = None
     last_test_ok_at: datetime | None = _ts(default=None)
+
+
+
+class LoginIdentity(SQLModel, table=True):
+    """How an account signs in (course-structure.md 3.1): `password` now; Microsoft Entra ID or Brightspace
+    LTI later, without changing other tables."""
+
+    __tablename__ = "login_identity"
+    __table_args__ = (UniqueConstraint("provider", "subject"),)
+
+    id: int | None = Field(default=None, primary_key=True)
+    account_id: int = Field(sa_column=Column(ForeignKey("account.id", ondelete="CASCADE"), nullable=False,
+                                             index=True))
+    provider: str = "password"
+    # `account:<id>` for `password`; the provider's opaque subject ID later (never identity text)
+    subject: str
+    created_at: datetime = _ts(default_factory=utcnow)

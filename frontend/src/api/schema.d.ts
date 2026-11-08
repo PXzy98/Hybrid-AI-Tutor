@@ -458,6 +458,491 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Login */
+        post: operations["auth_login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Logout */
+        post: operations["auth_logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/auth/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Me
+         * @description Allowed even when a password change is pending, so the client knows to ask for it.
+         */
+        get: operations["auth_me"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/auth/change-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Change Password */
+        post: operations["auth_change_password"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/auth/join": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Join
+         * @description Join a course with its invitation code (course-structure.md 3.3). Logged in (a student): the pending
+         *     membership with the account's e-mail becomes active. Not logged in: a new account is created for an
+         *     e-mail on the course list, every pending membership of that e-mail becomes active, and the new account
+         *     is logged in.
+         */
+        post: operations["auth_join"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Courses */
+        get: operations["courses_list"];
+        put?: never;
+        /**
+         * Create Course
+         * @description The creator becomes the course's first instructor.
+         */
+        post: operations["courses_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Course */
+        get: operations["courses_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Course */
+        patch: operations["courses_update"];
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Archive Course */
+        post: operations["courses_archive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Members */
+        get: operations["members_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/members/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Import Members
+         * @description Students from a CSV (`email`, optional `display_name`; other columns are ignored and not stored).
+         */
+        post: operations["members_import"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/members/instructors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add Instructor
+         * @description A co-instructor: an existing instructor account, by e-mail (an admin creates instructor accounts).
+         */
+        post: operations["members_add_instructor"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/members/{member_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove Member */
+        delete: operations["members_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/members/{member_id}/reset-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reset Password */
+        post: operations["members_reset_password"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/invite": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Invite
+         * @description The current code's expiry and use count (not the code itself; null when there is none).
+         */
+        get: operations["invite_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/invite/rotate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Rotate Invite
+         * @description A new invitation code; the previous one stops working.
+         */
+        post: operations["invite_rotate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/modules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Modules */
+        get: operations["modules_list"];
+        put?: never;
+        /** Create Module */
+        post: operations["modules_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/modules/{module_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Module */
+        delete: operations["modules_delete"];
+        options?: never;
+        head?: never;
+        /** Update Module */
+        patch: operations["modules_update"];
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/modules/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reorder Modules */
+        post: operations["modules_reorder"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/kcs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Kcs */
+        get: operations["kcs_list"];
+        put?: never;
+        /** Create Kc */
+        post: operations["kcs_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/kcs/{kc_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Kc */
+        get: operations["kcs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update Kc
+         * @description Change a KC, its prerequisites (the full list), or retire it (`status: retired`).
+         */
+        patch: operations["kcs_update"];
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/check-items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Items */
+        get: operations["check_items_list"];
+        put?: never;
+        /** Create Item */
+        post: operations["check_items_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/check-items/{item_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Item */
+        get: operations["check_items_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update Item
+         * @description Edit an item; `status: active` publishes a draft, `retired` takes it out of use.
+         */
+        patch: operations["check_items_update"];
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/misconceptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Misconceptions */
+        get: operations["misconceptions_list"];
+        put?: never;
+        /** Create Misconception */
+        post: operations["misconceptions_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/misconceptions/{misconception_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Misconception */
+        get: operations["misconceptions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Misconception */
+        patch: operations["misconceptions_update"];
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/content/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Import Content
+         * @description Content in the YAML seed layout into a course without content (one module per folder).
+         */
+        post: operations["content_import"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/content/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Export Content */
+        get: operations["content_export"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/admin/model-endpoints": {
         parameters: {
             query?: never;
@@ -530,6 +1015,224 @@ export interface paths {
         patch: operations["course_model_endpoints_update"];
         trace?: never;
     };
+    "/api/v2/admin/instructors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Instructors */
+        get: operations["admin_instructors_list"];
+        put?: never;
+        /** Create Instructor */
+        post: operations["admin_instructors_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/admin/instructors/{account_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Instructor */
+        patch: operations["admin_instructors_update"];
+        trace?: never;
+    };
+    "/api/v2/admin/instructors/{account_id}/reset-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reset Password
+         * @description A temporary password; all sessions of the account end.
+         */
+        post: operations["admin_instructors_reset_password"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/admin/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get System */
+        get: operations["admin_settings_get"];
+        /** Put System */
+        put: operations["admin_settings_update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/admin/settings/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** System History */
+        get: operations["admin_settings_history"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/admin/settings/restore/{history_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Restore System */
+        post: operations["admin_settings_restore"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/admin/settings/apply-status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Apply Status
+         * @description Polled by the settings page while `apply_state` is `applying` (course-structure.md 6.5).
+         */
+        get: operations["admin_settings_apply_status"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Course */
+        get: operations["course_settings_get"];
+        /** Put Course */
+        put: operations["course_settings_update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/settings/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Course History */
+        get: operations["course_settings_history"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/settings/restore/{history_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Restore Course */
+        post: operations["course_settings_restore"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/me/preferences": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Preferences */
+        get: operations["me_preferences_get"];
+        /** Put Preferences */
+        put: operations["me_preferences_update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/me/consent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Consent */
+        get: operations["me_consent_get"];
+        /**
+         * Put Consent
+         * @description Withdrawing consent also forgets the learning profile (state, evidence, preferences).
+         */
+        put: operations["me_consent_update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -540,6 +1243,24 @@ export interface components {
             options: components["schemas"]["ConfigOptions"];
             /** History */
             history: components["schemas"]["ConfigChange"][];
+        };
+        /** ApplyStatusOut */
+        ApplyStatusOut: {
+            /**
+             * Apply State
+             * @enum {string}
+             */
+            apply_state: "applied" | "applying" | "failed";
+            /** Version */
+            version: number;
+            /** Target Version */
+            target_version: number | null;
+            /** Started At */
+            started_at: string | null;
+            /** Error */
+            error: string | null;
+            /** Processes */
+            processes: components["schemas"]["ProcessOut"][];
         };
         /**
          * AskBody
@@ -618,6 +1339,22 @@ export interface components {
              */
             routing_progress: components["schemas"]["RoutingProgress"][];
         };
+        /** Body_content_import */
+        Body_content_import: {
+            /**
+             * File
+             * @description ZIP: <module>/kcs.yaml, items.yaml, misconceptions.yaml
+             */
+            file: string;
+        };
+        /** Body_members_import */
+        Body_members_import: {
+            /**
+             * File
+             * @description CSV with an `email` column
+             */
+            file: string;
+        };
         /** Body_upload_material_api_v1_admin_topics__topic__materials_post */
         Body_upload_material_api_v1_admin_topics__topic__materials_post: {
             /** File */
@@ -625,6 +1362,13 @@ export interface components {
         };
         /** ChangePasswordBody */
         ChangePasswordBody: {
+            /** Current Password */
+            current_password: string;
+            /** New Password */
+            new_password: string;
+        };
+        /** ChangePasswordIn */
+        ChangePasswordIn: {
             /** Current Password */
             current_password: string;
             /** New Password */
@@ -744,6 +1488,16 @@ export interface components {
             /** Knowledge Models */
             knowledge_models: string[];
         };
+        /** ConsentIn */
+        ConsentIn: {
+            /** Given */
+            given: boolean;
+        };
+        /** ConsentOut */
+        ConsentOut: {
+            /** Given */
+            given: boolean | null;
+        };
         /** ContentStatus */
         ContentStatus: {
             /**
@@ -753,6 +1507,91 @@ export interface components {
             serve_unreviewed: boolean;
             /** Topics */
             topics: components["schemas"]["TopicContentStatus"][];
+        };
+        /** CourseIn */
+        CourseIn: {
+            /** Code */
+            code: string;
+            /** Title */
+            title: string;
+            /**
+             * Course Type
+             * @enum {string}
+             */
+            course_type: "medical_science" | "life_science" | "ece" | "general";
+            /**
+             * Term Label
+             * @default
+             */
+            term_label: string;
+        };
+        /** CourseOut */
+        CourseOut: {
+            /** Id */
+            id: number;
+            /** Code */
+            code: string;
+            /** Title */
+            title: string;
+            /** Term Label */
+            term_label: string;
+            /**
+             * Course Type
+             * @enum {string}
+             */
+            course_type: "medical_science" | "life_science" | "ece" | "general";
+            /**
+             * Visibility Mode
+             * @enum {string}
+             */
+            visibility_mode: "A" | "B";
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "archived";
+            /** My Role */
+            my_role: ("instructor" | "student") | null;
+        };
+        /** CoursePatch */
+        CoursePatch: {
+            /** Code */
+            code?: string | null;
+            /** Title */
+            title?: string | null;
+            /** Term Label */
+            term_label?: string | null;
+        };
+        /** CourseSettingsIn */
+        CourseSettingsIn: {
+            values: components["schemas"]["CourseValues"];
+            /** Version */
+            version: number;
+        };
+        /** CourseSettingsOut */
+        CourseSettingsOut: {
+            values: components["schemas"]["CourseValues"];
+            /** Version */
+            version: number;
+        };
+        /** CourseValues */
+        CourseValues: {
+            /** Course Type */
+            course_type?: ("medical_science" | "life_science" | "ece" | "general") | null;
+            /** Visibility Mode */
+            visibility_mode?: ("A" | "B") | null;
+            /** Local Only */
+            local_only?: boolean | null;
+            /** Routing Preference */
+            routing_preference?: ("default" | "prefer_local" | "prefer_cloud") | null;
+            /** Routing Threshold */
+            routing_threshold?: number | null;
+            /** Show Routing Progress */
+            show_routing_progress?: boolean | null;
+            /** Local Endpoint Id */
+            local_endpoint_id?: number | null;
+            /** Cloud Endpoint Id */
+            cloud_endpoint_id?: number | null;
         };
         /** CreateStudentBody */
         CreateStudentBody: {
@@ -938,6 +1777,178 @@ export interface components {
             /** Rag Impl */
             rag_impl: string;
         };
+        /** HistoryEntryOut */
+        HistoryEntryOut: {
+            /** Id */
+            id: number;
+            /**
+             * Changed At
+             * Format: date-time
+             */
+            changed_at: string;
+            /** Account Id */
+            account_id: number | null;
+            /** Version */
+            version: number | null;
+            /** Changed */
+            changed: string[];
+            /** Values */
+            values: {
+                [key: string]: unknown;
+            };
+            /** Previous */
+            previous: {
+                [key: string]: unknown;
+            };
+        };
+        /** ImportCountsOut */
+        ImportCountsOut: {
+            /** Modules */
+            modules: number;
+            /** Kcs */
+            kcs: number;
+            /** Items */
+            items: number;
+            /** Misconceptions */
+            misconceptions: number;
+        };
+        /** ImportReportOut */
+        ImportReportOut: {
+            /** Added */
+            added: string[];
+            /** Pending */
+            pending: string[];
+            /** Unchanged */
+            unchanged: string[];
+            /** Rejected */
+            rejected: components["schemas"]["RejectedRow"][];
+        };
+        /** InstructorIn */
+        InstructorIn: {
+            /** Email */
+            email: string;
+        };
+        /** InviteOut */
+        InviteOut: {
+            /** Expires At */
+            expires_at: string | null;
+            /** Uses */
+            uses: number;
+            /** Max Uses */
+            max_uses: number | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Expired */
+            expired: boolean;
+        };
+        /** ItemIn */
+        ItemIn: {
+            /** Kc Id */
+            kc_id: number;
+            /** Code */
+            code: string;
+            /**
+             * Level
+             * @enum {string}
+             */
+            level: "basic" | "intermediate" | "advanced";
+            /** Stem */
+            stem: string;
+            /** Options */
+            options: {
+                [key: string]: components["schemas"]["OptionModel"];
+            };
+            /**
+             * Answer
+             * @enum {string}
+             */
+            answer: "A" | "B" | "C" | "D";
+            /**
+             * Explanation
+             * @default
+             */
+            explanation: string;
+            /**
+             * Status
+             * @default active
+             * @enum {string}
+             */
+            status: "draft" | "active";
+        };
+        /** ItemOut */
+        ItemOut: {
+            /** Id */
+            id: number;
+            /** Kc Id */
+            kc_id: number;
+            /** Code */
+            code: string;
+            /**
+             * Level
+             * @enum {string}
+             */
+            level: "basic" | "intermediate" | "advanced";
+            /** Stem */
+            stem: string;
+            /** Options */
+            options: {
+                [key: string]: components["schemas"]["OptionModel"];
+            };
+            /**
+             * Answer
+             * @enum {string}
+             */
+            answer: "A" | "B" | "C" | "D";
+            /** Explanation */
+            explanation: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "draft" | "active" | "retired";
+        };
+        /** ItemPatch */
+        ItemPatch: {
+            /** Kc Id */
+            kc_id?: number | null;
+            /** Level */
+            level?: ("basic" | "intermediate" | "advanced") | null;
+            /** Stem */
+            stem?: string | null;
+            /** Options */
+            options?: {
+                [key: string]: components["schemas"]["OptionModel"];
+            } | null;
+            /** Answer */
+            answer?: ("A" | "B" | "C" | "D") | null;
+            /** Explanation */
+            explanation?: string | null;
+            /** Status */
+            status?: ("draft" | "active" | "retired") | null;
+        };
+        /**
+         * JoinIn
+         * @description Logged in: `code` only. New student: `code`, `email`, `display_name` and `password`.
+         */
+        JoinIn: {
+            /** Code */
+            code: string;
+            /** Email */
+            email?: string | null;
+            /** Display Name */
+            display_name?: string | null;
+            /** Password */
+            password?: string | null;
+        };
+        /** JoinOut */
+        JoinOut: {
+            /** Course Id */
+            course_id: number;
+            me: components["schemas"]["MeOut"];
+        };
         /** KcBand */
         KcBand: {
             /** Kc Id */
@@ -946,6 +1957,70 @@ export interface components {
             name: string;
             /** Band */
             band: string;
+        };
+        /** KcIn */
+        KcIn: {
+            /** Module Id */
+            module_id: number;
+            /** Code */
+            code: string;
+            /** Name */
+            name: string;
+            /**
+             * Definition
+             * @default
+             */
+            definition: string;
+            /**
+             * Difficulty
+             * @enum {string}
+             */
+            difficulty: "basic" | "intermediate" | "advanced";
+            /**
+             * Prerequisite Ids
+             * @default []
+             */
+            prerequisite_ids: number[];
+        };
+        /** KcOut */
+        KcOut: {
+            /** Id */
+            id: number;
+            /** Module Id */
+            module_id: number | null;
+            /** Code */
+            code: string;
+            /** Name */
+            name: string;
+            /** Definition */
+            definition: string;
+            /**
+             * Difficulty
+             * @enum {string}
+             */
+            difficulty: "basic" | "intermediate" | "advanced";
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "draft" | "active" | "retired";
+            /** Prerequisite Ids */
+            prerequisite_ids: number[];
+        };
+        /** KcPatch */
+        KcPatch: {
+            /** Module Id */
+            module_id?: number | null;
+            /** Name */
+            name?: string | null;
+            /** Definition */
+            definition?: string | null;
+            /** Difficulty */
+            difficulty?: ("basic" | "intermediate" | "advanced") | null;
+            /** Status */
+            status?: ("active" | "retired") | null;
+            /** Prerequisite Ids */
+            prerequisite_ids?: number[] | null;
         };
         /** KcRecommendation */
         KcRecommendation: {
@@ -1047,6 +2122,16 @@ export interface components {
             /** Password */
             password: string;
         };
+        /** LoginIn */
+        LoginIn: {
+            /**
+             * Username
+             * @description username or e-mail
+             */
+            username: string;
+            /** Password */
+            password: string;
+        };
         /** MaterialFile */
         MaterialFile: {
             /** Name */
@@ -1070,6 +2155,116 @@ export interface components {
             /** Must Change Password */
             must_change_password: boolean;
         };
+        /** MeOut */
+        MeOut: {
+            /** Account Id */
+            account_id: number;
+            /** Username */
+            username: string;
+            /** Email */
+            email: string | null;
+            /** Display Name */
+            display_name: string;
+            /**
+             * System Role
+             * @enum {string}
+             */
+            system_role: "admin" | "instructor" | "student";
+            /** Must Change Password */
+            must_change_password: boolean;
+            /** Memberships */
+            memberships: components["schemas"]["MembershipOut"][];
+        };
+        /** MemberOut */
+        MemberOut: {
+            /** Id */
+            id: number;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "instructor" | "student";
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "active";
+            /** Account Id */
+            account_id: number | null;
+            /** Username */
+            username: string | null;
+            /** Display Name */
+            display_name: string | null;
+            /** Email */
+            email: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** MembershipOut */
+        MembershipOut: {
+            /** Course Id */
+            course_id: number;
+            /** Code */
+            code: string;
+            /** Title */
+            title: string;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "instructor" | "student";
+            /** Course Status */
+            course_status: string;
+        };
+        /** MisconceptionIn */
+        MisconceptionIn: {
+            /** Kc Id */
+            kc_id: number;
+            /** Code */
+            code: string;
+            /** Statement */
+            statement: string;
+            /** Correction */
+            correction: string;
+            /**
+             * Status
+             * @default active
+             * @enum {string}
+             */
+            status: "draft" | "active";
+        };
+        /** MisconceptionOut */
+        MisconceptionOut: {
+            /** Id */
+            id: number;
+            /** Kc Id */
+            kc_id: number;
+            /** Code */
+            code: string;
+            /** Statement */
+            statement: string;
+            /** Correction */
+            correction: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "draft" | "active" | "retired";
+        };
+        /** MisconceptionPatch */
+        MisconceptionPatch: {
+            /** Kc Id */
+            kc_id?: number | null;
+            /** Statement */
+            statement?: string | null;
+            /** Correction */
+            correction?: string | null;
+            /** Status */
+            status?: ("draft" | "active" | "retired") | null;
+        };
         /** MisconceptionSummary */
         MisconceptionSummary: {
             /** Misconception Id */
@@ -1080,6 +2275,80 @@ export interface components {
             statement: string;
             /** Students */
             students: number;
+        };
+        /** ModuleIn */
+        ModuleIn: {
+            /** Code */
+            code: string;
+            /** Title */
+            title: string;
+            /**
+             * Guideline
+             * @default
+             */
+            guideline: string;
+        };
+        /** ModuleOut */
+        ModuleOut: {
+            /** Id */
+            id: number;
+            /** Code */
+            code: string;
+            /** Title */
+            title: string;
+            /** Position */
+            position: number;
+            /** Guideline */
+            guideline: string | null;
+        };
+        /** ModulePatch */
+        ModulePatch: {
+            /** Title */
+            title?: string | null;
+            /** Guideline */
+            guideline?: string | null;
+        };
+        /** NewInviteOut */
+        NewInviteOut: {
+            /** Expires At */
+            expires_at: string | null;
+            /** Uses */
+            uses: number;
+            /** Max Uses */
+            max_uses: number | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Expired */
+            expired: boolean;
+            /** Code */
+            code: string;
+        };
+        /** NewStaffOut */
+        NewStaffOut: {
+            /** Account Id */
+            account_id: number;
+            /** Username */
+            username: string;
+            /** Email */
+            email: string | null;
+            /** Display Name */
+            display_name: string;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "instructor" | "admin";
+            /** Active */
+            active: boolean;
+            /** Must Change Password */
+            must_change_password: boolean;
+            /** Last Login At */
+            last_login_at: string | null;
+            /** Temporary Password */
+            temporary_password: string;
         };
         /** OllamaStatus */
         OllamaStatus: {
@@ -1156,6 +2425,13 @@ export interface components {
              */
             status: "suspected" | "confirmed";
         };
+        /** OptionModel */
+        OptionModel: {
+            /** Text */
+            text: string;
+            /** Misconception */
+            misconception?: string | null;
+        };
         /** PreferenceAnswers */
         PreferenceAnswers: {
             /** Sequencing */
@@ -1196,6 +2472,27 @@ export interface components {
              */
             source: "default" | "onboarding" | "feedback";
         };
+        /** PreferencesIn */
+        PreferencesIn: {
+            /** Sequencing */
+            sequencing?: ("example_first" | "concept_first") | null;
+            /** Detail */
+            detail?: ("concise" | "detailed") | null;
+        };
+        /** ProcessOut */
+        ProcessOut: {
+            /** Kind */
+            kind: string;
+            /**
+             * Last Seen
+             * Format: date-time
+             */
+            last_seen: string;
+            /** Component Version */
+            component_version: number;
+            /** Error */
+            error: string | null;
+        };
         /** Profile */
         Profile: {
             /** Personalized */
@@ -1227,6 +2524,20 @@ export interface components {
             passage_count: number;
             /** Message */
             message?: string | null;
+        };
+        /** RejectedRow */
+        RejectedRow: {
+            /** Row */
+            row: number;
+            /** Email */
+            email: string;
+            /** Reason */
+            reason: string;
+        };
+        /** ReorderIn */
+        ReorderIn: {
+            /** Module Ids */
+            module_ids: number[];
         };
         /** RouteScore */
         RouteScore: {
@@ -1403,6 +2714,50 @@ export interface components {
              */
             kc_ids: string[];
         };
+        /** StaffIn */
+        StaffIn: {
+            /** Email */
+            email: string;
+            /** Display Name */
+            display_name: string;
+            /**
+             * Role
+             * @default instructor
+             * @enum {string}
+             */
+            role: "instructor" | "admin";
+        };
+        /** StaffOut */
+        StaffOut: {
+            /** Account Id */
+            account_id: number;
+            /** Username */
+            username: string;
+            /** Email */
+            email: string | null;
+            /** Display Name */
+            display_name: string;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "instructor" | "admin";
+            /** Active */
+            active: boolean;
+            /** Must Change Password */
+            must_change_password: boolean;
+            /** Last Login At */
+            last_login_at: string | null;
+        };
+        /** StaffPatch */
+        StaffPatch: {
+            /** Active */
+            active?: boolean | null;
+            /** Role */
+            role?: ("instructor" | "admin") | null;
+            /** Display Name */
+            display_name?: string | null;
+        };
         /** StudentAccountOut */
         StudentAccountOut: {
             /** Id */
@@ -1465,8 +2820,57 @@ export interface components {
             /** Mean Source Confidence */
             mean_source_confidence?: number | null;
         };
+        /** SystemSettingsIn */
+        SystemSettingsIn: {
+            values: components["schemas"]["SystemValues"];
+            /** Version */
+            version: number;
+        };
+        /** SystemSettingsOut */
+        SystemSettingsOut: {
+            values: components["schemas"]["SystemValues"];
+            /** Version */
+            version: number;
+            /**
+             * Apply State
+             * @enum {string}
+             */
+            apply_state: "applied" | "applying" | "failed";
+        };
+        /** SystemValues */
+        SystemValues: {
+            /** Checkers */
+            checkers?: string[] | null;
+            /** Weak Evidence */
+            weak_evidence?: boolean | null;
+            /** Level Basic Below */
+            level_basic_below?: number | null;
+            /** Level Advanced Above */
+            level_advanced_above?: number | null;
+            /** Level Hysteresis */
+            level_hysteresis?: number | null;
+            /** Knowledge Model */
+            knowledge_model?: string | null;
+            /** Default Routing Method */
+            default_routing_method?: ("lr" | "svm") | null;
+            /** Local Llm Url */
+            local_llm_url?: string | null;
+            /** Local Llm Model */
+            local_llm_model?: string | null;
+            /** Enabled Course Types */
+            enabled_course_types?: ("medical_science" | "life_science" | "ece" | "general")[] | null;
+            /** Default Local Endpoint Id */
+            default_local_endpoint_id?: number | null;
+            /** Default Cloud Endpoint Id */
+            default_cloud_endpoint_id?: number | null;
+        };
         /** TemporaryPassword */
         TemporaryPassword: {
+            /** Temporary Password */
+            temporary_password: string;
+        };
+        /** TemporaryPasswordOut */
+        TemporaryPasswordOut: {
             /** Temporary Password */
             temporary_password: string;
         };
@@ -2448,6 +3852,1190 @@ export interface operations {
             };
         };
     };
+    auth_login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    auth_logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    auth_me: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeOut"];
+                };
+            };
+        };
+    };
+    auth_change_password: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangePasswordIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    auth_join: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JoinIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JoinOut"];
+                };
+            };
+            /** @description invalid code, or the e-mail is not on the course list */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description too many attempts */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    courses_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseOut"][];
+                };
+            };
+        };
+    };
+    courses_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CourseIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    courses_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    courses_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CoursePatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    courses_archive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseOut"];
+                };
+            };
+            /** @description the course still has students (end the term first) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    members_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    members_import: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_members_import"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportReportOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    members_add_instructor: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InstructorIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    members_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                member_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    members_reset_password: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                member_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TemporaryPasswordOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    invite_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InviteOut"] | null;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    invite_rotate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NewInviteOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    modules_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModuleOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    modules_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ModuleIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModuleOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    modules_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                module_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description the module still has KCs or materials */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    modules_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                module_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ModulePatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModuleOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    modules_reorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReorderIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModuleOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    kcs_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KcOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    kcs_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["KcIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KcOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    kcs_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                kc_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KcOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    kcs_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                kc_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["KcPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KcOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    check_items_list: {
+        parameters: {
+            query?: {
+                kc_id?: number | null;
+            };
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    check_items_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ItemIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    check_items_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    check_items_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ItemPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    misconceptions_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MisconceptionOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    misconceptions_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MisconceptionIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MisconceptionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    misconceptions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                misconception_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MisconceptionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    misconceptions_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                misconception_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MisconceptionPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MisconceptionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    content_import: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_content_import"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportCountsOut"];
+                };
+            };
+            /** @description the course already has modules */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    content_export: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/zip": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     model_endpoints_list: {
         parameters: {
             query?: never;
@@ -2684,6 +5272,532 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EndpointOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_instructors_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffOut"][];
+                };
+            };
+        };
+    };
+    admin_instructors_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StaffIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NewStaffOut"];
+                };
+            };
+            /** @description an account with this e-mail exists */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_instructors_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                account_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StaffPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_instructors_reset_password: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                account_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TemporaryPasswordOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_settings_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SystemSettingsOut"];
+                };
+            };
+        };
+    };
+    admin_settings_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SystemSettingsIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SystemSettingsOut"];
+                };
+            };
+            /** @description changed since it was read */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description a change is still being applied */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    admin_settings_history: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HistoryEntryOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_settings_restore: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                history_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SystemSettingsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_settings_apply_status: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplyStatusOut"];
+                };
+            };
+        };
+    };
+    course_settings_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseSettingsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    course_settings_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CourseSettingsIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseSettingsOut"];
+                };
+            };
+            /** @description changed since it was read */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    course_settings_history: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HistoryEntryOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    course_settings_restore: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                history_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseSettingsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    me_preferences_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Preferences"];
+                };
+            };
+        };
+    };
+    me_preferences_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreferencesIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Preferences"];
+                };
+            };
+            /** @description consent required */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    me_consent_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentOut"];
+                };
+            };
+        };
+    };
+    me_consent_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConsentIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentOut"];
                 };
             };
             /** @description Validation Error */

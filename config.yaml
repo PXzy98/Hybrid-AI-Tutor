@@ -89,6 +89,15 @@ limits:
   models:
     max_concurrent: 4            # requests at the same time per model connection (vLLM batches them)
     queue_timeout_seconds: 60    # a request waiting longer for a slot gets "the model is busy"
+  accounts:
+    allowed_email_domains: [uottawa.ca]  # roster import and activation (demo accounts use demo.invalid)
+    invite_code_length: 10
+    invite_expiry_days: 120      # a course invitation code expires after this; rotate it to get a new one
+    join_attempts_per_hour: 20   # POST /api/v2/auth/join, per client address
+    max_roster_rows: 2000
+    max_roster_bytes: 1000000
+  content:
+    max_import_bytes: 5000000    # content ZIP (YAML seed layout) for POST .../content/import
 
 content:
   dir: content/topics

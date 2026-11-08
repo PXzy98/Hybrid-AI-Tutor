@@ -228,9 +228,27 @@ class ModelLimits(Section):
     queue_timeout_seconds: float = Field(60.0, gt=0, le=600)
 
 
+class AccountLimits(Section):
+    """Enrollment (course-structure.md 3.1, 3.3; task Z9)."""
+
+    # e-mail domains a roster import and an activation accept (lower-case); demo accounts use demo.invalid
+    allowed_email_domains: list[str] = ["uottawa.ca"]
+    invite_code_length: int = Field(10, ge=8, le=32)
+    invite_expiry_days: float = Field(120, gt=0, le=730)
+    join_attempts_per_hour: int = Field(20, ge=1, le=10_000)  # per client address, for POST /auth/join
+    max_roster_rows: int = Field(2000, ge=1, le=100_000)
+    max_roster_bytes: int = Field(1_000_000, ge=1_000, le=50_000_000)
+
+
+class ContentLimits(Section):
+    max_import_bytes: int = Field(5_000_000, ge=1_000, le=200_000_000)  # content ZIP upload (task Z9)
+
+
 class LimitsConfig(Section):
     settings: SettingsApplyLimits = SettingsApplyLimits()
     models: ModelLimits = ModelLimits()
+    accounts: AccountLimits = AccountLimits()
+    content: ContentLimits = ContentLimits()
 
 
 class CourseConfig(Section):

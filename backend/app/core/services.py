@@ -14,6 +14,7 @@ from app.llm.endpoints import check_keys_readable
 from app.llm.factory import build_llm_clients
 from app.llm.gateway import Gateway
 from app.platform.components import ComponentManager, Components
+from app.platform.courses import CourseService
 from app.platform.settings import SettingsService, configure, migrate_v1_history
 from app.rag import Retriever, load_retriever
 from app.routing import RouteScorer, load_router
@@ -37,6 +38,7 @@ class Services:
     components: Components | None = None
     component_manager: ComponentManager | None = None
     gateway: Gateway | None = None  # the model gateway (task Z6)
+    courses: CourseService | None = None  # courses, members, invitation codes (task Z9)
 
     # the current component set; one reference, swapped as a whole
     @property
@@ -105,6 +107,9 @@ def build_services(settings: Settings | None = None) -> Services:
     secret = settings.settings_encryption_key.get_secret_value() if settings.settings_encryption_key else None
     check_keys_readable(engine, secret)  # stored API keys need SETTINGS_ENCRYPTION_KEY (design 6.3)
     services.gateway = Gateway(services)
+    services.accounts.default_course_id = content.course_id  # API v1 = the demo course
+    services.courses = CourseService(engine, services.accounts, settings.limits.accounts,
+                                     lambda: settings_service.system_values()[0].get("enabled_course_types"))
     services.component_manager = ComponentManager(services, settings)
     services.components = services.component_manager.initial()
     return services

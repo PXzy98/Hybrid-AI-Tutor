@@ -5,6 +5,12 @@ from app.api.deps import ServicesDep
 from app.auth.deps import CurrentUserDep
 from app.auth.service import AccountLocked, InvalidCredentials, PasswordPolicyError
 
+
+def v1_role(role: str) -> str:
+    """API v1 knows `student` and `instructor`; an admin sees the instructor pages there (rule 15)."""
+    return "instructor" if role == "admin" else role
+
+
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 GENERIC_LOGIN_ERROR = "invalid username or password"
@@ -39,7 +45,7 @@ def login(body: LoginBody, response: Response, services: ServicesDep):
                             "too many failed attempts; try again later") from None
     response.set_cookie(cfg.cookie_name, token, max_age=int(cfg.session_ttl_hours * 3600), httponly=True,
                         samesite="lax", secure=cfg.cookie_secure, path="/")
-    return Me(username=account.username, display_name=account.display_name, role=account.role,
+    return Me(username=account.username, display_name=account.display_name, role=v1_role(account.role),
               must_change_password=account.must_change_password)
 
 
@@ -53,7 +59,7 @@ def logout(request: Request, response: Response, services: ServicesDep):
 @router.get("/me", response_model=Me)
 def me(user: CurrentUserDep):
     """Allowed even when a password change is pending, so the client knows to ask for it."""
-    return Me(username=user.username, display_name=user.display_name, role=user.role,
+    return Me(username=user.username, display_name=user.display_name, role=v1_role(user.role),
               must_change_password=user.must_change_password)
 
 
@@ -66,5 +72,5 @@ def change_password(body: ChangePasswordBody, user: CurrentUserDep, services: Se
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "current password is wrong") from None
     except PasswordPolicyError as e:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(e)) from None
-    return Me(username=account.username, display_name=account.display_name, role=account.role,
+    return Me(username=account.username, display_name=account.display_name, role=v1_role(account.role),
               must_change_password=account.must_change_password)

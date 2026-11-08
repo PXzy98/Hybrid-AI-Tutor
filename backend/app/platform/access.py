@@ -77,3 +77,32 @@ def require_system_role(*roles: SystemRole):
         return user
 
     return dependency
+
+
+class DbCourseDirectory:
+    """Course memberships from the database (task Z9): an active member of an active course, with an active
+    account. An admin may manage every course (course-structure.md 3.2) and gets the instructor role."""
+
+    def __init__(self, engine) -> None:
+        self.engine = engine
+
+    def membership(self, account_id: int, course_id: int) -> CourseAccess | None:
+        from sqlmodel import Session, select
+
+        from app.storage.models import Account, Course, CourseMember
+
+        with Session(self.engine) as db:
+            account, course = db.get(Account, account_id), db.get(Course, course_id)
+            if account is None or not account.active or course is None:
+                return None
+            ref = CourseRef(id=course.id, code=course.code, title=course.title,
+                            course_type=course.course_type)
+            if account.role == "admin":
+                return CourseAccess(course=ref, account_id=account_id, role="instructor", student_id=None)
+            member = db.exec(select(CourseMember).where(CourseMember.course_id == course_id,
+                                                        CourseMember.account_id == account_id,
+                                                        CourseMember.status == "active")).first()
+            if member is None or (course.status != "active" and member.role == "student"):
+                return None
+            return CourseAccess(course=ref, account_id=account_id, role=member.role,
+                                student_id=account.student_id if member.role == "student" else None)
