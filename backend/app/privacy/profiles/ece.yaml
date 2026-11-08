@@ -1,4 +1,10 @@
-# Electrical and computer engineering: keys, tokens, repository URLs, internal IPs, ...: task Z11.
+# Electrical and computer engineering (task Z11): what students paste from labs and projects.
 # Circuit and signal values (V, mA, kOhm, Hz, dB) are not personal readings, so no medical rules here.
+# Keys and tokens are in the base layer (secret_token); test set: eval/privacy-filter/ece_cases.jsonl.
 extends: base
-recognizers: []
+recognizers:
+  - internal_address   # private IPv4 host addresses (with a port) and MAC addresses; "10.0.0.0/8" is kept
+  - repo_url           # github.com/<account>/<repo> and other code hosts: the account names the student
+consent_note: >-
+  Please remove passwords, API keys and lab network addresses from code you paste; the tutor also removes
+  the ones it recognises before anything leaves the course's servers.

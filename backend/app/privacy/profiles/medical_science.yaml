@@ -7,3 +7,6 @@ recognizers:
 health_detail_policy: generalize   # a checked hypothetical rewrite may go to the cloud (approved 20 Oct 2026)
 checkers: [medical_safety]
 medical_disclaimer: true           # "not medical advice"
+consent_note: >-
+  Questions about your own health are answered by the course's local model; at most a general rewrite
+  without your personal details may go to an external service. The tutor does not give medical advice.

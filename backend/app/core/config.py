@@ -78,7 +78,8 @@ class PrivacyConfig(Section):
     spacy_model: str = "en_core_web_lg"
     score_threshold: float = Field(0.5, ge=0, le=1)
     entities: list[str] = ["PERSON", "EMAIL_ADDRESS", "PHONE_NUMBER", "STUDENT_ID", "GRADE", "HEALTH_DETAIL",
-                           "POSTAL_CODE", "HEALTH_CARD", "ID_NUMBER", "DATE_OF_BIRTH", "ADDRESS"]
+                           "POSTAL_CODE", "HEALTH_CARD", "ID_NUMBER", "DATE_OF_BIRTH", "ADDRESS", "SECRET",
+                           "INTERNAL_ADDRESS", "REPO_URL"]
     local_only_types: list[str] = ["HEALTH_DETAIL"]
     # a question with a local-only finding (a personal health detail): answer it locally (the code default, a
     # safe fallback), or let the local model rewrite it as a general question about a hypothetical person and
