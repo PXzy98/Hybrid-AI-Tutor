@@ -18,27 +18,35 @@ class AttemptWindow:
             q.popleft()
         return q
 
+    def _wait_locked(self, key: str, now: float) -> int:
+        q = self._trim(key, now)
+        return max(1, int(q[0] + 3600 - now) + 1) if len(q) >= self.per_hour else 0
+
+    def _add_locked(self, key: str, now: float) -> None:
+        self._trim(key, now).append(now)
+        if len(self._seen) > 10_000:  # forget idle addresses
+            for k in [k for k, v in self._seen.items() if not v]:
+                del self._seen[k]
+
     def wait(self, key: str) -> int:
         """0 if another attempt is allowed now, else the seconds until it is."""
-        now = time.monotonic()
         with self._lock:
-            q = self._trim(key, now)
-            return max(1, int(q[0] + 3600 - now) + 1) if len(q) >= self.per_hour else 0
+            return self._wait_locked(key, time.monotonic())
 
     def add(self, key: str) -> None:
-        now = time.monotonic()
+        """Count an attempt whose outcome is known only afterwards (a failed login)."""
         with self._lock:
-            self._trim(key, now).append(now)
-            if len(self._seen) > 10_000:  # forget idle addresses
-                for k in [k for k, v in self._seen.items() if not v]:
-                    del self._seen[k]
+            self._add_locked(key, time.monotonic())
 
     def allow(self, key: str) -> int:
-        """Count this attempt if allowed: 0, else the seconds to wait (nothing is counted)."""
-        wait = self.wait(key)
-        if not wait:
-            self.add(key)
-        return wait
+        """Check and count this attempt in one step (parallel requests cannot both pass): 0 if allowed,
+        else the seconds to wait (nothing is counted)."""
+        with self._lock:
+            now = time.monotonic()
+            wait = self._wait_locked(key, now)
+            if not wait:
+                self._add_locked(key, now)
+            return wait
 
 
 def window(app_state, name: str, per_hour: int) -> AttemptWindow:

@@ -152,3 +152,25 @@ def test_the_app_installs_the_database_meter(make_client):
         with Session(services.engine) as db:
             assert db.exec(select(UsageCounter).where(UsageCounter.student_id == "sid-d")).first() is not None
     usage.configure(None)  # back to NoLimits for tests without the app
+
+
+def test_parallel_attempts_cannot_pass_the_limit_together():
+    import threading
+
+    from app.auth.ratelimit import AttemptWindow
+
+    window = AttemptWindow(per_hour=5)
+    start = threading.Barrier(40)
+    allowed = []
+
+    def attempt():
+        start.wait()
+        if window.allow("client") == 0:
+            allowed.append(1)
+
+    threads = [threading.Thread(target=attempt) for _ in range(40)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    assert len(allowed) == 5 and window.wait("client") > 0
