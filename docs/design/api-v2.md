@@ -140,6 +140,9 @@ logged in. Owner = component owner who implements it.
 | `DELETE /courses/{course_id}/ai/drafts/{draft_id}` | I | S | discard |
 | `POST /courses/{course_id}/ai/evaluations` | I | Z | start a local vs cloud evaluation (tier 4); returns a job |
 | `GET /courses/{course_id}/ai/evaluations[/{eval_id}]` | I | Z | reports |
+| `PUT /courses/{course_id}/ai/evaluations/{eval_id}/questions` | I | Z | the instructor's review of the generated questions (while `review`) |
+| `POST /courses/{course_id}/ai/evaluations/{eval_id}/run` | I | Z | answer and score; needs `confirm_cloud: true` (course material goes to the cloud model); 409 in a local-only course |
+| `PATCH /courses/{course_id}/ai/evaluations/{eval_id}/results/{question_id}` | I | Z | the instructor's spot check of one scored question |
 
 ### 3.8 Operations (owner Z)
 

@@ -302,6 +302,12 @@ class Settings(BaseSettings):
     database_url: str | None = None
     database_pooled: bool = True  # False: one connection per use (tests and short-lived tools)
     pgpassword: SecretStr | None = None  # PGPASSWORD: the database password, kept out of DATABASE_URL
+    # course materials, indexes, exports: courses/<id>/... (course-structure.md 7); relative to the repository
+    data_dir: str = "var"
+
+    def data_path(self) -> Path:
+        p = Path(self.data_dir)
+        return p if p.is_absolute() else REPO_ROOT / p
 
     @field_validator(
         "cloud_api_key", "cloud_model", "instructor_username", "instructor_initial_password", "pgpassword",

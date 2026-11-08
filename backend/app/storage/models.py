@@ -407,6 +407,46 @@ class UsageCounter(SQLModel, table=True):
     tokens: int = 0
 
 
+class Job(SQLModel, table=True):
+    """A background job, run by the worker (api-v2.md 3.4 `GET .../jobs/{job_id}`; task Z12)."""
+
+    __tablename__ = "job"
+
+    id: int | None = Field(default=None, primary_key=True)
+    course_id: int | None = Field(default=None, sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"),
+                                                                 index=True))
+    kind: str = Field(index=True)  # e.g. ai_evaluation.generate
+    ref_id: int | None = None  # the row the job works on (e.g. ai_evaluation.id)
+    status: str = Field(default="queued", index=True)  # queued | running | done | failed
+    progress: int = 0  # percent
+    error: str | None = None  # a short English message, never course or student text
+    created_by: int | None = None  # account id
+    created_at: datetime = _ts(default_factory=utcnow)
+    started_at: datetime | None = _ts(default=None)
+    finished_at: datetime | None = _ts(default=None)
+
+
+class AiEvaluation(SQLModel, table=True):
+    """Instructor AI tier 4: can the local model handle this course? (guide 4.9; task Z12). Generated
+    questions, answers and scores are course content; no student data is used."""
+
+    __tablename__ = "ai_evaluation"
+
+    id: int | None = Field(default=None, primary_key=True)
+    course_id: int = Field(sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=False,
+                                            index=True))
+    created_by: int | None = None
+    # generating -> review (the instructor checks the questions) -> running -> done | failed
+    status: str = "generating"
+    options: dict = Field(default_factory=dict, sa_column=Column(JSON, nullable=False))
+    questions: list = Field(default_factory=list, sa_column=Column(JSON, nullable=False))
+    results: list = Field(default_factory=list, sa_column=Column(JSON, nullable=False))
+    report: dict = Field(default_factory=dict, sa_column=Column(JSON, nullable=False))
+    error: str | None = None
+    created_at: datetime = _ts(default_factory=utcnow)
+    updated_at: datetime = _ts(default_factory=utcnow)
+
+
 class ProcessStatus(SQLModel, table=True):
     """Heartbeat of every api/worker process (design §6.5): which component version it runs."""
 
