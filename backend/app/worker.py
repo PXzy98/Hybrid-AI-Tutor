@@ -3,8 +3,9 @@
 
 It builds the same services as the api (database, settings, model gateway) and runs the component loop,
 so it takes part in live settings switches (course-structure.md 6.5) and shows up in `process_status`.
-Background jobs (index rebuilds, instructor AI drafts, evaluations, the daily usage reset) are added here
-as their tasks land; it runs no job yet.
+It also runs the background jobs (`app.platform.jobs`) in a second thread, one at a time, so a long job (an
+instructor AI evaluation) never delays the heartbeat. Running now: the instructor AI evaluation (Z12); index
+rebuilds, drafts and the daily usage reset are added as their tasks land.
 
 `python -m app.worker --check` is the container health check: the worker touches a heartbeat file on every
 round, and the check fails when it is older than three rounds.
@@ -33,6 +34,22 @@ def run(stop: threading.Event | None = None) -> None:
     manager.process_id = "worker-" + manager.process_id
     poll = services.settings.limits.settings.poll_seconds
     log.info("worker started (%s)", manager.process_id)
+    from app.platform import jobs
+
+    if jobs.fail_stale(services.engine):
+        log.warning("jobs left running by a stopped worker were marked failed")
+
+    def job_loop() -> None:
+        while not stop.is_set():
+            try:
+                if not jobs.run_one(services):
+                    stop.wait(poll)
+            except Exception:  # noqa: BLE001 - e.g. the database is briefly unreachable
+                log.exception("job round failed")
+                stop.wait(poll)
+
+    runner = threading.Thread(target=job_loop, name="jobs", daemon=True)
+    runner.start()
     try:
         while not stop.is_set():
             try:
@@ -42,6 +59,8 @@ def run(stop: threading.Event | None = None) -> None:
                 log.exception("worker round failed")
             stop.wait(poll)
     finally:
+        stop.set()
+        runner.join(timeout=30)  # a job in progress finishes its current model call
         manager.stop()
         services.engine.dispose()
         log.info("worker stopped")
