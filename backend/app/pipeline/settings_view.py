@@ -14,6 +14,13 @@ def default_routing_method(ctx: RequestContext, services) -> str:
     return ctx.settings.default_routing_method if ctx.settings else services.settings.routing.default_method
 
 
+def health_detail_policy(ctx: RequestContext, services) -> str:
+    """The stricter of the course's privacy profile and config.yaml: local_only wins (task Z7)."""
+    configured = services.settings.privacy.health_detail_policy
+    profile = ctx.profile.health_detail_policy if ctx.profile else configured
+    return "local_only" if "local_only" in (configured, profile) else "generalize"
+
+
 def local_only(ctx: RequestContext) -> bool:
     """The course uses the local model only (course setting `local_only`)."""
     return bool(ctx.settings and ctx.settings.local_only)

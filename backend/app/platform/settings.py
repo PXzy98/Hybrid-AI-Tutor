@@ -44,7 +44,11 @@ SYSTEM_FIELDS = ("checkers", "weak_evidence", "level_basic_below", "level_advanc
 COURSE_FIELDS = ("course_type", "visibility_mode", "local_only", "routing_preference", "routing_threshold",
                  "show_routing_progress", "usage_questions_per_minute", "usage_questions_per_day",
                  "usage_cloud_calls_per_day")
-COURSE_TYPES = ("medical_science", "life_science", "ece", "general")
+def course_types() -> list[str]:
+    """The course types are the privacy profiles (app/privacy/profiles/*.yaml, task Z7)."""
+    from app.privacy.profiles import profile_names
+
+    return profile_names()
 
 
 class SettingsError(ValueError):
@@ -134,7 +138,7 @@ def validate_system(values: dict) -> dict:
             raise SettingsError("the local model name must be one word, e.g. qwen3.5:9b")
         out["local_llm_model"] = model
     if out.get("enabled_course_types") is not None and \
-            not set(out["enabled_course_types"]) <= set(COURSE_TYPES):
+            not set(out["enabled_course_types"]) <= set(course_types()):
         raise SettingsError("unknown course type")
     return out
 
@@ -144,7 +148,7 @@ def validate_course(values: dict) -> dict:
     if unknown:
         raise SettingsError(f"unknown course setting(s): {', '.join(sorted(unknown))}")
     out = dict(values)
-    if out.get("course_type") not in (None, *COURSE_TYPES):
+    if out.get("course_type") is not None and out["course_type"] not in course_types():
         raise SettingsError("unknown course type")
     if out.get("visibility_mode") not in (None, "A", "B"):
         raise SettingsError("visibility_mode must be A or B")

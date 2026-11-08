@@ -1,0 +1,9 @@
+# Medical science: the full v3 health rules (guide 4.7).
+extends: base
+recognizers:
+  - health_context   # condition and medicine names next to a personal statement
+  - health_extra     # readings, symptoms with a duration, ...
+  - fr_health
+health_detail_policy: generalize   # a checked hypothetical rewrite may go to the cloud (approved 20 Oct 2026)
+checkers: [medical_safety]
+medical_disclaimer: true           # "not medical advice"

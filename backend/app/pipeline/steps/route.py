@@ -4,7 +4,7 @@ from time import perf_counter
 from app.core.registry import steps
 from app.core.schemas import RequestContext, RouteInput
 from app.pipeline.base import BaseStep
-from app.pipeline.settings_view import local_only, routing_threshold
+from app.pipeline.settings_view import health_detail_policy, local_only, routing_threshold
 from app.pipeline.steps.analyze_route import route_input
 from app.routing.evidence import assess_evidence, select_passages
 
@@ -43,7 +43,7 @@ class RouteStep(BaseStep):
         )
         score = await asyncio.to_thread(self.services.router.route_score, x)
         if score.score >= threshold:
-            generalize = self.services.settings.privacy.health_detail_policy == "generalize"
+            generalize = health_detail_policy(ctx, self.services) == "generalize"
             if cfg.force_local_if_not_cloud_safe and not ctx.pii.cloud_safe and not generalize:
                 score = score.model_copy(update={"reasons": [*score.reasons, "forced local: not cloud_safe"]})
             else:

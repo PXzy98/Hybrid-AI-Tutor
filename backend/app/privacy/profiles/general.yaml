@@ -1,0 +1,3 @@
+# General (default): the base layer only.
+extends: base
+recognizers: []

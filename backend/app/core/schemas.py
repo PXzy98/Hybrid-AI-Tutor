@@ -278,7 +278,7 @@ class AskResponse(BaseModel):
 
 
 # ---------------------------------------------------------------- v4 course scope (course-structure.md)
-CourseType = Literal["medical_science", "life_science", "ece", "general"]
+CourseType = str  # a privacy profile name: app/privacy/profiles/<name>.yaml (task Z7)
 VisibilityMode = Literal["A", "B"]
 
 
@@ -330,7 +330,7 @@ class PrivacyProfile(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     name: CourseType
-    recognizers: tuple[str, ...] = ()  # names of the extra recognizers on top of the base layer
+    recognizers: tuple[str, ...] = ()  # every custom recognizer of the profile (base layer + its own)
     health_detail_policy: Literal["local_only", "generalize"] = "local_only"
     checkers: tuple[str, ...] = ()  # extra checkers this profile turns on, e.g. medical_safety
     medical_disclaimer: bool = False
