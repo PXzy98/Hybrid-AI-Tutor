@@ -10,7 +10,9 @@ from app.learner.content import ContentStore
 from app.learner.facade import LearnerModel
 from app.llm.base import LLMClient
 from app.llm.cloud_guard import CloudClient
+from app.llm.endpoints import check_keys_readable
 from app.llm.factory import build_llm_clients
+from app.llm.gateway import Gateway
 from app.platform.components import ComponentManager, Components
 from app.platform.settings import SettingsService, configure, migrate_v1_history
 from app.rag import Retriever, load_retriever
@@ -34,6 +36,7 @@ class Services:
     settings_service: SettingsService
     components: Components | None = None
     component_manager: ComponentManager | None = None
+    gateway: Gateway | None = None  # the model gateway (task Z6)
 
     # the current component set; one reference, swapped as a whole
     @property
@@ -99,6 +102,9 @@ def build_services(settings: Settings | None = None) -> Services:
         content=content,
         settings_service=settings_service,
     )
+    secret = settings.settings_encryption_key.get_secret_value() if settings.settings_encryption_key else None
+    check_keys_readable(engine, secret)  # stored API keys need SETTINGS_ENCRYPTION_KEY (design 6.3)
+    services.gateway = Gateway(services)
     services.component_manager = ComponentManager(services, settings)
     services.components = services.component_manager.initial()
     return services

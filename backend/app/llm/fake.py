@@ -27,6 +27,13 @@ class FakeLLMClient:
         return LLMResult(text=text, model=self.model, backend=self.backend, prompt_tokens=10,
                          completion_tokens=20, latency_ms=1.0)
 
+    async def stream(self, messages: list[Message], *, json_schema: dict | None = None,
+                     max_tokens: int | None = None):
+        result = await self.complete(messages, json_schema=json_schema, max_tokens=max_tokens)
+        words = result.text.split(" ")
+        for i, word in enumerate(words):
+            yield word + (" " if i < len(words) - 1 else "")
+
     @property
     def last_messages(self) -> list[Message]:
         return self.calls[-1]["messages"]

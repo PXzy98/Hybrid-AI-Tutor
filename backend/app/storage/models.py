@@ -353,8 +353,12 @@ class SystemSettings(_SettingsMeta, table=True):
     level_hysteresis: float | None = None
     knowledge_model: str | None = None  # component
     default_routing_method: str | None = None  # component
-    local_llm_url: str | None = None  # component; replaced by model endpoints in Z6
+    local_llm_url: str | None = None  # component; v1 dashboard (a model endpoint takes precedence, Z6)
     local_llm_model: str | None = None  # component
+    default_local_endpoint_id: int | None = Field(
+        default=None, sa_column=Column(ForeignKey("model_endpoint.id", ondelete="SET NULL")))
+    default_cloud_endpoint_id: int | None = Field(
+        default=None, sa_column=Column(ForeignKey("model_endpoint.id", ondelete="SET NULL")))
     enabled_course_types: list | None = Field(default=None, sa_column=Column(JSON))
     previous_values: dict | None = Field(default=None, sa_column=Column(JSON))  # for a rollback (§6.5)
 
@@ -372,6 +376,10 @@ class CourseSettings(_SettingsMeta, table=True):
     usage_questions_per_minute: int | None = None
     usage_questions_per_day: int | None = None
     usage_cloud_calls_per_day: int | None = None
+    local_endpoint_id: int | None = Field(
+        default=None, sa_column=Column(ForeignKey("model_endpoint.id", ondelete="SET NULL")))
+    cloud_endpoint_id: int | None = Field(
+        default=None, sa_column=Column(ForeignKey("model_endpoint.id", ondelete="SET NULL")))
 
 
 class ProcessStatus(SQLModel, table=True):
@@ -397,3 +405,32 @@ class AuditLog(SQLModel, table=True):
     action: str  # e.g. settings.system.update, settings.course.restore
     target: str  # e.g. "system", "course:7"
     details: dict = Field(default_factory=dict, sa_column=Column(JSON))
+
+
+
+# ------------------------------------------------------------------- model connections (task Z6, guide 4.11)
+class ModelEndpoint(SQLModel, table=True):
+    """An OpenAI-compatible or Ollama model connection, of the system or of one course.
+
+    `trust` decides what it may receive: `trusted_local` gets original text and the learner profile (the
+    deployment's own model, or a service the instructor confirmed he controls); `external` gets only what
+    passed the cloud gate. The API key is stored encrypted (SETTINGS_ENCRYPTION_KEY); only its last four
+    characters are shown.
+    """
+
+    __tablename__ = "model_endpoint"
+
+    id: int | None = Field(default=None, primary_key=True)
+    course_id: int | None = Field(default=None, sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"),
+                                                                 index=True))  # None: a system connection
+    name: str
+    kind: str  # ollama | openai_compat
+    base_url: str
+    model: str
+    trust: str  # trusted_local | external
+    api_key_encrypted: str | None = None
+    api_key_last4: str | None = None
+    created_at: datetime = _ts(default_factory=utcnow)
+    updated_at: datetime = _ts(default_factory=utcnow)
+    updated_by: int | None = None
+    last_test_ok_at: datetime | None = _ts(default=None)
