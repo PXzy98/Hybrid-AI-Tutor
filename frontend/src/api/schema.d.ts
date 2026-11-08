@@ -739,6 +739,210 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/courses/{course_id}/modules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Modules */
+        get: operations["modules_list"];
+        put?: never;
+        /** Create Module */
+        post: operations["modules_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/modules/{module_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Module */
+        delete: operations["modules_delete"];
+        options?: never;
+        head?: never;
+        /** Update Module */
+        patch: operations["modules_update"];
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/modules/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reorder Modules */
+        post: operations["modules_reorder"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/kcs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Kcs */
+        get: operations["kcs_list"];
+        put?: never;
+        /** Create Kc */
+        post: operations["kcs_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/kcs/{kc_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Kc */
+        get: operations["kcs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update Kc
+         * @description Change a KC, its prerequisites (the full list), or retire it (`status: retired`).
+         */
+        patch: operations["kcs_update"];
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/check-items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Items */
+        get: operations["check_items_list"];
+        put?: never;
+        /** Create Item */
+        post: operations["check_items_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/check-items/{item_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Item */
+        get: operations["check_items_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update Item
+         * @description Edit an item; `status: active` publishes a draft, `retired` takes it out of use.
+         */
+        patch: operations["check_items_update"];
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/misconceptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Misconceptions */
+        get: operations["misconceptions_list"];
+        put?: never;
+        /** Create Misconception */
+        post: operations["misconceptions_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/misconceptions/{misconception_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Misconception */
+        get: operations["misconceptions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Misconception */
+        patch: operations["misconceptions_update"];
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/content/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Import Content
+         * @description Content in the YAML seed layout into a course without content (one module per folder).
+         */
+        post: operations["content_import"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/content/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Export Content */
+        get: operations["content_export"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/admin/model-endpoints": {
         parameters: {
             query?: never;
@@ -898,6 +1102,14 @@ export interface components {
              * @default []
              */
             routing_progress: components["schemas"]["RoutingProgress"][];
+        };
+        /** Body_content_import */
+        Body_content_import: {
+            /**
+             * File
+             * @description ZIP: <module>/kcs.yaml, items.yaml, misconceptions.yaml
+             */
+            file: string;
         };
         /** Body_members_import */
         Body_members_import: {
@@ -1288,6 +1500,17 @@ export interface components {
             /** Rag Impl */
             rag_impl: string;
         };
+        /** ImportCountsOut */
+        ImportCountsOut: {
+            /** Modules */
+            modules: number;
+            /** Kcs */
+            kcs: number;
+            /** Items */
+            items: number;
+            /** Misconceptions */
+            misconceptions: number;
+        };
         /** ImportReportOut */
         ImportReportOut: {
             /** Added */
@@ -1320,6 +1543,91 @@ export interface components {
             /** Expired */
             expired: boolean;
         };
+        /** ItemIn */
+        ItemIn: {
+            /** Kc Id */
+            kc_id: number;
+            /** Code */
+            code: string;
+            /**
+             * Level
+             * @enum {string}
+             */
+            level: "basic" | "intermediate" | "advanced";
+            /** Stem */
+            stem: string;
+            /** Options */
+            options: {
+                [key: string]: components["schemas"]["OptionModel"];
+            };
+            /**
+             * Answer
+             * @enum {string}
+             */
+            answer: "A" | "B" | "C" | "D";
+            /**
+             * Explanation
+             * @default
+             */
+            explanation: string;
+            /**
+             * Status
+             * @default active
+             * @enum {string}
+             */
+            status: "draft" | "active";
+        };
+        /** ItemOut */
+        ItemOut: {
+            /** Id */
+            id: number;
+            /** Kc Id */
+            kc_id: number;
+            /** Code */
+            code: string;
+            /**
+             * Level
+             * @enum {string}
+             */
+            level: "basic" | "intermediate" | "advanced";
+            /** Stem */
+            stem: string;
+            /** Options */
+            options: {
+                [key: string]: components["schemas"]["OptionModel"];
+            };
+            /**
+             * Answer
+             * @enum {string}
+             */
+            answer: "A" | "B" | "C" | "D";
+            /** Explanation */
+            explanation: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "draft" | "active" | "retired";
+        };
+        /** ItemPatch */
+        ItemPatch: {
+            /** Kc Id */
+            kc_id?: number | null;
+            /** Level */
+            level?: ("basic" | "intermediate" | "advanced") | null;
+            /** Stem */
+            stem?: string | null;
+            /** Options */
+            options?: {
+                [key: string]: components["schemas"]["OptionModel"];
+            } | null;
+            /** Answer */
+            answer?: ("A" | "B" | "C" | "D") | null;
+            /** Explanation */
+            explanation?: string | null;
+            /** Status */
+            status?: ("draft" | "active" | "retired") | null;
+        };
         /**
          * JoinIn
          * @description Logged in: `code` only. New student: `code`, `email`, `display_name` and `password`.
@@ -1348,6 +1656,70 @@ export interface components {
             name: string;
             /** Band */
             band: string;
+        };
+        /** KcIn */
+        KcIn: {
+            /** Module Id */
+            module_id: number;
+            /** Code */
+            code: string;
+            /** Name */
+            name: string;
+            /**
+             * Definition
+             * @default
+             */
+            definition: string;
+            /**
+             * Difficulty
+             * @enum {string}
+             */
+            difficulty: "basic" | "intermediate" | "advanced";
+            /**
+             * Prerequisite Ids
+             * @default []
+             */
+            prerequisite_ids: number[];
+        };
+        /** KcOut */
+        KcOut: {
+            /** Id */
+            id: number;
+            /** Module Id */
+            module_id: number | null;
+            /** Code */
+            code: string;
+            /** Name */
+            name: string;
+            /** Definition */
+            definition: string;
+            /**
+             * Difficulty
+             * @enum {string}
+             */
+            difficulty: "basic" | "intermediate" | "advanced";
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "draft" | "active" | "retired";
+            /** Prerequisite Ids */
+            prerequisite_ids: number[];
+        };
+        /** KcPatch */
+        KcPatch: {
+            /** Module Id */
+            module_id?: number | null;
+            /** Name */
+            name?: string | null;
+            /** Definition */
+            definition?: string | null;
+            /** Difficulty */
+            difficulty?: ("basic" | "intermediate" | "advanced") | null;
+            /** Status */
+            status?: ("active" | "retired") | null;
+            /** Prerequisite Ids */
+            prerequisite_ids?: number[] | null;
         };
         /** KcRecommendation */
         KcRecommendation: {
@@ -1546,6 +1918,52 @@ export interface components {
             /** Course Status */
             course_status: string;
         };
+        /** MisconceptionIn */
+        MisconceptionIn: {
+            /** Kc Id */
+            kc_id: number;
+            /** Code */
+            code: string;
+            /** Statement */
+            statement: string;
+            /** Correction */
+            correction: string;
+            /**
+             * Status
+             * @default active
+             * @enum {string}
+             */
+            status: "draft" | "active";
+        };
+        /** MisconceptionOut */
+        MisconceptionOut: {
+            /** Id */
+            id: number;
+            /** Kc Id */
+            kc_id: number;
+            /** Code */
+            code: string;
+            /** Statement */
+            statement: string;
+            /** Correction */
+            correction: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "draft" | "active" | "retired";
+        };
+        /** MisconceptionPatch */
+        MisconceptionPatch: {
+            /** Kc Id */
+            kc_id?: number | null;
+            /** Statement */
+            statement?: string | null;
+            /** Correction */
+            correction?: string | null;
+            /** Status */
+            status?: ("draft" | "active" | "retired") | null;
+        };
         /** MisconceptionSummary */
         MisconceptionSummary: {
             /** Misconception Id */
@@ -1556,6 +1974,38 @@ export interface components {
             statement: string;
             /** Students */
             students: number;
+        };
+        /** ModuleIn */
+        ModuleIn: {
+            /** Code */
+            code: string;
+            /** Title */
+            title: string;
+            /**
+             * Guideline
+             * @default
+             */
+            guideline: string;
+        };
+        /** ModuleOut */
+        ModuleOut: {
+            /** Id */
+            id: number;
+            /** Code */
+            code: string;
+            /** Title */
+            title: string;
+            /** Position */
+            position: number;
+            /** Guideline */
+            guideline: string | null;
+        };
+        /** ModulePatch */
+        ModulePatch: {
+            /** Title */
+            title?: string | null;
+            /** Guideline */
+            guideline?: string | null;
         };
         /** NewInviteOut */
         NewInviteOut: {
@@ -1650,6 +2100,13 @@ export interface components {
              */
             status: "suspected" | "confirmed";
         };
+        /** OptionModel */
+        OptionModel: {
+            /** Text */
+            text: string;
+            /** Misconception */
+            misconception?: string | null;
+        };
         /** PreferenceAnswers */
         PreferenceAnswers: {
             /** Sequencing */
@@ -1730,6 +2187,11 @@ export interface components {
             email: string;
             /** Reason */
             reason: string;
+        };
+        /** ReorderIn */
+        ReorderIn: {
+            /** Module Ids */
+            module_ids: number[];
         };
         /** RouteScore */
         RouteScore: {
@@ -3476,6 +3938,657 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["NewInviteOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    modules_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModuleOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    modules_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ModuleIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModuleOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    modules_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                module_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description the module still has KCs or materials */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    modules_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                module_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ModulePatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModuleOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    modules_reorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReorderIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModuleOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    kcs_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KcOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    kcs_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["KcIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KcOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    kcs_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                kc_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KcOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    kcs_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                kc_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["KcPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KcOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    check_items_list: {
+        parameters: {
+            query?: {
+                kc_id?: number | null;
+            };
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    check_items_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ItemIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    check_items_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    check_items_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ItemPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    misconceptions_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MisconceptionOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    misconceptions_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MisconceptionIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MisconceptionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    misconceptions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                misconception_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MisconceptionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    misconceptions_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                misconception_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MisconceptionPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MisconceptionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    content_import: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_content_import"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportCountsOut"];
+                };
+            };
+            /** @description the course already has modules */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    content_export: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/zip": unknown;
                 };
             };
             /** @description Validation Error */

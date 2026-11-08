@@ -5,6 +5,8 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
+from app.catalog import CatalogError
+from app.catalog.editor import CatalogConflict, CatalogNotFound
 from app.platform.courses import CourseConflict, CourseError, CourseNotFound, JoinRefused
 from app.platform.usage import UsageLimitExceeded
 
@@ -42,4 +44,13 @@ async def course_error_handler(request: Request, exc: CourseError) -> JSONRespon
         return error(409, ErrorCode.conflict, str(exc))
     if isinstance(exc, JoinRefused):
         return error(400, ErrorCode.invalid, str(exc))
+    return error(422, ErrorCode.invalid, str(exc))
+
+
+async def catalog_error_handler(request: Request, exc: CatalogError) -> JSONResponse:
+    """Course content (task Z9): 404 / 409, or 422 listing the content problems."""
+    if isinstance(exc, CatalogNotFound):
+        return error(404, ErrorCode.not_found, str(exc))
+    if isinstance(exc, CatalogConflict):
+        return error(409, ErrorCode.conflict, str(exc))
     return error(422, ErrorCode.invalid, str(exc))

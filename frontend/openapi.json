@@ -1825,6 +1825,994 @@
         }
       }
     },
+    "/api/v2/courses/{course_id}/modules": {
+      "get": {
+        "tags": [
+          "content"
+        ],
+        "summary": "List Modules",
+        "operationId": "modules_list",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ModuleOut"
+                  },
+                  "title": "Response Modules List"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "content"
+        ],
+        "summary": "Create Module",
+        "operationId": "modules_create",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModuleIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModuleOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/courses/{course_id}/modules/{module_id}": {
+      "patch": {
+        "tags": [
+          "content"
+        ],
+        "summary": "Update Module",
+        "operationId": "modules_update",
+        "parameters": [
+          {
+            "name": "module_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Module Id"
+            }
+          },
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModulePatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModuleOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "content"
+        ],
+        "summary": "Delete Module",
+        "operationId": "modules_delete",
+        "parameters": [
+          {
+            "name": "module_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Module Id"
+            }
+          },
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "409": {
+            "description": "the module still has KCs or materials"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/courses/{course_id}/modules/reorder": {
+      "post": {
+        "tags": [
+          "content"
+        ],
+        "summary": "Reorder Modules",
+        "operationId": "modules_reorder",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ModuleOut"
+                  },
+                  "title": "Response Modules Reorder"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/courses/{course_id}/kcs": {
+      "get": {
+        "tags": [
+          "content"
+        ],
+        "summary": "List Kcs",
+        "operationId": "kcs_list",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/KcOut"
+                  },
+                  "title": "Response Kcs List"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "content"
+        ],
+        "summary": "Create Kc",
+        "operationId": "kcs_create",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KcIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KcOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/courses/{course_id}/kcs/{kc_id}": {
+      "get": {
+        "tags": [
+          "content"
+        ],
+        "summary": "Get Kc",
+        "operationId": "kcs_get",
+        "parameters": [
+          {
+            "name": "kc_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Kc Id"
+            }
+          },
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KcOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "content"
+        ],
+        "summary": "Update Kc",
+        "description": "Change a KC, its prerequisites (the full list), or retire it (`status: retired`).",
+        "operationId": "kcs_update",
+        "parameters": [
+          {
+            "name": "kc_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Kc Id"
+            }
+          },
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KcPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KcOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/courses/{course_id}/check-items": {
+      "get": {
+        "tags": [
+          "content"
+        ],
+        "summary": "List Items",
+        "operationId": "check_items_list",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "kc_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kc Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ItemOut"
+                  },
+                  "title": "Response Check Items List"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "content"
+        ],
+        "summary": "Create Item",
+        "operationId": "check_items_create",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ItemIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/courses/{course_id}/check-items/{item_id}": {
+      "get": {
+        "tags": [
+          "content"
+        ],
+        "summary": "Get Item",
+        "operationId": "check_items_get",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Item Id"
+            }
+          },
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "content"
+        ],
+        "summary": "Update Item",
+        "description": "Edit an item; `status: active` publishes a draft, `retired` takes it out of use.",
+        "operationId": "check_items_update",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Item Id"
+            }
+          },
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ItemPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/courses/{course_id}/misconceptions": {
+      "get": {
+        "tags": [
+          "content"
+        ],
+        "summary": "List Misconceptions",
+        "operationId": "misconceptions_list",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MisconceptionOut"
+                  },
+                  "title": "Response Misconceptions List"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "content"
+        ],
+        "summary": "Create Misconception",
+        "operationId": "misconceptions_create",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MisconceptionIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MisconceptionOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/courses/{course_id}/misconceptions/{misconception_id}": {
+      "get": {
+        "tags": [
+          "content"
+        ],
+        "summary": "Get Misconception",
+        "operationId": "misconceptions_get",
+        "parameters": [
+          {
+            "name": "misconception_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Misconception Id"
+            }
+          },
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MisconceptionOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "content"
+        ],
+        "summary": "Update Misconception",
+        "operationId": "misconceptions_update",
+        "parameters": [
+          {
+            "name": "misconception_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Misconception Id"
+            }
+          },
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MisconceptionPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MisconceptionOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/courses/{course_id}/content/import": {
+      "post": {
+        "tags": [
+          "content"
+        ],
+        "summary": "Import Content",
+        "description": "Content in the YAML seed layout into a course without content (one module per folder).",
+        "operationId": "content_import",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_content_import"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportCountsOut"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "the course already has modules"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/courses/{course_id}/content/export": {
+      "get": {
+        "tags": [
+          "content"
+        ],
+        "summary": "Export Content",
+        "operationId": "content_export",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/zip": {}
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/admin/model-endpoints": {
       "get": {
         "tags": [
@@ -2392,6 +3380,21 @@
           "route_target"
         ],
         "title": "AskResponse"
+      },
+      "Body_content_import": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "description": "ZIP: <module>/kcs.yaml, items.yaml, misconceptions.yaml"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_content_import"
       },
       "Body_members_import": {
         "properties": {
@@ -3388,6 +4391,34 @@
         ],
         "title": "Health"
       },
+      "ImportCountsOut": {
+        "properties": {
+          "modules": {
+            "type": "integer",
+            "title": "Modules"
+          },
+          "kcs": {
+            "type": "integer",
+            "title": "Kcs"
+          },
+          "items": {
+            "type": "integer",
+            "title": "Items"
+          },
+          "misconceptions": {
+            "type": "integer",
+            "title": "Misconceptions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "modules",
+          "kcs",
+          "items",
+          "misconceptions"
+        ],
+        "title": "ImportCountsOut"
+      },
       "ImportReportOut": {
         "properties": {
           "added": {
@@ -3492,6 +4523,277 @@
         ],
         "title": "InviteOut"
       },
+      "ItemIn": {
+        "properties": {
+          "kc_id": {
+            "type": "integer",
+            "title": "Kc Id"
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]{1,64}$",
+            "title": "Code"
+          },
+          "level": {
+            "type": "string",
+            "enum": [
+              "basic",
+              "intermediate",
+              "advanced"
+            ],
+            "title": "Level"
+          },
+          "stem": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Stem"
+          },
+          "options": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/OptionModel"
+            },
+            "propertyNames": {
+              "enum": [
+                "A",
+                "B",
+                "C",
+                "D"
+              ]
+            },
+            "type": "object",
+            "title": "Options"
+          },
+          "answer": {
+            "type": "string",
+            "enum": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "title": "Answer"
+          },
+          "explanation": {
+            "type": "string",
+            "maxLength": 4000,
+            "title": "Explanation",
+            "default": ""
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "active"
+            ],
+            "title": "Status",
+            "default": "active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kc_id",
+          "code",
+          "level",
+          "stem",
+          "options",
+          "answer"
+        ],
+        "title": "ItemIn"
+      },
+      "ItemOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "kc_id": {
+            "type": "integer",
+            "title": "Kc Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "level": {
+            "type": "string",
+            "enum": [
+              "basic",
+              "intermediate",
+              "advanced"
+            ],
+            "title": "Level"
+          },
+          "stem": {
+            "type": "string",
+            "title": "Stem"
+          },
+          "options": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/OptionModel"
+            },
+            "propertyNames": {
+              "enum": [
+                "A",
+                "B",
+                "C",
+                "D"
+              ]
+            },
+            "type": "object",
+            "title": "Options"
+          },
+          "answer": {
+            "type": "string",
+            "enum": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "title": "Answer"
+          },
+          "explanation": {
+            "type": "string",
+            "title": "Explanation"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "active",
+              "retired"
+            ],
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "kc_id",
+          "code",
+          "level",
+          "stem",
+          "options",
+          "answer",
+          "explanation",
+          "status"
+        ],
+        "title": "ItemOut"
+      },
+      "ItemPatch": {
+        "properties": {
+          "kc_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kc Id"
+          },
+          "level": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "basic",
+                  "intermediate",
+                  "advanced"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Level"
+          },
+          "stem": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stem"
+          },
+          "options": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/OptionModel"
+                },
+                "propertyNames": {
+                  "enum": [
+                    "A",
+                    "B",
+                    "C",
+                    "D"
+                  ]
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Options"
+          },
+          "answer": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "A",
+                  "B",
+                  "C",
+                  "D"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Answer"
+          },
+          "explanation": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Explanation"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "draft",
+                  "active",
+                  "retired"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "title": "ItemPatch"
+      },
       "JoinIn": {
         "properties": {
           "code": {
@@ -3585,6 +4887,211 @@
           "band"
         ],
         "title": "KcBand"
+      },
+      "KcIn": {
+        "properties": {
+          "module_id": {
+            "type": "integer",
+            "title": "Module Id"
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]{1,64}$",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "definition": {
+            "type": "string",
+            "maxLength": 4000,
+            "title": "Definition",
+            "default": ""
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "basic",
+              "intermediate",
+              "advanced"
+            ],
+            "title": "Difficulty"
+          },
+          "prerequisite_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Prerequisite Ids",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "module_id",
+          "code",
+          "name",
+          "difficulty"
+        ],
+        "title": "KcIn"
+      },
+      "KcOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "module_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Module Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "definition": {
+            "type": "string",
+            "title": "Definition"
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "basic",
+              "intermediate",
+              "advanced"
+            ],
+            "title": "Difficulty"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "active",
+              "retired"
+            ],
+            "title": "Status"
+          },
+          "prerequisite_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Prerequisite Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "module_id",
+          "code",
+          "name",
+          "definition",
+          "difficulty",
+          "status",
+          "prerequisite_ids"
+        ],
+        "title": "KcOut"
+      },
+      "KcPatch": {
+        "properties": {
+          "module_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Module Id"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "definition": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Definition"
+          },
+          "difficulty": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "basic",
+                  "intermediate",
+                  "advanced"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Difficulty"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "active",
+                  "retired"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "prerequisite_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prerequisite Ids"
+          }
+        },
+        "type": "object",
+        "title": "KcPatch"
       },
       "KcRecommendation": {
         "properties": {
@@ -4123,6 +5630,150 @@
         ],
         "title": "MembershipOut"
       },
+      "MisconceptionIn": {
+        "properties": {
+          "kc_id": {
+            "type": "integer",
+            "title": "Kc Id"
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]{1,64}$",
+            "title": "Code"
+          },
+          "statement": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Statement"
+          },
+          "correction": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Correction"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "active"
+            ],
+            "title": "Status",
+            "default": "active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kc_id",
+          "code",
+          "statement",
+          "correction"
+        ],
+        "title": "MisconceptionIn"
+      },
+      "MisconceptionOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "kc_id": {
+            "type": "integer",
+            "title": "Kc Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "statement": {
+            "type": "string",
+            "title": "Statement"
+          },
+          "correction": {
+            "type": "string",
+            "title": "Correction"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "active",
+              "retired"
+            ],
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "kc_id",
+          "code",
+          "statement",
+          "correction",
+          "status"
+        ],
+        "title": "MisconceptionOut"
+      },
+      "MisconceptionPatch": {
+        "properties": {
+          "kc_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kc Id"
+          },
+          "statement": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Statement"
+          },
+          "correction": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4000,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correction"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "draft",
+                  "active",
+                  "retired"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "title": "MisconceptionPatch"
+      },
       "MisconceptionSummary": {
         "properties": {
           "misconception_id": {
@@ -4150,6 +5801,104 @@
           "students"
         ],
         "title": "MisconceptionSummary"
+      },
+      "ModuleIn": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]{1,64}$",
+            "title": "Code"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "guideline": {
+            "type": "string",
+            "maxLength": 4000,
+            "title": "Guideline",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "title"
+        ],
+        "title": "ModuleIn"
+      },
+      "ModuleOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "position": {
+            "type": "integer",
+            "title": "Position"
+          },
+          "guideline": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Guideline"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "code",
+          "title",
+          "position",
+          "guideline"
+        ],
+        "title": "ModuleOut"
+      },
+      "ModulePatch": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "guideline": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Guideline"
+          }
+        },
+        "type": "object",
+        "title": "ModulePatch"
       },
       "NewInviteOut": {
         "properties": {
@@ -4380,6 +6129,33 @@
         "title": "OpenMisconception",
         "description": "A misunderstanding the tutor is working on, in plain language (no catalog ID)."
       },
+      "OptionModel": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Text"
+          },
+          "misconception": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9._-]{1,64}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Misconception"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "OptionModel"
+      },
       "PreferenceAnswers": {
         "properties": {
           "sequencing": {
@@ -4581,6 +6357,22 @@
           "reason"
         ],
         "title": "RejectedRow"
+      },
+      "ReorderIn": {
+        "properties": {
+          "module_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Module Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "module_ids"
+        ],
+        "title": "ReorderIn"
       },
       "RouteScore": {
         "properties": {

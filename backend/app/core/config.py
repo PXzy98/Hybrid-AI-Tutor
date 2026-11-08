@@ -239,10 +239,15 @@ class AccountLimits(Section):
     max_roster_bytes: int = Field(1_000_000, ge=1_000, le=50_000_000)
 
 
+class ContentLimits(Section):
+    max_import_bytes: int = Field(5_000_000, ge=1_000, le=200_000_000)  # content ZIP upload (task Z9)
+
+
 class LimitsConfig(Section):
     settings: SettingsApplyLimits = SettingsApplyLimits()
     models: ModelLimits = ModelLimits()
     accounts: AccountLimits = AccountLimits()
+    content: ContentLimits = ContentLimits()
 
 
 class CourseConfig(Section):

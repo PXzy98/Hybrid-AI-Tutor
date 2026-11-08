@@ -95,6 +95,8 @@ limits:
     join_attempts_per_hour: 20   # POST /api/v2/auth/join, per client address
     max_roster_rows: 2000
     max_roster_bytes: 1000000
+  content:
+    max_import_bytes: 5000000    # content ZIP (YAML seed layout) for POST .../content/import
 
 content:
   dir: content/topics
