@@ -40,3 +40,20 @@ def test_only_postgresql_urls_are_accepted(url):
 def test_plain_postgresql_urls_use_psycopg():
     assert normalize_url("postgresql://tutor@db:5432/tutor") == "postgresql+psycopg://tutor@db:5432/tutor"
     assert normalize_url("postgres://tutor@db/tutor") == "postgresql+psycopg://tutor@db/tutor"
+
+
+def test_test_settings_come_from_dotenv_unless_set_in_the_environment(tmp_path, monkeypatch):
+    import app.storage.testing as testing
+
+    env = tmp_path / ".env"
+    env.write_text("TEST_DATABASE_URL=postgresql://tutor@127.0.0.1:5432/tutor\nPGPASSWORD=from-dotenv\n",
+                   encoding="utf-8")
+    monkeypatch.setattr(testing, "DOTENV", env)
+    monkeypatch.delenv("TEST_DATABASE_URL", raising=False)
+    monkeypatch.delenv("PGPASSWORD", raising=False)
+    assert testing.admin_url() == "postgresql+psycopg://tutor@127.0.0.1:5432/tutor"
+    import os
+
+    assert os.environ["PGPASSWORD"] == "from-dotenv"
+    monkeypatch.setenv("TEST_DATABASE_URL", "postgresql://other@db/x")
+    assert testing.admin_url() == "postgresql+psycopg://other@db/x"  # the environment wins
