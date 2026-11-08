@@ -7,7 +7,13 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1 import api_router
 from app.api.v2 import api_router_v2
-from app.api.v2.errors import catalog_error_handler, course_error_handler, usage_limit_handler
+from app.api.v2.errors import (
+    ApiError,
+    api_error_handler,
+    catalog_error_handler,
+    course_error_handler,
+    usage_limit_handler,
+)
 from app.catalog import CatalogError
 from app.core.services import build_services
 from app.platform.access import DbCourseDirectory
@@ -45,6 +51,7 @@ def create_app() -> FastAPI:
     app.add_exception_handler(UsageLimitExceeded, usage_limit_handler)
     app.add_exception_handler(CourseError, course_error_handler)
     app.add_exception_handler(CatalogError, catalog_error_handler)
+    app.add_exception_handler(ApiError, api_error_handler)
     return app
 
 
