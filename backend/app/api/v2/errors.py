@@ -5,6 +5,7 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
+from app.platform.courses import CourseConflict, CourseError, CourseNotFound, JoinRefused
 from app.platform.usage import UsageLimitExceeded
 
 
@@ -31,3 +32,14 @@ def error(status_code: int, code: ErrorCode, detail: str, **extra) -> JSONRespon
 async def usage_limit_handler(request: Request, exc: UsageLimitExceeded) -> JSONResponse:
     return error(429, ErrorCode.usage_limit, "Usage limit reached. Try again later.",
                  retry_after_seconds=exc.retry_after_seconds)
+
+
+async def course_error_handler(request: Request, exc: CourseError) -> JSONResponse:
+    """Courses, members and joining (task Z9): 404 / 409 / 400 / 422 with the service's English message."""
+    if isinstance(exc, CourseNotFound):
+        return error(404, ErrorCode.not_found, str(exc))
+    if isinstance(exc, CourseConflict):
+        return error(409, ErrorCode.conflict, str(exc))
+    if isinstance(exc, JoinRefused):
+        return error(400, ErrorCode.invalid, str(exc))
+    return error(422, ErrorCode.invalid, str(exc))
