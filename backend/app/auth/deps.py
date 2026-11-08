@@ -12,7 +12,7 @@ class CurrentUser:
     account_id: int
     username: str
     display_name: str
-    role: Literal["student", "instructor"]
+    role: Literal["student", "instructor", "admin"]  # system role
     student_id: str | None
     must_change_password: bool
     token_hash: str
@@ -48,7 +48,8 @@ def require_student(user: CurrentUserDep) -> CurrentUser:
 
 
 def require_instructor(user: CurrentUserDep) -> CurrentUser:
-    if user.role != "instructor":
+    """API v1 instructor pages (the demo course): instructors and admins."""
+    if user.role not in ("instructor", "admin"):
         raise HTTPException(status.HTTP_403_FORBIDDEN, "instructors only")
     return _ready(user)
 
