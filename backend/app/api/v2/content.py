@@ -26,7 +26,10 @@ Status = Literal["draft", "active", "retired"]
 
 
 def _editor(request: Request) -> CatalogEditor:
-    return CatalogEditor(request.app.state.services.engine)
+    services = request.app.state.services
+    manager = services.component_manager
+    # the served course's content is reloaded in this process at once (others within poll_seconds)
+    return CatalogEditor(services.engine, on_change=manager.sync if manager else None)
 
 
 # -------------------------------------------------------------------------------------------- modules
