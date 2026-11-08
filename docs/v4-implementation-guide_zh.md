@@ -460,6 +460,19 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 
 ---
 
+### 7.5 Z 代做的其他人任务
+
+以下是 Z 作为组长决定代做的（2026-11-08），每项一个 PR，**由原负责人审查**：负责人审查并批准 PR，之后这部分仍归原负责人（规则 11 其他方面不变）。
+
+| 任务 | 负责人 | Z 做了什么 | PR | 负责人要做的 |
+|---|---|---|---|---|
+| T14 | T | 按第 7 节用英文重写 `TODO.md`；中文入门文档挪到 `docs/GETTING_STARTED_zh.md`；`README.md`、`GETTING_STARTED.md` 里不再有中文 | #54 | 审查文字 |
+| T 的一部分（bandit B615，Z13 扫描发现） | T | 路由和证据模型固定到 Hugging Face 的 commit（`app/routing/revisions.py`，Docker 构建也用它） | #56 | 审查；和 Z 一起升级到 `transformers` 5 |
+| S4 的一部分（Z11 的后续） | S | 资料索引只在扫描发现学生数据时拒绝（`ScanResult.blocking`）：写了老师名字的课程资料不再被拒 | #55 | 审查 |
+| S 的一部分（bandit B314，Z13 扫描发现） | S | PubMed 返回的 XML 改用 `defusedxml` 解析 | #55 | 审查 |
+
+仍由负责人自己完成：S 在学习者数据表加 `course_id`，并提供按课程导出和删除学习者数据的接口（学期结束和 v2 提问接口要用）；T6/T7（API v2 的前端，要发送 `X-CSRF-Token`）；CI 扫描报告的 `react-router` 7 和 `vite`/`vitest` 升级。
+
 ## 8. 开发流程
 
 ### 8.1 分支和 PR

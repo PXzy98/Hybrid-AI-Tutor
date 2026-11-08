@@ -517,6 +517,22 @@ data); users build against the fakes without waiting for the real implementation
 
 ---
 
+### 7.5 Work done by Z for other owners
+
+Z did these with the decision of Z as team lead (2026-11-08), each as its own PR **for the owner's review**: the
+owner reviews and approves the PR, and the area stays the owner's afterwards (rule 11 is otherwise unchanged).
+
+| Task | Owner | What Z did | PR | Owner's step |
+|---|---|---|---|---|
+| T14 | T | `TODO.md` in English from section 7; the Chinese guide moved to `docs/GETTING_STARTED_zh.md`; no Chinese left in `README.md` and `GETTING_STARTED.md` | #54 | review the wording |
+| part of T (bandit B615, found by the Z13 scans) | T | the routing and evidence models pinned to Hugging Face commits (`app/routing/revisions.py`, also used by the Docker build) | #56 | review; move to `transformers` 5 together with Z |
+| part of S4 (follow-up of Z11) | S | indexing accepts a document unless its scan found student data (`ScanResult.blocking`): course material that names its instructor is no longer refused | #55 | review |
+| part of S (bandit B314, found by the Z13 scans) | S | PubMed responses parsed with `defusedxml` | #55 | review |
+
+Still the owners' own work: S's `course_id` on the learner tables with an interface to export and delete one
+course's learner data (needed by end of term and the v2 ask endpoint); T6/T7 (frontend for API v2, which sends
+`X-CSRF-Token`); the `react-router` 7 and `vite`/`vitest` updates reported by the CI scans.
+
 ## 8. Workflow
 
 ### 8.1 Branches and PRs
