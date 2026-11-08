@@ -172,7 +172,9 @@ def run(request: Request, evaluation_id: int, body: RunIn, access: CourseInstruc
         raise ApiError(422, ErrorCode.invalid, "confirm that course material and these questions may go to "
                                                "the cloud model (confirm_cloud)")
     with Session(engine, expire_on_commit=False) as db:
-        row = _get(db, access.course.id, evaluation_id)
+        _get(db, access.course.id, evaluation_id)  # 404 for another course's evaluation
+        # locked while checked, so two requests cannot both start it (one run, one job)
+        row = db.exec(select(AiEvaluation).where(AiEvaluation.id == evaluation_id).with_for_update()).one()
         if row.status != "review" or not row.questions:
             raise ApiError(409, ErrorCode.conflict, "the evaluation must be in review and have questions")
         row.status, row.updated_at = "running", utcnow()

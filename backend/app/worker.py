@@ -36,12 +36,12 @@ def run(stop: threading.Event | None = None) -> None:
     log.info("worker started (%s)", manager.process_id)
     from app.platform import jobs
 
-    if jobs.fail_stale(services.engine):
-        log.warning("jobs left running by a stopped worker were marked failed")
-
     def job_loop() -> None:
         while not stop.is_set():
             try:
+                # every round, not only at start: a job interrupted just before a restart becomes stale later
+                if jobs.fail_stale(services.engine):
+                    log.warning("jobs left running by a stopped worker were marked failed")
                 if not jobs.run_one(services):
                     stop.wait(poll)
             except Exception:  # noqa: BLE001 - e.g. the database is briefly unreachable

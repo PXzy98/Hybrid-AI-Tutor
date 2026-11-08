@@ -170,3 +170,99 @@ def test_unknown_job_kinds_fail_and_stale_jobs_are_failed(world):
     assert jobs.fail_stale(services.engine) >= 1
     with Session(services.engine) as db:
         assert db.get(Job, stale_id).status == "failed"
+
+
+def test_the_app_reads_the_course_index_from_data_dir(make_client, tmp_path, monkeypatch):
+    """Production wiring (review of #53): a course with a published index gets questions from it."""
+    from app.rag.course_retriever import IndexedCourseRetriever
+
+    monkeypatch.setenv("DATA_DIR", str(tmp_path))
+    with make_client() as client:
+        services = client.app.state.services
+        assert isinstance(services.course_retriever, IndexedCourseRetriever)
+        assert services.course_retriever.data_root == tmp_path
+        services.accounts.create_instructor("prof", PASSWORD, must_change=False)
+        prof = _login(client.app, "prof")
+        body = {"code": "ELG 5902", "title": "F", "course_type": "ece"}
+        course_id = prof.post(f"{V2}/courses", json=body).json()["id"]
+        url = f"{V2}/courses/{course_id}"
+        module = prof.post(f"{url}/modules", json={"code": "circuits", "title": "Circuits"}).json()
+        prof.post(f"{url}/kcs", json={"module_id": module["id"], "code": "C.1", "name": "Pull-up resistors",
+                                      "definition": "What holds a signal line high.", "difficulty": "basic"})
+        folder = tmp_path / "courses" / str(course_id) / "materials" / "_course"
+        folder.mkdir(parents=True)
+        note = "A pull-up resistor holds a signal line high when nothing drives it."
+        (folder / "notes.md").write_text(note, encoding="utf-8")
+        IndexedCourseRetriever(tmp_path, scan=lambda text: True).rebuild(course_id)  # the worker's job (S4)
+        services.gateway = FakeGateway({"local": FakeLLMClient(QUESTIONS)})
+        evaluation_id = prof.post(f"{url}/ai/evaluations", json={"module_ids": [module["id"]]}).json()["id"]
+        jobs.run_pending(services)
+        ev = prof.get(f"{url}/ai/evaluations/{evaluation_id}").json()
+        assert ev["status"] == "review", ev["error"]
+        assert len(ev["questions"]) == 2
+        assert "pull-up resistor holds a signal line high" in services.gateway.clients["local"].sent_text()
+
+
+def test_two_runs_at_the_same_moment_start_one_job(world):
+    import threading
+
+    prof, url, services, app = world["prof"], world["url"], world["services"], world["app"]
+    evaluation_id = prof.post(f"{url}/ai/evaluations", json={}).json()["id"]
+    jobs.run_pending(services)
+    clients = [_login(app, "prof") for _ in range(4)]
+    start, codes = threading.Barrier(len(clients)), []
+
+    def run(c):
+        start.wait()
+        r = c.post(f"{url}/ai/evaluations/{evaluation_id}/run", json={"confirm_cloud": True})
+        codes.append(r.status_code)
+
+    threads = [threading.Thread(target=run, args=(c,)) for c in clients]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    assert sorted(codes) == [202, 409, 409, 409]
+    with Session(services.engine) as db:
+        from sqlmodel import select
+
+        runs = db.exec(select(Job).where(Job.kind == "ai_evaluation.run", Job.ref_id == evaluation_id)).all()
+    assert len(runs) == 1
+
+
+def test_the_worker_fails_a_job_that_becomes_stale_while_it_runs(use_config, tmp_path, monkeypatch):
+    """Review of #53: stale jobs are checked every round, not only at start."""
+    import threading
+    import time
+
+    from app import worker
+    from app.core.config import get_settings
+    from app.storage.db import make_engine
+
+    monkeypatch.setattr(worker, "HEARTBEAT", tmp_path / "alive")
+    use_config({"limits": {"settings": {"poll_seconds": 0.2}}})
+    stop, seen = threading.Event(), {}
+
+    def watch():
+        for _ in range(1200):  # building the services takes a while
+            if (tmp_path / "alive").exists():
+                break
+            time.sleep(0.1)
+        engine = make_engine(get_settings().database_url, pooled=False)
+        with Session(engine) as db:  # a job left running by a worker that stopped long ago
+            job = Job(kind="x", status="running", started_at=Job().created_at - jobs.STALE_AFTER * 2)
+            db.add(job)
+            db.commit()
+            job_id = job.id
+        for _ in range(100):
+            with Session(engine) as db:
+                if db.get(Job, job_id).status == "failed":
+                    seen["failed"] = True
+                    break
+            time.sleep(0.1)
+        engine.dispose()
+        stop.set()
+
+    threading.Thread(target=watch).start()
+    worker.run(stop)
+    assert seen.get("failed") is True

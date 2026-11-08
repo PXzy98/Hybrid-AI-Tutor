@@ -94,8 +94,10 @@ async def generate(services, job) -> None:
         chosen = options.get("module_ids")
         modules = [m for m in db.exec(q.order_by(Module.position, Module.id)).all()
                    if not chosen or m.id in chosen]
-        kc_names = {m.id: [k.name for k in db.exec(select(Kc).where(Kc.module_id == m.id,
-                                                                     Kc.status == "active")).all()]
+        # the module's vocabulary for finding its material: KC names and definitions (the course retriever
+        # matches words, so a short module title alone may find nothing)
+        active = db.exec(select(Kc).where(Kc.course_id == evaluation.course_id, Kc.status == "active")).all()
+        kc_names = {m.id: [f"{k.name} {k.definition}".strip() for k in active if k.module_id == m.id]
                     for m in modules}
     settings = services.effective(evaluation.course_id)
     per_module = options.get("questions_per_module", 5)
