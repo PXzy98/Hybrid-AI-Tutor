@@ -49,9 +49,11 @@ def privacy_profile(course_type: str) -> PrivacyProfile:
     if course_type == "base" or course_type not in profile_names():
         raise ProfileError(f"unknown privacy profile: {course_type}")
     own = _raw(course_type)
-    parent = _raw(own["extends"]) if own.get("extends") else {}
-    if parent.get("extends"):
-        raise ProfileError("profiles extend the base layer only")
+    if own.get("extends") != "base":  # guide 4.7: the base layer protects every course
+        raise ProfileError(f"{course_type}.yaml must start with 'extends: base'")
+    parent = _raw("base")
+    if parent.get("extends") or not parent.get("recognizers"):
+        raise ProfileError("base.yaml must list the base recognizers and extend nothing")
     merged = {**{k: v for k, v in parent.items() if k != "recognizers"},
               **{k: v for k, v in own.items() if k not in ("recognizers", "extends")}}
     recognizers = tuple(dict.fromkeys([*(parent.get("recognizers") or []), *(own.get("recognizers") or [])]))

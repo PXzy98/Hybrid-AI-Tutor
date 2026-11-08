@@ -44,7 +44,8 @@ def test_a_new_profile_needs_one_file_and_becomes_a_course_type(profile_dir):
 
 @pytest.mark.parametrize("content", ["extends: base\nrecognizers: [no_such_recognizer]\n",
                                      "extends: base\ncheckers: [no_such_checker]\n",
-                                     "extends: base\ncolour: blue\n"])
+                                     "extends: base\ncolour: blue\n",
+                                     "", "recognizers: [grade]\n", "extends: general\n"])
 def test_invalid_profile_files_are_refused(profile_dir, content):
     (profile_dir / "broken.yaml").write_text(content, encoding="utf-8")
     with pytest.raises(profiles.ProfileError):

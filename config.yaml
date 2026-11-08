@@ -85,6 +85,9 @@ limits:
   settings:
     poll_seconds: 5              # each process checks the system settings version this often (design 6.5)
     apply_timeout_seconds: 120   # a component change not applied everywhere by then is rolled back
+  models:
+    max_concurrent: 4            # requests at the same time per model connection (vLLM batches them)
+    queue_timeout_seconds: 60    # a request waiting longer for a slot gets "the model is busy"
 
 content:
   dir: content/topics

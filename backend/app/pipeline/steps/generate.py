@@ -60,7 +60,12 @@ class GenerateStep(BaseStep):
         return await self._local(ctx, safety_retry)
 
     async def _local(self, ctx: RequestContext, safety_retry: bool = False) -> LLMResult:
-        return await self.services.local_llm.complete(render_local(ctx, safety_retry=safety_retry))
+        """Original text: only a trusted local connection may receive it (the gateway enforces it)."""
+        messages = render_local(ctx, safety_retry=safety_retry)
+        if self.services.gateway is None or ctx.settings is None:  # contexts built by unit tests
+            return await self.services.local_llm.complete(messages)
+        return await self.services.gateway.complete("local", messages, settings=ctx.settings,
+                                                    trust_required="trusted_local")
 
     async def _cloud(self, ctx: RequestContext, safety_retry: bool) -> LLMResult:
         """The cloud gate. The same privacy rules apply whichever router chose the cloud route:
@@ -79,7 +84,8 @@ class GenerateStep(BaseStep):
             log.error("cloud request blocked by the leak guard (%s), request=%s",
                       ", ".join(found), ctx.request_id)
             return await self._fallback(ctx, safety_retry, PRIVACY_BLOCK_WARNING)
-        cloud = self.services.cloud_llm
+        gateway = self.services.gateway
+        cloud = gateway.cloud_client(ctx.settings) if gateway is not None else self.services.cloud_llm
         if not cloud.available:
             if not self.services.settings.llm.cloud.fallback_to_local:
                 raise LLMError("cloud route chosen but no cloud model is configured")

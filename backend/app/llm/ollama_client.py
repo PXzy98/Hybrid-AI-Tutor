@@ -1,4 +1,6 @@
 """Local model through Ollama's native /api/chat (not /v1): the only way to switch thinking off reliably."""
+import json
+from collections.abc import AsyncIterator
 from time import perf_counter
 
 import httpx
@@ -51,6 +53,36 @@ class OllamaClient:
             completion_tokens=data.get("eval_count"),
             latency_ms=round((perf_counter() - t0) * 1000, 1),
         )
+
+    async def stream(self, messages: list[Message], *, json_schema: dict | None = None,
+                     max_tokens: int | None = None) -> AsyncIterator[str]:
+        """The answer as it is generated (task Z6: token streaming), from Ollama's NDJSON stream."""
+        body: dict = {"model": self.model, "messages": messages, "stream": True, "think": False,
+                      "options": {"temperature": self.temperature, "num_ctx": self.num_ctx,
+                                  "num_predict": max_tokens or self.max_tokens}}
+        if json_schema is not None:
+            body["format"] = json_schema
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout_s, transport=self._transport) as client:
+                async with client.stream("POST", self.url, json=body) as r:
+                    if r.status_code != 200:
+                        raise LLMError(f"ollama HTTP {r.status_code}")
+                    async for line in r.aiter_lines():
+                        if not line.strip():
+                            continue
+                        try:
+                            part = json.loads(line)
+                        except ValueError:
+                            raise LLMError("ollama returned invalid JSON") from None
+                        piece = part.get("message", {}).get("content", "")
+                        if piece:
+                            yield piece
+                        if part.get("done"):
+                            return
+        except httpx.TimeoutException as e:
+            raise LLMUnavailable(f"ollama timed out after {self.timeout_s}s") from e
+        except httpx.HTTPError as e:
+            raise LLMUnavailable(f"ollama request failed ({type(e).__name__})") from e
 
     async def _post(self, body: dict) -> httpx.Response:
         """One retry on connection errors only; a timeout is not retried (the model may still be busy)."""

@@ -40,10 +40,12 @@ COMPONENT_FIELDS = ("checkers", "knowledge_model", "default_routing_method", "lo
                     "level_hysteresis")
 SYSTEM_FIELDS = ("checkers", "weak_evidence", "level_basic_below", "level_advanced_above", "level_hysteresis",
                  "knowledge_model", "default_routing_method", "local_llm_url", "local_llm_model",
-                 "enabled_course_types")
+                 "enabled_course_types", "default_local_endpoint_id", "default_cloud_endpoint_id")
 COURSE_FIELDS = ("course_type", "visibility_mode", "local_only", "routing_preference", "routing_threshold",
                  "show_routing_progress", "usage_questions_per_minute", "usage_questions_per_day",
-                 "usage_cloud_calls_per_day")
+                 "usage_cloud_calls_per_day", "local_endpoint_id", "cloud_endpoint_id")
+
+
 def course_types() -> list[str]:
     """The course types are the privacy profiles (app/privacy/profiles/*.yaml, task Z7)."""
     from app.privacy.profiles import profile_names
@@ -137,6 +139,9 @@ def validate_system(values: dict) -> dict:
         if not model or " " in model:
             raise SettingsError("the local model name must be one word, e.g. qwen3.5:9b")
         out["local_llm_model"] = model
+    for name in ("default_local_endpoint_id", "default_cloud_endpoint_id"):
+        if out.get(name) is not None and not isinstance(out[name], int):
+            raise SettingsError(f"{name} must be a connection ID")
     if out.get("enabled_course_types") is not None and \
             not set(out["enabled_course_types"]) <= set(course_types()):
         raise SettingsError("unknown course type")
@@ -158,7 +163,8 @@ def validate_course(values: dict) -> dict:
     for name in ("local_only", "show_routing_progress"):
         if out.get(name) is not None and not isinstance(out[name], bool):
             raise SettingsError(f"{name} must be true or false")
-    for name in ("usage_questions_per_minute", "usage_questions_per_day", "usage_cloud_calls_per_day"):
+    for name in ("usage_questions_per_minute", "usage_questions_per_day", "usage_cloud_calls_per_day",
+                 "local_endpoint_id", "cloud_endpoint_id"):
         if out.get(name) is not None and (not isinstance(out[name], int) or out[name] < 0):
             raise SettingsError(f"{name} must be a non-negative integer")
     return out
@@ -226,6 +232,13 @@ class SettingsService:
                     log.warning("ignoring invalid %s setting %s: %s", scope, name, e)
                     continue
                 base[name] = tuple(value) if name == "checkers" else value
+        # model connections: course connection -> system default -> the deployment's model (None)
+        if system is not None:
+            base["local_endpoint_id"] = system.default_local_endpoint_id
+            base["cloud_endpoint_id"] = system.default_cloud_endpoint_id
+        if course is not None:
+            base["local_endpoint_id"] = course.local_endpoint_id or base["local_endpoint_id"]
+            base["cloud_endpoint_id"] = course.cloud_endpoint_id or base["cloud_endpoint_id"]
         base["course_version"] = course.version if course else 0
         base["system_version"] = system.version if system else 0
         return EffectiveSettings(**base)
@@ -257,11 +270,34 @@ class SettingsService:
         except ValueError as e:
             raise SettingsError("need 0 < level_basic_below < level_advanced_above < 1") from e
 
+    def check_endpoints(self, values: dict, *, course_id: int | None) -> None:
+        """A referenced connection exists, belongs to the system or this course, and a local one is trusted
+        (it receives original text); a cloud one is external."""
+        from app.storage.models import ModelEndpoint
+
+        pairs = (("default_local_endpoint_id", "local"), ("default_cloud_endpoint_id", "cloud"),
+                 ("local_endpoint_id", "local"), ("cloud_endpoint_id", "cloud"))
+        with Session(self.engine) as db:
+            for name, role in pairs:
+                endpoint_id = values.get(name)
+                if endpoint_id is None:
+                    continue
+                row = db.get(ModelEndpoint, endpoint_id)
+                if row is None or row.course_id not in (None, course_id):
+                    raise SettingsError(f"{name}: unknown model connection")
+                if name.startswith("default_") and row.course_id is not None:
+                    raise SettingsError(f"{name}: a system default must be a system connection")
+                if role == "local" and row.trust != "trusted_local":
+                    raise SettingsError(f"{name}: the local model must be a trusted local connection")
+                if role == "cloud" and row.trust != "external":
+                    raise SettingsError(f"{name}: the cloud model must be an external connection")
+
     def save_system(self, values: dict, *, expected_version: int, account_id: int | None,
                     action: str = "settings.system.update") -> int:
         """Store the system settings (all fields; null = config default). Returns the new version."""
         values = validate_system({**dict.fromkeys(SYSTEM_FIELDS), **values})
         self.check_levels(values)
+        self.check_endpoints(values, course_id=None)
         with Session(self.engine) as db:
             db.exec(text("SELECT pg_advisory_xact_lock(590203)"))
             row = db.get(SystemSettings, 1, with_for_update=True) or SystemSettings(id=1, version=0)
@@ -294,6 +330,7 @@ class SettingsService:
     def save_course(self, course_id: int, values: dict, *, expected_version: int, account_id: int | None,
                     action: str = "settings.course.update") -> int:
         values = validate_course({**dict.fromkeys(COURSE_FIELDS), **values})
+        self.check_endpoints(values, course_id=course_id)
         with Session(self.engine) as db:
             # a per-course lock: FOR UPDATE cannot lock the row before it exists (first save)
             db.exec(text("SELECT pg_advisory_xact_lock(590204, :c)").bindparams(c=course_id))

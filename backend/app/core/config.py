@@ -220,8 +220,16 @@ class SettingsApplyLimits(Section):
     apply_timeout_seconds: float = Field(120.0, gt=0, le=3600)
 
 
+class ModelLimits(Section):
+    """Per model connection (task Z6): requests at the same time, and the wait for a free slot."""
+
+    max_concurrent: int = Field(4, ge=1, le=256)
+    queue_timeout_seconds: float = Field(60.0, gt=0, le=600)
+
+
 class LimitsConfig(Section):
     settings: SettingsApplyLimits = SettingsApplyLimits()
+    models: ModelLimits = ModelLimits()
 
 
 class CourseConfig(Section):
@@ -257,6 +265,7 @@ class Settings(BaseSettings):
     ollama_url: str = "http://192.168.2.25:11434"
     cloud_base_url: str = "https://api.openai.com/v1"
     cloud_api_key: SecretStr | None = None
+    settings_encryption_key: SecretStr | None = None  # Fernet key for API keys of model connections (Z6)
     cloud_model: str | None = None
     instructor_username: str | None = None
     instructor_initial_password: SecretStr | None = None
@@ -267,6 +276,7 @@ class Settings(BaseSettings):
 
     @field_validator(
         "cloud_api_key", "cloud_model", "instructor_username", "instructor_initial_password", "pgpassword",
+        "settings_encryption_key",
         mode="before",
     )
     @classmethod

@@ -1,6 +1,7 @@
 """Any OpenAI-compatible chat API (OpenAI, Groq, Kimi, DeepSeek, ...). Only used behind CloudClient."""
 import asyncio
 import logging
+from collections.abc import AsyncIterator
 from time import perf_counter
 
 import openai
@@ -14,12 +15,13 @@ log = logging.getLogger("app.llm")
 class OpenAICompatClient:
     def __init__(self, base_url: str, api_key: str, model: str, *, timeout_s: float = 30,
                  max_tokens: int = 800, temperature: float = 0.2,
-                 client: openai.AsyncOpenAI | None = None) -> None:
+                 client: openai.AsyncOpenAI | None = None, transport=None) -> None:
         self.model = model
         self.max_tokens = max_tokens
         self.temperature = temperature
         self._injected = client
         self._args = {"base_url": base_url, "api_key": api_key, "timeout": timeout_s, "max_retries": 1}
+        self._transport = transport  # e.g. ssrf.PinnedTransport for instructor-added connections
         self._clients: dict[int, openai.AsyncOpenAI] = {}
 
     def _client(self) -> openai.AsyncOpenAI:
@@ -29,7 +31,14 @@ class OpenAICompatClient:
             return self._injected
         loop = id(asyncio.get_running_loop())
         if loop not in self._clients:
-            self._clients = {loop: openai.AsyncOpenAI(**self._args)}  # drop clients of finished loops
+            extra = {}
+            if self._transport is not None:
+                import httpx
+
+                extra["http_client"] = httpx.AsyncClient(transport=self._transport,
+                                                         timeout=self._args["timeout"])
+            # drop the clients of finished loops
+            self._clients = {loop: openai.AsyncOpenAI(**self._args, **extra)}
         return self._clients[loop]
 
     async def complete(self, messages: list[Message], *, json_schema: dict | None = None,
@@ -67,3 +76,22 @@ class OpenAICompatClient:
             completion_tokens=usage.completion_tokens if usage else None,
             latency_ms=round((perf_counter() - t0) * 1000, 1),
         )
+
+    async def stream(self, messages: list[Message], *, json_schema: dict | None = None,
+                     max_tokens: int | None = None) -> AsyncIterator[str]:
+        """The answer as it is generated (task Z6: token streaming)."""
+        kwargs: dict = {"response_format": {"type": "json_object"}} if json_schema is not None else {}
+        try:
+            chunks = await self._client().chat.completions.create(
+                model=self.model, messages=messages, temperature=self.temperature,
+                max_tokens=max_tokens or self.max_tokens, stream=True, **kwargs,
+            )
+            async for chunk in chunks:
+                piece = chunk.choices[0].delta.content if chunk.choices else None
+                if piece:
+                    yield piece
+        except (openai.APIConnectionError, openai.APITimeoutError, openai.RateLimitError,
+                openai.AuthenticationError) as e:
+            raise LLMUnavailable(f"model API unavailable ({type(e).__name__})") from e
+        except openai.APIError as e:
+            raise LLMError(f"model API error ({type(e).__name__})") from e
