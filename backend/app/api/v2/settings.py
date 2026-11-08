@@ -3,7 +3,7 @@ settings (the course's instructors), their history and undo, and the state of a 
 
 Every `PUT` sends the `version` it read: 409 if the settings changed since, 423 (`settings_applying`) while a
 component change is still being applied. A `null` value means "use the next layer" (course → system →
-config.yaml).
+config.yaml). The `usage_*` course fields are not exposed: usage limits are config only for now (guide 4.4).
 """
 from datetime import datetime
 from typing import Annotated, Literal
@@ -46,9 +46,6 @@ class CourseValues(BaseModel):
     routing_preference: Literal["default", "prefer_local", "prefer_cloud"] | None = None
     routing_threshold: float | None = Field(None, ge=0, le=1)
     show_routing_progress: bool | None = None
-    usage_questions_per_minute: int | None = Field(None, ge=0)
-    usage_questions_per_day: int | None = Field(None, ge=0)
-    usage_cloud_calls_per_day: int | None = Field(None, ge=0)
     local_endpoint_id: int | None = None
     cloud_endpoint_id: int | None = None
 

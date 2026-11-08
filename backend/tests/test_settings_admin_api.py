@@ -86,6 +86,9 @@ def test_course_settings_belong_to_the_course_instructors(world):
     assert world["anon"].get(url).status_code == 401
     current = prof.get(url).json()
     assert current == {"values": {k: None for k in current["values"]}, "version": 0}
+    assert not any(k.startswith("usage_") for k in current["values"])  # config only for now (guide 4.4)
+    r = prof.put(url, json={"values": {"usage_questions_per_day": 5}, "version": 0})
+    assert r.status_code == 200 and r.json()["version"] == 0  # the unknown field is ignored, nothing saved
     r = prof.put(url, json={"values": {"local_only": True, "routing_threshold": 0.7}, "version": 0})
     assert r.status_code == 200 and r.json()["values"]["local_only"] is True
     assert prof.put(url, json={"values": {}, "version": 0}).status_code == 409

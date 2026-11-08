@@ -1588,12 +1588,6 @@ export interface components {
             routing_threshold?: number | null;
             /** Show Routing Progress */
             show_routing_progress?: boolean | null;
-            /** Usage Questions Per Minute */
-            usage_questions_per_minute?: number | null;
-            /** Usage Questions Per Day */
-            usage_questions_per_day?: number | null;
-            /** Usage Cloud Calls Per Day */
-            usage_cloud_calls_per_day?: number | null;
             /** Local Endpoint Id */
             local_endpoint_id?: number | null;
             /** Cloud Endpoint Id */

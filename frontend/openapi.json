@@ -4814,42 +4814,6 @@
             ],
             "title": "Show Routing Progress"
           },
-          "usage_questions_per_minute": {
-            "anyOf": [
-              {
-                "type": "integer",
-                "minimum": 0.0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Usage Questions Per Minute"
-          },
-          "usage_questions_per_day": {
-            "anyOf": [
-              {
-                "type": "integer",
-                "minimum": 0.0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Usage Questions Per Day"
-          },
-          "usage_cloud_calls_per_day": {
-            "anyOf": [
-              {
-                "type": "integer",
-                "minimum": 0.0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Usage Cloud Calls Per Day"
-          },
           "local_endpoint_id": {
             "anyOf": [
               {
