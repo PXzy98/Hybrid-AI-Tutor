@@ -39,6 +39,7 @@ class Services:
     component_manager: ComponentManager | None = None
     gateway: Gateway | None = None  # the model gateway (task Z6)
     courses: CourseService | None = None  # courses, members, invitation codes (task Z9)
+    usage: object | None = None  # the usage meter (task Z10; app.platform.usage)
 
     # the current component set; one reference, swapped as a whole
     @property
@@ -108,6 +109,10 @@ def build_services(settings: Settings | None = None) -> Services:
     check_keys_readable(engine, secret)  # stored API keys need SETTINGS_ENCRYPTION_KEY (design 6.3)
     services.gateway = Gateway(services)
     services.accounts.default_course_id = content.course_id  # API v1 = the demo course
+    from app.platform import usage
+
+    services.usage = usage.DbUsageMeter(engine, settings.limits.usage, settings_service.effective)
+    usage.configure(services.usage)  # check_usage / record_usage (task Z10)
     services.courses = CourseService(engine, services.accounts, settings.limits.accounts,
                                      lambda: settings_service.system_values()[0].get("enabled_course_types"))
     services.component_manager = ComponentManager(services, settings)

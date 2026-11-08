@@ -1116,6 +1116,28 @@
         }
       }
     },
+    "/api/v2/auth/csrf": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Get Csrf",
+        "description": "Public. With a session: its token. Without: a short-lived anonymous token (also set as a cookie).",
+        "operationId": "auth_csrf",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CsrfOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/auth/login": {
       "post": {
         "tags": [
@@ -1144,6 +1166,9 @@
               }
             }
           },
+          "429": {
+            "description": "too many failed attempts"
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -1164,6 +1189,21 @@
         ],
         "summary": "Logout",
         "operationId": "auth_logout",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          }
+        }
+      }
+    },
+    "/api/v2/auth/logout-all": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Logout All",
+        "description": "End every session of the account, on every device (this one included).",
+        "operationId": "auth_logout_all",
         "responses": {
           "204": {
             "description": "Successful Response"
@@ -4555,13 +4595,13 @@
           },
           "course_type": {
             "type": "string",
-            "enum": [
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Course Type",
+            "examples": [
               "medical_science",
-              "life_science",
-              "ece",
-              "general"
-            ],
-            "title": "Course Type"
+              "ece"
+            ]
           },
           "term_label": {
             "type": "string",
@@ -4598,13 +4638,13 @@
           },
           "course_type": {
             "type": "string",
-            "enum": [
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Course Type",
+            "examples": [
               "medical_science",
-              "life_science",
-              "ece",
-              "general"
-            ],
-            "title": "Course Type"
+              "ece"
+            ]
           },
           "visibility_mode": {
             "type": "string",
@@ -4735,11 +4775,11 @@
             "anyOf": [
               {
                 "type": "string",
-                "enum": [
+                "maxLength": 64,
+                "minLength": 1,
+                "examples": [
                   "medical_science",
-                  "life_science",
-                  "ece",
-                  "general"
+                  "ece"
                 ]
               },
               {
@@ -4878,6 +4918,19 @@
           "temporary_password"
         ],
         "title": "CreatedStudent"
+      },
+      "CsrfOut": {
+        "properties": {
+          "csrf_token": {
+            "type": "string",
+            "title": "Csrf Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "csrf_token"
+        ],
+        "title": "CsrfOut"
       },
       "DiagnosticAnswer": {
         "properties": {
@@ -8422,11 +8475,11 @@
               {
                 "items": {
                   "type": "string",
-                  "enum": [
+                  "maxLength": 64,
+                  "minLength": 1,
+                  "examples": [
                     "medical_science",
-                    "life_science",
-                    "ece",
-                    "general"
+                    "ece"
                   ]
                 },
                 "type": "array"

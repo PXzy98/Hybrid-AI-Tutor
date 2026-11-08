@@ -5,13 +5,13 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session
 
 from app.storage.models import CourseMember, SystemSettings
-from tests.conftest import PASSWORD
+from tests.conftest import PASSWORD, csrf_client
 
 V2 = "/api/v2"
 
 
 def _login(app, username: str, password: str = PASSWORD) -> TestClient:
-    c = TestClient(app)
+    c = csrf_client(app)
     r = c.post(f"{V2}/auth/login", json={"username": username, "password": password})
     assert r.status_code == 200, r.text
     return c
@@ -34,7 +34,7 @@ def world(make_client):
         with Session(services.engine) as db:
             db.add(CourseMember(course_id=course, account_id=alice.id, role="student", status="active"))
             db.commit()
-        yield {"app": app, "services": services, "course": course, "anon": TestClient(app), **people}
+        yield {"app": app, "services": services, "course": course, "anon": csrf_client(app), **people}
 
 
 def test_system_settings_are_admin_only_versioned_and_restorable(world):
@@ -129,7 +129,7 @@ def test_admin_manages_instructor_accounts(world):
     assert {"root", "prof", "other", "new.prof"} <= listed and "alice" not in listed
     aid = new["account_id"]
     assert root.patch(f"{V2}/admin/instructors/{aid}", json={"active": False}).json()["active"] is False
-    bad = TestClient(app).post(f"{V2}/auth/login", json={"username": "new.prof",
+    bad = csrf_client(app).post(f"{V2}/auth/login", json={"username": "new.prof",
                                                          "password": new["temporary_password"]})
     assert bad.status_code == 401
     promoted = root.patch(f"{V2}/admin/instructors/{aid}", json={"active": True, "role": "admin"})

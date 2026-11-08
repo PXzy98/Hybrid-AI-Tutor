@@ -87,17 +87,47 @@ def _fresh_settings(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, _test_datab
     get_settings.cache_clear()
 
 
+def _csrf_client_class():
+    from fastapi.testclient import TestClient
+
+    from app.auth import csrf
+
+    class CsrfTestClient(TestClient):
+        """Like the frontend: sends X-CSRF-Token on state-changing /api/v2 requests (task Z10). A plain
+        TestClient is for tests of the CSRF check itself."""
+
+        def request(self, method, url, **kwargs):
+            if method.upper() in csrf.UNSAFE and str(url).startswith("/api/v2/"):
+                headers = dict(kwargs.pop("headers", None) or {})
+                headers.setdefault(csrf.HEADER, self._csrf_token())
+                kwargs["headers"] = headers
+            return super().request(method, url, **kwargs)
+
+        def _csrf_token(self) -> str:
+            services = getattr(self.app.state, "services", None)
+            session = self.cookies.get(services.settings.auth.cookie_name if services else "tutor_session")
+            if session:
+                return csrf.session_token(session)
+            anonymous = self.cookies.get(csrf.ANON_COOKIE)
+            return anonymous or super().request("GET", "/api/v2/auth/csrf").json()["csrf_token"]
+
+    return CsrfTestClient
+
+
+def csrf_client(app):
+    """A TestClient for `app` that sends the CSRF header like the frontend."""
+    return _csrf_client_class()(app)
+
+
 @pytest.fixture
 def make_client(use_config, monkeypatch: pytest.MonkeyPatch):
     """Start the app (lifespan included) with config overrides: `with make_client({...}) as client:`."""
-    from fastapi.testclient import TestClient
-
     from app.main import create_app
 
-    def _make(overrides: dict | None = None) -> TestClient:
+    def _make(overrides: dict | None = None):
         monkeypatch.setenv("OLLAMA_URL", "http://127.0.0.1:9")  # closed port: health check fails fast
         use_config(overrides)
-        return TestClient(create_app())
+        return csrf_client(create_app())
 
     return _make
 

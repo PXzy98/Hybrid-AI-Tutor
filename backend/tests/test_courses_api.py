@@ -8,7 +8,7 @@ from sqlmodel import Session, select
 
 from app.storage.models import Account, CourseInvite, CourseMember, LoginIdentity, utcnow
 from app.storage.testing import dump_rows
-from tests.conftest import PASSWORD
+from tests.conftest import PASSWORD, csrf_client
 
 V2 = "/api/v2"
 DOMAINS = {"limits": {"accounts": {"allowed_email_domains": ["uottawa.ca", "demo.invalid"]}}}
@@ -21,10 +21,10 @@ class World:
         self.app = client.app
         self.services = client.app.state.services
         self.accounts = self.services.accounts
-        self.anon = TestClient(self.app)
+        self.anon = csrf_client(self.app)
 
     def client(self, login: str | None = None, password: str = PASSWORD) -> TestClient:
-        c = TestClient(self.app)
+        c = csrf_client(self.app)
         if login:
             r = c.post(f"{V2}/auth/login", json={"username": login, "password": password})
             assert r.status_code == 200, r.text
@@ -139,7 +139,7 @@ def test_a_new_student_activates_with_the_code_and_all_his_pending_memberships_b
         r = world.anon.post(f"{V2}/auth/join", json=bad)
         assert r.status_code == 400 and r.json()["code"] == "invalid", r.text
     assert world.anon.post(f"{V2}/auth/join", json={"code": code}).status_code == 422
-    student = TestClient(world.app)
+    student = csrf_client(world.app)
     r = student.post(f"{V2}/auth/join", json=body)
     assert r.status_code == 200, r.text
     me = r.json()["me"]
@@ -278,3 +278,27 @@ def test_login_by_email_and_admin_sees_every_course(world):
     assert root.get(f"{V2}/auth/me").json()["system_role"] == "admin"
     assert root.post(f"{V2}/auth/logout").status_code == 204
     assert root.get(f"{V2}/auth/me").status_code == 401
+
+
+def test_a_new_profile_file_is_a_course_type_of_the_api(world, tmp_path, monkeypatch):
+    """Z7 + Z9: the course types are the privacy profile files; the API takes a new one without a change."""
+    from app.privacy import profiles
+
+    for name in ("base", "general", "medical_science", "ece", "life_science"):
+        (tmp_path / f"{name}.yaml").write_text((profiles.PROFILE_DIR / f"{name}.yaml").read_text("utf-8"),
+                                               encoding="utf-8")
+    (tmp_path / "law.yaml").write_text("extends: base\nrecognizers: []\n", encoding="utf-8")
+    monkeypatch.setattr(profiles, "PROFILE_DIR", tmp_path)
+    profiles._raw.cache_clear()
+    profiles.privacy_profile.cache_clear()
+    try:
+        world.accounts.create_instructor("prof", PASSWORD, must_change=False)
+        prof = world.client("prof")
+        r = prof.post(f"{V2}/courses", json={"code": "LAW 1", "title": "Law", "course_type": "law"})
+        assert r.status_code == 201 and r.json()["course_type"] == "law"
+        assert prof.get(f"{V2}/courses/{r.json()['id']}").json()["course_type"] == "law"
+        bad = prof.post(f"{V2}/courses", json={"code": "X 1", "title": "X", "course_type": "astrology"})
+        assert bad.status_code == 422
+    finally:
+        profiles._raw.cache_clear()
+        profiles.privacy_profile.cache_clear()
