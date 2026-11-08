@@ -84,24 +84,29 @@ def import_topics(db: Session, course_id: int, topics: Sequence[TopicContent],
 
 
 def load_course_content(engine: Engine, course_id: int) -> ContentStore:
-    """The course's modules as validated topics. Retired KCs are left out; items and misconceptions keep
-    their status (the store serves only active ones)."""
+    """The course's modules as validated topics. Retired KCs and modules without KCs are left out; items and
+    misconceptions keep their status (the store serves only active ones)."""
     with Session(engine) as db:
         course = db.get(Course, course_id)
         if course is None:
             raise CatalogError(f"no course {course_id}")
-        modules = db.exec(select(Module).where(Module.course_id == course_id).order_by(Module.position)).all()
-        kcs = db.exec(select(Kc).where(Kc.course_id == course_id, Kc.status != "retired")
-                      .order_by(Kc.id)).all()
-        codes = {k.id: k.code for k in kcs}
-        prereqs: dict[int, list[str]] = {}
-        for edge in db.exec(select(KcPrerequisite).where(KcPrerequisite.kc_id.in_(list(codes)))).all():
-            if edge.prerequisite_id in codes:
-                prereqs.setdefault(edge.kc_id, []).append(codes[edge.prerequisite_id])
-        items = db.exec(select(CheckItem).where(CheckItem.course_id == course_id)
-                        .order_by(CheckItem.id)).all()
-        mcs = db.exec(select(CatalogMisconception).where(CatalogMisconception.course_id == course_id)
-                      .order_by(CatalogMisconception.id)).all()
+        topics = course_topics(db, course_id)
+    return ContentStore(topics, course_id=course_id, source=f"course {course.code}")
+
+
+def course_topics(db: Session, course_id: int) -> list[TopicContent]:
+    """The course's modules that have KCs, as topics (not validated across topics; see `validate`)."""
+    modules = db.exec(select(Module).where(Module.course_id == course_id)
+                      .order_by(Module.position, Module.id)).all()
+    kcs = db.exec(select(Kc).where(Kc.course_id == course_id, Kc.status != "retired").order_by(Kc.id)).all()
+    codes = {k.id: k.code for k in kcs}
+    prereqs: dict[int, list[str]] = {}
+    for edge in db.exec(select(KcPrerequisite).where(KcPrerequisite.kc_id.in_(list(codes)))).all():
+        if edge.prerequisite_id in codes:
+            prereqs.setdefault(edge.kc_id, []).append(codes[edge.prerequisite_id])
+    items = db.exec(select(CheckItem).where(CheckItem.course_id == course_id).order_by(CheckItem.id)).all()
+    mcs = db.exec(select(CatalogMisconception).where(CatalogMisconception.course_id == course_id)
+                  .order_by(CatalogMisconception.id)).all()
     loaded_mcs = {m.code for m in mcs if m.kc_id in codes}  # misconceptions of retired KCs are left out
 
     def options(raw: dict) -> dict:
@@ -112,6 +117,8 @@ def load_course_content(engine: Engine, course_id: int) -> ContentStore:
     topics = []
     for module in modules:
         module_kcs = [k for k in kcs if k.module_id == module.id]
+        if not module_kcs:
+            continue  # a new module before its first KC
         ids = {k.id for k in module_kcs}
         topics.append(TopicContent(
             topic=module.code, name=module.title, guideline=module.guideline,
@@ -124,7 +131,7 @@ def load_course_content(engine: Engine, course_id: int) -> ContentStore:
                                           correction=m.correction, status=m.status)
                             for m in mcs if m.kc_id in ids],
         ))
-    return ContentStore(topics, course_id=course_id, source=f"course {course.code}")
+    return topics
 
 
 def ensure_demo_course(engine: Engine, topics: Sequence[TopicContent], status: ContentStatus | None) -> int:

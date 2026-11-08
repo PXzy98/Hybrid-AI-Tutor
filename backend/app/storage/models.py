@@ -199,6 +199,8 @@ class Course(SQLModel, table=True):
     visibility_mode: str = "A"  # A | B (design §4.5)
     status: str = "active"  # active | archived
     created_at: datetime = _ts(default_factory=utcnow)
+    # incremented by every content edit; processes reload the content when it changes (task Z9)
+    content_version: int = Field(default=0, sa_column_kwargs={"server_default": "0"})
 
 
 class Module(SQLModel, table=True):

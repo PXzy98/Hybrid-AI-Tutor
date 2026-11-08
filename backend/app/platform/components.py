@@ -13,6 +13,9 @@ Every process runs `ComponentManager.sync()` every `limits.settings.poll_seconds
 3. help finish the change: when every live process (heartbeat within 3 × poll) runs the target version the
    row becomes `applied`; an error or the timeout rolls it back (a new version with the old values).
 The process that saved the change syncs at once, so a single process applies it before the request returns.
+
+The same loop reloads the served course's content when its `course.content_version` changes (a content edit
+through API v2, task Z9): the new `ContentStore` and a component set built on it are swapped in.
 """
 import logging
 import os
@@ -26,7 +29,7 @@ from typing import TYPE_CHECKING
 from sqlmodel import Session, select
 
 from app.core.config import Settings
-from app.storage.models import ProcessStatus, utcnow
+from app.storage.models import Course, ProcessStatus, utcnow
 
 if TYPE_CHECKING:
     from app.core.services import Services
@@ -106,6 +109,8 @@ class ComponentManager:
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
         self._sync_lock = threading.Lock()
+        self._values: dict = {}  # the system values the current component set was built from
+        self.content_version: int | None = None  # of the served course, as loaded
 
     # ---------------------------------------------------------------------------------- building
     def build(self, version: int, values: dict) -> Components:
@@ -129,7 +134,33 @@ class ComponentManager:
 
     def initial(self) -> Components:
         values, version, _ = self.services.settings_service.system_values()
-        return self.build(version, values)
+        self.content_version = self._content_version()
+        built = self.build(version, values)
+        self._values = values
+        return built
+
+    def _content_version(self) -> int | None:
+        with Session(self.services.engine) as db:
+            course = db.get(Course, self.services.content.course_id)
+        return course.content_version if course else None
+
+    def _sync_content(self) -> None:
+        """Reload the served course's content after an edit; a failure keeps the old content (reported)."""
+        from app.catalog import load_course_content
+
+        version = self._content_version()
+        if version is None or version == self.content_version:
+            return
+        old = self.services.content
+        try:
+            self.services.content = load_course_content(self.services.engine, old.course_id)
+            self.services.components = self.build(self.services.components.version, self._values)
+            self.content_version = version
+            log.info("course content reloaded (content version %s)", version)
+        except Exception as e:  # noqa: BLE001 - keep serving the old content
+            self.services.content = old
+            self.error = f"content reload: {type(e).__name__}: {e}"[:300]
+            log.warning("could not reload the course content: %s", self.error)
 
     # ------------------------------------------------------------------------------------- syncing
     def sync(self) -> None:
@@ -140,11 +171,13 @@ class ComponentManager:
             if version != self.services.components.version:
                 try:
                     self.services.components = self.build(version, values)
+                    self._values = values
                     self.error = None
                     log.info("components switched to settings version %s", version)
                 except Exception as e:  # noqa: BLE001 - keep serving with the old set, report the reason
                     self.error = f"{type(e).__name__}: {e}"[:300]
                     log.warning("could not build components for version %s: %s", version, self.error)
+            self._sync_content()
             self._heartbeat()
             if state == "applying":
                 live, errors = self._live_processes()

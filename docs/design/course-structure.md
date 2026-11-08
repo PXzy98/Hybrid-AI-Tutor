@@ -215,6 +215,11 @@ Rules:
   and learner state; they are not shown or used for new questions.
 - **YAML import/export** (A6): `content/topics/<topic>/{kcs,items,misconceptions}.yaml` stays as the seed
   format of the demo course. The importer maps each topic folder to a module.
+- **Codes are fixed once created** (Z9): learner state, evidence and learner misconceptions refer to KCs,
+  items and misconceptions by code, so the API edits everything except the code. Every change is checked
+  with the seed checks (unique codes, known prerequisites, no cycles, four options, known misconception tags)
+  on the whole course before it is saved. The API export and import use the seed layout as a ZIP; an
+  imported row without `status` is `active` (the instructor's own content, decision E).
 - `content.serve_unreviewed` and `reviewed_by` are removed from config, code and tests.
 
 ---
