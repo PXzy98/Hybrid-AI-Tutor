@@ -1,0 +1,12 @@
+# Local development only (loaded automatically by `docker compose ...`; production uses
+# `docker compose -f docker-compose.yml ...` and does not load it).
+# Makes the database reachable from this machine (127.0.0.1 only), for a backend or tests run on the host
+# (docs/DATABASE.md). An `internal: true` network cannot publish ports, so the db joins a second network here.
+services:
+  db:
+    networks: [internal, devhost]
+    ports:
+      - "127.0.0.1:${DB_PORT:-5432}:5432"
+
+networks:
+  devhost: {}

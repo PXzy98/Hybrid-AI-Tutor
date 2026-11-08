@@ -12,6 +12,7 @@ from app.api.deps import RunnerDep, ServicesDep
 from app.auth.deps import Student
 from app.core.schemas import AskRequest, AskResponse, RequestContext, Source
 from app.pipeline.runner import PipelineError
+from app.privacy.profiles import privacy_profile
 from app.rag.sources import source_positions
 from app.routing.methods import METHOD_LABELS
 
@@ -81,6 +82,7 @@ def _prepare(body: AskBody, user, services) -> RequestContext:
         request_id=str(uuid.uuid4()),
         request=req,
         settings=eff,
+        profile=privacy_profile(eff.course_type),  # the course's privacy profile (task Z7)
         show_routing_progress=eff.show_routing_progress,
         history=services.sessions.history(session_id, last=settings.sessions.history_turns),
     )

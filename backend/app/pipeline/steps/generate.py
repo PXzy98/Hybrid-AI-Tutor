@@ -5,7 +5,7 @@ from app.core.schemas import CloudRequest, LLMResult, RequestContext
 from app.llm.base import LLMError
 from app.llm.cloud_guard import build_cloud_request
 from app.pipeline.base import BaseStep
-from app.pipeline.settings_view import local_only
+from app.pipeline.settings_view import health_detail_policy, local_only
 from app.privacy.analyzer import PIIAnalyzer
 from app.privacy.generalize import generalize
 from app.privacy.llm_check import reveals_personal_health
@@ -106,7 +106,7 @@ class GenerateStep(BaseStep):
             ctx.pii = ctx.pii.model_copy(update={"cloud_safe": False})
         if ctx.pii.cloud_safe:
             return req
-        if self.services.settings.privacy.health_detail_policy != "generalize":
+        if health_detail_policy(ctx, self.services) != "generalize":
             return None
         rewrite = ctx.generalized_question  # a safety retry reuses the rewrite of the first attempt
         if rewrite is None:

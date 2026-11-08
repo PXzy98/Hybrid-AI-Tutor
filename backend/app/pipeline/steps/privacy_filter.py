@@ -4,6 +4,7 @@ from app.pipeline.base import BaseStep
 from app.privacy.analyzer import PIIAnalyzer, resolve_overlaps
 from app.privacy.anonymizer import anonymize
 from app.privacy.policy import identified_health_topic
+from app.privacy.profiles import privacy_profile, profile_names
 from app.privacy.session_health import follow_up_findings, had_personal_health, refers_back
 
 
@@ -25,12 +26,26 @@ class PrivacyFilterStep(BaseStep):
     def __init__(self, services) -> None:
         super().__init__(services)
         self.cfg = services.settings.privacy
-        self.analyzer = PIIAnalyzer(self.cfg)
+        self.analyzer = PIIAnalyzer(self.cfg)  # all recognizers (or the config's list): no profile known
+        self._by_profile: dict[str, PIIAnalyzer] = {}
+        if self.cfg.recognizers is None:  # build every profile's analyzer now: a missing model stops startup
+            for name in profile_names():
+                self._analyzer_for(privacy_profile(name))
+
+    def _analyzer_for(self, profile) -> PIIAnalyzer:
+        """The analyzer with the profile's recognizers (task Z7). An explicit privacy.recognizers list in
+        config.yaml (the E6 ablation) applies to every course instead."""
+        if profile is None or self.cfg.recognizers is not None:
+            return self.analyzer
+        if profile.name not in self._by_profile:
+            cfg = self.cfg.model_copy(update={"recognizers": list(profile.recognizers)})
+            self._by_profile[profile.name] = PIIAnalyzer(cfg)
+        return self._by_profile[profile.name]
 
     async def run(self, ctx: RequestContext) -> RequestContext:
         question = ctx.request.question
         names, usernames = self.services.accounts.identity_terms(ctx.request.student_id)
-        findings = self.analyzer.analyze(question, names, usernames)
+        findings = self._analyzer_for(ctx.profile).analyze(question, names, usernames)
         health_session = had_personal_health(ctx.history)
         if health_session:
             findings = resolve_overlaps(findings + follow_up_findings(question),
