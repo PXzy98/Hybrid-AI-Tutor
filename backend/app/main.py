@@ -16,6 +16,7 @@ from app.api.v2.errors import (
 )
 from app.catalog import CatalogError
 from app.core.services import build_services
+from app.platform import metrics
 from app.platform.access import DbCourseDirectory
 from app.platform.courses import CourseError
 from app.platform.usage import UsageLimitExceeded
@@ -44,10 +45,13 @@ def create_app() -> FastAPI:
         description="Health-education tutor with a local learner model. Design: docs/System_Design_v3.md",
         lifespan=lifespan,
     )
+    app.middleware("http")(metrics.middleware)  # request counts and durations by route template (Z13)
     app.add_middleware(CORSMiddleware, allow_origins=DEV_ORIGINS, allow_credentials=True,  # session cookie
                        allow_methods=["*"], allow_headers=["*"])
     app.include_router(api_router)
     app.include_router(api_router_v2)  # docs/design/api-v2.md; /api/v1 is frozen
+    # Prometheus (task Z13): not under /api, so the web proxy never serves it (only the stack reaches it)
+    app.add_api_route("/metrics", metrics.metrics, methods=["GET"], include_in_schema=False)
     app.add_exception_handler(UsageLimitExceeded, usage_limit_handler)
     app.add_exception_handler(CourseError, course_error_handler)
     app.add_exception_handler(CatalogError, catalog_error_handler)
