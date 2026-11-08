@@ -9,6 +9,7 @@ import os
 import uuid
 from collections.abc import Iterator
 from contextlib import contextmanager
+from pathlib import Path
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import make_url
@@ -18,9 +19,24 @@ from sqlmodel import SQLModel
 from app.storage.db import init_db, make_engine, normalize_url
 
 TEST_URL_ENV = "TEST_DATABASE_URL"
+DOTENV = Path(__file__).resolve().parents[3] / ".env"
+
+
+def load_test_env() -> None:
+    """Take TEST_DATABASE_URL and PGPASSWORD from the repository's .env when they are not in the environment
+    (the .env that setup_local.py writes); libpq then reads PGPASSWORD for every test connection."""
+    if not DOTENV.is_file():
+        return
+    from dotenv import dotenv_values
+
+    values = dotenv_values(DOTENV)
+    for name in (TEST_URL_ENV, "PGPASSWORD"):
+        if not os.environ.get(name) and values.get(name):
+            os.environ[name] = values[name]
 
 
 def admin_url() -> str:
+    load_test_env()
     url = os.environ.get(TEST_URL_ENV, "").strip()
     if not url:
         raise RuntimeError(
