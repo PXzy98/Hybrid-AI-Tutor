@@ -84,10 +84,12 @@ class InviteOut(BaseModel):
     max_uses: int | None
     created_at: datetime
     expired: bool
+    # the code, when it can be shown again (stored encrypted with SETTINGS_ENCRYPTION_KEY); else null
+    code: str | None = None
 
 
 class NewInviteOut(InviteOut):
-    code: str  # shown only now: the code is stored as a hash; rotate again if it is lost
+    code: str  # always shown when it is created
 
 
 def _courses(request: Request):
@@ -168,7 +170,8 @@ def reset_password(request: Request, member_id: int, access: CourseInstructor):
 # ------------------------------------------------------------------------------------ invitation code
 @router.get("/courses/{course_id}/invite", response_model=InviteOut | None, operation_id="invite_get")
 def get_invite(request: Request, access: CourseInstructor):
-    """The current code's expiry and use count (not the code itself; null when there is none)."""
+    """The current code with its expiry and use count (null when there is none). `code` is null when it
+    cannot be shown again (no SETTINGS_ENCRYPTION_KEY on the server, or another one): rotate for a new one."""
     view = _courses(request).invite(access.course.id)
     return InviteOut(**view.__dict__) if view else None
 
@@ -177,4 +180,4 @@ def get_invite(request: Request, access: CourseInstructor):
 def rotate_invite(request: Request, access: CourseInstructor):
     """A new invitation code; the previous one stops working."""
     code, view = _courses(request).rotate_invite(access.course.id)
-    return NewInviteOut(code=code, **view.__dict__)
+    return NewInviteOut(**{**view.__dict__, "code": code})

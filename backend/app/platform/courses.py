@@ -4,8 +4,9 @@ Identity data stays in `account` (privacy invariant 6): a membership holds an e-
 (no account yet) and loses it when the account is linked. A roster CSV keeps only the `email` column (and
 reads `display_name`); every other column is ignored and never stored.
 
-The invitation code is stored only as a SHA-256 hash, like a session token: it is shown once, when it is
-created, and an instructor who lost it rotates it.
+Joining checks the invitation code's SHA-256 hash. The code itself is also stored, encrypted with
+`SETTINGS_ENCRYPTION_KEY`, so the course's instructors can look it up again; without that key it is stored as
+the hash only and shown once, when it is created.
 """
 import csv
 import hashlib
@@ -21,6 +22,7 @@ from sqlmodel import Session, col, delete, select
 from app.auth.service import AccountService, PasswordPolicyError
 from app.catalog import create_course
 from app.core.config import AccountLimits
+from app.llm import secrets as secrets_box
 from app.platform.settings import course_types
 from app.storage.models import Account, Course, CourseInvite, CourseMember, utcnow
 
@@ -78,6 +80,7 @@ class InviteView:
     max_uses: int | None
     created_at: datetime
     expired: bool
+    code: str | None = None  # None when it cannot be shown again (no or another encryption key)
 
 
 @dataclass
@@ -107,17 +110,25 @@ def _course_view(course: Course, my_role: str | None) -> CourseView:
                       course.visibility_mode, course.status, my_role)
 
 
-def _invite_view(invite: CourseInvite) -> InviteView:
+def _invite_view(invite: CourseInvite, key: str | None) -> InviteView:
     expired = invite.expires_at is not None and invite.expires_at <= utcnow()
-    return InviteView(invite.expires_at, invite.uses, invite.max_uses, invite.created_at, expired)
+    code = None
+    if invite.code_encrypted and key:
+        try:
+            code = secrets_box.decrypt(invite.code_encrypted, key)
+        except secrets_box.MissingEncryptionKey:
+            code = None  # the key changed: rotating makes a new code
+    return InviteView(invite.expires_at, invite.uses, invite.max_uses, invite.created_at, expired, code)
 
 
 class CourseService:
-    def __init__(self, engine, accounts: AccountService, limits: AccountLimits, enabled_course_types) -> None:
+    def __init__(self, engine, accounts: AccountService, limits: AccountLimits, enabled_course_types,
+                 encryption_key: str | None = None) -> None:
         self.engine = engine
         self.accounts = accounts
         self.limits = limits
         self._enabled_course_types = enabled_course_types  # () -> list[str] | None (system settings)
+        self._key = encryption_key  # SETTINGS_ENCRYPTION_KEY: invitation codes can be shown again
 
     def _db(self) -> Session:
         return Session(self.engine, expire_on_commit=False)
@@ -337,7 +348,7 @@ class CourseService:
         with self._db() as db:
             self._course(db, course_id)
             row = db.exec(select(CourseInvite).where(CourseInvite.course_id == course_id)).first()
-            return _invite_view(row) if row else None
+            return _invite_view(row, self._key) if row else None
 
     def rotate_invite(self, course_id: int) -> tuple[str, InviteView]:
         """A new code for the course; the old one stops working. Returns the code (shown once) and its
@@ -350,10 +361,11 @@ class CourseService:
             db.exec(delete(CourseInvite).where(CourseInvite.course_id == course_id))
             code = "".join(secrets.choice(INVITE_ALPHABET) for _ in range(length))
             row = CourseInvite(course_id=course_id, code_hash=invite_hash(code), role="student",
+                               code_encrypted=secrets_box.encrypt(code, self._key) if self._key else None,
                                expires_at=utcnow() + timedelta(days=self.limits.invite_expiry_days))
             db.add(row)
             db.commit()
-            return code, _invite_view(row)
+            return code, _invite_view(row, self._key)
 
     # ----------------------------------------------------------------------------------------- join
     def _valid_invite(self, db: Session, code: str) -> tuple[CourseInvite, Course]:

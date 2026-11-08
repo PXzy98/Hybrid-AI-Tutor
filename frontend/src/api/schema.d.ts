@@ -458,6 +458,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/auth/csrf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Csrf
+         * @description Public. With a session: its token. Without: a short-lived anonymous token (also set as a cookie).
+         */
+        get: operations["auth_csrf"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/auth/login": {
         parameters: {
             query?: never;
@@ -486,6 +506,26 @@ export interface paths {
         put?: never;
         /** Logout */
         post: operations["auth_logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/auth/logout-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Logout All
+         * @description End every session of the account, on every device (this one included).
+         */
+        post: operations["auth_logout_all"];
         delete?: never;
         options?: never;
         head?: never;
@@ -708,7 +748,8 @@ export interface paths {
         };
         /**
          * Get Invite
-         * @description The current code's expiry and use count (not the code itself; null when there is none).
+         * @description The current code with its expiry and use count (null when there is none). `code` is null when it
+         *     cannot be shown again (no SETTINGS_ENCRYPTION_KEY on the server, or another one): rotate for a new one.
          */
         get: operations["invite_get"];
         put?: never;
@@ -1614,6 +1655,11 @@ export interface components {
             /** Temporary Password */
             temporary_password: string;
         };
+        /** CsrfOut */
+        CsrfOut: {
+            /** Csrf Token */
+            csrf_token: string;
+        };
         /** DiagnosticAnswer */
         DiagnosticAnswer: {
             /** Item Id */
@@ -1845,6 +1891,8 @@ export interface components {
             created_at: string;
             /** Expired */
             expired: boolean;
+            /** Code */
+            code?: string | null;
         };
         /** ItemIn */
         ItemIn: {
@@ -3854,6 +3902,26 @@ export interface operations {
             };
         };
     };
+    auth_csrf: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CsrfOut"];
+                };
+            };
+        };
+    };
     auth_login: {
         parameters: {
             query?: never;
@@ -3885,9 +3953,34 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
+            /** @description too many failed attempts */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     auth_logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    auth_logout_all: {
         parameters: {
             query?: never;
             header?: never;

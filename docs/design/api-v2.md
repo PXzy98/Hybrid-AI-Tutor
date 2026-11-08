@@ -25,7 +25,7 @@ component owner who implements it. Data model and rules: [course-structure.md](c
 | Topic | Rule |
 |---|---|
 | Authentication | Same server-side session cookie as v1 (`HttpOnly`, `Secure` in production, `SameSite=Lax`). |
-| CSRF | Every state-changing request (POST, PUT, PATCH, DELETE), including the public `login` and `join`, sends header `X-CSRF-Token` with the value from `GET /api/v2/auth/csrf` (Z10). That endpoint is **public**: without a session it sets a short-lived anonymous CSRF cookie and returns the matching token (double-submit). Login issues a new token bound to the new session, and logout clears it. |
+| CSRF | Every state-changing request (POST, PUT, PATCH, DELETE), including the public `login` and `join`, sends header `X-CSRF-Token` with the value from `GET /api/v2/auth/csrf` (Z10). That endpoint is **public**: without a session it sets a short-lived anonymous CSRF cookie and returns the matching token (double-submit). Login issues a new token bound to the new session (also in the `X-CSRF-Token` header of the `login` and `join` responses), and logout clears it. A missing or wrong token is 403 with `code: csrf_failed`. `/api/v1` is frozen and does not check it (Z10). |
 | Course scope | Course-scoped endpoints are under `/api/v2/courses/{course_id}/...`; access is checked by `require_course_role` before anything else. A course the caller cannot see returns **404**, not 403. |
 | IDs | Integers for database objects; `student_id` stays a UUID string and is the only student identifier in learner endpoints. |
 | Errors | `{"detail": "<human-readable English>", "code": "<machine_code>"}`; codes are listed in `backend/app/api/v2/errors.py`. |
@@ -48,6 +48,7 @@ logged in. Owner = component owner who implements it.
 |---|---|---|
 | `POST /auth/login` | public | username or e-mail (field `username`) + password |
 | `POST /auth/logout` | any | end session |
+| `POST /auth/logout-all` | any | end every session of the account, on every device (Z10) |
 | `GET /auth/me` | any | account, system role, memberships |
 | `POST /auth/change-password` | any | ends all other sessions |
 | `GET /auth/csrf` | public | CSRF token (anonymous before login, bound to the session after) |
@@ -84,7 +85,7 @@ logged in. Owner = component owner who implements it.
 | `POST /courses/{course_id}/members/instructors` | I | add a co-instructor by e-mail |
 | `DELETE /courses/{course_id}/members/{member_id}` | I | remove a member |
 | `POST /courses/{course_id}/members/{member_id}/reset-password` | I | temporary password for a student |
-| `GET /courses/{course_id}/invite`, `POST /courses/{course_id}/invite/rotate` | I | invitation code: `GET` shows its expiry and use count; `rotate` returns a new code, the only time it is shown (stored as a hash) |
+| `GET /courses/{course_id}/invite`, `POST /courses/{course_id}/invite/rotate` | I | invitation code: `GET` shows the code (stored encrypted with `SETTINGS_ENCRYPTION_KEY`; null without that key), its expiry and use count; `rotate` returns a new code |
 | `GET /courses/{course_id}/usage` | I | usage summary of the course |
 | `GET /courses/{course_id}/logs` | I | sanitized request logs |
 | `GET /courses/{course_id}/audit` | I | audit log of the course |

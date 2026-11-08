@@ -19,6 +19,7 @@ class ErrorCode(StrEnum):
     conflict = "conflict"  # settings or content changed since it was read (optimistic locking)
     settings_applying = "settings_applying"  # 423 while a settings change is applied
     usage_limit = "usage_limit"  # 429
+    csrf_failed = "csrf_failed"  # 403: missing or wrong X-CSRF-Token (task Z10)
 
 
 class ErrorBody(BaseModel):

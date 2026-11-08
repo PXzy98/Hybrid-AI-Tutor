@@ -38,6 +38,12 @@ jobs:
           for i in 1 2 3 4 5; do python -m spacy download en_core_web_sm && break; [ "$i" = 5 ] && exit 1; sleep 20; done
       - name: Lint
         run: python -m ruff check . ../scripts
+      - name: Security scans (task Z13; known findings are listed with their reason, anything new fails)
+        run: |
+          python -m pip install "bandit==1.9.4" "pip-audit==2.10.1"
+          python -m bandit -q -r app -ll -b .bandit-baseline.json
+          ignored=$(sed -e 's/#.*//' -e '/^[[:space:]]*$/d' -e 's/^/--ignore-vuln /' .pip-audit-ignore)
+          python -m pip_audit --skip-editable --progress-spinner off $ignored
       - name: Migrations upgrade an empty database
         run: |
           psql -h localhost -U postgres -c "CREATE DATABASE migration_check"
@@ -71,6 +77,10 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm test
+      - name: npm audit (production dependencies; high or critical fails, task Z13)
+        run: npm audit --omit=dev --audit-level=high
+      - name: npm audit (development tools, report only)
+        run: npm audit || true
 
   docker:
     # Builds both images as in production, then checks that the API runs offline with its routing and
@@ -91,6 +101,14 @@ jobs:
           ENV
       - name: Build
         run: docker compose build
+      - name: Image scan (Trivy; HIGH and CRITICAL with a fix, report only, task Z13)
+        run: |
+          for image in $(docker compose config --images | sort -u); do
+            echo "::group::$image"
+            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:0.58.0 image \
+              --severity HIGH,CRITICAL --ignore-unfixed --exit-code 0 --no-progress --scanners vuln "$image"
+            echo "::endgroup::"
+          done
       - name: Start
         run: docker compose up -d --wait --wait-timeout 180
       - name: Health through the web proxy

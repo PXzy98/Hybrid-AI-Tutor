@@ -326,7 +326,10 @@ class CourseInvite(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     course_id: int = Field(sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=False,
                                             index=True))
-    code_hash: str = Field(unique=True, index=True)  # SHA-256 of the invitation code; the code is not stored
+    code_hash: str = Field(unique=True, index=True)  # SHA-256 of the invitation code: what join checks
+    # the code itself, Fernet-encrypted with SETTINGS_ENCRYPTION_KEY, so instructors can see it again (None
+    # without a key: then it is shown only once)
+    code_encrypted: str | None = None
     role: str = "student"
     expires_at: datetime | None = _ts(default=None)
     max_uses: int | None = None
@@ -384,6 +387,24 @@ class CourseSettings(_SettingsMeta, table=True):
         default=None, sa_column=Column(ForeignKey("model_endpoint.id", ondelete="SET NULL")))
     cloud_endpoint_id: int | None = Field(
         default=None, sa_column=Column(ForeignKey("model_endpoint.id", ondelete="SET NULL")))
+
+
+class UsageCounter(SQLModel, table=True):
+    """Usage per student + course + period (guide 4.4, task Z10): questions per minute and per day, cloud
+    calls per day. Counts only; no question text."""
+
+    __tablename__ = "usage_counter"
+    __table_args__ = (UniqueConstraint("student_id", "course_id", "kind", "period", "period_start"),)
+
+    id: int | None = Field(default=None, primary_key=True)
+    student_id: str = Field(index=True)
+    course_id: int = Field(sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=False,
+                                            index=True))
+    kind: str  # question | cloud_call
+    period: str  # minute | day
+    period_start: datetime = _ts()
+    count: int = 0
+    tokens: int = 0
 
 
 class ProcessStatus(SQLModel, table=True):
