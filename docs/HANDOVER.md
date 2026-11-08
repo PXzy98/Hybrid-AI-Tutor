@@ -23,7 +23,7 @@ stand and where to look. Running the system: [OPERATIONS.md](OPERATIONS.md).
 | Task | State | Where |
 |---|---|---|
 | Z1 interface contract | merged | `backend/app/platform/`, `core/schemas.py` |
-| Z2 9B vs 27B | PR #51 | `eval/model-compare/` (27B judged better on open questions; both fit one 24 GB GPU in 4-bit) |
+| Z2 9B vs 27B | PR #51 | `eval/model-compare/` (small, not robust lead for 27B on open questions; both fit one 24 GB GPU in 4-bit) |
 | Z3 PostgreSQL + Alembic | merged | `backend/alembic/`, `app/storage/` |
 | Z4 course catalog | merged | `app/catalog/` |
 | Z5 settings layers, live component switch | merged | `app/platform/settings.py`, `components.py` |
