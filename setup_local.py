@@ -11,6 +11,7 @@ import getpass
 import json
 import os
 import re
+import secrets
 import shutil
 import subprocess
 import sys
@@ -37,10 +38,11 @@ def valid_password(password, username, minimum=10):
     )
 
 
-def env_text(username, password, ollama_model):
+def env_text(username, password, ollama_model, db_password=None):
     """Quote values as data; passwords are never interpolated into shell commands."""
     if not re.fullmatch(r"[a-z0-9._-]{3,32}", username) or not valid_password(password, username):
         raise ValueError("Use a username and a different password of at least 10 characters.")
+    db_password = db_password or secrets.token_urlsafe(24)  # PostgreSQL of `docker compose up -d db`
     values = {
         "OLLAMA_URL": "http://127.0.0.1:11434",
         "LLM__LOCAL__MODEL": ollama_model,
@@ -49,7 +51,9 @@ def env_text(username, password, ollama_model):
         "CLOUD_API_KEY": "", "CLOUD_MODEL": "",
         "INSTRUCTOR_USERNAME": username,
         "INSTRUCTOR_INITIAL_PASSWORD": password,
-        "DATABASE_URL": "",
+        "DATABASE_URL": "postgresql+psycopg://tutor@127.0.0.1:5432/tutor",
+        "PGPASSWORD": db_password, "POSTGRES_PASSWORD": db_password,
+        "TEST_DATABASE_URL": "postgresql+psycopg://tutor@127.0.0.1:5432/tutor",
         "ROUTING__IMPL": "semantic", "RAG__IMPL": "medical_hybrid",
         "PRIVACY__SPACY_MODEL": "en_core_web_lg",
     }
@@ -118,6 +122,15 @@ with TestClient(app):
 """
 
 
+def start_database(env):
+    """Start the PostgreSQL service of docker-compose.yml (unless DATABASE_URL points elsewhere)."""
+    docker = shutil.which("docker")
+    if not docker:
+        raise RuntimeError("Install Docker (for `docker compose up -d db`) or set DATABASE_URL and "
+                           "PGPASSWORD in .env to your own PostgreSQL server; see docs/DATABASE.md.")
+    execute([docker, "compose", "up", "-d", "--wait", "db"], ROOT, env)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--reuse-python", type=Path, help="Reuse an existing virtualenv's Python executable")
@@ -167,6 +180,7 @@ def main(argv=None):
         execute([python, "-c", ASSET_CHECK], backend, env)
     else:
         print("Reusing cached semantic/evidence models and trained weights.", flush=True)
+    start_database(env)
     execute([python, "-c", STARTUP_CHECK], backend, env)
     npm = shutil.which("npm.cmd") or shutil.which("npm")
     if not npm:

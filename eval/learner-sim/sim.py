@@ -31,15 +31,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "backend"))
 
-from sqlalchemy.pool import StaticPool  # noqa: E402
-from sqlmodel import create_engine  # noqa: E402
 
 from app.core.config import Settings  # noqa: E402
 from app.core.schemas import Evidence  # noqa: E402
 from app.learner.checks import choose_item, diagnostic_items, evidence_for, grade  # noqa: E402
 from app.learner.content import ContentStore  # noqa: E402
 from app.learner.facade import build_learner_model  # noqa: E402
-from app.storage.db import init_db  # noqa: E402
+from app.storage.db import make_engine  # noqa: E402
+from app.storage.testing import temporary_database, truncate_all  # noqa: E402
 
 FORGET = 0.02
 ASK_RATE = 0.5
@@ -143,11 +142,26 @@ def settings_for(base: Settings, cfg: RunConfig) -> Settings:
     return base.model_copy(update={"learner": learner})
 
 
+_database: list = []  # [context manager, url] of the temporary database, created on first use
+
+
+def database_url() -> str:
+    """One temporary PostgreSQL database (TEST_DATABASE_URL) for the whole run, dropped at exit."""
+    if not _database:
+        import atexit
+
+        manager = temporary_database()
+        _database.extend([manager, manager.__enter__()])
+        atexit.register(manager.__exit__, None, None, None)
+    return _database[1]
+
+
 def run(base: Settings, content: ContentStore, topic: str, cfg: RunConfig, students: list[SimStudent],
         interactions: int, noise: float, seed: int) -> RunResult:
     settings = settings_for(base, cfg)
-    engine = create_engine("sqlite://", poolclass=StaticPool, connect_args={"check_same_thread": False})
-    init_db(engine)
+    url = database_url()
+    truncate_all(url)  # every configuration starts from empty learner tables
+    engine = make_engine(url)
     learner = build_learner_model(settings, engine, content)
     lv = settings.learner.levels
     kc_ids = [k.id for k in content.kcs(topic)]

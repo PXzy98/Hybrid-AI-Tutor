@@ -1,3 +1,4 @@
+"""Conversation turns in the application database (`sessions.store: database`)."""
 from sqlalchemy import Engine
 from sqlmodel import Session, col, select
 
@@ -6,8 +7,8 @@ from app.core.schemas import Turn
 from app.storage.models import SessionTurn
 
 
-@session_stores.register("sqlite")
-class SqliteSessionStore:
+@session_stores.register("database")
+class DatabaseSessionStore:
     def __init__(self, engine: Engine) -> None:
         self.engine = engine
 

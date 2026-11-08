@@ -1,5 +1,4 @@
 """Learner model: knowledge models (BKT and rule), preferences, recommender, facade, consent, persistence."""
-import sqlite3
 
 import pytest
 
@@ -34,10 +33,9 @@ def make(use_config):
 
 
 def rows(table):
-    path = get_settings().database_url.removeprefix("sqlite:///")
-    with sqlite3.connect(path) as con:
-        con.row_factory = sqlite3.Row
-        return [dict(r) for r in con.execute(f"SELECT * FROM {table}")]  # noqa: S608
+    from app.storage.testing import table_rows
+
+    return table_rows(get_settings().database_url, table)
 
 
 # ------------------------------------------------------------------------- knowledge models

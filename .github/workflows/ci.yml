@@ -11,6 +11,18 @@ jobs:
     defaults:
       run:
         working-directory: backend
+    services:
+      postgres:
+        # tests and evaluation harnesses create and drop their own databases here (TEST_DATABASE_URL)
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: ci-only-password
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgresql+psycopg://postgres@localhost:5432/postgres
+      PGPASSWORD: ci-only-password
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -25,6 +37,10 @@ jobs:
           python -m spacy download en_core_web_sm
       - name: Lint
         run: python -m ruff check . ../scripts
+      - name: Migrations upgrade an empty database
+        run: |
+          psql -h localhost -U postgres -c "CREATE DATABASE migration_check"
+          DATABASE_URL=postgresql+psycopg://postgres@localhost:5432/migration_check python -m alembic upgrade head
       - name: Test
         run: python -m pytest -q
       - name: Test with the rule knowledge model (swap check)
@@ -69,6 +85,7 @@ jobs:
           INSTRUCTOR_INITIAL_PASSWORD=ci-initial-password-only
           CONTENT__SERVE_UNREVIEWED=true
           OLLAMA_URL=http://127.0.0.1:9
+          POSTGRES_PASSWORD=ci-only-db-password
           ENV
       - name: Build
         run: docker compose build

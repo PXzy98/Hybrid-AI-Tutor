@@ -12,7 +12,6 @@ from app.storage.models import (
     LearnerMisconception,
     LearnerPreference,
     LearnerTopicLevel,
-    as_utc,
     utcnow,
 )
 
@@ -69,7 +68,7 @@ class LearnerRepository:
         out: dict[str, datetime] = {}
         for row in self.evidence(student_id):
             if row.item_id:
-                out[row.item_id] = as_utc(row.created_at)
+                out[row.item_id] = row.created_at
         return out
 
     # ---------------------------------------------------------------- topic level
@@ -112,7 +111,7 @@ class LearnerRepository:
             stmt = stmt.where(col(LearnerMisconception.status).in_(statuses))
         with self._db() as db:
             rows = db.exec(stmt).all()
-        return sorted(rows, key=lambda r: (as_utc(r.updated_at), r.id), reverse=True)
+        return sorted(rows, key=lambda r: (r.updated_at, r.id), reverse=True)
 
     def misconception(self, student_id: str, misconception_id: str) -> LearnerMisconception | None:
         with self._db() as db:

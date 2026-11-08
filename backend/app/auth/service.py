@@ -12,7 +12,7 @@ from app.auth import passwords
 from app.auth import sessions as auth_sessions
 from app.auth.purge import purge_student
 from app.core.config import Settings
-from app.storage.models import Account, as_utc, utcnow
+from app.storage.models import Account, utcnow
 
 log = logging.getLogger("app.auth")
 
@@ -129,7 +129,7 @@ class AccountService:
                 passwords.burn_time(password)
                 raise InvalidCredentials()
             now = utcnow()
-            if account.locked_until and as_utc(account.locked_until) > now:
+            if account.locked_until and account.locked_until > now:
                 raise AccountLocked()
             if not passwords.verify_password(account.password_hash, password):
                 account.failed_logins += 1

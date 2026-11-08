@@ -46,7 +46,8 @@ class Services:
 
 def build_services(settings: Settings | None = None) -> Services:
     settings = settings or get_settings()
-    engine = make_engine(settings.database_url)
+    password = settings.pgpassword.get_secret_value() if settings.pgpassword else None
+    engine = make_engine(settings.database_url, pooled=settings.database_pooled, password=password)
     init_db(engine)
     local_llm, cloud_llm, understand_llm = build_llm_clients(settings)
     content = ContentStore(settings.content_dir(), settings.content.serve_unreviewed)  # validated here

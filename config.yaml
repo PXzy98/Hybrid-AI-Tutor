@@ -51,7 +51,7 @@ privacy:
   log_raw_text: false                 # must stay false
 
 sessions:
-  store: sqlite
+  store: database
   history_turns: 6
 
 learner:

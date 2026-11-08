@@ -17,9 +17,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     # the privacy filter refuses to start unless this model is installed, so image and config always match
     PRIVACY__SPACY_MODEL=${SPACY_MODEL} \
-    # what the app writes (database, instructor uploads) lives in /app/var, the only volume; what ships with the
-    # image (course sources in /app/data, models) stays outside it, so a rebuild is never hidden by an old volume
-    DATABASE_URL=sqlite:////app/var/app.db \
+    # instructor uploads live in /app/var, the only volume of this container (the database is the db service);
+    # what ships with the image (course sources in /app/data, models) stays outside it
     RAG__MATERIALS_DIR=/app/var/topics \
     HF_HOME=/opt/hf \
     ROUTING__MODEL_DIR=/app/models/routing
@@ -47,6 +46,8 @@ SentenceTransformer(sys.argv[1], device='cpu'); [CrossEncoder(m, device='cpu') f
 COPY data/routing/models /app/models/routing
 COPY data/medical_rag /app/data/medical_rag
 COPY backend/app backend/app
+COPY backend/alembic.ini backend/alembic.ini
+COPY backend/alembic backend/alembic
 COPY config.yaml ./config.yaml
 COPY content ./content
 COPY scripts/demo_seed.py ./scripts/demo_seed.py

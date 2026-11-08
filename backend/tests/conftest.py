@@ -6,6 +6,7 @@ import pytest
 import yaml
 
 from app.core.config import DEFAULT_CONFIG, Settings, get_settings
+from app.storage.testing import temporary_database, truncate_all
 
 
 def _deep_merge(base: dict, overrides: dict) -> dict:
@@ -33,14 +34,41 @@ def _write_config(path: Path, overrides: dict) -> None:
     path.write_text(yaml.safe_dump(_deep_merge(_deep_merge(base, TEST_BASE), overrides)), encoding="utf-8")
 
 
+@pytest.fixture(scope="session")
+def _test_database():
+    """One temporary PostgreSQL database for the run (TEST_DATABASE_URL), created with the current schema
+    and dropped at the end; never the application database."""
+    with temporary_database() as url:
+        yield url
+
+
 @pytest.fixture(autouse=True)
-def _fresh_settings(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
-    """Every test starts with an empty settings cache and its own SQLite file (never data/app.db)."""
+def _close_engines(monkeypatch: pytest.MonkeyPatch, _test_database: str):
+    """Close every engine a test creates (so pooled connections never pile up), then empty the tables."""
+    import app.storage.db as db
+
+    created = []
+    original = db.create_engine
+
+    def tracked(*args, **kwargs):
+        created.append(original(*args, **kwargs))
+        return created[-1]
+
+    monkeypatch.setattr(db, "create_engine", tracked)
+    yield
+    for engine in created:
+        engine.dispose()
+    truncate_all(_test_database)
+
+
+@pytest.fixture(autouse=True)
+def _fresh_settings(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, _test_database: str, _close_engines):
+    """Every test starts with an empty settings cache and empty tables in the temporary database."""
     # Isolate tests from machine-specific .env (including RAG and privacy overrides).
     monkeypatch.setitem(Settings.model_config, "env_file", None)
     _write_config(tmp_path / "config.yaml", {})
     monkeypatch.setenv("APP_CONFIG", str(tmp_path / "config.yaml"))
-    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{(tmp_path / 'test.db').as_posix()}")
+    monkeypatch.setenv("DATABASE_URL", _test_database)
     # a developer's .env must not change test behaviour: no instructor bootstrap unless a test asks for it
     monkeypatch.setenv("INSTRUCTOR_USERNAME", "")
     monkeypatch.setenv("INSTRUCTOR_INITIAL_PASSWORD", "")
