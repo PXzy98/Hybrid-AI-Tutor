@@ -326,7 +326,10 @@ class CourseInvite(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     course_id: int = Field(sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=False,
                                             index=True))
-    code_hash: str = Field(unique=True, index=True)  # SHA-256 of the invitation code; the code is not stored
+    code_hash: str = Field(unique=True, index=True)  # SHA-256 of the invitation code: what join checks
+    # the code itself, Fernet-encrypted with SETTINGS_ENCRYPTION_KEY, so instructors can see it again (None
+    # without a key: then it is shown only once)
+    code_encrypted: str | None = None
     role: str = "student"
     expires_at: datetime | None = _ts(default=None)
     max_uses: int | None = None

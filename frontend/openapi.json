@@ -1777,7 +1777,7 @@
           "courses"
         ],
         "summary": "Get Invite",
-        "description": "The current code's expiry and use count (not the code itself; null when there is none).",
+        "description": "The current code with its expiry and use count (null when there is none). `code` is null when it\ncannot be shown again (no SETTINGS_ENCRYPTION_KEY on the server, or another one): rotate for a new one.",
         "operationId": "invite_get",
         "parameters": [
           {
@@ -5538,6 +5538,17 @@
           "expired": {
             "type": "boolean",
             "title": "Expired"
+          },
+          "code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Code"
           }
         },
         "type": "object",

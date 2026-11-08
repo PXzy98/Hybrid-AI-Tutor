@@ -748,7 +748,8 @@ export interface paths {
         };
         /**
          * Get Invite
-         * @description The current code's expiry and use count (not the code itself; null when there is none).
+         * @description The current code with its expiry and use count (null when there is none). `code` is null when it
+         *     cannot be shown again (no SETTINGS_ENCRYPTION_KEY on the server, or another one): rotate for a new one.
          */
         get: operations["invite_get"];
         put?: never;
@@ -1890,6 +1891,8 @@ export interface components {
             created_at: string;
             /** Expired */
             expired: boolean;
+            /** Code */
+            code?: string | null;
         };
         /** ItemIn */
         ItemIn: {

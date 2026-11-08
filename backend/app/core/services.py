@@ -114,7 +114,8 @@ def build_services(settings: Settings | None = None) -> Services:
     services.usage = usage.DbUsageMeter(engine, settings.limits.usage, settings_service.effective)
     usage.configure(services.usage)  # check_usage / record_usage (task Z10)
     services.courses = CourseService(engine, services.accounts, settings.limits.accounts,
-                                     lambda: settings_service.system_values()[0].get("enabled_course_types"))
+                                     lambda: settings_service.system_values()[0].get("enabled_course_types"),
+                                     encryption_key=secret)  # invitation codes can be shown again
     services.component_manager = ComponentManager(services, settings)
     services.components = services.component_manager.initial()
     return services

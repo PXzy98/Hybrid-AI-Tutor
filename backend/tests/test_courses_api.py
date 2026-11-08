@@ -156,7 +156,7 @@ def test_a_new_student_activates_with_the_code_and_all_his_pending_memberships_b
         subject = db.exec(select(LoginIdentity.subject).where(LoginIdentity.account_id == account.id)).one()
         assert subject == f"account:{account.id}"
     invite = prof.get(f"{V2}/courses/{first}/invite").json()
-    assert invite["uses"] == 1 and "code" not in invite
+    assert invite["uses"] == 1 and invite["code"] is None  # no SETTINGS_ENCRYPTION_KEY here: shown once
 
 
 def test_a_logged_in_student_joins_with_the_code_and_keeps_his_password(world):
@@ -302,3 +302,25 @@ def test_a_new_profile_file_is_a_course_type_of_the_api(world, tmp_path, monkeyp
     finally:
         profiles._raw.cache_clear()
         profiles.privacy_profile.cache_clear()
+
+
+def test_with_an_encryption_key_instructors_see_the_code_again(make_client, monkeypatch):
+    from cryptography.fernet import Fernet
+
+    key = Fernet.generate_key().decode()
+    monkeypatch.setenv("SETTINGS_ENCRYPTION_KEY", key)
+    with make_client(DOMAINS) as client:
+        world = World(client)
+        world.accounts.create_instructor("prof", PASSWORD, must_change=False)
+        prof = world.client("prof")
+        course_id = world.course(prof)
+        code = prof.post(f"{V2}/courses/{course_id}/invite/rotate").json()["code"]
+        assert prof.get(f"{V2}/courses/{course_id}/invite").json()["code"] == code
+        assert code not in dump_rows(world.services.settings.database_url)  # stored encrypted only
+        world.services.courses._key = Fernet.generate_key().decode()  # the key was changed
+        assert prof.get(f"{V2}/courses/{course_id}/invite").json()["code"] is None  # no error: rotate
+        world.services.courses._key = key
+        new = prof.post(f"{V2}/courses/{course_id}/invite/rotate").json()["code"]
+        assert new != code and prof.get(f"{V2}/courses/{course_id}/invite").json()["code"] == new
+        world.accounts.create_instructor("other", PASSWORD, must_change=False)
+        assert world.client("other").get(f"{V2}/courses/{course_id}/invite").status_code == 404
