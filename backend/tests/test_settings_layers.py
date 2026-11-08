@@ -175,3 +175,48 @@ def test_v1_dashboard_put_is_refused_while_a_change_applies(make_client):
         assert client.put("/api/v1/admin/config", json={**body, "knowledge": other}).status_code == 200
         r = client.put("/api/v1/admin/config", json={**body, "knowledge": body["knowledge"]})
         assert r.status_code == 423
+
+
+def test_a_local_only_course_never_calls_the_cloud_model(make_client):
+    from app.llm.cloud_guard import CloudClient
+    from app.llm.fake import FakeLLMClient
+    from tests.conftest import PASSWORD
+
+    with make_client({"routing": {"stub_score": 1.0}}) as client:  # the router would pick the cloud
+        services = client.app.state.services
+        cloud = FakeLLMClient("Cloud answer.", model="gpt-test", backend="cloud")
+        services.cloud_llm = CloudClient(cloud)
+        services.local_llm = FakeLLMClient("Local answer.")
+        services.settings_service.save_course(services.content.course_id, {"local_only": True},
+                                              expected_version=0, account_id=None)
+        account, _ = services.accounts.create_student("alice", "Alice")
+        services.accounts.set_password(account.id, PASSWORD, must_change=False)
+        services.learner.set_consent(account.student_id, True)
+        client.post("/api/v1/auth/login", json={"username": "alice", "password": PASSWORD})
+        reply = client.post("/api/v1/ask", json={"topic": "asthma", "question": "What is asthma?"}).json()
+    assert reply["route_target"] == "local" and cloud.calls == []
+
+
+def test_level_thresholds_are_checked_as_they_will_apply(services):
+    service = services.settings_service
+    with pytest.raises(SettingsError):
+        service.save_system({"level_basic_below": 0}, expected_version=0, account_id=1)
+    with pytest.raises(SettingsError):  # above the configured advanced threshold (0.70)
+        service.save_system({"level_basic_below": 0.8}, expected_version=0, account_id=1)
+    assert service.save_system({"level_basic_below": 0.3}, expected_version=0, account_id=1) == 1
+
+
+def test_parallel_first_saves_of_a_course_conflict_cleanly(services):
+    from concurrent.futures import ThreadPoolExecutor
+
+    service, demo = services.settings_service, services.content.course_id
+
+    def save(value):
+        try:
+            return service.save_course(demo, {"routing_threshold": value}, expected_version=0, account_id=1)
+        except SettingsConflict:
+            return "conflict"
+
+    with ThreadPoolExecutor(4) as pool:
+        results = list(pool.map(save, [0.1, 0.2, 0.3, 0.4]))
+    assert results.count(1) == 1 and results.count("conflict") == 3

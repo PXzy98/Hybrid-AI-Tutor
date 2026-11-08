@@ -14,5 +14,10 @@ def default_routing_method(ctx: RequestContext, services) -> str:
     return ctx.settings.default_routing_method if ctx.settings else services.settings.routing.default_method
 
 
+def local_only(ctx: RequestContext) -> bool:
+    """The course uses the local model only (course setting `local_only`)."""
+    return bool(ctx.settings and ctx.settings.local_only)
+
+
 def weak_evidence(ctx: RequestContext, services) -> bool:
     return ctx.settings.weak_evidence if ctx.settings else services.settings.learner.weak_evidence

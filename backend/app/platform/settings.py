@@ -34,8 +34,10 @@ from app.storage.models import AuditLog, ConfigHistory, Course, CourseSettings, 
 log = logging.getLogger("app.settings")
 
 REQUIRED_CHECKERS = ("medical_safety", "pii_leak", "profile_leak")  # never switched off (privacy rule 4)
+# fields that need a new component set (the learner model is built from the learner fields)
 COMPONENT_FIELDS = ("checkers", "knowledge_model", "default_routing_method", "local_llm_url",
-                    "local_llm_model")
+                    "local_llm_model", "weak_evidence", "level_basic_below", "level_advanced_above",
+                    "level_hysteresis")
 SYSTEM_FIELDS = ("checkers", "weak_evidence", "level_basic_below", "level_advanced_above", "level_hysteresis",
                  "knowledge_model", "default_routing_method", "local_llm_url", "local_llm_model",
                  "enabled_course_types")
@@ -236,10 +238,26 @@ class SettingsService:
             return _values(row, COURSE_FIELDS), (row.version if row else 0)
 
     # --------------------------------------------------------------------------------------- write
+    def check_levels(self, values: dict) -> None:
+        """The level thresholds as they will apply (null = config default) must still be ordered."""
+        from app.core.config import LevelsConfig
+
+        base = self.base.learner.levels
+        try:
+            LevelsConfig(basic_below=base.basic_below if values.get("level_basic_below") is None
+                         else values["level_basic_below"],
+                         advanced_above=base.advanced_above if values.get("level_advanced_above") is None
+                         else values["level_advanced_above"],
+                         hysteresis=base.hysteresis if values.get("level_hysteresis") is None
+                         else values["level_hysteresis"])
+        except ValueError as e:
+            raise SettingsError("need 0 < level_basic_below < level_advanced_above < 1") from e
+
     def save_system(self, values: dict, *, expected_version: int, account_id: int | None,
                     action: str = "settings.system.update") -> int:
         """Store the system settings (all fields; null = config default). Returns the new version."""
         values = validate_system({**dict.fromkeys(SYSTEM_FIELDS), **values})
+        self.check_levels(values)
         with Session(self.engine) as db:
             db.exec(text("SELECT pg_advisory_xact_lock(590203)"))
             row = db.get(SystemSettings, 1, with_for_update=True) or SystemSettings(id=1, version=0)
@@ -273,6 +291,8 @@ class SettingsService:
                     action: str = "settings.course.update") -> int:
         values = validate_course({**dict.fromkeys(COURSE_FIELDS), **values})
         with Session(self.engine) as db:
+            # a per-course lock: FOR UPDATE cannot lock the row before it exists (first save)
+            db.exec(text("SELECT pg_advisory_xact_lock(590204, :c)").bindparams(c=course_id))
             if db.get(Course, course_id) is None:
                 raise SettingsError(f"no course {course_id}")
             row = db.get(CourseSettings, course_id, with_for_update=True)

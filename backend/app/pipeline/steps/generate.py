@@ -5,6 +5,7 @@ from app.core.schemas import CloudRequest, LLMResult, RequestContext
 from app.llm.base import LLMError
 from app.llm.cloud_guard import build_cloud_request
 from app.pipeline.base import BaseStep
+from app.pipeline.settings_view import local_only
 from app.privacy.analyzer import PIIAnalyzer
 from app.privacy.generalize import generalize
 from app.privacy.llm_check import reveals_personal_health
@@ -17,6 +18,7 @@ log = logging.getLogger("app.pipeline")
 CLOUD_FALLBACK_WARNING = "The cloud model was unavailable, so the local model answered."
 CLOUD_MISSING_WARNING = "No cloud model is connected, so the local model answered this question."
 PRIVACY_BLOCK_WARNING = "A privacy check kept this question on the local model."
+LOCAL_ONLY_WARNING = "This course uses the local model only."
 GENERALIZED_NOTE = ("For privacy, the cloud model received a general version of your question, without your "
                     "personal health details.")
 LOCAL_CAPABILITY_NOTE = ("This question may be beyond what the local model does well; "
@@ -49,6 +51,10 @@ class GenerateStep(BaseStep):
 
     async def produce(self, ctx: RequestContext, *, safety_retry: bool = False) -> LLMResult:
         """One answer on the chosen route. Also used by `verify` to regenerate after a safety failure."""
+        if ctx.target == "cloud" and local_only(ctx):  # the hard boundary: never call the cloud model
+            ctx.target = "local"
+            if LOCAL_ONLY_WARNING not in ctx.warnings:
+                ctx.warnings.append(LOCAL_ONLY_WARNING)
         if ctx.target == "cloud":
             return await self._cloud(ctx, safety_retry)
         return await self._local(ctx, safety_retry)

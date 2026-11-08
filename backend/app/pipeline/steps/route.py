@@ -4,7 +4,7 @@ from time import perf_counter
 from app.core.registry import steps
 from app.core.schemas import RequestContext, RouteInput
 from app.pipeline.base import BaseStep
-from app.pipeline.settings_view import routing_threshold
+from app.pipeline.settings_view import local_only, routing_threshold
 from app.pipeline.steps.analyze_route import route_input
 from app.routing.evidence import assess_evidence, select_passages
 
@@ -19,6 +19,12 @@ class RouteStep(BaseStep):
     on_error = "skip"  # target stays "local"
 
     async def run(self, ctx: RequestContext) -> RequestContext:
+        ctx = await self._decide(ctx)
+        if local_only(ctx) and ctx.target == "cloud":  # course setting: never the cloud model
+            ctx.target = "local"
+        return ctx
+
+    async def _decide(self, ctx: RequestContext) -> RequestContext:
         if self.services.settings.routing.impl == "semantic":
             return await self._semantic(ctx)
         ctx.target = "local"  # safe default if anything below fails
