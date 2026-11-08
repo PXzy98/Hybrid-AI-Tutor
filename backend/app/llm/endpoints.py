@@ -11,6 +11,7 @@ A connection belongs to the system (`course_id` None, admin) or to one course (i
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 
+from sqlalchemy import text
 from sqlmodel import Session, select
 
 from app.llm import secrets
@@ -50,11 +51,15 @@ def build_client(row: ModelEndpoint, encryption_key: str | None, *, timeout_s: f
     """An LLMClient for the connection (the URL is checked again by the gateway before each call)."""
     from app.llm.ollama_client import OllamaClient
     from app.llm.openai_compat import OpenAICompatClient
+    from app.llm.ssrf import PinnedTransport
 
+    pinned = PinnedTransport(trust=row.trust)  # resolve + check + connect in one step (no DNS rebinding)
     if row.kind == "ollama":
-        return OllamaClient(row.base_url, row.model, timeout_s=timeout_s, max_tokens=max_tokens)
+        return OllamaClient(row.base_url, row.model, timeout_s=timeout_s, max_tokens=max_tokens,
+                            transport=pinned)
     key = secrets.decrypt(row.api_key_encrypted, encryption_key) if row.api_key_encrypted else "none"
-    return OpenAICompatClient(row.base_url, key, row.model, timeout_s=timeout_s, max_tokens=max_tokens)
+    return OpenAICompatClient(row.base_url, key, row.model, timeout_s=timeout_s, max_tokens=max_tokens,
+                              transport=pinned)
 
 
 Tester = Callable[[ModelEndpoint, str | None], Awaitable[None]]  # raises when the connection does not work
@@ -140,6 +145,13 @@ def delete_endpoint(engine, endpoint_id: int, *, course_id: int | None, account_
         row = db.get(ModelEndpoint, endpoint_id)
         if row is None or row.course_id != course_id:
             raise EndpointError("unknown connection")
+        # the settings that use it fall back (ON DELETE SET NULL); a new version makes every process's cache
+        # recompute the fallback
+        db.exec(text("UPDATE system_settings SET version = version + 1, updated_at = now() "
+                     "WHERE default_local_endpoint_id = :e OR default_cloud_endpoint_id = :e")
+                .bindparams(e=endpoint_id))
+        db.exec(text("UPDATE course_settings SET version = version + 1, updated_at = now() "
+                     "WHERE local_endpoint_id = :e OR cloud_endpoint_id = :e").bindparams(e=endpoint_id))
         db.delete(row)
         db.add(AuditLog(account_id=account_id, action="model_endpoint.delete",
                         target=f"model_endpoint:{endpoint_id}", details={"course_id": course_id}))

@@ -134,9 +134,11 @@ class Gateway:
             raise LLMUnavailable("this course uses the local model only")
         if client is None:
             raise LLMUnavailable(f"no model connection for '{role}'")
+        backend = "local" if trust == "trusted_local" else "cloud"  # by trust, not by wire protocol
         if not stream:
             async with self._slot(key):
-                return await client.complete(messages, json_schema=json_schema)
+                result = await client.complete(messages, json_schema=json_schema)
+            return result.model_copy(update={"backend": backend})
 
         async def tokens() -> AsyncIterator[str]:
             async with self._slot(key):
@@ -155,7 +157,8 @@ class Gateway:
         if settings is not None and settings.local_only:
             return CloudClient(None)
         if self._endpoint_id("cloud", settings) is None:
-            return self.services.cloud_llm  # the deployment's cloud connection (.env)
+            # the deployment's cloud connection (.env): the same queue, around the existing CloudClient
+            return _QueuedCloud(self, self.services.cloud_llm, "cloud")
         client, _, key = self.resolve("cloud", settings)
         return CloudClient(_Queued(self, client, key))
 
@@ -170,3 +173,22 @@ class _Queued:
     async def complete(self, messages, *, json_schema=None, max_tokens=None):
         async with self.gateway._slot(self.key):
             return await self.client.complete(messages, json_schema=json_schema, max_tokens=max_tokens)
+
+
+class _QueuedCloud:
+    """The deployment's CloudClient behind the queue of its connection (still accepts only a CloudRequest)."""
+
+    def __init__(self, gateway: Gateway, cloud, key: str) -> None:
+        self.gateway, self.cloud, self.key = gateway, cloud, key
+
+    @property
+    def available(self) -> bool:
+        return self.cloud.available
+
+    @property
+    def model(self):
+        return self.cloud.model
+
+    async def complete(self, req, *, safety_retry: bool = False):
+        async with self.gateway._slot(self.key):
+            return await self.cloud.complete(req, safety_retry=safety_retry)

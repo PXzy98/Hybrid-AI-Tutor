@@ -13,6 +13,8 @@ import socket
 from functools import lru_cache
 from urllib.parse import urlparse
 
+import httpx
+
 SYSTEM_SERVICES = {"db", "postgres", "api", "web", "worker", "proxy", "caddy", "prometheus", "grafana"}
 
 
@@ -66,3 +68,49 @@ def check_endpoint_url(url: str, *, trust: str, resolve=_addresses, system=_syst
         if trust != "trusted_local" and (ip.is_private or ip.is_loopback):
             raise UnsafeEndpoint("an external connection must be a public address")
     return url.strip().rstrip("/")
+
+
+class PinnedTransport(httpx.AsyncBaseTransport):
+    """An httpx transport that resolves the host, checks every address and connects to a checked address,
+    in one step per request, so a name cannot resolve to a safe address for the check and to an internal
+    one for the connection (DNS rebinding). The Host header and TLS name stay the original host name."""
+
+    def __init__(self, *, trust: str, resolve=None, system=None, inner=None) -> None:
+        self.trust = trust
+        self._resolve = resolve or _addresses
+        self._system = system or _system_addresses
+        self._given = inner
+        self._inners: dict[int, object] = {}
+
+    def _inner(self):
+        """One connection pool per event loop (a pool belongs to the loop that opened it)."""
+        if self._given is not None:
+            return self._given
+        import asyncio
+
+        loop = id(asyncio.get_running_loop())
+        if loop not in self._inners:
+            self._inners = {loop: httpx.AsyncHTTPTransport(retries=0)}
+        return self._inners[loop]
+
+    async def handle_async_request(self, request):
+        host = request.url.host
+        addresses = self._resolve(host)  # ONE lookup: the addresses checked are the ones connected to
+        check_endpoint_url(str(request.url), trust=self.trust, resolve=lambda _: addresses,
+                           system=self._system)
+        try:
+            ipaddress.ip_address(host)
+            pinned = request  # already an address literal: checked above
+        except ValueError:
+            address = addresses[0]
+            literal = f"[{address}]" if address.version == 6 else str(address)
+            pinned = request
+            pinned.url = request.url.copy_with(host=literal)
+            port = request.url.port
+            pinned.headers["Host"] = host if port in (None, 80, 443) else f"{host}:{port}"
+            pinned.extensions = {**request.extensions, "sni_hostname": host}
+        return await self._inner().handle_async_request(pinned)
+
+    async def aclose(self) -> None:
+        for inner in list(self._inners.values()):
+            await inner.aclose()

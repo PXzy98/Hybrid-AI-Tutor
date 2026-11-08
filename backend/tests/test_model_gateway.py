@@ -230,3 +230,68 @@ def test_an_external_course_connection_receives_only_the_sanitized_cloud_request
     assert reply["route_target"] == "cloud" and reply["model_used"] == "course-gpt"
     sent = external.sent_text()
     assert "Alice" not in sent and "Tremblay" not in sent and "300418277" not in sent
+
+
+
+def test_connections_are_pinned_to_the_checked_address():
+    """DNS rebinding: the connection goes to the checked address, with the original Host and TLS name."""
+    import httpx
+
+    from app.llm.ssrf import PinnedTransport
+
+    seen = {}
+
+    class Inner:
+        async def handle_async_request(self, request):
+            seen.update(url=str(request.url), host=request.headers["Host"],
+                        sni=request.extensions.get("sni_hostname"))
+            return httpx.Response(200, json={"ok": True})
+
+    answers = iter(["93.184.216.34", "169.254.169.254"])  # safe for the check, metadata afterwards
+    transport = PinnedTransport(trust="external", inner=Inner(), system=lambda: frozenset(),
+                                resolve=lambda host: [ipaddress.ip_address(next(answers))])
+
+    async def call():
+        async with httpx.AsyncClient(transport=transport) as client:
+            return await client.get("https://models.example.org/v1/models")
+
+    assert asyncio.run(call()).status_code == 200
+    assert seen == {"url": "https://93.184.216.34/v1/models", "host": "models.example.org",
+                    "sni": "models.example.org"}
+
+    rebinding = PinnedTransport(trust="external", inner=Inner(), system=lambda: frozenset(),
+                                resolve=lambda host: [ipaddress.ip_address("169.254.169.254")])
+
+    async def blocked():
+        async with httpx.AsyncClient(transport=rebinding) as client:
+            await client.get("https://models.example.org/v1/models")
+
+    with pytest.raises(UnsafeEndpoint):
+        asyncio.run(blocked())
+
+
+def test_deleting_a_connection_makes_cached_settings_fall_back(services):
+    v = _create(services)
+    service, demo = services.settings_service, services.content.course_id
+    service.save_course(demo, {"cloud_endpoint_id": v.id}, expected_version=0, account_id=1)
+    assert services.effective().cloud_endpoint_id == v.id  # cached now
+    delete_endpoint(services.engine, v.id, course_id=None, account_id=1)
+    assert services.effective().cloud_endpoint_id is None
+
+
+def test_the_default_cloud_connection_is_queued_and_trusted_results_are_local(services, monkeypatch):
+    from app.llm.cloud_guard import CloudClient
+
+    services.cloud_llm = CloudClient(FakeLLMClient("cloud"))
+    eff = services.effective()
+    assert type(services.gateway.cloud_client(eff)).__name__ == "_QueuedCloud"
+    vllm = FakeLLMClient("from vLLM", backend="cloud")  # an OpenAI-compatible client reports "cloud"
+    _fake_clients(monkeypatch, vllm)
+    v = _create(services, kind="openai_compat", trust="trusted_local", base_url="http://10.0.0.5:8000/v1",
+                confirm_controlled=True, api_key=None)
+    services.settings_service.save_course(services.content.course_id, {"local_endpoint_id": v.id},
+                                          expected_version=0, account_id=1)
+    result = asyncio.run(services.gateway.complete("local", [{"role": "user", "content": "x"}],
+                                                   settings=services.effective(),
+                                                   trust_required="trusted_local"))
+    assert result.backend == "local"

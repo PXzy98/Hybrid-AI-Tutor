@@ -15,12 +15,13 @@ log = logging.getLogger("app.llm")
 class OpenAICompatClient:
     def __init__(self, base_url: str, api_key: str, model: str, *, timeout_s: float = 30,
                  max_tokens: int = 800, temperature: float = 0.2,
-                 client: openai.AsyncOpenAI | None = None) -> None:
+                 client: openai.AsyncOpenAI | None = None, transport=None) -> None:
         self.model = model
         self.max_tokens = max_tokens
         self.temperature = temperature
         self._injected = client
         self._args = {"base_url": base_url, "api_key": api_key, "timeout": timeout_s, "max_retries": 1}
+        self._transport = transport  # e.g. ssrf.PinnedTransport for instructor-added connections
         self._clients: dict[int, openai.AsyncOpenAI] = {}
 
     def _client(self) -> openai.AsyncOpenAI:
@@ -30,7 +31,14 @@ class OpenAICompatClient:
             return self._injected
         loop = id(asyncio.get_running_loop())
         if loop not in self._clients:
-            self._clients = {loop: openai.AsyncOpenAI(**self._args)}  # drop clients of finished loops
+            extra = {}
+            if self._transport is not None:
+                import httpx
+
+                extra["http_client"] = httpx.AsyncClient(transport=self._transport,
+                                                         timeout=self._args["timeout"])
+            # drop the clients of finished loops
+            self._clients = {loop: openai.AsyncOpenAI(**self._args, **extra)}
         return self._clients[loop]
 
     async def complete(self, messages: list[Message], *, json_schema: dict | None = None,
