@@ -7,20 +7,22 @@ and throughput are not measured here (eval/load-test/run.py does that on the ser
 1. Check items (content/topics, 84 multiple-choice questions with an answer key): accuracy without RAG and
    with RAG (4 passages from the app's retriever), per model and level.
 2. Open course questions (eval/medical_rag_cases.json, 20): both models answer with RAG; a judge of another
-   family compares each pair blind (order randomized) for correctness, use of the passages and clarity.
+   family compares each pair blind, once in each order (a win counts only when both agree), for correctness,
+   use of the passages and clarity.
 3. A vLLM memory estimate per model (weights + KV cache), from the parameter counts.
 
 Only course content goes to the hosted models (no student data). The key is OPENROUTER_API_KEY (environment
-or the repository's .env). Answers are cached in results/answers.jsonl, so a rerun only asks what is missing.
+or the repository's .env). Answers are cached in results/answers.jsonl under a hash of the prompts, so a
+rerun only asks what is new or changed. Course material: the bundled MedlinePlus pages only, no uploads.
 
     .venv\\Scripts\\python eval\\model-compare\\run.py            # full run (costs a few cents to dollars)
     .venv\\Scripts\\python eval\\model-compare\\run.py --smoke    # 3 items, 2 questions: checks the pipeline
 """
 
 import argparse
+import hashlib
 import json
 import os
-import random
 import re
 import statistics
 import sys
@@ -83,13 +85,15 @@ def open_questions() -> list[dict]:
 
 class Passages:
     def __init__(self) -> None:
+        import tempfile
+
         from app.rag.medical_hybrid import MedicalHybridRetriever
 
-        import yaml
-
-        config = yaml.safe_load((ROOT / "config.yaml").read_text(encoding="utf-8"))  # config.yaml only, no .env
-        materials = Path(config["rag"]["materials_dir"])
-        self.retriever = MedicalHybridRetriever(materials if materials.is_absolute() else ROOT / materials)
+        # Only the bundled MedlinePlus pages (data/medical_rag), never instructor uploads: an upload has not
+        # been through scan_document and must not go to a hosted model. An empty folder as the uploads
+        # folder, and no settings (the developer's .env is not read).
+        self._empty = tempfile.TemporaryDirectory()
+        self.retriever = MedicalHybridRetriever(Path(self._empty.name))
 
     def __call__(self, query: str, topic: str, k: int = 4) -> list[str]:
         return [p.text for p in self.retriever.retrieve(query, topic, k=k)]
@@ -143,6 +147,12 @@ class Cache:
                 row = json.loads(line)
                 self.rows[row["key"]] = row
 
+    def ask(self, api, kind: str, model: str, system: str, user: str, max_tokens: int) -> dict:
+        """The cached answer of exactly this request: the key includes a hash of the prompts and the limit, so
+        a changed question, passage or prompt is asked again."""
+        digest = hashlib.sha256(json.dumps([system, user, max_tokens]).encode("utf-8")).hexdigest()[:20]
+        return self.get(f"{kind}|{model}|{digest}", lambda: api.complete(model, system, user, max_tokens))
+
     def get(self, key: str, make):
         if key not in self.rows:
             row = {"key": key, **make()}
@@ -183,7 +193,6 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--smoke", action="store_true")
     ap.add_argument("--out", type=Path, default=HERE / "results")
-    ap.add_argument("--seed", type=int, default=7)
     a = ap.parse_args()
     key = os.environ.get("OPENROUTER_API_KEY") or _from_dotenv("OPENROUTER_API_KEY")
     if not key:
@@ -201,10 +210,7 @@ def main() -> None:
         for name, model in MODELS.items():
             for rag in (False, True):
                 prompt = mcq_prompt(item, ctx if rag else None)
-                row = cache.get(
-                    f"mcq|{model}|{rag}|{item['id']}",
-                    lambda m=model, p=prompt: api.complete(m, MCQ_SYSTEM, p, 16),
-                )
+                row = cache.ask(api, "mcq", model, MCQ_SYSTEM, prompt, 16)
                 choice = parse_letter(row["text"])
                 mcq.append(
                     {
@@ -220,37 +226,38 @@ def main() -> None:
                     }
                 )
 
-    # 2) open questions with RAG, judged blind in random order
-    rng = random.Random(a.seed)
+    # 2) open questions with RAG, judged blind in both orders
     judged = []
     for q in questions:
         ctx = passages(q["query"], q["topic"])
         user = "Course passages:\n" + "\n---\n".join(ctx) + f"\n\nStudent question: {q['query']}"
         answers = {
-            name: cache.get(
-                f"open|{model}|{q['query']}", lambda m=model, u=user: api.complete(m, OPEN_SYSTEM, u, 400)
-            )
-            for name, model in MODELS.items()
+            name: cache.ask(api, "open", model, OPEN_SYSTEM, user, 400) for name, model in MODELS.items()
         }
-        order = ["9b", "27b"]
-        rng.shuffle(order)
-        verdict_prompt = (
-            user + f"\n\nAnswer A:\n{answers[order[0]]['text']}\n\nAnswer B:\n{answers[order[1]]['text']}"
-        )
-        verdict = cache.get(
-            f"judge|{JUDGE}|{q['query']}|{','.join(order)}",
-            lambda p=verdict_prompt: api.complete(JUDGE, JUDGE_SYSTEM, p, 4000),
-        )
-        winner = _winner(verdict["text"], order)
+        # judged twice, once in each order: a model wins only when both verdicts agree, else a tie (a single
+        # verdict of a reasoning judge changed between runs, and judges prefer one position)
+        verdicts, winners = [], []
+        for order in (["9b", "27b"], ["27b", "9b"]):
+            verdict_prompt = (
+                user + f"\n\nAnswer A:\n{answers[order[0]]['text']}\n\nAnswer B:\n{answers[order[1]]['text']}"
+            )
+            verdict = cache.ask(api, "judge", JUDGE, JUDGE_SYSTEM, verdict_prompt, 4000)
+            verdicts.append(verdict)
+            winners.append(_winner(verdict["text"], order))
+        if "unparsed" in winners:
+            winner = "unparsed"
+        else:
+            winner = winners[0] if winners[0] == winners[1] else "tie"
         judged.append(
             {
                 "query": q["query"],
                 "topic": q["topic"],
                 "winner": winner,
-                "reason": _reason(verdict["text"]),
+                "verdicts": winners,
+                "reason": _reason(verdicts[0]["text"]),
                 "words": {n: len(answers[n]["text"].split()) for n in answers},
                 "seconds": {n: answers[n]["seconds"] for n in answers},
-                "cost": sum(answers[n]["cost"] for n in answers) + verdict["cost"],
+                "cost": sum(answers[n]["cost"] for n in answers) + sum(v["cost"] for v in verdicts),
             }
         )
 
@@ -289,7 +296,8 @@ def write_report(out: Path, mcq: list[dict], judged: list[dict], cache: Cache, s
         "",
         f"{'SMOKE RUN: ' if smoke else ''}{len({r['id'] for r in mcq})} check items, {len(judged)} open "
         f"questions. Models through OpenRouter ({MODELS['9b']}, {MODELS['27b']}), temperature 0, thinking "
-        f"off; judge {JUDGE} (another family), blind and in random order. Total cost of the cached calls: "
+        f"off; judge {JUDGE} (another family), blind, each pair judged in both orders (a win only when both "
+        f"agree). Total cost of the cached calls: "
         f"${total_cost:.2f}.",
         "",
         "## 1. Check items (multiple choice, answer key)",
@@ -310,8 +318,8 @@ def write_report(out: Path, mcq: list[dict], judged: list[dict], cache: Cache, s
         )
     unparsed = sum(1 for r in mcq if r["choice"] is None)
     if mcq and min(accuracy([r for r in mcq if r["model"] == n]) for n in MODELS) >= 0.95:
-        lines += ["", "**Ceiling effect**: both models answer (almost) every item correctly, even without RAG. "
-                  "These items do not separate the models; the open questions below do."]
+        lines += ["", "**Ceiling effect**: both models answer (almost) every item correctly, even without "
+                  "RAG. These items do not separate the models; the open questions below do."]
     lines += [
         "",
         f"Answers without a readable letter count as wrong: {unparsed}.",
