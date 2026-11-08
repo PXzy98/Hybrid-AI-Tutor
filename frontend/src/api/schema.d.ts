@@ -1015,6 +1015,224 @@ export interface paths {
         patch: operations["course_model_endpoints_update"];
         trace?: never;
     };
+    "/api/v2/admin/instructors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Instructors */
+        get: operations["admin_instructors_list"];
+        put?: never;
+        /** Create Instructor */
+        post: operations["admin_instructors_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/admin/instructors/{account_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Instructor */
+        patch: operations["admin_instructors_update"];
+        trace?: never;
+    };
+    "/api/v2/admin/instructors/{account_id}/reset-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reset Password
+         * @description A temporary password; all sessions of the account end.
+         */
+        post: operations["admin_instructors_reset_password"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/admin/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get System */
+        get: operations["admin_settings_get"];
+        /** Put System */
+        put: operations["admin_settings_update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/admin/settings/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** System History */
+        get: operations["admin_settings_history"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/admin/settings/restore/{history_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Restore System */
+        post: operations["admin_settings_restore"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/admin/settings/apply-status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Apply Status
+         * @description Polled by the settings page while `apply_state` is `applying` (course-structure.md 6.5).
+         */
+        get: operations["admin_settings_apply_status"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Course */
+        get: operations["course_settings_get"];
+        /** Put Course */
+        put: operations["course_settings_update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/settings/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Course History */
+        get: operations["course_settings_history"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/settings/restore/{history_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Restore Course */
+        post: operations["course_settings_restore"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/me/preferences": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Preferences */
+        get: operations["me_preferences_get"];
+        /** Put Preferences */
+        put: operations["me_preferences_update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/me/consent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Consent */
+        get: operations["me_consent_get"];
+        /**
+         * Put Consent
+         * @description Withdrawing consent also forgets the learning profile (state, evidence, preferences).
+         */
+        put: operations["me_consent_update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1025,6 +1243,24 @@ export interface components {
             options: components["schemas"]["ConfigOptions"];
             /** History */
             history: components["schemas"]["ConfigChange"][];
+        };
+        /** ApplyStatusOut */
+        ApplyStatusOut: {
+            /**
+             * Apply State
+             * @enum {string}
+             */
+            apply_state: "applied" | "applying" | "failed";
+            /** Version */
+            version: number;
+            /** Target Version */
+            target_version: number | null;
+            /** Started At */
+            started_at: string | null;
+            /** Error */
+            error: string | null;
+            /** Processes */
+            processes: components["schemas"]["ProcessOut"][];
         };
         /**
          * AskBody
@@ -1252,6 +1488,16 @@ export interface components {
             /** Knowledge Models */
             knowledge_models: string[];
         };
+        /** ConsentIn */
+        ConsentIn: {
+            /** Given */
+            given: boolean;
+        };
+        /** ConsentOut */
+        ConsentOut: {
+            /** Given */
+            given: boolean | null;
+        };
         /** ContentStatus */
         ContentStatus: {
             /**
@@ -1315,6 +1561,43 @@ export interface components {
             title?: string | null;
             /** Term Label */
             term_label?: string | null;
+        };
+        /** CourseSettingsIn */
+        CourseSettingsIn: {
+            values: components["schemas"]["CourseValues"];
+            /** Version */
+            version: number;
+        };
+        /** CourseSettingsOut */
+        CourseSettingsOut: {
+            values: components["schemas"]["CourseValues"];
+            /** Version */
+            version: number;
+        };
+        /** CourseValues */
+        CourseValues: {
+            /** Course Type */
+            course_type?: ("medical_science" | "life_science" | "ece" | "general") | null;
+            /** Visibility Mode */
+            visibility_mode?: ("A" | "B") | null;
+            /** Local Only */
+            local_only?: boolean | null;
+            /** Routing Preference */
+            routing_preference?: ("default" | "prefer_local" | "prefer_cloud") | null;
+            /** Routing Threshold */
+            routing_threshold?: number | null;
+            /** Show Routing Progress */
+            show_routing_progress?: boolean | null;
+            /** Usage Questions Per Minute */
+            usage_questions_per_minute?: number | null;
+            /** Usage Questions Per Day */
+            usage_questions_per_day?: number | null;
+            /** Usage Cloud Calls Per Day */
+            usage_cloud_calls_per_day?: number | null;
+            /** Local Endpoint Id */
+            local_endpoint_id?: number | null;
+            /** Cloud Endpoint Id */
+            cloud_endpoint_id?: number | null;
         };
         /** CreateStudentBody */
         CreateStudentBody: {
@@ -1499,6 +1782,30 @@ export interface components {
             routing_impl: string;
             /** Rag Impl */
             rag_impl: string;
+        };
+        /** HistoryEntryOut */
+        HistoryEntryOut: {
+            /** Id */
+            id: number;
+            /**
+             * Changed At
+             * Format: date-time
+             */
+            changed_at: string;
+            /** Account Id */
+            account_id: number | null;
+            /** Version */
+            version: number | null;
+            /** Changed */
+            changed: string[];
+            /** Values */
+            values: {
+                [key: string]: unknown;
+            };
+            /** Previous */
+            previous: {
+                [key: string]: unknown;
+            };
         };
         /** ImportCountsOut */
         ImportCountsOut: {
@@ -2025,6 +2332,30 @@ export interface components {
             /** Code */
             code: string;
         };
+        /** NewStaffOut */
+        NewStaffOut: {
+            /** Account Id */
+            account_id: number;
+            /** Username */
+            username: string;
+            /** Email */
+            email: string | null;
+            /** Display Name */
+            display_name: string;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "instructor" | "admin";
+            /** Active */
+            active: boolean;
+            /** Must Change Password */
+            must_change_password: boolean;
+            /** Last Login At */
+            last_login_at: string | null;
+            /** Temporary Password */
+            temporary_password: string;
+        };
         /** OllamaStatus */
         OllamaStatus: {
             /** Reachable */
@@ -2146,6 +2477,27 @@ export interface components {
              * @enum {string}
              */
             source: "default" | "onboarding" | "feedback";
+        };
+        /** PreferencesIn */
+        PreferencesIn: {
+            /** Sequencing */
+            sequencing?: ("example_first" | "concept_first") | null;
+            /** Detail */
+            detail?: ("concise" | "detailed") | null;
+        };
+        /** ProcessOut */
+        ProcessOut: {
+            /** Kind */
+            kind: string;
+            /**
+             * Last Seen
+             * Format: date-time
+             */
+            last_seen: string;
+            /** Component Version */
+            component_version: number;
+            /** Error */
+            error: string | null;
         };
         /** Profile */
         Profile: {
@@ -2368,6 +2720,50 @@ export interface components {
              */
             kc_ids: string[];
         };
+        /** StaffIn */
+        StaffIn: {
+            /** Email */
+            email: string;
+            /** Display Name */
+            display_name: string;
+            /**
+             * Role
+             * @default instructor
+             * @enum {string}
+             */
+            role: "instructor" | "admin";
+        };
+        /** StaffOut */
+        StaffOut: {
+            /** Account Id */
+            account_id: number;
+            /** Username */
+            username: string;
+            /** Email */
+            email: string | null;
+            /** Display Name */
+            display_name: string;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "instructor" | "admin";
+            /** Active */
+            active: boolean;
+            /** Must Change Password */
+            must_change_password: boolean;
+            /** Last Login At */
+            last_login_at: string | null;
+        };
+        /** StaffPatch */
+        StaffPatch: {
+            /** Active */
+            active?: boolean | null;
+            /** Role */
+            role?: ("instructor" | "admin") | null;
+            /** Display Name */
+            display_name?: string | null;
+        };
         /** StudentAccountOut */
         StudentAccountOut: {
             /** Id */
@@ -2429,6 +2825,50 @@ export interface components {
             mean_clarity?: number | null;
             /** Mean Source Confidence */
             mean_source_confidence?: number | null;
+        };
+        /** SystemSettingsIn */
+        SystemSettingsIn: {
+            values: components["schemas"]["SystemValues"];
+            /** Version */
+            version: number;
+        };
+        /** SystemSettingsOut */
+        SystemSettingsOut: {
+            values: components["schemas"]["SystemValues"];
+            /** Version */
+            version: number;
+            /**
+             * Apply State
+             * @enum {string}
+             */
+            apply_state: "applied" | "applying" | "failed";
+        };
+        /** SystemValues */
+        SystemValues: {
+            /** Checkers */
+            checkers?: string[] | null;
+            /** Weak Evidence */
+            weak_evidence?: boolean | null;
+            /** Level Basic Below */
+            level_basic_below?: number | null;
+            /** Level Advanced Above */
+            level_advanced_above?: number | null;
+            /** Level Hysteresis */
+            level_hysteresis?: number | null;
+            /** Knowledge Model */
+            knowledge_model?: string | null;
+            /** Default Routing Method */
+            default_routing_method?: ("lr" | "svm") | null;
+            /** Local Llm Url */
+            local_llm_url?: string | null;
+            /** Local Llm Model */
+            local_llm_model?: string | null;
+            /** Enabled Course Types */
+            enabled_course_types?: ("medical_science" | "life_science" | "ece" | "general")[] | null;
+            /** Default Local Endpoint Id */
+            default_local_endpoint_id?: number | null;
+            /** Default Cloud Endpoint Id */
+            default_cloud_endpoint_id?: number | null;
         };
         /** TemporaryPassword */
         TemporaryPassword: {
@@ -4838,6 +5278,532 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EndpointOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_instructors_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffOut"][];
+                };
+            };
+        };
+    };
+    admin_instructors_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StaffIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NewStaffOut"];
+                };
+            };
+            /** @description an account with this e-mail exists */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_instructors_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                account_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StaffPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_instructors_reset_password: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                account_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TemporaryPasswordOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_settings_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SystemSettingsOut"];
+                };
+            };
+        };
+    };
+    admin_settings_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SystemSettingsIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SystemSettingsOut"];
+                };
+            };
+            /** @description changed since it was read */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description a change is still being applied */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    admin_settings_history: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HistoryEntryOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_settings_restore: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                history_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SystemSettingsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_settings_apply_status: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplyStatusOut"];
+                };
+            };
+        };
+    };
+    course_settings_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseSettingsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    course_settings_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CourseSettingsIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseSettingsOut"];
+                };
+            };
+            /** @description changed since it was read */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    course_settings_history: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HistoryEntryOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    course_settings_restore: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                history_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseSettingsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    me_preferences_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Preferences"];
+                };
+            };
+        };
+    };
+    me_preferences_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreferencesIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Preferences"];
+                };
+            };
+            /** @description consent required */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    me_consent_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentOut"];
+                };
+            };
+        };
+    };
+    me_consent_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConsentIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentOut"];
                 };
             };
             /** @description Validation Error */
