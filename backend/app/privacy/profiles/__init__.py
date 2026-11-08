@@ -5,10 +5,14 @@ Task Z7: one YAML file per profile in this folder. `base.yaml` is the layer ever
 profile (course type) needs one new file. Files are validated when first loaded: unknown recognizers or
 checkers stop the app.
 
-Still Z1 stand-ins, safe by default (task Z11):
-- `scan_document` reports "not scanned" (it never claims a file is clean);
-- `search_query` returns None, so no web search query is ever produced.
+Task Z11:
+- `scan_document(text, profile)` runs the profile's analyzer over an uploaded document and reports entity
+  types and counts (never the matched text); `blocking` lists the types that are student data;
+- `search_query(ctx)` is the only source of web search queries (rule 5): built from the sanitized question,
+  never from the original, and None whenever a safe general query cannot be made;
+- `consent_text(profile)` is the onboarding consent text of the course type (base text + the profile's note).
 """
+import re
 from dataclasses import dataclass, field
 from functools import cache
 from pathlib import Path
@@ -30,7 +34,8 @@ def _raw(name: str) -> dict:
     if not path.is_file():
         raise ProfileError(f"unknown privacy profile: {name}")
     data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    unknown = set(data) - {"extends", "recognizers", "health_detail_policy", "checkers", "medical_disclaimer"}
+    unknown = set(data) - {"extends", "recognizers", "health_detail_policy", "checkers", "medical_disclaimer",
+                           "consent_note"}
     if unknown:
         raise ProfileError(f"{path.name}: unknown keys {sorted(unknown)}")
     return data
@@ -69,6 +74,17 @@ def privacy_profile(course_type: str) -> PrivacyProfile:
                           medical_disclaimer=bool(merged.get("medical_disclaimer", False)))
 
 
+# Found in a course document, these are student data and keep it out of the index: identifiers of a person
+# other than a name or contact (course documents name their staff and authors), grades, credentials and
+# personal health details. Names, e-mail addresses and phone numbers are reported but do not block.
+BLOCKING_TYPES = frozenset({"STUDENT_ID", "GRADE", "HEALTH_CARD", "ID_NUMBER", "DATE_OF_BIRTH", "SECRET",
+                            "HEALTH_DETAIL"})
+SCAN_CHUNK_CHARS = 20_000  # the analyzer runs on pieces of this size (spaCy and the regexes stay fast)
+# consecutive pieces overlap by this much, so a value at a piece boundary is also seen whole (a 4096-bit
+# private key in PEM form is about 3,300 characters)
+SCAN_OVERLAP_CHARS = 4_000
+
+
 @dataclass(frozen=True)
 class ScanFinding:
     type: str  # entity type, e.g. PERSON, STUDENT_ID; never the matched text
@@ -80,12 +96,92 @@ class ScanResult:
     scanned: bool
     findings: tuple[ScanFinding, ...] = field(default_factory=tuple)
 
+    @property
+    def blocking(self) -> tuple[str, ...]:
+        """The found types that are student data (BLOCKING_TYPES); empty when the document may be indexed."""
+        return tuple(f.type for f in self.findings if f.type in BLOCKING_TYPES)
+
+
+@cache
+def _scanner(profile_name: str, recognizers: tuple[str, ...]):
+    from app.core.config import get_settings
+    from app.privacy.analyzer import PIIAnalyzer
+
+    base = get_settings().privacy
+    names = list(recognizers) if base.recognizers is None else list(base.recognizers)
+    return PIIAnalyzer(base.model_copy(update={"recognizers": names}))
+
+
+def _windows(text: str, size: int = SCAN_CHUNK_CHARS, overlap: int = SCAN_OVERLAP_CHARS):
+    """(offset, piece) windows of `size` characters; each starts `size - overlap` after the previous one."""
+    step = max(1, size - overlap)
+    start = 0
+    while True:
+        yield start, text[start:start + size]
+        if start + size >= len(text):
+            return
+        start += step
+
 
 def scan_document(text: str, profile: PrivacyProfile) -> ScanResult:
-    """Personal data found in an uploaded document (types and counts only)."""
-    return ScanResult(scanned=False)
+    """Personal data found in an uploaded document (types and counts only), with the course's profile.
+
+    Findings are collected over overlapping windows in document positions; overlapping findings of the same
+    type are one finding, so a value cut at a window edge, and also found whole in the next window, counts
+    once."""
+    analyzer = _scanner(profile.name, tuple(profile.recognizers))
+    spans: dict[str, list[tuple[int, int]]] = {}
+    for offset, piece in _windows(text or ""):
+        for f in analyzer.analyze(piece):
+            spans.setdefault(f.type, []).append((offset + f.start, offset + f.end))
+    counts: dict[str, int] = {}
+    for kind, found in spans.items():
+        merged_end = -1
+        for start, end in sorted(found):
+            if start >= merged_end:  # not overlapping the previous finding: a new one
+                counts[kind] = counts.get(kind, 0) + 1
+            merged_end = max(merged_end, end)
+    return ScanResult(scanned=True, findings=tuple(ScanFinding(t, n) for t, n in sorted(counts.items())))
+
+
+PLACEHOLDER_RE = re.compile(r"<[A-Z_]+_\d+>")
+SEARCH_QUERY_MAX_CHARS = 200
 
 
 def search_query(ctx: RequestContext) -> str | None:
-    """A sanitized, general web search query for the question, or None when none can be made safely."""
-    return None
+    """A sanitized, general web search query for the question, or None when none can be made safely.
+
+    Built only from the privacy filter's sanitized text (never the original question). None when the filter
+    has not run, when the question must stay local, or when nothing general is left: every sentence that
+    held personal data (a placeholder) is dropped, not just the value, because the rest of such a sentence is
+    about the student ("my grade in ... is <GRADE_1>, can I ..."). The cloud never sees more than this.
+    """
+    pii = ctx.pii
+    if pii is None or not pii.cloud_safe:
+        return None
+    sentences = re.split(r"(?<=[.!?])\s+|\n+", pii.sanitized_text)
+    kept = [s.strip() for s in sentences if s.strip() and not PLACEHOLDER_RE.search(s)]
+    query = re.sub(r"\s+", " ", " ".join(kept)).strip()
+    if len(query.split()) < 3:
+        return None
+    if len(query) > SEARCH_QUERY_MAX_CHARS:
+        query = query[:SEARCH_QUERY_MAX_CHARS].rsplit(" ", 1)[0]
+    return query
+
+
+# the reviewed v1 onboarding text (app/api/v1/onboarding.py, unchanged there: API v1 is frozen)
+CONSENT_BASE = (
+    "To adapt explanations to you, the tutor keeps a learning profile: an estimate of how well you know each "
+    "topic part, which common misunderstandings you may have, and how you like explanations presented "
+    "(examples first or ideas first, short or detailed). It does not keep your questions in readable form "
+    "with your name. The profile is stored only on the course's own servers and is never sent to external "
+    "AI services; they may only receive a coarse level such as 'basic'. You can view or reset your profile "
+    "at any time under 'What I know', and the instructor can delete your account and its data. Without "
+    "consent the tutor still answers, but does not adapt to you."
+)
+
+
+def consent_text(profile: PrivacyProfile) -> str:
+    """The consent text shown at onboarding for this course type: the base text plus the profile's note."""
+    note = _raw(profile.name).get("consent_note") if profile.name in profile_names() else None
+    return f"{CONSENT_BASE} {note.strip()}" if note else CONSENT_BASE

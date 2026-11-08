@@ -78,7 +78,8 @@ class PrivacyConfig(Section):
     spacy_model: str = "en_core_web_lg"
     score_threshold: float = Field(0.5, ge=0, le=1)
     entities: list[str] = ["PERSON", "EMAIL_ADDRESS", "PHONE_NUMBER", "STUDENT_ID", "GRADE", "HEALTH_DETAIL",
-                           "POSTAL_CODE", "HEALTH_CARD", "ID_NUMBER", "DATE_OF_BIRTH", "ADDRESS"]
+                           "POSTAL_CODE", "HEALTH_CARD", "ID_NUMBER", "DATE_OF_BIRTH", "ADDRESS", "SECRET",
+                           "INTERNAL_ADDRESS", "REPO_URL"]
     local_only_types: list[str] = ["HEALTH_DETAIL"]
     # a question with a local-only finding (a personal health detail): answer it locally (the code default, a
     # safe fallback), or let the local model rewrite it as a general question about a hypothetical person and
@@ -235,6 +236,7 @@ class AccountLimits(Section):
     invite_code_length: int = Field(10, ge=8, le=32)
     invite_expiry_days: float = Field(120, gt=0, le=730)
     join_attempts_per_hour: int = Field(20, ge=1, le=10_000)  # per client address, for POST /auth/join
+    login_failures_per_hour: int = Field(30, ge=1, le=10_000)  # per client address, v1 and v2 login (Z10)
     max_roster_rows: int = Field(2000, ge=1, le=100_000)
     max_roster_bytes: int = Field(1_000_000, ge=1_000, le=50_000_000)
 
@@ -243,11 +245,20 @@ class ContentLimits(Section):
     max_import_bytes: int = Field(5_000_000, ge=1_000, le=200_000_000)  # content ZIP upload (task Z9)
 
 
+class UsageLimits(Section):
+    """Per student and course (guide 4.4, task Z10). Hard caps: a course value can only lower them."""
+
+    questions_per_minute: int = Field(6, ge=1, le=1000)
+    questions_per_day: int = Field(200, ge=1, le=100_000)
+    cloud_calls_per_day: int = Field(50, ge=0, le=100_000)
+
+
 class LimitsConfig(Section):
     settings: SettingsApplyLimits = SettingsApplyLimits()
     models: ModelLimits = ModelLimits()
     accounts: AccountLimits = AccountLimits()
     content: ContentLimits = ContentLimits()
+    usage: UsageLimits = UsageLimits()
 
 
 class CourseConfig(Section):

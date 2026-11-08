@@ -38,7 +38,8 @@ privacy:
   spacy_model: en_core_web_lg         # tests use en_core_web_sm
   score_threshold: 0.5                # phone numbers need a context word ("phone", "call"): 0.4 -> 0.75
   entities: [PERSON, EMAIL_ADDRESS, PHONE_NUMBER, STUDENT_ID, GRADE, HEALTH_DETAIL,
-             POSTAL_CODE, HEALTH_CARD, ID_NUMBER, DATE_OF_BIRTH, ADDRESS]   # E6 A5; age and sex are kept on purpose (they change medical answers, G1-95)
+             POSTAL_CODE, HEALTH_CARD, ID_NUMBER, DATE_OF_BIRTH, ADDRESS,   # E6 A5;
+             SECRET, INTERNAL_ADDRESS, REPO_URL]   # Z11: keys and tokens (every course), lab addresses and repos (ECE); age and sex are kept on purpose (they change medical answers, G1-95)
   local_only_types: [HEALTH_DETAIL]   # any of these -> cloud_safe = false
   health_detail_policy: generalize    # local_only | generalize: hypothetical rewrite for the cloud (approved by the professor, 20 Oct 2026)
   # Beta (E6 v4: cloud exposure 15.8% -> 2.7%): the local model double-checks cloud-bound questions that mention a
@@ -93,10 +94,15 @@ limits:
     invite_code_length: 10
     invite_expiry_days: 120      # a course invitation code expires after this; rotate it to get a new one
     join_attempts_per_hour: 20   # POST /api/v2/auth/join, per client address
+    login_failures_per_hour: 30  # failed logins per client address (v1 and v2); then 429 for the hour
     max_roster_rows: 2000
     max_roster_bytes: 1000000
   content:
     max_import_bytes: 5000000    # content ZIP (YAML seed layout) for POST .../content/import
+  usage:                         # per student and course; course settings can only lower them
+    questions_per_minute: 6
+    questions_per_day: 200
+    cloud_calls_per_day: 50
 
 content:
   dir: content/topics

@@ -8,7 +8,7 @@ from sqlmodel import Session, select
 
 from app.storage.models import Account, CourseInvite, CourseMember, LoginIdentity, utcnow
 from app.storage.testing import dump_rows
-from tests.conftest import PASSWORD
+from tests.conftest import PASSWORD, csrf_client
 
 V2 = "/api/v2"
 DOMAINS = {"limits": {"accounts": {"allowed_email_domains": ["uottawa.ca", "demo.invalid"]}}}
@@ -21,10 +21,10 @@ class World:
         self.app = client.app
         self.services = client.app.state.services
         self.accounts = self.services.accounts
-        self.anon = TestClient(self.app)
+        self.anon = csrf_client(self.app)
 
     def client(self, login: str | None = None, password: str = PASSWORD) -> TestClient:
-        c = TestClient(self.app)
+        c = csrf_client(self.app)
         if login:
             r = c.post(f"{V2}/auth/login", json={"username": login, "password": password})
             assert r.status_code == 200, r.text
@@ -139,7 +139,7 @@ def test_a_new_student_activates_with_the_code_and_all_his_pending_memberships_b
         r = world.anon.post(f"{V2}/auth/join", json=bad)
         assert r.status_code == 400 and r.json()["code"] == "invalid", r.text
     assert world.anon.post(f"{V2}/auth/join", json={"code": code}).status_code == 422
-    student = TestClient(world.app)
+    student = csrf_client(world.app)
     r = student.post(f"{V2}/auth/join", json=body)
     assert r.status_code == 200, r.text
     me = r.json()["me"]

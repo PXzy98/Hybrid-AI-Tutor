@@ -14,6 +14,7 @@ which upgrade is worth it? All data is fictional.
 | `generalize_eval.py` | the hypothetical rewrite (`privacy.health_detail_policy: generalize`) with the real local model, on every personal-health question of the main set and held-out v2: how many pass, identifiers left → `results/generalize.md` |
 | `utility.py` | answer quality after redaction (placeholders, surrogates, hypothetical rewrite), judged by a second model → `results/utility.md` |
 | `spot_check.md` | 50 random labels of the main set checked |
+| `ece_cases.jsonl`, `ece.py` | engineering courses (task Z11): 47 fictional ECE questions (22 positive: fake keys and tokens, also inside JSON and Python dictionaries, lab addresses, repository URLs, names and numbers; 25 negative: course terms) → `results/ece/report.md`, `general` vs `ece` profile |
 
 ```
 .venv\Scripts\python eval\privacy-filter\run.py                       # main set, all configurations (~10 min with Ollama)

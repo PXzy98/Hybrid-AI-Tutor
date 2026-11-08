@@ -29,30 +29,53 @@ COMPONENT_VERSION = Gauge("tutor_component_version", "System settings version th
 CONTENT_VERSION = Gauge("tutor_content_version", "Content version of the served course", registry=REGISTRY)
 
 
-def _route(request: Request) -> str:
+def _route(scope) -> str:
     """The route template of the request, e.g. /api/v2/courses/{course_id}; "unmatched" for unknown paths.
 
-    Built from the full path and the path parameters (an included router's route knows only its own part of
-    the path)."""
-    if request.scope.get("route") is None:
+    By position, not by value (/courses/1/modules/1 has two parameters with the same value): the matched
+    route's own path is the end of the request path (a route of an included router knows only its own part),
+    so its segments replace the last segments of the request path."""
+    own = getattr(scope.get("route"), "path", None)
+    if not own:
         return "unmatched"
-    by_value = {str(v): k for k, v in (request.scope.get("path_params") or {}).items()}
-    return "/".join(f"{{{by_value[s]}}}" if s in by_value else s for s in request.url.path.split("/"))
+    full, tail = scope["path"].strip("/").split("/"), own.strip("/").split("/")
+    if len(tail) > len(full):
+        return own
+    return "/" + "/".join(full[:len(full) - len(tail)] + tail)
 
 
-async def middleware(request: Request, call_next):
-    if request.url.path == "/metrics":
-        return await call_next(request)
-    start = time.perf_counter()
-    status = 500
-    try:
-        response = await call_next(request)
-        status = response.status_code
-        return response
-    finally:
-        route = _route(request)
-        REQUESTS.labels(request.method, route, str(status)).inc()
-        LATENCY.labels(request.method, route).observe(time.perf_counter() - start)
+class MetricsMiddleware:
+    """ASGI middleware: counts every request and times it until the last byte of the response is sent (a
+    streamed answer is timed to its end, not to its first event)."""
+
+    def __init__(self, app) -> None:
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http" or scope["path"] == "/metrics":
+            await self.app(scope, receive, send)
+            return
+        start, state = time.perf_counter(), {"status": 500, "recorded": False}
+
+        def record() -> None:
+            if state["recorded"]:
+                return
+            state["recorded"] = True
+            route, method = _route(scope), scope["method"]
+            REQUESTS.labels(method, route, str(state["status"])).inc()
+            LATENCY.labels(method, route).observe(time.perf_counter() - start)
+
+        async def send_and_watch(message) -> None:
+            if message["type"] == "http.response.start":
+                state["status"] = message["status"]
+            await send(message)
+            if message["type"] == "http.response.body" and not message.get("more_body", False):
+                record()
+
+        try:
+            await self.app(scope, receive, send_and_watch)
+        finally:
+            record()  # an error, or a client that went away before the end
 
 
 def metrics(request: Request) -> Response:

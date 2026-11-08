@@ -2,18 +2,21 @@
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1 import api_router
 from app.api.v2 import api_router_v2
 from app.api.v2.errors import (
     ApiError,
+    ErrorCode,
     api_error_handler,
     catalog_error_handler,
     course_error_handler,
+    error,
     usage_limit_handler,
 )
+from app.auth import csrf
 from app.catalog import CatalogError
 from app.core.services import build_services
 from app.platform import metrics
@@ -38,6 +41,15 @@ async def lifespan(app: FastAPI):
     services.engine.dispose()
 
 
+async def _csrf(request: Request, call_next):
+    services = getattr(request.app.state, "services", None)
+    cookie_name = services.settings.auth.cookie_name if services else "tutor_session"
+    if not csrf.check(request, cookie_name):
+        return error(403, ErrorCode.csrf_failed,
+                     "Missing or invalid CSRF token. Get one from /api/v2/auth/csrf.")
+    return await call_next(request)
+
+
 def create_app() -> FastAPI:
     app = FastAPI(
         title="Privacy-Aware Hybrid AI Tutor",
@@ -45,7 +57,10 @@ def create_app() -> FastAPI:
         description="Health-education tutor with a local learner model. Design: docs/System_Design_v3.md",
         lifespan=lifespan,
     )
-    app.middleware("http")(metrics.middleware)  # request counts and durations by route template (Z13)
+    # innermost first: CSRF (API v2 only, app.auth.csrf), then the metrics (Z13; requests refused by CSRF are
+    # counted too, streamed answers until their last byte), then CORS around everything
+    app.middleware("http")(_csrf)
+    app.add_middleware(metrics.MetricsMiddleware)
     app.add_middleware(CORSMiddleware, allow_origins=DEV_ORIGINS, allow_credentials=True,  # session cookie
                        allow_methods=["*"], allow_headers=["*"])
     app.include_router(api_router)

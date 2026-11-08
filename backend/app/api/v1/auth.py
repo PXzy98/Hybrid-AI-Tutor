@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Request, Response, status
 from pydantic import BaseModel, Field
 
 from app.api.deps import ServicesDep
+from app.auth import ratelimit
 from app.auth.deps import CurrentUserDep
 from app.auth.service import AccountLocked, InvalidCredentials, PasswordPolicyError
 
@@ -34,11 +35,15 @@ class Me(BaseModel):
 
 
 @router.post("/login", response_model=Me)
-def login(body: LoginBody, response: Response, services: ServicesDep):
+def login(body: LoginBody, request: Request, response: Response, services: ServicesDep):
     cfg = services.settings.auth
+    failures, client = ratelimit.login_failures(request, services), ratelimit.client_address(request)
+    if failures.wait(client):  # failed logins per client address (task Z10, shared with API v2)
+        raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, "too many failed attempts; try again later")
     try:
         account, token = services.accounts.login(body.username, body.password)
     except InvalidCredentials:
+        failures.add(client)
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, GENERIC_LOGIN_ERROR) from None
     except AccountLocked:
         raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS,
