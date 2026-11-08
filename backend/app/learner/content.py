@@ -1,9 +1,14 @@
 """Domain content: KC map, check-question item bank, misconception catalog (design §4).
 
-One folder per topic: content/topics/<topic>/{kcs,items,misconceptions}.yaml. Everything is validated
-when the app starts, so broken content never reaches students:
+Since task Z4 the content of a course lives in the database (app/catalog); this module holds the validated
+in-memory form the learner model and pipeline read, one `TopicContent` per course module. The YAML seed
+format stays (content/topics/<topic>/{kcs,items,misconceptions}.yaml, imported by app/catalog/importer.py).
+Everything is validated before use, so broken content never reaches students:
 unique IDs, known prerequisites, no prerequisite cycles, 4 options with a valid key, known misconception
 tags, misconceptions attached to known KCs.
+
+Status (course-structure.md §5): only `active` items and misconceptions are shown to students; `draft`
+(unreviewed, e.g. the imported v3 bank) and `retired` ones are kept but never served.
 """
 from pathlib import Path
 from typing import Literal
@@ -14,6 +19,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_valida
 from app.core.schemas import CheckItemPublic, Level
 
 OptionKey = Literal["A", "B", "C", "D"]
+ContentStatus = Literal["draft", "active", "retired"]
 
 
 class ContentError(ValueError):
@@ -45,7 +51,7 @@ class Item(Strict):
     options: dict[OptionKey, Option]
     answer: OptionKey
     explanation: str = ""
-    reviewed_by: str | None = None
+    status: ContentStatus = "draft"
 
     @field_validator("options", mode="before")
     @classmethod
@@ -53,8 +59,8 @@ class Item(Strict):
         return {k: ({"text": o} if isinstance(o, str) else o) for k, o in (v or {}).items()}
 
     @property
-    def reviewed(self) -> bool:
-        return bool(self.reviewed_by)
+    def active(self) -> bool:
+        return self.status == "active"
 
     def public(self) -> CheckItemPublic:
         """What the student sees: no answer key, no misconception tags."""
@@ -67,11 +73,11 @@ class Misconception(Strict):
     kc: str
     statement: str
     correction: str
-    reviewed_by: str | None = None
+    status: ContentStatus = "draft"
 
     @property
-    def reviewed(self) -> bool:
-        return bool(self.reviewed_by)
+    def active(self) -> bool:
+        return self.status == "active"
 
 
 class TopicContent(Strict):
@@ -89,15 +95,27 @@ def _read_yaml(path: Path):
     return yaml.safe_load(path.read_text(encoding="utf-8"))
 
 
-def load_topic(folder: Path) -> TopicContent:
+def _seed_status(rows: list, status: ContentStatus | None) -> list:
+    """The YAML seed's review field becomes a status: `reviewed_by` set -> active, otherwise draft.
+    `status` overrides it (e.g. "active" for simulations and tests with fictional students)."""
+    out = []
+    for row in rows:
+        row = dict(row)
+        reviewed = row.pop("reviewed_by", None)
+        row["status"] = status or row.get("status") or ("active" if reviewed else "draft")
+        out.append(row)
+    return out
+
+
+def load_topic(folder: Path, status: ContentStatus | None = None) -> TopicContent:
     kcs = _read_yaml(folder / "kcs.yaml") or {}
     data = {
         "topic": kcs.get("topic", folder.name),
         "name": kcs.get("name", folder.name.replace("_", " ").title()),
         "guideline": kcs.get("guideline", ""),
         "kcs": kcs.get("kcs", []),
-        "items": _read_yaml(folder / "items.yaml") or [],
-        "misconceptions": _read_yaml(folder / "misconceptions.yaml") or [],
+        "items": _seed_status(_read_yaml(folder / "items.yaml") or [], status),
+        "misconceptions": _seed_status(_read_yaml(folder / "misconceptions.yaml") or [], status),
     }
     try:
         return TopicContent(**data)
@@ -172,18 +190,30 @@ def find_cycle(graph: dict[str, list[str]]) -> list[str] | None:
     return None
 
 
+def load_yaml_topics(root: Path, status: ContentStatus | None = None) -> list[TopicContent]:
+    root = Path(root)
+    folders = sorted(p for p in root.iterdir() if p.is_dir()) if root.exists() else []
+    return [load_topic(f, status) for f in folders]
+
+
 class ContentStore:
-    def __init__(self, root: Path, serve_unreviewed: bool = False) -> None:
-        self.root = Path(root)
-        self.serve_unreviewed = serve_unreviewed
-        folders = sorted(p for p in self.root.iterdir() if p.is_dir()) if self.root.exists() else []
-        self._topics = {t.topic: t for t in (load_topic(f) for f in folders)}
+    """The validated content of one course; topics are its modules (by module code)."""
+
+    def __init__(self, topics: list[TopicContent], *, course_id: int | None = None,
+                 source: str = "content") -> None:
+        self.course_id = course_id
+        self._topics = {t.topic: t for t in topics}
         problems = validate(list(self._topics.values()))
         if problems:
-            raise ContentError("invalid content in " + str(self.root) + ":\n" + "\n".join(problems))
+            raise ContentError("invalid content in " + source + ":\n" + "\n".join(problems))
         self._kcs = {k.id: (t.topic, k) for t in self._topics.values() for k in t.kcs}
         self._items = {i.id: i for t in self._topics.values() for i in t.items}
         self._mcs = {m.id: m for t in self._topics.values() for m in t.misconceptions}
+
+    @classmethod
+    def from_yaml(cls, root: Path, status: ContentStatus | None = None) -> "ContentStore":
+        """The YAML seed directly (scripts, simulations, tests); the app reads the database."""
+        return cls(load_yaml_topics(root, status), source=str(root))
 
     # ------------------------------------------------------------------ topics / KCs
     def topics(self) -> list[str]:
@@ -209,16 +239,15 @@ class ContentStore:
         return list(k.prerequisites) if k else []
 
     # ----------------------------------------------------------------------- items
-    def items(self, kc_id: str, reviewed_only: bool | None = None) -> list[Item]:
-        """Items of a KC. By default, unreviewed items are served only if content.serve_unreviewed."""
-        only_reviewed = (not self.serve_unreviewed) if reviewed_only is None else reviewed_only
-        return [i for i in self._items.values() if i.kc == kc_id and (i.reviewed or not only_reviewed)]
+    def items(self, kc_id: str, include_unpublished: bool = False) -> list[Item]:
+        """Active items of a KC (the ones students may see); all of them with include_unpublished."""
+        return [i for i in self._items.values() if i.kc == kc_id and (i.active or include_unpublished)]
 
     def item(self, item_id: str) -> Item | None:
         return self._items.get(item_id)
 
-    def reviewed_item_count(self, topic: str) -> int:
-        return sum(1 for k in self.kcs(topic) for i in self.items(k.id, reviewed_only=True))
+    def active_item_count(self, topic: str) -> int:
+        return sum(1 for k in self.kcs(topic) for _ in self.items(k.id))
 
     # -------------------------------------------------------------- misconceptions
     def misconception(self, mc_id: str) -> Misconception | None:
@@ -231,9 +260,9 @@ class ContentStore:
         return list(self._mcs.values())
 
     def servable(self, mc: Misconception) -> bool:
-        """May the statement and correction be shown to students? Same rule as items: reviewed, or
-        content.serve_unreviewed. Tracking by ID happens either way."""
-        return mc.reviewed or self.serve_unreviewed
+        """May the statement and correction be shown to students? Same rule as items: only when active.
+        Tracking by ID happens either way."""
+        return mc.active
 
     def targeted_misconceptions(self, item: Item) -> set[str]:
         """Misconceptions this item's distractors are written to reveal."""

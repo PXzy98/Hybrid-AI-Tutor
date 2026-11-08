@@ -188,7 +188,7 @@ async def test_leak_guard_blocks_before_sending(services):
 def test_privacy_end_to_end_forced_cloud(make_client):
     """A question with PII from a student with a rich learner profile, forced to the cloud by the router:
     the cloud gets only allow-listed, sanitized data; the student gets their name back; the DB stays clean."""
-    with make_client({"routing": {"stub_score": 1.0}, "content": {"serve_unreviewed": True}}) as client:
+    with make_client({"routing": {"stub_score": 1.0}, "content": {"seed_status": "active"}}) as client:
         api = Api(client)
         alice = api.make_student("alice", "Alice Tremblay")
         api.login("alice")

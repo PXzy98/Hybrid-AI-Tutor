@@ -61,7 +61,7 @@ async def main_async(args) -> None:
     model = args.model or s.llm.understand.model
     client = OllamaClient(s.ollama_url, model, temperature=0.0, num_ctx=s.llm.local.num_ctx,
                           timeout_s=args.timeout, max_tokens=200)
-    content = ContentStore(s.content_dir(), serve_unreviewed=True)
+    content = ContentStore.from_yaml(s.content_dir(), "active")
     cases = [json.loads(line) for line in (HERE / "cases.jsonl").read_text("utf-8").splitlines() if line.strip()]
     await classify(client, content, "warm-up: what is blood pressure?")  # load the model, not counted
 

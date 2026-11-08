@@ -5,7 +5,7 @@ from alembic.migration import MigrationContext
 from sqlalchemy import inspect, text
 from sqlmodel import SQLModel
 
-from app.storage.db import DatabaseConfigError, init_db, make_engine, normalize_url
+from app.storage.db import DatabaseConfigError, head_revision, init_db, make_engine, normalize_url
 from app.storage.testing import temporary_database
 
 
@@ -18,7 +18,7 @@ def test_migrations_match_the_models_and_upgrading_twice_is_a_no_op():
                                     SQLModel.metadata)
             version = conn.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
         assert diff == [], diff
-        assert version == "0001"
+        assert version == head_revision()
         assert set(inspect(engine).get_table_names()) == set(SQLModel.metadata.tables) | {"alembic_version"}
         engine.dispose()
 

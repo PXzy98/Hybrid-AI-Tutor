@@ -24,7 +24,7 @@ def dev(make_client):
     """`dev(overrides)`: the app with a logged-in, consenting student; closed after the test."""
     with ExitStack() as stack:
         def _make(overrides: dict | None = None) -> Api:
-            cfg = {"content": {"serve_unreviewed": True}, **(overrides or {})}
+            cfg = {"content": {"seed_status": "active"}, **(overrides or {})}
             api = Api(stack.enter_context(make_client(cfg)))
             api.student = api.make_student()
             api.login("alice")

@@ -198,8 +198,19 @@ class LLMConfig(Section):
 
 
 class ContentConfig(Section):
-    dir: str = "content/topics"
-    serve_unreviewed: bool = False
+    dir: str = "content/topics"  # YAML seed of the demo course (imported once, task Z4)
+    # Status of seed items and misconceptions without `reviewed_by`: draft (invisible to students) by default;
+    # "active" only for demos and tests with fictional students.
+    seed_status: Literal["draft", "active"] = "draft"
+
+    @model_validator(mode="before")
+    @classmethod
+    def _removed_settings(cls, data):
+        if isinstance(data, dict) and "serve_unreviewed" in data:
+            raise ValueError("content.serve_unreviewed was removed (task Z4): only active content is served. "
+                             "Remove CONTENT__SERVE_UNREVIEWED from .env; for a demo with unreviewed content "
+                             "set CONTENT__SEED_STATUS=active before the demo course is first created.")
+        return data
 
 
 class CourseConfig(Section):
@@ -212,7 +223,7 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         extra="ignore",
         # SECTION__FIELD overrides one config.yaml value, e.g. PRIVACY__SPACY_MODEL=en_core_web_sm or
-        # CONTENT__SERVE_UNREVIEWED=true (used by the Docker image and the demo)
+        # CONTENT__SEED_STATUS=active (the demo)
         env_nested_delimiter="__",
     )
 

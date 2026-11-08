@@ -63,7 +63,7 @@ class TopicContentStatus(BaseModel):
 
 
 class ContentStatus(BaseModel):
-    serve_unreviewed: bool  # development/demo: unreviewed items and corrections are shown to students
+    serve_unreviewed: bool = False  # API v1 field, always false since Z4 (only active content is served)
     topics: list[TopicContentStatus]
 
 
@@ -137,7 +137,7 @@ def content_status(content: ContentStore, topics: list[str], materials_dir, retr
         indexed = status(t) if callable(status) else []
         out.append(TopicContentStatus(
             topic=t, name=tc.name, kcs=len(tc.kcs), items=len(tc.items),
-            items_reviewed=sum(i.reviewed for i in tc.items), misconceptions=len(tc.misconceptions),
-            misconceptions_reviewed=sum(m.reviewed for m in tc.misconceptions),
+            items_reviewed=sum(i.active for i in tc.items), misconceptions=len(tc.misconceptions),
+            misconceptions_reviewed=sum(m.active for m in tc.misconceptions),
             materials=list_materials(materials_dir(t)), rag_materials=indexed))
-    return ContentStatus(serve_unreviewed=content.serve_unreviewed, topics=out)
+    return ContentStatus(topics=out)

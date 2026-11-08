@@ -12,7 +12,7 @@ from app.prompts.render import level_partial, style_partial
 from app.storage.models import EvidenceLog, utcnow
 from tests.conftest import Api
 
-DEV = {"content": {"serve_unreviewed": True}}  # nothing is reviewed yet; the MVP demo runs like this
+DEV = {"content": {"seed_status": "active"}}  # nothing is reviewed yet; the MVP demo runs like this
 HBP = "high_blood_pressure"
 
 

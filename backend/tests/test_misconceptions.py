@@ -20,7 +20,7 @@ def dev(make_client):
     """`dev(overrides)`: the app with a logged-in, consenting student; closed after the test."""
     with ExitStack() as stack:
         def _make(overrides: dict | None = None, consent: bool = True) -> Api:
-            cfg = {"content": {"serve_unreviewed": True}, **(overrides or {})}
+            cfg = {"content": {"seed_status": "active"}, **(overrides or {})}
             api = Api(stack.enter_context(make_client(cfg)))
             api.student = api.make_student()
             api.sid = api.student.student_id
@@ -125,7 +125,7 @@ def test_stated_misconception_is_suspected_then_confirmed(dev):
 
 
 def test_unreviewed_corrections_are_tracked_but_not_shown(dev):
-    api = dev({"content": {"serve_unreviewed": False}})
+    api = dev({"content": {"seed_status": "draft"}})
     api.services.learner.tracker.distractor_chosen(api.sid, "HBP.MC5")
     assert status(api, "HBP.MC5") == "confirmed"
     assert api.services.learner.context(api.sid, HBP).misconceptions == []

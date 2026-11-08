@@ -11,7 +11,8 @@ DEMO_STUDENT_PASSWORD (default below) and are reset if they already exist.
     demo.advanced      diagnostic + one correct check answer per part -> "advanced"
 
 Answer keys are read from content/ only to simulate students; the API never reveals them.
-Requires content.serve_unreviewed=true on the server while the content is unreviewed.
+Requires CONTENT__SEED_STATUS=active on the server (before the demo course is first created) while the
+content is unreviewed.
 """
 import argparse
 import getpass
@@ -68,7 +69,8 @@ def seed_student(base: str, content: ContentStore, admin: httpx.Client, spec, pa
         s.delete("/api/v1/learner/me")  # start from a clean profile when re-seeding
         diagnostic = s.get("/api/v1/onboarding", params={"topic": TOPIC}).json()["diagnostic"]
         if not diagnostic:
-            fail("the server serves no check questions: set CONTENT__SERVE_UNREVIEWED=true (docs/DEMO.md)")
+            fail("the server serves no check questions: start it once with CONTENT__SEED_STATUS=active "
+                 "on an empty database (docs/DATABASE.md)")
         answers = []
         for n, item in enumerate(diagnostic):
             key = content.item(item["id"]).answer
@@ -79,7 +81,7 @@ def seed_student(base: str, content: ContentStore, admin: httpx.Client, spec, pa
         if profile == "advanced":
             used = {a["item_id"] for a in answers}
             for kc in content.kcs(TOPIC):
-                item = next(i for i in content.items(kc.id, reviewed_only=False) if i.id not in used)
+                item = next(i for i in content.items(kc.id, include_unpublished=True) if i.id not in used)
                 s.post("/api/v1/check", json={"item_id": item.id, "choice": item.answer})
         me = s.get("/api/v1/learner/me", params={"topic": TOPIC}).json()
         bands = [k["band"] for k in me["topics"][0]["kcs"]]
@@ -94,7 +96,7 @@ def main(argv: list[str] | None = None) -> None:
     instructor_pw = os.environ.get("DEMO_INSTRUCTOR_PASSWORD") or getpass.getpass("Instructor password: ")
     student_pw = os.environ.get("DEMO_STUDENT_PASSWORD", DEFAULT_STUDENT_PASSWORD)
 
-    content = ContentStore(ROOT / "content" / "topics", serve_unreviewed=True)
+    content = ContentStore.from_yaml(ROOT / "content" / "topics", "active")
     with httpx.Client(base_url=args.base_url, timeout=60) as admin:
         try:
             me = login(admin, args.instructor, instructor_pw)

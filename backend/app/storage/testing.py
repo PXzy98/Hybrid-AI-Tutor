@@ -86,9 +86,10 @@ def table_rows(url: str, table: str, where: str = "", params: dict | None = None
     """Rows of one application table as dicts, in primary-key order (tests and audits only)."""
     if table not in SQLModel.metadata.tables:
         raise ValueError(f"unknown table {table!r}")
+    keys = ", ".join(f'"{c.name}"' for c in SQLModel.metadata.tables[table].primary_key.columns)
     engine = make_engine(url, pooled=False)
     with engine.connect() as conn:
-        rows = conn.execute(text(f'SELECT * FROM "{table}" {where} ORDER BY id'), params or {})  # noqa: S608
+        rows = conn.execute(text(f'SELECT * FROM "{table}" {where} ORDER BY {keys}'), params or {})  # noqa: S608
         out = [dict(r._mapping) for r in rows]
     engine.dispose()
     return out

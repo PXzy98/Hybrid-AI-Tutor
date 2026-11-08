@@ -83,7 +83,7 @@ jobs:
           cat > .env <<'ENV'
           INSTRUCTOR_USERNAME=prof
           INSTRUCTOR_INITIAL_PASSWORD=ci-initial-password-only
-          CONTENT__SERVE_UNREVIEWED=true
+          CONTENT__SEED_STATUS=active
           OLLAMA_URL=http://127.0.0.1:9
           POSTGRES_PASSWORD=ci-only-db-password
           ENV
