@@ -458,6 +458,78 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/admin/model-endpoints": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List System */
+        get: operations["model_endpoints_list"];
+        put?: never;
+        /** Create System */
+        post: operations["model_endpoints_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/admin/model-endpoints/{endpoint_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete System */
+        delete: operations["model_endpoints_delete"];
+        options?: never;
+        head?: never;
+        /** Update System */
+        patch: operations["model_endpoints_update"];
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/model-endpoints": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Course */
+        get: operations["course_model_endpoints_list"];
+        put?: never;
+        /** Create Course Endpoint */
+        post: operations["course_model_endpoints_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/model-endpoints/{endpoint_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Course Endpoint */
+        delete: operations["course_model_endpoints_delete"];
+        options?: never;
+        head?: never;
+        /** Update Course Endpoint */
+        patch: operations["course_model_endpoints_update"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -674,7 +746,10 @@ export interface components {
         };
         /** ContentStatus */
         ContentStatus: {
-            /** Serve Unreviewed */
+            /**
+             * Serve Unreviewed
+             * @default false
+             */
             serve_unreviewed: boolean;
             /** Topics */
             topics: components["schemas"]["TopicContentStatus"][];
@@ -707,6 +782,80 @@ export interface components {
              * @enum {string}
              */
             choice: "A" | "B" | "C" | "D";
+        };
+        /** EndpointIn */
+        EndpointIn: {
+            /** Name */
+            name: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "ollama" | "openai_compat";
+            /** Base Url */
+            base_url: string;
+            /** Model */
+            model: string;
+            /**
+             * Trust
+             * @default external
+             * @enum {string}
+             */
+            trust: "trusted_local" | "external";
+            /** Api Key */
+            api_key?: string | null;
+            /**
+             * Confirm Controlled
+             * @default false
+             */
+            confirm_controlled: boolean;
+        };
+        /** EndpointOut */
+        EndpointOut: {
+            /** Id */
+            id: number;
+            /** Course Id */
+            course_id: number | null;
+            /** Name */
+            name: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "ollama" | "openai_compat";
+            /** Base Url */
+            base_url: string;
+            /** Model */
+            model: string;
+            /**
+             * Trust
+             * @enum {string}
+             */
+            trust: "trusted_local" | "external";
+            /** Api Key Last4 */
+            api_key_last4?: string | null;
+            /** Last Test Ok At */
+            last_test_ok_at?: string | null;
+        };
+        /** EndpointPatch */
+        EndpointPatch: {
+            /** Name */
+            name?: string | null;
+            /** Kind */
+            kind?: ("ollama" | "openai_compat") | null;
+            /** Base Url */
+            base_url?: string | null;
+            /** Model */
+            model?: string | null;
+            /** Trust */
+            trust?: ("trusted_local" | "external") | null;
+            /** Api Key */
+            api_key?: string | null;
+            /**
+             * Confirm Controlled
+             * @default false
+             */
+            confirm_controlled: boolean;
         };
         /** ErrorBody */
         ErrorBody: {
@@ -2295,6 +2444,255 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SurveySummary"];
+                };
+            };
+        };
+    };
+    model_endpoints_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EndpointOut"][];
+                };
+            };
+        };
+    };
+    model_endpoints_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EndpointIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EndpointOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    model_endpoints_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                endpoint_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    model_endpoints_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                endpoint_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EndpointPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EndpointOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    course_model_endpoints_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EndpointOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    course_model_endpoints_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EndpointIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EndpointOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    course_model_endpoints_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                endpoint_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    course_model_endpoints_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                endpoint_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EndpointPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EndpointOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
