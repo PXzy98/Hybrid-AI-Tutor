@@ -81,6 +81,11 @@ llm:
   understand: { model: "qwen3.5:9b", think: false, format: json, timeout_s: 5 }
   cloud: { timeout_s: 30, max_tokens: 2000, fallback_to_local: true, history_turns: 0 }   # reasoning tokens count
 
+limits:
+  settings:
+    poll_seconds: 5              # each process checks the system settings version this often (design 6.5)
+    apply_timeout_seconds: 120   # a component change not applied everywhere by then is rolled back
+
 content:
   dir: content/topics
   seed_status: draft                  # status of unreviewed seed items; active only for demos

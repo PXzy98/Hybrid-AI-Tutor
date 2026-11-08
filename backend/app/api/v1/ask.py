@@ -52,19 +52,19 @@ class RoutingOptions(BaseModel):
 
 @router.get("/routing/options", response_model=RoutingOptions)
 def routing_options(_: Student, services: ServicesDep):
-    cfg = services.settings.routing
+    cfg, eff = services.settings.routing, services.effective()
     return RoutingOptions(
-        show_progress=cfg.show_progress,
-        default_method=cfg.default_method,
+        show_progress=eff.show_routing_progress,
+        default_method=eff.default_routing_method,
         methods=[RoutingMethodOption(id=m, label=METHOD_LABELS[m]) for m in cfg.enabled_methods],
     )
 
 
 def _prepare(body: AskBody, user, services) -> RequestContext:
-    settings = services.settings
+    settings, eff = services.settings, services.effective()  # the request's settings snapshot
     if body.topic not in settings.topics(body.course_id):
         raise HTTPException(422, f"unknown topic for course '{body.course_id}'")
-    method = body.routing_method or settings.routing.default_method
+    method = body.routing_method or eff.default_routing_method
     if method not in settings.routing.enabled_methods:
         raise HTTPException(422, "This routing method is disabled. Refresh the method options.")
     session_id = body.session_id or str(uuid.uuid4())
@@ -80,7 +80,8 @@ def _prepare(body: AskBody, user, services) -> RequestContext:
     return RequestContext(
         request_id=str(uuid.uuid4()),
         request=req,
-        show_routing_progress=settings.routing.show_progress,
+        settings=eff,
+        show_routing_progress=eff.show_routing_progress,
         history=services.sessions.history(session_id, last=settings.sessions.history_turns),
     )
 

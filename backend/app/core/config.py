@@ -213,6 +213,17 @@ class ContentConfig(Section):
         return data
 
 
+class SettingsApplyLimits(Section):
+    """Live component switch (course-structure.md section 6.5)."""
+
+    poll_seconds: float = Field(5.0, gt=0, le=60)
+    apply_timeout_seconds: float = Field(120.0, gt=0, le=3600)
+
+
+class LimitsConfig(Section):
+    settings: SettingsApplyLimits = SettingsApplyLimits()
+
+
 class CourseConfig(Section):
     topics: list[str]
 
@@ -236,6 +247,7 @@ class Settings(BaseSettings):
     privacy: PrivacyConfig = PrivacyConfig()
     sessions: SessionsConfig = SessionsConfig()
     learner: LearnerConfig = LearnerConfig()
+    limits: LimitsConfig = LimitsConfig()
     auth: AuthConfig = AuthConfig()
     llm: LLMConfig = LLMConfig()
     content: ContentConfig = ContentConfig()

@@ -233,9 +233,9 @@ def test_teacher_toggle_is_enforced_server_side_and_persisted(make_client, monke
         config = api.client.get("/api/v1/admin/config").json()["values"]
         config["show_routing_progress"] = False
         assert api.client.put("/api/v1/admin/config", json=config).status_code == 200
-        from app.admin.runtime_config import restore_latest
+        from app.core.services import build_services
 
-        assert restore_latest(api.client.app).show_routing_progress is False
+        assert build_services().effective().show_routing_progress is False  # stored: survives a restart
         api.login("alice")
         assert api.client.get("/api/v1/routing/options").json()["show_progress"] is False
         body = {"topic": "high_blood_pressure", "question": "Explain pressure."}

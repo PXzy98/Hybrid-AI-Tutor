@@ -41,6 +41,21 @@ students, on a new database (it has no effect once the course exists).
 `content.serve_unreviewed` no longer exists; an old `.env` that sets `CONTENT__SERVE_UNREVIEWED` stops the
 app with a message saying what to do.
 
+## Settings (task Z5)
+
+Run-time settings are stored in `system_settings` (one row) and `course_settings` (one row per course); every
+field is nullable and null means "use the next layer": course → system → `config.yaml`
+(`app/platform/settings.py`, course-structure.md section 6). Each row has a `version`: a write must send the
+version it read (409 otherwise), and every change is in `config_history` and `audit_log` and can be restored.
+`effective_settings(course_id)` is cached per process by version, so all processes see a change on their
+next request.
+
+System fields that need new objects (knowledge model, checkers, routing method, local model server) are
+switched live in every process (`app/platform/components.py`): each process sends a heartbeat to
+`process_status` every `limits.settings.poll_seconds`, builds the new set and swaps it in; the row is locked
+(423) until all live processes run it, and a failure or `limits.settings.apply_timeout_seconds` rolls it back.
+On the first start after Z5 the newest v3 dashboard change is copied into these rows.
+
 ## Moving a v3 installation
 
 ```bash

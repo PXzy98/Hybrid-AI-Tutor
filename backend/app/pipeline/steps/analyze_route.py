@@ -6,6 +6,7 @@ from time import perf_counter
 from app.core.registry import steps
 from app.core.schemas import RequestContext, RouteInput, SemanticAnalysis
 from app.pipeline.base import BaseStep
+from app.pipeline.settings_view import default_routing_method
 
 
 def route_input(ctx: RequestContext) -> RouteInput:
@@ -32,7 +33,7 @@ class AnalyzeRouteStep(BaseStep):
         if self.services.settings.routing.impl != "semantic":
             return ctx
         router = self.services.router
-        method = ctx.request.routing_method or self.services.settings.routing.default_method
+        method = ctx.request.routing_method or default_routing_method(ctx, self.services)
         t0 = perf_counter()
         await ctx.report("embedding", "running", "Encoding the question locally.")
         try:

@@ -4,6 +4,7 @@ from time import perf_counter
 from app.core.registry import steps
 from app.core.schemas import RequestContext, RouteInput
 from app.pipeline.base import BaseStep
+from app.pipeline.settings_view import routing_threshold
 from app.pipeline.steps.analyze_route import route_input
 from app.routing.evidence import assess_evidence, select_passages
 
@@ -24,6 +25,7 @@ class RouteStep(BaseStep):
         if ctx.pii is None:
             raise RuntimeError("route needs the privacy filter result")
         cfg = self.services.settings.routing
+        threshold = routing_threshold(ctx, self.services)
         learner = ctx.learner if ctx.learner and ctx.learner.personalized else None
         x = RouteInput(
             sanitized_question=ctx.pii.sanitized_text,
@@ -34,7 +36,7 @@ class RouteStep(BaseStep):
             kc_ids=ctx.understanding.kc_ids if ctx.understanding else [],
         )
         score = await asyncio.to_thread(self.services.router.route_score, x)
-        if score.score >= cfg.threshold:
+        if score.score >= threshold:
             generalize = self.services.settings.privacy.health_detail_policy == "generalize"
             if cfg.force_local_if_not_cloud_safe and not ctx.pii.cloud_safe and not generalize:
                 score = score.model_copy(update={"reasons": [*score.reasons, "forced local: not cloud_safe"]})
@@ -50,7 +52,7 @@ class RouteStep(BaseStep):
         router = self.services.router
         x = route_input(ctx)
         analysis = ctx.semantic_analysis or await asyncio.to_thread(router.analyze, x)
-        threshold = self.services.settings.routing.threshold
+        threshold = routing_threshold(ctx, self.services)
         if router.capable(analysis, threshold):
             t0 = perf_counter()
             await ctx.report("evidence", "running", "Checking relevance and question support.")

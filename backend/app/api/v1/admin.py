@@ -23,6 +23,7 @@ from app.admin.runtime_config import InvalidConfig, RuntimeConfig
 from app.admin.summary import ClassSummary, class_summary
 from app.api.deps import ServicesDep
 from app.auth.deps import Instructor
+from app.platform.settings import SettingsConflict, SettingsLocked
 
 router = APIRouter(prefix="/admin", tags=["admin: dashboard"])
 
@@ -48,7 +49,7 @@ def _admin_config(services) -> AdminConfig:
     changes = [ConfigChange(changed_at=h.changed_at,
                             changed=sorted(k for k in h.values if h.values.get(k) != h.previous.get(k)))
                for h in runtime_config.history(services.engine)]
-    return AdminConfig(values=runtime_config.current(services.settings),
+    return AdminConfig(values=runtime_config.current(services),
                        options=ConfigOptions(checkers=runtime_config.available_checkers(),
                                              required_checkers=list(runtime_config.REQUIRED_CHECKERS),
                                              knowledge_models=runtime_config.available_knowledge_models()),
@@ -72,6 +73,10 @@ def put_config(body: RuntimeConfig, user: Instructor, request: Request):
         runtime_config.change(request.app, body, user.account_id)
     except InvalidConfig as e:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(e)) from None
+    except SettingsLocked:
+        raise HTTPException(status.HTTP_423_LOCKED, "A settings change is still being applied.") from None
+    except SettingsConflict as e:
+        raise HTTPException(status.HTTP_409_CONFLICT, str(e)) from None
     return _admin_config(request.app.state.services)
 
 

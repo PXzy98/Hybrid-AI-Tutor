@@ -4,6 +4,7 @@ from app.core.registry import steps
 from app.core.schemas import Evidence, RequestContext
 from app.learner.preference import PreferenceSignal
 from app.pipeline.base import BaseStep
+from app.pipeline.settings_view import weak_evidence as weak_evidence_on
 
 # Presentation hints in the student's own wording. Implicit signals: a preference changes only after three
 # consistent ones (simple preference model), so a single phrasing never flips it.
@@ -50,7 +51,7 @@ class UpdateLearnerStep(BaseStep):
         learner, sid = self.services.learner, ctx.request.student_id
         for mc_id in ctx.understanding.misconception_ids if ctx.understanding else []:
             learner.misconception_stated(sid, mc_id)
-        if self.services.settings.learner.weak_evidence:
+        if weak_evidence_on(ctx, self.services):
             learner.observe_request(sid, weak_evidence(ctx, self.services.content))
         for signal in preference_hints(ctx.request.question):
             learner.update_preferences(sid, signal)

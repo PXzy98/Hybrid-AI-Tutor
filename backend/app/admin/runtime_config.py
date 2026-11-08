@@ -1,26 +1,21 @@
-"""Runtime-editable config subset (design §9: admin config).
+"""API v1 dashboard config, kept as it was (rule 15) on top of the settings layers of task Z5.
 
-The dashboard may change: the routing threshold, the enabled checkers, the knowledge model, weak evidence,
-the level thresholds, and the local model server (address and model name: the professor's own Ollama server,
-G1-94). A change is validated, stored in `config_history`, and applied without a restart:
-the settings object is replaced, and the learner model and the pipeline are rebuilt. The newest history row
-is applied again at startup, so a change survives a restart.
-
-The medical-safety and privacy checkers cannot be switched off from the dashboard (design §2: safety and
-privacy rules never depend on configuration).
+The v1 dashboard edits one flat object. Since Z5 it is stored as layered settings: the routing threshold and
+progress display belong to the demo course (`course_settings`), the checkers, knowledge model, weak evidence,
+level thresholds and local model server to `system_settings`. A component change is applied live in every
+process (`app.platform.components`); the v1 PUT keeps its "applied at once" behaviour in this process.
 """
-
-from urllib.parse import urlparse
 
 from fastapi import FastAPI
 from pydantic import BaseModel, ConfigDict, Field
 from sqlmodel import Session, col, select
 
-from app.core.config import LevelsConfig, Settings
-from app.core.registry import checkers, import_submodules, knowledge_models
+from app.core.config import LevelsConfig
+from app.platform.settings import REQUIRED_CHECKERS, SettingsError, _known_checkers, _known_knowledge_models
 from app.storage.models import ConfigHistory
 
-REQUIRED_CHECKERS = ("medical_safety", "pii_leak", "profile_leak")
+__all__ = ["REQUIRED_CHECKERS", "RuntimeConfig", "InvalidConfig", "available_checkers",
+           "available_knowledge_models", "current", "change", "history"]
 
 
 class RuntimeConfig(BaseModel):
@@ -42,121 +37,61 @@ class InvalidConfig(ValueError):
 
 
 def available_checkers() -> list[str]:
-    import_submodules("app.verify.checkers")
-    return checkers.names()
+    return _known_checkers()
 
 
 def available_knowledge_models() -> list[str]:
-    import_submodules("app.learner.knowledge")
-    return knowledge_models.names()
+    return _known_knowledge_models()
 
 
-def current(settings: Settings) -> RuntimeConfig:
+def current(services) -> RuntimeConfig:
+    eff, s = services.effective(), services.settings
     return RuntimeConfig(
-        routing_threshold=settings.routing.threshold,
-        show_routing_progress=settings.routing.show_progress,
-        checkers=list(settings.verify.checkers),
-        knowledge=settings.learner.knowledge,
-        weak_evidence=settings.learner.weak_evidence,
-        levels=settings.learner.levels,
-        local_llm_url=settings.ollama_url,
-        local_llm_model=settings.llm.local.model,
+        routing_threshold=eff.routing_threshold,
+        show_routing_progress=eff.show_routing_progress,
+        checkers=list(eff.checkers),
+        knowledge=eff.knowledge_model,
+        weak_evidence=eff.weak_evidence,
+        levels=LevelsConfig(basic_below=eff.level_basic_below, advanced_above=eff.level_advanced_above,
+                            hysteresis=eff.level_hysteresis),
+        local_llm_url=s.ollama_url,
+        local_llm_model=s.llm.local.model,
     )
-
-
-def validate(rc: RuntimeConfig) -> None:
-    known = available_checkers()
-    unknown = [c for c in rc.checkers if c not in known]
-    if unknown:
-        raise InvalidConfig(f"unknown checker(s): {', '.join(unknown)}")
-    if len(set(rc.checkers)) != len(rc.checkers):
-        raise InvalidConfig("a checker is listed twice")
-    missing = [c for c in REQUIRED_CHECKERS if c not in rc.checkers]
-    if missing:
-        raise InvalidConfig(f"these checkers cannot be switched off: {', '.join(missing)}")
-    if rc.knowledge not in available_knowledge_models():
-        raise InvalidConfig(f"unknown knowledge model: {rc.knowledge}")
-    if rc.local_llm_url is not None:
-        url = urlparse(rc.local_llm_url.strip())
-        if url.scheme not in ("http", "https") or not url.hostname:
-            raise InvalidConfig("the local model server must be an http(s) address, e.g. http://10.0.0.5:11434")
-    model = rc.local_llm_model
-    if model is not None and (not model.strip() or " " in model.strip()):
-        raise InvalidConfig("the local model name must be one word, e.g. qwen3.5:9b")
-
-
-def with_runtime(settings: Settings, rc: RuntimeConfig) -> Settings:
-    """A copy of the settings with the runtime subset replaced (sections re-validated)."""
-    routing = settings.routing.model_validate(
-        {
-            **settings.routing.model_dump(),
-            "threshold": rc.routing_threshold,
-            "show_progress": rc.show_routing_progress,
-        }
-    )
-    verify = settings.verify.model_validate({**settings.verify.model_dump(), "checkers": rc.checkers})
-    learner = settings.learner.model_validate(
-        {
-            **settings.learner.model_dump(),
-            "knowledge": rc.knowledge,
-            "weak_evidence": rc.weak_evidence,
-            "levels": rc.levels.model_dump(),
-        }
-    )
-    update = {"routing": routing, "verify": verify, "learner": learner}
-    if rc.local_llm_url is not None:
-        update["ollama_url"] = rc.local_llm_url.strip().rstrip("/")
-    if rc.local_llm_model is not None and rc.local_llm_model.strip() != settings.llm.local.model:
-        model = rc.local_llm_model.strip()
-        llm = settings.llm.model_dump()
-        # the understand step follows the answer model
-        if llm["understand"]["model"] == llm["local"]["model"]:
-            llm["understand"]["model"] = model
-        llm["local"]["model"] = model
-        update["llm"] = settings.llm.model_validate(llm)
-    return settings.model_copy(update=update)
-
-
-def apply(app: FastAPI, rc: RuntimeConfig) -> None:
-    """Swap in the new settings, then rebuild what was built from them (learner model, pipeline).
-
-    Requests already running keep the objects they started with; the next request uses the new ones.
-    """
-    from app.pipeline.runner import build_runner
-
-    services = app.state.services
-    services.reconfigure(with_runtime(services.settings, rc))
-    app.state.runner = build_runner(services)
 
 
 def change(app: FastAPI, rc: RuntimeConfig, account_id: int | None) -> bool:
-    """Validate, apply and record a change. Returns False when nothing changed (no history row)."""
-    validate(rc)
+    """Validate and store a v1 change in the settings layers. Returns False when nothing changed."""
     services = app.state.services
-    before = current(services.settings)
+    before = current(services)
     if before == rc:
         return False
-    apply(app, rc)
-    with Session(services.engine) as db:
-        db.add(ConfigHistory(account_id=account_id, values=rc.model_dump(), previous=before.model_dump()))
-        db.commit()
+    service, course_id = services.settings_service, services.content.course_id
+    system, system_version, _ = service.system_values()
+    course, course_version = service.course_values(course_id)
+    # only the fields that changed are stored, so untouched ones keep following config.yaml
+    mapping = {"checkers": ("system", "checkers"), "knowledge": ("system", "knowledge_model"),
+               "weak_evidence": ("system", "weak_evidence"), "local_llm_url": ("system", "local_llm_url"),
+               "local_llm_model": ("system", "local_llm_model"),
+               "routing_threshold": ("course", "routing_threshold"),
+               "show_routing_progress": ("course", "show_routing_progress")}
+    for v1_name, (scope, name) in mapping.items():
+        new = getattr(rc, v1_name)
+        if new is not None and new != getattr(before, v1_name):
+            (system if scope == "system" else course)[name] = new
+    for v1_name, name in (("basic_below", "level_basic_below"), ("advanced_above", "level_advanced_above"),
+                          ("hysteresis", "level_hysteresis")):
+        if getattr(rc.levels, v1_name) != getattr(before.levels, v1_name):
+            system[name] = getattr(rc.levels, v1_name)
+    try:
+        service.save_system(system, expected_version=system_version, account_id=account_id)
+        service.save_course(course_id, course, expected_version=course_version, account_id=account_id)
+    except SettingsError as e:
+        raise InvalidConfig(str(e)) from None
+    services.component_manager.sync()  # this process switches before the response (v1: "applied at once")
     return True
 
 
 def history(engine, limit: int = 10) -> list[ConfigHistory]:
+    """The dashboard's change list: system and course changes, newest first."""
     with Session(engine) as db:
         return list(db.exec(select(ConfigHistory).order_by(col(ConfigHistory.id).desc()).limit(limit)).all())
-
-
-def restore_latest(app: FastAPI) -> RuntimeConfig | None:
-    """At startup: apply the newest stored change, if it is still valid (else keep config.yaml)."""
-    rows = history(app.state.services.engine, limit=1)
-    if not rows:
-        return None
-    try:
-        rc = RuntimeConfig.model_validate(rows[0].values)
-        validate(rc)
-    except (ValueError, InvalidConfig):
-        return None
-    apply(app, rc)
-    return rc
