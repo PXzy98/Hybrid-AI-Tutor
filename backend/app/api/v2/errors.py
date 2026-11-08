@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from app.catalog import CatalogError
 from app.catalog.editor import CatalogConflict, CatalogNotFound
 from app.platform.courses import CourseConflict, CourseError, CourseNotFound, JoinRefused
+from app.platform.settings import SettingsConflict, SettingsLocked
 from app.platform.usage import UsageLimitExceeded
 
 
@@ -54,3 +55,24 @@ async def catalog_error_handler(request: Request, exc: CatalogError) -> JSONResp
     if isinstance(exc, CatalogConflict):
         return error(409, ErrorCode.conflict, str(exc))
     return error(422, ErrorCode.invalid, str(exc))
+
+
+class ApiError(Exception):
+    """Raised by v2 endpoints for an error body with a code (handled for /api/v2 only)."""
+
+    def __init__(self, status_code: int, code: ErrorCode, detail: str) -> None:
+        super().__init__(detail)
+        self.status_code, self.code, self.detail = status_code, code, detail
+
+
+async def api_error_handler(request: Request, exc: ApiError) -> JSONResponse:
+    return error(exc.status_code, exc.code, exc.detail)
+
+
+def settings_error(exc: Exception) -> ApiError:
+    """SettingsError -> 422, SettingsConflict -> 409, SettingsLocked -> 423 settings_applying."""
+    if isinstance(exc, SettingsLocked):
+        return ApiError(423, ErrorCode.settings_applying, str(exc))
+    if isinstance(exc, SettingsConflict):
+        return ApiError(409, ErrorCode.conflict, str(exc))
+    return ApiError(422, ErrorCode.invalid, str(exc))

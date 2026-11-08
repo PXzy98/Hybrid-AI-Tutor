@@ -234,6 +234,64 @@ class AccountService:
             db.commit()
             return account
 
+    # ------------------------------------------------------ admin: instructor accounts (Z9)
+    def list_staff(self) -> list[Account]:
+        with self._db() as db:
+            return list(db.exec(select(Account).where(col(Account.role).in_(["instructor", "admin"]))
+                                .order_by(col(Account.username))).all())
+
+    def create_staff(self, email: str, display_name: str, role: Role = "instructor") -> tuple[Account, str]:
+        """An instructor (or admin) account by e-mail, username = e-mail prefix, with a one-time temporary
+        password that must be changed at the first login. Returns the account and the password."""
+        email = email.strip().lower()
+        if not re.match(r"^[a-z0-9._%+'-]+@[a-z0-9.-]+\.[a-z]{2,}$", email):
+            raise AccountError("not a valid e-mail address")
+        temp = passwords.temporary_password()
+        with self._db() as db:
+            if db.exec(select(Account).where(Account.email == email)).first() is not None:
+                raise UsernameTaken(email)
+            account = self._create(db, username_for_email(db, email), display_name, role, temp,
+                                   must_change=True, email=email, demo_member=False)
+        return account, temp
+
+    def update_staff(self, account_id: int, *, acting_account_id: int, active: bool | None = None,
+                     role: Role | None = None, display_name: str | None = None) -> Account:
+        """Deactivate, reactivate, or change between instructor and admin. Nobody changes their own role
+        or deactivates themselves, so there is always an admin left."""
+        with self._db() as db:
+            account = self._get(db, account_id)
+            if account.role not in ("instructor", "admin"):
+                raise AccountNotFound(account_id)
+            if account_id == acting_account_id and (active is False or (role and role != account.role)):
+                raise AccountError("you cannot deactivate yourself or change your own role")
+            if role is not None:
+                if role not in ("instructor", "admin"):
+                    raise AccountError("role must be instructor or admin")
+                account.role = role
+            if display_name is not None:
+                account.display_name = display_name.strip() or account.username
+            if active is not None:
+                account.active = active
+                if not active:
+                    auth_sessions.revoke_all(db, account.id)
+            db.add(account)
+            db.commit()
+            return account
+
+    def reset_staff_password(self, account_id: int) -> str:
+        temp = passwords.temporary_password()
+        with self._db() as db:
+            account = self._get(db, account_id)
+            if account.role not in ("instructor", "admin"):
+                raise AccountNotFound(account_id)
+            account.password_hash = passwords.hash_password(temp)
+            account.must_change_password = True
+            account.failed_logins, account.locked_until = 0, None
+            db.add(account)
+            auth_sessions.revoke_all(db, account.id)
+            db.commit()
+        return temp
+
     # ------------------------------------------------- instructor: student accounts
     def _get(self, db: Session, account_id: int, role: Role | None = None) -> Account:
         account = db.get(Account, account_id)
