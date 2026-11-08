@@ -29,11 +29,15 @@ WORKDIR /app
 
 # 1) dependencies and the spaCy model: cached unless pyproject.toml or the model changes.
 #    CPU-only torch first: the default wheel bundles CUDA (several GB) that the encoders do not need.
+#    The model comes from GitHub releases, which sometimes answer 504: up to five tries.
 COPY backend/pyproject.toml backend/pyproject.toml
 RUN pip install torch --index-url https://download.pytorch.org/whl/cpu \
     && mkdir -p backend/app && touch backend/app/__init__.py \
     && pip install -e ./backend \
-    && python -m spacy download ${SPACY_MODEL}
+    && for i in 1 2 3 4 5; do \
+         python -m spacy download ${SPACY_MODEL} && break; \
+         [ "$i" = 5 ] && exit 1; sleep 20; \
+       done
 
 # 2) routing encoder and evidence models into the Hugging Face cache (only the files the loaders use)
 RUN python -c "import sys; from sentence_transformers import CrossEncoder, SentenceTransformer; \
