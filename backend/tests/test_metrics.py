@@ -20,7 +20,8 @@ def test_metrics_count_requests_by_route_template(make_client):
         for key, value in before.items():
             assert _count(*key) == value + 1, key
         body = r.text
-        assert "987654" not in body and "no-such-page" not in body  # no IDs or paths as labels
+        # no IDs or paths as labels (sample values are numbers that may contain the same digits)
+        assert "/987654" not in body and "no-such-page" not in body
         assert "tutor_http_request_duration_seconds_bucket" in body and "tutor_component_version" in body
         assert 'route="/metrics"' not in body  # scrapes are not counted
         assert "/metrics" not in client.app.openapi()["paths"]  # not part of the API
