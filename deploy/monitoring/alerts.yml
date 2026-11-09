@@ -1,0 +1,54 @@
+# Alert rules (task Z13). Metric names: app/platform/metrics.py (tutor_*) and vLLM's own (vllm:*).
+groups:
+  - name: tutor
+    rules:
+      - alert: TutorApiDown
+        expr: up{job="tutor-api"} == 0
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: "The tutor api does not answer /metrics"
+      - alert: TutorServerErrors
+        expr: >
+          sum(rate(tutor_http_requests_total{status=~"5.."}[5m]))
+          / clamp_min(sum(rate(tutor_http_requests_total[5m])), 1e-9) > 0.05
+        for: 10m
+        labels: {severity: warning}
+        annotations:
+          summary: "More than 5% of requests fail with a server error"
+      - alert: TutorSlowRequests
+        # answers from a model take time; this fires when the 95th percentile of all requests exceeds a minute
+        expr: >
+          histogram_quantile(0.95, sum by (le) (rate(tutor_http_request_duration_seconds_bucket[10m]))) > 60
+        for: 10m
+        labels: {severity: warning}
+        annotations:
+          summary: "95% of requests take longer than a minute"
+      - alert: TutorManyFailedLogins
+        expr: >
+          sum(increase(tutor_http_requests_total{route=~"/api/v[12]/auth/login", status="401"}[10m])) > 50
+        labels: {severity: warning}
+        annotations:
+          summary: "More than 50 failed logins in 10 minutes (password guessing?)"
+      - alert: TutorSettingsNotApplied
+        # every live process (api and worker, from their heartbeats) runs the same settings version once a change
+        # is applied (course-structure.md 6.5)
+        expr: max(tutor_process_component_version) != min(tutor_process_component_version)
+        for: 10m
+        labels: {severity: warning}
+        annotations:
+          summary: "Processes run different settings versions for 10 minutes"
+  - name: vllm
+    rules:
+      - alert: VllmDown
+        expr: up{job="vllm"} == 0
+        for: 5m
+        labels: {severity: critical}
+        annotations:
+          summary: "The local model server does not answer"
+      - alert: VllmQueueLong
+        expr: sum(vllm:num_requests_waiting) > 10
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: "More than 10 requests wait for the local model (students wait)"

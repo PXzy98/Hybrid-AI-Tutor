@@ -1,0 +1,4 @@
+# The vLLM server(s) the course uses, as host:port of its OpenAI-compatible server (it serves /metrics there).
+# Empty until the test host is set up; Prometheus reloads this file by itself. Example:
+# - targets: ["10.0.0.5:8000"]
+[]

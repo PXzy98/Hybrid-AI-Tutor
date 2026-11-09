@@ -91,6 +91,47 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  # ---- monitoring (task Z13): `docker compose --profile monitoring up -d`; not started otherwise ----------
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    profiles: [monitoring]
+    command: ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.retention.time=30d"]
+    volumes:
+      - ./deploy/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./deploy/monitoring/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - ./deploy/monitoring/targets:/etc/prometheus/targets:ro
+      - prometheus-data:/prometheus
+    networks: [public]  # reaches api:8000 and the vLLM server; publishes no port
+    restart: unless-stopped
+
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    profiles: [monitoring]
+    command: ["--config.file=/etc/alertmanager/alertmanager.yml"]
+    volumes:
+      - ./deploy/monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    networks: [public]
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    profiles: [monitoring]
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+    # refuses to start without GRAFANA_ADMIN_PASSWORD in .env (never the default admin password)
+    entrypoint: ["sh", "-c", "test -n \"$$GF_SECURITY_ADMIN_PASSWORD\" || { echo 'set GRAFANA_ADMIN_PASSWORD in .env'; exit 1; }; exec /run.sh"]
+    ports:
+      - "127.0.0.1:${GRAFANA_PORT:-3000}:3000"  # this host only: open it through an SSH tunnel
+    volumes:
+      - ./deploy/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./deploy/monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    networks: [public]
+    depends_on: [prometheus]
+    restart: unless-stopped
+
 networks:
   public: {}
   internal:
@@ -100,3 +141,5 @@ volumes:
   tutor-data:
   db-data:
   caddy-data:
+  prometheus-data:
+  grafana-data:
