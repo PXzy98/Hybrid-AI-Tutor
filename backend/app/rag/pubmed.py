@@ -6,10 +6,11 @@ Articles are candidates, not verified clinical evidence.
 """
 import os
 import re
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # types only; parsing goes through defusedxml
 from dataclasses import asdict, dataclass
 
 import httpx
+from defusedxml import ElementTree as SafeET
 
 _BASE = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
 _TOPIC_TERMS = {
@@ -45,7 +46,7 @@ def _text(element: ET.Element | None) -> str:
 
 
 def _parse_articles(xml: bytes, allowed_pmids: set[str]) -> list[PubMedCandidate]:
-    root = ET.fromstring(xml)
+    root = SafeET.fromstring(xml)  # refuses entity expansion and external entities (bandit B314)
     result = []
     for node in root.findall(".//PubmedArticle"):
         pmid = _text(node.find("./MedlineCitation/PMID"))

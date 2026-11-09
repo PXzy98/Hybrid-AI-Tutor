@@ -53,3 +53,20 @@ def test_explicit_completed_clean_scan_allows_fictional_index(tmp_path):
     rag = IndexedCourseRetriever(tmp_path, scan=cb)
     assert rag.rebuild(101) == 1
     assert rag.retrieve(101, None, "Quartzzyme", 4)
+
+
+def test_names_and_contacts_do_not_block_but_student_data_does():
+    # course material names its instructor and cites authors; a student number in it is student data
+    def scan(findings):
+        result = ScanResult(scanned=True, findings=findings)
+        return privacy_scan_callback(privacy_profile("general"), scanner=lambda text, profile: result)
+
+    assert scan((ScanFinding("PERSON", 3), ScanFinding("EMAIL_ADDRESS", 1)))("lecture notes") is True
+    assert scan((ScanFinding("PERSON", 3), ScanFinding("GRADE", 1)))("marks sheet") is False
+    assert scan((ScanFinding("SECRET", 1),))("lab config") is False
+
+
+def test_real_scanning_accepts_lecture_notes_that_name_the_instructor():
+    accepted = privacy_scan_callback(privacy_profile("general"))
+    assert accepted("Lecture 3 by Prof. Marie Dubois. Office hours: Monday 2 pm, room 401.") is True
+    assert accepted("Results: student 300418277 scored 87% on the midterm.") is False

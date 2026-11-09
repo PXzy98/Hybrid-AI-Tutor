@@ -2266,26 +2266,6 @@
   },
   "results": [
     {
-      "code": "47 def _parse_articles(xml: bytes, allowed_pmids: set[str]) -> list[PubMedCandidate]:\n48     root = ET.fromstring(xml)\n49     result = []\n",
-      "col_offset": 11,
-      "end_col_offset": 29,
-      "filename": "app/rag/pubmed.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 20,
-        "link": "https://cwe.mitre.org/data/definitions/20.html"
-      },
-      "issue_severity": "MEDIUM",
-      "issue_text": "Using xml.etree.ElementTree.fromstring to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree.fromstring with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called",
-      "line_number": 48,
-      "line_range": [
-        48
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b313-b320-xml-bad-elementtree",
-      "test_id": "B314",
-      "test_name": "blacklist"
-    },
-    {
       "code": "26     # lookups by downstream libraries during student requests.\n27     return snapshot_download(repo_id=name, cache_dir=cache_dir, local_files_only=True)\n28 \n",
       "col_offset": 11,
       "end_col_offset": 86,
