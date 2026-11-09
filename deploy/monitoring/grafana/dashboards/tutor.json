@@ -127,7 +127,7 @@
     {
       "id": 5,
       "type": "timeseries",
-      "title": "Settings version per process",
+      "title": "Settings version per process (api and worker)",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -147,8 +147,8 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "tutor_component_version",
-          "legendFormat": ""
+          "expr": "tutor_process_component_version",
+          "legendFormat": "{{kind}} {{process}}"
         }
       ]
     },

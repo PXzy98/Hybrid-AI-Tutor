@@ -27,6 +27,10 @@ LATENCY = Histogram("tutor_http_request_duration_seconds", "HTTP request duratio
 COMPONENT_VERSION = Gauge("tutor_component_version", "System settings version the component set runs",
                           registry=REGISTRY)
 CONTENT_VERSION = Gauge("tutor_content_version", "Content version of the served course", registry=REGISTRY)
+# every live api and worker process from process_status (their heartbeats): the worker serves no /metrics of
+# its own, so this is how an alert sees a process left on another settings version (course-structure.md 6.5)
+PROCESS_VERSION = Gauge("tutor_process_component_version", "Settings version each live process runs",
+                        ["process", "kind"], registry=REGISTRY)
 
 
 def _route(scope) -> str:
@@ -85,4 +89,24 @@ def metrics(request: Request) -> Response:
         manager = services.component_manager
         if manager is not None and manager.content_version is not None:
             CONTENT_VERSION.set(manager.content_version)
+        _process_versions(services)
     return Response(generate_latest(REGISTRY), media_type=CONTENT_TYPE_LATEST)
+
+
+def _process_versions(services) -> None:
+    """The settings version of every process with a recent heartbeat (3 x poll, as the apply check uses)."""
+    from datetime import timedelta
+
+    from sqlmodel import Session, select
+
+    from app.storage.models import ProcessStatus, utcnow
+
+    since = utcnow() - timedelta(seconds=3 * services.settings.limits.settings.poll_seconds)
+    try:
+        with Session(services.engine) as db:
+            rows = db.exec(select(ProcessStatus).where(ProcessStatus.last_seen >= since)).all()
+    except Exception:  # noqa: BLE001 - the metrics page must answer even when the database does not
+        return
+    PROCESS_VERSION.clear()  # processes that stopped drop out
+    for row in rows:
+        PROCESS_VERSION.labels(row.process_id, row.kind).set(row.component_version)

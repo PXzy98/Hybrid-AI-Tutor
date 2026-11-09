@@ -65,3 +65,24 @@ def test_a_streamed_response_is_timed_to_its_last_byte():
     assert TestClient(app).get("/test-stream").text.endswith("last event\n")
     took = REGISTRY.get_sample_value("tutor_http_request_duration_seconds_sum", labels) - before
     assert took >= 0.3
+
+
+def test_every_live_process_reports_its_settings_version(make_client):
+    """Review of #58: the worker has no /metrics; the api exports every live process from process_status."""
+    from datetime import timedelta
+
+    from sqlmodel import Session
+
+    from app.storage.models import ProcessStatus, utcnow
+
+    with make_client() as client:
+        engine = client.app.state.services.engine
+        with Session(engine) as db:
+            db.add(ProcessStatus(process_id="worker-host-1", kind="worker", component_version=3))
+            db.add(ProcessStatus(process_id="api-gone", kind="api", component_version=1,
+                                 last_seen=utcnow() - timedelta(hours=1)))  # stopped long ago
+            db.commit()
+        body = client.get("/metrics").text
+        assert 'tutor_process_component_version{kind="worker",process="worker-host-1"} 3.0' in body
+        assert 'process="api-gone"' not in body
+        assert 'tutor_process_component_version{kind="api"' in body  # this api process itself

@@ -32,6 +32,7 @@ def run(stop: threading.Event | None = None) -> None:
     services = build_services()
     manager = services.component_manager
     manager.process_id = "worker-" + manager.process_id
+    manager.kind = "worker"
     poll = services.settings.limits.settings.poll_seconds
     log.info("worker started (%s)", manager.process_id)
     from app.platform import jobs

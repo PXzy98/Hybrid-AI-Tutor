@@ -39,6 +39,7 @@ outside. A Prometheus container in the stack scrapes `http://api:8000/metrics`:
 | `tutor_http_request_duration_seconds` | `method`, `route` | request duration histogram |
 | `tutor_component_version` | none | system settings version the process runs (course-structure.md 6.5) |
 | `tutor_content_version` | none | content version of the served course |
+| `tutor_process_component_version` | `process`, `kind` | settings version of every live api and worker process (from their heartbeats; the worker has no `/metrics` of its own) |
 
 Values are per process; with several uvicorn workers, scrape each one or sum them. Prometheus, alerts and
 Grafana: the next section.
@@ -71,7 +72,7 @@ ssh -L 3000:127.0.0.1:3000 <host>    # then open http://localhost:3000 (user adm
 |---|---|
 | `prometheus.yml` | scrapes `api:8000/metrics` every 15 s; vLLM from `targets/vllm.yml` |
 | `targets/vllm.yml` | the vLLM server(s) as `host:port` (empty until the test host exists; reloaded by itself) |
-| `alerts.yml` | api down, more than 5% server errors, 95th percentile above a minute, more than 50 failed logins in 10 minutes, processes on different settings versions, vLLM down, more than 10 requests waiting for vLLM |
+| `alerts.yml` | api down, more than 5% server errors, 95th percentile above a minute, more than 50 failed logins in 10 minutes, live processes (api and worker) on different settings versions, vLLM down, more than 10 requests waiting for vLLM |
 | `alertmanager.yml` | no receiver yet: alerts show in Alertmanager and Prometheus; add e-mail or Teams there once chosen |
 | `grafana/` | the Prometheus data source and the "Tutor overview" dashboard (requests, errors, durations, failed logins and limits, settings versions, vLLM queue and tokens) |
 

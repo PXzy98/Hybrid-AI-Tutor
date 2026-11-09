@@ -31,8 +31,9 @@ groups:
         annotations:
           summary: "More than 50 failed logins in 10 minutes (password guessing?)"
       - alert: TutorSettingsNotApplied
-        # every process runs the same system settings version once a change is applied (course-structure.md 6.5)
-        expr: max(tutor_component_version) != min(tutor_component_version)
+        # every live process (api and worker, from their heartbeats) runs the same settings version once a change
+        # is applied (course-structure.md 6.5)
+        expr: max(tutor_process_component_version) != min(tutor_process_component_version)
         for: 10m
         labels: {severity: warning}
         annotations:

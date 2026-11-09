@@ -104,6 +104,7 @@ class ComponentManager:
         self.base = base
         limits = base.limits.settings
         self.poll_s, self.timeout_s = limits.poll_seconds, limits.apply_timeout_seconds
+        self.kind = "api"  # api | worker (process_status.kind; the worker sets it)
         self.process_id = f"{socket.gethostname()}-{os.getpid()}-{uuid.uuid4().hex[:6]}"
         self.error: str | None = None
         self._stop = threading.Event()
@@ -186,7 +187,7 @@ class ComponentManager:
     def _heartbeat(self) -> None:
         with Session(self.services.engine) as db:
             row = db.get(ProcessStatus, self.process_id) or ProcessStatus(process_id=self.process_id)
-            row.last_seen, row.error = utcnow(), self.error
+            row.last_seen, row.error, row.kind = utcnow(), self.error, self.kind
             row.component_version = self.services.components.version
             db.add(row)
             db.commit()
