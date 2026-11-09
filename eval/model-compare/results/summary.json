@@ -1,0 +1,4083 @@
+{
+  "mcq": [
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "basic",
+      "id": "AST.1-q1",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.68,
+      "cost": 2.756e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "basic",
+      "id": "AST.1-q1",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.41,
+      "cost": 1.2506e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "basic",
+      "id": "AST.1-q1",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.32,
+      "cost": 3.198e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "basic",
+      "id": "AST.1-q1",
+      "choice": "B",
+      "correct": true,
+      "seconds": 1.08,
+      "cost": 0.0001215,
+      "completion_tokens": 1
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "AST.1-q2",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.22,
+      "cost": 2.652e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "AST.1-q2",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.44,
+      "cost": 6.44e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "AST.1-q2",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.27,
+      "cost": 3.094e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "AST.1-q2",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.44,
+      "cost": 0.00017134,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "advanced",
+      "id": "AST.1-q3",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.34,
+      "cost": 3.276e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "advanced",
+      "id": "AST.1-q3",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.25,
+      "cost": 1.3962e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "advanced",
+      "id": "AST.1-q3",
+      "choice": "D",
+      "correct": true,
+      "seconds": 1.55,
+      "cost": 3.753e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "advanced",
+      "id": "AST.1-q3",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.41,
+      "cost": 0.00014404,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "basic",
+      "id": "AST.2-q1",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.42,
+      "cost": 3.146e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "basic",
+      "id": "AST.2-q1",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.7,
+      "cost": 1.6432e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "basic",
+      "id": "AST.2-q1",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.29,
+      "cost": 3.588e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "basic",
+      "id": "AST.2-q1",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.45,
+      "cost": 0.00016874,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "AST.2-q2",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.47,
+      "cost": 1.07e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "AST.2-q2",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.55,
+      "cost": 4.82e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "AST.2-q2",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.45,
+      "cost": 3.224e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "AST.2-q2",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.32,
+      "cost": 0.00012974,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "advanced",
+      "id": "AST.2-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.53,
+      "cost": 1.16e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "advanced",
+      "id": "AST.2-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.34,
+      "cost": 1.6562e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "advanced",
+      "id": "AST.2-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.55,
+      "cost": 3.458e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "advanced",
+      "id": "AST.2-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 1.49,
+      "cost": 0.000195,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "basic",
+      "id": "AST.3-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.4,
+      "cost": 1.1e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "basic",
+      "id": "AST.3-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.55,
+      "cost": 6.25e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "basic",
+      "id": "AST.3-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 1.52,
+      "cost": 2.825e-05,
+      "completion_tokens": 1
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "basic",
+      "id": "AST.3-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.33,
+      "cost": 0.00016692,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "AST.3-q2",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.27,
+      "cost": 9.22e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "AST.3-q2",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.27,
+      "cost": 1.521e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "AST.3-q2",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.29,
+      "cost": 3.432e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "AST.3-q2",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.34,
+      "cost": 0.00015652,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "advanced",
+      "id": "AST.3-q3",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.46,
+      "cost": 1.14e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "advanced",
+      "id": "AST.3-q3",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.24,
+      "cost": 1.287e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "advanced",
+      "id": "AST.3-q3",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.28,
+      "cost": 3.406e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "advanced",
+      "id": "AST.3-q3",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.66,
+      "cost": 9.75e-05,
+      "completion_tokens": 1
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "basic",
+      "id": "AST.4-q1",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.27,
+      "cost": 1.27e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "basic",
+      "id": "AST.4-q1",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.37,
+      "cost": 5.93e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "basic",
+      "id": "AST.4-q1",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.61,
+      "cost": 2.535e-05,
+      "completion_tokens": 1
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "basic",
+      "id": "AST.4-q1",
+      "choice": "C",
+      "correct": true,
+      "seconds": 1.29,
+      "cost": 0.00015808,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "AST.4-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.31,
+      "cost": 8.66e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "AST.4-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.64,
+      "cost": 2.034e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "AST.4-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.44,
+      "cost": 3.25e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "AST.4-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.32,
+      "cost": 7.046e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "advanced",
+      "id": "AST.4-q3",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.34,
+      "cost": 3.276e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "advanced",
+      "id": "AST.4-q3",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.34,
+      "cost": 3.276e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "advanced",
+      "id": "AST.4-q3",
+      "choice": "A",
+      "correct": true,
+      "seconds": 1.82,
+      "cost": 4.17e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "advanced",
+      "id": "AST.4-q3",
+      "choice": "A",
+      "correct": true,
+      "seconds": 1.82,
+      "cost": 4.17e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "basic",
+      "id": "AST.5-q1",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.51,
+      "cost": 3.094e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "basic",
+      "id": "AST.5-q1",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.46,
+      "cost": 6.07e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "basic",
+      "id": "AST.5-q1",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.35,
+      "cost": 3.536e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "basic",
+      "id": "AST.5-q1",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.35,
+      "cost": 0.00016224,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "AST.5-q2",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.56,
+      "cost": 2.99e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "AST.5-q2",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.32,
+      "cost": 1.6692e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "AST.5-q2",
+      "choice": "C",
+      "correct": true,
+      "seconds": 1.12,
+      "cost": 3.84e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "AST.5-q2",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.89,
+      "cost": 0.00017134,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "advanced",
+      "id": "AST.5-q3",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.14,
+      "cost": 2.311e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "advanced",
+      "id": "AST.5-q3",
+      "choice": "D",
+      "correct": true,
+      "seconds": 1.03,
+      "cost": 5.058e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "advanced",
+      "id": "AST.5-q3",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.23,
+      "cost": 3.978e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "advanced",
+      "id": "AST.5-q3",
+      "choice": "D",
+      "correct": true,
+      "seconds": 1.1,
+      "cost": 0.00015925,
+      "completion_tokens": 1
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "basic",
+      "id": "HBP.1-q1",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.33,
+      "cost": 3.432e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "basic",
+      "id": "HBP.1-q1",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.48,
+      "cost": 1.3078e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "basic",
+      "id": "HBP.1-q1",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.32,
+      "cost": 3.874e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "basic",
+      "id": "HBP.1-q1",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.46,
+      "cost": 0.0001352,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "basic",
+      "id": "HBP.1-q2",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.38,
+      "cost": 1.19e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "basic",
+      "id": "HBP.1-q2",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.41,
+      "cost": 5.84e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "basic",
+      "id": "HBP.1-q2",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.29,
+      "cost": 3.536e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "basic",
+      "id": "HBP.1-q2",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.32,
+      "cost": 0.00015626,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "HBP.1-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.31,
+      "cost": 1.17e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "HBP.1-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.45,
+      "cost": 5.52e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "HBP.1-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.29,
+      "cost": 3.432e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "HBP.1-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 1.03,
+      "cost": 0.00013925,
+      "completion_tokens": 1
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "advanced",
+      "id": "HBP.1-q4",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.53,
+      "cost": 4.03e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "advanced",
+      "id": "HBP.1-q4",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.37,
+      "cost": 1.4768e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "advanced",
+      "id": "HBP.1-q4",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.4,
+      "cost": 4.472e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "advanced",
+      "id": "HBP.1-q4",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.37,
+      "cost": 0.0001521,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "basic",
+      "id": "HBP.2-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.55,
+      "cost": 1.05e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "basic",
+      "id": "HBP.2-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 1.15,
+      "cost": 4.762e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "basic",
+      "id": "HBP.2-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.32,
+      "cost": 3.172e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "basic",
+      "id": "HBP.2-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.33,
+      "cost": 0.00015912,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "basic",
+      "id": "HBP.2-q2",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.4,
+      "cost": 3.354e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "basic",
+      "id": "HBP.2-q2",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.3,
+      "cost": 1.3e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "basic",
+      "id": "HBP.2-q2",
+      "choice": "B",
+      "correct": true,
+      "seconds": 1.01,
+      "cost": 3.35e-05,
+      "completion_tokens": 1
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "basic",
+      "id": "HBP.2-q2",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.42,
+      "cost": 0.00013442,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "HBP.2-q3",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.45,
+      "cost": 3.536e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "HBP.2-q3",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.26,
+      "cost": 1.6276e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "HBP.2-q3",
+      "choice": "A",
+      "correct": true,
+      "seconds": 1.8,
+      "cost": 3.525e-05,
+      "completion_tokens": 1
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "HBP.2-q3",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.32,
+      "cost": 0.00016718,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "advanced",
+      "id": "HBP.2-q4",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.71,
+      "cost": 3.692e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "advanced",
+      "id": "HBP.2-q4",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.33,
+      "cost": 6.2e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "advanced",
+      "id": "HBP.2-q4",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.31,
+      "cost": 4.134e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "advanced",
+      "id": "HBP.2-q4",
+      "choice": "C",
+      "correct": true,
+      "seconds": 1.08,
+      "cost": 0.00015575,
+      "completion_tokens": 1
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "basic",
+      "id": "HBP.3-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.59,
+      "cost": 2.756e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "basic",
+      "id": "HBP.3-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.24,
+      "cost": 9.145e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "basic",
+      "id": "HBP.3-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.39,
+      "cost": 3.198e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "basic",
+      "id": "HBP.3-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.44,
+      "cost": 0.0001443,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "basic",
+      "id": "HBP.3-q2",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.24,
+      "cost": 3.25e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "basic",
+      "id": "HBP.3-q2",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.21,
+      "cost": 1.4482e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "basic",
+      "id": "HBP.3-q2",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.32,
+      "cost": 3.692e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "basic",
+      "id": "HBP.3-q2",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.33,
+      "cost": 0.00014924,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "HBP.3-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.36,
+      "cost": 1.12e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "HBP.3-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.51,
+      "cost": 1.4092e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "HBP.3-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.51,
+      "cost": 2.2425e-05,
+      "completion_tokens": 1
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "HBP.3-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 1.55,
+      "cost": 0.00013675,
+      "completion_tokens": 1
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "advanced",
+      "id": "HBP.3-q4",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.34,
+      "cost": 1.52e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "advanced",
+      "id": "HBP.3-q4",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.36,
+      "cost": 6.5e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "advanced",
+      "id": "HBP.3-q4",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.83,
+      "cost": 4.394e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "advanced",
+      "id": "HBP.3-q4",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.9,
+      "cost": 0.00017342,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "basic",
+      "id": "HBP.4-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.34,
+      "cost": 2.756e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "basic",
+      "id": "HBP.4-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.32,
+      "cost": 1.339e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "basic",
+      "id": "HBP.4-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.32,
+      "cost": 3.198e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "basic",
+      "id": "HBP.4-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.66,
+      "cost": 0.0001014,
+      "completion_tokens": 1
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "HBP.4-q2",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.35,
+      "cost": 3.094e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "HBP.4-q2",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.28,
+      "cost": 1.4326e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "HBP.4-q2",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.36,
+      "cost": 3.536e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "HBP.4-q2",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.81,
+      "cost": 0.00010842,
+      "completion_tokens": 1
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "HBP.4-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.5,
+      "cost": 1.002e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "HBP.4-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.3,
+      "cost": 1.599e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "HBP.4-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.88,
+      "cost": 3.726e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "HBP.4-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 1.09,
+      "cost": 0.000155,
+      "completion_tokens": 1
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "advanced",
+      "id": "HBP.4-q4",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.48,
+      "cost": 3.224e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "advanced",
+      "id": "HBP.4-q4",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.43,
+      "cost": 6.24e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "advanced",
+      "id": "HBP.4-q4",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.32,
+      "cost": 3.666e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "advanced",
+      "id": "HBP.4-q4",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.75,
+      "cost": 0.000122265,
+      "completion_tokens": 1
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "basic",
+      "id": "HBP.5-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.37,
+      "cost": 9.8e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "basic",
+      "id": "HBP.5-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.22,
+      "cost": 1.5444e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "basic",
+      "id": "HBP.5-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.38,
+      "cost": 2.938e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "basic",
+      "id": "HBP.5-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.34,
+      "cost": 0.00015886,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "HBP.5-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.2,
+      "cost": 2.782e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "HBP.5-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.27,
+      "cost": 9.256e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "HBP.5-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.25,
+      "cost": 3.224e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "HBP.5-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.28,
+      "cost": 9.698e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "HBP.5-q3",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.33,
+      "cost": 1.31e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "HBP.5-q3",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.27,
+      "cost": 1.6146e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "HBP.5-q3",
+      "choice": "B",
+      "correct": true,
+      "seconds": 1.43,
+      "cost": 3.848e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "HBP.5-q3",
+      "choice": "B",
+      "correct": true,
+      "seconds": 1.13,
+      "cost": 0.00017118,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "advanced",
+      "id": "HBP.5-q4",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.18,
+      "cost": 2.226e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "advanced",
+      "id": "HBP.5-q4",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.29,
+      "cost": 1.8238e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "advanced",
+      "id": "HBP.5-q4",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.29,
+      "cost": 3.848e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "advanced",
+      "id": "HBP.5-q4",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.72,
+      "cost": 0.00016796,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "basic",
+      "id": "HBP.6-q1",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.27,
+      "cost": 3.767e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "basic",
+      "id": "HBP.6-q1",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.22,
+      "cost": 1.4612e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "basic",
+      "id": "HBP.6-q1",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.32,
+      "cost": 3.822e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "basic",
+      "id": "HBP.6-q1",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.34,
+      "cost": 0.00015054,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "HBP.6-q2",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.5,
+      "cost": 3.458e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "HBP.6-q2",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.38,
+      "cost": 1.8296e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "HBP.6-q2",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.34,
+      "cost": 3.9e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "HBP.6-q2",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.35,
+      "cost": 0.00016848,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "HBP.6-q3",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.37,
+      "cost": 3.68e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "HBP.6-q3",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.2,
+      "cost": 1.3156e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "HBP.6-q3",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.28,
+      "cost": 3.744e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "HBP.6-q3",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.36,
+      "cost": 0.00013598,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "advanced",
+      "id": "HBP.6-q4",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.23,
+      "cost": 4.318e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "advanced",
+      "id": "HBP.6-q4",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.38,
+      "cost": 1.6822e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "advanced",
+      "id": "HBP.6-q4",
+      "choice": "A",
+      "correct": true,
+      "seconds": 1.14,
+      "cost": 3.85e-05,
+      "completion_tokens": 1
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "advanced",
+      "id": "HBP.6-q4",
+      "choice": "A",
+      "correct": true,
+      "seconds": 1.03,
+      "cost": 0.000163,
+      "completion_tokens": 1
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "basic",
+      "id": "MIG.1-q1",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.29,
+      "cost": 3.477e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "basic",
+      "id": "MIG.1-q1",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.36,
+      "cost": 1.7004e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "basic",
+      "id": "MIG.1-q1",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.52,
+      "cost": 2.4375e-05,
+      "completion_tokens": 1
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "basic",
+      "id": "MIG.1-q1",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.34,
+      "cost": 0.00017446,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "MIG.1-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.31,
+      "cost": 3.25e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "MIG.1-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.29,
+      "cost": 5.81e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "MIG.1-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.56,
+      "cost": 2.535e-05,
+      "completion_tokens": 1
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "MIG.1-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.32,
+      "cost": 0.00015496,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "advanced",
+      "id": "MIG.1-q3",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.29,
+      "cost": 3.912e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "advanced",
+      "id": "MIG.1-q3",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.37,
+      "cost": 6.04e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "advanced",
+      "id": "MIG.1-q3",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.28,
+      "cost": 3.952e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "advanced",
+      "id": "MIG.1-q3",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.73,
+      "cost": 0.00016094,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "basic",
+      "id": "MIG.2-q1",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.33,
+      "cost": 2.886e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "basic",
+      "id": "MIG.2-q1",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.33,
+      "cost": 6.47e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "basic",
+      "id": "MIG.2-q1",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.36,
+      "cost": 3.328e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "basic",
+      "id": "MIG.2-q1",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.94,
+      "cost": 0.00012675,
+      "completion_tokens": 1
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "MIG.2-q2",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.44,
+      "cost": 1.47e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "MIG.2-q2",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.4,
+      "cost": 6.12e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "MIG.2-q2",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.38,
+      "cost": 4.212e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "MIG.2-q2",
+      "choice": "C",
+      "correct": true,
+      "seconds": 2.52,
+      "cost": 0.00015425,
+      "completion_tokens": 1
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "advanced",
+      "id": "MIG.2-q3",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.31,
+      "cost": 1.35e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "advanced",
+      "id": "MIG.2-q3",
+      "choice": "D",
+      "correct": true,
+      "seconds": 2.44,
+      "cost": 1.7107e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "advanced",
+      "id": "MIG.2-q3",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.66,
+      "cost": 2.73e-05,
+      "completion_tokens": 1
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "advanced",
+      "id": "MIG.2-q3",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.46,
+      "cost": 0.00015782,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "basic",
+      "id": "MIG.3-q1",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.37,
+      "cost": 1.09e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "basic",
+      "id": "MIG.3-q1",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.39,
+      "cost": 1.1974e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "basic",
+      "id": "MIG.3-q1",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.69,
+      "cost": 2.184e-05,
+      "completion_tokens": 1
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "basic",
+      "id": "MIG.3-q1",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.33,
+      "cost": 0.0001118,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "MIG.3-q2",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.23,
+      "cost": 3.216e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "MIG.3-q2",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.47,
+      "cost": 6.45e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "MIG.3-q2",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.34,
+      "cost": 3.328e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "MIG.3-q2",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.35,
+      "cost": 0.00017212,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "advanced",
+      "id": "MIG.3-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.27,
+      "cost": 3.796e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "advanced",
+      "id": "MIG.3-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.34,
+      "cost": 1.2815e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "advanced",
+      "id": "MIG.3-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 1.05,
+      "cost": 3.4e-05,
+      "completion_tokens": 1
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "advanced",
+      "id": "MIG.3-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.71,
+      "cost": 8.7165e-05,
+      "completion_tokens": 1
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "basic",
+      "id": "MIG.4-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.47,
+      "cost": 1.17e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "basic",
+      "id": "MIG.4-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.29,
+      "cost": 1.4497e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "basic",
+      "id": "MIG.4-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.85,
+      "cost": 3.432e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "basic",
+      "id": "MIG.4-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.34,
+      "cost": 0.00013442,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "MIG.4-q2",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.28,
+      "cost": 3.216e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "MIG.4-q2",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.47,
+      "cost": 4.98e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "MIG.4-q2",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.97,
+      "cost": 3.328e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "MIG.4-q2",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.7,
+      "cost": 9.7695e-05,
+      "completion_tokens": 1
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "advanced",
+      "id": "MIG.4-q3",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.31,
+      "cost": 4.115e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "advanced",
+      "id": "MIG.4-q3",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.33,
+      "cost": 1.528e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "advanced",
+      "id": "MIG.4-q3",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.32,
+      "cost": 4.134e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "advanced",
+      "id": "MIG.4-q3",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.39,
+      "cost": 0.00014144,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "basic",
+      "id": "MIG.5-q1",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.3,
+      "cost": 3.361e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "basic",
+      "id": "MIG.5-q1",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.3,
+      "cost": 1.7571e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "basic",
+      "id": "MIG.5-q1",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.51,
+      "cost": 2.3595e-05,
+      "completion_tokens": 1
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "basic",
+      "id": "MIG.5-q1",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.45,
+      "cost": 0.00016198,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "MIG.5-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.47,
+      "cost": 1.22e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "MIG.5-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.34,
+      "cost": 1.7107e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "MIG.5-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.45,
+      "cost": 3.614e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "MIG.5-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.36,
+      "cost": 0.00015782,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "advanced",
+      "id": "MIG.5-q3",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.28,
+      "cost": 4.202e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "advanced",
+      "id": "MIG.5-q3",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.3,
+      "cost": 1.9775e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "advanced",
+      "id": "MIG.5-q3",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.33,
+      "cost": 4.212e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "advanced",
+      "id": "MIG.5-q3",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.74,
+      "cost": 0.000133965,
+      "completion_tokens": 1
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "basic",
+      "id": "PNE.1-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.25,
+      "cost": 2.723e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "basic",
+      "id": "PNE.1-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.49,
+      "cost": 1.4664e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "basic",
+      "id": "PNE.1-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.5,
+      "cost": 2.886e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "basic",
+      "id": "PNE.1-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.4,
+      "cost": 0.00015106,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "PNE.1-q2",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.32,
+      "cost": 3.042e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "PNE.1-q2",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.29,
+      "cost": 1.1829e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "PNE.1-q2",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.32,
+      "cost": 3.172e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "PNE.1-q2",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.37,
+      "cost": 0.0001105,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "advanced",
+      "id": "PNE.1-q3",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.28,
+      "cost": 3.796e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "advanced",
+      "id": "PNE.1-q3",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.21,
+      "cost": 1.3163e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "advanced",
+      "id": "PNE.1-q3",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.42,
+      "cost": 3.848e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "advanced",
+      "id": "PNE.1-q3",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.88,
+      "cost": 8.9505e-05,
+      "completion_tokens": 1
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "basic",
+      "id": "PNE.2-q1",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.3,
+      "cost": 3.274e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "basic",
+      "id": "PNE.2-q1",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.3,
+      "cost": 1.9108e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "basic",
+      "id": "PNE.2-q1",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.37,
+      "cost": 3.38e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "basic",
+      "id": "PNE.2-q1",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.44,
+      "cost": 0.00017576,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "PNE.2-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.35,
+      "cost": 8.82e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "PNE.2-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.38,
+      "cost": 6.27e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "PNE.2-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.31,
+      "cost": 3.302e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "PNE.2-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.47,
+      "cost": 0.00016692,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "advanced",
+      "id": "PNE.2-q3",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.36,
+      "cost": 1.29e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "advanced",
+      "id": "PNE.2-q3",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.65,
+      "cost": 5.46e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "advanced",
+      "id": "PNE.2-q3",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.39,
+      "cost": 3.744e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "advanced",
+      "id": "PNE.2-q3",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.38,
+      "cost": 0.00014586,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "basic",
+      "id": "PNE.3-q1",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.34,
+      "cost": 3.274e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "basic",
+      "id": "PNE.3-q1",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.55,
+      "cost": 5.45e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "basic",
+      "id": "PNE.3-q1",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.6,
+      "cost": 2.301e-05,
+      "completion_tokens": 1
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "basic",
+      "id": "PNE.3-q1",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.71,
+      "cost": 0.00010725,
+      "completion_tokens": 1
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "PNE.3-q2",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.3,
+      "cost": 3.129e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "PNE.3-q2",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.26,
+      "cost": 1.3366e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "PNE.3-q2",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.45,
+      "cost": 3.25e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "PNE.3-q2",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.35,
+      "cost": 0.00012428,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "advanced",
+      "id": "PNE.3-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.29,
+      "cost": 3.187e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "advanced",
+      "id": "PNE.3-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.72,
+      "cost": 4.738e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "advanced",
+      "id": "PNE.3-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.29,
+      "cost": 3.302e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "advanced",
+      "id": "PNE.3-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.68,
+      "cost": 0.000116415,
+      "completion_tokens": 1
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "basic",
+      "id": "PNE.4-q1",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.25,
+      "cost": 1.16e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "basic",
+      "id": "PNE.4-q1",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.52,
+      "cost": 1.6237e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "basic",
+      "id": "PNE.4-q1",
+      "choice": "A",
+      "correct": true,
+      "seconds": 1.06,
+      "cost": 3.025e-05,
+      "completion_tokens": 1
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "basic",
+      "id": "PNE.4-q1",
+      "choice": "A",
+      "correct": true,
+      "seconds": 4.06,
+      "cost": 0.00014125,
+      "completion_tokens": 1
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "PNE.4-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.33,
+      "cost": 2.926e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "PNE.4-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.48,
+      "cost": 6.03e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "PNE.4-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.39,
+      "cost": 3.068e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "PNE.4-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.33,
+      "cost": 0.0001612,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "advanced",
+      "id": "PNE.4-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.35,
+      "cost": 1.38e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "advanced",
+      "id": "PNE.4-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.5,
+      "cost": 1.9688e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "advanced",
+      "id": "PNE.4-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.34,
+      "cost": 3.978e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "advanced",
+      "id": "PNE.4-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 1.06,
+      "cost": 0.00018096,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "basic",
+      "id": "PNE.5-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.21,
+      "cost": 3.158e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "basic",
+      "id": "PNE.5-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.44,
+      "cost": 5.2e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "basic",
+      "id": "PNE.5-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.63,
+      "cost": 3.276e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "basic",
+      "id": "PNE.5-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.33,
+      "cost": 0.0001391,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "PNE.5-q2",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.32,
+      "cost": 3.361e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "PNE.5-q2",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.22,
+      "cost": 1.4526e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "PNE.5-q2",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.34,
+      "cost": 3.458e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "PNE.5-q2",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.31,
+      "cost": 0.00013468,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "advanced",
+      "id": "PNE.5-q3",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.3,
+      "cost": 1.24e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "advanced",
+      "id": "PNE.5-q3",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.24,
+      "cost": 1.296e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "advanced",
+      "id": "PNE.5-q3",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.23,
+      "cost": 3.666e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "advanced",
+      "id": "PNE.5-q3",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.39,
+      "cost": 0.00012064,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "basic",
+      "id": "T2D.1-q1",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.87,
+      "cost": 9.06e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "basic",
+      "id": "T2D.1-q1",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.29,
+      "cost": 1.5164e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "basic",
+      "id": "T2D.1-q1",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.24,
+      "cost": 3.38e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "basic",
+      "id": "T2D.1-q1",
+      "choice": "A",
+      "correct": true,
+      "seconds": 1.76,
+      "cost": 0.0001608,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "T2D.1-q2",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.31,
+      "cost": 1.648e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "T2D.1-q2",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.22,
+      "cost": 1.6266e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "T2D.1-q2",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.33,
+      "cost": 2.964e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "T2D.1-q2",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.67,
+      "cost": 0.00011037,
+      "completion_tokens": 1
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "advanced",
+      "id": "T2D.1-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.29,
+      "cost": 1.6e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "advanced",
+      "id": "T2D.1-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.29,
+      "cost": 2.0413e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "advanced",
+      "id": "T2D.1-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.31,
+      "cost": 4.55e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "advanced",
+      "id": "T2D.1-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.39,
+      "cost": 0.00018746,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "basic",
+      "id": "T2D.2-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.35,
+      "cost": 1.05e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "basic",
+      "id": "T2D.2-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.27,
+      "cost": 5.15e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "basic",
+      "id": "T2D.2-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.57,
+      "cost": 2.106e-05,
+      "completion_tokens": 1
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "basic",
+      "id": "T2D.2-q1",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.38,
+      "cost": 0.0001378,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "T2D.2-q2",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.14,
+      "cost": 1.869e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "T2D.2-q2",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.23,
+      "cost": 1.7078e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "T2D.2-q2",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.71,
+      "cost": 3.302e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "T2D.2-q2",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.36,
+      "cost": 0.00015756,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "advanced",
+      "id": "T2D.2-q3",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.27,
+      "cost": 4.144e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "advanced",
+      "id": "T2D.2-q3",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.36,
+      "cost": 1.9108e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "advanced",
+      "id": "T2D.2-q3",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.37,
+      "cost": 4.16e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "advanced",
+      "id": "T2D.2-q3",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.34,
+      "cost": 0.00017576,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "basic",
+      "id": "T2D.3-q1",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.47,
+      "cost": 3.506e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "basic",
+      "id": "T2D.3-q1",
+      "choice": "C",
+      "correct": true,
+      "seconds": 1.1,
+      "cost": 5.81e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "basic",
+      "id": "T2D.3-q1",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.64,
+      "cost": 2.457e-05,
+      "completion_tokens": 1
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "basic",
+      "id": "T2D.3-q1",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.37,
+      "cost": 0.00015548,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "T2D.3-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.34,
+      "cost": 1.41e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "T2D.3-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.14,
+      "cost": 0.0001127,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "T2D.3-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.24,
+      "cost": 4.056e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "T2D.3-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.35,
+      "cost": 0.0001768,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "advanced",
+      "id": "T2D.3-q3",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.42,
+      "cost": 1.34e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "advanced",
+      "id": "T2D.3-q3",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.37,
+      "cost": 5.81e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "advanced",
+      "id": "T2D.3-q3",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.57,
+      "cost": 2.6715e-05,
+      "completion_tokens": 1
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "advanced",
+      "id": "T2D.3-q3",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.38,
+      "cost": 0.00015548,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "basic",
+      "id": "T2D.4-q1",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.3,
+      "cost": 1.06e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "basic",
+      "id": "T2D.4-q1",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.57,
+      "cost": 1.8905e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "basic",
+      "id": "T2D.4-q1",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.38,
+      "cost": 3.198e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "basic",
+      "id": "T2D.4-q1",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.37,
+      "cost": 0.00017394,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "T2D.4-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.34,
+      "cost": 3.129e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "T2D.4-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.4,
+      "cost": 6.21e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "T2D.4-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 1.16,
+      "cost": 2.2035e-05,
+      "completion_tokens": 1
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "T2D.4-q2",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.33,
+      "cost": 0.00016536,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "advanced",
+      "id": "T2D.4-q3",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.26,
+      "cost": 3.477e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "advanced",
+      "id": "T2D.4-q3",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.26,
+      "cost": 3.477e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "advanced",
+      "id": "T2D.4-q3",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.31,
+      "cost": 3.562e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "advanced",
+      "id": "T2D.4-q3",
+      "choice": "D",
+      "correct": true,
+      "seconds": 0.31,
+      "cost": 3.562e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "basic",
+      "id": "T2D.5-q1",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.3,
+      "cost": 3.332e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "basic",
+      "id": "T2D.5-q1",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.35,
+      "cost": 1.9282e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "basic",
+      "id": "T2D.5-q1",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.29,
+      "cost": 3.432e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "basic",
+      "id": "T2D.5-q1",
+      "choice": "A",
+      "correct": true,
+      "seconds": 0.5,
+      "cost": 0.00017732,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "T2D.5-q2",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.26,
+      "cost": 3.216e-06,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "T2D.5-q2",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.39,
+      "cost": 1.905e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "intermediate",
+      "id": "T2D.5-q2",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.31,
+      "cost": 3.328e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "intermediate",
+      "id": "T2D.5-q2",
+      "choice": "B",
+      "correct": true,
+      "seconds": 0.27,
+      "cost": 0.00017524,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": false,
+      "level": "advanced",
+      "id": "T2D.5-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.41,
+      "cost": 1.41e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "9b",
+      "rag": true,
+      "level": "advanced",
+      "id": "T2D.5-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.27,
+      "cost": 1.7484e-05,
+      "completion_tokens": 2
+    },
+    {
+      "model": "27b",
+      "rag": false,
+      "level": "advanced",
+      "id": "T2D.5-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.55,
+      "cost": 2.808e-05,
+      "completion_tokens": 1
+    },
+    {
+      "model": "27b",
+      "rag": true,
+      "level": "advanced",
+      "id": "T2D.5-q3",
+      "choice": "C",
+      "correct": true,
+      "seconds": 0.26,
+      "cost": 0.0001612,
+      "completion_tokens": 2
+    }
+  ],
+  "judged": [
+    {
+      "query": "What do systolic and diastolic blood pressure mean?",
+      "topic": "high_blood_pressure",
+      "winner": "27b",
+      "verdicts": [
+        "27b",
+        "27b"
+      ],
+      "reason": "Both answers define systolic and diastolic pressure correctly and use the 120/80 example from the passages, but B stays focused on the question while A adds a slightly overstated claim that the two numbers 'provide a complete picture' of blood pressure status.",
+      "words": {
+        "9b": 104,
+        "27b": 99
+      },
+      "seconds": {
+        "9b": 1.1,
+        "27b": 2.26
+      },
+      "cost": 0.0075189770000000005
+    },
+    {
+      "query": "How is high blood pressure diagnosed over multiple visits?",
+      "topic": "high_blood_pressure",
+      "winner": "tie",
+      "verdicts": [
+        "27b",
+        "9b"
+      ],
+      "reason": "Both answers are accurate and grounded in the passages, but B better addresses the multi-visit question and ties the diagnostic thresholds to those visits, while A adds an inaccurate hypertensive-crisis detail ('180+/120+', where the passage says higher than 180 and/or higher than 120).",
+      "words": {
+        "9b": 108,
+        "27b": 96
+      },
+      "seconds": {
+        "9b": 1.25,
+        "27b": 2.18
+      },
+      "cost": 0.007407313999999999
+    },
+    {
+      "query": "What changes can help manage hypertension?",
+      "topic": "high_blood_pressure",
+      "winner": "tie",
+      "verdicts": [
+        "tie",
+        "tie"
+      ],
+      "reason": "Both answers accurately reflect the passages: lifestyle changes (heart-healthy eating, exercise), medication if needed, possibly more than one type, treating underlying causes, and working with a provider. Neither adds unsupported claims, and both are equally clear.",
+      "words": {
+        "9b": 102,
+        "27b": 104
+      },
+      "seconds": {
+        "9b": 1.02,
+        "27b": 2.31
+      },
+      "cost": 0.005632628
+    },
+    {
+      "query": "Why is high blood pressure dangerous over time?",
+      "topic": "high_blood_pressure",
+      "winner": "27b",
+      "verdicts": [
+        "27b",
+        "27b"
+      ],
+      "reason": "Both answers are correct and use the key passage, but B stays focused on why sustained high blood pressure is dangerous, while A adds tangential material on types and hypertensive crisis and claims 'regardless of the type' damage occurs, which the passages don't state.",
+      "words": {
+        "9b": 93,
+        "27b": 62
+      },
+      "seconds": {
+        "9b": 1.07,
+        "27b": 1.42
+      },
+      "cost": 0.0059193959999999995
+    },
+    {
+      "query": "What common allergens may trigger allergic asthma?",
+      "topic": "asthma",
+      "winner": "27b",
+      "verdicts": [
+        "27b",
+        "27b"
+      ],
+      "reason": "Answer B lists all five allergens from the passage, including pets, while Answer A omits pets and so gives an incomplete answer, though A's added diagnostic detail is accurate.",
+      "words": {
+        "9b": 101,
+        "27b": 62
+      },
+      "seconds": {
+        "9b": 1.15,
+        "27b": 1.66
+      },
+      "cost": 0.006222819
+    },
+    {
+      "query": "What are typical symptoms of asthma?",
+      "topic": "asthma",
+      "winner": "tie",
+      "verdicts": [
+        "27b",
+        "9b"
+      ],
+      "reason": "Both answers list the four symptoms correctly, but B stays closer to the question and the passages. A adds emergency-care and treatment details that were not asked for, and B's 'if not managed properly' is a small embellishment but minor.",
+      "words": {
+        "9b": 106,
+        "27b": 75
+      },
+      "seconds": {
+        "9b": 1.1,
+        "27b": 1.73
+      },
+      "cost": 0.0072761
+    },
+    {
+      "query": "How does a clinician test lung function for asthma?",
+      "topic": "asthma",
+      "winner": "tie",
+      "verdicts": [
+        "27b",
+        "9b"
+      ],
+      "reason": "Both answers are accurate and use the passages, but B states the spirometry-before-and-after-challenge point more precisely, mentions the physical exam and medical history, and is clearer to read with its bulleted list.",
+      "words": {
+        "9b": 110,
+        "27b": 102
+      },
+      "seconds": {
+        "9b": 1.11,
+        "27b": 2.1
+      },
+      "cost": 0.0068505499999999995
+    },
+    {
+      "query": "When does a severe asthma attack require emergency care?",
+      "topic": "asthma",
+      "winner": "tie",
+      "verdicts": [
+        "27b",
+        "tie"
+      ],
+      "reason": "Both correctly say emergency care is needed when quick-relief medicines do not work, but B stays closer to the passages, while A adds the unsupported claim that symptoms 'cannot be controlled with your standard treatment plan' and blurs the passage's wording.",
+      "words": {
+        "9b": 99,
+        "27b": 85
+      },
+      "seconds": {
+        "9b": 1.29,
+        "27b": 1.88
+      },
+      "cost": 0.007080360000000001
+    },
+    {
+      "query": "What are some environmental triggers for migraines?",
+      "topic": "migraine",
+      "winner": "tie",
+      "verdicts": [
+        "27b",
+        "9b"
+      ],
+      "reason": "Both correctly list lights, noises, smells, and weather changes, but A calls tobacco use an environmental factor, which is questionable, while B correctly separates it as a lifestyle trigger and covers the other passage triggers (caffeine, skipped meals, foods) accurately.",
+      "words": {
+        "9b": 97,
+        "27b": 94
+      },
+      "seconds": {
+        "9b": 1.15,
+        "27b": 1.93
+      },
+      "cost": 0.0073762
+    },
+    {
+      "query": "How can you feel in the postdrome after a migraine?",
+      "topic": "migraine",
+      "winner": "tie",
+      "verdicts": [
+        "27b",
+        "tie"
+      ],
+      "reason": "Both correctly give exhausted, weak, and confused, lasting up to a day, but B stays closer to the passages, while A adds the unsupported claim that the postdrome follows 'the headache and potentially the aura', and B's 'mental fog' is only a mild paraphrase of 'confused'.",
+      "words": {
+        "9b": 82,
+        "27b": 68
+      },
+      "seconds": {
+        "9b": 0.93,
+        "27b": 1.84
+      },
+      "cost": 0.00702451
+    },
+    {
+      "query": "What symptoms can accompany migraine attacks?",
+      "topic": "migraine",
+      "winner": "tie",
+      "verdicts": [
+        "27b",
+        "tie"
+      ],
+      "reason": "Both answers are accurate and use the passages, but B includes more of the passage details (fluid retention, migraine without headache, being touched) and is organized more clearly, while A adds the morning and timing information but omits those details.",
+      "words": {
+        "9b": 109,
+        "27b": 110
+      },
+      "seconds": {
+        "9b": 1.4,
+        "27b": 2.34
+      },
+      "cost": 0.007594086
+    },
+    {
+      "query": "What can help during a migraine attack without medicine?",
+      "topic": "migraine",
+      "winner": "27b",
+      "verdicts": [
+        "27b",
+        "27b"
+      ],
+      "reason": "The passages cover prevention rather than treatment during an attack, and B acknowledges this, while A stretches the passages by suggesting that avoiding movement relieves pain and that trigger-avoidance helps during an attack, neither of which the text states.",
+      "words": {
+        "9b": 123,
+        "27b": 118
+      },
+      "seconds": {
+        "9b": 1.28,
+        "27b": 2.4
+      },
+      "cost": 0.008725023
+    },
+    {
+      "query": "Which kinds of infection can cause pneumonia?",
+      "topic": "pneumonia",
+      "winner": "9b",
+      "verdicts": [
+        "9b",
+        "9b"
+      ],
+      "reason": "Both answers are accurate and use the passages well, but A states that bacterial pneumonia can occur independently or after a cold or flu, and it labels aspiration as a non-infectious cause that can lead to infection, which fits the passage better than B's brief note that viral infections can preced",
+      "words": {
+        "9b": 93,
+        "27b": 74
+      },
+      "seconds": {
+        "9b": 1.12,
+        "27b": 2.09
+      },
+      "cost": 0.007638022
+    },
+    {
+      "query": "What breathing symptoms can pneumonia cause?",
+      "topic": "pneumonia",
+      "winner": "tie",
+      "verdicts": [
+        "27b",
+        "9b"
+      ],
+      "reason": "Both correctly list cough with phlegm, shortness of breath, and chest pain when breathing, but B stays focused on the question and its extras are mostly accurate, while A adds off-topic diagnosis details and claims 'breathing difficulties can still occur' for older adults, which the passages do not ",
+      "words": {
+        "9b": 123,
+        "27b": 83
+      },
+      "seconds": {
+        "9b": 1.25,
+        "27b": 1.98
+      },
+      "cost": 0.008188721999999999
+    },
+    {
+      "query": "What is bacteremia, a complication of pneumonia?",
+      "topic": "pneumonia",
+      "winner": "27b",
+      "verdicts": [
+        "27b",
+        "27b"
+      ],
+      "reason": "Both answers define bacteremia correctly, but B stays focused on the question and ties it to hospital treatment, while A adds loosely relevant detail about treatment and a prevention claim the passages do not support.",
+      "words": {
+        "9b": 112,
+        "27b": 94
+      },
+      "seconds": {
+        "9b": 1.1,
+        "27b": 1.82
+      },
+      "cost": 0.007160605
+    },
+    {
+      "query": "What would a doctor listen to during a pneumonia exam?",
+      "topic": "pneumonia",
+      "winner": "27b",
+      "verdicts": [
+        "27b",
+        "27b"
+      ],
+      "reason": "Both correctly say the doctor listens to the lungs with a stethoscope, but B stays closer to the question and explains that fluid in the air sacs causes abnormal sounds; A adds treatment details that are off-topic and says the sounds determine the treatment, which the passages do not support.",
+      "words": {
+        "9b": 109,
+        "27b": 101
+      },
+      "seconds": {
+        "9b": 1.03,
+        "27b": 8.28
+      },
+      "cost": 0.007129654
+    },
+    {
+      "query": "What test measures average blood glucose over three months?",
+      "topic": "type2_diabetes",
+      "winner": "tie",
+      "verdicts": [
+        "tie",
+        "tie"
+      ],
+      "reason": "Both correctly identify the A1C test as measuring average blood glucose over 3 months and accurately contrast it with the FPG and RPG tests, using the passage in the same way and with similar clarity.",
+      "words": {
+        "9b": 83,
+        "27b": 63
+      },
+      "seconds": {
+        "9b": 1.24,
+        "27b": 1.42
+      },
+      "cost": 0.0065553420000000005
+    },
+    {
+      "query": "What are early signs of type 2 diabetes?",
+      "topic": "type2_diabetes",
+      "winner": "tie",
+      "verdicts": [
+        "27b",
+        "tie"
+      ],
+      "reason": "Both answers correctly list the passage's symptoms, but B stays closer to the passages and notes that high-risk people should be vigilant even if they feel fine, which fits the point that many people have no symptoms. A adds an unsupported claim that early detection helps manage the condition and th",
+      "words": {
+        "9b": 120,
+        "27b": 95
+      },
+      "seconds": {
+        "9b": 1.35,
+        "27b": 2.12
+      },
+      "cost": 0.007501566
+    },
+    {
+      "query": "How does family history affect type 2 diabetes risk?",
+      "topic": "type2_diabetes",
+      "winner": "9b",
+      "verdicts": [
+        "9b",
+        "9b"
+      ],
+      "reason": "Answer A stays within the passages and explicitly notes that the exact mechanism isn't detailed, while Answer B makes unsupported claims, such as that risk rises even without other risk factors and that genetics makes the body more susceptible to obesity and inactivity issues.",
+      "words": {
+        "9b": 121,
+        "27b": 113
+      },
+      "seconds": {
+        "9b": 1.13,
+        "27b": 7.42
+      },
+      "cost": 0.00796589
+    },
+    {
+      "query": "Does prediabetes increase the risk of type 2 diabetes?",
+      "topic": "type2_diabetes",
+      "winner": "tie",
+      "verdicts": [
+        "27b",
+        "9b"
+      ],
+      "reason": "Both answers correctly say yes and cite the passage, but B is more faithful to it, since it links prediabetes to the specific prevention steps (weight loss, fewer calories, more activity). A adds 'significantly,' which the passage does not support, and its prevention link is vaguer.",
+      "words": {
+        "9b": 91,
+        "27b": 92
+      },
+      "seconds": {
+        "9b": 0.92,
+        "27b": 1.83
+      },
+      "cost": 0.0074682590000000005
+    }
+  ],
+  "cost": 0.162379309
+}

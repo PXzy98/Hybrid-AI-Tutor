@@ -43,3 +43,6 @@ data/*.db-shm
 # ZIP handoff attachments (the branch bundle is not source)
 /handoff/
 /SHA256.json
+
+# course materials, indexes and exports (DATA_DIR, task Z12)
+/var/

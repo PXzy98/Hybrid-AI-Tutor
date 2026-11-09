@@ -1,6 +1,6 @@
 # Fully integrated version v3
 
-English version of [开始使用.md](开始使用.md). Two statements were updated on 19 Oct 2026 to match the current
+A Chinese version is in [docs/GETTING_STARTED_zh.md](docs/GETTING_STARTED_zh.md). Two statements were updated on 19 Oct 2026 to match the current
 code; they are marked *(updated)*.
 
 This project combines: the full instructor dashboard from the main branch, Siyun's real medical RAG, and our
