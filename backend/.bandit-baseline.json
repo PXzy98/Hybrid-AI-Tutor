@@ -2264,26 +2264,5 @@
       "skipped_tests": 0
     }
   },
-  "results": [
-    {
-      "code": "26     # lookups by downstream libraries during student requests.\n27     return snapshot_download(repo_id=name, cache_dir=cache_dir, local_files_only=True)\n28 \n",
-      "col_offset": 11,
-      "end_col_offset": 86,
-      "filename": "app/routing/models.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 494,
-        "link": "https://cwe.mitre.org/data/definitions/494.html"
-      },
-      "issue_severity": "MEDIUM",
-      "issue_text": "Unsafe Hugging Face Hub download without revision pinning in snapshot_download()",
-      "line_number": 27,
-      "line_range": [
-        27
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b615_huggingface_unsafe_download.html",
-      "test_id": "B615",
-      "test_name": "huggingface_unsafe_download"
-    }
-  ]
+  "results": []
 }
