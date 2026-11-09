@@ -39,9 +39,13 @@ RUN pip install torch --index-url https://download.pytorch.org/whl/cpu \
          [ "$i" = 5 ] && exit 1; sleep 20; \
        done
 
-# 2) routing encoder and evidence models into the Hugging Face cache (only the files the loaders use)
-RUN python -c "import sys; from sentence_transformers import CrossEncoder, SentenceTransformer; \
-SentenceTransformer(sys.argv[1], device='cpu'); [CrossEncoder(m, device='cpu') for m in sys.argv[2:]]" \
+# 2) routing encoder and evidence models into the Hugging Face cache (only the files the loaders use), at the
+#    commits pinned in app/routing/revisions.py (copied alone, so this layer stays cached until a pin changes)
+COPY backend/app/routing/revisions.py /tmp/revisions.py
+RUN python -c "import runpy, sys; from sentence_transformers import CrossEncoder, SentenceTransformer; \
+R = runpy.run_path('/tmp/revisions.py')['REVISIONS']; \
+SentenceTransformer(sys.argv[1], device='cpu', revision=R.get(sys.argv[1])); \
+[CrossEncoder(m, device='cpu', revision=R.get(m)) for m in sys.argv[2:]]" \
     "${EMBEDDING_MODEL}" "${RELEVANCE_MODEL}" "${ANSWERABILITY_MODEL}" \
     && chmod -R a+rX /opt/hf
 

@@ -12,6 +12,7 @@ from threading import RLock
 import numpy as np
 
 from app.core.config import REPO_ROOT, RoutingConfig
+from app.routing.revisions import REVISIONS
 
 MODEL_LOCK = RLock()
 HEADS = ("cloud_required", "requires_evidence", "requires_fresh_evidence")
@@ -23,8 +24,10 @@ def asset_path(name: str, cache_dir: str | None, local_only: bool) -> str:
     from huggingface_hub import snapshot_download
 
     # Passing a resolved local directory also prevents optional Hub metadata
-    # lookups by downstream libraries during student requests.
-    return snapshot_download(repo_id=name, cache_dir=cache_dir, local_files_only=True)
+    # lookups by downstream libraries during student requests. The pinned commit (revisions.py) is the one
+    # that was downloaded.
+    return snapshot_download(repo_id=name, cache_dir=cache_dir, local_files_only=True,
+                             revision=REVISIONS.get(name))
 
 
 def weights_path(cfg: RoutingConfig, method: str) -> Path:
@@ -46,6 +49,7 @@ def sentence_encoder(name: str, cache_dir: str | None, local_only: bool):
             device="cpu",
             local_files_only=local_only,
             trust_remote_code=False,
+            revision=REVISIONS.get(name),
         )
 
 
@@ -63,6 +67,7 @@ def pair_encoder(name: str, cache_dir: str | None, local_only: bool):
             cache_folder=cache_dir,
             local_files_only=local_only,
             trust_remote_code=False,
+            revision=REVISIONS.get(name),
         )
 
 
