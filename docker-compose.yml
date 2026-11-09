@@ -26,6 +26,8 @@ x-app: &app
     PGPASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
     # instructor uploads inside the named volume, whatever .env says
     RAG__MATERIALS_DIR: /app/var/topics
+    # course materials, indexes and exports in the same volume (course-structure.md 7)
+    DATA_DIR: /app/var
   depends_on:
     db:
       condition: service_healthy

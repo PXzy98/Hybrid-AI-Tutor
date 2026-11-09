@@ -40,6 +40,7 @@ class Services:
     gateway: Gateway | None = None  # the model gateway (task Z6)
     courses: CourseService | None = None  # courses, members, invitation codes (task Z9)
     usage: object | None = None  # the usage meter (task Z10; app.platform.usage)
+    course_retriever: object | None = None  # per-course index (S4; app.rag.course_retriever), read-only here
 
     # the current component set; one reference, swapped as a whole
     @property
@@ -116,6 +117,11 @@ def build_services(settings: Settings | None = None) -> Services:
     services.courses = CourseService(engine, services.accounts, settings.limits.accounts,
                                      lambda: settings_service.system_values()[0].get("enabled_course_types"),
                                      encryption_key=secret)  # invitation codes can be shown again
+    from app.rag.course_retriever import IndexedCourseRetriever
+
+    # retrieval from the published course indexes (index/current.json); no scanner here, so this object can
+    # never publish an index (rebuilds belong to the worker job with scan_document, S4/Z11)
+    services.course_retriever = IndexedCourseRetriever(settings.data_path())
     services.component_manager = ComponentManager(services, settings)
     services.components = services.component_manager.initial()
     return services

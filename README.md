@@ -1,12 +1,14 @@
 # Integrated main + RAG + semantic routing (v3)
 
-完整保留教师后台，合并真实医学 RAG 和 500 题 LR/SVM routing。
-Windows 首次运行请看 [开始使用.md](开始使用.md)（English: [GETTING_STARTED.md](GETTING_STARTED.md)），版本来源与限制见 [docs/history/INTEGRATION.md](docs/history/INTEGRATION.md)。
-安装：Python 3.12 运行 `setup_local.py`；启动：分别运行 `start_backend.ps1` 与 `start_frontend.ps1`。
+Keeps the full instructor dashboard and adds the real medical RAG and the LR/SVM routing trained on 500 questions.
+First run on Windows: [GETTING_STARTED.md](GETTING_STARTED.md) (Chinese version:
+[docs/GETTING_STARTED_zh.md](docs/GETTING_STARTED_zh.md)); version sources and limits:
+[docs/history/INTEGRATION.md](docs/history/INTEGRATION.md).
+Install: run `setup_local.py` with Python 3.12; start: run `start_backend.ps1` and `start_frontend.ps1`.
 
 ---
 
-以下为主分支原有项目说明：
+The original project description of the main branch follows:
 
 # Privacy-Aware Hybrid AI Tutor
 
@@ -100,7 +102,7 @@ CLOUD_API_KEY=...
 CLOUD_MODEL=deepseek-flash
 ```
 
-The cloud only receives the sanitized question, the topic, course passages and three coarse labels; a question with a personal health detail reaches the cloud only as a general question rewritten by the local model ("Can a person with asthma play soccer?"), and stays local if the rewrite fails its checks (`privacy.health_detail_policy: generalize`, approved by the professor; `local_only` keeps all such questions local). Without a key, or when the cloud fails, the local model answers and the student is told why. Reasoning models count their hidden reasoning against `llm.cloud.max_tokens` (2000). Check the provider's data location and retention with the client before a pilot (DeepSeek stores data in China): see [docs/history/隐私升级.md](docs/history/隐私升级.md).
+The cloud only receives the sanitized question, the topic, course passages and three coarse labels; a question with a personal health detail reaches the cloud only as a general question rewritten by the local model ("Can a person with asthma play soccer?"), and stays local if the rewrite fails its checks (`privacy.health_detail_policy: generalize`, approved by the professor; `local_only` keeps all such questions local). Without a key, or when the cloud fails, the local model answers and the student is told why. Reasoning models count their hidden reasoning against `llm.cloud.max_tokens` (2000). Check the provider's data location and retention with the client before a pilot (DeepSeek stores data in China): see [docs/history (privacy upgrade notes)](docs/history/%E9%9A%90%E7%A7%81%E5%8D%87%E7%BA%A7.md).
 
 Run the app in development mode (two terminals):
 
