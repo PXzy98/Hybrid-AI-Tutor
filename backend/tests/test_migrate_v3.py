@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 
 import pytest
-from sqlalchemy import create_engine
+from sqlalchemy import MetaData, Table, create_engine
 from sqlmodel import Session, SQLModel, select
 
 from app.storage.db import make_engine
@@ -27,7 +27,11 @@ def _script():
 def _v3_database(path: Path) -> Path:
     """A v3-shaped SQLite file with one fictional student, naive UTC timestamps as v3 wrote them."""
     engine = create_engine(f"sqlite:///{path.as_posix()}")
-    SQLModel.metadata.create_all(engine, tables=[SQLModel.metadata.tables[t] for t in V3_TABLES])
+    v3 = MetaData()  # v3 had no course: the learner tables come without course_id
+    for name in V3_TABLES:
+        table = SQLModel.metadata.tables[name]
+        Table(name, v3, *[c._copy() for c in table.columns if c.name != "course_id"])
+    v3.create_all(engine)
     when = datetime(2026, 10, 20, 12, 0, 0)  # naive, as SQLite returned it in v3
     with engine.begin() as conn:
         conn.execute(SQLModel.metadata.tables["account"].insert(), [
@@ -71,6 +75,7 @@ def test_v3_data_moves_into_the_demo_course_and_a_second_run_is_refused(tmp_path
             state = db.exec(select(LearnerKcState)).one()
             assert state.last_seen.tzinfo is not None and state.last_seen.hour == 12  # stored as UTC
             assert db.exec(select(EvidenceLog)).one().item_id == "HBP.1-q1"
+            assert state.course_id == course.id == db.exec(select(EvidenceLog)).one().course_id
             assert db.exec(select(RequestLog)).one().sanitized_question == "What is asthma?"
             db.add(Account(username="new.one", display_name="N", role="student", password_hash="x"))
             db.commit()  # the ID sequence continues after the copied IDs

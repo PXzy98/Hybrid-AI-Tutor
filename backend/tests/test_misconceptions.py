@@ -83,7 +83,7 @@ def test_only_ids_and_counts_are_stored(dev):
     api.services.learner.tracker.weak_signal(api.sid, "HBP.MC3")
     with Session(api.services.engine) as db:
         row = db.exec(select(LearnerMisconception)).one()
-    assert set(row.model_dump()) == {"id", "student_id", "misconception_id", "kc_id", "status",
+    assert set(row.model_dump()) == {"id", "student_id", "course_id", "misconception_id", "kc_id", "status",
                                      "evidence_count", "updated_at"}
 
 

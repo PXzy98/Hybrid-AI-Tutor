@@ -66,11 +66,11 @@ What Z did in other owners' areas (for their review): guide section 7.5.
 
 | Owner | Task | Why it matters |
 |---|---|---|
-| S | `course_id` on the learner tables + an interface to export and delete one course's learner data | needed by end of term and export (Z9) and the v2 ask endpoint |
+| S | API v2 endpoints for materials (S4), drafts (S6, S7), learner views (S9) and class insights (S10) | the modules are merged; nothing calls them yet |
 | T | `transformers` 5 together with Z | 6 pip-audit advisories ignored with reason |
 | T | `react-router` 7 (moderate advisory), `vite`/`vitest` (dev tools); `README.md`, `frontend/README.md` and `docs/DEMO.md` still describe SQLite | CI reports the advisories |
 | T | frontend for API v2 (T6, T7); a v2 client sends `X-CSRF-Token` | course management is API-only until then |
-| Z | v2 ask endpoint (pipeline per course, usage checks); end of term and export | after S's interface |
+| Z | v2 ask endpoint (pipeline per course, usage checks); end of term and export | learner data is per course since #60 (`app/learner/course_data.py`) |
 | Z | deploy on the test host with the monitoring profile, the vLLM load test, Z2 local speed | needs access to the test host and the vLLM server |
 | Z | choose the alert receiver (`deploy/monitoring/alertmanager.yml`) | alerts are only visible in Alertmanager until then |
 | Others | Lavin's second review of the 30 revised items; permission for the ELG 5902 materials | content |
