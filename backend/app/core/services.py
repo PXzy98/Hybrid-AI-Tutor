@@ -41,6 +41,7 @@ class Services:
     courses: CourseService | None = None  # courses, members, invitation codes (task Z9)
     usage: object | None = None  # the usage meter (task Z10; app.platform.usage)
     course_retriever: object | None = None  # per-course index (S4; app.rag.course_retriever), read-only here
+    course_scopes: object | None = None  # content, learner model and retriever per course (API v2 ask)
 
     # the current component set; one reference, swapped as a whole
     @property
@@ -110,6 +111,7 @@ def build_services(settings: Settings | None = None) -> Services:
     check_keys_readable(engine, secret)  # stored API keys need SETTINGS_ENCRYPTION_KEY (design 6.3)
     services.gateway = Gateway(services)
     services.accounts.default_course_id = content.course_id  # API v1 = the demo course
+    services.sessions.course_id = content.course_id  # its conversations belong to that course
     from app.platform import usage
 
     services.usage = usage.DbUsageMeter(engine, settings.limits.usage, settings_service.effective)
@@ -122,6 +124,9 @@ def build_services(settings: Settings | None = None) -> Services:
     # retrieval from the published course indexes (index/current.json); no scanner here, so this object can
     # never publish an index (rebuilds belong to the worker job with scan_document, S4/Z11)
     services.course_retriever = IndexedCourseRetriever(settings.data_path())
+    from app.platform.course_scope import CourseScopes
+
+    services.course_scopes = CourseScopes(services)
     services.component_manager = ComponentManager(services, settings)
     services.components = services.component_manager.initial()
     return services

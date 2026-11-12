@@ -39,7 +39,7 @@ class GenerateStep(BaseStep):
 
     def __init__(self, services) -> None:
         super().__init__(services)
-        self.leaks = CloudLeakGuard(PIIAnalyzer(services.settings.privacy), services.content)
+        self.leaks = CloudLeakGuard(PIIAnalyzer(services.settings.privacy), lambda: services.content)
 
     async def run(self, ctx: RequestContext) -> RequestContext:
         result = await self.produce(ctx)

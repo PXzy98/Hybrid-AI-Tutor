@@ -29,6 +29,7 @@ from typing import TYPE_CHECKING
 from sqlmodel import Session, select
 
 from app.core.config import Settings
+from app.platform import course_scope
 from app.storage.models import Course, ProcessStatus, utcnow
 
 if TYPE_CHECKING:
@@ -52,13 +53,19 @@ _COMPONENT_ATTRS = ("settings", "learner", "local_llm", "understand_llm")
 
 class BoundServices:
     """What the steps of one runner see: the component attributes of *their* set, everything else (engine,
-    retriever, cloud client, ...) read through to the shared Services object."""
+    retriever, cloud client, ...) read through to the shared Services object. Inside a course scope
+    (app.platform.course_scope, API v2) the content, learner model, retriever and conversations are the
+    request's course."""
 
     def __init__(self, services: "Services", components: Components) -> None:
         object.__setattr__(self, "_services", services)
         object.__setattr__(self, "components", components)
 
     def __getattr__(self, name: str):
+        if name in course_scope.SCOPED:
+            scope = course_scope.current()
+            if scope is not None:
+                return getattr(scope, name)
         if name in _COMPONENT_ATTRS:
             return getattr(self.components, name)
         return getattr(self._services, name)

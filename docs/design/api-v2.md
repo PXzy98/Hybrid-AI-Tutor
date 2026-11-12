@@ -119,6 +119,15 @@ logged in. Owner = component owner who implements it.
 | `DELETE /courses/{course_id}/me/learning-data` | S | S | delete own data in this course |
 | `POST /courses/{course_id}/survey` | S | S | optional rating |
 
+Notes on ask (implemented in `backend/app/api/v2/ask.py`):
+- the response is the v1 answer plus `conversation_id`; the stream sends `meta`, `progress`, `result` or
+  `error`, then `done`;
+- without `module_id` the question is about the course as a whole: retrieval searches the whole course and
+  no check item is attached;
+- 429 `usage_limit` when the student reached the question limit of the course; when only the daily cloud
+  limit is reached, the answer comes from the local model with a warning;
+- a `conversation_id` of another student or another course is 404.
+
 ### 3.6 Instructor views of learners (owner S)
 
 | Method and path | Who | Purpose |

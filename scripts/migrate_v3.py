@@ -12,7 +12,8 @@ course-structure.md section 11:
 6. course materials and the index are registered later (they need the privacy scanner of task Z11);
 7. the target must be empty: the script refuses to run on a database that already has accounts or courses.
 
-Login sessions are not copied (everyone logs in again). Learner rows get the new course's course_id.
+Login sessions are not copied (everyone logs in again). Learner rows, request logs and conversation turns
+get the new course's course_id.
 
 Run from the repository root, with DATABASE_URL / PGPASSWORD of the new database in .env:
     python scripts/migrate_v3.py --source data/app.db
@@ -39,7 +40,8 @@ COPIED = ["account", "learner_preference", "consent", "learner_kc_state", "learn
           "evidence_log", "learner_misconception", "request_log", "session_turn", "survey_response",
           "config_history"]
 
-LEARNER_COURSE_TABLES = ["learner_kc_state", "learner_topic_level", "evidence_log", "learner_misconception"]
+COURSE_TABLES = ["learner_kc_state", "learner_topic_level", "evidence_log", "learner_misconception",
+                 "request_log", "session_turn"]
 
 V4_ACCOUNT_STEPS = (  # the same steps as Alembic revision 0005 (course-structure.md 3.1 and 11)
     "UPDATE account SET email = username || '@demo.invalid' WHERE email IS NULL",
@@ -95,7 +97,7 @@ def migrate(source: Path, target_engine, *, seed_status: str | None = None) -> d
                     conn.execute(text(f"SELECT setval(pg_get_serial_sequence('\"{name}\"', 'id'), "
                                       f"(SELECT COALESCE(MAX(id), 1) FROM \"{name}\"))"))
             counts[name] = len(rows)
-        for name in LEARNER_COURSE_TABLES:  # step 4: v3 learner data belongs to the new course
+        for name in COURSE_TABLES:  # steps 4-5: v3 learner data and logs belong to the new course
             conn.execute(text(f'UPDATE "{name}" SET course_id = :course'), {"course": course.id})
         # v3 accounts: e-mail, password identity, demo-course membership; the v3 instructor is the admin
         for statement in V4_ACCOUNT_STEPS:
