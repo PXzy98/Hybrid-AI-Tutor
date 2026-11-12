@@ -100,6 +100,10 @@ def _learner_course() -> Column:
     return Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=True, index=True)
 
 
+# tables whose rows belong to one course and had no course_id before (assigned to the demo course)
+ROWS_OF_A_COURSE = ("learner_kc_state", "learner_topic_level", "evidence_log", "learner_misconception")
+
+
 class LearnerKcState(SQLModel, table=True):
     __tablename__ = "learner_kc_state"
 

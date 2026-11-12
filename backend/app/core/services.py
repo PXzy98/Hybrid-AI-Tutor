@@ -83,7 +83,24 @@ def load_demo_content(engine, settings: Settings) -> ContentStore:
 
     status = "active" if settings.content.seed_status == "active" else None
     course_id = ensure_demo_course(engine, load_yaml_topics(settings.content_dir()), status)
+    adopt_rows_without_course(engine, course_id)
     return load_course_content(engine, course_id)
+
+
+def adopt_rows_without_course(engine, course_id: int) -> None:
+    """Rows written before learner data had a course belong to the demo course (the one API v1 served).
+
+    The migration assigns them when the course exists; a database upgraded from before the course catalog
+    gets its demo course only at this start, after the migrations, so they are assigned here.
+    """
+    from sqlalchemy import text
+
+    from app.storage.models import ROWS_OF_A_COURSE
+
+    with engine.begin() as conn:
+        for table in ROWS_OF_A_COURSE:
+            conn.execute(text(f'UPDATE "{table}" SET course_id = :course WHERE course_id IS NULL'),
+                         {"course": course_id})
 
 
 def build_services(settings: Settings | None = None) -> Services:
