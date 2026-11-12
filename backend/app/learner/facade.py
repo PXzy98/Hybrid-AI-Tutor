@@ -40,10 +40,10 @@ class LearnerModel:
         return self.repo.consent(student_id) is True
 
     def set_consent(self, student_id: str, given: bool) -> None:
-        """Withdrawing consent also forgets the learning profile."""
+        """Withdrawing consent also forgets the learning profile, in every course (consent is global)."""
         self.repo.set_consent(student_id, given)
         if not given:
-            self.repo.reset(student_id)
+            self.repo.forget(student_id)
 
     # ------------------------------------------------------------------- context
     def context(self, student_id: str, topic: str, kc_ids: list[str] | None = None) -> LearnerContext:
@@ -165,9 +165,13 @@ class LearnerModel:
     def reset(self, student_id: str) -> None:
         self.repo.reset(student_id)
 
+    def delete_course_data(self, student_id: str) -> None:
+        """The student's data in this course only (course-structure.md 4.4)."""
+        self.repo.delete_course_data(student_id)
+
 
 def build_learner_model(settings: Settings, engine: Engine, content: ContentStore) -> LearnerModel:
-    repo = LearnerRepository(engine)
+    repo = LearnerRepository(engine, content.course_id)  # learner data is per course
     knowledge = load_knowledge_model(settings, repo, content)
     preferences = load_preference_model(settings, repo)
     recommender = Recommender(knowledge, content, settings)

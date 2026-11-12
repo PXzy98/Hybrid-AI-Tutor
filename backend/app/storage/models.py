@@ -93,12 +93,23 @@ class SessionTurn(SQLModel, table=True):
 
 
 # ---------------------------------------------------------------------- learner model (design §5, §9)
-# Keyed by student_id only. No free-text columns: evidence holds IDs, flags and numbers, never question text.
+# Keyed by student_id and course_id (course-structure.md 4.1); preferences and consent are global. No
+# free-text columns: evidence holds IDs, flags and numbers, never question text.
+def _learner_course() -> Column:
+    # NULL only in offline simulations that run on the YAML seed without a course row
+    return Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=True, index=True)
+
+
+# tables whose rows belong to one course and had no course_id before (assigned to the demo course)
+ROWS_OF_A_COURSE = ("learner_kc_state", "learner_topic_level", "evidence_log", "learner_misconception")
+
+
 class LearnerKcState(SQLModel, table=True):
     __tablename__ = "learner_kc_state"
 
     id: int | None = Field(default=None, primary_key=True)
     student_id: str = Field(index=True)
+    course_id: int | None = Field(default=None, sa_column=_learner_course())
     kc_id: str = Field(index=True)
     p_mastery: float
     level: str  # basic | intermediate | advanced (with hysteresis)
@@ -113,6 +124,7 @@ class LearnerTopicLevel(SQLModel, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     student_id: str = Field(index=True)
+    course_id: int | None = Field(default=None, sa_column=_learner_course())
     topic: str
     level: str
     updated_at: datetime = _ts(default_factory=utcnow)
@@ -135,6 +147,7 @@ class EvidenceLog(SQLModel, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     student_id: str = Field(index=True)
+    course_id: int | None = Field(default=None, sa_column=_learner_course())
     kc_id: str = Field(index=True)
     kind: str  # strong | weak | diagnostic
     source: str  # check | understand | onboarding
@@ -163,6 +176,7 @@ class LearnerMisconception(SQLModel, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     student_id: str = Field(index=True)
+    course_id: int | None = Field(default=None, sa_column=_learner_course())
     misconception_id: str = Field(index=True)
     kc_id: str
     status: str  # suspected | confirmed | resolved
