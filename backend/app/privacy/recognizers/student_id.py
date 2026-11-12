@@ -19,6 +19,24 @@ ID_CONTEXT_RE = re.compile(r"\b(?:id|i\.d\.|id number|student\s*(?:no\.?|num(?:b
 PREFIX_SPLIT_RE = re.compile(r"(?<![\d.,/-])3[ ./-]?0[ ./-]?0(?:[ ./-]?\d){6}(?!\d|[ ./]\d)")
 # a letter O typed for a zero: "3OO418277" (at most two)
 O_FOR_ZERO_RE = re.compile(r"(?<![\w.,/-])(?=(?:[^Oo\W]*[Oo]){1,2}[^Oo\W]*\b)[\dOo]{9}(?![\w]|[.,/-]\w)")
+# Not student numbers (found by scanning open course material): an ISBN, whose ten characters are nine digits
+# and a check character that may be X ("ISBN: 072167335X", "0-7216-7335-X"); a run of one repeated digit
+# ("111111111" in a figure); and decimal numbers with one decimal place among other separators
+# ("30.0-34.9 25.0" in a chart legend). Mixed separators alone are not enough: students write "300-987 654"
+# (found by E6).
+ISBN_BEFORE_RE = re.compile(r"ISBN(?:-1[03])?\s*:?\s*$", re.I)
+ISBN_CHECK_AFTER_RE = re.compile(r"[ -]?[Xx](?![A-Za-z0-9])")
+DECIMAL_RE = re.compile(r"\d\.\d(?!\d)")
+
+
+def _not_a_student_number(text: str, start: int, end: int) -> bool:
+    value = text[start:end]
+    digits = {c for c in value if c.isdigit()}
+    separators = {c for c in value if not c.isalnum()}
+    return (bool(ISBN_BEFORE_RE.search(text[max(0, start - 12):start]))
+            or bool(ISBN_CHECK_AFTER_RE.match(text, end))
+            or len(digits) == 1
+            or (len(separators) > 1 and bool(DECIMAL_RE.search(value))))
 
 
 @pii_recognizers.register("student_id")
@@ -51,7 +69,7 @@ class StudentIdRecognizer(PatternRecognizer):
         for m in O_FOR_ZERO_RE.finditer(text):
             if sum(c.isdigit() for c in m.group()) >= 7:
                 results.append(self._result(m.start(), m.end(), 0.6, "O for zero", O_FOR_ZERO_RE))
-        return results
+        return [r for r in results if not _not_a_student_number(text, r.start, r.end)]
 
     def _result(self, start: int, end: int, score: float, name: str, pattern: re.Pattern) -> RecognizerResult:
         # the context enhancer expects the explanation and metadata that pattern results carry

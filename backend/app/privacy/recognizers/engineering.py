@@ -40,6 +40,11 @@ ASSIGNED_SECRET_RE = re.compile(
 # words that follow "token" or "password" in course prose, not values
 _NOT_VALUES = {"expired", "invalid", "required", "missing", "rotation", "hashing", "hashed", "storage",
                "generation", "validation", "strength", "manager", "managers", "policy", "policies", "reset"}
+# placeholders in teaching code, not values (found by scanning open course material): the name of a constant
+# or environment variable ("token=API_KEY", "YOUR_PASSWORD"), a bracketed hint ("<your-api-key>"), "xxxxxx"
+PLACEHOLDER_VALUE_RE = re.compile(
+    r"[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+|<[^<>]+>|\{\{?[^{}]+\}?\}|[xX]{4,}|\*{4,}|\.{3,}"
+    r"|(?i:your)[_-]?(?i:[a-z_-]*)(?i:key|token|secret|password|pass)(?i:[a-z_-]*)")
 
 _O = r"(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)"  # one octet
 PRIVATE_IPV4 = (rf"(?<![\d.])(?:10\.{_O}\.{_O}\.{_O}|172\.(?:1[6-9]|2\d|3[01])\.{_O}\.{_O}"
@@ -63,6 +68,8 @@ class SecretTokenRecognizer(PatternRecognizer):
             plain_word = value.isalpha() and len(value) < 12
             if value.lower() in _NOT_VALUES or plain_word:
                 continue  # "the token expired", "password is required"
+            if PLACEHOLDER_VALUE_RE.fullmatch(value.strip("`.,:)]")):
+                continue  # "token=API_KEY", 'password = "YOUR_PASSWORD"'
             results.append(self._result(m.start(1), m.end(1)))
         return results
 
