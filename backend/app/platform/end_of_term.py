@@ -9,6 +9,10 @@ The export is a ZIP in the data volume (`courses/<course_id>/exports/<export_id>
 Then, for that course: student memberships, learner state, evidence, misconceptions, plans, conversations,
 request logs and usage counters are deleted. The course, its content, materials, settings and instructors
 stay; accounts stay. Nothing here reads or writes question text.
+
+`maintenance()` runs in the worker: it deletes expired exports of every course (also courses nobody opens
+again), and for a day after a term ended it deletes rows that requests still running at the end of term
+wrote for students who are no longer members.
 """
 import io
 import json
@@ -20,15 +24,17 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 from sqlalchemy import Engine, delete
-from sqlmodel import Session
+from sqlmodel import Session, col, select
 
 from app.admin.summary import class_summary
 from app.learner import course_views
 from app.learner.course_data import delete_course_data
 from app.learner.instructor_view import export_course_profiles
+from app.learner.repository import COURSE_TABLES
 from app.platform.access import CourseAccess
 from app.platform.course_scope import CourseScope
 from app.storage.models import (
+    Account,
     AuditLog,
     CourseInvite,
     CourseMember,
@@ -40,6 +46,9 @@ from app.storage.models import (
 )
 
 EXPORT_ID = re.compile(r"^[0-9]{8}T[0-9]{6}Z-[0-9a-f]{12}$")
+STUDENT_TABLES = (*COURSE_TABLES, LearningPlan, SessionTurn, RequestLog, UsageCounter)
+SWEEP_HOURS = 24  # how long after an end of term late writes are looked for (far above any request timeout)
+DELETED = "deleted"  # student_id of request logs kept after a student deleted their own data
 
 
 @dataclass(frozen=True)
@@ -120,3 +129,39 @@ def export_file(data_root: Path, course_id: int, export_id: str, retention_hours
     purge_expired(data_root, course_id, retention_hours)
     path = exports_dir(data_root, course_id) / f"{export_id}.zip"
     return path if path.is_file() else None
+
+
+def purge_all_expired(data_root: Path, retention_hours: int) -> None:
+    """Expired exports of every course."""
+    for folder in (data_root / "courses").glob("*/exports"):
+        if folder.parent.name.isdigit():
+            purge_expired(data_root, int(folder.parent.name), retention_hours)
+
+
+def sweep_removed_students(engine: Engine, course_id: int) -> int:
+    """Delete the course's rows of students who are not active members: a request that was waiting on a
+    model when the term ended writes its log, turns, usage and learner updates afterwards. Returns the
+    number of deleted rows."""
+    members = (select(Account.student_id).join(CourseMember, CourseMember.account_id == Account.id)
+               .where(CourseMember.course_id == course_id, CourseMember.status == "active",
+                      col(Account.student_id).is_not(None)))
+    removed = 0
+    with Session(engine) as db:
+        for table in STUDENT_TABLES:
+            removed += db.exec(delete(table).where(table.course_id == course_id,
+                                                   col(table.student_id).not_in(members),
+                                                   table.student_id != DELETED)).rowcount
+        db.commit()
+    return removed
+
+
+def maintenance(engine: Engine, data_root: Path, retention_hours: int) -> None:
+    """Run by the worker every few minutes."""
+    purge_all_expired(data_root, retention_hours)
+    since = utcnow() - timedelta(hours=SWEEP_HOURS)
+    with Session(engine) as db:
+        targets = db.exec(select(AuditLog.target).where(AuditLog.action == "course.end_term",
+                                                        AuditLog.created_at >= since).distinct()).all()
+    for target in targets:
+        if target and target.startswith("course:") and target[7:].isdigit():
+            sweep_removed_students(engine, int(target[7:]))

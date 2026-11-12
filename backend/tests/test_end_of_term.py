@@ -7,7 +7,11 @@ import time
 import zipfile
 
 import pytest
+from sqlmodel import Session
 
+from app.platform import end_of_term
+from app.storage.models import RequestLog, SessionTurn
+from tests.conftest import csrf_client
 from tests.test_ask_v2 import V2, World, _login, rows
 from tests.test_learner_v2 import Q1, set_mode
 
@@ -96,3 +100,38 @@ def test_exports_belong_to_the_course_instructors_and_expire(world):
     old = time.time() - 73 * 3600
     os.utime(path, (old, old))
     assert world.prof.get(url).status_code == 404 and not path.exists()  # expired: deleted
+
+
+def test_logged_out_callers_can_neither_end_the_term_nor_download(world):
+    _login(world.app, "alice").post(f"{world.url}/check", json=Q1)
+    export_id = world.prof.post(f"{world.url}/end-term", json={"confirm": True}).json()["export_id"]
+    world.enrol("alice")
+    _login(world.app, "alice").post(f"{world.url}/check", json=Q1)
+    anonymous = csrf_client(world.app)
+    assert anonymous.post(f"{world.url}/end-term", json={"confirm": True}).status_code == 401
+    assert len(rows("evidence_log")) == 1  # nothing was deleted
+    r = anonymous.get(f"{world.url}/exports/{export_id}")
+    assert r.status_code == 401 and r.headers["content-type"] != "application/zip"
+
+
+def test_maintenance_removes_late_writes_and_expired_exports(world):
+    alice = _login(world.app, "alice")
+    alice.post(f"{world.url}/check", json=Q1)
+    export_id = world.prof.post(f"{world.url}/end-term", json={"confirm": True}).json()["export_id"]
+    late = world.students["alice"].student_id  # a request that was still running writes afterwards
+    world.enrol("bob")  # next term's student keeps their data
+    current = world.students["bob"].student_id
+    with Session(world.services.engine) as db:
+        for sid in (late, current):
+            db.add(RequestLog(request_id=f"r-{sid}", session_id="s", student_id=sid, course_id=world.course,
+                              topic="circuits", sanitized_question="[test]"))
+            db.add(SessionTurn(session_id="s", student_id=sid, course_id=world.course, role="student",
+                               text="[test]"))
+        db.commit()
+    path = world.data / "courses" / str(world.course) / "exports" / f"{export_id}.zip"
+    old = time.time() - 73 * 3600
+    os.utime(path, (old, old))
+    end_of_term.maintenance(world.services.engine, world.data, 72)
+    assert {r["student_id"] for r in rows("request_log")} == {current}
+    assert {r["student_id"] for r in rows("session_turn")} == {current}
+    assert not path.exists()  # deleted although nobody opened the course again

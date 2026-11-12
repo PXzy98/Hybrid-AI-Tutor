@@ -4,8 +4,9 @@
 It builds the same services as the api (database, settings, model gateway) and runs the component loop,
 so it takes part in live settings switches (course-structure.md 6.5) and shows up in `process_status`.
 It also runs the background jobs (`app.platform.jobs`) in a second thread, one at a time, so a long job (an
-instructor AI evaluation) never delays the heartbeat. Running now: the instructor AI evaluation (Z12); index
-rebuilds, drafts and the daily usage reset are added as their tasks land.
+instructor AI evaluation) never delays the heartbeat. Running now: the instructor AI evaluation (Z12) and,
+every few minutes, the end-of-term maintenance (expired exports, late writes; `app.platform.end_of_term`);
+index rebuilds, drafts and the daily usage reset are added as their tasks land.
 
 `python -m app.worker --check` is the container health check: the worker touches a heartbeat file on every
 round, and the check fails when it is older than three rounds.
@@ -20,6 +21,7 @@ import threading
 import time
 from pathlib import Path
 
+MAINTENANCE_SECONDS = 300
 HEARTBEAT = Path(os.environ.get("WORKER_HEARTBEAT_FILE", Path(tempfile.gettempdir()) / "tutor-worker.alive"))
 
 log = logging.getLogger("app.worker")
@@ -35,11 +37,16 @@ def run(stop: threading.Event | None = None) -> None:
     manager.kind = "worker"
     poll = services.settings.limits.settings.poll_seconds
     log.info("worker started (%s)", manager.process_id)
-    from app.platform import jobs
+    from app.platform import end_of_term, jobs
 
     def job_loop() -> None:
+        last_maintenance = 0.0
         while not stop.is_set():
             try:
+                if time.monotonic() - last_maintenance >= MAINTENANCE_SECONDS:
+                    last_maintenance = time.monotonic()
+                    end_of_term.maintenance(services.engine, services.settings.data_path(),
+                                            services.settings.limits.courses.export_retention_hours)
                 # every round, not only at start: a job interrupted just before a restart becomes stale later
                 if jobs.fail_stale(services.engine):
                     log.warning("jobs left running by a stopped worker were marked failed")
