@@ -1,6 +1,6 @@
 # Frontend
 
-React + TypeScript (Vite), Tailwind CSS, React Router, TanStack Query. Design: docs/System_Design_v3.md.
+React + TypeScript (Vite), Tailwind CSS, React Router, TanStack Query. shadcn/ui, API v2.
 
 ## Run
 
@@ -28,11 +28,14 @@ After a backend API change: from `backend/`, run `..\.venv\Scripts\python -m app
 
 | Path | Who | What |
 |---|---|---|
-| `/login` | everyone | Log in (accounts are created by the instructor) |
+| `/login` | everyone | Log in with username or e-mail |
+| `/join` | everyone | Join a course with an invitation code (new students also create their account) |
 | `/change-password` | everyone | Forced after a temporary password |
-| `/start` | students | Consent, 2 preference questions, diagnostic (every part optional) |
-| `/chat` | students | Topic picker, answers with sources, level badge, check questions, presentation feedback |
-| `/me` | students | "What I know": bands per knowledge component, reset |
-| `/admin` | instructor | Placeholder until the dashboard (Step 13) |
+| `/courses` | logged in | Course picker; the left sidebar lists courses, modules and the student's conversations |
+| `/courses/:id/:tab` | students | Tabs: chat, my progress (bands, visibility choices, read-only plan), personalize, quizzes, end-of-term survey |
+| `/courses/:id/:tab` | instructors | Tabs: class overview, students (progress, plan editor), course content, members (invitation code, CSV import), settings, end of term, quizzes, end-of-term survey |
+
+Everything uses `/api/v2`; every non-GET request sends `X-CSRF-Token` (`src/api/client.ts`). UI components are
+shadcn/ui, copied into `src/components/ui/`. Answers are rendered as Markdown with KaTeX.
 
 Identity is only the httpOnly session cookie; nothing about the user is kept in `localStorage`.

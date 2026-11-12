@@ -4,9 +4,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { ApiError } from "@/api/client";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useI18n } from "@/i18n";
-import type { MessageKey } from "@/i18n/en";
 
 /** A failed request, shown with the server's English sentence (the codes below get a translated one). */
 export function ErrorNote({ error }: { error: unknown }) {
@@ -28,23 +26,6 @@ export function SectionTitle({ title, children }: { title: string; children?: Re
       <h2 className="text-lg font-semibold">{title}</h2>
       {children && <p className="text-sm text-muted-foreground">{children}</p>}
     </div>
-  );
-}
-
-/** A tab another developer will fill in (quizzes, end-of-term survey). The endpoints do not exist yet. */
-export function PlaceholderTab({ id, title }: { id: "quizzes" | "survey"; title: MessageKey }) {
-  const { t } = useI18n();
-  // PLACEHOLDER: replace the body of this component when the endpoints for this tab are in the API
-  return (
-    <Card data-placeholder={id}>
-      <CardHeader>
-        <CardTitle>{t(title)}</CardTitle>
-        <CardDescription>{t("placeholder.body")}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <p className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">{t("placeholder.soon")}</p>
-      </CardContent>
-    </Card>
   );
 }
 

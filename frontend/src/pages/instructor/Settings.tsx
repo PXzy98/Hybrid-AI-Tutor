@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 
+import { ApiError } from "@/api/client";
 import { api, type Course, type CourseSettings, type CourseValues } from "@/api/endpoints";
 import { ErrorNote } from "@/components/common";
 import { Alert } from "@/components/ui/alert";
@@ -65,7 +66,7 @@ function SettingsForm({ course, initial }: { course: Course; initial: CourseSett
       qc.invalidateQueries({ queryKey: ["courses"] });
     },
   });
-  const conflict = save.error && "status" in (save.error as object) && (save.error as { status: number }).status === 409;
+  const conflict = save.error instanceof ApiError && save.error.status === 409;
   function submit(e: FormEvent) {
     e.preventDefault();
     save.mutate();

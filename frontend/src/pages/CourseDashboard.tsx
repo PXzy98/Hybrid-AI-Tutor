@@ -3,7 +3,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import type { Course } from "@/api/endpoints";
 import { roleIn, useCourses, useMe } from "@/auth";
-import { ErrorNote, PlaceholderTab } from "@/components/common";
+import { ErrorNote } from "@/components/common";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useI18n } from "@/i18n";
@@ -11,10 +11,13 @@ import type { MessageKey } from "@/i18n/en";
 import Content from "./instructor/Content";
 import EndOfTerm from "./instructor/EndOfTerm";
 import Members from "./instructor/Members";
+import InstructorQuizzes from "./instructor/Quizzes";
 import Overview from "./instructor/Overview";
 import Settings from "./instructor/Settings";
 import Students from "./instructor/Students";
+import Survey from "./Survey";
 import Chat from "./student/Chat";
+import StudentQuizzes from "./student/Quizzes";
 import Progress from "./student/Progress";
 import Start from "./student/Start";
 
@@ -44,8 +47,8 @@ function Dashboard({ course, student, tab }: { course: Course; student: boolean;
         { id: "chat", label: "tab.chat", node: <Chat course={course} />, keepMounted: true },
         { id: "progress", label: "tab.progress", node: <Progress course={course} /> },
         { id: "start", label: "tab.start", node: <Start course={course} /> },
-        { id: "quizzes", label: "tab.quizzes", node: <PlaceholderTab id="quizzes" title="tab.quizzes" /> },
-        { id: "survey", label: "tab.survey", node: <PlaceholderTab id="survey" title="tab.survey" /> },
+        { id: "quizzes", label: "tab.quizzes", node: <StudentQuizzes course={course} /> },
+        { id: "survey", label: "tab.survey", node: <Survey course={course} student /> },
       ]
     : [
         { id: "overview", label: "tab.overview", node: <Overview course={course} /> },
@@ -54,8 +57,8 @@ function Dashboard({ course, student, tab }: { course: Course; student: boolean;
         { id: "members", label: "tab.members", node: <Members course={course} /> },
         { id: "settings", label: "tab.settings", node: <Settings course={course} /> },
         { id: "endterm", label: "tab.endterm", node: <EndOfTerm course={course} /> },
-        { id: "quizzes", label: "tab.quizzes", node: <PlaceholderTab id="quizzes" title="tab.quizzes" /> },
-        { id: "survey", label: "tab.survey", node: <PlaceholderTab id="survey" title="tab.survey" /> },
+        { id: "quizzes", label: "tab.quizzes", node: <InstructorQuizzes course={course} /> },
+        { id: "survey", label: "tab.survey", node: <Survey course={course} student={false} /> },
       ];
   const active = tabs.find((x) => x.id === tab)?.id ?? tabs[0].id;
   return (

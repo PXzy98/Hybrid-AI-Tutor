@@ -28,6 +28,17 @@ export type StudentOverview = Schemas["InstructorProfileView"];
 export type Plan = Schemas["PlanOut"];
 export type PlanBody = Schemas["PlanIn"];
 export type EndTermResult = Schemas["EndTermOut"];
+export type Quiz = Schemas["QuizOut"];
+export type StudentQuiz = Schemas["StudentQuizOut"];
+export type QuizQuestion = Schemas["QuizQuestion"];
+export type QuizResults = Schemas["QuizResults"];
+export type OwnAttempt = Schemas["OwnAttempt"];
+export type QuizBody = Schemas["QuizIn"];
+export type QuizPatch = Schemas["QuizPatch"];
+export type DraftBody = Schemas["DraftIn"];
+export type Job = Schemas["JobOut"];
+export type Survey = Schemas["SurveyOut"];
+export type SurveyAnswers = Schemas["SurveyAnswers"];
 export type Difficulty = Schemas["KcOut"]["difficulty"];
 
 const c = (id: number) => `/courses/${id}`;
@@ -104,4 +115,23 @@ export const api = {
   studentPlan: (id: number, studentId: string) => request<Plan>("GET", `${c(id)}/students/${encodeURIComponent(studentId)}/plan`),
   savePlan: (id: number, studentId: string, plan: PlanBody) =>
     request<Plan>("PUT", `${c(id)}/students/${encodeURIComponent(studentId)}/plan`, plan),
+
+  // quizzes
+  quizzes: (id: number) => request<Quiz[]>("GET", `${c(id)}/quizzes`),
+  studentQuizzes: (id: number) => request<StudentQuiz[]>("GET", `${c(id)}/quizzes`),
+  createQuiz: (id: number, input: QuizBody) => request<Quiz>("POST", `${c(id)}/quizzes`, input),
+  updateQuiz: (id: number, quizId: number, changes: QuizPatch) => request<Quiz>("PATCH", `${c(id)}/quizzes/${quizId}`, changes),
+  deleteQuiz: (id: number, quizId: number) => request<void>("DELETE", `${c(id)}/quizzes/${quizId}`),
+  draftQuiz: (id: number, quizId: number, input: DraftBody) =>
+    request<Schemas["DraftOut"]>("POST", `${c(id)}/quizzes/${quizId}/drafts`, input),
+  job: (id: number, jobId: number) => request<Job>("GET", `${c(id)}/jobs/${jobId}`),
+  attemptQuiz: (id: number, quizId: number, answers: number[]) =>
+    request<OwnAttempt>("POST", `${c(id)}/quizzes/${quizId}/attempt`, { answers }),
+  quizResults: (id: number, quizId: number) => request<QuizResults>("GET", `${c(id)}/quizzes/${quizId}/results`),
+
+  // end-of-term survey
+  survey: (id: number) => request<Survey>("GET", `${c(id)}/survey`),
+  setSurveyWindow: (id: number, opens_at: string, closes_at: string) =>
+    request<Survey>("PUT", `${c(id)}/survey`, { opens_at, closes_at }),
+  answerSurvey: (id: number, answers: SurveyAnswers) => request<Survey>("POST", `${c(id)}/survey/responses`, answers),
 };

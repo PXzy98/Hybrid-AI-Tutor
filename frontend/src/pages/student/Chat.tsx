@@ -71,7 +71,7 @@ function ChatPane({ course, initialConversation, moduleId }: { course: Course; i
       setPartial("");
       return api.askStream(course.id, {
         question: input.question, module_id: moduleId, language: "en",
-        ...(conversation ? { conversation_id: conversation } : {}),
+        conversation_id: conversation ?? "",
       }, (event) => {
         if (event.type === "meta") updateTrace(input.traceId, { visible: event.data.show_progress, method: event.data.method });
         if (event.type === "progress") updateTrace(input.traceId, {}, event.data);
