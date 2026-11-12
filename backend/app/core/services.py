@@ -93,14 +93,15 @@ def adopt_rows_without_course(engine, course_id: int) -> None:
     The migration assigns them when the course exists; a database upgraded from before the course catalog
     gets its demo course only at this start, after the migrations, so they are assigned here.
     """
-    from sqlalchemy import text
+    from sqlalchemy import update
+    from sqlmodel import SQLModel
 
     from app.storage.models import ROWS_OF_A_COURSE
 
     with engine.begin() as conn:
-        for table in ROWS_OF_A_COURSE:
-            conn.execute(text(f'UPDATE "{table}" SET course_id = :course WHERE course_id IS NULL'),
-                         {"course": course_id})
+        for name in ROWS_OF_A_COURSE:
+            table = SQLModel.metadata.tables[name]
+            conn.execute(update(table).where(table.c.course_id.is_(None)).values(course_id=course_id))
 
 
 def build_services(settings: Settings | None = None) -> Services:
