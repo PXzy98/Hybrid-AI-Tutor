@@ -350,6 +350,10 @@ class SettingsService:
             row.version += 1
             row.updated_at, row.updated_by, row.apply_state = utcnow(), account_id, "applied"
             db.add(row)
+            if before["visibility_mode"] != values["visibility_mode"]:
+                from app.learner.course_views import reset_visibility
+
+                reset_visibility(db, course_id)  # nobody is visible until they acknowledge (design 4.5)
             db.add(ConfigHistory(account_id=account_id, scope="course", course_id=course_id,
                                  version=row.version, values=values, previous=before))
             db.add(AuditLog(account_id=account_id, action=action, target=f"course:{course_id}",

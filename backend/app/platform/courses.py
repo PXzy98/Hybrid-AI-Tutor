@@ -71,6 +71,7 @@ class MemberView:
     display_name: str | None
     email: str | None  # the account's e-mail, or the invited e-mail while pending
     created_at: datetime
+    student_id: str | None = None  # pseudonymous ID of a student, for the learner endpoints
 
 
 @dataclass(frozen=True)
@@ -229,7 +230,8 @@ class CourseService:
                            .where(CourseMember.course_id == course_id)
                            .order_by(col(CourseMember.role), col(CourseMember.id))).all()
             return [MemberView(m.id, m.role, m.status, m.account_id, a.username if a else None,
-                               a.display_name if a else None, a.email if a else m.email, m.created_at)
+                               a.display_name if a else None, a.email if a else m.email, m.created_at,
+                               a.student_id if a and m.role == "student" else None)
                     for m, a in rows]
 
     def import_roster(self, course_id: int, data: bytes) -> ImportReport:

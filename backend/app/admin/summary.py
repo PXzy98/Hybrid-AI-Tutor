@@ -60,9 +60,12 @@ def consenting_students(engine) -> list[str]:
         return sorted(db.exec(select(Consent.student_id).where(Consent.given == True)).all())  # noqa: E712
 
 
-def class_summary(engine, learner: LearnerModel, content: ContentStore, topic: str, min_group: int
-                  ) -> ClassSummary:
+def class_summary(engine, learner: LearnerModel, content: ContentStore, topic: str, min_group: int,
+                  members: list[str] | None = None) -> ClassSummary:
+    """`members`: the course's students (API v2); None counts every consenting student (API v1)."""
     students = consenting_students(engine)
+    if members is not None:
+        students = sorted(set(students) & set(members))
     if len(students) < min_group:
         return ClassSummary(topic=topic, min_group=min_group, suppressed=True)
     kcs = content.kcs(topic)

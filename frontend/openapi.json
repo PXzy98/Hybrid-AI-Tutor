@@ -4485,6 +4485,511 @@
           }
         }
       }
+    },
+    "/api/v2/courses/{course_id}/check": {
+      "post": {
+        "tags": [
+          "learner"
+        ],
+        "summary": "Check",
+        "description": "Answer a check question of this course: graded by the key, applied as strong evidence.",
+        "operationId": "learner_check",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/courses/{course_id}/onboarding": {
+      "get": {
+        "tags": [
+          "learner"
+        ],
+        "summary": "Get Onboarding",
+        "operationId": "learner_onboarding_get",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "module_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Module Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OnboardingOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "learner"
+        ],
+        "summary": "Post Onboarding",
+        "description": "Consent and preferences are global; the diagnostic answers count in this course only.",
+        "operationId": "learner_onboarding_submit",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OnboardingIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OnboardingResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/courses/{course_id}/me/profile": {
+      "get": {
+        "tags": [
+          "learner"
+        ],
+        "summary": "My Profile",
+        "description": "\"What I know\" in this course (bands, never probabilities), what the instructor can see, and the\ninstructor's plan when there is one.",
+        "operationId": "learner_profile",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CourseProfileOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/courses/{course_id}/me/visibility": {
+      "post": {
+        "tags": [
+          "learner"
+        ],
+        "summary": "My Visibility",
+        "description": "Acknowledge visibility mode B (from then on the instructor can see new data), opt out, or opt back in\n(a new start: earlier data stays hidden).",
+        "operationId": "learner_visibility",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VisibilityIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VisibilityOut"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "not possible in this mode"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/courses/{course_id}/me/learning-data": {
+      "delete": {
+        "tags": [
+          "learner"
+        ],
+        "summary": "Delete My Course Data",
+        "description": "Forget what the tutor learned about the caller in this course, with the conversations and the plan.\nOther courses, the preferences, the consent and the membership stay.",
+        "operationId": "learner_delete_course_data",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/courses/{course_id}/class-summary": {
+      "get": {
+        "tags": [
+          "learner"
+        ],
+        "summary": "Get Class Summary",
+        "description": "Aggregates of one module over the course's consenting students; small groups are suppressed.",
+        "operationId": "learner_class_summary",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "module_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Module Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassSummary"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/courses/{course_id}/students/{student_id}/overview": {
+      "get": {
+        "tags": [
+          "learner"
+        ],
+        "summary": "Student Overview",
+        "description": "One student's overview: only in mode B, after the student's acknowledgement, without an opt-out, and\nonly data from after the acknowledgement. Each view is written to the audit log.",
+        "operationId": "learner_student_overview",
+        "parameters": [
+          {
+            "name": "student_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Student Id"
+            }
+          },
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstructorProfileView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/courses/{course_id}/students/{student_id}/plan": {
+      "get": {
+        "tags": [
+          "learner"
+        ],
+        "summary": "Get Plan",
+        "operationId": "learner_plan_get",
+        "parameters": [
+          {
+            "name": "student_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Student Id"
+            }
+          },
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "learner"
+        ],
+        "summary": "Put Plan",
+        "description": "Set the learning plan of a visible student: KCs of this course to focus on, a goal level, a note.",
+        "operationId": "learner_plan_update",
+        "parameters": [
+          {
+            "name": "student_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Student Id"
+            }
+          },
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -5113,6 +5618,31 @@
         ],
         "title": "CheckBody"
       },
+      "CheckIn": {
+        "properties": {
+          "item_id": {
+            "type": "string",
+            "maxLength": 64,
+            "title": "Item Id"
+          },
+          "choice": {
+            "type": "string",
+            "enum": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "title": "Choice"
+          }
+        },
+        "type": "object",
+        "required": [
+          "item_id",
+          "choice"
+        ],
+        "title": "CheckIn"
+      },
       "CheckItemPublic": {
         "properties": {
           "id": {
@@ -5626,6 +6156,51 @@
         },
         "type": "object",
         "title": "CoursePatch"
+      },
+      "CourseProfileOut": {
+        "properties": {
+          "personalized": {
+            "type": "boolean",
+            "title": "Personalized"
+          },
+          "preferences": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Preferences"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "modules": {
+            "items": {
+              "$ref": "#/components/schemas/ModuleProfile"
+            },
+            "type": "array",
+            "title": "Modules",
+            "default": []
+          },
+          "visibility": {
+            "$ref": "#/components/schemas/VisibilityOut"
+          },
+          "plan": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PlanOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "personalized",
+          "visibility"
+        ],
+        "title": "CourseProfileOut"
       },
       "CourseSettingsIn": {
         "properties": {
@@ -6564,6 +7139,55 @@
         ],
         "title": "InstructorIn"
       },
+      "InstructorProfileView": {
+        "properties": {
+          "student_id": {
+            "type": "string",
+            "title": "Student Id"
+          },
+          "visible_since": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Visible Since"
+          },
+          "kcs": {
+            "items": {
+              "$ref": "#/components/schemas/KcView"
+            },
+            "type": "array",
+            "title": "Kcs",
+            "default": []
+          },
+          "open_misconceptions": {
+            "type": "integer",
+            "title": "Open Misconceptions",
+            "default": 0
+          },
+          "checks_answered": {
+            "type": "integer",
+            "title": "Checks Answered",
+            "default": 0
+          },
+          "last_active": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "student_id",
+          "visible_since"
+        ],
+        "title": "InstructorProfileView"
+      },
       "InviteOut": {
         "properties": {
           "expires_at": {
@@ -7328,6 +7952,34 @@
         ],
         "title": "KcSummary"
       },
+      "KcView": {
+        "properties": {
+          "kc_code": {
+            "type": "string",
+            "title": "Kc Code"
+          },
+          "level": {
+            "type": "string",
+            "enum": [
+              "basic",
+              "intermediate",
+              "advanced"
+            ],
+            "title": "Level"
+          },
+          "p_mastery": {
+            "type": "number",
+            "title": "P Mastery"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kc_code",
+          "level",
+          "p_mastery"
+        ],
+        "title": "KcView"
+      },
       "LevelsConfig": {
         "properties": {
           "basic_below": {
@@ -7757,6 +8409,17 @@
             "type": "string",
             "format": "date-time",
             "title": "Created At"
+          },
+          "student_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Student Id"
           }
         },
         "type": "object",
@@ -8079,6 +8742,45 @@
         "type": "object",
         "title": "ModulePatch"
       },
+      "ModuleProfile": {
+        "properties": {
+          "module_id": {
+            "type": "integer",
+            "title": "Module Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "kcs": {
+            "items": {
+              "$ref": "#/components/schemas/KcBand"
+            },
+            "type": "array",
+            "title": "Kcs"
+          },
+          "misconceptions": {
+            "items": {
+              "$ref": "#/components/schemas/OpenMisconception"
+            },
+            "type": "array",
+            "title": "Misconceptions",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "module_id",
+          "code",
+          "title",
+          "kcs"
+        ],
+        "title": "ModuleProfile"
+      },
       "NewInviteOut": {
         "properties": {
           "expires_at": {
@@ -8264,6 +8966,42 @@
         ],
         "title": "OnboardingBody"
       },
+      "OnboardingIn": {
+        "properties": {
+          "module_id": {
+            "type": "integer",
+            "title": "Module Id"
+          },
+          "consent": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Consent"
+          },
+          "preferences": {
+            "$ref": "#/components/schemas/PreferenceAnswers",
+            "default": {}
+          },
+          "answers": {
+            "items": {
+              "$ref": "#/components/schemas/DiagnosticAnswer"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Answers"
+          }
+        },
+        "type": "object",
+        "required": [
+          "module_id"
+        ],
+        "title": "OnboardingIn"
+      },
       "OnboardingInfo": {
         "properties": {
           "topic": {
@@ -8309,6 +9047,52 @@
           "diagnostic"
         ],
         "title": "OnboardingInfo"
+      },
+      "OnboardingOut": {
+        "properties": {
+          "module_id": {
+            "type": "integer",
+            "title": "Module Id"
+          },
+          "consent_text": {
+            "type": "string",
+            "title": "Consent Text"
+          },
+          "consent_given": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Consent Given"
+          },
+          "preference_questions": {
+            "items": {
+              "$ref": "#/components/schemas/PreferenceQuestion"
+            },
+            "type": "array",
+            "title": "Preference Questions"
+          },
+          "diagnostic": {
+            "items": {
+              "$ref": "#/components/schemas/CheckItemPublic"
+            },
+            "type": "array",
+            "title": "Diagnostic"
+          }
+        },
+        "type": "object",
+        "required": [
+          "module_id",
+          "consent_text",
+          "consent_given",
+          "preference_questions",
+          "diagnostic"
+        ],
+        "title": "OnboardingOut"
       },
       "OnboardingResult": {
         "properties": {
@@ -8406,6 +9190,77 @@
           "text"
         ],
         "title": "OptionModel"
+      },
+      "PlanIn": {
+        "properties": {
+          "focus_kcs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 8,
+            "minItems": 1,
+            "title": "Focus Kcs"
+          },
+          "goal": {
+            "type": "string",
+            "enum": [
+              "basic",
+              "intermediate",
+              "advanced"
+            ],
+            "title": "Goal"
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 500,
+            "title": "Notes",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "focus_kcs",
+          "goal"
+        ],
+        "title": "PlanIn"
+      },
+      "PlanOut": {
+        "properties": {
+          "focus_kcs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Focus Kcs"
+          },
+          "goal": {
+            "type": "string",
+            "enum": [
+              "basic",
+              "intermediate",
+              "advanced"
+            ],
+            "title": "Goal"
+          },
+          "notes": {
+            "type": "string",
+            "title": "Notes"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "focus_kcs",
+          "goal",
+          "notes",
+          "updated_at"
+        ],
+        "title": "PlanOut"
       },
       "PreferenceAnswers": {
         "properties": {
@@ -10021,6 +10876,69 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "VisibilityIn": {
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "acknowledge",
+              "opt_out",
+              "opt_in"
+            ],
+            "title": "Action"
+          }
+        },
+        "type": "object",
+        "required": [
+          "action"
+        ],
+        "title": "VisibilityIn"
+      },
+      "VisibilityOut": {
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "A",
+              "B"
+            ],
+            "title": "Mode"
+          },
+          "acknowledged": {
+            "type": "boolean",
+            "title": "Acknowledged"
+          },
+          "opted_out": {
+            "type": "boolean",
+            "title": "Opted Out"
+          },
+          "visible_to_instructor": {
+            "type": "boolean",
+            "title": "Visible To Instructor"
+          },
+          "visible_since": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visible Since"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mode",
+          "acknowledged",
+          "opted_out",
+          "visible_to_instructor"
+        ],
+        "title": "VisibilityOut",
+        "description": "What the instructor can see of this student (course-structure.md 4.5)."
       }
     }
   }
