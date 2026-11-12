@@ -14,7 +14,7 @@ const reply: AskResponse = { session_id: "session", answer: "A clear answer.", m
   sources: [], checks: [], warnings: [], timings_ms: {}, routing_progress: [] };
 const askDefaults = { session_id: "", course_id: "default", language: "en" };
 const options = { show_progress: true, default_method: "lr", methods: [{ id: "lr", label: "Logistic Regression (LR)" }, { id: "svm", label: "Support Vector Machine (SVM)" }] };
-function mount(element: JSX.Element) {
+function mount(element: React.JSX.Element) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   return render(<QueryClientProvider client={client}><MemoryRouter>{element}</MemoryRouter></QueryClientProvider>);
 }

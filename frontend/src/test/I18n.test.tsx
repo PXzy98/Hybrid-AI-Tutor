@@ -17,7 +17,7 @@ const json = (body: unknown, status = 200) =>
 const placeholders = (s: string) => [...s.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort();
 const ME = { id: 1, username: "s.one", display_name: "S One", role: "student", must_change_password: false };
 
-function mount(element: JSX.Element, lang?: Lang, path = "/") {
+function mount(element: React.JSX.Element, lang?: Lang, path = "/") {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   return render(
     <QueryClientProvider client={client}>

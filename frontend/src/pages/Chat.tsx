@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 
 import { api, type AskBody, type AskResponse } from "../api/endpoints";
+import Markdown from "../components/Markdown";
 import Band from "../components/Band";
 import CheckCard from "../components/CheckCard";
 import { TRIAL_QUESTIONS } from "../components/surveyScenarios";
@@ -161,7 +162,7 @@ function TutorMessage({ reply, sessionId }: { reply: AskResponse; sessionId: str
   const { t } = useI18n();
   return (
     <article className="max-w-[90%] rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm">
-      <p className="whitespace-pre-wrap text-slate-900">{reply.answer}</p>
+      <Markdown>{reply.answer}</Markdown>
       {!!reply.warnings?.length && (
         <ul className="mt-2 space-y-0.5 text-xs text-amber-800">
           {reply.warnings.map((w) => <li key={w}>⚠ {w}</li>)}

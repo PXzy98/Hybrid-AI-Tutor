@@ -10,7 +10,7 @@ import StudentsPage from "../pages/admin/Students";
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 
-function renderPage(page: JSX.Element) {
+function renderPage(page: React.JSX.Element) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   return render(<QueryClientProvider client={client}><MemoryRouter>{page}</MemoryRouter></QueryClientProvider>);
 }
