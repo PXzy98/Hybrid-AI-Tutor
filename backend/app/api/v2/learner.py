@@ -252,7 +252,9 @@ def get_class_summary(module_id: int, access: CourseInstructor, request: Request
 def student_overview(student_id: str, access: CourseInstructor, request: Request):
     """One student's overview: only in mode B, after the student's acknowledgement, without an opt-out, and
     only data from after the acknowledgement. Each view is written to the audit log."""
-    store = course_views.DbLearnerViewStore(_services(request).engine)
+    services = _services(request)
+    scope = _scope(services, access.course.id)
+    store = course_views.DbLearnerViewStore(services.engine, services.settings, scope.content)
     try:
         return profile_for_instructor(access, student_id, store=store)
     except NotVisible:
@@ -262,7 +264,8 @@ def student_overview(student_id: str, access: CourseInstructor, request: Request
 @router.get("/courses/{course_id}/students/{student_id}/plan", response_model=PlanOut,
             operation_id="learner_plan_get")
 def get_plan(student_id: str, access: CourseInstructor, request: Request):
-    plan = course_views.shown_plan(_services(request).engine, access.course.id, student_id)
+    plan = course_views.shown_plan(_services(request).engine, access.course.id, student_id,
+                                   viewer_account_id=access.account_id)  # audited
     if plan is None:
         raise ApiError(404, ErrorCode.not_found, "no learning plan is available for this student")
     return _plan_out(plan)
