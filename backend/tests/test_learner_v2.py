@@ -113,6 +113,35 @@ def test_the_instructor_sees_a_student_only_in_mode_b_after_the_acknowledgement(
     assert alice.get(f"{world.url}/me/profile").json()["visibility"]["acknowledged"] is False
 
 
+def test_mastery_for_the_instructor_uses_only_answers_since_the_acknowledgement(world):
+    world.enrol("bob")
+    world.consent("bob")
+    bob_sid = world.students["bob"].student_id
+    alice, bob = _login(world.app, "alice"), _login(world.app, "bob")
+    for _ in range(3):  # hidden wrong answers: they must not lower what the instructor sees later
+        alice.post(f"{world.url}/check", json={**Q1, "choice": "B"})
+    set_mode(world, "B")
+    for student in (alice, bob):
+        student.post(f"{world.url}/me/visibility", json={"action": "acknowledge"})
+        student.post(f"{world.url}/check", json=Q1)
+    seen = {sid: world.prof.get(f"{world.url}/students/{sid}/overview").json()["kcs"]
+            for sid in (world.sid, bob_sid)}
+    assert seen[world.sid] == seen[bob_sid] and seen[world.sid][0]["kc_code"] == "C.1"
+
+
+def test_instructor_plan_reads_are_audited(world):
+    alice = _login(world.app, "alice")
+    set_mode(world, "B")
+    alice.post(f"{world.url}/me/visibility", json={"action": "acknowledge"})
+    plan_url = f"{world.url}/students/{world.sid}/plan"
+    world.prof.put(plan_url, json={"focus_kcs": ["C.1"], "goal": "basic", "notes": ""})
+    for _ in range(2):
+        assert world.prof.get(plan_url).status_code == 200
+    alice.get(f"{world.url}/me/profile")  # the student's own read is not an instructor view
+    views = [a for a in rows("audit_log") if a["action"] == "learner.plan.view"]
+    assert len(views) == 2 and views[0]["details"] == {"student_id": world.sid}
+
+
 def test_other_people_cannot_use_the_learner_endpoints(world):
     world.accounts = world.services.accounts
     world.accounts.create_instructor("other", "correct-horse-battery", must_change=False)

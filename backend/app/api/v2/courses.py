@@ -155,7 +155,7 @@ def end_term(request: Request, body: EndTermIn, access: CourseInstructor):
     done = end_of_term.end_term(
         services.engine, services.settings.data_path(), _scope(services, access.course.id), access,
         min_group=services.settings.learner.class_summary_min_group,
-        retention_hours=services.settings.limits.courses.export_retention_hours)
+        retention_hours=services.settings.limits.courses.export_retention_hours, settings=services.settings)
     return EndTermOut(**done.__dict__)
 
 

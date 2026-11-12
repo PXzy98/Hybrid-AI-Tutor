@@ -5,10 +5,13 @@ the rows they work on: the visibility fields of `course_member`, the learner tab
 `learning_plan` table and the audit log. Nothing here holds or returns question text.
 """
 from collections.abc import Sequence
+from datetime import datetime
 
 from sqlalchemy import Engine, delete, update
 from sqlmodel import Session, select
 
+from app.core.schemas import Evidence, KcState
+from app.learner.knowledge import load_knowledge_model
 from app.learner.learning_plan import (
     LearningPlan,
     change_visibility,
@@ -28,8 +31,8 @@ from app.storage.models import (
     AuditLog,
     CourseMember,
     EvidenceLog,
-    LearnerKcState,
     LearnerMisconception,
+    QuizAttempt,
     RequestLog,
     SessionTurn,
     utcnow,
@@ -91,11 +94,40 @@ def course_student_ids(engine: Engine, course_id: int) -> list[str]:
     return sorted(s for s in rows if s)
 
 
-class DbLearnerViewStore:
-    """`instructor_view.LearnerViewStore` on the course tables."""
+class _WindowRepo:
+    """A learner repository in memory, fed only the evidence of the visibility window: the knowledge model
+    replays it from the prior, so earlier (hidden) answers cannot shape what the instructor sees."""
 
-    def __init__(self, engine: Engine) -> None:
+    def __init__(self) -> None:
+        self._states: dict[str, KcState] = {}
+        self._rows: list[EvidenceLog] = []
+        self.at: datetime | None = None  # created_at of the row being replayed
+
+    def states(self, student_id: str, kc_ids: list[str]) -> dict[str, KcState]:
+        return {k: self._states[k] for k in kc_ids if k in self._states}
+
+    def save_state(self, student_id: str, state: KcState) -> None:
+        self._states[state.kc_id] = state
+
+    def log_evidence(self, student_id: str, ev: Evidence, weight: float = 1.0) -> datetime:
+        self._rows.append(EvidenceLog(id=len(self._rows) + 1, student_id=student_id, kc_id=ev.kc_id,
+                                      kind=ev.kind, source=ev.source, item_id=ev.item_id, correct=ev.correct,
+                                      signal=ev.signal, misconception_id=ev.misconception_id, weight=weight,
+                                      created_at=self.at))
+        return self.at
+
+    def evidence(self, student_id: str, kc_id: str | None = None) -> list[EvidenceLog]:
+        return [r for r in self._rows if kc_id is None or r.kc_id == kc_id]
+
+
+class DbLearnerViewStore:
+    """`instructor_view.LearnerViewStore` on the course tables. Mastery for the instructor is replayed from
+    the evidence since `visible_since` with the course's knowledge model (`settings`, `content`); without
+    them no mastery is shown."""
+
+    def __init__(self, engine: Engine, settings=None, content=None) -> None:
         self.engine = engine
+        self.settings, self.content = settings, content
 
     def visibility(self, course_id: int, student_id: str) -> VisibilityState | None:
         return visibility_state(self.engine, course_id, student_id)
@@ -106,8 +138,23 @@ class DbLearnerViewStore:
                                                *where)).all()
 
     def kc_signals(self, course_id: int, student_id: str) -> Sequence[LearnerSignal]:
-        return [LearnerSignal(course_id, student_id, r.last_seen, r.kc_id, r.p_mastery)
-                for r in self._rows(LearnerKcState, course_id, student_id) if r.last_seen is not None]
+        state = self.visibility(course_id, student_id)
+        if state is None or state.visible_since is None or self.content is None:
+            return []
+        since = EvidenceLog.created_at >= state.visible_since
+        rows = sorted(self._rows(EvidenceLog, course_id, student_id, since), key=lambda r: r.id)
+        repo = _WindowRepo()
+        model = load_knowledge_model(self.settings, repo, self.content)
+        latest: dict[str, LearnerSignal] = {}
+        for r in rows:
+            if self.content.kc(r.kc_id) is None:  # a KC that no longer exists
+                continue
+            repo.at = r.created_at
+            new = model.update(student_id, Evidence(kc_id=r.kc_id, kind=r.kind, correct=r.correct,
+                                                    signal=r.signal, misconception_id=r.misconception_id,
+                                                    item_id=r.item_id, source=r.source))
+            latest[r.kc_id] = LearnerSignal(course_id, student_id, r.created_at, r.kc_id, new.p_mastery)
+        return list(latest.values())
 
     def check_answers(self, course_id: int, student_id: str) -> Sequence[CheckAnswerRecord]:
         return [CheckAnswerRecord(course_id, student_id, r.created_at, r.item_id, bool(r.correct))
@@ -123,9 +170,10 @@ class DbLearnerViewStore:
         return [ActivityRecord(course_id, student_id, r.created_at, "question")
                 for r in self._rows(RequestLog, course_id, student_id)]
 
-    def audit_view(self, course_id: int, student_id: str, viewer_account_id: int) -> bool:
+    def audit_view(self, course_id: int, student_id: str, viewer_account_id: int,
+                   action: str = "learner.overview.view") -> bool:
         with Session(self.engine) as db:
-            db.add(AuditLog(account_id=viewer_account_id, action="learner.overview.view",
+            db.add(AuditLog(account_id=viewer_account_id, action=action,
                             target=f"course:{course_id}", details={"student_id": student_id}))
             db.commit()
         return True
@@ -139,16 +187,23 @@ def _plan(row: PlanRow | None) -> LearningPlan | None:
                         row.updated_at)
 
 
-def shown_plan(engine: Engine, course_id: int, student_id: str) -> LearningPlan | None:
+def shown_plan(engine: Engine, course_id: int, student_id: str, *,
+               viewer_account_id: int | None = None) -> LearningPlan | None:
     """The plan the student and the instructor may see now (none in mode A, after an opt-out, or from before
-    the current consent)."""
+    the current consent). `viewer_account_id`: an instructor's read, audited in the same transaction before
+    the plan is returned."""
     with Session(engine) as db:
         member = _member(db, course_id, student_id)
         if member is None:
             return None
         row = db.exec(select(PlanRow).where(PlanRow.course_id == course_id,
                                             PlanRow.student_id == student_id)).first()
-        return visible_learning_plan(_state(member, course_id, student_id), _plan(row))
+        plan = visible_learning_plan(_state(member, course_id, student_id), _plan(row))
+        if plan is not None and viewer_account_id is not None:
+            db.add(AuditLog(account_id=viewer_account_id, action="learner.plan.view",
+                            target=f"course:{course_id}", details={"student_id": student_id}))
+            db.commit()
+        return plan
 
 
 def save_plan(engine: Engine, course_id: int, student_id: str, *, focus_kcs: list[str], goal: str,
@@ -179,12 +234,14 @@ def save_plan(engine: Engine, course_id: int, student_id: str, *, focus_kcs: lis
 
 # ------------------------------------------------------------------------- a student's own deletion
 def delete_own_course_data(engine: Engine, learner, course_id: int, student_id: str) -> None:
-    """`DELETE .../me/learning-data` (course-structure.md 4.4): the student's learner data, plan and
-    conversations in this course; request logs stay for the class statistics without the student.
+    """`DELETE .../me/learning-data` (course-structure.md 4.4): the student's learner data, plan, quiz
+    attempts and conversations in this course; request logs stay for the class statistics without the student.
     Preferences, consent, the membership and other courses are untouched."""
     learner.delete_course_data(student_id)
     with Session(engine) as db:
         db.exec(delete(PlanRow).where(PlanRow.course_id == course_id, PlanRow.student_id == student_id))
+        db.exec(delete(QuizAttempt).where(QuizAttempt.course_id == course_id,
+                                          QuizAttempt.student_id == student_id))
         db.exec(delete(SessionTurn).where(SessionTurn.course_id == course_id,
                                           SessionTurn.student_id == student_id))
         db.exec(update(RequestLog).where(RequestLog.course_id == course_id,

@@ -57,6 +57,7 @@ def test_ending_the_term_exports_then_deletes_the_course_student_data(world):
     assert set(files) == {"export.json", "class_summary.json", "students.json"}
     assert files["export.json"]["students"] == 2 and files["class_summary.json"][0]["students"] == 2
     assert [s["student_id"] for s in files["students.json"]] == [sid]  # only the student who acknowledged
+    assert [k["kc_code"] for k in files["students.json"][0]["kcs"]] == ["C.1"]  # mastery since visible
     text = json.dumps(files)
     assert "volt" not in text and "alice" not in text.lower()  # no question text, no names
 

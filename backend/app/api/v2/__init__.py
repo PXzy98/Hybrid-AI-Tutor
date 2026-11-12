@@ -16,7 +16,9 @@ from app.api.v2 import (
     learner,
     me,
     model_endpoints,
+    quizzes,
     settings,
+    survey,
 )
 
 api_router_v2 = APIRouter(prefix="/api/v2")
@@ -30,3 +32,5 @@ api_router_v2.include_router(me.router)
 api_router_v2.include_router(ai_evaluations.router)
 api_router_v2.include_router(ask.router)
 api_router_v2.include_router(learner.router)
+api_router_v2.include_router(quizzes.router)
+api_router_v2.include_router(survey.router)

@@ -1672,6 +1672,154 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/courses/{course_id}/quizzes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Quizzes
+         * @description Instructors: every quiz of the course. Students: published quizzes assigned to them.
+         */
+        get: operations["quizzes_list"];
+        put?: never;
+        /** Create Quiz */
+        post: operations["quizzes_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/quizzes/{quiz_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Quiz */
+        get: operations["quizzes_get"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete Quiz
+         * @description Only a quiz nobody has answered (close it otherwise).
+         */
+        delete: operations["quizzes_delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Update Quiz
+         * @description Edit, publish (`status: published`, every question reviewed) or close a quiz. Saving `questions`
+         *     marks them reviewed; questions cannot change once students have answered.
+         */
+        patch: operations["quizzes_update"];
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/quizzes/{quiz_id}/drafts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Draft Questions
+         * @description The local model drafts questions from the course material (a background job, `GET .../jobs/{id}`);
+         *     they are added to the draft quiz unreviewed.
+         */
+        post: operations["quizzes_draft"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/quizzes/{quiz_id}/attempt": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Attempt
+         * @description Answer the quiz once, while it is open. The result comes back at once; with consent it also updates
+         *     the knowledge model.
+         */
+        post: operations["quizzes_attempt"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/quizzes/{quiz_id}/results": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Results
+         * @description Class aggregates (suppressed below the minimum group) and, for students visible to the instructor
+         *     (visibility mode B, acknowledged, not opted out), their own results; each individual view is audited.
+         */
+        get: operations["quizzes_results"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/survey": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Survey */
+        get: operations["survey_get"];
+        /**
+         * Set Window
+         * @description Open the survey for a time window (usually the last week of term); set again to change or close it.
+         */
+        put: operations["survey_window_set"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/survey/responses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Answer */
+        post: operations["survey_answer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1857,6 +2005,22 @@ export interface components {
              * @default []
              */
             routing_progress: components["schemas"]["RoutingProgress"][];
+        };
+        /** AttemptIn */
+        AttemptIn: {
+            /** Answers */
+            answers: number[];
+        };
+        /** AttemptResult */
+        AttemptResult: {
+            /** Correct */
+            correct: boolean;
+            /** Chosen */
+            chosen: number;
+            /** Answer */
+            answer: number;
+            /** Explanation */
+            explanation: string;
         };
         /** Body_content_import */
         Body_content_import: {
@@ -2194,6 +2358,23 @@ export interface components {
              * @enum {string}
              */
             choice: "A" | "B" | "C" | "D";
+        };
+        /** DraftIn */
+        DraftIn: {
+            /**
+             * Count
+             * @default 5
+             */
+            count: number;
+            /** Kinds */
+            kinds?: ("mcq" | "true_false")[];
+            /** Kc Codes */
+            kc_codes?: string[] | null;
+        };
+        /** DraftOut */
+        DraftOut: {
+            /** Job Id */
+            job_id: number;
         };
         /** EndTermIn */
         EndTermIn: {
@@ -3210,6 +3391,20 @@ export interface components {
             /** Misconception */
             misconception?: string | null;
         };
+        /** OwnAttempt */
+        OwnAttempt: {
+            /** Score */
+            score: number;
+            /** Total */
+            total: number;
+            /**
+             * Submitted At
+             * Format: date-time
+             */
+            submitted_at: string;
+            /** Results */
+            results: components["schemas"]["AttemptResult"][];
+        };
         /** PlanIn */
         PlanIn: {
             /** Focus Kcs */
@@ -3314,6 +3509,21 @@ export interface components {
              */
             topics: components["schemas"]["TopicProfile"][];
         };
+        /**
+         * PublicQuestion
+         * @description A question as a student sees it before answering: no answer, no explanation.
+         */
+        PublicQuestion: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "mcq" | "true_false";
+            /** Stem */
+            stem: string;
+            /** Options */
+            options: string[];
+        };
         /** QuestionIn */
         QuestionIn: {
             /** Module Id */
@@ -3331,10 +3541,159 @@ export interface components {
              */
             reference: string;
         };
+        /** QuestionStat */
+        QuestionStat: {
+            /** Position */
+            position: number;
+            /** Kc */
+            kc: string | null;
+            /** Correct Rate */
+            correct_rate: number;
+        };
         /** QuestionsIn */
         QuestionsIn: {
             /** Questions */
             questions: components["schemas"]["QuestionIn"][];
+        };
+        /** QuizIn */
+        QuizIn: {
+            /** Title */
+            title: string;
+            /** Module Id */
+            module_id?: number | null;
+            /**
+             * Kind
+             * @default practice
+             * @enum {string}
+             */
+            kind: "practice" | "final";
+            /** Opens At */
+            opens_at?: string | null;
+            /** Closes At */
+            closes_at?: string | null;
+            /** Assigned To */
+            assigned_to?: string[] | null;
+            /** Questions */
+            questions?: components["schemas"]["QuizQuestion"][];
+        };
+        /**
+         * QuizOut
+         * @description The instructor's view: answers and explanations included.
+         */
+        QuizOut: {
+            /** Id */
+            id: number;
+            /** Title */
+            title: string;
+            /** Module Id */
+            module_id: number | null;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "practice" | "final";
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "draft" | "published" | "closed";
+            /** Opens At */
+            opens_at: string | null;
+            /** Closes At */
+            closes_at: string | null;
+            /** Assigned To */
+            assigned_to: string[] | null;
+            /** Questions */
+            questions: components["schemas"]["QuizQuestion"][];
+            /** Attempts */
+            attempts: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** QuizPatch */
+        QuizPatch: {
+            /** Title */
+            title?: string | null;
+            /** Module Id */
+            module_id?: number | null;
+            /** Kind */
+            kind?: ("practice" | "final") | null;
+            /** Status */
+            status?: ("draft" | "published" | "closed") | null;
+            /** Opens At */
+            opens_at?: string | null;
+            /** Closes At */
+            closes_at?: string | null;
+            /** Assigned To */
+            assigned_to?: string[] | null;
+            /** Questions */
+            questions?: components["schemas"]["QuizQuestion"][] | null;
+        };
+        /**
+         * QuizQuestion
+         * @description A question as stored and as the instructor edits it.
+         */
+        QuizQuestion: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "mcq" | "true_false";
+            /** Kc */
+            kc?: string | null;
+            /** Stem */
+            stem: string;
+            /** Options */
+            options?: string[];
+            /** Answer */
+            answer: number;
+            /**
+             * Explanation
+             * @default
+             */
+            explanation: string;
+            /** Sources */
+            sources?: string[];
+            /**
+             * Reviewed
+             * @default true
+             */
+            reviewed: boolean;
+        };
+        /** QuizResults */
+        QuizResults: {
+            /** Quiz Id */
+            quiz_id: number;
+            /** Attempts */
+            attempts: number;
+            /** Sufficient Sample */
+            sufficient_sample: boolean;
+            /** Min Group Size */
+            min_group_size: number;
+            /** Mean Score */
+            mean_score?: number | null;
+            /**
+             * Questions
+             * @default []
+             */
+            questions: components["schemas"]["QuestionStat"][];
+            /** Pre Post */
+            pre_post?: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Students
+             * @default []
+             */
+            students: components["schemas"]["StudentResult"][];
         };
         /** RagMaterial */
         RagMaterial: {
@@ -3628,10 +3987,96 @@ export interface components {
             /** Last Login At */
             last_login_at: string | null;
         };
+        /**
+         * StudentQuizOut
+         * @description The student's view: no answers before the student has answered.
+         */
+        StudentQuizOut: {
+            /** Id */
+            id: number;
+            /** Title */
+            title: string;
+            /** Module Id */
+            module_id: number | null;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "practice" | "final";
+            /** Open */
+            open: boolean;
+            /** Opens At */
+            opens_at: string | null;
+            /** Closes At */
+            closes_at: string | null;
+            /**
+             * Questions
+             * @default []
+             */
+            questions: components["schemas"]["PublicQuestion"][];
+            attempt?: components["schemas"]["OwnAttempt"] | null;
+        };
+        /** StudentResult */
+        StudentResult: {
+            /** Student Id */
+            student_id: string;
+            /** Score */
+            score: number;
+            /** Total */
+            total: number;
+            /**
+             * Submitted At
+             * Format: date-time
+             */
+            submitted_at: string;
+            /** Pre Test */
+            pre_test?: number | null;
+        };
+        /**
+         * SurveyAnswers
+         * @description 1 (not at all) to 5 (very much); no free text.
+         */
+        SurveyAnswers: {
+            /** Helpfulness */
+            helpfulness: number;
+            /** Material Relevance */
+            material_relevance: number;
+            /** Clarity */
+            clarity: number;
+            /** Source Confidence */
+            source_confidence: number;
+            /** Learning Effect */
+            learning_effect: number;
+        };
+        /** SurveyOut */
+        SurveyOut: {
+            /** Opens At */
+            opens_at: string | null;
+            /** Closes At */
+            closes_at: string | null;
+            /** Open */
+            open: boolean;
+            /** Answered */
+            answered?: boolean | null;
+            results?: components["schemas"]["SurveyResults"] | null;
+        };
         /** SurveyReceipt */
         SurveyReceipt: {
             /** Saved */
             saved: boolean;
+        };
+        /** SurveyResults */
+        SurveyResults: {
+            /** Responses */
+            responses: number;
+            /** Min Group Size */
+            min_group_size: number;
+            /** Sufficient Sample */
+            sufficient_sample: boolean;
+            /** Means */
+            means?: {
+                [key: string]: number;
+            } | null;
         };
         /** SurveySubmission */
         SurveySubmission: {
@@ -3848,6 +4293,19 @@ export interface components {
             visible_to_instructor: boolean;
             /** Visible Since */
             visible_since?: string | null;
+        };
+        /** WindowIn */
+        WindowIn: {
+            /**
+             * Opens At
+             * Format: date-time
+             */
+            opens_at: string;
+            /**
+             * Closes At
+             * Format: date-time
+             */
+            closes_at: string;
         };
     };
     responses: never;
@@ -7524,6 +7982,375 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PlanOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    quizzes_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuizOut"][] | components["schemas"]["StudentQuizOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    quizzes_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuizIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuizOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    quizzes_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                quiz_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuizOut"] | components["schemas"]["StudentQuizOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    quizzes_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                quiz_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    quizzes_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                quiz_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuizPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuizOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    quizzes_draft: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                quiz_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DraftIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DraftOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    quizzes_attempt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                quiz_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AttemptIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwnAttempt"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    quizzes_results: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                quiz_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuizResults"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    survey_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SurveyOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    survey_window_set: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WindowIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SurveyOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    survey_answer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SurveyAnswers"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SurveyOut"];
                 };
             };
             /** @description Validation Error */
