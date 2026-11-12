@@ -46,7 +46,7 @@
 - 增加教师端 AI；
 - 用一套 Docker Compose 部署。
 
-**示例课程**："General Medical Knowledge"（v3 的 5 个主题作为 5 个模块，再补齐整门课的资料）和 **ELG 5902**（工程课，用来验证其他学科也能用）。
+**示例和测试课程**：8 门公开课程（MIT OpenCourseWare 和哈佛 CS50x，许可都是 CC BY-NC-SA 4.0），医学、生命科学、ECE、计算机科学各两门，以 zip 形式放在 `data/demo_courses/archives/`，使用前先运行 `python scripts/fetch_open_courses.py unpack` 解压（说明见 `data/demo_courses/README.md`）。课程包里有讲义、大纲、日历、作业和考试；答案单独放在 `instructor_only/`，永远不能当课程资料上传。**之后所有测试、评估和演示都用这些课程**（2026-11-12 决定，取代 ELG 5902）。虚构的 "General Medical Knowledge" 只留给 v3 迁移用。
 
 **现阶段不做**：
 - 中文界面，以及"兼容中文输入"以外的中文功能（规则 14）；
@@ -404,13 +404,13 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | S2 | `.pptx`：`python-pptx` 读取每页的文字、表格和演讲者备注；每段记录 `slide N`；页标题作为分段标题；检查解压后大小；全是图片时给出明确错误；用虚构的 3 页 PPT 测试 | S4–S5 | S1 | `backend/app/rag/documents.py`、`admin/materials.py` | 测试通过；来源显示 slide N |
 | S3 | 引用编号和 Sources 列表对齐 | S5 | S1 | `backend/app/api/v1/ask.py`、`backend/app/prompts/render.py` | 有测试 |
 | S4 | 课程检索器：课程级和模块级资料；每门课一个磁盘索引，带 `index_version`；后台任务重建；上传时调用 `scan_document()` | S5–S6 | Z4、Z11（先用假实现） | `backend/app/rag/`（`medical_hybrid.py` 改名并改造） | 大纲和项目要求能被检索到 |
-| S5 | 示例课程资料：补齐"General Medical Knowledge"（大纲、项目要求、模板、讲义）；ELG 5902（由斯允先征得 Gita 教授同意） | S5 | 独立 | `data/`（目录按 course-structure.md 第 7 节） | 两门课都能上传和检索 |
+| S5 | 示例课程资料：`data/demo_courses/` 里的 8 个公开课程包（Z 已做好，见 7.5）；剩下的是确认每个课程包都能通过课程检索器上传和检索 | S5 | 独立 | `data/`（目录按 course-structure.md 第 7 节） | 8 门课都能上传和检索 |
 | S6 | 教师端 AI 第一档后端，通过模型网关 | S6 | S4、Z6 | 新的 `backend/app/instructor_ai/` | 教师接受后学生才看得到 |
 | S7 | 教师端 AI 第二档后端（知识点、检测题、误解；草稿 → 接受）；课程摸底题也用它（D3） | S6–S7 | Z4、S4 | 同上 | 新课程可以由 AI 起草，接受后用于个性化 |
 | S8 | 课程级知识模型（4.10） | S6–S7 | Z4 | `backend/app/learner/knowledge/` | 和现有 BKT 的对比评估（`eval/learner-sim/`） |
 | S9 | 可见性方案 A/B、个人概览、学习计划、不公开、审计；结束学期导出的内容 | S6–S7 | Z4、Z10 | `backend/app/learner/`、`backend/app/api/v2/` | 测试覆盖"不该看到的不返回" |
 | S10 | 教师端 AI 第三档：班级洞察后端 | S7 | S8 | `backend/app/instructor_ai/` | 不返回原文 |
-| S11 | 两门课的检索评估（`eval/course_rag_benchmark.py`） | S7 | S5 | `eval/` | 两门课都有结果 |
+| S11 | 公开课程包的检索评估，每个领域至少一门（`eval/course_rag_benchmark.py`） | S7 | S5 | `eval/` | 每个领域都有结果 |
 | S12 | 自查和交接文档 | S8 | — | `docs/` | 自查清单 |
 | Q1 | 小测和学期末问卷，2026-11-12 导师会议后新增（第 9 节）：小测（选择题和判断题，本地模型起草，审阅，发布，自动评分，结果遵守可见性规则，`final` 小测 = 后测，和课程诊断（前测）对比）；学期末问卷（时间窗口、匿名打分、最小组人数）；结束学期时两者都以汇总形式导出，然后删除 | S7 | S9、S6 | `backend/app/learner/quizzes.py`、`backend/app/api/v2/quizzes.py`、`backend/app/api/v2/survey.py`、`backend/app/instructor_ai/quiz_drafts.py`、`backend/app/platform/end_of_term.py`、迁移 0013 | `backend/tests/test_quizzes_v2.py` 通过；每个接口都有访问测试；api-v2.md 3.9、3.10 |
 
@@ -423,7 +423,7 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | T1 | Beta 路由评估（G1-105）和 Beta 报告（G1-108） | S4 | — | `eval/` | 按时交付 |
 | T2 | 前端改版设计稿：用 v0 出几版；选定 AI Elements 或 assistant-ui（7.4） | S4–S5 | 独立 | 设计稿 | Z、S 和客户认可 |
 | T3 | 升级到 Tailwind 4 和 React 19，引入 shadcn/ui；现有页面改版；回答用 Markdown 渲染（修好粗体） | S5 | T2 | `frontend/` | 现有前端测试通过；截图对比 |
-| T4 | ECE 路由评估：用 ELG 5902 资料写工程问题并标注，做评估；需要时补训练数据、重新训练 | S5–S6 | S5 | `backend/app/routing/`、`data/routing/`、`eval/` | 报告；工程问题不会全部被送云端 |
+| T4 | ECE 和计算机科学的路由评估：用 `data/demo_courses/` 里 ECE 和计算机科学的课程包写问题并标注，做评估；需要时补训练数据、重新训练 | S5–S6 | S5 | `backend/app/routing/`、`data/routing/`、`eval/` | 报告；工程问题不会全部被送云端 |
 | T5 | 问题类型分类（concept / logistics）：标注数据，路由模型多一个输出 | S6 | T4 | `backend/app/routing/` | 准确率报告 |
 | T6 | 新页面：选课程、加入页（邀请码）、课程管理、成员导入、课程设置 | S6 | Z9 的 OpenAPI | `frontend/src/pages/` | 主要流程有界面测试 |
 | T7 | 新页面：教师端 AI（四档）、个人概览、学习计划、可见性方案和不公开。新前端**没有每条回答后的评分**，回答下面也**没有"更详细 / 更简短 / 先举例 / 先讲概念"按钮**（决定见第 9 节）：评价只有学期末问卷 | S6–S7 | S6～S10、Z12 的 OpenAPI | `frontend/src/pages/` | 同上 |
@@ -594,7 +594,6 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 **待决定**：
 - 项目名：候选 HALO（Hybrid Adaptive Learning Orchestrator）、COMPASS、CAIRN、MAPLE；
 - vLLM 机器一直开着，还是只在上课时间开；
-- ELG 5902 材料的使用许可（Gita 教授）；
 - 本学期的交付范围（和 Ismaeel 教授、Abbas 教授确认）。
 
 **现阶段不做**：中文界面、伦理审批、备份和硬盘加密、云端服务商比较。

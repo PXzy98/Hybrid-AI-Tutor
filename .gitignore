@@ -46,3 +46,8 @@ data/*.db-shm
 
 # course materials, indexes and exports (DATA_DIR, task Z12)
 /var/
+
+# Open course packs: the repository stores data/demo_courses/archives/*.zip; unpack with
+# python scripts/fetch_open_courses.py unpack
+/data/demo_courses/mit_*/
+/data/demo_courses/harvard_*/
