@@ -106,11 +106,29 @@ class GradeContextRecognizer(EntityRecognizer):
                 if not _blood_type(text, a, b)]
 
 
+# the letter itself is a blood type or an allele: "blood type A", "type AB", "an A allele", "an A from the
+# first grandparent"; a grade word right after it ("a B on the midterm") wins
+BLOOD_BEFORE_RE = re.compile(r"(?:blood\s+(?:types?|groups?)|types?|groups?|alleles?|genotypes?)\s+"
+                             r"(?:[ABO]{1,2}\s*(?:,|or|and)\s*)*$", re.I)
+BLOOD_AFTER_RE = re.compile(r"\s*(?:alleles?|blood|antigens?|genotypes?)", re.I)
+FROM_PARENT_RE = re.compile(r"\s+from\s+(?:\w+\s+){0,3}?(?:grand)?(?:parents?|mother|father|mom|dad)",
+                            re.I)
+GRADE_AFTER_RE = re.compile(r"(?:\W+\w+){0,4}?\W+(?:midterm|exam|quiz|test|final|course|assignment|grade|"
+                            r"mark|score|paper|lab|project)s?", re.I)
+
+
 def _blood_type(text: str, start: int, end: int) -> bool:
-    """An A or B inherited from a parent, not a grade (found by scanning open course material): "the first
-    parent received an A from the first grandparent". Only the letters A and B, and only in a sentence about
-    inheritance."""
+    """An A or B that is a blood type or an inherited allele, not a grade (found by scanning open course
+    material): "the first parent received an A from the first grandparent". The letter itself must be part
+    of the blood type or inheritance wording, in a sentence about inheritance; "I hit a B on the midterm
+    about dominant alleles" stays a grade."""
     if text[start:end] not in ("A", "B"):
         return False
     sentence = next((s for s in SENTENCE_RE.finditer(text) if s.start() <= start < s.end()), None)
-    return bool(sentence and INHERITANCE_RE.search(sentence.group()))
+    if not (sentence and INHERITANCE_RE.search(sentence.group())):
+        return False
+    if GRADE_AFTER_RE.match(text, end):
+        return False
+    before = text[max(sentence.start(), start - 40):start]
+    return bool(BLOOD_BEFORE_RE.search(before) or BLOOD_AFTER_RE.match(text, end)
+                or FROM_PARENT_RE.match(text, end))

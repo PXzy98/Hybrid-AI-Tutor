@@ -40,11 +40,18 @@ ASSIGNED_SECRET_RE = re.compile(
 # words that follow "token" or "password" in course prose, not values
 _NOT_VALUES = {"expired", "invalid", "required", "missing", "rotation", "hashing", "hashed", "storage",
                "generation", "validation", "strength", "manager", "managers", "policy", "policies", "reset"}
-# placeholders in teaching code, not values (found by scanning open course material): the name of a constant
-# or environment variable ("token=API_KEY", "YOUR_PASSWORD"), a bracketed hint ("<your-api-key>"), "xxxxxx"
+# placeholders in teaching code, not values (found by scanning open course material). Only explicit ones: the
+# name of a key variable right after "=", unquoted (a reference in code, "?token=API_KEY"); a value that says
+# it is a placeholder ("YOUR_PASSWORD", "<your-api-key>", "{{ api_key }}", "xxxxxx"). A quoted or spaced
+# constant-like value ('password = "LAB_PASS_2026"', "password: LAB_PASS") or a bracketed value with digits
+# or symbols is a real credential.
+CONSTANT_NAME_RE = re.compile(r"(?:[A-Z]+_)+(?:KEY|TOKEN|SECRET)")
+_PLACEHOLDER_WORD = r"(?:your|example|placeholder|changeme|change[_-]me|replace[_-]?me|dummy|redacted)"
 PLACEHOLDER_VALUE_RE = re.compile(
-    r"[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+|<[^<>]+>|\{\{?[^{}]+\}?\}|[xX]{4,}|\*{4,}|\.{3,}"
-    r"|(?i:your)[_-]?(?i:[a-z_-]*)(?i:key|token|secret|password|pass)(?i:[a-z_-]*)")
+    rf"(?i:(?:[a-z]+[_-])*{_PLACEHOLDER_WORD}(?:[_-][a-z]+)*)"  # YOUR_PASSWORD, example-token
+    rf"|<\s*(?i:(?:[a-z]+[ _-])*(?:{_PLACEHOLDER_WORD}|api)(?:[ _-][a-z]+)*)\s*>"  # <your-api-key>
+    r"|\{\{?\s*[a-z_]+(?:\.[a-z_]+)*\s*\}?\}|[xX]{4,}|\*{4,}|\.{3,}")  # {{ api_key }}, xxxxxx
+
 
 _O = r"(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)"  # one octet
 PRIVATE_IPV4 = (rf"(?<![\d.])(?:10\.{_O}\.{_O}\.{_O}|172\.(?:1[6-9]|2\d|3[01])\.{_O}\.{_O}"
@@ -68,8 +75,10 @@ class SecretTokenRecognizer(PatternRecognizer):
             plain_word = value.isalpha() and len(value) < 12
             if value.lower() in _NOT_VALUES or plain_word:
                 continue  # "the token expired", "password is required"
-            if PLACEHOLDER_VALUE_RE.fullmatch(value.strip("`.,:)]")):
-                continue  # "token=API_KEY", 'password = "YOUR_PASSWORD"'
+            bare = value.strip("`.,:)]")
+            reference = m.start(1) > 0 and text[m.start(1) - 1] == "="
+            if PLACEHOLDER_VALUE_RE.fullmatch(bare) or (reference and CONSTANT_NAME_RE.fullmatch(bare)):
+                continue  # 'password = "YOUR_PASSWORD"', "token=API_KEY"
             results.append(self._result(m.start(1), m.end(1)))
         return results
 

@@ -77,6 +77,25 @@ def test_grades_and_health_details_of_an_identified_student_block(text, kind):
     assert kind in _blocking("medical_science", text)
 
 
+@pytest.mark.parametrize("text", [
+    'password = "LAB_PASS_2026"',
+    'password = "<Lab4Pass!2026>"',
+    "my password is LAB_PASS_2026",
+    "api_key: GHX_LIVE_KEY",
+])
+def test_constant_like_or_bracketed_credentials_still_block(text):
+    assert "SECRET" in _blocking("general", text)
+
+
+@pytest.mark.parametrize("text", [
+    "I hit a B on the midterm about dominant alleles.",
+    "My genetics exam grade was an A, the one on recessive genes.",
+    "I got an A in the course on inheritance.",
+])
+def test_grades_in_sentences_about_inheritance_are_still_found(text):
+    assert "GRADE" in _types("life_science", text)
+
+
 def test_a_real_credential_still_blocks_in_every_course():
     for profile in ("general", "ece", "medical_science", "life_science"):
         assert "SECRET" in _blocking(profile, 'password = "Lab4Pass!2026"')
