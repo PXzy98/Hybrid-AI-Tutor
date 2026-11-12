@@ -12,6 +12,11 @@ multi-course product ("v4").
    settings, the database or the HTTP API.
 3. [docs/IMPLEMENTATION_LOG.md](docs/IMPLEMENTATION_LOG.md) for how the current code came about.
 
+**Test and demo courses**: every test, evaluation and demo uses the eight open courses of
+[data/demo_courses/README.md](data/demo_courses/README.md). They are stored as zips; run
+`python scripts/fetch_open_courses.py unpack` once before using them, never commit the unpacked folders, and
+never upload their `instructor_only/` files (solutions) as course material.
+
 Files named `*_zh.md` in `docs/` are Chinese companions for the team; do not use them as instructions.
 `docs/history/` is out of date.
 
