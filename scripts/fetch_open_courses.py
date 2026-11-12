@@ -118,29 +118,36 @@ def strip_tags(fragment: str) -> str:
 
 
 def html_to_md(fragment: str) -> str:
-    """Enough Markdown for these pages: headings, lists, code blocks, emphasis."""
+    """Enough Markdown for these pages: headings, lists, code blocks, emphasis. Code is decoded once and
+    kept aside until the HTML is gone, so "if (x < y)" or "#include <stdio.h>" is never taken for a tag."""
+    kept: list[str] = []
+
+    def keep(code: str) -> str:
+        kept.append(code)
+        return f"\x00{len(kept) - 1}\x00"
+
+    def code_text(html: str) -> str:
+        return unescape(re.sub(r"<[^>]+>", "", html))
+
     t = re.sub(r"(?is)<(script|style|nav|footer|button|svg|form)[^>]*>.*?</\1>", "", fragment)
     t = re.sub(r"(?is)<pre[^>]*>(.*?)</pre>",
-               lambda m: "\n```\n" + unescape(re.sub(r"<[^>]+>", "", m.group(1))).strip("\n") + "\n```\n", t)
+               lambda m: "\n" + keep("```\n" + code_text(m.group(1)).strip("\n") + "\n```") + "\n", t)
+    t = re.sub(r"(?is)<code[^>]*>(.*?)</code>", lambda m: keep("`" + code_text(m.group(1)) + "`"), t)
     for n in range(1, 5):
         t = re.sub(rf"(?is)<h{n}[^>]*>(.*?)</h{n}>",
                    lambda m, n=n: f"\n\n{'#' * n} {strip_tags(m.group(1))}\n\n", t)
     t = re.sub(r"(?is)<tr[^>]*>(.*?)</tr>", lambda m: "\n| " + " | ".join(
         strip_tags(x) for x in re.findall(r"(?is)<t[dh][^>]*>(.*?)</t[dh]>", m.group(1))) + " |\n", t)
     t = re.sub(r"(?is)<li[^>]*>", "\n- ", t)
-    t = re.sub(r"(?is)<code[^>]*>(.*?)</code>", lambda m: "`" + re.sub(r"<[^>]+>", "", m.group(1)) + "`", t)
     t = re.sub(r"(?is)<(strong|b)>(.*?)</\1>", r"**\2**", t)
     t = re.sub(r"(?is)<(em|i)>(.*?)</\1>", r"*\2*", t)
     t = re.sub(r"(?is)<br\s*/?>", "\n", t)
     t = re.sub(r"(?is)</(p|div|ul|ol|table|tr|blockquote)>", "\n\n", t)
     t = re.sub(r"(?is)</t[dh]>", " | ", t)
     t = unescape(re.sub(r"(?s)<[^>]+>", "", t))
-    parts = re.split(r"(\n```\n.*?\n```\n)", t, flags=re.S)  # code blocks stay as they are
-    for i, p in enumerate(parts):
-        if not p.startswith("\n```"):
-            p = re.sub(r" *\n *", "\n", re.sub(r"[ \t]+", " ", p))
-            parts[i] = re.sub(r"\n(-\n)+", "\n", re.sub(r"\n{3,}", "\n\n", p))
-    return "".join(parts).strip() + "\n"
+    t = re.sub(r" *\n *", "\n", re.sub(r"[ \t]+", " ", t))
+    t = re.sub(r"\n(-\n)+", "\n", re.sub(r"\n{3,}", "\n\n", t))
+    return re.sub(r"\x00(\d+)\x00", lambda m: kept[int(m.group(1))], t).strip() + "\n"
 
 
 def main_content(html: str) -> str:
