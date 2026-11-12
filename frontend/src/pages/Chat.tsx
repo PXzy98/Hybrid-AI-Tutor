@@ -2,10 +2,9 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 
-import { api, type AskBody, type AskResponse, type FeedbackAction } from "../api/endpoints";
+import { api, type AskBody, type AskResponse } from "../api/endpoints";
 import Band from "../components/Band";
 import CheckCard from "../components/CheckCard";
-import FeedbackSurvey from "../components/FeedbackSurvey";
 import { TRIAL_QUESTIONS } from "../components/surveyScenarios";
 import TopicPicker from "../components/TopicPicker";
 import { useI18n } from "../i18n";
@@ -18,8 +17,6 @@ type Message =
   | { role: "routing"; trace: RoutingTrace };
 
 type SendInput = { question: string; topic: string; sessionId: string; traceId: string; method: NonNullable<AskBody["routing_method"]> };
-
-const FEEDBACK: FeedbackAction[] = ["more_detail", "shorter", "example_first", "concept_first"];
 
 export default function Chat() {
   const [topic, setTopic] = useState("high_blood_pressure");
@@ -71,7 +68,6 @@ export default function Chat() {
       push({ role: "error", text: (e as Error).message }, input.topic);
     },
   });
-  const feedback = useMutation({ mutationFn: api.feedback });
 
   useEffect(() => {
     // a block body on purpose: in some browsers scrollIntoView returns a Promise, which must not be
@@ -130,11 +126,6 @@ export default function Chat() {
           ),
         )}
         {ask.isPending && <p className="text-sm text-slate-500">{t("chat.thinking")}</p>}
-        {lastTutor && (
-          <div className="self-start">
-            <FeedbackSurvey key={topic} topic={topic} />
-          </div>
-        )}
         <div ref={endRef} />
       </section>
 
@@ -161,18 +152,6 @@ export default function Chat() {
                     onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) send(e); }} />
           <button type="submit" className="btn-primary self-end" disabled={!question.trim() || ask.isPending || !routingOptions.data}>{t("chat.send")}</button>
         </div>
-        {profile.data?.personalized && (
-          <div className="flex flex-wrap items-center gap-2 text-sm" role="group" aria-label={t("chat.feedbackGroup")}>
-            <span className="text-slate-600">{t("chat.nextAnswers")}</span>
-            {FEEDBACK.map((f) => (
-              <button key={f} type="button" className="btn-secondary px-2.5 py-1 text-xs"
-                      onClick={() => feedback.mutate(f)} disabled={feedback.isPending}>
-                {t(`feedback.${f}`)}
-              </button>
-            ))}
-            {feedback.isSuccess && <span role="status" className="text-xs text-emerald-700">{t("chat.saved")}</span>}
-          </div>
-        )}
       </form>
     </div>
   );
