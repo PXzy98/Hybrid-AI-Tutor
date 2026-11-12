@@ -648,6 +648,45 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/courses/{course_id}/end-term": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * End Term
+         * @description End the term: build the export (class summary; in visibility mode B also the overviews the
+         *     instructor may see), then delete the students' memberships and their data in this course. The course,
+         *     its content, materials and settings stay for the next class list.
+         */
+        post: operations["courses_end_term"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/exports/{export_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download Export */
+        get: operations["courses_export_download"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/courses/{course_id}/members": {
         parameters: {
             query?: never;
@@ -2155,6 +2194,32 @@ export interface components {
              * @enum {string}
              */
             choice: "A" | "B" | "C" | "D";
+        };
+        /** EndTermIn */
+        EndTermIn: {
+            /**
+             * Confirm
+             * @constant
+             */
+            confirm: true;
+        };
+        /** EndTermOut */
+        EndTermOut: {
+            /** Export Id */
+            export_id: string;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /** Students Removed */
+            students_removed: number;
+            /** Students Exported */
+            students_exported: number;
+            /** Deleted */
+            deleted: {
+                [key: string]: number;
+            };
         };
         /** EndpointIn */
         EndpointIn: {
@@ -5001,6 +5066,81 @@ export interface operations {
             };
             /** @description the course still has students (end the term first) */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    courses_end_term: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EndTermIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EndTermOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    courses_export_download: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                export_id: string;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                    "application/zip": unknown;
+                };
+            };
+            /** @description unknown or expired */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

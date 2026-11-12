@@ -99,6 +99,8 @@ limits:
     max_roster_bytes: 1000000
   content:
     max_import_bytes: 5000000    # content ZIP (YAML seed layout) for POST .../content/import
+  courses:
+    export_retention_hours: 72   # how long an end-of-term export can be downloaded
   usage:                         # per student and course; course settings can only lower them
     questions_per_minute: 6
     questions_per_day: 200

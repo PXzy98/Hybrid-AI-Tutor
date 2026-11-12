@@ -245,6 +245,10 @@ class ContentLimits(Section):
     max_import_bytes: int = Field(5_000_000, ge=1_000, le=200_000_000)  # content ZIP upload (task Z9)
 
 
+class CourseLimits(Section):
+    export_retention_hours: int = Field(72, ge=1, le=24 * 365)  # end-of-term export download (task Z9)
+
+
 class UsageLimits(Section):
     """Per student and course (guide 4.4, task Z10). Hard caps: a course value can only lower them."""
 
@@ -258,6 +262,7 @@ class LimitsConfig(Section):
     models: ModelLimits = ModelLimits()
     accounts: AccountLimits = AccountLimits()
     content: ContentLimits = ContentLimits()
+    courses: CourseLimits = CourseLimits()
     usage: UsageLimits = UsageLimits()
 
 

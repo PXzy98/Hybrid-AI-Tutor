@@ -7,9 +7,12 @@ from datetime import datetime
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, File, Request, UploadFile
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
+from app.api.v2.errors import ApiError, ErrorCode
 from app.auth.deps import AnyUser, CurrentUser
+from app.platform import end_of_term
 from app.platform.access import CourseAccess, require_course_role, require_system_role
 from app.platform.courses import CourseError
 
@@ -127,6 +130,45 @@ def update_course(request: Request, body: CoursePatch, access: CourseInstructor)
              responses={409: {"description": "the course still has students (end the term first)"}})
 def archive_course(request: Request, access: CourseInstructor):
     return _course_out(_courses(request).archive(access.course.id))
+
+
+class EndTermIn(BaseModel):
+    confirm: Literal[True]  # the student data of the course is deleted and cannot be restored
+
+
+class EndTermOut(BaseModel):
+    export_id: str
+    expires_at: datetime  # the export can be downloaded until then
+    students_removed: int
+    students_exported: int  # individual overviews in the export (visibility mode B only)
+    deleted: dict[str, int]  # rows per table
+
+
+@router.post("/courses/{course_id}/end-term", response_model=EndTermOut, operation_id="courses_end_term")
+def end_term(request: Request, body: EndTermIn, access: CourseInstructor):
+    """End the term: build the export (class summary; in visibility mode B also the overviews the
+    instructor may see), then delete the students' memberships and their data in this course. The course,
+    its content, materials and settings stay for the next class list."""
+    from app.api.v2.ask import _scope
+
+    services = request.app.state.services
+    done = end_of_term.end_term(
+        services.engine, services.settings.data_path(), _scope(services, access.course.id), access,
+        min_group=services.settings.learner.class_summary_min_group,
+        retention_hours=services.settings.limits.courses.export_retention_hours)
+    return EndTermOut(**done.__dict__)
+
+
+@router.get("/courses/{course_id}/exports/{export_id}", operation_id="courses_export_download",
+            responses={200: {"content": {"application/zip": {}}}, 404: {"description": "unknown or expired"}})
+def download_export(request: Request, export_id: str, access: CourseInstructor):
+    settings = request.app.state.services.settings
+    path = end_of_term.export_file(settings.data_path(), access.course.id, export_id,
+                                   settings.limits.courses.export_retention_hours)
+    if path is None:
+        raise ApiError(404, ErrorCode.not_found, "export not found or expired")
+    return FileResponse(path, media_type="application/zip", filename=f"{access.course.code}-{export_id}.zip",
+                        headers={"Cache-Control": "no-store"})
 
 
 # -------------------------------------------------------------------------------------------- members
