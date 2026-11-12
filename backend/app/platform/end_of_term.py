@@ -64,13 +64,13 @@ def exports_dir(data_root: Path, course_id: int) -> Path:
     return data_root / "courses" / str(course_id) / "exports"
 
 
-def _build_export(engine: Engine, scope: CourseScope, access: CourseAccess, min_group: int
+def _build_export(engine: Engine, scope: CourseScope, access: CourseAccess, min_group: int, settings
                   ) -> tuple[bytes, int]:
     students = course_views.course_student_ids(engine, access.course.id)
     summaries = [class_summary(engine, scope.learner, scope.content, code, min_group,
                                members=students).model_dump(mode="json")
                  for code in scope.content.topics()]
-    store = course_views.DbLearnerViewStore(engine)
+    store = course_views.DbLearnerViewStore(engine, settings, scope.content)
     profiles = [p.model_dump(mode="json") for p in export_course_profiles(access, students, store=store)]
     meta = {"course_code": access.course.code, "course_title": access.course.title,
             "exported_at": utcnow().isoformat(), "students": len(students),
@@ -85,12 +85,12 @@ def _build_export(engine: Engine, scope: CourseScope, access: CourseAccess, min_
 
 
 def end_term(engine: Engine, data_root: Path, scope: CourseScope, access: CourseAccess, *, min_group: int,
-             retention_hours: int) -> TermEnded:
+             retention_hours: int, settings) -> TermEnded:
     """Build the export, write it, then delete the student data of the course. If the export cannot be
     written, nothing is deleted."""
     course_id = access.course.id
     purge_expired(data_root, course_id, retention_hours)
-    data, exported = _build_export(engine, scope, access, min_group)
+    data, exported = _build_export(engine, scope, access, min_group, settings)
     now = utcnow()
     export_id = f"{now:%Y%m%dT%H%M%SZ}-{secrets.token_hex(6)}"
     folder = exports_dir(data_root, course_id)
