@@ -15,6 +15,8 @@ def test_courses_say_whether_they_are_local_only(make_client):
         world.prof.put(f"{world.url}/settings", json={"values": {"local_only": True},
                                                       "version": current["version"]})
         assert alice.get(world.url).json()["local_only"] is True
+        set_mode(world, "B")
+        assert alice.get(world.url).json()["visibility_mode"] == "B"  # the setting, not the course row
 
 
 def test_members_show_who_is_visible_without_an_audited_view(make_client):

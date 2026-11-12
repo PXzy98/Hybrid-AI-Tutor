@@ -106,7 +106,9 @@ def _courses(request: Request):
 
 def _course_out(view, request: Request) -> CourseOut:
     eff = request.app.state.services.settings_service.effective(view.id)
-    return CourseOut(**view.__dict__, local_only=bool(eff.local_only))
+    # the effective settings, not the course row's initial values: the course settings may change them
+    values = {**view.__dict__, "visibility_mode": eff.visibility_mode}
+    return CourseOut(**values, local_only=bool(eff.local_only))
 
 
 # -------------------------------------------------------------------------------------------- courses
