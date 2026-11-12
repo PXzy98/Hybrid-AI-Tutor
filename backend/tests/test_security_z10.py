@@ -174,3 +174,26 @@ def test_parallel_attempts_cannot_pass_the_limit_together():
     for t in threads:
         t.join()
     assert len(allowed) == 5 and window.wait("client") > 0
+
+
+def test_reservations_are_atomic_and_can_be_given_back(meter):
+    from concurrent.futures import ThreadPoolExecutor
+
+    services, m, demo, _ = meter
+
+    def take(_):
+        try:
+            m.reserve_usage("sid-r", demo, "question")
+            return True
+        except UsageLimitExceeded:
+            return False
+
+    with ThreadPoolExecutor(max_workers=8) as pool:  # concurrent requests: only the allowed two get in
+        assert sum(pool.map(take, range(8))) == 2
+    m.release_usage("sid-r", demo, "question")  # no answer was produced
+    m.add_tokens("sid-r", demo, "question", 7)
+    assert take(0) and not take(0)
+    with Session(services.engine) as db:
+        day = db.exec(select(UsageCounter).where(UsageCounter.student_id == "sid-r",
+                                                 UsageCounter.period == "day")).one()
+    assert (day.count, day.tokens) == (2, 7)

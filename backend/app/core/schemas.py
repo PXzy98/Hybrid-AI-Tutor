@@ -371,6 +371,21 @@ class RequestContext(BaseModel):
     def set_progress_sink(self, sink) -> None:
         self._progress_sink = sink
 
+    # counts each actual cloud invocation (API v2 usage limits); None: not metered (API v1, unit tests)
+    _cloud_meter: Any = PrivateAttr(default=None)
+
+    def set_cloud_meter(self, meter) -> None:
+        """`meter.reserve() -> bool` before a cloud call (False: the limit is reached), `meter.used(tokens)`
+        after it."""
+        self._cloud_meter = meter
+
+    def reserve_cloud_call(self) -> bool:
+        return self._cloud_meter is None or self._cloud_meter.reserve()
+
+    def cloud_call_done(self, tokens: int) -> None:
+        if self._cloud_meter is not None:
+            self._cloud_meter.used(tokens)
+
     async def report(self, stage: str, status: str, detail: str = "", duration_ms: float | None = None):
         if not self.show_routing_progress:
             return
