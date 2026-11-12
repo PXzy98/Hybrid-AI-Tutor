@@ -592,6 +592,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/course-types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Course Types
+         * @description The course types a new course can have now (privacy profiles enabled by the admin).
+         */
+        get: operations["course_types_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/courses": {
         parameters: {
             query?: never;
@@ -1018,6 +1038,48 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/materials": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Materials */
+        get: operations["materials_list"];
+        put?: never;
+        /**
+         * Upload
+         * @description Refused (422, nothing stored) when the file type is not allowed, it is too large or unreadable, or
+         *     the privacy scan finds student data (the response names the finding types, never the text).
+         */
+        post: operations["materials_upload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/materials/{material_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete Material
+         * @description Delete the file and rebuild the index without it (old index versions with its text are removed).
+         */
+        delete: operations["materials_delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -2030,6 +2092,16 @@ export interface components {
              */
             file: string;
         };
+        /** Body_materials_upload */
+        Body_materials_upload: {
+            /**
+             * File
+             * @description PDF, PPTX, DOCX, Markdown, text or HTML
+             */
+            file: string;
+            /** Module Id */
+            module_id?: number | null;
+        };
         /** Body_members_import */
         Body_members_import: {
             /**
@@ -2271,6 +2343,11 @@ export interface components {
             status: "active" | "archived";
             /** My Role */
             my_role: ("instructor" | "student") | null;
+            /**
+             * Local Only
+             * @default false
+             */
+            local_only: boolean;
         };
         /** CoursePatch */
         CoursePatch: {
@@ -3061,6 +3138,33 @@ export interface components {
              */
             uploaded_at: string;
         };
+        /** MaterialOut */
+        MaterialOut: {
+            /** Id */
+            id: number;
+            /** Module Id */
+            module_id: number | null;
+            /** Filename */
+            filename: string;
+            /** Size Bytes */
+            size_bytes: number;
+            /** Scan Status */
+            scan_status: string;
+            /**
+             * Uploaded At
+             * Format: date-time
+             */
+            uploaded_at: string;
+        };
+        /** MaterialsOut */
+        MaterialsOut: {
+            /** Index Version */
+            index_version: number;
+            /** Rebuild Job Id */
+            rebuild_job_id?: number | null;
+            /** Materials */
+            materials: components["schemas"]["MaterialOut"][];
+        };
         /** Me */
         Me: {
             /** Username */
@@ -3121,6 +3225,8 @@ export interface components {
             created_at: string;
             /** Student Id */
             student_id?: string | null;
+            /** Visible To Instructor */
+            visible_to_instructor?: boolean | null;
         };
         /** MembershipOut */
         MembershipOut: {
@@ -4245,6 +4351,12 @@ export interface components {
             display_name?: string | null;
             /** Active */
             active?: boolean | null;
+        };
+        /** UploadOut */
+        UploadOut: {
+            material: components["schemas"]["MaterialOut"];
+            /** Job Id */
+            job_id: number;
         };
         /** UploadResult */
         UploadResult: {
@@ -5383,6 +5495,26 @@ export interface operations {
             };
         };
     };
+    course_types_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string[];
+                };
+            };
+        };
+    };
     courses_list: {
         parameters: {
             query?: never;
@@ -6479,6 +6611,102 @@ export interface operations {
                 content: {
                     "application/zip": unknown;
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    materials_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    materials_upload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_materials_upload"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    materials_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                material_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

@@ -14,6 +14,7 @@ from app.api.v2 import (
     content,
     courses,
     learner,
+    materials,
     me,
     model_endpoints,
     quizzes,
@@ -25,6 +26,7 @@ api_router_v2 = APIRouter(prefix="/api/v2")
 api_router_v2.include_router(auth.router)
 api_router_v2.include_router(courses.router)
 api_router_v2.include_router(content.router)
+api_router_v2.include_router(materials.router)
 api_router_v2.include_router(model_endpoints.router)
 api_router_v2.include_router(admin.router)
 api_router_v2.include_router(settings.router)
