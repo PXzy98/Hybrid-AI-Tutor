@@ -73,7 +73,7 @@ What Z did in other owners' areas (for their review): guide section 7.5.
 | Z | v2 ask endpoint (pipeline per course, usage checks); end of term and export | after S's interface |
 | Z | deploy on the test host with the monitoring profile, the vLLM load test, Z2 local speed | needs access to the test host and the vLLM server |
 | Z | choose the alert receiver (`deploy/monitoring/alertmanager.yml`) | alerts are only visible in Alertmanager until then |
-| Others | Lavin's second review of the 30 revised items; permission for the ELG 5902 materials | content |
+| Others | Lavin's second review of the 30 revised items | content |
 
 ## 5. Working on the code
 

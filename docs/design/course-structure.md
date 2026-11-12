@@ -386,7 +386,8 @@ columns, so switching between them keeps every student's state.
   loads the new version on the next request and drops the old one from its cache. Old versions are deleted
   by the worker after a short delay.
 - **Demo course**: the MedlinePlus snapshots in `data/medical_rag/` become materials of "General Medical
-  Knowledge" (one module each), A7.
+  Knowledge" (one module each), A7. Tests and demos of v4 use the eight open course packs in
+  `data/demo_courses/` (decided 2026-11-12; see its `README.md`).
 
 ---
 

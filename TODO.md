@@ -51,5 +51,4 @@ T1–T14 in guide section 7.3. Open items that other tasks wait for:
 ## Waiting for others
 
 - Lavin: second review of the 30 revised check items.
-- Prof. Gita: permission to use the ELG 5902 material (S5).
 - Course server access: vLLM load test, Z2 local speed, Z13 part 2.

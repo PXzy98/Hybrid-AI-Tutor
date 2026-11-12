@@ -52,8 +52,12 @@ Design documents that are part of this guide:
 - instructor AI;
 - one Docker Compose deployment.
 
-**Demo courses**: "General Medical Knowledge" (the five v3 topics as five modules, plus full course
-material) and **ELG 5902** (an engineering course, to check that other subjects work).
+**Demo and test courses**: eight open courses (MIT OpenCourseWare and Harvard CS50x, CC BY-NC-SA 4.0), two
+each in medical science, life science, ECE and computer science, in `data/demo_courses/` (stored as zips:
+run `python scripts/fetch_open_courses.py unpack` first; see its `README.md`). They include syllabi,
+calendars, assignments and exams; solutions are in `instructor_only/` and are never course material.
+**Every test, evaluation and demo uses them** (decided 2026-11-12, replacing ELG 5902). The
+fictional "General Medical Knowledge" course stays for the v3 migration.
 
 **Out of scope for now**:
 - a Chinese interface or other Chinese features beyond handling Chinese input (rule 14);
@@ -457,13 +461,13 @@ data); users build against the fakes without waiting for the real implementation
 | S2 | `.pptx`: `python-pptx` reads slide text, tables and speaker notes; `slide N` per chunk; slide titles as section headings; unpacked size check; clear error when slides are images only; tests with a fictional 3-slide deck | S4–S5 | S1 | `backend/app/rag/documents.py`, `admin/materials.py` | tests pass; sources show slide N |
 | S3 | Citation numbers match the Sources list | S5 | S1 | `backend/app/api/v1/ask.py`, `backend/app/prompts/render.py` | tests |
 | S4 | Course retriever: course-level and module-level material; one index per course on disk with `index_version`; worker rebuild; uploads call `scan_document()` | S5–S6 | Z4, Z11 (fake first) | `backend/app/rag/` (`medical_hybrid.py` renamed and changed) | syllabus and project requirements are retrieved |
-| S5 | Demo course material: complete "General Medical Knowledge" (syllabus, project requirements, templates, lecture notes); ELG 5902 (Siyun asks Prof. Gita for permission first) | S5 | independent | `data/` (layout from course-structure.md section 7) | both courses upload and retrieve |
+| S5 | Demo course material: the eight open course packs in `data/demo_courses/` (done by Z, see 7.5); remaining: check that each pack uploads and retrieves through the course retriever | S5 | independent | `data/` (layout from course-structure.md section 7) | all eight courses upload and retrieve |
 | S6 | Instructor AI tier 1 backend, through the model gateway | S6 | S4, Z6 | new `backend/app/instructor_ai/` | drafts visible to students only after acceptance |
 | S7 | Instructor AI tier 2 backend (KCs, check items, misconceptions; drafts → accepted); also used by the course diagnostic (D3) | S6–S7 | Z4, S4 | same | a new course can be drafted by AI and used for personalization after acceptance |
 | S8 | Course-level knowledge model (4.10) | S6–S7 | Z4 | `backend/app/learner/knowledge/` | evaluation against the current BKT (`eval/learner-sim/`) |
 | S9 | Visibility modes A/B, overview, learning plan, opt-out, audit; end-of-term export content | S6–S7 | Z4, Z10 | `backend/app/learner/`, `backend/app/api/v2/` | tests cover "what must not be seen is not returned" |
 | S10 | Instructor AI tier 3: class insights backend | S7 | S8 | `backend/app/instructor_ai/` | never returns question text |
-| S11 | Retrieval evaluation on both courses (`eval/course_rag_benchmark.py`) | S7 | S5 | `eval/` | results for both |
+| S11 | Retrieval evaluation on the open course packs, at least one per area (`eval/course_rag_benchmark.py`) | S7 | S5 | `eval/` | results per area |
 | S12 | Self-review and handover documents | S8 | — | `docs/` | checklist |
 
 **If behind, postpone in this order**: S10 → the learning-plan part of S9.
@@ -475,7 +479,7 @@ data); users build against the fakes without waiting for the real implementation
 | T1 | Beta routing evaluation (G1-105) and Beta report (G1-108) | S4 | — | `eval/` | delivered on time |
 | T2 | Frontend redesign draft: a few versions with v0; choose AI Elements or assistant-ui (7.4) | S4–S5 | independent | design draft | Z, S and the client agree |
 | T3 | Upgrade to Tailwind 4 and React 19, add shadcn/ui; restyle existing pages; render answers as Markdown (fixes bold) | S5 | T2 | `frontend/` | existing frontend tests pass; screenshots compared |
-| T4 | ECE routing evaluation: write and label engineering questions from the ELG 5902 material; evaluate; add training data and retrain if needed | S5–S6 | S5 | `backend/app/routing/`, `data/routing/`, `eval/` | report; engineering questions are not all sent to the cloud |
+| T4 | ECE and computer science routing evaluation: write and label questions from the ECE and computer science packs in `data/demo_courses/`; evaluate; add training data and retrain if needed | S5–S6 | S5 | `backend/app/routing/`, `data/routing/`, `eval/` | report; engineering questions are not all sent to the cloud |
 | T5 | Question type classifier (concept / logistics): labelled data, one more output of the routing model | S6 | T4 | `backend/app/routing/` | accuracy report |
 | T6 | New pages: course picker, join page (invitation code), course management, member import, course settings | S6 | Z9 OpenAPI | `frontend/src/pages/` | UI tests for the main flows |
 | T7 | New pages: instructor AI (four tiers), overview, learning plan, visibility mode and opt-out | S6–S7 | S6–S10, Z12 OpenAPI | `frontend/src/pages/` | same |
@@ -528,6 +532,7 @@ owner reviews and approves the PR, and the area stays the owner's afterwards (ru
 | part of T (bandit B615, found by the Z13 scans) | T | the routing and evidence models pinned to Hugging Face commits (`app/routing/revisions.py`, also used by the Docker build) | #56 | review; move to `transformers` 5 together with Z |
 | part of S4 (follow-up of Z11) | S | indexing accepts a document unless its scan found student data (`ScanResult.blocking`): course material that names its instructor is no longer refused | #55 | review |
 | part of S (bandit B314, found by the Z13 scans) | S | PubMed responses parsed with `defusedxml` | #55 | review |
+| part of S5 (advisor meeting 2026-11-12) | S | eight open course packs (lectures, syllabi, calendars, assignments, exams; solutions kept instructor-only) as zips in `data/demo_courses/archives/` with manifests, attribution and license; `scripts/fetch_open_courses.py` to unpack and rebuild them; `tests/test_open_course_packs.py` | this PR | review; S5, S11 and T4 use the packs |
 
 Still the owners' own work: S's `course_id` on the learner tables with an interface to export and delete one
 course's learner data (needed by end of term and the v2 ask endpoint); T6/T7 (frontend for API v2, which sends
@@ -633,7 +638,7 @@ course's learner data (needed by end of term and the v2 ask endpoint); T6/T7 (fr
 | Topic | Decision |
 |---|---|
 | Course structure, accounts, enrollment, data scope, settings, database, migration, API version | [design/course-structure.md](design/course-structure.md) section 1, [design/api-v2.md](design/api-v2.md) |
-| Demo courses | "General Medical Knowledge" + ELG 5902 |
+| Demo and test courses | eight open courses in `data/demo_courses/` (two each: medical science, life science, ECE, computer science); "General Medical Knowledge" only for the v3 migration |
 | First privacy profiles | medical science, life science, ECE |
 | Deployment | one Docker Compose stack; vLLM deployed separately and reached by API |
 | Database | PostgreSQL only |
@@ -649,7 +654,6 @@ course's learner data (needed by end of term and the v2 ask endpoint); T6/T7 (fr
 **Open**:
 - project name: candidates HALO (Hybrid Adaptive Learning Orchestrator), COMPASS, CAIRN, MAPLE;
 - whether the vLLM machine runs all the time or only during class hours;
-- permission to use the ELG 5902 material (Prof. Gita);
 - scope for this term (to confirm with Prof. Ismaeel and Prof. Abbas).
 
 **Not now**: a Chinese interface, ethics approval, backups and disk encryption, comparing cloud providers.
