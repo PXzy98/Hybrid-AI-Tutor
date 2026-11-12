@@ -1,5 +1,6 @@
 """Learner data is per course (course-structure.md 4.1, 4.4): two courses never mix, and one course's data
 can be exported and deleted as a whole. Preferences and consent are global."""
+from sqlalchemy import text
 from sqlmodel import Session
 
 from app.catalog import create_course, load_course_content
@@ -123,3 +124,17 @@ def test_load_course_content_carries_the_course_id(use_config):
     content = load_course_content(services.engine, services.content.course_id)
     learner = build_learner_model(services.settings, services.engine, content)
     assert learner.repo.course_id == content.course_id is not None
+
+
+def test_rows_from_before_the_course_column_join_the_demo_course_at_startup(use_config):
+    """A database upgraded from before the course catalog has no course when the migration runs."""
+    services = build_services(use_config({}))
+    services.learner.set_consent(A, True)
+    services.learner.observe(A, strong("HBP.1", True))
+    with services.engine.begin() as conn:
+        conn.execute(text("UPDATE learner_kc_state SET course_id = NULL"))
+        conn.execute(text("UPDATE evidence_log SET course_id = NULL"))
+    assert services.learner.repo.evidence(A) == []
+    services = build_services(get_settings())  # the next start
+    assert len(services.learner.repo.evidence(A)) == 1
+    assert services.learner.knowledge.state(A, ["HBP.1"])["HBP.1"].n_obs == 1

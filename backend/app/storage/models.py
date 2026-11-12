@@ -103,6 +103,12 @@ class SessionTurn(SQLModel, table=True):
 # Keyed by student_id and course_id (course-structure.md 4.1); preferences and consent are global. No
 # free-text columns: evidence holds IDs, flags and numbers, never question text. course_id is NULL only in
 # offline simulations that run on the YAML seed without a course row.
+
+# tables whose rows belong to one course and had no course_id before (assigned to the demo course)
+ROWS_OF_A_COURSE = ("learner_kc_state", "learner_topic_level", "evidence_log", "learner_misconception",
+                    "request_log", "session_turn")
+
+
 class LearnerKcState(SQLModel, table=True):
     __tablename__ = "learner_kc_state"
 
