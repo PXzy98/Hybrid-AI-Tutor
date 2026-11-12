@@ -1322,6 +1322,32 @@
         }
       }
     },
+    "/api/v2/course-types": {
+      "get": {
+        "tags": [
+          "courses"
+        ],
+        "summary": "List Course Types",
+        "description": "The course types a new course can have now (privacy profiles enabled by the admin).",
+        "operationId": "course_types_list",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array",
+                  "title": "Response Course Types List"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/courses": {
       "get": {
         "tags": [
@@ -7003,6 +7029,11 @@
               }
             ],
             "title": "My Role"
+          },
+          "local_only": {
+            "type": "boolean",
+            "title": "Local Only",
+            "default": false
           }
         },
         "type": "object",
@@ -9507,6 +9538,17 @@
               }
             ],
             "title": "Student Id"
+          },
+          "visible_to_instructor": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visible To Instructor"
           }
         },
         "type": "object",

@@ -89,7 +89,7 @@ class StudentQuizOut(BaseModel):
     open: bool
     opens_at: datetime | None
     closes_at: datetime | None
-    questions: list[PublicQuestion] = []  # only while the quiz is open and not yet answered
+    questions: list[PublicQuestion] = []  # while open, and after the student has answered
     attempt: OwnAttempt | None = None
 
 
@@ -148,7 +148,8 @@ def _student_out(services, quiz: Quiz, student_id: str) -> StudentQuizOut:
     open_now = core.is_open(quiz)
     return StudentQuizOut(id=quiz.id, title=quiz.title, module_id=quiz.module_id, kind=quiz.kind,
                           open=open_now, opens_at=quiz.opens_at, closes_at=quiz.closes_at,
-                          questions=core.public_questions(quiz) if open_now and attempt is None else [],
+                          # while open and unanswered, to answer; after answering, to read the result
+                          questions=core.public_questions(quiz) if (open_now or attempt) else [],
                           attempt=_own(quiz, attempt) if attempt else None)
 
 

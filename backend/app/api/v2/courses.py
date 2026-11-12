@@ -34,6 +34,7 @@ class CourseOut(BaseModel):
     visibility_mode: Literal["A", "B"]
     status: Literal["active", "archived"]
     my_role: Literal["instructor", "student"] | None
+    local_only: bool = False  # the course's effective setting: no question goes to a cloud model
 
 
 class CourseIn(BaseModel):
@@ -59,6 +60,9 @@ class MemberOut(BaseModel):
     email: str | None
     created_at: datetime
     student_id: str | None = None  # students: the ID used by the overview and plan endpoints
+    # students: whether the overview may be shown now (mode B, acknowledged, not opted out); not audited,
+    # it reveals no learner data
+    visible_to_instructor: bool | None = None
 
 
 class RejectedRow(BaseModel):
@@ -100,36 +104,49 @@ def _courses(request: Request):
     return request.app.state.services.courses
 
 
-def _course_out(view) -> CourseOut:
-    return CourseOut(**view.__dict__)
+def _course_out(view, request: Request) -> CourseOut:
+    eff = request.app.state.services.settings_service.effective(view.id)
+    # the effective settings, not the course row's initial values: the course settings may change them
+    values = {**view.__dict__, "visibility_mode": eff.visibility_mode}
+    return CourseOut(**values, local_only=bool(eff.local_only))
 
 
 # -------------------------------------------------------------------------------------------- courses
+@router.get("/course-types", response_model=list[str], operation_id="course_types_list")
+def list_course_types(request: Request, user: AnyUser):
+    """The course types a new course can have now (privacy profiles enabled by the admin)."""
+    from app.platform.settings import course_types
+
+    enabled = request.app.state.services.settings_service.system_values()[0].get("enabled_course_types")
+    return [t for t in course_types() if not enabled or t in enabled]
+
+
 @router.get("/courses", response_model=list[CourseOut], operation_id="courses_list")
 def list_courses(request: Request, user: AnyUser):
-    return [_course_out(v) for v in _courses(request).visible_courses(user.account_id)]
+    return [_course_out(v, request) for v in _courses(request).visible_courses(user.account_id)]
 
 
 @router.post("/courses", response_model=CourseOut, status_code=201, operation_id="courses_create")
 def create_course(request: Request, body: CourseIn, user: Creator):
     """The creator becomes the course's first instructor."""
-    return _course_out(_courses(request).create(user.account_id, **body.model_dump()))
+    return _course_out(_courses(request).create(user.account_id, **body.model_dump()), request)
 
 
 @router.get("/courses/{course_id}", response_model=CourseOut, operation_id="courses_get")
 def get_course(request: Request, access: CourseMemberAccess):
-    return _course_out(_courses(request).get(access.course.id, my_role=access.role))
+    return _course_out(_courses(request).get(access.course.id, my_role=access.role), request)
 
 
 @router.patch("/courses/{course_id}", response_model=CourseOut, operation_id="courses_update")
 def update_course(request: Request, body: CoursePatch, access: CourseInstructor):
-    return _course_out(_courses(request).update(access.course.id, **body.model_dump(exclude_none=True)))
+    view = _courses(request).update(access.course.id, **body.model_dump(exclude_none=True))
+    return _course_out(view, request)
 
 
 @router.post("/courses/{course_id}/archive", response_model=CourseOut, operation_id="courses_archive",
              responses={409: {"description": "the course still has students (end the term first)"}})
 def archive_course(request: Request, access: CourseInstructor):
-    return _course_out(_courses(request).archive(access.course.id))
+    return _course_out(_courses(request).archive(access.course.id), request)
 
 
 class EndTermIn(BaseModel):
@@ -174,7 +191,18 @@ def download_export(request: Request, export_id: str, access: CourseInstructor):
 # -------------------------------------------------------------------------------------------- members
 @router.get("/courses/{course_id}/members", response_model=list[MemberOut], operation_id="members_list")
 def list_members(request: Request, access: CourseInstructor):
-    return [MemberOut(**m.__dict__) for m in _courses(request).members(access.course.id)]
+    from app.learner import course_views
+
+    engine = request.app.state.services.engine
+    out = []
+    for m in _courses(request).members(access.course.id):
+        row = MemberOut(**m.__dict__)
+        if row.role == "student" and row.status == "active" and row.student_id:
+            state = course_views.visibility_state(engine, access.course.id, row.student_id)
+            row.visible_to_instructor = bool(state and state.mode == "B" and state.visible_since
+                                             and not state.hidden_from_instructor)
+        out.append(row)
+    return out
 
 
 @router.post("/courses/{course_id}/members/import", response_model=ImportReportOut,
