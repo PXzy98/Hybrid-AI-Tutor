@@ -10,6 +10,42 @@ This script shows the five ideas of the system:
 Updated 19 Oct 2026 for the integrated system (semantic routing, medical RAG, cloud gate, survey). The run below
 was tested in development mode with the local GPU server and DeepSeek as the cloud model.
 
+## Build the multi-course demo (one command)
+
+`scripts/build_demo.py` creates the demo courses from the open course packs (`data/demo_courses/README.md`)
+through API v2 only; it never writes to the database. Start the app (see below), make sure the instructor or
+admin account has chosen its own password (log in once in the browser), then:
+
+```powershell
+$env:DEMO_INSTRUCTOR_USERNAME="prof"
+$env:DEMO_INSTRUCTOR_PASSWORD="<the instructor password>"
+.venv\Scripts\python scripts\build_demo.py --base-url http://localhost:8000
+# optional: --packs harvard_cs50x mit_6_006_algorithms   --students 5   --sample-activity
+```
+
+Default packs, one per area: `mit_hst151_pharmacology`, `mit_7_016_intro_biology`, `mit_6_002_circuits`,
+`harvard_cs50x`. The script:
+
+1. unpacks the packs when needed (`scripts/fetch_open_courses.py unpack`); `instructor_only/` is never uploaded;
+2. creates one course per pack with the pack's course type (skipped when the course code exists, so the command
+   can run twice), one module per manifest module, uploads the module files and the course-level documents,
+   and waits for the index rebuild. Files the privacy scan refuses (422) are listed and skipped;
+3. creates fictional students "Demo Student 1..N" (default 3), lists them in each course and lets them join
+   with the course's invitation code. The generated logins are written to `var/demo_accounts.json`
+   (git-ignored, never printed). The addresses use `DEMO_EMAIL_DOMAIN` (default `uottawa.ca`, which must be in
+   `limits.accounts.allowed_email_domains` of the server); at most 20 joins per hour are allowed per client
+   address, so `--students` times the number of packs must stay below that;
+4. sets visibility mode B in every demo course;
+5. with `--sample-activity`: each student acknowledges mode B, answers the check questions the modules have
+   (the packs have none yet, so this is usually nothing) and asks two questions, which needs a working model
+   connection; failures are reported, not fatal.
+
+It ends with a table: course, modules, uploaded, refused, index version. Docker:
+`docker compose exec -e DEMO_INSTRUCTOR_USERNAME=prof -e DEMO_INSTRUCTOR_PASSWORD=<...> api python /app/scripts/build_demo.py --base-url http://127.0.0.1:8000`
+(the packs must then be unpacked in the container's `data/demo_courses/`; run `unpack` there first).
+
+The six-minute script below is the older single-course (high blood pressure) demo.
+
 ## Before the demo (once, about 15 minutes)
 
 1. Create `.env` from `.env.example`. For the demo, set:
@@ -86,10 +122,8 @@ was tested in development mode with the local GPU server and DeepSeek as the clo
 The request log keeps only sanitized text:
 
 ```powershell
-.venv\Scripts\python -c "import sqlite3; c=sqlite3.connect('data/app.db'); [print(r) for r in c.execute('select target, sanitized_question from request_log order by id desc limit 3')]"
+docker compose exec -T db psql -U tutor -d tutor -c "select target, sanitized_question from request_log order by id desc limit 3"
 ```
-
-(Docker: `docker compose exec api python -c "..."` with the path `/app/var/app.db`.)
 
 ### If something goes wrong
 
