@@ -1,10 +1,14 @@
 import { useState, type FormEvent } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 
-import { ApiError } from "../api/client";
-import { api } from "../api/endpoints";
-import { homeFor, useMe, useResetSession } from "../auth";
-import { LanguageSwitch, useI18n } from "../i18n";
+import { api } from "@/api/endpoints";
+import { useMe, useResetSession } from "@/auth";
+import { ErrorNote } from "@/components/common";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { LanguageSwitch, useI18n } from "@/i18n";
 
 export default function Login() {
   const { data: me } = useMe();
@@ -13,21 +17,21 @@ export default function Login() {
   const { t } = useI18n();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState<unknown>(null);
   const [busy, setBusy] = useState(false);
 
-  if (me) return <Navigate to={homeFor(me)} replace />;
+  if (me) return <Navigate to={me.must_change_password ? "/change-password" : "/courses"} replace />;
 
   async function submit(e: FormEvent) {
     e.preventDefault();
     setBusy(true);
-    setError("");
+    setError(null);
     try {
       const account = await api.login(username, password);
       resetSession(account);
-      navigate(homeFor(account), { replace: true });
+      navigate(account.must_change_password ? "/change-password" : "/courses", { replace: true });
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t("app.serverUnreachable"));
+      setError(err);
     } finally {
       setBusy(false);
     }
@@ -35,27 +39,35 @@ export default function Login() {
 
   return (
     <main className="flex min-h-screen items-center justify-center px-4">
-      <form onSubmit={submit} className="card w-full max-w-sm space-y-4" aria-labelledby="login-title">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h1 id="login-title" className="text-xl font-semibold text-slate-900">{t("app.name")}</h1>
-            <p className="text-sm text-slate-600">{t("login.intro")}</p>
-          </div>
-          <LanguageSwitch />
-        </div>
-        <div>
-          <label htmlFor="username" className="label">{t("login.username")}</label>
-          <input id="username" className="input" autoComplete="username" value={username}
-                 onChange={(e) => setUsername(e.target.value)} required />
-        </div>
-        <div>
-          <label htmlFor="password" className="label">{t("login.password")}</label>
-          <input id="password" type="password" className="input" autoComplete="current-password" value={password}
-                 onChange={(e) => setPassword(e.target.value)} required />
-        </div>
-        {error && <p role="alert" className="text-sm text-rose-700">{error}</p>}
-        <button type="submit" className="btn-primary w-full" disabled={busy}>{busy ? t("login.busy") : t("login.submit")}</button>
-      </form>
+      <Card className="w-full max-w-sm">
+        <form onSubmit={submit} className="space-y-4" aria-labelledby="login-title">
+          <CardHeader>
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1.5">
+                <CardTitle><h1 id="login-title" className="text-xl">{t("app.name")}</h1></CardTitle>
+                <CardDescription>{t("login.intro")}</CardDescription>
+              </div>
+              <LanguageSwitch />
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-1.5">
+              <Label htmlFor="username">{t("login.username")}</Label>
+              <Input id="username" autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} required />
+            </div>
+            <div className="grid gap-1.5">
+              <Label htmlFor="password">{t("login.password")}</Label>
+              <Input id="password" type="password" autoComplete="current-password" value={password}
+                     onChange={(e) => setPassword(e.target.value)} required />
+            </div>
+            <ErrorNote error={error} />
+            <Button type="submit" className="w-full" disabled={busy}>{busy ? t("login.busy") : t("login.submit")}</Button>
+            <p className="text-center text-sm text-muted-foreground">
+              {t("login.noAccount")} <Link to="/join" className="text-primary underline">{t("login.joinLink")}</Link>
+            </p>
+          </CardContent>
+        </form>
+      </Card>
     </main>
   );
 }

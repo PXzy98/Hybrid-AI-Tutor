@@ -1,6 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
 
-import { useI18n } from "../i18n";
+import { Button } from "@/components/ui/button";
+import { useI18n } from "@/i18n";
 
 type State = { failed: boolean };
 
@@ -24,10 +25,10 @@ export default class ErrorBoundary extends Component<{ children: ReactNode }, St
 function Crashed() {
   const { t } = useI18n();
   return (
-    <div role="alert" className="card mx-auto max-w-lg space-y-3">
+    <div role="alert" className="mx-auto max-w-lg space-y-3 rounded-xl border bg-card p-6">
       <h1 className="text-lg font-semibold">{t("error.title")}</h1>
-      <p className="text-sm text-slate-700">{t("error.body")}</p>
-      <button type="button" className="btn-primary" onClick={() => window.location.reload()}>{t("error.reload")}</button>
+      <p className="text-sm text-muted-foreground">{t("error.body")}</p>
+      <Button type="button" onClick={() => window.location.reload()}>{t("error.reload")}</Button>
     </div>
   );
 }
