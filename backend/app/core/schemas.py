@@ -218,7 +218,7 @@ class Evidence(BaseModel):
     signal: Literal["confusion", "misconception"] | None = None  # weak
     misconception_id: str | None = None
     item_id: str | None = None
-    source: Literal["check", "understand", "onboarding"]
+    source: Literal["check", "understand", "onboarding", "quiz"]
 
 
 class Understanding(BaseModel):

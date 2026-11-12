@@ -3,6 +3,7 @@
 Text columns hold SANITIZED text only (privacy invariant 1). Usernames, display names and password
 hashes exist only in `account` (privacy invariant 6); every other table uses the random `student_id`.
 """
+import uuid
 from datetime import UTC, datetime
 
 from sqlalchemy import JSON, Column, DateTime, ForeignKey, UniqueConstraint
@@ -552,3 +553,91 @@ class LoginIdentity(SQLModel, table=True):
     # `account:<id>` for `password`; the provider's opaque subject ID later (never identity text)
     subject: str
     created_at: datetime = _ts(default_factory=utcnow)
+
+
+# ------------------------------------------------------------------ quizzes and the end-of-term survey
+class Quiz(SQLModel, table=True):
+    """A quiz of a course (course-structure.md 4.6): multiple choice and true/false questions, graded
+    automatically, for progress only (not a grade). Course content: it stays at the end of term.
+
+    `questions`: [{"kind": "mcq" | "true_false", "kc": <KC code> | null, "stem": str, "options": [str],
+    "answer": <index>, "explanation": str, "sources": [file names], "reviewed": bool}]. AI drafts arrive
+    with `reviewed: false`; a quiz is published only when every question is reviewed."""
+
+    __tablename__ = "quiz"
+
+    id: int | None = Field(default=None, primary_key=True)
+    course_id: int = Field(sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=False,
+                                            index=True))
+    module_id: int | None = Field(default=None, sa_column=Column(ForeignKey("module.id", ondelete="SET NULL"),
+                                                                 nullable=True))
+    title: str
+    kind: str = "practice"  # practice | final (the end-of-term post-test)
+    status: str = "draft"  # draft | published | closed
+    opens_at: datetime | None = _ts(default=None, nullable=True)
+    closes_at: datetime | None = _ts(default=None, nullable=True)
+    assigned_to: list | None = Field(default=None, sa_column=Column(JSON, nullable=True))  # student_ids
+    questions: list = Field(default_factory=list, sa_column=Column(JSON, nullable=False))
+    # the last AI draft request ({"count", "kinds", "kc_codes"}), read by the `quiz.draft` job
+    draft_request: dict | None = Field(default=None, sa_column=Column(JSON, nullable=True))
+    created_by: int | None = None
+    created_at: datetime = _ts(default_factory=utcnow)
+    updated_at: datetime = _ts(default_factory=utcnow)
+
+
+class QuizAttempt(SQLModel, table=True):
+    """A student's one attempt at a quiz: the chosen indexes and the grading, no text."""
+
+    __tablename__ = "quiz_attempt"
+    __table_args__ = (UniqueConstraint("quiz_id", "student_id"),)
+
+    id: int | None = Field(default=None, primary_key=True)
+    quiz_id: int = Field(sa_column=Column(ForeignKey("quiz.id", ondelete="CASCADE"), nullable=False,
+                                          index=True))
+    course_id: int | None = Field(default=None, sa_column=_course_scope())
+    student_id: str = Field(index=True)
+    answers: list = Field(default_factory=list, sa_column=Column(JSON, nullable=False))
+    correct: list = Field(default_factory=list, sa_column=Column(JSON, nullable=False))
+    score: int = 0
+    total: int = 0
+    submitted_at: datetime = _ts(default_factory=utcnow)
+
+
+class SurveyWindow(SQLModel, table=True):
+    """When the course's end-of-term survey is open (one window per course)."""
+
+    __tablename__ = "survey_window"
+
+    course_id: int = Field(sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), primary_key=True))
+    opens_at: datetime = _ts()
+    closes_at: datetime = _ts()
+    updated_by: int | None = None
+    updated_at: datetime = _ts(default_factory=utcnow)
+
+
+class CourseSurveyResponse(SQLModel, table=True):
+    """One anonymous end-of-term answer: ratings only, no student ID, no time (a random key, so neither the
+    order nor the moment links it to a submission)."""
+
+    __tablename__ = "course_survey_response"
+
+    id: str = Field(default_factory=lambda: uuid.uuid4().hex, primary_key=True)
+    course_id: int = Field(sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=False,
+                                            index=True))
+    helpfulness: int
+    material_relevance: int
+    clarity: int
+    source_confidence: int
+    learning_effect: int
+
+
+class CourseSurveySubmission(SQLModel, table=True):
+    """Only that the student has answered the course's survey (one answer each); not which answer."""
+
+    __tablename__ = "course_survey_submission"
+    __table_args__ = (UniqueConstraint("course_id", "student_id"),)
+
+    id: str = Field(default_factory=lambda: uuid.uuid4().hex, primary_key=True)
+    course_id: int = Field(sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=False,
+                                            index=True))
+    student_id: str = Field(index=True)

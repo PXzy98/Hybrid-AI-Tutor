@@ -32,6 +32,7 @@ from app.storage.models import (
     CourseMember,
     EvidenceLog,
     LearnerMisconception,
+    QuizAttempt,
     RequestLog,
     SessionTurn,
     utcnow,
@@ -233,12 +234,14 @@ def save_plan(engine: Engine, course_id: int, student_id: str, *, focus_kcs: lis
 
 # ------------------------------------------------------------------------- a student's own deletion
 def delete_own_course_data(engine: Engine, learner, course_id: int, student_id: str) -> None:
-    """`DELETE .../me/learning-data` (course-structure.md 4.4): the student's learner data, plan and
-    conversations in this course; request logs stay for the class statistics without the student.
+    """`DELETE .../me/learning-data` (course-structure.md 4.4): the student's learner data, plan, quiz
+    attempts and conversations in this course; request logs stay for the class statistics without the student.
     Preferences, consent, the membership and other courses are untouched."""
     learner.delete_course_data(student_id)
     with Session(engine) as db:
         db.exec(delete(PlanRow).where(PlanRow.course_id == course_id, PlanRow.student_id == student_id))
+        db.exec(delete(QuizAttempt).where(QuizAttempt.course_id == course_id,
+                                          QuizAttempt.student_id == student_id))
         db.exec(delete(SessionTurn).where(SessionTurn.course_id == course_id,
                                           SessionTurn.student_id == student_id))
         db.exec(update(RequestLog).where(RequestLog.course_id == course_id,
