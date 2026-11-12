@@ -5,7 +5,9 @@ days) and refuses with `UsageLimitExceeded` (HTTP 429 with `retry_after_seconds`
 `limits.usage` in config.yaml; a course's `usage_*` setting can only lower them (they stay null for now).
 
 `check_usage` / `record_usage` are the interface (course-structure.md section 9); the app installs the
-database meter at startup. `NoLimits` stays for scripts and unit tests without the app.
+database meter at startup. `reserve_usage` checks and counts in one transaction, so concurrent requests
+cannot all take the last allowed use; `release_usage` gives a reservation back (no answer was produced) and
+`add_tokens` adds the tokens once they are known. `NoLimits` stays for scripts and unit tests without the app.
 """
 from datetime import datetime, timedelta
 from typing import Literal, Protocol
@@ -33,12 +35,27 @@ class UsageMeter(Protocol):
 
     def record_usage(self, student_id: str, course_id: int, kind: UsageKind, *, tokens: int = 0) -> None: ...
 
+    def reserve_usage(self, student_id: str, course_id: int, kind: UsageKind) -> None: ...
+
+    def release_usage(self, student_id: str, course_id: int, kind: UsageKind) -> None: ...
+
+    def add_tokens(self, student_id: str, course_id: int, kind: UsageKind, tokens: int) -> None: ...
+
 
 class NoLimits:
     def check_usage(self, student_id: str, course_id: int, kind: UsageKind) -> None:
         return None
 
     def record_usage(self, student_id: str, course_id: int, kind: UsageKind, *, tokens: int = 0) -> None:
+        return None
+
+    def reserve_usage(self, student_id: str, course_id: int, kind: UsageKind) -> None:
+        return None
+
+    def release_usage(self, student_id: str, course_id: int, kind: UsageKind) -> None:
+        return None
+
+    def add_tokens(self, student_id: str, course_id: int, kind: UsageKind, tokens: int) -> None:
         return None
 
 
@@ -97,6 +114,47 @@ class DbUsageMeter:
                                                UsageCounter.period_start < periods["minute"][0]))
             db.commit()
 
+    def _upsert(self, student_id: str, course_id: int, kind: UsageKind, period: str, start: datetime,
+                count: int, tokens: int):
+        stmt = insert(UsageCounter).values(student_id=student_id, course_id=course_id, kind=kind,
+                                           period=period, period_start=start, count=max(count, 0),
+                                           tokens=tokens)
+        return stmt.on_conflict_do_update(
+            index_elements=["student_id", "course_id", "kind", "period", "period_start"],
+            set_={"count": func.greatest(UsageCounter.count + count, 0),
+                  "tokens": UsageCounter.tokens + tokens},
+        ).returning(UsageCounter.count)
+
+    def reserve_usage(self, student_id: str, course_id: int, kind: UsageKind) -> None:
+        """Counts one use, or raises UsageLimitExceeded and counts nothing. The upsert locks the counter row
+        until the commit, so a concurrent request waits and then sees this one's count."""
+        now = utcnow()
+        periods = _periods(now)
+        with Session(self.engine) as db:
+            for period, limit in self._windows(course_id, kind):
+                start, end = periods[period]
+                used = db.exec(self._upsert(student_id, course_id, kind, period, start, 1, 0)).scalar_one()
+                if used > limit:
+                    db.rollback()
+                    raise UsageLimitExceeded(kind, max(1, int((end - now).total_seconds()) + 1))
+            db.commit()
+
+    def release_usage(self, student_id: str, course_id: int, kind: UsageKind) -> None:
+        periods = _periods(utcnow())
+        with Session(self.engine) as db:
+            for period, _ in self._windows(course_id, kind):
+                db.exec(self._upsert(student_id, course_id, kind, period, periods[period][0], -1, 0))
+            db.commit()
+
+    def add_tokens(self, student_id: str, course_id: int, kind: UsageKind, tokens: int) -> None:
+        if tokens <= 0:
+            return
+        periods = _periods(utcnow())
+        with Session(self.engine) as db:
+            for period, _ in self._windows(course_id, kind):
+                db.exec(self._upsert(student_id, course_id, kind, period, periods[period][0], 0, tokens))
+            db.commit()
+
 
 # ------------------------------------------------------------------------------------------ module API
 _meter: UsageMeter = NoLimits()
@@ -115,3 +173,16 @@ def check_usage(student_id: str, course_id: int, kind: UsageKind) -> None:
 
 def record_usage(student_id: str, course_id: int, kind: UsageKind, *, tokens: int = 0) -> None:
     _meter.record_usage(student_id, course_id, kind, tokens=tokens)
+
+
+def reserve_usage(student_id: str, course_id: int, kind: UsageKind) -> None:
+    """Checks and counts one use atomically; raises UsageLimitExceeded (nothing counted) at the limit."""
+    _meter.reserve_usage(student_id, course_id, kind)
+
+
+def release_usage(student_id: str, course_id: int, kind: UsageKind) -> None:
+    _meter.release_usage(student_id, course_id, kind)
+
+
+def add_tokens(student_id: str, course_id: int, kind: UsageKind, tokens: int) -> None:
+    _meter.add_tokens(student_id, course_id, kind, tokens)

@@ -174,6 +174,13 @@ def test_the_cloud_limit_keeps_the_answer_local(make_client):
         assert any("limit of cloud answers" in w for w in body["warnings"])
 
 
+def test_api_v1_logs_show_only_the_demo_course(world):
+    alice = _login(world.app, "alice")
+    assert alice.post(f"{world.url}/ask", json={"question": "What is a volt?"}).status_code == 200
+    page = world.prof.get("/api/v1/admin/logs").json()
+    assert page["total"] == 0 and page["entries"] == []  # the other course's request is not shown
+
+
 def test_ending_a_course_removes_its_conversations_and_logs(world):
     alice = _login(world.app, "alice")
     assert alice.post(f"{world.url}/ask", json={"question": "What is a volt?"}).status_code == 200
