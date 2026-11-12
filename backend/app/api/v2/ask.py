@@ -23,6 +23,7 @@ from app.catalog import CatalogError
 from app.core.schemas import AskRequest, AskResponse, RequestContext, Turn
 from app.learner.content import ContentError
 from app.pipeline.runner import PipelineError
+from app.pipeline.steps.generate import CLOUD_LIMIT_NOTE
 from app.platform import course_scope, usage
 from app.platform.access import CourseAccess, require_course_role
 from app.platform.course_scope import GENERAL_TOPIC, CourseScope
@@ -31,7 +32,6 @@ from app.storage.models import SessionTurn
 
 router = APIRouter(tags=["ask"])
 CourseStudent = Annotated[CourseAccess, Depends(require_course_role("student"))]
-CLOUD_LIMIT_NOTE = "Today's limit of cloud answers is reached: this answer comes from the local model."
 
 
 class AskIn(BaseModel):
@@ -102,13 +102,13 @@ def _prepare(body: AskIn, access: CourseAccess, services) -> tuple[RequestContex
         raise ApiError(422, ErrorCode.invalid, "This routing method is disabled.")
     conversation_id = body.conversation_id or str(uuid.uuid4())
     known = bool(body.conversation_id) and _owned(services, access, conversation_id)
-    usage.check_usage(access.student_id, course_id, "question")  # 429 with retry_after_seconds
     warnings = []
-    try:
+    try:  # a first look; each cloud call reserves its own use (_CloudMeter)
         usage.check_usage(access.student_id, course_id, "cloud_call")
     except usage.UsageLimitExceeded:  # still answered, by the local model only
         eff = eff.model_copy(update={"local_only": True})
         warnings.append(CLOUD_LIMIT_NOTE)
+    usage.reserve_usage(access.student_id, course_id, "question")  # last: 429 with retry_after_seconds
     request = AskRequest(session_id=conversation_id, course_id=str(course_id), student_id=access.student_id,
                          topic=topic, question=body.question, language=body.language, routing_method=method)
     turns = services.settings.sessions.history_turns
@@ -117,15 +117,36 @@ def _prepare(body: AskIn, access: CourseAccess, services) -> tuple[RequestContex
         settings=eff, profile=privacy_profile(eff.course_type), warnings=warnings,
         show_routing_progress=eff.show_routing_progress,
         history=scope.sessions.history(conversation_id, last=turns) if known else [])
+    ctx.set_cloud_meter(_CloudMeter(access.student_id, course_id))
     return ctx, scope
 
 
+class _CloudMeter:
+    """Reserves one cloud call per actual invocation, so safety retries count too."""
+
+    def __init__(self, student_id: str, course_id: int) -> None:
+        self.student_id, self.course_id = student_id, course_id
+
+    def reserve(self) -> bool:
+        try:
+            usage.reserve_usage(self.student_id, self.course_id, "cloud_call")
+        except usage.UsageLimitExceeded:
+            return False
+        return True
+
+    def used(self, tokens: int) -> None:
+        usage.add_tokens(self.student_id, self.course_id, "cloud_call", tokens)
+
+
 def _record_usage(ctx: RequestContext) -> None:
-    student, course_id = ctx.request.student_id, ctx.course.id
+    """The question was reserved in _prepare; add its tokens."""
     tokens = ((ctx.llm.prompt_tokens or 0) + (ctx.llm.completion_tokens or 0)) if ctx.llm else 0
-    usage.record_usage(student, course_id, "question", tokens=tokens)
-    if ctx.llm and ctx.llm.backend == "cloud":
-        usage.record_usage(student, course_id, "cloud_call", tokens=tokens)
+    usage.add_tokens(ctx.request.student_id, ctx.course.id, "question", tokens)
+
+
+def _release(ctx: RequestContext) -> None:
+    """No answer: the question does not count (cloud calls already made still do)."""
+    usage.release_usage(ctx.request.student_id, ctx.course.id, "question")
 
 
 def _out(ctx: RequestContext) -> AskOut:
@@ -146,7 +167,11 @@ async def ask(body: AskIn, access: CourseStudent, request: Request, background: 
         with course_scope.use(scope):
             ctx = await runner.run(ctx)
     except PipelineError as e:
+        _release(ctx)
         return JSONResponse(status_code=503, content=_error(ctx, e.step).model_dump())
+    except BaseException:
+        _release(ctx)
+        raise
     finally:
         ctx.clear_pii_mapping()
     _record_usage(ctx)
@@ -169,11 +194,13 @@ async def ask_stream(body: AskIn, access: CourseStudent, request: Request):
     ctx.set_progress_sink(progress)
 
     async def produce():
+        answered = False
         try:
             with course_scope.use(scope):
                 await runner.run(ctx)
                 ctx.clear_pii_mapping()
                 _record_usage(ctx)
+                answered = True
                 await queue.put(("result", _out(ctx).model_dump(mode="json")))
                 await runner.run_post(ctx)
         except PipelineError as e:
@@ -183,6 +210,8 @@ async def ask_stream(body: AskIn, access: CourseStudent, request: Request):
         except Exception:  # noqa: BLE001 - the stream ends with an error event, never with a broken body
             await queue.put(("error", _error(ctx, "pipeline").model_dump()))
         finally:
+            if not answered:
+                _release(ctx)
             ctx.clear_pii_mapping()
             ctx.set_progress_sink(None)
             await queue.put(None)
