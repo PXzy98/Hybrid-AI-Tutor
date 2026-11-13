@@ -106,12 +106,17 @@ class LearnerRepository:
             stmt = select(LearnerPreference).where(LearnerPreference.student_id == student_id)
             return db.exec(stmt).first()
 
-    def save_preferences(self, student_id: str, prefs: Preferences, implicit: dict) -> None:
+    def save_preferences(self, student_id: str, prefs: Preferences, implicit: dict, *,
+                         changed: bool = True) -> None:
+        """`changed`: the student chose or a preference changed. Only then does `updated_at` move, so a write
+        of the implicit counters alone does not make older preferences look new (visibility window)."""
         with self._db() as db:
             row = db.exec(select(LearnerPreference).where(LearnerPreference.student_id == student_id)).first()
             row = row or LearnerPreference(student_id=student_id)
             row.sequencing, row.detail, row.source = prefs.sequencing, prefs.detail, prefs.source
-            row.implicit, row.updated_at = dict(implicit), utcnow()
+            row.implicit = dict(implicit)
+            if changed:
+                row.updated_at = utcnow()
             db.add(row)
             db.commit()
 
