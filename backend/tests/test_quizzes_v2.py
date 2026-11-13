@@ -63,7 +63,8 @@ def test_students_answer_a_published_quiz_once_without_seeing_the_answers(world)
     again = alice.post(f"{world.url}/quizzes/{quiz['id']}/attempt", json={"answers": [0, 1]})
     assert again.status_code == 409
     after = alice.get(f"{world.url}/quizzes/{quiz['id']}").json()
-    assert after["questions"] == [] and after["attempt"]["score"] == 1  # the result, not the quiz again
+    assert after["attempt"]["score"] == 1
+    assert after["questions"][0]["stem"] == MCQ["stem"]  # shown again, to read the result
     # with consent the answer to the KC-linked question is evidence for the knowledge model
     quiz_evidence = [e for e in rows("evidence_log") if e["source"] == "quiz"]
     found = [(e["kc_id"], e["correct"], e["course_id"]) for e in quiz_evidence]
@@ -283,3 +284,19 @@ def test_a_student_deleting_their_data_removes_their_attempts(world):
     _login(world.app, "bob").post(f"{world.url}/quizzes/{quiz['id']}/attempt", json={"answers": [0, 1]})
     assert alice.delete(f"{world.url}/me/learning-data").status_code == 204
     assert [a["student_id"] for a in rows("quiz_attempt")] == [world.sid["bob"]]
+
+
+def test_ai_drafts_are_not_added_once_the_quiz_is_published(world):
+    reply = json.dumps({"questions": [{"kind": "true_false", "stem": "Current is measured in amperes.",
+                                       "answer": 0, "explanation": "The notes say so.", "passage": 1}]})
+    world.services.gateway = FakeGateway({"local": FakeLLMClient(reply, model="local-9b")})
+    world.services.course_retriever = FakeCourseRetriever([Chunk(text="Current is measured in amperes.",
+                                                                 source="notes.md", topic="circuits",
+                                                                 score=1.0)])
+    quiz = _quiz(world)
+    job = world.prof.post(f"{world.url}/quizzes/{quiz['id']}/drafts", json={"count": 1}).json()["job_id"]
+    _publish(world, quiz["id"])  # before the worker ran the job
+    jobs.run_pending(world.services)
+    assert world.prof.get(f"{world.url}/jobs/{job}").json()["status"] == "failed"
+    after = world.prof.get(f"{world.url}/quizzes/{quiz['id']}").json()["questions"]
+    assert len(after) == 2 and all(q["reviewed"] for q in after)

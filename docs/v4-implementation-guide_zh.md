@@ -46,7 +46,7 @@
 - 增加教师端 AI；
 - 用一套 Docker Compose 部署。
 
-**示例课程**："General Medical Knowledge"（v3 的 5 个主题作为 5 个模块，再补齐整门课的资料）和 **ELG 5902**（工程课，用来验证其他学科也能用）。
+**示例和测试课程**：8 门公开课程（MIT OpenCourseWare 和哈佛 CS50x，许可都是 CC BY-NC-SA 4.0），医学、生命科学、ECE、计算机科学各两门，以 zip 形式放在 `data/demo_courses/archives/`，使用前先运行 `python scripts/fetch_open_courses.py unpack` 解压（说明见 `data/demo_courses/README.md`）。课程包里有讲义、大纲、日历、作业和考试；答案单独放在 `instructor_only/`，永远不能当课程资料上传。**之后所有测试、评估和演示都用这些课程**（2026-11-12 决定，取代 ELG 5902）。虚构的 "General Medical Knowledge" 只留给 v3 迁移用。
 
 **现阶段不做**：
 - 中文界面，以及"兼容中文输入"以外的中文功能（规则 14）；
@@ -270,6 +270,7 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
   - A → B 要先通知学生，学生确认后才对他生效，而且**只显示确认之后的数据**。
 - **不公开**：方案 B 下学生可以隐藏自己的数据。教师看到"该学生选择不公开"；他的数据只计入班级汇总；不能给他定学习计划；系统的自动个性化照常。
 - **审计**：每次查看个人概览都记录。
+- **小测结果**遵守同样的规则（course-structure.md 4.6）：班级汇总要达到最小组人数才显示；个人结果只在方案 B、学生已确认、没有选择不公开、且是 `visible_since` 之后的作答时才显示，并记录审计。
 
 ### 4.9 教师端 AI（四档）
 
@@ -281,6 +282,7 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | 4 | 本地模型能不能胜任这门课？用资料生成测试题（教师可抽查），本地和云端模型都带 RAG 作答，评审模型打分 + 教师抽查，按模块和题型出报告，带延迟和费用 | 只用生成的题目，不涉及学生；把课程资料发给云端前要教师同意 |
 
 另外：
+- **小测**（任务 Q1）：教师自己写，或由本地模型根据课程资料起草选择题和判断题（任务 `quiz.draft`，只走可信的本地连接，不涉及学生数据）；教师审阅后发布；AI 起草的题没审阅就不能发布；
 - 教师端的提问不走个性化，也不写入学习者模型；
 - 生成功能只通过模型网关调用模型；
 - 上传的文件先过 `scan_document()`（文件里可能有学生名单）。
@@ -402,14 +404,15 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | S2 | `.pptx`：`python-pptx` 读取每页的文字、表格和演讲者备注；每段记录 `slide N`；页标题作为分段标题；检查解压后大小；全是图片时给出明确错误；用虚构的 3 页 PPT 测试 | S4–S5 | S1 | `backend/app/rag/documents.py`、`admin/materials.py` | 测试通过；来源显示 slide N |
 | S3 | 引用编号和 Sources 列表对齐 | S5 | S1 | `backend/app/api/v1/ask.py`、`backend/app/prompts/render.py` | 有测试 |
 | S4 | 课程检索器：课程级和模块级资料；每门课一个磁盘索引，带 `index_version`；后台任务重建；上传时调用 `scan_document()` | S5–S6 | Z4、Z11（先用假实现） | `backend/app/rag/`（`medical_hybrid.py` 改名并改造） | 大纲和项目要求能被检索到 |
-| S5 | 示例课程资料：补齐"General Medical Knowledge"（大纲、项目要求、模板、讲义）；ELG 5902（由斯允先征得 Gita 教授同意） | S5 | 独立 | `data/`（目录按 course-structure.md 第 7 节） | 两门课都能上传和检索 |
+| S5 | 示例课程资料：`data/demo_courses/` 里的 8 个公开课程包（Z 已做好，见 7.5）；剩下的是确认每个课程包都能通过课程检索器上传和检索 | S5 | 独立 | `data/`（目录按 course-structure.md 第 7 节） | 8 门课都能上传和检索 |
 | S6 | 教师端 AI 第一档后端，通过模型网关 | S6 | S4、Z6 | 新的 `backend/app/instructor_ai/` | 教师接受后学生才看得到 |
 | S7 | 教师端 AI 第二档后端（知识点、检测题、误解；草稿 → 接受）；课程摸底题也用它（D3） | S6–S7 | Z4、S4 | 同上 | 新课程可以由 AI 起草，接受后用于个性化 |
 | S8 | 课程级知识模型（4.10） | S6–S7 | Z4 | `backend/app/learner/knowledge/` | 和现有 BKT 的对比评估（`eval/learner-sim/`） |
 | S9 | 可见性方案 A/B、个人概览、学习计划、不公开、审计；结束学期导出的内容 | S6–S7 | Z4、Z10 | `backend/app/learner/`、`backend/app/api/v2/` | 测试覆盖"不该看到的不返回" |
 | S10 | 教师端 AI 第三档：班级洞察后端 | S7 | S8 | `backend/app/instructor_ai/` | 不返回原文 |
-| S11 | 两门课的检索评估（`eval/course_rag_benchmark.py`） | S7 | S5 | `eval/` | 两门课都有结果 |
+| S11 | 公开课程包的检索评估，每个领域至少一门（`eval/course_rag_benchmark.py`） | S7 | S5 | `eval/` | 每个领域都有结果 |
 | S12 | 自查和交接文档 | S8 | — | `docs/` | 自查清单 |
+| Q1 | 小测和学期末问卷，2026-11-12 导师会议后新增（第 9 节）：小测（选择题和判断题，本地模型起草，审阅，发布，自动评分，结果遵守可见性规则，`final` 小测 = 后测，和课程诊断（前测）对比）；学期末问卷（时间窗口、匿名打分、最小组人数）；结束学期时两者都以汇总形式导出，然后删除 | S7 | S9、S6 | `backend/app/learner/quizzes.py`、`backend/app/api/v2/quizzes.py`、`backend/app/api/v2/survey.py`、`backend/app/instructor_ai/quiz_drafts.py`、`backend/app/platform/end_of_term.py`、迁移 0013 | `backend/tests/test_quizzes_v2.py` 通过；每个接口都有访问测试；api-v2.md 3.9、3.10 |
 
 **落后时按这个顺序往后推**：S10 → S9 里的学习计划部分。
 
@@ -420,17 +423,23 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | T1 | Beta 路由评估（G1-105）和 Beta 报告（G1-108） | S4 | — | `eval/` | 按时交付 |
 | T2 | 前端改版设计稿：用 v0 出几版；选定 AI Elements 或 assistant-ui（7.4） | S4–S5 | 独立 | 设计稿 | Z、S 和客户认可 |
 | T3 | 升级到 Tailwind 4 和 React 19，引入 shadcn/ui；现有页面改版；回答用 Markdown 渲染（修好粗体） | S5 | T2 | `frontend/` | 现有前端测试通过；截图对比 |
-| T4 | ECE 路由评估：用 ELG 5902 资料写工程问题并标注，做评估；需要时补训练数据、重新训练 | S5–S6 | S5 | `backend/app/routing/`、`data/routing/`、`eval/` | 报告；工程问题不会全部被送云端 |
+| T4 | ECE 和计算机科学的路由评估：用 `data/demo_courses/` 里 ECE 和计算机科学的课程包写问题并标注，做评估；需要时补训练数据、重新训练 | S5–S6 | S5 | `backend/app/routing/`、`data/routing/`、`eval/` | 报告；工程问题不会全部被送云端 |
 | T5 | 问题类型分类（concept / logistics）：标注数据，路由模型多一个输出 | S6 | T4 | `backend/app/routing/` | 准确率报告 |
 | T6 | 新页面：选课程、加入页（邀请码）、课程管理、成员导入、课程设置 | S6 | Z9 的 OpenAPI | `frontend/src/pages/` | 主要流程有界面测试 |
-| T7 | 新页面：教师端 AI（四档）、个人概览、学习计划、可见性方案和不公开 | S6–S7 | S6～S10、Z12 的 OpenAPI | `frontend/src/pages/` | 同上 |
-| T8 | "数据可能发往云端"的提示（文字由 Z 提供）；所有新页面的英法文字 | S6–S7 | Z11 | `frontend/src/i18n/` | 三处都有提示 |
+| T7 | 新页面：教师端 AI（四档）、个人概览、学习计划、可见性方案和不公开。新前端**没有每条回答后的评分**，回答下面也**没有"更详细 / 更简短 / 先举例 / 先讲概念"按钮**（决定见第 9 节）：评价只有学期末问卷 | S6–S7 | S6～S10、Z12 的 OpenAPI | `frontend/src/pages/` | 同上 |
+| T8 | "数据可能发往云端"的提示（文字由 Z 提供）；所有新页面的英法文字，包括小测和问卷；已删除的每条回答评分和风格按钮不再需要文字 | S6–S7 | Z11 | `frontend/src/i18n/` | 三处都有提示 |
 | T9 | 演示账号和示例数据脚本（只通过 API）；两门课的演示流程 | S6 | Z9、S5 | `scripts/` | 一条命令建好演示环境 |
 | T10 | 视频（11/25）；把法语界面截图发给 Lavin 审核并改回 | S6 | T3 | — | 按时交付 |
 | T11 | 改名（定名后）；无障碍自查（键盘、屏幕阅读器、对比度、放大） | S7 | 定名 | `frontend/` | 自查清单 |
 | T12 | 学生使用手册、教师使用手册（含 course-structure.md 3.4 关于助教的说明）；路由、前端、网络搜索的交接文档 | S8 | — | `docs/` | 新教师照着能用 |
 | T13 | 网络搜索（G1-92）+ 评估（G1-106）：搜索 API、白名单、清洗结果、作为资料交给生成步骤；查询只用 `search_query()`；出网只走统一的出网函数 | S7 | Z11、Z6 | 新的 `backend/app/websearch/`、`config.yaml` 的 pipeline | E4 审计：搜索请求里没有个人信息；评估报告 |
 | T14 | 清除 `docs/` 以外 Markdown 里的中文（规则 14）：按第 7 节用英文重写 `TODO.md`；把仓库根目录的中文版入门文档挪到 `docs/GETTING_STARTED_zh.md` 并修好链接；删掉 `README.md`、`GETTING_STARTED.md` 里的中文行。`frontend/src/test/Routing.test.tsx` 里的中文测试文本保留（它测试的是中文输入） | S5 | — | 上述文件 | `docs/` 以外的 Markdown 里没有中文 |
+
+### 7.3a 前端 v2（任务 F1）
+
+| ID | 任务 | Sprint | 依赖 | 主要文件 | 完成标准 |
+|---|---|---|---|---|---|
+| F1 | 基于 API v2 的前端，正在做（包含 T6、T7 和 T8 的文字）：**学生端**（聊天、我的进度、小测、问卷）和**教师端**（班级概览、每个学生的进度（遵守可见性规则）、小测、资料、设置）。没有每条回答后的评分，没有回答风格按钮；不使用 `/api/v1/survey`。用 `data/demo_courses/` 里的八个开放课程包测试 | S7 | Z9、Q1、S6～S10、Z12 的 OpenAPI | `frontend/` | `npm run build && npm test`；两个端在演示课程包上都能用 |
 
 ### 7.4 前端技术栈（T）
 
@@ -472,8 +481,11 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | S 的一部分（bandit B314，Z13 扫描发现） | S | PubMed 返回的 XML 改用 `defusedxml` 解析 | #55 | 审查 |
 | 学习者数据按课程（course-structure.md 4.1、4.4） | S | `learner_kc_state`、`learner_topic_level`、`evidence_log`、`learner_misconception` 加 `course_id`（已有的行归到演示课程）；每门课一个 `LearnerRepository`；`app/learner/course_data.py` 导出和删除一门课的学习者数据 | #60 | 审查 |
 | S9（API v2 接口和数据库部分） | S | `app/api/v2/learner.py`：检查题、课程诊断、个人档案、可见性选择、删除自己在一门课的数据、班级汇总、个人概览、学习计划；`app/learner/course_views.py` 在数据库上实现 `LearnerViewStore`、可见性变更和计划（`learning_plan`，迁移 0012） | #62 | 审查 |
+| S5 的一部分（11-12 顾问会议） | S | `data/demo_courses/archives/` 里的 8 个公开课程包（讲义、大纲、日历、作业、考试；答案只给教师），带清单、署名和许可；`scripts/fetch_open_courses.py` 用来解压和重建；`tests/test_open_course_packs.py` | 本 PR | 审查；S5、S11、T4 都用这些课程包 |
+| Q1（新增：小测和学期末问卷；S9 的问卷、S6 的教师端 AI 里的小测起草） | S | `app/learner/quizzes.py`、`app/api/v2/quizzes.py`、`app/api/v2/survey.py`、`app/instructor_ai/quiz_drafts.py`、结束学期的导出和删除、迁移 0013；api-v2.md 3.9、3.10 | 分支 `feature/q1-quizzes-survey` | 审查 |
+| F1（前端 v2：学生端和教师端；包含 T6、T7 和 T8 的文字） | T | `frontend/` | 随 F1 | 审查 |
 
-从 2026-11-11 起，按同样的决定，Z 也用这种方式做 7.2 和 7.3 里 S 和 T 剩下的任务（每个任务一个 PR，开 PR 时加到上表）。还没开始的：S4、S6、S7、S10 的 API v2 接口；S9 的问卷；T3 到 T13；CI 扫描报告的 `react-router` 7 和 `vite`/`vitest` 升级。
+从 2026-11-11 起，按同样的决定，Z 也用这种方式做 7.2 和 7.3 里 S 和 T 剩下的任务（每个任务一个 PR，开 PR 时加到上表）。还没开始的：S4、S6、S7、S10 的 API v2 接口；T3 到 T13（T6、T7 和 T8 的一部分由 F1 承担，见 7.3a）；CI 扫描报告的 `react-router` 7 和 `vite`/`vitest` 升级。
 
 ## 8. 开发流程
 
@@ -562,12 +574,17 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | 事项 | 决定 |
 |---|---|
 | 课程结构、账号、入学、数据范围、设置、数据库、迁移、API 版本 | [design/course-structure.md](design/course-structure.md) 第 1 节、[design/api-v2.md](design/api-v2.md) |
-| 示例课程 | "General Medical Knowledge" + ELG 5902 |
+| 示例和测试课程 | `data/demo_courses/` 里的 8 门公开课程（医学、生命科学、ECE、计算机科学各两门）；"General Medical Knowledge" 只用于 v3 迁移 |
 | 首批隐私档案 | 医学、生命科学、ECE |
 | 部署 | 一套 Docker Compose；vLLM 单独部署，通过 API 连接 |
 | 数据库 | 只用 PostgreSQL |
 | 用量限制 | 先用配置文件；课程级字段已预留 |
 | 可见性 | 每门课选方案；学生可以不公开；切换前的数据不显示 |
+| 对导师系统的评价（2026-11-12） | 只有学期末问卷。每条回答后的评分和"更详细 / 更简短 / 先举例 / 先讲概念"按钮从新前端删除；`/api/v1/survey` 保留（API v1 已冻结），但新前端不使用 |
+| 可见性和不公开（2026-11-12） | 方案 A/B 和不公开保留 |
+| 本学期的小测（2026-11-12） | 只做选择题和判断题，自动评分，不计成绩，只看进度；AI 由本地模型根据课程资料起草，教师审阅后才能发布；`final` 小测是后测，和课程诊断（前测）对比；结果遵守可见性规则（4.8） |
+| 针对个别学生的资料（2026-11-12） | 下学期；本学期只有带备注的学习计划（S9） |
+| 两个端（2026-11-12） | 学生端（聊天、我的进度、小测、问卷）和教师端（班级概览、每个学生的进度（遵守可见性规则）、小测、资料、设置） |
 | 登录 | 现在用自建账号；预留 `login_identity` 给 OAuth |
 | 教师端 AI | 四档都做 |
 | 知识模型 | 课程级分层模型；规则模型只兜底 |
@@ -578,7 +595,6 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 **待决定**：
 - 项目名：候选 HALO（Hybrid Adaptive Learning Orchestrator）、COMPASS、CAIRN、MAPLE；
 - vLLM 机器一直开着，还是只在上课时间开；
-- ELG 5902 材料的使用许可（Gita 教授）；
 - 本学期的交付范围（和 Ismaeel 教授、Abbas 教授确认）。
 
 **现阶段不做**：中文界面、伦理审批、备份和硬盘加密、云端服务商比较。

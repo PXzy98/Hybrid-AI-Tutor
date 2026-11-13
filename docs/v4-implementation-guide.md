@@ -52,8 +52,12 @@ Design documents that are part of this guide:
 - instructor AI;
 - one Docker Compose deployment.
 
-**Demo courses**: "General Medical Knowledge" (the five v3 topics as five modules, plus full course
-material) and **ELG 5902** (an engineering course, to check that other subjects work).
+**Demo and test courses**: eight open courses (MIT OpenCourseWare and Harvard CS50x, CC BY-NC-SA 4.0), two
+each in medical science, life science, ECE and computer science, in `data/demo_courses/` (stored as zips:
+run `python scripts/fetch_open_courses.py unpack` first; see its `README.md`). They include syllabi,
+calendars, assignments and exams; solutions are in `instructor_only/` and are never course material.
+**Every test, evaluation and demo uses them** (decided 2026-11-12, replacing ELG 5902). The
+fictional "General Medical Knowledge" course stays for the v3 migration.
 
 **Out of scope for now**:
 - a Chinese interface or other Chinese features beyond handling Chinese input (rule 14);
@@ -319,6 +323,8 @@ Highlights:
 - **Opt-out**: in mode B a student can hide his data. The instructor then sees "this student chose not to
   share"; his data only counts in class aggregates; no learning plan; automatic personalization continues.
 - **Audit**: every view of an individual overview is logged.
+- **Quiz results** follow the same rules (course-structure.md 4.6): class aggregates above the minimum group; an
+  individual result only in mode B, acknowledged, not opted out, after `visible_since`, audited.
 
 ### 4.9 Instructor AI (four tiers)
 
@@ -330,6 +336,9 @@ Highlights:
 | 4 | Can the local model handle this course? Generate test questions from the material (instructor can review), answer with the local and the cloud model (both with RAG), score with a judge model + instructor spot checks, report per module and question type with latency and cost | generated questions only, no student data; instructor consent before course material goes to the cloud |
 
 Also:
+- **quizzes** (task Q1): the instructor writes them, or the local model drafts multiple choice and true/false
+  questions from the course material (job `quiz.draft`, trusted local connection only, no student data); the
+  instructor reviews them and publishes; AI-drafted questions cannot be published unreviewed;
 - instructor questions do not go through learner personalization and are not written to the learner model;
 - generation only through the model gateway;
 - uploads go through `scan_document()` first (a file may contain a class list).
@@ -457,14 +466,15 @@ data); users build against the fakes without waiting for the real implementation
 | S2 | `.pptx`: `python-pptx` reads slide text, tables and speaker notes; `slide N` per chunk; slide titles as section headings; unpacked size check; clear error when slides are images only; tests with a fictional 3-slide deck | S4–S5 | S1 | `backend/app/rag/documents.py`, `admin/materials.py` | tests pass; sources show slide N |
 | S3 | Citation numbers match the Sources list | S5 | S1 | `backend/app/api/v1/ask.py`, `backend/app/prompts/render.py` | tests |
 | S4 | Course retriever: course-level and module-level material; one index per course on disk with `index_version`; worker rebuild; uploads call `scan_document()` | S5–S6 | Z4, Z11 (fake first) | `backend/app/rag/` (`medical_hybrid.py` renamed and changed) | syllabus and project requirements are retrieved |
-| S5 | Demo course material: complete "General Medical Knowledge" (syllabus, project requirements, templates, lecture notes); ELG 5902 (Siyun asks Prof. Gita for permission first) | S5 | independent | `data/` (layout from course-structure.md section 7) | both courses upload and retrieve |
+| S5 | Demo course material: the eight open course packs in `data/demo_courses/` (done by Z, see 7.5); remaining: check that each pack uploads and retrieves through the course retriever | S5 | independent | `data/` (layout from course-structure.md section 7) | all eight courses upload and retrieve |
 | S6 | Instructor AI tier 1 backend, through the model gateway | S6 | S4, Z6 | new `backend/app/instructor_ai/` | drafts visible to students only after acceptance |
 | S7 | Instructor AI tier 2 backend (KCs, check items, misconceptions; drafts → accepted); also used by the course diagnostic (D3) | S6–S7 | Z4, S4 | same | a new course can be drafted by AI and used for personalization after acceptance |
 | S8 | Course-level knowledge model (4.10) | S6–S7 | Z4 | `backend/app/learner/knowledge/` | evaluation against the current BKT (`eval/learner-sim/`) |
 | S9 | Visibility modes A/B, overview, learning plan, opt-out, audit; end-of-term export content | S6–S7 | Z4, Z10 | `backend/app/learner/`, `backend/app/api/v2/` | tests cover "what must not be seen is not returned" |
 | S10 | Instructor AI tier 3: class insights backend | S7 | S8 | `backend/app/instructor_ai/` | never returns question text |
-| S11 | Retrieval evaluation on both courses (`eval/course_rag_benchmark.py`) | S7 | S5 | `eval/` | results for both |
+| S11 | Retrieval evaluation on the open course packs, at least one per area (`eval/course_rag_benchmark.py`) | S7 | S5 | `eval/` | results per area |
 | S12 | Self-review and handover documents | S8 | — | `docs/` | checklist |
+| Q1 | Quizzes and the end-of-term survey, added after the advisor meeting of 2026-11-12 (section 9): quizzes (multiple choice and true/false, AI drafts by the local model, review, publish, auto-grading, results under the visibility rules, `final` quiz = post-test against the course diagnostic); end-of-term survey (window, anonymous ratings, minimum group); end of term exports both as aggregates and deletes the rows | S7 | S9, S6 | `backend/app/learner/quizzes.py`, `backend/app/api/v2/quizzes.py`, `backend/app/api/v2/survey.py`, `backend/app/instructor_ai/quiz_drafts.py`, `backend/app/platform/end_of_term.py`, migration 0013 | `backend/tests/test_quizzes_v2.py` passes; access tests for every endpoint; api-v2.md 3.9, 3.10 |
 
 **If behind, postpone in this order**: S10 → the learning-plan part of S9.
 
@@ -475,17 +485,23 @@ data); users build against the fakes without waiting for the real implementation
 | T1 | Beta routing evaluation (G1-105) and Beta report (G1-108) | S4 | — | `eval/` | delivered on time |
 | T2 | Frontend redesign draft: a few versions with v0; choose AI Elements or assistant-ui (7.4) | S4–S5 | independent | design draft | Z, S and the client agree |
 | T3 | Upgrade to Tailwind 4 and React 19, add shadcn/ui; restyle existing pages; render answers as Markdown (fixes bold) | S5 | T2 | `frontend/` | existing frontend tests pass; screenshots compared |
-| T4 | ECE routing evaluation: write and label engineering questions from the ELG 5902 material; evaluate; add training data and retrain if needed | S5–S6 | S5 | `backend/app/routing/`, `data/routing/`, `eval/` | report; engineering questions are not all sent to the cloud |
+| T4 | ECE and computer science routing evaluation: write and label questions from the ECE and computer science packs in `data/demo_courses/`; evaluate; add training data and retrain if needed | S5–S6 | S5 | `backend/app/routing/`, `data/routing/`, `eval/` | report; engineering questions are not all sent to the cloud |
 | T5 | Question type classifier (concept / logistics): labelled data, one more output of the routing model | S6 | T4 | `backend/app/routing/` | accuracy report |
 | T6 | New pages: course picker, join page (invitation code), course management, member import, course settings | S6 | Z9 OpenAPI | `frontend/src/pages/` | UI tests for the main flows |
-| T7 | New pages: instructor AI (four tiers), overview, learning plan, visibility mode and opt-out | S6–S7 | S6–S10, Z12 OpenAPI | `frontend/src/pages/` | same |
-| T8 | "Data may be sent to the cloud" notices (text from Z); en/fr strings of all new pages | S6–S7 | Z11 | `frontend/src/i18n/` | notices in all three places |
+| T7 | New pages: instructor AI (four tiers), overview, learning plan, visibility mode and opt-out. The new frontend has **no rating after an answer** and **no "more detail / shorter / example first / concept first" buttons** under answers (decision in section 9): evaluation is only the end-of-term survey | S6–S7 | S6–S10, Z12 OpenAPI | `frontend/src/pages/` | same |
+| T8 | "Data may be sent to the cloud" notices (text from Z); en/fr strings of all new pages, including quizzes and the survey; no strings for the removed per-answer rating and style buttons | S6–S7 | Z11 | `frontend/src/i18n/` | notices in all three places |
 | T9 | Demo accounts and sample data scripts (through the API only); demo flow for both courses | S6 | Z9, S5 | `scripts/` | one command builds the demo |
 | T10 | Video (Nov 25); send French UI screenshots to Lavin and apply her corrections | S6 | T3 | — | delivered on time |
 | T11 | Renaming (once the name is chosen); accessibility self-check (keyboard, screen reader, contrast, zoom) | S7 | name | `frontend/` | checklist |
 | T12 | Student manual, instructor manual (including the TA note in course-structure.md 3.4); routing, frontend and web search handover | S8 | — | `docs/` | a new instructor can use it |
 | T13 | Web search (G1-92) + evaluation (G1-106): search API, allow-list, cleaning, results as passages for generation; query only from `search_query()`; outbound calls only through the single outbound helper | S7 | Z11, Z6 | new `backend/app/websearch/`, `config.yaml` pipeline | E4 audit: no personal data in search requests; evaluation report |
 | T14 | Remove Chinese from Markdown outside `docs/` (rule 14): rewrite `TODO.md` in English from section 7; move the Chinese copy of `GETTING_STARTED.md` from the repository root to `docs/GETTING_STARTED_zh.md` and fix its links; remove the Chinese lines of `README.md` and `GETTING_STARTED.md`. The Chinese test text in `frontend/src/test/Routing.test.tsx` stays (it tests Chinese input) | S5 | — | listed files | no Chinese in Markdown outside `docs/` |
+
+### 7.3a Frontend v2 (task F1)
+
+| ID | Task | Sprint | Depends on | Main files | Done when |
+|---|---|---|---|---|---|
+| F1 | Frontend on API v2, being done now (carries T6 and T7, and the strings of T8): a **student dashboard** (chat, my progress, quizzes, survey) and an **instructor dashboard** (class overview, each student's progress under the visibility rules, quizzes, materials, settings). No rating after an answer, no answer-style buttons; `/api/v1/survey` is not used. Tested with the eight open course packs in `data/demo_courses/` | S7 | Z9, Q1, S6–S10, Z12 OpenAPI | `frontend/` | `npm run build && npm test`; both dashboards work on the demo packs |
 
 ### 7.4 Frontend stack (T)
 
@@ -530,10 +546,13 @@ owner reviews and approves the PR, and the area stays the owner's afterwards (ru
 | part of S (bandit B314, found by the Z13 scans) | S | PubMed responses parsed with `defusedxml` | #55 | review |
 | learner data per course (course-structure.md 4.1, 4.4) | S | `course_id` on `learner_kc_state`, `learner_topic_level`, `evidence_log` and `learner_misconception` (existing rows go to the demo course); one `LearnerRepository` per course; `app/learner/course_data.py` exports and deletes one course's learner data | #60 | review |
 | S9 (API v2 endpoints and database side) | S | `app/api/v2/learner.py`: check, course diagnostic, profile, visibility choices, deleting own course data, class summary, individual overview, learning plan; `app/learner/course_views.py` implements `LearnerViewStore`, visibility changes and plans on the database (`learning_plan`, migration 0012) | #62 | review |
+| part of S5 (advisor meeting 2026-11-12) | S | eight open course packs (lectures, syllabi, calendars, assignments, exams; solutions kept instructor-only) as zips in `data/demo_courses/archives/` with manifests, attribution and license; `scripts/fetch_open_courses.py` to unpack and rebuild them; `tests/test_open_course_packs.py` | this PR | review; S5, S11 and T4 use the packs |
+| Q1 (new: quizzes and the end-of-term survey; the survey of S9, quiz drafts as instructor AI of S6) | S | `app/learner/quizzes.py`, `app/api/v2/quizzes.py`, `app/api/v2/survey.py`, `app/instructor_ai/quiz_drafts.py`, end of term export and deletion, migration 0013; api-v2.md 3.9, 3.10 | branch `feature/q1-quizzes-survey` | review |
+| F1 (frontend v2: student and instructor dashboards; carries T6, T7 and the strings of T8) | T | `frontend/` | with F1 | review |
 
 From 2026-11-11, by the same decision, Z also works on the remaining S and T tasks of sections 7.2 and 7.3 in
 this way (one PR per task, listed in the table above when it is opened). Not started yet: the API v2
-endpoints of S4, S6, S7 and S10; the survey of S9; T3 to T13; the `react-router` 7 and `vite`/`vitest` updates reported by
+endpoints of S4, S6, S7 and S10; T3 to T13 (T6, T7 and part of T8 are carried by F1, section 7.3a); the `react-router` 7 and `vite`/`vitest` updates reported by
 the CI scans.
 
 ## 8. Workflow
@@ -636,12 +655,17 @@ the CI scans.
 | Topic | Decision |
 |---|---|
 | Course structure, accounts, enrollment, data scope, settings, database, migration, API version | [design/course-structure.md](design/course-structure.md) section 1, [design/api-v2.md](design/api-v2.md) |
-| Demo courses | "General Medical Knowledge" + ELG 5902 |
+| Demo and test courses | eight open courses in `data/demo_courses/` (two each: medical science, life science, ECE, computer science); "General Medical Knowledge" only for the v3 migration |
 | First privacy profiles | medical science, life science, ECE |
 | Deployment | one Docker Compose stack; vLLM deployed separately and reached by API |
 | Database | PostgreSQL only |
 | Usage limits | config file for now; course-level fields prepared |
 | Visibility | mode per course; students can opt out; data before the switch is not shown |
+| Evaluation of the tutor (2026-11-12) | only the end-of-term survey. The rating after each answer and the "more detail / shorter / example first / concept first" buttons are removed from the new frontend; `/api/v1/survey` stays (API v1 is frozen) but the new frontend does not use it |
+| Visibility and opt-out (2026-11-12) | modes A/B and opt-out stay |
+| Quizzes this term (2026-11-12) | multiple choice and true/false only, graded automatically, not a grade, progress only; AI drafts by the local model from the course material, reviewed by the instructor before publishing; a `final` quiz is the post-test, compared with the course diagnostic (pre-test); results follow the visibility rules (4.8) |
+| Targeted material (2026-11-12) | for single students: next term; this term only the learning plan with notes (S9) |
+| Dashboards (2026-11-12) | two: student (chat, my progress, quizzes, survey) and instructor (class overview, each student's progress under the visibility rules, quizzes, materials, settings) |
 | Login | own accounts now; `login_identity` prepared for OAuth |
 | Instructor AI | all four tiers |
 | Knowledge model | course-level layered model; rule model only as fallback |
@@ -652,7 +676,6 @@ the CI scans.
 **Open**:
 - project name: candidates HALO (Hybrid Adaptive Learning Orchestrator), COMPASS, CAIRN, MAPLE;
 - whether the vLLM machine runs all the time or only during class hours;
-- permission to use the ELG 5902 material (Prof. Gita);
 - scope for this term (to confirm with Prof. Ismaeel and Prof. Abbas).
 
 **Not now**: a Chinese interface, ethics approval, backups and disk encryption, comparing cloud providers.

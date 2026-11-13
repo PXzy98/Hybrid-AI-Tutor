@@ -54,7 +54,7 @@ def test_ending_the_term_exports_then_deletes_the_course_student_data(world):
     assert done["deleted"]["evidence_log"] == 2 and done["deleted"]["session_turn"] == 4
 
     files = _export(world, done["export_id"])
-    assert set(files) == {"export.json", "class_summary.json", "students.json"}
+    assert set(files) == {"export.json", "class_summary.json", "students.json", "quizzes.json", "survey.json"}
     assert files["export.json"]["students"] == 2 and files["class_summary.json"][0]["students"] == 2
     assert [s["student_id"] for s in files["students.json"]] == [sid]  # only the student who acknowledged
     assert [k["kc_code"] for k in files["students.json"][0]["kcs"]] == ["C.1"]  # mastery since visible
@@ -82,7 +82,8 @@ def test_mode_a_exports_no_individual_data(world):
     _login(world.app, "alice").post(f"{world.url}/check", json=Q1)
     done = world.prof.post(f"{world.url}/end-term", json={"confirm": True}).json()
     assert done["students_exported"] == 0
-    assert set(_export(world, done["export_id"])) == {"export.json", "class_summary.json"}
+    files = set(_export(world, done["export_id"]))
+    assert files == {"export.json", "class_summary.json", "quizzes.json", "survey.json"}
 
 
 def test_exports_belong_to_the_course_instructors_and_expire(world):

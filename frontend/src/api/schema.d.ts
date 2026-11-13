@@ -592,6 +592,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/course-types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Course Types
+         * @description The course types a new course can have now (privacy profiles enabled by the admin).
+         */
+        get: operations["course_types_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/courses": {
         parameters: {
             query?: never;
@@ -2427,6 +2447,11 @@ export interface components {
             status: "active" | "archived";
             /** My Role */
             my_role: ("instructor" | "student") | null;
+            /**
+             * Local Only
+             * @default false
+             */
+            local_only: boolean;
         };
         /** CoursePatch */
         CoursePatch: {
@@ -3341,6 +3366,8 @@ export interface components {
             created_at: string;
             /** Student Id */
             student_id?: string | null;
+            /** Visible To Instructor */
+            visible_to_instructor?: boolean | null;
         };
         /** MembershipOut */
         MembershipOut: {
@@ -5677,6 +5704,26 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    course_types_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string[];
+                };
             };
         };
     };
