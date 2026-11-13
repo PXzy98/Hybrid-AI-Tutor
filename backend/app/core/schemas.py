@@ -368,6 +368,11 @@ class RequestContext(BaseModel):
     _progress_sink: Any = PrivateAttr(default=None)
     _request_started: float = PrivateAttr(default_factory=perf_counter)
 
+    @property
+    def question_type(self) -> Literal["concept", "logistics"]:
+        """Course logistics or concept (T5), set by the analyze_route step; concept until it ran."""
+        return self.semantic_analysis.question_kind if self.semantic_analysis else "concept"
+
     def set_progress_sink(self, sink) -> None:
         self._progress_sink = sink
 

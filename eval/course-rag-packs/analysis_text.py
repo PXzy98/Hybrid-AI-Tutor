@@ -54,6 +54,11 @@ retrieval, and unchanged course-wide.
 
 **Suggestions (not done here).** Down-weight practice exams and homework in course-wide retrieval too (or search
 them only when asked for);
-index calendar rows with their session and date words; add a semantic or query-expansion step before the
+add a semantic or query-expansion step before the
 lexical score; fix the scan false positives.
+
+**T5 (question type).** Logistics questions are now retrieved with `question_kind="logistics"` (course-level
+files not weighted down, boosted by 1.5), and Markdown table rows such as calendar rows are indexed one
+passage per row with their column names ("Lecture 11. TOPICS: Midterm Exam ..."). Before: logistics hit@1 0.69,
+hit@4 0.85; calendar questions hit@4 0.60. The question-type head and the numbers are in `eval/question-type/`.
 """

@@ -1,0 +1,749 @@
+{"question": "how do computers represent letters, is it ASCII or Unicode for emoji?", "course": "harvard_cs50x", "source": "s11", "label": "concept"}
+{"question": "what is pseudocode and why write it before real code?", "course": "harvard_cs50x", "source": "s11", "label": "concept"}
+{"question": "which cs50 helper functions can I use to read an int or a float from the user in C?", "course": "harvard_cs50x", "source": "s11", "label": "concept"}
+{"question": "how do I read what the user typed after the program name in the terminal?", "course": "harvard_cs50x", "source": "s11", "label": "concept"}
+{"question": "why is binary search faster than going through a phone book page by page?", "course": "harvard_cs50x", "source": "s11", "label": "concept"}
+{"question": "how does merge sort split up a list and how does recursion help?", "course": "harvard_cs50x", "source": "s11", "label": "concept"}
+{"question": "what's the difference between selection sort and bubble sort in how many swaps they make?", "course": "harvard_cs50x", "source": "s11", "label": "concept"}
+{"question": "my program crashes when I copy a string into a variable that never got memory, what's happening?", "course": "harvard_cs50x", "source": "s11", "label": "concept"}
+{"question": "how do I find memory leaks in my C program?", "course": "harvard_cs50x", "source": "s11", "label": "concept"}
+{"question": "why do we write colors like FF0000 in base 16?", "course": "harvard_cs50x", "source": "s11", "label": "concept"}
+{"question": "what is the advantage of a linked list over an array when the size changes?", "course": "harvard_cs50x", "source": "s11", "label": "concept"}
+{"question": "how do hash tables avoid searching through a whole list, and what is a collision?", "course": "harvard_cs50x", "source": "s11", "label": "concept"}
+{"question": "how do I translate my C blur filter code to something shorter in Python?", "course": "harvard_cs50x", "source": "s11", "label": "concept"}
+{"question": "how can I read a CSV file row by row with the column names in Python?", "course": "harvard_cs50x", "source": "s11", "label": "concept"}
+{"question": "what is a foreign key and how is it different from a primary key?", "course": "harvard_cs50x", "source": "s11", "label": "concept"}
+{"question": "how do attackers trick a website's database with user input?", "course": "harvard_cs50x", "source": "s11", "label": "concept"}
+{"question": "what does DNS do when I type a web address?", "course": "harvard_cs50x", "source": "s11", "label": "concept"}
+{"question": "how do I pass a name typed in a form to my Flask route?", "course": "harvard_cs50x", "source": "s11", "label": "concept"}
+{"question": "why use POST instead of GET so passwords don't show in the URL?", "course": "harvard_cs50x", "source": "s11", "label": "concept"}
+{"question": "how do I use a greedy algorithm to give change with the fewest coins?", "course": "harvard_cs50x", "source": "s11", "label": "concept"}
+{"question": "which two filters do I have to implement in the image problem, and what about blur?", "course": "harvard_cs50x", "source": "s11", "label": "concept"}
+{"question": "in the spell checker problem, which files am I given and what do I implement?", "course": "harvard_cs50x", "source": "s11", "label": "concept"}
+{"question": "what score do I need to get the edX certificate?", "course": "harvard_cs50x", "source": "s11", "label": "logistics"}
+{"question": "do I need to buy a textbook?", "course": "harvard_cs50x", "source": "s11", "label": "logistics"}
+{"question": "how is a problem scored, correctness versus style?", "course": "harvard_cs50x", "source": "s11", "label": "logistics"}
+{"question": "what is the deadline to finish the course?", "course": "harvard_cs50x", "source": "s11", "label": "logistics"}
+{"question": "can I do the final project with friends and how big should it be then?", "course": "harvard_cs50x", "source": "s11", "label": "logistics"}
+{"question": "for problem set 3 do I have to do both Runoff and Tideman?", "course": "harvard_cs50x", "source": "s11", "label": "logistics"}
+{"question": "how do I train a neural network with PyTorch on a GPU cluster?", "course": "harvard_cs50x", "source": "s11", "label": "concept"}
+{"question": "who is the head teaching fellow and when are the office hours?", "course": "harvard_cs50x", "source": "s11", "label": "logistics"}
+{"question": "explain how Rust's borrow checker prevents data races", "course": "harvard_cs50x", "source": "s11", "label": "concept"}
+{"question": "when can I treat a circuit as a lumped circuit instead of worrying about fields and wave effects?", "course": "mit_6_002_circuits", "source": "s11", "label": "concept"}
+{"question": "what does the sum of the voltages around a loop have to equal?", "course": "mit_6_002_circuits", "source": "s11", "label": "concept"}
+{"question": "how do I find the voltage at each node using the node method?", "course": "mit_6_002_circuits", "source": "s11", "label": "concept"}
+{"question": "how does superposition work when there are several independent sources?", "course": "mit_6_002_circuits", "source": "s11", "label": "concept"}
+{"question": "how do I replace a complicated network with a simple equivalent source and resistor?", "course": "mit_6_002_circuits", "source": "s11", "label": "concept"}
+{"question": "why do digital systems use a forbidden region between 0 and 1 voltages?", "course": "mit_6_002_circuits", "source": "s11", "label": "concept"}
+{"question": "how much noise margin does a 5V digital signal give for a logic one?", "course": "mit_6_002_circuits", "source": "s11", "label": "concept"}
+{"question": "what promise does a gate make about its outputs if the inputs are valid?", "course": "mit_6_002_circuits", "source": "s11", "label": "concept"}
+{"question": "how is a transistor modelled as a switch with an on resistance?", "course": "mit_6_002_circuits", "source": "s11", "label": "concept"}
+{"question": "which MOSFET operating regions are there: cutoff, triode, saturation?", "course": "mit_6_002_circuits", "source": "s11", "label": "concept"}
+{"question": "how do I do small signal analysis around a DC bias point?", "course": "mit_6_002_circuits", "source": "s11", "label": "concept"}
+{"question": "what is a dependent source and why do amplifiers need one?", "course": "mit_6_002_circuits", "source": "s11", "label": "concept"}
+{"question": "what happens to the voltage when a capacitor charges through a resistor, how fast does it settle?", "course": "mit_6_002_circuits", "source": "s11", "label": "concept"}
+{"question": "why does a gate have a delay before the output changes?", "course": "mit_6_002_circuits", "source": "s11", "label": "concept"}
+{"question": "how does a circuit remember a bit, what makes memory possible?", "course": "mit_6_002_circuits", "source": "s11", "label": "concept"}
+{"question": "energy sloshing between a capacitor and an inductor, what kind of response is this?", "course": "mit_6_002_circuits", "source": "s11", "label": "concept"}
+{"question": "how do I tell if an RLC circuit is overdamped, underdamped or critically damped?", "course": "mit_6_002_circuits", "source": "s11", "label": "concept"}
+{"question": "what is a complex impedance and how do I use it for a capacitor?", "course": "mit_6_002_circuits", "source": "s11", "label": "concept"}
+{"question": "how does a low pass filter treat high frequencies?", "course": "mit_6_002_circuits", "source": "s11", "label": "concept"}
+{"question": "why does an op amp circuit with negative feedback keep the two input voltages equal?", "course": "mit_6_002_circuits", "source": "s11", "label": "concept"}
+{"question": "what does positive feedback with hysteresis do for turning an analog signal into digital?", "course": "mit_6_002_circuits", "source": "s11", "label": "concept"}
+{"question": "how do you get rid of the static power in a logic gate with a pull-up resistor?", "course": "mit_6_002_circuits", "source": "s11", "label": "concept"}
+{"question": "how is the final grade weighted between quizzes, final, homework and labs?", "course": "mit_6_002_circuits", "source": "s11", "label": "logistics"}
+{"question": "can I hand in homework late, and how many can I skip?", "course": "mit_6_002_circuits", "source": "s11", "label": "logistics"}
+{"question": "what can I bring to the quizzes and the final exam?", "course": "mit_6_002_circuits", "source": "s11", "label": "logistics"}
+{"question": "which textbook should I get?", "course": "mit_6_002_circuits", "source": "s11", "label": "logistics"}
+{"question": "what is homework 11 and is it optional?", "course": "mit_6_002_circuits", "source": "s11", "label": "logistics"}
+{"question": "when is homework 4 due and which lecture is it handed out in?", "course": "mit_6_002_circuits", "source": "s11", "label": "logistics"}
+{"question": "how do I design a PID controller for a quadcopter?", "course": "mit_6_002_circuits", "source": "s11", "label": "concept"}
+{"question": "what are the office hours of the head TA?", "course": "mit_6_002_circuits", "source": "s11", "label": "logistics"}
+{"question": "explain how a transformer steps up grid voltage for long distance power lines", "course": "mit_6_002_circuits", "source": "s11", "label": "concept"}
+{"question": "how does a dynamic array resize itself and why is append still cheap on average?", "course": "mit_6_006_algorithms", "source": "s11", "label": "concept"}
+{"question": "how does insertion sort work and why is it quadratic?", "course": "mit_6_006_algorithms", "source": "s11", "label": "concept"}
+{"question": "how do hash tables handle two keys that land in the same slot?", "course": "mit_6_006_algorithms", "source": "s11", "label": "concept"}
+{"question": "how can we sort in linear time using counting sort, and how do I keep it stable?", "course": "mit_6_006_algorithms", "source": "s11", "label": "concept"}
+{"question": "what keeps an AVL tree balanced after an insert?", "course": "mit_6_006_algorithms", "source": "s11", "label": "concept"}
+{"question": "how do I build a priority queue with a binary heap and sort with it?", "course": "mit_6_006_algorithms", "source": "s11", "label": "concept"}
+{"question": "how do I find the fewest hops between two nodes in an unweighted graph?", "course": "mit_6_006_algorithms", "source": "s11", "label": "concept"}
+{"question": "how do I use depth first search to order tasks with dependencies?", "course": "mit_6_006_algorithms", "source": "s11", "label": "concept"}
+{"question": "what does relaxing an edge mean in shortest path algorithms?", "course": "mit_6_006_algorithms", "source": "s11", "label": "concept"}
+{"question": "how does Bellman-Ford detect a negative cycle?", "course": "mit_6_006_algorithms", "source": "s11", "label": "concept"}
+{"question": "why does Dijkstra fail if some edge weights are negative?", "course": "mit_6_006_algorithms", "source": "s11", "label": "concept"}
+{"question": "how can I reweight edges so I can run Dijkstra for all pairs?", "course": "mit_6_006_algorithms", "source": "s11", "label": "concept"}
+{"question": "how do I turn a recursive brute force into dynamic programming with memoization?", "course": "mit_6_006_algorithms", "source": "s11", "label": "concept"}
+{"question": "what does pseudopolynomial time mean, like for knapsack?", "course": "mit_6_006_algorithms", "source": "s11", "label": "concept"}
+{"question": "what are P, NP and exponential time problems?", "course": "mit_6_006_algorithms", "source": "s11", "label": "concept"}
+{"question": "how does a balanced binary tree support find next in a sorted set?", "course": "mit_6_006_algorithms", "source": "s11", "label": "concept"}
+{"question": "how does the dynamic program for all pairs shortest paths work, and what is the piano fingering problem?", "course": "mit_6_006_algorithms", "source": "s11", "label": "concept"}
+{"question": "what should I review for the final, what topics does the review lecture list?", "course": "mit_6_006_algorithms", "source": "s11", "label": "concept"}
+{"question": "what are the problem solving paradigms: brute force, decrease and conquer, divide and conquer?", "course": "mit_6_006_algorithms", "source": "s11", "label": "concept"}
+{"question": "what are the course prerequisites and what happens if I get a C on problem set 0?", "course": "mit_6_006_algorithms", "source": "s11", "label": "logistics"}
+{"question": "how much do the quizzes and final count towards the grade?", "course": "mit_6_006_algorithms", "source": "s11", "label": "logistics"}
+{"question": "do I need to buy CLRS?", "course": "mit_6_006_algorithms", "source": "s11", "label": "logistics"}
+{"question": "in which week is quiz 2 and what is the review before it?", "course": "mit_6_006_algorithms", "source": "s11", "label": "logistics"}
+{"question": "when is problem set 5 due?", "course": "mit_6_006_algorithms", "source": "s11", "label": "logistics"}
+{"question": "what files come with each problem set template?", "course": "mit_6_006_algorithms", "source": "s11", "label": "logistics"}
+{"question": "how do I fine-tune a large language model with LoRA?", "course": "mit_6_006_algorithms", "source": "s11", "label": "concept"}
+{"question": "who is the head TA and what are the office hours?", "course": "mit_6_006_algorithms", "source": "s11", "label": "logistics"}
+{"question": "how does photosynthesis convert light into sugar?", "course": "mit_6_006_algorithms", "source": "s11", "label": "concept"}
+{"question": "why do hydrogen bonds form between water molecules?", "course": "mit_7_016_intro_biology", "source": "s11", "label": "concept"}
+{"question": "what makes a cell membrane a bilayer and what is it made of?", "course": "mit_7_016_intro_biology", "source": "s11", "label": "concept"}
+{"question": "how do enzymes speed up a reaction, what happens to the energy barrier?", "course": "mit_7_016_intro_biology", "source": "s11", "label": "concept"}
+{"question": "what kinds of molecules can slow down an enzyme, like competitive versus non-competitive ones?", "course": "mit_7_016_intro_biology", "source": "s11", "label": "concept"}
+{"question": "which sugars link up with glycosidic bonds to make starch or cellulose?", "course": "mit_7_016_intro_biology", "source": "s11", "label": "concept"}
+{"question": "what did the phage experiment prove about DNA versus protein as the genetic material?", "course": "mit_7_016_intro_biology", "source": "s11", "label": "concept"}
+{"question": "why is one DNA strand copied continuously and the other in pieces?", "course": "mit_7_016_intro_biology", "source": "s11", "label": "concept"}
+{"question": "how does DNA polymerase proofread what it just added?", "course": "mit_7_016_intro_biology", "source": "s11", "label": "concept"}
+{"question": "what gets added to the two ends of a freshly made mRNA before it leaves the nucleus?", "course": "mit_7_016_intro_biology", "source": "s11", "label": "concept"}
+{"question": "which codon starts translation and what amino acid does the first tRNA carry?", "course": "mit_7_016_intro_biology", "source": "s11", "label": "concept"}
+{"question": "if two genes are 10 map units apart, how do I get the recombination frequency?", "course": "mit_7_016_intro_biology", "source": "s11", "label": "concept"}
+{"question": "how do scientists cut and paste a gene into a plasmid?", "course": "mit_7_016_intro_biology", "source": "s11", "label": "concept"}
+{"question": "why does PCR use a polymerase from hot spring bacteria?", "course": "mit_7_016_intro_biology", "source": "s11", "label": "concept"}
+{"question": "how does a newly made protein know which organelle it should go to?", "course": "mit_7_016_intro_biology", "source": "s11", "label": "concept"}
+{"question": "what happens inside the cell when a growth factor binds a receptor that autophosphorylates?", "course": "mit_7_016_intro_biology", "source": "s11", "label": "concept"}
+{"question": "how can you switch neurons on with light?", "course": "mit_7_016_intro_biology", "source": "s11", "label": "concept"}
+{"question": "which proteins control whether a cell moves from one phase of the cell cycle to the next?", "course": "mit_7_016_intro_biology", "source": "s11", "label": "concept"}
+{"question": "what is the difference between a proto-oncogene and a tumor suppressor when they mutate?", "course": "mit_7_016_intro_biology", "source": "s11", "label": "concept"}
+{"question": "where does the glowing green jellyfish protein get its colour from?", "course": "mit_7_016_intro_biology", "source": "s11", "label": "concept"}
+{"question": "what are the three kinds of microscopy we need to know and what limits what we can see?", "course": "mit_7_016_intro_biology", "source": "s11", "label": "concept"}
+{"question": "which immune cells give long term memory of an infection?", "course": "mit_7_016_intro_biology", "source": "s11", "label": "concept"}
+{"question": "why does HIV go after helper T cells specifically and why does it mutate so fast?", "course": "mit_7_016_intro_biology", "source": "s11", "label": "concept"}
+{"question": "how is my final grade split between exams and problem sets?", "course": "mit_7_016_intro_biology", "source": "s11", "label": "logistics"}
+{"question": "do all six problem sets count towards the grade?", "course": "mit_7_016_intro_biology", "source": "s11", "label": "logistics"}
+{"question": "what are my options for the news brief assignment?", "course": "mit_7_016_intro_biology", "source": "s11", "label": "logistics"}
+{"question": "which lectures will be on the second midterm?", "course": "mit_7_016_intro_biology", "source": "s11", "label": "logistics"}
+{"question": "how long is the final exam and what does it cover?", "course": "mit_7_016_intro_biology", "source": "s11", "label": "logistics"}
+{"question": "what is the textbook for this course?", "course": "mit_7_016_intro_biology", "source": "s11", "label": "logistics"}
+{"question": "what does the lecturer say about the Krebs cycle steps in the mitochondrial matrix of plants?", "course": "mit_7_016_intro_biology", "source": "s11", "label": "concept"}
+{"question": "how do I calculate the torque needed by a robot arm joint carrying a 5 kg load?", "course": "mit_7_016_intro_biology", "source": "s11", "label": "concept"}
+{"question": "can I get an extension on a problem set for a medical reason, and who do I email?", "course": "mit_7_016_intro_biology", "source": "s11", "label": "logistics"}
+{"question": "how do I use a complementation test to tell if two recessive mutations are in the same gene?", "course": "mit_7_03_genetics", "source": "s11", "label": "concept"}
+{"question": "how can I tell from a family tree whether a trait is autosomal dominant?", "course": "mit_7_03_genetics", "source": "s11", "label": "concept"}
+{"question": "how are distances on a genetic map related to how often genes recombine?", "course": "mit_7_03_genetics", "source": "s11", "label": "concept"}
+{"question": "how do I order three genes from a cross with eight kinds of offspring?", "course": "mit_7_03_genetics", "source": "s11", "label": "concept"}
+{"question": "in fungi, why do we look at all four products of one meiosis packed in a sac?", "course": "mit_7_03_genetics", "source": "s11", "label": "concept"}
+{"question": "how do you use viruses of bacteria to do genetic crosses?", "course": "mit_7_03_genetics", "source": "s11", "label": "concept"}
+{"question": "what is a suppressor mutation and why is it useful in genetic analysis?", "course": "mit_7_03_genetics", "source": "s11", "label": "concept"}
+{"question": "what are jumping genes and how long are they?", "course": "mit_7_03_genetics", "source": "s11", "label": "concept"}
+{"question": "how does P1 move bacterial DNA from one cell to another?", "course": "mit_7_03_genetics", "source": "s11", "label": "concept"}
+{"question": "what do LacZ and LacY do with lactose and what is the logic of the operon?", "course": "mit_7_03_genetics", "source": "s11", "label": "concept"}
+{"question": "when is a population in Hardy-Weinberg equilibrium and how do I check it?", "course": "mit_7_03_genetics", "source": "s11", "label": "concept"}
+{"question": "why does marrying a cousin raise the chance of a recessive disease?", "course": "mit_7_03_genetics", "source": "s11", "label": "concept"}
+{"question": "what does a lod score tell you about linkage?", "course": "mit_7_03_genetics", "source": "s11", "label": "concept"}
+{"question": "what is nondisjunction and how does it give an extra chromosome?", "course": "mit_7_03_genetics", "source": "s11", "label": "concept"}
+{"question": "oncogenes versus tumor suppressors: which are dominant and which recessive?", "course": "mit_7_03_genetics", "source": "s11", "label": "concept"}
+{"question": "how are knockout mice made using embryonic stem cells?", "course": "mit_7_03_genetics", "source": "s11", "label": "concept"}
+{"question": "what are SNPs and SSRs and why are they used as markers?", "course": "mit_7_03_genetics", "source": "s11", "label": "concept"}
+{"question": "how do twin studies help for traits with many genes?", "course": "mit_7_03_genetics", "source": "s11", "label": "concept"}
+{"question": "how do I calculate how allele frequency changes with a given mutation rate per generation?", "course": "mit_7_03_genetics", "source": "s11", "label": "concept"}
+{"question": "what is the physical structure of a gene, exons and introns, in the first lecture?", "course": "mit_7_03_genetics", "source": "s11", "label": "concept"}
+{"question": "how is my grade made up, points for quizzes, final and problem sets?", "course": "mit_7_03_genetics", "source": "s11", "label": "logistics"}
+{"question": "is there a required textbook?", "course": "mit_7_03_genetics", "source": "s11", "label": "logistics"}
+{"question": "can I bring notes to the exams?", "course": "mit_7_03_genetics", "source": "s11", "label": "logistics"}
+{"question": "which lectures does quiz II cover?", "course": "mit_7_03_genetics", "source": "s11", "label": "logistics"}
+{"question": "does the seventh problem set count towards the grade?", "course": "mit_7_03_genetics", "source": "s11", "label": "logistics"}
+{"question": "when is problem set 4 due?", "course": "mit_7_03_genetics", "source": "s11", "label": "logistics"}
+{"question": "what are the symptoms of cystic fibrosis in newborns?", "course": "mit_7_03_genetics", "source": "s11", "label": "concept"}
+{"question": "who do I contact if I want to switch recitation sections?", "course": "mit_7_03_genetics", "source": "s11", "label": "logistics"}
+{"question": "how does RNA interference silence a gene in C. elegans?", "course": "mit_7_03_genetics", "source": "s11", "label": "concept"}
+{"question": "what is the difference between hypertrophy and hyperplasia of cells?", "course": "mit_hst035_pathology", "source": "s11", "label": "concept"}
+{"question": "how do coagulative necrosis and apoptosis differ?", "course": "mit_hst035_pathology", "source": "s11", "label": "concept"}
+{"question": "a cell changes into another cell type because of chronic irritation, what is this adaptation called?", "course": "mit_hst035_pathology", "source": "s11", "label": "concept"}
+{"question": "which white cells show up first in acute inflammation and what do they do?", "course": "mit_hst035_pathology", "source": "s11", "label": "concept"}
+{"question": "how do white blood cells follow a chemical gradient to the injured spot?", "course": "mit_hst035_pathology", "source": "s11", "label": "concept"}
+{"question": "what is the difference between regeneration and scar formation during healing?", "course": "mit_hst035_pathology", "source": "s11", "label": "concept"}
+{"question": "which parts of the extracellular matrix give tissue its tensile strength?", "course": "mit_hst035_pathology", "source": "s11", "label": "concept"}
+{"question": "how big are bacteria compared with viruses and fungi, and which ones live inside cells?", "course": "mit_hst035_pathology", "source": "s11", "label": "concept"}
+{"question": "why are grafts lost after a transplant, besides rejection?", "course": "mit_hst035_pathology", "source": "s11", "label": "concept"}
+{"question": "which kinds of graft (self, twin, other species) provoke an immune response?", "course": "mit_hst035_pathology", "source": "s11", "label": "concept"}
+{"question": "what does trans fat do to the HDL to cholesterol ratio?", "course": "mit_hst035_pathology", "source": "s11", "label": "concept"}
+{"question": "does eating nuts change the risk of obesity?", "course": "mit_hst035_pathology", "source": "s11", "label": "concept"}
+{"question": "what causes ischemia from reduced blood supply, like clots or blockage?", "course": "mit_hst035_pathology", "source": "s11", "label": "concept"}
+{"question": "how common is Down syndrome and what is the usual chromosome cause?", "course": "mit_hst035_pathology", "source": "s11", "label": "concept"}
+{"question": "a girl with 45,X karyotype, which syndrome is that?", "course": "mit_hst035_pathology", "source": "s11", "label": "concept"}
+{"question": "how is heme broken down to bilirubin in the body?", "course": "mit_hst035_pathology", "source": "s11", "label": "concept"}
+{"question": "what are the patterns of liver injury leading up to cirrhosis?", "course": "mit_hst035_pathology", "source": "s11", "label": "concept"}
+{"question": "what cell types make up the first line of defence in the blood and which one becomes a macrophage?", "course": "mit_hst035_pathology", "source": "s11", "label": "concept"}
+{"question": "how do cells keep apical and basolateral proteins separate in an epithelium?", "course": "mit_hst035_pathology", "source": "s11", "label": "concept"}
+{"question": "what do the 1970s and 1980s new infections list tell us about emerging disease?", "course": "mit_hst035_pathology", "source": "s11", "label": "concept"}
+{"question": "how is the final grade divided between exams, homework and the term presentation?", "course": "mit_hst035_pathology", "source": "s11", "label": "logistics"}
+{"question": "which textbook is required?", "course": "mit_hst035_pathology", "source": "s11", "label": "logistics"}
+{"question": "how many homeworks can I skip before my grade drops?", "course": "mit_hst035_pathology", "source": "s11", "label": "logistics"}
+{"question": "how long should my term presentation be and how many pages is the written summary?", "course": "mit_hst035_pathology", "source": "s11", "label": "logistics"}
+{"question": "what do I have to hand in for homework 3 and 7?", "course": "mit_hst035_pathology", "source": "s11", "label": "logistics"}
+{"question": "in which session is the midterm exam?", "course": "mit_hst035_pathology", "source": "s11", "label": "logistics"}
+{"question": "how do I treat acute myeloid leukemia with targeted kinase inhibitors?", "course": "mit_hst035_pathology", "source": "s11", "label": "concept"}
+{"question": "is there a make-up lab if I miss the visit to the hospital?", "course": "mit_hst035_pathology", "source": "s11", "label": "logistics"}
+{"question": "how does a pacemaker generate its rhythm electrically?", "course": "mit_hst035_pathology", "source": "s11", "label": "concept"}
+{"question": "why does a pill taken by mouth sometimes reach the blood at less than the full dose, even though the same drug by IV is 100%?", "course": "mit_hst151_pharmacology", "source": "s11", "label": "concept"}
+{"question": "what is the therapeutic index and how do you compute it from ED50?", "course": "mit_hst151_pharmacology", "source": "s11", "label": "concept"}
+{"question": "difference between a full agonist and a partial agonist on a dose response curve", "course": "mit_hst151_pharmacology", "source": "s11", "label": "concept"}
+{"question": "if the carrier gets saturated, does the rate of drug transport still go up with concentration?", "course": "mit_hst151_pharmacology", "source": "s11", "label": "concept"}
+{"question": "when would a doctor give a loading dose instead of just starting a constant infusion?", "course": "mit_hst151_pharmacology", "source": "s11", "label": "concept"}
+{"question": "how do the apparent volume of distribution and clearance change the plasma concentration after a single dose?", "course": "mit_hst151_pharmacology", "source": "s11", "label": "concept"}
+{"question": "a farm worker was exposed to parathion; what antidote can regenerate the enzyme if given before it ages?", "course": "mit_hst151_pharmacology", "source": "s11", "label": "concept"}
+{"question": "how long do you keep giving atropine to someone poisoned with an organophosphate?", "course": "mit_hst151_pharmacology", "source": "s11", "label": "concept"}
+{"question": "what are the main classes of blood pressure drugs, like prazosin or nifedipine?", "course": "mit_hst151_pharmacology", "source": "s11", "label": "concept"}
+{"question": "which drug is the classic choice to improve the pumping strength of the heart in systolic failure?", "course": "mit_hst151_pharmacology", "source": "s11", "label": "concept"}
+{"question": "how do statins lower cholesterol, what enzyme do they block?", "course": "mit_hst151_pharmacology", "source": "s11", "label": "concept"}
+{"question": "what does vitamin B3 (nicotinic acid) do to fat tissue and free fatty acids?", "course": "mit_hst151_pharmacology", "source": "s11", "label": "concept"}
+{"question": "tangier disease, which transporter is defective?", "course": "mit_hst151_pharmacology", "source": "s11", "label": "concept"}
+{"question": "which drugs keep a transplanted kidney from being rejected, and when did cyclosporine come along?", "course": "mit_hst151_pharmacology", "source": "s11", "label": "concept"}
+{"question": "how can breathing in a gas help a patient with pulmonary hypertension without dropping systemic blood pressure?", "course": "mit_hst151_pharmacology", "source": "s11", "label": "concept"}
+{"question": "why is levodopa given together with carbidopa for Parkinson's?", "course": "mit_hst151_pharmacology", "source": "s11", "label": "concept"}
+{"question": "how does lamotrigine stop seizures?", "course": "mit_hst151_pharmacology", "source": "s11", "label": "concept"}
+{"question": "do valium-type drugs and barbiturates bind to the same site on the GABA-A receptor?", "course": "mit_hst151_pharmacology", "source": "s11", "label": "concept"}
+{"question": "what is the most common way bacteria become resistant to penicillin?", "course": "mit_hst151_pharmacology", "source": "s11", "label": "concept"}
+{"question": "which chemo drugs cross-link DNA and are not specific to one phase of the cell cycle?", "course": "mit_hst151_pharmacology", "source": "s11", "label": "concept"}
+{"question": "what are the typical acute effects and side effects of morphine-like painkillers?", "course": "mit_hst151_pharmacology", "source": "s11", "label": "concept"}
+{"question": "how are we graded in this class, letter grades or pass/fail?", "course": "mit_hst151_pharmacology", "source": "s11", "label": "logistics"}
+{"question": "which book do I have to buy for the course?", "course": "mit_hst151_pharmacology", "source": "s11", "label": "logistics"}
+{"question": "when is the drug evaluation paper due and how long should it be?", "course": "mit_hst151_pharmacology", "source": "s11", "label": "logistics"}
+{"question": "how long is my case presentation and what do I have to hand out?", "course": "mit_hst151_pharmacology", "source": "s11", "label": "logistics"}
+{"question": "which session is the midterm?", "course": "mit_hst151_pharmacology", "source": "s11", "label": "logistics"}
+{"question": "how many hours a week do we meet?", "course": "mit_hst151_pharmacology", "source": "s11", "label": "logistics"}
+{"question": "who is the teaching assistant and what are their office hours?", "course": "mit_hst151_pharmacology", "source": "s11", "label": "logistics"}
+{"question": "how do CRISPR gene editing therapies get delivered into liver cells?", "course": "mit_hst151_pharmacology", "source": "s11", "label": "concept"}
+{"question": "what is the standard insulin dosing schedule for a newly diagnosed type 1 diabetic child?", "course": "mit_hst151_pharmacology", "source": "s11", "label": "concept"}
+{"question": "why do we write any input as a sum of delayed impulses when finding the output of an LTI system?", "course": "mit_res_6_007_signals", "source": "s11", "label": "concept"}
+{"question": "what algebraic properties does convolution have, like commutative and associative, and what do they mean for cascaded systems?", "course": "mit_res_6_007_signals", "source": "s11", "label": "concept"}
+{"question": "how do I solve a system described by a constant coefficient difference equation?", "course": "mit_res_6_007_signals", "source": "s11", "label": "concept"}
+{"question": "how do I represent a periodic signal as a sum of complex exponentials?", "course": "mit_res_6_007_signals", "source": "s11", "label": "concept"}
+{"question": "how do we extend the Fourier series to signals that are not periodic?", "course": "mit_res_6_007_signals", "source": "s11", "label": "concept"}
+{"question": "what does time-frequency duality mean for the Fourier transform?", "course": "mit_res_6_007_signals", "source": "s11", "label": "concept"}
+{"question": "how does filtering use the convolution property to pick out frequencies?", "course": "mit_res_6_007_signals", "source": "s11", "label": "concept"}
+{"question": "how does amplitude modulation shift a message up to a carrier frequency?", "course": "mit_res_6_007_signals", "source": "s11", "label": "concept"}
+{"question": "what is aliasing and what happens if I sample below twice the highest frequency?", "course": "mit_res_6_007_signals", "source": "s11", "label": "concept"}
+{"question": "how do I reconstruct a continuous signal from its samples without an ideal lowpass filter?", "course": "mit_res_6_007_signals", "source": "s11", "label": "concept"}
+{"question": "how is the Laplace transform a generalization of the Fourier transform?", "course": "mit_res_6_007_signals", "source": "s11", "label": "concept"}
+{"question": "what is the z-transform to discrete-time what Laplace is to continuous-time?", "course": "mit_res_6_007_signals", "source": "s11", "label": "concept"}
+{"question": "how do I design a Butterworth filter with a maximally flat passband?", "course": "mit_res_6_007_signals", "source": "s11", "label": "concept"}
+{"question": "how does feedback stabilize an unstable cart and pole?", "course": "mit_res_6_007_signals", "source": "s11", "label": "concept"}
+{"question": "what do the poles of a second order system tell about damping and oscillation?", "course": "mit_res_6_007_signals", "source": "s11", "label": "concept"}
+{"question": "how do I turn a continuous-time filter into a discrete-time filter?", "course": "mit_res_6_007_signals", "source": "s11", "label": "concept"}
+{"question": "how does the discrete-time Fourier series differ from the continuous one?", "course": "mit_res_6_007_signals", "source": "s11", "label": "concept"}
+{"question": "how does discrete-time processing of a sampled continuous signal work end to end?", "course": "mit_res_6_007_signals", "source": "s11", "label": "concept"}
+{"question": "what is linearity and time invariance, and which properties are defined in lecture 3?", "course": "mit_res_6_007_signals", "source": "s11", "label": "concept"}
+{"question": "what background do I need before taking this course?", "course": "mit_res_6_007_signals", "source": "s11", "label": "logistics"}
+{"question": "which textbook goes with the video lectures?", "course": "mit_res_6_007_signals", "source": "s11", "label": "logistics"}
+{"question": "what are the four parts of the course materials?", "course": "mit_res_6_007_signals", "source": "s11", "label": "logistics"}
+{"question": "should I look at the solutions as soon as I get stuck on a problem?", "course": "mit_res_6_007_signals", "source": "s11", "label": "logistics"}
+{"question": "which problem set belongs to the lecture about sampling?", "course": "mit_res_6_007_signals", "source": "s11", "label": "logistics"}
+{"question": "how should I watch the videos, alone or in a group?", "course": "mit_res_6_007_signals", "source": "s11", "label": "logistics"}
+{"question": "what is the exam schedule and how is the course graded?", "course": "mit_res_6_007_signals", "source": "s11", "label": "logistics"}
+{"question": "how do I implement a convolutional neural network layer in PyTorch?", "course": "mit_res_6_007_signals", "source": "s11", "label": "concept"}
+{"question": "what is the mechanism of action of beta blockers in the heart?", "course": "mit_res_6_007_signals", "source": "s11", "label": "concept"}
+{"question": "What is a resistor?", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "what does KVL say", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "What is the lumped matter discipline in circuits?", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "What is a Thevenin equivalent?", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "what is a noise margin?", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "What is a MOSFET used for?", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "Why does a capacitor voltage not jump instantly when a switch closes?", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "How does a voltage divider split the voltage between two resistors?", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "Why does a digital gate need a forbidden region between 0 and 1?", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "How does negative feedback keep the two op amp inputs at the same voltage?", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "Why does an RC low pass filter let low frequencies through?", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "why does CMOS use almost no static power?", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "How does a small signal model replace a nonlinear device near its bias point?", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "I have a 10k resistor and a 1 uF capacitor in series. What is the time constant?", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "Two resistors, 2k and 3k, are in parallel across a 5V source. How much current does the source supply?", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "How do I find the Thevenin resistance seen by a load in a circuit with one source and three resistors?", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "A NAND gate has its inputs both high. What does the switch resistor model say the output is?", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "My op amp inverting amplifier has Rf = 100k and Rin = 10k. What is the gain?", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "How do I use superposition when a circuit has a voltage source and a current source?", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "How do I write node equations for a circuit with three nodes?", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "If an RLC circuit has damping ratio less than one, what will the step response look like?", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "How do I draw the impedance of a capacitor at high frequency?", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "A MOSFET amplifier is biased in saturation, loaded by a resistor, and driven by a source with output resistance. Derive the small signal gain including loading, then explain how the gain changes if the bias point moves toward triode and the load resistor is doubled.", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "Design an op amp circuit with positive feedback that converts a noisy sensor voltage into clean digital levels, choose resistors for 0.5 V hysteresis, and check the result against the digital noise margins of the next gate.", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "A second order RLC circuit drives a CMOS inverter chain. Compare how the damping, the gate delay and the dynamic power trade off, and recommend component values that meet a speed target without ringing above the threshold.", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "Derive the transfer function of a two stage RC filter with a buffer in between, then compare it with the unbuffered version and explain why loading changes the corner frequency.", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "Given a circuit with a dependent source, two capacitors and an initial charge on one of them, find the complete response for t > 0 and discuss which parts are transient and which are steady state.", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "Explain why an audio playback circuit with an op amp, a speaker and a filter might oscillate, weighing the op amp model limits, the load capacitance and the feedback network, and propose a fix.", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "Compare the power dissipation of a ratioed NMOS gate and a CMOS gate switching at 100 MHz with a given load capacitance, including static and dynamic parts, and argue which is better for a battery device.", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "A lab measurement of an RC circuit disagrees with the predicted time constant by 20 percent. Analyze the possible causes among oscilloscope probe loading, component tolerance and the source resistance, and say how you would tell them apart.", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "Derive the incremental model of a diode circuit with a nonlinear resistor in series, then use it to estimate the output ripple when a small sinusoid rides on a DC bias, comparing it with the exact exponential solution.", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "when is homework 4 due?", "course": "mit_6_002_circuits", "source": "t4", "label": "logistics"}
+{"question": "How is my grade weighted between quizzes, final, homework and labs?", "course": "mit_6_002_circuits", "source": "t4", "label": "logistics"}
+{"question": "Can I hand in homework late in 6.002?", "course": "mit_6_002_circuits", "source": "t4", "label": "logistics"}
+{"question": "What can I bring to the final exam?", "course": "mit_6_002_circuits", "source": "t4", "label": "logistics"}
+{"question": "Which textbook does the course use?", "course": "mit_6_002_circuits", "source": "t4", "label": "logistics"}
+{"question": "How many homework grades are dropped, and is homework 11 optional?", "course": "mit_6_002_circuits", "source": "t4", "label": "logistics"}
+{"question": "What topics does quiz 1 cover according to the course schedule?", "course": "mit_6_002_circuits", "source": "t4", "label": "logistics"}
+{"question": "What is the latest version of the SPICE simulator that supports this course's lab and when was it released?", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "Which MOSFET technology node is currently the most advanced in commercial chips this year?", "course": "mit_6_002_circuits", "source": "t4", "label": "concept"}
+{"question": "What is a linear time invariant system?", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "what is convolution", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "What is the Fourier transform used for?", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "What is aliasing?", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "what is the sampling theorem", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "What is a pole of a system?", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "Why does multiplying a signal by a cosine shift its spectrum?", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "How does a system's impulse response determine its output for any input?", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "Why do we get aliasing when we sample too slowly?", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "How does the Laplace transform generalize the Fourier transform?", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "Why is the z-transform the discrete time counterpart of the Laplace transform?", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "How does feedback change the poles of a system?", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "Why does a Butterworth filter have a flat passband?", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "What is the convolution of a unit step with a unit step?", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "A signal has highest frequency 4 kHz. What is the minimum sampling rate to avoid aliasing?", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "How do I find the Fourier series coefficients of a square wave?", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "What is the Fourier transform of a rectangular pulse?", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "How do I check whether y[n] = x[n] + 2 is a linear system?", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "How do I solve y[n] - 0.5 y[n-1] = x[n] for the impulse response?", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "How do I find the poles of H(s) = 1/(s^2 + 2s + 5)?", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "What is amplitude modulation with a 1 kHz carrier and a 100 Hz message going to look like in frequency?", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "How do I find the output of an ideal low pass filter when the input is a sum of two sinusoids?", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "A continuous time signal is sampled, processed by a discrete time filter obtained from a Butterworth prototype, and reconstructed. Derive the overall equivalent continuous time frequency response and explain where the sampling rate and the mapping method distort it.", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "Design a feedback controller for the inverted pendulum on a cart that stabilizes the unstable pole, choose the gain from a root locus argument, and discuss how a delay in the loop affects stability.", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "Compare impulse invariance and the bilinear transform for turning an analog second order filter into a digital one, covering aliasing, frequency warping and the stability of the resulting poles.", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "A communication system uses AM with a carrier, then a channel with an echo, then a demodulator. Derive the received spectrum, discuss the effect of the echo on the demodulated message and propose an equalizer.", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "Given a difference equation with initial conditions that is not initially at rest, find the complete response using the z-transform, and explain how the unilateral transform handles the initial conditions compared with the bilateral one.", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "A sampled signal is interpolated with a zero order hold and then low pass filtered. Compare the result with ideal band-limited interpolation in time and in frequency, and quantify the passband droop.", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "Explain how the region of convergence interacts with causality and stability for a rational transform with poles at both sides of the imaginary axis, and derive the possible impulse responses.", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "Derive the discrete time Fourier transform of a windowed sinusoid, relate the main lobe width to the window length, and explain the trade-off with spectral leakage when choosing a window for measuring two close tones.", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "A feedback amplifier has a forward path with two poles and a feedback gain that is varied. Analyze the closed loop pole locations, the damping and the step response overshoot as the gain increases, and identify the gain at instability.", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "What background do I need before taking the signals course?", "course": "mit_res_6_007_signals", "source": "t4", "label": "logistics"}
+{"question": "Should I look at the problem solutions as soon as I get stuck?", "course": "mit_res_6_007_signals", "source": "t4", "label": "logistics"}
+{"question": "Which problem set goes with the lecture on sampling?", "course": "mit_res_6_007_signals", "source": "t4", "label": "logistics"}
+{"question": "How are the video lectures supposed to be watched, alone or in groups?", "course": "mit_res_6_007_signals", "source": "t4", "label": "logistics"}
+{"question": "Which lecture does the problem set on the z-transform belong to?", "course": "mit_res_6_007_signals", "source": "t4", "label": "logistics"}
+{"question": "What is the newest version of the Python signal processing library SciPy and what did it change?", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "Which is the latest cellular standard being deployed this year and what modulation does it use?", "course": "mit_res_6_007_signals", "source": "t4", "label": "concept"}
+{"question": "What is an algorithm?", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "what is a hash table", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "What is a binary heap?", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "What does O(n log n) mean?", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "What is dynamic programming?", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "what is a graph in computer science", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "Why is merge sort n log n?", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "How does a hash table handle collisions with chaining?", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "Why does counting sort run in linear time?", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "How does breadth first search find shortest paths in an unweighted graph?", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "Why does Dijkstra's algorithm fail with negative edge weights?", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "How does an AVL tree keep itself balanced after an insertion?", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "Why does a dynamic array have amortized constant append?", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "Sort the list 5, 2, 9, 1 with insertion sort and show each step.", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "How do I run depth first search to get a topological order of a DAG?", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "How do I count the paths in a DAG from s to t with memoization?", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "What is the running time of building a heap from n items?", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "How do I detect a negative cycle with Bellman-Ford?", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "How do I do a binary search on a sorted array of 1000 elements and how many steps at most?", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "How do I reconstruct the actual shortest path after running Dijkstra?", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "Write the recurrence for the longest common subsequence of two strings.", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "How do I use a stack to check if parentheses are balanced?", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "Design an algorithm that finds the cheapest route through a weighted graph with some negative edges and a limit on the number of edges used, prove its correctness and analyze its running time compared with running Bellman-Ford and Johnson's algorithm.", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "Given a knapsack variant with item dependencies and a weight limit, formulate the subproblems, write the recurrence, argue why it is only pseudopolynomial and discuss when it becomes impractical.", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "Compare hash tables, AVL trees and sorted arrays as the data structure for a database index with frequent range queries and bursts of inserts, weighing worst case, amortized cost and memory.", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "Prove that any comparison sort needs Omega(n log n) comparisons, then explain precisely which assumption radix sort breaks and the input sizes at which radix sort actually beats merge sort.", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "A social network graph has billions of edges. Analyze how BFS, DFS and a priority queue based algorithm would scale for computing shortest paths from many sources, and propose a hybrid approach with a complexity argument.", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "Derive the amortized cost of a dynamic array that grows by a factor of 1.5 and shrinks by half when a quarter full, using the potential method, and explain why the shrink rule avoids thrashing.", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "Show how to reduce a scheduling problem with precedence constraints to a shortest path problem in a DAG, handle ties and resource limits, and explain which part makes the general problem NP-hard.", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "Explain the interaction of hash function quality, load factor, resizing policy and adversarial inputs on the expected and worst case time of a hash table, and design a scheme that stays fast under attack.", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "Derive all pairs shortest paths with Floyd-Warshall via dynamic programming, compare its cost to running Dijkstra from every vertex on sparse and dense graphs, and decide which to use for a road network with a few negative tolls.", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "How much do the quizzes and the final exam count towards the grade?", "course": "mit_6_006_algorithms", "source": "t4", "label": "logistics"}
+{"question": "Do I need to buy CLRS for 6.006?", "course": "mit_6_006_algorithms", "source": "t4", "label": "logistics"}
+{"question": "What happens if I get a C on problem set 0?", "course": "mit_6_006_algorithms", "source": "t4", "label": "logistics"}
+{"question": "In which week is quiz 2, and is there a review before it?", "course": "mit_6_006_algorithms", "source": "t4", "label": "logistics"}
+{"question": "What are the prerequisites for the algorithms course?", "course": "mit_6_006_algorithms", "source": "t4", "label": "logistics"}
+{"question": "What is the newest Python release and which sorting algorithm does its built-in sort use now?", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "Which algorithm do the major databases currently use for their default index, as of this year's releases?", "course": "mit_6_006_algorithms", "source": "t4", "label": "concept"}
+{"question": "What is a variable in programming?", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "what is a pointer in C", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "What is an array?", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "What does it mean to compile a program?", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "what is a linked list", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "What is SQL?", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "Why does binary search need a sorted list?", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "How does a hash table find an item without checking every entry?", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "Why does my program crash with a segmentation fault when I use a pointer I never set?", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "How does recursion work with the call stack in a factorial function?", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "Why does POST keep a password out of the URL while GET does not?", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "How does malloc differ from declaring a normal local variable?", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "How does DNS turn a domain name into an address?", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "How do I read an integer from the user in C with the cs50 library?", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "How do I loop through a string and print each character in C?", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "How do I open a CSV file in Python and print each row?", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "How do I write a SQL query that counts the rows in a table by a column value?", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "How do I make a Flask route that reads a name from a form?", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "How do I swap two integers using pointers in C?", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "How do I use valgrind to find a memory leak?", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "How do I make the cash problem return the fewest coins with a greedy approach?", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "How do I add a trie node for a new letter in a spell checker?", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "I am building a web app with Flask and SQLite where users can add items to a shopping cart. Design the tables, the routes and the session handling, explain how to prevent SQL injection and what could go wrong with concurrent requests.", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "My spell checker in C is correct but slow and leaks memory on large dictionaries. Compare a hash table and a trie for the load and check functions, optimize both, and explain how to prove there is no leak and no overflow.", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "Compare selection sort, merge sort and a hash based approach to count the most common words in a very large file that does not fit in memory, with the running time and memory of each, and propose a design.", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "Explain how an image filter that blurs by averaging neighbours can read outside the array at the edges, how to handle corners in a way that does not change the result for interior pixels, and how to test it thoroughly.", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "Walk through how a browser loads a page from a typed URL, including DNS, TCP, HTTPS and rendering of HTML, CSS and JavaScript, and explain where an attacker could intercept or tamper and which defenses apply.", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "I want a final project that predicts which movies a student will like using the IMDb tables. Plan the schema, the joins, the Python code and an evaluation approach, and discuss the privacy risks of storing user ratings.", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "Write and justify a plan to convert a C program that uses arrays of structs and manual memory into Python, comparing memory use, speed and safety, and identify which bugs disappear and which remain.", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "Analyze the trade-offs between a linked list, a dynamic array and a binary search tree for a to-do app that needs frequent inserts at the front, sorted display and random access, with the running time of each operation.", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "Explain how to debug a program that sometimes prints garbage values, covering uninitialized memory, off by one errors and buffer overflows, and design a systematic strategy using tools such as valgrind, asan and gdb.", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "What score do I need to get the verified certificate?", "course": "harvard_cs50x", "source": "t4", "label": "logistics"}
+{"question": "Do I have to buy any textbook for CS50x?", "course": "harvard_cs50x", "source": "t4", "label": "logistics"}
+{"question": "Can I do the final project with a friend and how big should it be?", "course": "harvard_cs50x", "source": "t4", "label": "logistics"}
+{"question": "In problem set 3, do I have to submit both runoff and tideman?", "course": "harvard_cs50x", "source": "t4", "label": "logistics"}
+{"question": "How is each problem scored, correctness against style?", "course": "harvard_cs50x", "source": "t4", "label": "logistics"}
+{"question": "How many problem sets are there and what is the final project?", "course": "harvard_cs50x", "source": "t4", "label": "logistics"}
+{"question": "Which version of Python does the course codespace currently use?", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "What is the latest release of the Flask library and what changed in it?", "course": "harvard_cs50x", "source": "t4", "label": "concept"}
+{"question": "What does systolic pressure describe?", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "What are arteries, and what do they carry?", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "What is meant by primary hypertension?", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "What is ambulatory blood pressure monitoring?", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "Can someone have hypertension without noticing symptoms?", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "What is meant by target-organ damage?", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "How can retaining sodium contribute to higher blood pressure?", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "Why can a stressful moment temporarily change a blood pressure reading?", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "Why can stiff arteries change the pressure needed to move blood?", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "Why should the measurement arm be supported near heart level?", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "How can sustained high pressure gradually damage small blood vessels?", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "A classmate writes 120/80 mmHg. Which part is the unit rather than a third pressure value?", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "For a practice reading of 126/78, calculate the pulse pressure using subtraction only.", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "For a classroom example, explain why a clinic-only rise in pressure is called a white-coat effect.", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "Two identical serving sizes list different sodium amounts. How can a learner identify which contains less sodium?", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "Reproduce the categories from the supplied classification chart and cite the chart.", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "Summarize the RAAS pathway exactly as presented in the lecture diagram.", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "Which sodium examples are used in the course material, and where do they appear?", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "What prevalence percentage is reported in the supplied study table, including its population and year?", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "Walk through the instructor's solution to the blood pressure calculation exercise.", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "What follow-up schedule is described in the supplied classroom case handout?", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "For a fictional patient with hypertension, chronic kidney disease, heart failure and potassium abnormalities, compare possible management priorities and justify the tradeoffs.", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "A case includes abrupt-onset hypertension, fluctuating potassium and inconsistent laboratory findings. Compare alternative secondary causes and the evidence that would distinguish them.", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "Pressure rises after two medication changes and a change in sleep pattern. Analyze competing causal explanations instead of attributing the rise to the last event alone.", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "Explain how changes in cardiac output, vascular remodeling and neurohormonal feedback can offset one another over a prolonged hypertensive course.", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "For a teaching case with stroke history, frailty and recurrent dizziness, weigh the benefits and harms of different blood pressure targets using supporting evidence.", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "Keep the language simple, but justify priorities for hypertension complicated by heart failure, renal impairment and a potassium disturbance.", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "Compare two supplied hypertension guidelines that disagree on thresholds, accounting for their dates, evidence grading and target populations.", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "For a purely mathematical monitoring exercise, minimize x^2+2y^2+3z^2 subject to x+y+z=B, 0<=x<=U and y,z>=0, with B,U>0. Derive the optimizer in every parameter regime and its sensitivity to U.", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "Explain why an intervention result from a narrowly selected hypertension trial may not transfer to a case with several excluded comorbidities.", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "What is the latest available estimate of hypertension prevalence in Canada, and what population does it describe?", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "What is the present Canadian regulatory status of the named hypertension drug?", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "Compare the newest Canadian and European hypertension recommendations, explaining dated evidence and population differences.", "course": "high_blood_pressure", "source": "seed", "label": "concept"}
+{"question": "What is the main job of insulin?", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "What does an HbA1c test summarize?", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "What is meant by fasting blood glucose?", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "What are carbohydrates in food?", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "What is a long-term complication of diabetes, as a general concept?", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "What does albumin in urine indicate that clinicians may want to investigate?", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "Why can blood glucose rise after a meal?", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "Why can glucose remain in the blood when tissues respond poorly to insulin?", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "Explain the basic link between high blood glucose, urination and thirst.", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "How can the structure and fiber content of a meal affect glucose absorption?", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "What is the general purpose of the body's counterregulatory response to falling glucose?", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "A learner compares HbA1c with a single glucose reading. Which reflects the longer-term pattern, and why?", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "A student says insulin resistance means the body has no insulin at all. Clarify the terminology.", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "Two food labels use different serving sizes. How should a learner make a fair comparison of carbohydrate amounts?", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "A practice chart contains readings across several days. Why should its overall trend be considered before focusing on one unusual point?", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "Find and cite the diagnostic values in the supplied diabetes lecture notes.", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "Explain the HbA1c figure in the supplied handout using its own caption and units.", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "What symptoms of low glucose are listed in the uploaded student handout?", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "Describe the participant group in the uploaded diabetes trial.", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "Walk through the instructor's worked example on interpreting glucose measurements.", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "Which limitations are acknowledged by the authors of the supplied diabetes study?", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "A fictional case combines type 2 diabetes, reduced kidney function, recurrent hypoglycemia and several medicines. Compare competing management considerations and justify priorities.", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "A teaching case combines pre-existing type 2 diabetes, pregnancy and kidney impairment. Compare the evidence needed to assess possible treatment approaches.", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "Repeated low glucose episodes, reduced awareness of symptoms and a changing medication schedule occur together. Trace possible mechanisms and competing risks.", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "Unexpected weight change occurs alongside altered glucose values, appetite and several medication changes. Compare competing causal accounts.", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "Compare two supplied diabetes guidelines that recommend different targets, considering age, comorbidity and evidence certainty.", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "Explain this simply but fully: renal impairment, repeated low glucose, several medicines and irregular meals all coexist. How do these constraints change the reasoning?", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "Evaluate a diabetes risk model trained in one population before applying it to a group with different age, ethnicity and baseline disease prevalence.", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "For a fictional nonclinical control exercise, g'=g+v, g(0)=1, g(1)=0, and |v(t)|<=2. Minimize the integral of g(t)^2+v(t)^2 over t in [0,1]. Derive the optimality conditions and determine where an input bound could become active.", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "A diabetes intervention trial excluded frailty, kidney disease and heart failure. Assess whether its conclusions can support a recommendation for a case with all three.", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "What current regulator safety communications apply to the specified diabetes drug?", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "What are the current publicly documented Canadian coverage rules for the specified glucose-monitoring device?", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "Compare the latest Canadian and international diabetes recommendations for people with cardiorenal disease, identifying dated sources and differences in evidence grading.", "course": "type2_diabetes", "source": "seed", "label": "concept"}
+{"question": "What are the airways?", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "What does wheezing describe?", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "What is meant by asthma control?", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "What is a spacer used with an inhaler?", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "What is a written asthma action plan?", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "What does variable airflow limitation mean?", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "Why can narrowing the airways make breathing more difficult?", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "How can inflammation make the airways more sensitive to triggers?", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "Why might asthma symptoms vary between day and night?", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "How can recognizing a repeated trigger pattern help someone understand their asthma?", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "Why can inconsistent use of prescribed controller therapy affect symptom patterns?", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "A learner is shown an inhaler attached to a holding chamber. What is the chamber called and what is its general purpose?", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "A learner thinks a controller and a reliever always have identical roles. Explain the distinction in their general purposes.", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "What details would help organize a study diary of symptoms and possible exposures?", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "Use a simple tube analogy to explain airway narrowing, while acknowledging that a living airway is more complex.", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "Which triggers are actually listed in the course handout?", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "What spirometry interpretation steps are described in the supplied lecture slides?", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "Summarize the sections of the supplied sample asthma action plan without adding instructions not present in it.", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "What asthma prevalence estimate appears in the provided study, and which population was measured?", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "How did the authors measure adherence in the uploaded paper?", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "Explain airway inflammation with citations to the supplied course passages.", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "A fictional asthma case has persistent symptoms despite several therapies, uncertain adherence and unclear inhaler technique. Compare competing explanations and prioritize further assessment.", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "Symptoms differ between workdays and holidays, but exposures and monitoring records are incomplete. Analyze evidence for competing occupational and nonoccupational explanations.", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "A fictional case combines asthma, arrhythmia and a complex medication list. Analyze possible interactions and the constraints they create for management decisions.", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "Symptoms suggest airflow limitation, but repeated lung-function tests disagree and were performed under different conditions. Develop a reasoned explanation of the discrepancy.", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "Assess an observational study where disease severity influences treatment intensity and adherence is poorly measured.", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "Several therapies, variable adherence and uncertain inhaler use coexist. In simple language, justify how these factors should be separated before interpreting persistent symptoms.", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "A supplied asthma vignette has several interacting risk factors and contradictory information. Compare priorities while making the uncertainty explicit.", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "In an abstract airway-response exercise, x'=y, y'=-x-ky+v and k>0. Derive a state-feedback law v=-a*x-b*y that stabilizes the origin, then characterize its stability boundaries and critically damped parameter choices.", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "Analyze a year-long asthma case with seasonal exposures, infections, medication changes and lung-function measurements, distinguishing correlation from a supported causal account.", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "Is the named asthma therapy currently approved in Canada for the specified age group?", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "What is the latest available Canadian asthma prevalence estimate and its reporting year?", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "Compare the most recent Canadian and international asthma recommendations for a complex case, citing dated versions and differences in evidence certainty.", "course": "asthma", "source": "seed", "label": "concept"}
+{"question": "What is migraine aura?", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "What does photophobia mean?", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "What is meant by a migraine trigger?", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "What is meant by migraine-related disability?", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "What does preventive migraine treatment aim to do?", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "What does unilateral headache mean?", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "How can a migraine episode affect sensitivity to light and sound?", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "What is the basic idea of cortical spreading depolarization in discussions of aura?", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "What is the basic connection between migraine-related neural activity and nausea?", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "How can a headache diary make patterns easier to recognize?", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "How can hormonal changes be relevant to the timing of migraine episodes?", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "A fictional learner describes light as unusually uncomfortable during an episode. Which symptom term describes light sensitivity?", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "A classmate confuses preventing future episodes with relieving a current episode. Explain the difference in treatment goals without naming a medicine.", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "Two fictional students have the same number of episodes but different disruption to daily activities. Explain why their burden can differ.", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "For a classroom diary graph, distinguish the number of headache days from a rating of pain intensity.", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "Find and cite the migraine classification criteria reproduced in the course handout.", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "List the trigger examples actually included in the course material.", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "Which disability measure is described in the uploaded article, and how did that study use it?", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "What prevalence estimate is reported in the supplied migraine study, including its population and year?", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "Which participants were eligible for the uploaded migraine study?", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "Walk through the instructor's worked example of interpreting a headache diary.", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "A fictional case combines recurrent headache, transient visual symptoms, vascular risk factors and contradictory examination findings. Compare alternative explanations and the evidence needed to distinguish them.", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "A headache diary shows increasing headache days alongside several acute medicines, poor sleep and stress. Analyze competing explanations for the worsening pattern.", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "A supplied case has a longstanding migraine history but a changed headache pattern, systemic symptoms and new examination findings. Analyze why prior history alone is insufficient to explain the change.", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "Review a fictional migraine case with multiple serotonergic medicines, kidney impairment and prior adverse reactions, explaining competing interaction concerns.", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "Critically assess an observational migraine study where people with more severe disease are more likely to receive the intervention.", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "Headache days rise while acute-medicine use, stress and sleep disruption change together. Explain the possible feedback loops in simple language without choosing one cause prematurely.", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "A complex vignette combines migraine, hormonal therapy, vascular risk factors and a history of adverse reactions. Explain how the constraints affect interpretation and decision-making.", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "For an abstract diary-sampling exercise, minimize x^2+4y^2 subject to x+y=B, x>=L and y>=0, where B>=L>=0. Derive the optimal allocation, all boundary regimes and sensitivity to L without clinical interpretation.", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "A migraine trial excluded pregnancy, vascular disease and extensive medication use. Assess the limits of applying its results to a case with those features.", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "What current regulator safety communications concern the specified migraine medicine?", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "Which migraine trial findings were published during the past month?", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "Compare the latest recommendations from two migraine guideline organizations, including their dates, target populations and evidence certainty.", "course": "migraine", "source": "seed", "label": "concept"}
+{"question": "What are alveoli?", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "What does bacterial pneumonia mean?", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "What does hospital-acquired pneumonia refer to?", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "What does oxygenation mean?", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "What is the pleura?", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "What is the general purpose of a sputum culture?", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "How can fluid and inflammation in alveoli interfere with gas exchange?", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "Why can the body's response to infection include fever?", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "How can material entering the airway contribute to lung inflammation or infection?", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "Why do antibiotics not directly target viruses in the same way they target susceptible bacteria?", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "Why can fatigue or cough sometimes persist after other features of a respiratory illness improve?", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "A student labels the tiny air sacs on a lung diagram. What are these structures called?", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "A classmate confuses sputum with saliva. Explain the basic difference.", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "A practice monitor displays an oxygen saturation percentage. Explain what the percentage represents without recommending an action threshold.", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "A course chart contains measurements over several days. Why should a learner look at the sequence rather than only the final value?", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "Find and cite how the supplied notes distinguish community-acquired and hospital-acquired pneumonia.", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "What symptoms are listed in the instructor-approved pneumonia handout?", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "Walk through the instructor's worked example of the classroom severity score.", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "What pneumonia incidence estimate is reported in the provided article, including its population and year?", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "Which limitations do the authors acknowledge in the provided pneumonia article?", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "Describe the pattern in the uploaded respiratory-measurement graph without inventing values.", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "A fictional pneumonia case combines renal impairment, multiple drug allergies and immunosuppression. Compare the constraints affecting possible treatment approaches.", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "A case combines immunosuppression, several exposures, atypical imaging and initially negative tests. Compare plausible explanations and limits of the initial evidence.", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "A case shows little improvement after an initial intervention, with uncertain adherence, changing imaging and new laboratory findings. Compare possible reasons for nonresponse.", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "Two severity tools disagree while oxygen measurements, comorbidities and functional status point in different directions. Analyze why the risk assessment is uncertain.", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "Critically assess a pneumonia cohort study where illness severity influences treatment selection and admission decisions.", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "Explain this in everyday language but retain the tradeoffs: lung infection, poor kidney function, several allergies and impaired immune defenses occur together.", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "Assess how verification bias and differences in testing frequency could distort the apparent accuracy of a pneumonia diagnostic test.", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "For a purely hypothetical testing exercise, a population has prevalence p, test sensitivity s and specificity t, and a positive test incurs confirmation cost c. With false-negative loss L and testing cost k per person, derive when testing everyone has lower expected cost than testing nobody, using only these assumptions.", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "A pneumonia trial excluded pregnancy, immunosuppression and severe renal impairment. Assess the limits of applying its results to a case with those features.", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "What are the current Canadian recommendations for the named pneumococcal vaccine in the specified population?", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "What is the latest available Canadian pneumonia incidence or hospitalization estimate, including its reporting period?", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "Compare the newest pneumonia guidance from two organizations, including dates, clinical settings, resistance assumptions and evidence certainty.", "course": "pneumonia", "source": "seed", "label": "concept"}
+{"question": "When is the first essay due in world history?", "label": "logistics", "course": "supp_history", "source": "supplement"}
+{"question": "How much is the midterm worth in the final grade?", "label": "logistics", "course": "supp_history", "source": "supplement"}
+{"question": "What is the late policy for reading responses?", "label": "logistics", "course": "supp_history", "source": "supplement"}
+{"question": "Where do I find the syllabus for this course?", "label": "logistics", "course": "supp_history", "source": "supplement"}
+{"question": "What time are Professor Alvarez's office hours?", "label": "logistics", "course": "supp_history", "source": "supplement"}
+{"question": "Is attendance mandatory in the discussion sections?", "label": "logistics", "course": "supp_history", "source": "supplement"}
+{"question": "Can I take the final exam on a different day?", "label": "logistics", "course": "supp_history", "source": "supplement"}
+{"question": "How many pages should the research paper be?", "label": "logistics", "course": "supp_history", "source": "supplement"}
+{"question": "which readings are assigned for week 6", "label": "logistics", "course": "supp_history", "source": "supplement"}
+{"question": "Will the midterm be open book?", "label": "logistics", "course": "supp_history", "source": "supplement"}
+{"question": "how do i submit my essay, on the portal or by email", "label": "logistics", "course": "supp_history", "source": "supplement"}
+{"question": "What is the plagiarism policy for the term paper?", "label": "logistics", "course": "supp_history", "source": "supplement"}
+{"question": "Do we have class during reading week?", "label": "logistics", "course": "supp_history", "source": "supplement"}
+{"question": "How many absences are allowed before my grade drops?", "label": "logistics", "course": "supp_history", "source": "supplement"}
+{"question": "who is my TA for section B", "label": "logistics", "course": "supp_history", "source": "supplement"}
+{"question": "Which chapters does the final exam cover?", "label": "logistics", "course": "supp_history", "source": "supplement"}
+{"question": "What caused the fall of the Western Roman Empire?", "label": "concept", "course": "supp_history", "source": "supplement"}
+{"question": "Explain the difference between feudalism and manorialism.", "label": "concept", "course": "supp_history", "source": "supplement"}
+{"question": "Why did the Industrial Revolution begin in Britain?", "label": "concept", "course": "supp_history", "source": "supplement"}
+{"question": "What was the significance of the Treaty of Westphalia?", "label": "concept", "course": "supp_history", "source": "supplement"}
+{"question": "How did the printing press change European society?", "label": "concept", "course": "supp_history", "source": "supplement"}
+{"question": "What deadline did Austria give Serbia in the July ultimatum and why was it so short?", "label": "concept", "course": "supp_history", "source": "supplement"}
+{"question": "How were Roman legions organised by rank and pay?", "label": "concept", "course": "supp_history", "source": "supplement"}
+{"question": "What daily schedule did medieval monks follow?", "label": "concept", "course": "supp_history", "source": "supplement"}
+{"question": "What was on the civil service exam in imperial China?", "label": "concept", "course": "supp_history", "source": "supplement"}
+{"question": "Why was the midterm election of 1862 important for the Union?", "label": "concept", "course": "supp_history", "source": "supplement"}
+{"question": "What did the Syllabus of Errors condemn and why did the pope issue it?", "label": "concept", "course": "supp_history", "source": "supplement"}
+{"question": "How did the Silk Road shape trade between Rome and China?", "label": "concept", "course": "supp_history", "source": "supplement"}
+{"question": "Describe the causes of the French Revolution.", "label": "concept", "course": "supp_history", "source": "supplement"}
+{"question": "why did the Mongol empire split into khanates", "label": "concept", "course": "supp_history", "source": "supplement"}
+{"question": "How did the grading of land into classes work in the Domesday Book?", "label": "concept", "course": "supp_history", "source": "supplement"}
+{"question": "How did the Ottoman divan decide state affairs?", "label": "concept", "course": "supp_history", "source": "supplement"}
+{"question": "When is the next lab report due in organic chemistry?", "label": "logistics", "course": "supp_chemistry", "source": "supplement"}
+{"question": "Do I need to wear goggles to the first lab session or only from week 2?", "label": "logistics", "course": "supp_chemistry", "source": "supplement"}
+{"question": "what percent of the grade is the final exam", "label": "logistics", "course": "supp_chemistry", "source": "supplement"}
+{"question": "Which textbook edition is required for general chemistry?", "label": "logistics", "course": "supp_chemistry", "source": "supplement"}
+{"question": "Can I use a calculator on the midterm?", "label": "logistics", "course": "supp_chemistry", "source": "supplement"}
+{"question": "How are the lab sections assigned?", "label": "logistics", "course": "supp_chemistry", "source": "supplement"}
+{"question": "Is there a make-up lab if I miss one?", "label": "logistics", "course": "supp_chemistry", "source": "supplement"}
+{"question": "When does the problem set on equilibrium go out?", "label": "logistics", "course": "supp_chemistry", "source": "supplement"}
+{"question": "What is the policy on regrade requests for exams?", "label": "logistics", "course": "supp_chemistry", "source": "supplement"}
+{"question": "Who do I email about a conflict with the exam date?", "label": "logistics", "course": "supp_chemistry", "source": "supplement"}
+{"question": "How many homework assignments are dropped?", "label": "logistics", "course": "supp_chemistry", "source": "supplement"}
+{"question": "Which room is the Thursday recitation in?", "label": "logistics", "course": "supp_chemistry", "source": "supplement"}
+{"question": "does the course have a curve", "label": "logistics", "course": "supp_chemistry", "source": "supplement"}
+{"question": "What is on the formula sheet we can bring to the final?", "label": "logistics", "course": "supp_chemistry", "source": "supplement"}
+{"question": "When is the drop deadline for the course?", "label": "logistics", "course": "supp_chemistry", "source": "supplement"}
+{"question": "Which lectures are covered by quiz 2?", "label": "logistics", "course": "supp_chemistry", "source": "supplement"}
+{"question": "What is Le Chatelier's principle?", "label": "concept", "course": "supp_chemistry", "source": "supplement"}
+{"question": "Why does ice float on water?", "label": "concept", "course": "supp_chemistry", "source": "supplement"}
+{"question": "Explain the difference between an SN1 and an SN2 reaction.", "label": "concept", "course": "supp_chemistry", "source": "supplement"}
+{"question": "How does a buffer resist changes in pH?", "label": "concept", "course": "supp_chemistry", "source": "supplement"}
+{"question": "What determines the boiling point of a liquid?", "label": "concept", "course": "supp_chemistry", "source": "supplement"}
+{"question": "How is a rate law determined experimentally?", "label": "concept", "course": "supp_chemistry", "source": "supplement"}
+{"question": "How do you read a titration curve to find the equivalence point?", "label": "concept", "course": "supp_chemistry", "source": "supplement"}
+{"question": "Why is the deadline for a reaction to reach equilibrium so hard to predict?", "label": "concept", "course": "supp_chemistry", "source": "supplement"}
+{"question": "how is the schedule of a distillation column set to separate two liquids", "label": "concept", "course": "supp_chemistry", "source": "supplement"}
+{"question": "what happens to the entropy of the universe in a spontaneous process", "label": "concept", "course": "supp_chemistry", "source": "supplement"}
+{"question": "How do I balance this redox equation: Fe2+ + MnO4- in acid?", "label": "concept", "course": "supp_chemistry", "source": "supplement"}
+{"question": "What is the difference between molarity and molality?", "label": "concept", "course": "supp_chemistry", "source": "supplement"}
+{"question": "Why do transition metals form coloured complexes?", "label": "concept", "course": "supp_chemistry", "source": "supplement"}
+{"question": "what does a catalyst do to the activation energy", "label": "concept", "course": "supp_chemistry", "source": "supplement"}
+{"question": "How is the pH of a weak acid computed from Ka?", "label": "concept", "course": "supp_chemistry", "source": "supplement"}
+{"question": "Explain hybridization in methane.", "label": "concept", "course": "supp_chemistry", "source": "supplement"}
+{"question": "When are the problem sets for microeconomics due?", "label": "logistics", "course": "supp_economics", "source": "supplement"}
+{"question": "How is the participation grade calculated?", "label": "logistics", "course": "supp_economics", "source": "supplement"}
+{"question": "What is the weight of the term paper compared with the final?", "label": "logistics", "course": "supp_economics", "source": "supplement"}
+{"question": "Is the final cumulative?", "label": "logistics", "course": "supp_economics", "source": "supplement"}
+{"question": "can we bring a cheat sheet to the midterm", "label": "logistics", "course": "supp_economics", "source": "supplement"}
+{"question": "Who is the instructor and how do I reach them?", "label": "logistics", "course": "supp_economics", "source": "supplement"}
+{"question": "What is the schedule for the guest lectures?", "label": "logistics", "course": "supp_economics", "source": "supplement"}
+{"question": "Do I have to attend the tutorials?", "label": "logistics", "course": "supp_economics", "source": "supplement"}
+{"question": "How do I get an extension on the term paper?", "label": "logistics", "course": "supp_economics", "source": "supplement"}
+{"question": "what are the course prerequisites", "label": "logistics", "course": "supp_economics", "source": "supplement"}
+{"question": "When will midterm grades be posted?", "label": "logistics", "course": "supp_economics", "source": "supplement"}
+{"question": "Where is the final exam held?", "label": "logistics", "course": "supp_economics", "source": "supplement"}
+{"question": "Are the lecture slides posted before class?", "label": "logistics", "course": "supp_economics", "source": "supplement"}
+{"question": "How many points is each quiz worth?", "label": "logistics", "course": "supp_economics", "source": "supplement"}
+{"question": "what's the deadline to register for the exam", "label": "logistics", "course": "supp_economics", "source": "supplement"}
+{"question": "Is there an alternative assignment if I miss the group presentation?", "label": "logistics", "course": "supp_economics", "source": "supplement"}
+{"question": "What is the difference between a normal good and an inferior good?", "label": "concept", "course": "supp_economics", "source": "supplement"}
+{"question": "Explain how comparative advantage leads to trade.", "label": "concept", "course": "supp_economics", "source": "supplement"}
+{"question": "Why does a monopoly produce less than a competitive market?", "label": "concept", "course": "supp_economics", "source": "supplement"}
+{"question": "How does the central bank use interest rates to control inflation?", "label": "concept", "course": "supp_economics", "source": "supplement"}
+{"question": "What is the multiplier effect?", "label": "concept", "course": "supp_economics", "source": "supplement"}
+{"question": "How does elasticity affect the deadweight loss of a tax?", "label": "concept", "course": "supp_economics", "source": "supplement"}
+{"question": "How do firms schedule production to minimise cost in the short run?", "label": "concept", "course": "supp_economics", "source": "supplement"}
+{"question": "Why did the Bretton Woods system end in 1971?", "label": "concept", "course": "supp_economics", "source": "supplement"}
+{"question": "what is a Nash equilibrium", "label": "concept", "course": "supp_economics", "source": "supplement"}
+{"question": "How does the Phillips curve relate unemployment to inflation?", "label": "concept", "course": "supp_economics", "source": "supplement"}
+{"question": "Why do prices rise when demand shifts right?", "label": "concept", "course": "supp_economics", "source": "supplement"}
+{"question": "explain the prisoner's dilemma with an example", "label": "concept", "course": "supp_economics", "source": "supplement"}
+{"question": "How is GDP calculated using the expenditure approach?", "label": "concept", "course": "supp_economics", "source": "supplement"}
+{"question": "What is fiscal policy meant to control?", "label": "concept", "course": "supp_economics", "source": "supplement"}
+{"question": "What is the difference between nominal and real interest rates?", "label": "concept", "course": "supp_economics", "source": "supplement"}
+{"question": "Why is the long-run supply curve flat in a perfectly competitive industry?", "label": "concept", "course": "supp_economics", "source": "supplement"}
+{"question": "When is the clinical placement schedule released?", "label": "logistics", "course": "supp_nursing", "source": "supplement"}
+{"question": "How many clinical hours do I need to complete this term?", "label": "logistics", "course": "supp_nursing", "source": "supplement"}
+{"question": "What is the dress code for the simulation lab?", "label": "logistics", "course": "supp_nursing", "source": "supplement"}
+{"question": "When is the medication calculation exam?", "label": "logistics", "course": "supp_nursing", "source": "supplement"}
+{"question": "What happens if I fail the dosage calculation test, can I retake it?", "label": "logistics", "course": "supp_nursing", "source": "supplement"}
+{"question": "Who is my clinical instructor for the hospital rotation?", "label": "logistics", "course": "supp_nursing", "source": "supplement"}
+{"question": "How is the care plan assignment graded?", "label": "logistics", "course": "supp_nursing", "source": "supplement"}
+{"question": "Where do I upload my immunization records for the course?", "label": "logistics", "course": "supp_nursing", "source": "supplement"}
+{"question": "Is the pharmacology midterm in person?", "label": "logistics", "course": "supp_nursing", "source": "supplement"}
+{"question": "What is the pass mark for the final exam?", "label": "logistics", "course": "supp_nursing", "source": "supplement"}
+{"question": "do I need to buy the textbook or is the library copy ok", "label": "logistics", "course": "supp_nursing", "source": "supplement"}
+{"question": "When are the office hours for the lab coordinator?", "label": "logistics", "course": "supp_nursing", "source": "supplement"}
+{"question": "Can I switch to a different clinical group?", "label": "logistics", "course": "supp_nursing", "source": "supplement"}
+{"question": "How long is the reflective journal supposed to be?", "label": "logistics", "course": "supp_nursing", "source": "supplement"}
+{"question": "what is the deadline for the case study submission", "label": "logistics", "course": "supp_nursing", "source": "supplement"}
+{"question": "Which weeks are the simulation labs?", "label": "logistics", "course": "supp_nursing", "source": "supplement"}
+{"question": "What are the signs of hypoglycemia in a diabetic patient?", "label": "concept", "course": "supp_nursing", "source": "supplement"}
+{"question": "How do you calculate the drip rate for an IV infusion?", "label": "concept", "course": "supp_nursing", "source": "supplement"}
+{"question": "Explain the stages of a pressure ulcer.", "label": "concept", "course": "supp_nursing", "source": "supplement"}
+{"question": "Why is hand hygiene the most effective way to prevent infection?", "label": "concept", "course": "supp_nursing", "source": "supplement"}
+{"question": "What does a nurse check before giving a beta blocker?", "label": "concept", "course": "supp_nursing", "source": "supplement"}
+{"question": "What is the schedule of insulin injections for a patient on a basal-bolus regimen?", "label": "concept", "course": "supp_nursing", "source": "supplement"}
+{"question": "How is the Glasgow Coma Scale graded?", "label": "concept", "course": "supp_nursing", "source": "supplement"}
+{"question": "Why do patients on warfarin need regular INR tests?", "label": "concept", "course": "supp_nursing", "source": "supplement"}
+{"question": "when should antibiotics be de-escalated after culture results", "label": "concept", "course": "supp_nursing", "source": "supplement"}
+{"question": "what is the difference between a sign and a symptom", "label": "concept", "course": "supp_nursing", "source": "supplement"}
+{"question": "Explain how to take a manual blood pressure.", "label": "concept", "course": "supp_nursing", "source": "supplement"}
+{"question": "What does the Braden scale measure?", "label": "concept", "course": "supp_nursing", "source": "supplement"}
+{"question": "What is the difference between type 1 and type 2 diabetes?", "label": "concept", "course": "supp_nursing", "source": "supplement"}
+{"question": "why does fluid overload cause pulmonary edema", "label": "concept", "course": "supp_nursing", "source": "supplement"}
+{"question": "How should a nurse position a patient with shortness of breath?", "label": "concept", "course": "supp_nursing", "source": "supplement"}
+{"question": "what are the side effects of furosemide", "label": "concept", "course": "supp_nursing", "source": "supplement"}
+{"question": "When is the statistics midterm?", "label": "logistics", "course": "supp_statistics", "source": "supplement"}
+{"question": "Is R or Python used for the assignments?", "label": "logistics", "course": "supp_statistics", "source": "supplement"}
+{"question": "how is the final grade split between homework, midterm and final", "label": "logistics", "course": "supp_statistics", "source": "supplement"}
+{"question": "Are the homeworks done individually or in groups?", "label": "logistics", "course": "supp_statistics", "source": "supplement"}
+{"question": "What is the policy on late homework?", "label": "logistics", "course": "supp_statistics", "source": "supplement"}
+{"question": "When is the project proposal due?", "label": "logistics", "course": "supp_statistics", "source": "supplement"}
+{"question": "Can I get the solutions to the practice exam?", "label": "logistics", "course": "supp_statistics", "source": "supplement"}
+{"question": "Which dates are the review sessions?", "label": "logistics", "course": "supp_statistics", "source": "supplement"}
+{"question": "How do I sign up for the TA's office hours?", "label": "logistics", "course": "supp_statistics", "source": "supplement"}
+{"question": "do we get a formula sheet for the exam", "label": "logistics", "course": "supp_statistics", "source": "supplement"}
+{"question": "What's on the syllabus for week 4?", "label": "logistics", "course": "supp_statistics", "source": "supplement"}
+{"question": "How many quizzes are there this semester?", "label": "logistics", "course": "supp_statistics", "source": "supplement"}
+{"question": "What are the grading criteria for the final project?", "label": "logistics", "course": "supp_statistics", "source": "supplement"}
+{"question": "Does the lowest quiz get dropped?", "label": "logistics", "course": "supp_statistics", "source": "supplement"}
+{"question": "Where can I find the lecture recordings?", "label": "logistics", "course": "supp_statistics", "source": "supplement"}
+{"question": "Who do I contact about a grading error on my midterm?", "label": "logistics", "course": "supp_statistics", "source": "supplement"}
+{"question": "What does a p-value tell you?", "label": "concept", "course": "supp_statistics", "source": "supplement"}
+{"question": "Explain the central limit theorem in simple terms.", "label": "concept", "course": "supp_statistics", "source": "supplement"}
+{"question": "What is the difference between a confidence interval and a prediction interval?", "label": "concept", "course": "supp_statistics", "source": "supplement"}
+{"question": "Why do we divide by n-1 when estimating the sample variance?", "label": "concept", "course": "supp_statistics", "source": "supplement"}
+{"question": "How do you check the assumptions of linear regression?", "label": "concept", "course": "supp_statistics", "source": "supplement"}
+{"question": "When should I use a t-test instead of a z-test?", "label": "concept", "course": "supp_statistics", "source": "supplement"}
+{"question": "How is tumour grade used as a covariate in a Kaplan-Meier analysis?", "label": "concept", "course": "supp_statistics", "source": "supplement"}
+{"question": "What is a stopping rule in sequential testing?", "label": "concept", "course": "supp_statistics", "source": "supplement"}
+{"question": "what are residual plots used for in regression diagnostics", "label": "concept", "course": "supp_statistics", "source": "supplement"}
+{"question": "How does bootstrapping estimate a standard error?", "label": "concept", "course": "supp_statistics", "source": "supplement"}
+{"question": "What is overfitting in a regression model?", "label": "concept", "course": "supp_statistics", "source": "supplement"}
+{"question": "why is the median robust to outliers", "label": "concept", "course": "supp_statistics", "source": "supplement"}
+{"question": "Explain Bayes' theorem with an example.", "label": "concept", "course": "supp_statistics", "source": "supplement"}
+{"question": "How does a Markov chain's transition matrix determine its steady state?", "label": "concept", "course": "supp_statistics", "source": "supplement"}
+{"question": "what is the difference between correlation and causation", "label": "concept", "course": "supp_statistics", "source": "supplement"}
+{"question": "How does stratified sampling reduce variance?", "label": "concept", "course": "supp_statistics", "source": "supplement"}
+{"question": "When is the first sprint review for the software engineering project?", "label": "logistics", "course": "supp_software", "source": "supplement"}
+{"question": "How are team members graded in the group project?", "label": "logistics", "course": "supp_software", "source": "supplement"}
+{"question": "What is the deadline for the design document?", "label": "logistics", "course": "supp_software", "source": "supplement"}
+{"question": "Which version control platform do we have to use for the course?", "label": "logistics", "course": "supp_software", "source": "supplement"}
+{"question": "Do I need to attend the stand-up meetings in person?", "label": "logistics", "course": "supp_software", "source": "supplement"}
+{"question": "is the final exam open laptop", "label": "logistics", "course": "supp_software", "source": "supplement"}
+{"question": "How many late days do we get for the assignments?", "label": "logistics", "course": "supp_software", "source": "supplement"}
+{"question": "Who is the teaching assistant for the capstone project?", "label": "logistics", "course": "supp_software", "source": "supplement"}
+{"question": "What is the weight of the individual quiz versus the team project?", "label": "logistics", "course": "supp_software", "source": "supplement"}
+{"question": "When are the project demos scheduled?", "label": "logistics", "course": "supp_software", "source": "supplement"}
+{"question": "Can we choose our own team members?", "label": "logistics", "course": "supp_software", "source": "supplement"}
+{"question": "what is the required report length for the final project", "label": "logistics", "course": "supp_software", "source": "supplement"}
+{"question": "Where do I submit the code for assignment 3?", "label": "logistics", "course": "supp_software", "source": "supplement"}
+{"question": "What are the office hours for the algorithms course?", "label": "logistics", "course": "supp_software", "source": "supplement"}
+{"question": "How do I request a regrade for my code review?", "label": "logistics", "course": "supp_software", "source": "supplement"}
+{"question": "Is there a makeup for the midterm if I am sick?", "label": "logistics", "course": "supp_software", "source": "supplement"}
+{"question": "What is the difference between a process and a thread?", "label": "concept", "course": "supp_software", "source": "supplement"}
+{"question": "Explain how a hash table handles collisions.", "label": "concept", "course": "supp_software", "source": "supplement"}
+{"question": "What is the purpose of dependency injection?", "label": "concept", "course": "supp_software", "source": "supplement"}
+{"question": "Why is quicksort faster than merge sort in practice?", "label": "concept", "course": "supp_software", "source": "supplement"}
+{"question": "How does garbage collection work in Java?", "label": "concept", "course": "supp_software", "source": "supplement"}
+{"question": "How does earliest-deadline-first scheduling work in a real-time operating system?", "label": "concept", "course": "supp_software", "source": "supplement"}
+{"question": "How does the Linux scheduler decide which process runs next?", "label": "concept", "course": "supp_software", "source": "supplement"}
+{"question": "What should a code review look for in terms of maintainability?", "label": "concept", "course": "supp_software", "source": "supplement"}
+{"question": "what makes a good unit test", "label": "concept", "course": "supp_software", "source": "supplement"}
+{"question": "What is the CAP theorem?", "label": "concept", "course": "supp_software", "source": "supplement"}
+{"question": "explain big-O notation with an example", "label": "concept", "course": "supp_software", "source": "supplement"}
+{"question": "How does TCP guarantee reliable delivery?", "label": "concept", "course": "supp_software", "source": "supplement"}
+{"question": "why do we use indexes in a database", "label": "concept", "course": "supp_software", "source": "supplement"}
+{"question": "what happens when I run git rebase", "label": "concept", "course": "supp_software", "source": "supplement"}
+{"question": "How does a sprint backlog differ from a product backlog?", "label": "concept", "course": "supp_software", "source": "supplement"}
+{"question": "What does the product owner do in Scrum?", "label": "concept", "course": "supp_software", "source": "supplement"}
