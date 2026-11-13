@@ -12,7 +12,7 @@ each push, and a **full mode** against the real servers, run on request.
 | `personalization/` | **E3** Does personalization fit better without losing accuracy? | `run.py` (~40 min with local models) | `run.py --smoke` | `results/report.md`, `abbas_sample.csv` |
 | `privacy-filter/` | **E6** Does the privacy filter find the PII in student questions? Benchmark vs Presidio, upgrades (trf, GLiNER, local LLM), ablation, held-out sets, answer quality after redaction | `run.py` (~10 min with Ollama; `--fast` ~1 min), `exposure.py`, `utility.py`; see its README | `run.py --smoke` | `results/report.md`, `results/holdout_test/report.md`, `results/exposure.md`, `results/utility.md` |
 | `privacy-audit/` | **E4** Does any profile or identity data reach the cloud? `--e6`: the E6 questions end to end, incl. "no personal health question reaches the cloud" | `run.py`, `run.py --e6` | `run.py --smoke` (exit 1 on any leak) | `results/report.md`, `results/e6/report.md` |
-| `course-rag-packs/` | **S11** Does the course index find the right file for student questions on the open course packs (medical science, life science, ECE, computer science)? | `run.py` (~2 min, no model, no network; needs the unpacked packs) | `run.py --smoke` (~3 min, not in CI: needs the packs) | `results/report.md`, `results/metrics.json` |
+| `course-rag-packs/` | **S11** Does the course index find the right file for student questions on the open course packs (medical science, life science, ECE, computer science)? | `run.py` (~5 min for eight packs, no model, no network; needs the unpacked packs) | `run.py --smoke` (~6 min, not in CI: needs the packs) | `results/report.md`, `results/metrics.json` |
 
 ```powershell
 .venv\Scripts\python eval\understand-tagging\run.py --repeat 2

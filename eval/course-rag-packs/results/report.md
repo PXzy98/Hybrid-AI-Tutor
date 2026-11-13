@@ -32,6 +32,23 @@ Course type `ece`; 1158 passages; index built whole course.
 
 Top score (course-wide): answerable median 0.27, 10th percentile 0.17; 3 questions not in the material: mean 0.17, max 0.25; chance that an answerable question outscores an unanswerable one 0.89.
 
+## mit_6_006_algorithms
+
+Course type `ece`; 589 passages; index built per file (refused files skipped).
+
+Files refused by the privacy scan (not indexed): `modules/03_lecture_3_sorting.pdf`.
+
+Questions left out because every gold file was refused: alg-02.
+
+| Type | n | scoped hit@1 | scoped hit@4 | scoped MRR | course-wide hit@1 | course-wide hit@4 | course-wide MRR |
+|---|---|---|---|---|---|---|---|
+| concept | 13 | 0.77 | 1.00 | 0.87 | 0.54 | 0.92 | 0.68 |
+| application | 5 | 0.80 | 0.80 | 0.80 | 0.80 | 0.80 | 0.80 |
+| logistics | 6 | 0.67 | 1.00 | 0.76 | 0.67 | 1.00 | 0.76 |
+| all | 24 | 0.75 | 0.96 | 0.83 | 0.62 | 0.92 | 0.73 |
+
+Top score (course-wide): answerable median 0.22, 10th percentile 0.15; 3 questions not in the material: mean 0.13, max 0.14; chance that an answerable question outscores an unanswerable one 0.96.
+
 ## mit_7_016_intro_biology
 
 Course type `life_science`; 788 passages; index built whole course.
@@ -44,6 +61,38 @@ Course type `life_science`; 788 passages; index built whole course.
 | all | 28 | 0.86 | 0.93 | 0.88 | 0.71 | 0.93 | 0.79 |
 
 Top score (course-wide): answerable median 0.20, 10th percentile 0.14; 3 questions not in the material: mean 0.18, max 0.30; chance that an answerable question outscores an unanswerable one 0.68.
+
+## mit_7_03_genetics
+
+Course type `life_science`; 726 passages; index built per file (refused files skipped).
+
+Files refused by the privacy scan (not indexed): `exams/exam3_2004.pdf`.
+
+| Type | n | scoped hit@1 | scoped hit@4 | scoped MRR | course-wide hit@1 | course-wide hit@4 | course-wide MRR |
+|---|---|---|---|---|---|---|---|
+| concept | 15 | 0.80 | 0.93 | 0.86 | 0.60 | 0.93 | 0.76 |
+| application | 5 | 0.80 | 1.00 | 0.87 | 0.80 | 0.80 | 0.80 |
+| logistics | 6 | 0.67 | 0.83 | 0.75 | 0.67 | 0.83 | 0.75 |
+| all | 26 | 0.77 | 0.92 | 0.83 | 0.65 | 0.89 | 0.76 |
+
+Top score (course-wide): answerable median 0.20, 10th percentile 0.14; 3 questions not in the material: mean 0.17, max 0.26; chance that an answerable question outscores an unanswerable one 0.69.
+
+## mit_hst035_pathology
+
+Course type `medical_science`; 361 passages; index built per file (refused files skipped).
+
+Files refused by the privacy scan (not indexed): `assignments/homework5.pdf`, `modules/09_diet_and_disease_development.pdf`, `modules/10_ischemia_and_infarction.pdf`, `modules/12_the_liver.pdf`.
+
+Questions left out because every gold file was refused: path-11, path-12, path-13, path-16, path-17.
+
+| Type | n | scoped hit@1 | scoped hit@4 | scoped MRR | course-wide hit@1 | course-wide hit@4 | course-wide MRR |
+|---|---|---|---|---|---|---|---|
+| concept | 13 | 0.85 | 1.00 | 0.90 | 0.77 | 0.77 | 0.77 |
+| application | 2 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| logistics | 6 | 0.67 | 1.00 | 0.78 | 0.67 | 1.00 | 0.78 |
+| all | 21 | 0.81 | 1.00 | 0.88 | 0.76 | 0.86 | 0.79 |
+
+Top score (course-wide): answerable median 0.23, 10th percentile 0.15; 3 questions not in the material: mean 0.17, max 0.20; chance that an answerable question outscores an unanswerable one 0.78.
 
 ## mit_hst151_pharmacology
 
@@ -62,14 +111,33 @@ Questions left out because every gold file was refused: hst151-09.
 
 Top score (course-wide): answerable median 0.22, 10th percentile 0.12; 3 questions not in the material: mean 0.12, max 0.17; chance that an answerable question outscores an unanswerable one 0.90.
 
+## mit_res_6_007_signals
+
+Course type `ece`; 855 passages; index built per file (refused files skipped).
+
+Files refused by the privacy scan (not indexed): `assignments/problem_set_10.pdf`.
+
+| Type | n | scoped hit@1 | scoped hit@4 | scoped MRR | course-wide hit@1 | course-wide hit@4 | course-wide MRR |
+|---|---|---|---|---|---|---|---|
+| concept | 14 | 0.93 | 1.00 | 0.96 | 0.50 | 1.00 | 0.74 |
+| application | 5 | 0.80 | 0.80 | 0.80 | 0.60 | 0.80 | 0.70 |
+| logistics | 6 | 0.83 | 0.83 | 0.83 | 0.83 | 0.83 | 0.83 |
+| all | 25 | 0.88 | 0.92 | 0.90 | 0.60 | 0.92 | 0.75 |
+
+Top score (course-wide): answerable median 0.23, 10th percentile 0.14; 3 questions not in the material: mean 0.15, max 0.20; chance that an answerable question outscores an unanswerable one 0.91.
+
 ## All packs
 
 | Pack | scoped hit@1 | scoped hit@4 | scoped MRR | course-wide hit@1 | course-wide hit@4 | course-wide MRR | unanswerable max top score |
 |---|---|---|---|---|---|---|---|
 | harvard_cs50x | 0.70 | 0.89 | 0.79 | 0.63 | 0.89 | 0.75 | 0.11 |
 | mit_6_002_circuits | 0.86 | 0.96 | 0.89 | 0.71 | 0.93 | 0.80 | 0.25 |
+| mit_6_006_algorithms | 0.75 | 0.96 | 0.83 | 0.62 | 0.92 | 0.73 | 0.14 |
 | mit_7_016_intro_biology | 0.86 | 0.93 | 0.88 | 0.71 | 0.93 | 0.79 | 0.30 |
+| mit_7_03_genetics | 0.77 | 0.92 | 0.83 | 0.65 | 0.89 | 0.76 | 0.26 |
+| mit_hst035_pathology | 0.81 | 1.00 | 0.88 | 0.76 | 0.86 | 0.79 | 0.20 |
 | mit_hst151_pharmacology | 0.96 | 0.96 | 0.96 | 0.96 | 0.96 | 0.96 | 0.17 |
+| mit_res_6_007_signals | 0.88 | 0.92 | 0.90 | 0.60 | 0.92 | 0.75 | 0.20 |
 
 ## Misses (course-wide, no gold file in the top results)
 
@@ -78,9 +146,19 @@ Top score (course-wide): answerable median 0.22, 10th percentile 0.12; 3 questio
 - `cs50-25` (logistics): gold `syllabus.md`; top result `assignments/pset_1.md` (score 0.27); scoped rank None
 - `circ-03` (application): gold `modules/02_lecture_2_basic_circuit_analysis_method.pdf`; top result `modules/06_lecture_6_nonlinear_analysis.pdf` (score 0.43); scoped rank 4
 - `circ-28` (logistics): gold `calendar.md`; top result `syllabus.md` (score 0.25); scoped rank None
+- `alg-07` (application): gold `modules/09_lecture_9_breadth_first_search.pdf`; top result `modules/11_lecture_11_weighted_shortest_paths.pdf` (score 0.11); scoped rank None
+- `alg-17` (concept): gold `modules/16_lecture_17_dynamic_programming_part_3.pdf`; top result `modules/17_lecture_18_pseudopolynomial.pdf` (score 0.20); scoped rank 1
 - `bio7016-02` (concept): gold `modules/02_recitation_2.pdf`, `modules/09_recitation_9.pdf`; top result `modules/13_recitation_13.pdf` (score 0.15); scoped rank None
 - `bio7016-26` (logistics): gold `calendar.md`; top result `modules/07_recitation_7.pdf` (score 0.16); scoped rank None
+- `gen-02` (application): gold `modules/04_lecture_4_probability_and_pedigrees.pdf`; top result `modules/33_lecture_35_genetics_of_cancer_ii.pdf` (score 0.17); scoped rank 3
+- `gen-08` (concept): gold `modules/12_lecture_12_bacterial_genetics_transposition.pdf`; top result `exams/exam1_2004.pdf` (score 0.10); scoped rank None
+- `gen-26` (logistics): gold `calendar.md`; top result `assignments.md` (score 0.30); scoped rank None
+- `path-05` (concept): gold `modules/05_acute_and_chronic_inflammation.pdf`; top result `syllabus.md` (score 0.16); scoped rank 4
+- `path-18` (concept): gold `modules/03_the_immune_system.pdf`; top result `modules/06_tissue_repair_fibrosis_and_healing.pdf` (score 0.21); scoped rank 1
+- `path-20` (concept): gold `modules/07_infectious_diseases.pdf`; top result `modules/02_epithelial_structure_and_function.pdf` (score 0.15); scoped rank 2
 - `hst151-26` (logistics): gold `calendar.md`; top result `syllabus.md` (score 0.25); scoped rank None
+- `sig-16` (application): gold `modules/23_lecture_23_mapping_continuous_time_filters_to_di.pdf`; top result `modules/18_lecture_18_mapping_continuous_time_filters_to_di.pdf` (score 0.26); scoped rank None
+- `sig-24` (logistics): gold `assignments.md`; top result `modules/19_lecture_19_continuous_time_second_order_systems.pdf` (score 0.14); scoped rank None
 
 ## Analysis
 
@@ -115,10 +193,16 @@ for `bio7016-22` (HIV, helper T cells) likewise.
    has top score 0.30 (`assignments.md`) and `circ-30` (head TA office hours) 0.25 (`syllabus.md`), above the
    10th percentile of answerable questions; see the chance-of-outscoring figures in the tables. A fixed score
    threshold cannot be used to say "I have no material on this".
-6. **Privacy-scan refusals remove material.** Seven HST.151 files (including lectures 5 and 6) and two CS50x
-   problem sets are refused as student data (known false positives, `data/demo_courses/README.md`), so questions
-   about them cannot be answered (`hst151-09`, `cs50-22`, left out of the metrics). The whole-course rebuild fails
-   closed on the first such file, so the harness had to scan and skip file by file.
+6. **Privacy-scan refusals remove material.** Seven HST.151 files (including lectures 5 and 6), four HST.035
+   files (lectures 9, 10 and 12), two CS50x problem sets, and one file each in 6.006 (lecture 3), 7.03 and
+   RES.6-007 are refused as student data (known false positives, `data/demo_courses/README.md`). Questions
+   about them cannot be answered (`hst151-09`, `cs50-22`, `alg-02`, and five HST.035 questions, left out of
+   the metrics). The whole-course rebuild fails closed on the first such file, so the harness had to scan
+   and skip file by file; six of the eight packs could not be indexed whole.
+7. **Near-duplicate lectures compete.** `sig-16` (continuous to discrete filters) and `alg-17` (dynamic
+   programming III) return the neighbouring lecture with the same title words first (`sig-16`: lecture 18
+   before 23; `alg-17`: lecture 18 before 17 course-wide, though scoped it is rank 1). Scoping by module
+   fixes this when the student has chosen one.
 
 **Suggestions (not done here).** Down-weight practice exams and homework (or search them only when asked for);
 index calendar rows with their session and date words; add a semantic or query-expansion step before the

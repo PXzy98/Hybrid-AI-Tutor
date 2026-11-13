@@ -34,10 +34,16 @@ for `bio7016-22` (HIV, helper T cells) likewise.
    has top score 0.30 (`assignments.md`) and `circ-30` (head TA office hours) 0.25 (`syllabus.md`), above the
    10th percentile of answerable questions; see the chance-of-outscoring figures in the tables. A fixed score
    threshold cannot be used to say "I have no material on this".
-6. **Privacy-scan refusals remove material.** Seven HST.151 files (including lectures 5 and 6) and two CS50x
-   problem sets are refused as student data (known false positives, `data/demo_courses/README.md`), so questions
-   about them cannot be answered (`hst151-09`, `cs50-22`, left out of the metrics). The whole-course rebuild fails
-   closed on the first such file, so the harness had to scan and skip file by file.
+6. **Privacy-scan refusals remove material.** Seven HST.151 files (including lectures 5 and 6), four HST.035
+   files (lectures 9, 10 and 12), two CS50x problem sets, and one file each in 6.006 (lecture 3), 7.03 and
+   RES.6-007 are refused as student data (known false positives, `data/demo_courses/README.md`). Questions
+   about them cannot be answered (`hst151-09`, `cs50-22`, `alg-02`, and five HST.035 questions, left out of
+   the metrics). The whole-course rebuild fails closed on the first such file, so the harness had to scan
+   and skip file by file; six of the eight packs could not be indexed whole.
+7. **Near-duplicate lectures compete.** `sig-16` (continuous to discrete filters) and `alg-17` (dynamic
+   programming III) return the neighbouring lecture with the same title words first (`sig-16`: lecture 18
+   before 23; `alg-17`: lecture 18 before 17 course-wide, though scoped it is rank 1). Scoping by module
+   fixes this when the student has chosen one.
 
 **Suggestions (not done here).** Down-weight practice exams and homework (or search them only when asked for);
 index calendar rows with their session and date words; add a semantic or query-expansion step before the
