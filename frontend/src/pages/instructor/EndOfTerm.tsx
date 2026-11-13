@@ -61,6 +61,7 @@ export default function EndOfTerm({ course }: { course: Course }) {
                 <Button type="button" onClick={() => save.mutate(early.data.export_id)} disabled={save.isPending}>
                   <Download aria-hidden />{t("end.download")}
                 </Button>
+                <ErrorNote error={save.error} />
               </div>
             )}
           </CardContent>
