@@ -1,0 +1,2098 @@
+{
+  "rows": 160,
+  "uncertain": 17,
+  "scored": 143,
+  "uncertain_ids": [
+    "circ-026",
+    "circ-027",
+    "circ-031",
+    "circ-039",
+    "circ-040",
+    "sig-027",
+    "sig-029",
+    "sig-039",
+    "sig-040",
+    "alg-028",
+    "alg-031",
+    "alg-039",
+    "alg-040",
+    "cs50-026",
+    "cs50-031",
+    "cs50-039",
+    "cs50-040"
+  ],
+  "shipped": {
+    "lr": {
+      "all": {
+        "n": 143,
+        "accuracy": 0.601,
+        "head_only_accuracy": 0.839,
+        "cloud_share": 0.476,
+        "label_cloud_share": 0.189,
+        "cloud_recall": 0.704,
+        "local_recall": 0.578,
+        "confusion": {
+          "local->local": 67,
+          "local->cloud": 49,
+          "cloud->local": 8,
+          "cloud->cloud": 19
+        },
+        "unreliable_share": 0.455,
+        "evidence_head_accuracy": 0.895
+      },
+      "by_pack": {
+        "harvard_cs50x": {
+          "n": 36,
+          "accuracy": 0.611,
+          "head_only_accuracy": 0.806,
+          "cloud_share": 0.583,
+          "label_cloud_share": 0.194,
+          "cloud_recall": 1.0,
+          "local_recall": 0.517,
+          "confusion": {
+            "local->local": 15,
+            "local->cloud": 14,
+            "cloud->local": 0,
+            "cloud->cloud": 7
+          },
+          "unreliable_share": 0.583,
+          "evidence_head_accuracy": 0.944
+        },
+        "mit_6_002_circuits": {
+          "n": 35,
+          "accuracy": 0.657,
+          "head_only_accuracy": 0.886,
+          "cloud_share": 0.4,
+          "label_cloud_share": 0.171,
+          "cloud_recall": 0.667,
+          "local_recall": 0.655,
+          "confusion": {
+            "local->local": 19,
+            "local->cloud": 10,
+            "cloud->local": 2,
+            "cloud->cloud": 4
+          },
+          "unreliable_share": 0.343,
+          "evidence_head_accuracy": 0.8
+        },
+        "mit_6_006_algorithms": {
+          "n": 36,
+          "accuracy": 0.556,
+          "head_only_accuracy": 0.833,
+          "cloud_share": 0.583,
+          "label_cloud_share": 0.194,
+          "cloud_recall": 0.857,
+          "local_recall": 0.483,
+          "confusion": {
+            "local->local": 14,
+            "local->cloud": 15,
+            "cloud->local": 1,
+            "cloud->cloud": 6
+          },
+          "unreliable_share": 0.583,
+          "evidence_head_accuracy": 0.917
+        },
+        "mit_res_6_007_signals": {
+          "n": 36,
+          "accuracy": 0.583,
+          "head_only_accuracy": 0.833,
+          "cloud_share": 0.333,
+          "label_cloud_share": 0.194,
+          "cloud_recall": 0.286,
+          "local_recall": 0.655,
+          "confusion": {
+            "local->local": 19,
+            "local->cloud": 10,
+            "cloud->local": 5,
+            "cloud->cloud": 2
+          },
+          "unreliable_share": 0.306,
+          "evidence_head_accuracy": 0.917
+        }
+      },
+      "by_type": {
+        "application": {
+          "n": 36,
+          "accuracy": 0.25,
+          "head_only_accuracy": 0.944,
+          "cloud_share": 0.75,
+          "label_cloud_share": 0.0,
+          "cloud_recall": null,
+          "local_recall": 0.25,
+          "confusion": {
+            "local->local": 9,
+            "local->cloud": 27,
+            "cloud->local": 0,
+            "cloud->cloud": 0
+          },
+          "unreliable_share": 0.722,
+          "evidence_head_accuracy": 0.917
+        },
+        "concept": {
+          "n": 52,
+          "accuracy": 0.635,
+          "head_only_accuracy": 1.0,
+          "cloud_share": 0.365,
+          "label_cloud_share": 0.0,
+          "cloud_recall": null,
+          "local_recall": 0.635,
+          "confusion": {
+            "local->local": 33,
+            "local->cloud": 19,
+            "cloud->local": 0,
+            "cloud->cloud": 0
+          },
+          "unreliable_share": 0.365,
+          "evidence_head_accuracy": 1.0
+        },
+        "hard": {
+          "n": 27,
+          "accuracy": 0.704,
+          "head_only_accuracy": 0.222,
+          "cloud_share": 0.704,
+          "label_cloud_share": 1.0,
+          "cloud_recall": 0.704,
+          "local_recall": null,
+          "confusion": {
+            "local->local": 0,
+            "local->cloud": 0,
+            "cloud->local": 8,
+            "cloud->cloud": 19
+          },
+          "unreliable_share": 0.63,
+          "evidence_head_accuracy": 0.963
+        },
+        "logistics": {
+          "n": 28,
+          "accuracy": 0.893,
+          "head_only_accuracy": 1.0,
+          "cloud_share": 0.107,
+          "label_cloud_share": 0.0,
+          "cloud_recall": null,
+          "local_recall": 0.893,
+          "confusion": {
+            "local->local": 25,
+            "local->cloud": 3,
+            "cloud->local": 0,
+            "cloud->cloud": 0
+          },
+          "unreliable_share": 0.107,
+          "evidence_head_accuracy": 0.607
+        }
+      },
+      "by_pack_type": {
+        "harvard_cs50x/application": {
+          "n": 9,
+          "accuracy": 0.333,
+          "head_only_accuracy": 1.0,
+          "cloud_share": 0.667,
+          "label_cloud_share": 0.0,
+          "cloud_recall": null,
+          "local_recall": 0.333,
+          "confusion": {
+            "local->local": 3,
+            "local->cloud": 6,
+            "cloud->local": 0,
+            "cloud->cloud": 0
+          },
+          "unreliable_share": 0.667,
+          "evidence_head_accuracy": 1.0
+        },
+        "harvard_cs50x/concept": {
+          "n": 13,
+          "accuracy": 0.462,
+          "head_only_accuracy": 1.0,
+          "cloud_share": 0.538,
+          "label_cloud_share": 0.0,
+          "cloud_recall": null,
+          "local_recall": 0.462,
+          "confusion": {
+            "local->local": 6,
+            "local->cloud": 7,
+            "cloud->local": 0,
+            "cloud->cloud": 0
+          },
+          "unreliable_share": 0.538,
+          "evidence_head_accuracy": 1.0
+        },
+        "harvard_cs50x/hard": {
+          "n": 7,
+          "accuracy": 1.0,
+          "head_only_accuracy": 0.0,
+          "cloud_share": 1.0,
+          "label_cloud_share": 1.0,
+          "cloud_recall": 1.0,
+          "local_recall": null,
+          "confusion": {
+            "local->local": 0,
+            "local->cloud": 0,
+            "cloud->local": 0,
+            "cloud->cloud": 7
+          },
+          "unreliable_share": 1.0,
+          "evidence_head_accuracy": 0.857
+        },
+        "harvard_cs50x/logistics": {
+          "n": 7,
+          "accuracy": 0.857,
+          "head_only_accuracy": 1.0,
+          "cloud_share": 0.143,
+          "label_cloud_share": 0.0,
+          "cloud_recall": null,
+          "local_recall": 0.857,
+          "confusion": {
+            "local->local": 6,
+            "local->cloud": 1,
+            "cloud->local": 0,
+            "cloud->cloud": 0
+          },
+          "unreliable_share": 0.143,
+          "evidence_head_accuracy": 0.857
+        },
+        "mit_6_002_circuits/application": {
+          "n": 9,
+          "accuracy": 0.333,
+          "head_only_accuracy": 0.889,
+          "cloud_share": 0.667,
+          "label_cloud_share": 0.0,
+          "cloud_recall": null,
+          "local_recall": 0.333,
+          "confusion": {
+            "local->local": 3,
+            "local->cloud": 6,
+            "cloud->local": 0,
+            "cloud->cloud": 0
+          },
+          "unreliable_share": 0.556,
+          "evidence_head_accuracy": 0.778
+        },
+        "mit_6_002_circuits/concept": {
+          "n": 13,
+          "accuracy": 0.692,
+          "head_only_accuracy": 1.0,
+          "cloud_share": 0.308,
+          "label_cloud_share": 0.0,
+          "cloud_recall": null,
+          "local_recall": 0.692,
+          "confusion": {
+            "local->local": 9,
+            "local->cloud": 4,
+            "cloud->local": 0,
+            "cloud->cloud": 0
+          },
+          "unreliable_share": 0.308,
+          "evidence_head_accuracy": 1.0
+        },
+        "mit_6_002_circuits/hard": {
+          "n": 6,
+          "accuracy": 0.667,
+          "head_only_accuracy": 0.5,
+          "cloud_share": 0.667,
+          "label_cloud_share": 1.0,
+          "cloud_recall": 0.667,
+          "local_recall": null,
+          "confusion": {
+            "local->local": 0,
+            "local->cloud": 0,
+            "cloud->local": 2,
+            "cloud->cloud": 4
+          },
+          "unreliable_share": 0.5,
+          "evidence_head_accuracy": 1.0
+        },
+        "mit_6_002_circuits/logistics": {
+          "n": 7,
+          "accuracy": 1.0,
+          "head_only_accuracy": 1.0,
+          "cloud_share": 0.0,
+          "label_cloud_share": 0.0,
+          "cloud_recall": null,
+          "local_recall": 1.0,
+          "confusion": {
+            "local->local": 7,
+            "local->cloud": 0,
+            "cloud->local": 0,
+            "cloud->cloud": 0
+          },
+          "unreliable_share": 0.0,
+          "evidence_head_accuracy": 0.286
+        },
+        "mit_6_006_algorithms/application": {
+          "n": 9,
+          "accuracy": 0.0,
+          "head_only_accuracy": 0.889,
+          "cloud_share": 1.0,
+          "label_cloud_share": 0.0,
+          "cloud_recall": null,
+          "local_recall": 0.0,
+          "confusion": {
+            "local->local": 0,
+            "local->cloud": 9,
+            "cloud->local": 0,
+            "cloud->cloud": 0
+          },
+          "unreliable_share": 1.0,
+          "evidence_head_accuracy": 0.889
+        },
+        "mit_6_006_algorithms/concept": {
+          "n": 13,
+          "accuracy": 0.615,
+          "head_only_accuracy": 1.0,
+          "cloud_share": 0.385,
+          "label_cloud_share": 0.0,
+          "cloud_recall": null,
+          "local_recall": 0.615,
+          "confusion": {
+            "local->local": 8,
+            "local->cloud": 5,
+            "cloud->local": 0,
+            "cloud->cloud": 0
+          },
+          "unreliable_share": 0.385,
+          "evidence_head_accuracy": 1.0
+        },
+        "mit_6_006_algorithms/hard": {
+          "n": 7,
+          "accuracy": 0.857,
+          "head_only_accuracy": 0.286,
+          "cloud_share": 0.857,
+          "label_cloud_share": 1.0,
+          "cloud_recall": 0.857,
+          "local_recall": null,
+          "confusion": {
+            "local->local": 0,
+            "local->cloud": 0,
+            "cloud->local": 1,
+            "cloud->cloud": 6
+          },
+          "unreliable_share": 0.857,
+          "evidence_head_accuracy": 1.0
+        },
+        "mit_6_006_algorithms/logistics": {
+          "n": 7,
+          "accuracy": 0.857,
+          "head_only_accuracy": 1.0,
+          "cloud_share": 0.143,
+          "label_cloud_share": 0.0,
+          "cloud_recall": null,
+          "local_recall": 0.857,
+          "confusion": {
+            "local->local": 6,
+            "local->cloud": 1,
+            "cloud->local": 0,
+            "cloud->cloud": 0
+          },
+          "unreliable_share": 0.143,
+          "evidence_head_accuracy": 0.714
+        },
+        "mit_res_6_007_signals/application": {
+          "n": 9,
+          "accuracy": 0.333,
+          "head_only_accuracy": 1.0,
+          "cloud_share": 0.667,
+          "label_cloud_share": 0.0,
+          "cloud_recall": null,
+          "local_recall": 0.333,
+          "confusion": {
+            "local->local": 3,
+            "local->cloud": 6,
+            "cloud->local": 0,
+            "cloud->cloud": 0
+          },
+          "unreliable_share": 0.667,
+          "evidence_head_accuracy": 1.0
+        },
+        "mit_res_6_007_signals/concept": {
+          "n": 13,
+          "accuracy": 0.769,
+          "head_only_accuracy": 1.0,
+          "cloud_share": 0.231,
+          "label_cloud_share": 0.0,
+          "cloud_recall": null,
+          "local_recall": 0.769,
+          "confusion": {
+            "local->local": 10,
+            "local->cloud": 3,
+            "cloud->local": 0,
+            "cloud->cloud": 0
+          },
+          "unreliable_share": 0.231,
+          "evidence_head_accuracy": 1.0
+        },
+        "mit_res_6_007_signals/hard": {
+          "n": 7,
+          "accuracy": 0.286,
+          "head_only_accuracy": 0.143,
+          "cloud_share": 0.286,
+          "label_cloud_share": 1.0,
+          "cloud_recall": 0.286,
+          "local_recall": null,
+          "confusion": {
+            "local->local": 0,
+            "local->cloud": 0,
+            "cloud->local": 5,
+            "cloud->cloud": 2
+          },
+          "unreliable_share": 0.143,
+          "evidence_head_accuracy": 1.0
+        },
+        "mit_res_6_007_signals/logistics": {
+          "n": 7,
+          "accuracy": 0.857,
+          "head_only_accuracy": 1.0,
+          "cloud_share": 0.143,
+          "label_cloud_share": 0.0,
+          "cloud_recall": null,
+          "local_recall": 0.857,
+          "confusion": {
+            "local->local": 6,
+            "local->cloud": 1,
+            "cloud->local": 0,
+            "cloud->cloud": 0
+          },
+          "unreliable_share": 0.143,
+          "evidence_head_accuracy": 0.571
+        }
+      },
+      "wrong": [
+        {
+          "id": "circ-002",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.019,
+          "nearest_similarity": 0.243
+        },
+        {
+          "id": "circ-007",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.009,
+          "nearest_similarity": 0.147
+        },
+        {
+          "id": "circ-009",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.014,
+          "nearest_similarity": 0.219
+        },
+        {
+          "id": "circ-013",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.222,
+          "nearest_similarity": 0.248
+        },
+        {
+          "id": "circ-014",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.011,
+          "nearest_similarity": 0.218
+        },
+        {
+          "id": "circ-017",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.02,
+          "nearest_similarity": 0.237
+        },
+        {
+          "id": "circ-018",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.052,
+          "nearest_similarity": 0.188
+        },
+        {
+          "id": "circ-019",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.378,
+          "nearest_similarity": 0.221
+        },
+        {
+          "id": "circ-021",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: capability score",
+          "cloud_probability": 0.606,
+          "nearest_similarity": 0.365
+        },
+        {
+          "id": "circ-022",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.005,
+          "nearest_similarity": 0.188
+        },
+        {
+          "id": "circ-028",
+          "label": "cloud",
+          "route": "local",
+          "reason": "local",
+          "cloud_probability": 0.123,
+          "nearest_similarity": 0.283
+        },
+        {
+          "id": "circ-030",
+          "label": "cloud",
+          "route": "local",
+          "reason": "local",
+          "cloud_probability": 0.511,
+          "nearest_similarity": 0.37
+        },
+        {
+          "id": "sig-002",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.003,
+          "nearest_similarity": 0.237
+        },
+        {
+          "id": "sig-004",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.008,
+          "nearest_similarity": 0.249
+        },
+        {
+          "id": "sig-011",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.005,
+          "nearest_similarity": 0.216
+        },
+        {
+          "id": "sig-014",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.003,
+          "nearest_similarity": 0.234
+        },
+        {
+          "id": "sig-016",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.028,
+          "nearest_similarity": 0.168
+        },
+        {
+          "id": "sig-018",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.04,
+          "nearest_similarity": 0.244
+        },
+        {
+          "id": "sig-019",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.016,
+          "nearest_similarity": 0.226
+        },
+        {
+          "id": "sig-020",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.005,
+          "nearest_similarity": 0.192
+        },
+        {
+          "id": "sig-022",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.421,
+          "nearest_similarity": 0.236
+        },
+        {
+          "id": "sig-023",
+          "label": "cloud",
+          "route": "local",
+          "reason": "local",
+          "cloud_probability": 0.039,
+          "nearest_similarity": 0.261
+        },
+        {
+          "id": "sig-024",
+          "label": "cloud",
+          "route": "local",
+          "reason": "local",
+          "cloud_probability": 0.351,
+          "nearest_similarity": 0.444
+        },
+        {
+          "id": "sig-026",
+          "label": "cloud",
+          "route": "local",
+          "reason": "local",
+          "cloud_probability": 0.13,
+          "nearest_similarity": 0.312
+        },
+        {
+          "id": "sig-028",
+          "label": "cloud",
+          "route": "local",
+          "reason": "local",
+          "cloud_probability": 0.11,
+          "nearest_similarity": 0.257
+        },
+        {
+          "id": "sig-030",
+          "label": "cloud",
+          "route": "local",
+          "reason": "local",
+          "cloud_probability": 0.073,
+          "nearest_similarity": 0.303
+        },
+        {
+          "id": "sig-035",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.184,
+          "nearest_similarity": 0.242
+        },
+        {
+          "id": "alg-002",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.002,
+          "nearest_similarity": 0.229
+        },
+        {
+          "id": "alg-007",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.004,
+          "nearest_similarity": 0.233
+        },
+        {
+          "id": "alg-008",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.035,
+          "nearest_similarity": 0.228
+        },
+        {
+          "id": "alg-010",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.024,
+          "nearest_similarity": 0.249
+        },
+        {
+          "id": "alg-011",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.333,
+          "nearest_similarity": 0.166
+        },
+        {
+          "id": "alg-014",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.26,
+          "nearest_similarity": 0.216
+        },
+        {
+          "id": "alg-015",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.217,
+          "nearest_similarity": 0.205
+        },
+        {
+          "id": "alg-016",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.009,
+          "nearest_similarity": 0.23
+        },
+        {
+          "id": "alg-017",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.001,
+          "nearest_similarity": 0.223
+        },
+        {
+          "id": "alg-018",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.192,
+          "nearest_similarity": 0.247
+        },
+        {
+          "id": "alg-019",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.008,
+          "nearest_similarity": 0.139
+        },
+        {
+          "id": "alg-020",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.061,
+          "nearest_similarity": 0.166
+        },
+        {
+          "id": "alg-021",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.012,
+          "nearest_similarity": 0.211
+        },
+        {
+          "id": "alg-022",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.82,
+          "nearest_similarity": 0.165
+        },
+        {
+          "id": "alg-029",
+          "label": "cloud",
+          "route": "local",
+          "reason": "local",
+          "cloud_probability": 0.195,
+          "nearest_similarity": 0.272
+        },
+        {
+          "id": "alg-034",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.008,
+          "nearest_similarity": 0.203
+        },
+        {
+          "id": "cs50-005",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.007,
+          "nearest_similarity": 0.221
+        },
+        {
+          "id": "cs50-007",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.002,
+          "nearest_similarity": 0.226
+        },
+        {
+          "id": "cs50-009",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.014,
+          "nearest_similarity": 0.124
+        },
+        {
+          "id": "cs50-010",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.009,
+          "nearest_similarity": 0.214
+        },
+        {
+          "id": "cs50-011",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.005,
+          "nearest_similarity": 0.201
+        },
+        {
+          "id": "cs50-012",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.001,
+          "nearest_similarity": 0.211
+        },
+        {
+          "id": "cs50-013",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.001,
+          "nearest_similarity": 0.21
+        },
+        {
+          "id": "cs50-015",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.004,
+          "nearest_similarity": 0.14
+        },
+        {
+          "id": "cs50-016",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.002,
+          "nearest_similarity": 0.161
+        },
+        {
+          "id": "cs50-018",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.119,
+          "nearest_similarity": 0.222
+        },
+        {
+          "id": "cs50-019",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.019,
+          "nearest_similarity": 0.134
+        },
+        {
+          "id": "cs50-020",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.001,
+          "nearest_similarity": 0.231
+        },
+        {
+          "id": "cs50-021",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.125,
+          "nearest_similarity": 0.213
+        },
+        {
+          "id": "cs50-035",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.037,
+          "nearest_similarity": 0.186
+        }
+      ]
+    },
+    "svm": {
+      "all": {
+        "n": 143,
+        "accuracy": 0.608,
+        "head_only_accuracy": 0.846,
+        "cloud_share": 0.497,
+        "label_cloud_share": 0.189,
+        "cloud_recall": 0.778,
+        "local_recall": 0.569,
+        "confusion": {
+          "local->local": 66,
+          "local->cloud": 50,
+          "cloud->local": 6,
+          "cloud->cloud": 21
+        },
+        "unreliable_share": 0.455,
+        "evidence_head_accuracy": 0.895
+      },
+      "by_pack": {
+        "harvard_cs50x": {
+          "n": 36,
+          "accuracy": 0.611,
+          "head_only_accuracy": 0.806,
+          "cloud_share": 0.583,
+          "label_cloud_share": 0.194,
+          "cloud_recall": 1.0,
+          "local_recall": 0.517,
+          "confusion": {
+            "local->local": 15,
+            "local->cloud": 14,
+            "cloud->local": 0,
+            "cloud->cloud": 7
+          },
+          "unreliable_share": 0.583,
+          "evidence_head_accuracy": 0.944
+        },
+        "mit_6_002_circuits": {
+          "n": 35,
+          "accuracy": 0.657,
+          "head_only_accuracy": 0.914,
+          "cloud_share": 0.457,
+          "label_cloud_share": 0.171,
+          "cloud_recall": 0.833,
+          "local_recall": 0.621,
+          "confusion": {
+            "local->local": 18,
+            "local->cloud": 11,
+            "cloud->local": 1,
+            "cloud->cloud": 5
+          },
+          "unreliable_share": 0.343,
+          "evidence_head_accuracy": 0.8
+        },
+        "mit_6_006_algorithms": {
+          "n": 36,
+          "accuracy": 0.556,
+          "head_only_accuracy": 0.833,
+          "cloud_share": 0.583,
+          "label_cloud_share": 0.194,
+          "cloud_recall": 0.857,
+          "local_recall": 0.483,
+          "confusion": {
+            "local->local": 14,
+            "local->cloud": 15,
+            "cloud->local": 1,
+            "cloud->cloud": 6
+          },
+          "unreliable_share": 0.583,
+          "evidence_head_accuracy": 0.889
+        },
+        "mit_res_6_007_signals": {
+          "n": 36,
+          "accuracy": 0.611,
+          "head_only_accuracy": 0.833,
+          "cloud_share": 0.361,
+          "label_cloud_share": 0.194,
+          "cloud_recall": 0.429,
+          "local_recall": 0.655,
+          "confusion": {
+            "local->local": 19,
+            "local->cloud": 10,
+            "cloud->local": 4,
+            "cloud->cloud": 3
+          },
+          "unreliable_share": 0.306,
+          "evidence_head_accuracy": 0.944
+        }
+      },
+      "by_type": {
+        "application": {
+          "n": 36,
+          "accuracy": 0.222,
+          "head_only_accuracy": 0.889,
+          "cloud_share": 0.778,
+          "label_cloud_share": 0.0,
+          "cloud_recall": null,
+          "local_recall": 0.222,
+          "confusion": {
+            "local->local": 8,
+            "local->cloud": 28,
+            "cloud->local": 0,
+            "cloud->cloud": 0
+          },
+          "unreliable_share": 0.722,
+          "evidence_head_accuracy": 0.917
+        },
+        "concept": {
+          "n": 52,
+          "accuracy": 0.635,
+          "head_only_accuracy": 1.0,
+          "cloud_share": 0.365,
+          "label_cloud_share": 0.0,
+          "cloud_recall": null,
+          "local_recall": 0.635,
+          "confusion": {
+            "local->local": 33,
+            "local->cloud": 19,
+            "cloud->local": 0,
+            "cloud->cloud": 0
+          },
+          "unreliable_share": 0.365,
+          "evidence_head_accuracy": 1.0
+        },
+        "hard": {
+          "n": 27,
+          "accuracy": 0.778,
+          "head_only_accuracy": 0.333,
+          "cloud_share": 0.778,
+          "label_cloud_share": 1.0,
+          "cloud_recall": 0.778,
+          "local_recall": null,
+          "confusion": {
+            "local->local": 0,
+            "local->cloud": 0,
+            "cloud->local": 6,
+            "cloud->cloud": 21
+          },
+          "unreliable_share": 0.63,
+          "evidence_head_accuracy": 0.963
+        },
+        "logistics": {
+          "n": 28,
+          "accuracy": 0.893,
+          "head_only_accuracy": 1.0,
+          "cloud_share": 0.107,
+          "label_cloud_share": 0.0,
+          "cloud_recall": null,
+          "local_recall": 0.893,
+          "confusion": {
+            "local->local": 25,
+            "local->cloud": 3,
+            "cloud->local": 0,
+            "cloud->cloud": 0
+          },
+          "unreliable_share": 0.107,
+          "evidence_head_accuracy": 0.607
+        }
+      },
+      "by_pack_type": {
+        "harvard_cs50x/application": {
+          "n": 9,
+          "accuracy": 0.333,
+          "head_only_accuracy": 1.0,
+          "cloud_share": 0.667,
+          "label_cloud_share": 0.0,
+          "cloud_recall": null,
+          "local_recall": 0.333,
+          "confusion": {
+            "local->local": 3,
+            "local->cloud": 6,
+            "cloud->local": 0,
+            "cloud->cloud": 0
+          },
+          "unreliable_share": 0.667,
+          "evidence_head_accuracy": 1.0
+        },
+        "harvard_cs50x/concept": {
+          "n": 13,
+          "accuracy": 0.462,
+          "head_only_accuracy": 1.0,
+          "cloud_share": 0.538,
+          "label_cloud_share": 0.0,
+          "cloud_recall": null,
+          "local_recall": 0.462,
+          "confusion": {
+            "local->local": 6,
+            "local->cloud": 7,
+            "cloud->local": 0,
+            "cloud->cloud": 0
+          },
+          "unreliable_share": 0.538,
+          "evidence_head_accuracy": 1.0
+        },
+        "harvard_cs50x/hard": {
+          "n": 7,
+          "accuracy": 1.0,
+          "head_only_accuracy": 0.0,
+          "cloud_share": 1.0,
+          "label_cloud_share": 1.0,
+          "cloud_recall": 1.0,
+          "local_recall": null,
+          "confusion": {
+            "local->local": 0,
+            "local->cloud": 0,
+            "cloud->local": 0,
+            "cloud->cloud": 7
+          },
+          "unreliable_share": 1.0,
+          "evidence_head_accuracy": 0.857
+        },
+        "harvard_cs50x/logistics": {
+          "n": 7,
+          "accuracy": 0.857,
+          "head_only_accuracy": 1.0,
+          "cloud_share": 0.143,
+          "label_cloud_share": 0.0,
+          "cloud_recall": null,
+          "local_recall": 0.857,
+          "confusion": {
+            "local->local": 6,
+            "local->cloud": 1,
+            "cloud->local": 0,
+            "cloud->cloud": 0
+          },
+          "unreliable_share": 0.143,
+          "evidence_head_accuracy": 0.857
+        },
+        "mit_6_002_circuits/application": {
+          "n": 9,
+          "accuracy": 0.222,
+          "head_only_accuracy": 0.778,
+          "cloud_share": 0.778,
+          "label_cloud_share": 0.0,
+          "cloud_recall": null,
+          "local_recall": 0.222,
+          "confusion": {
+            "local->local": 2,
+            "local->cloud": 7,
+            "cloud->local": 0,
+            "cloud->cloud": 0
+          },
+          "unreliable_share": 0.556,
+          "evidence_head_accuracy": 0.778
+        },
+        "mit_6_002_circuits/concept": {
+          "n": 13,
+          "accuracy": 0.692,
+          "head_only_accuracy": 1.0,
+          "cloud_share": 0.308,
+          "label_cloud_share": 0.0,
+          "cloud_recall": null,
+          "local_recall": 0.692,
+          "confusion": {
+            "local->local": 9,
+            "local->cloud": 4,
+            "cloud->local": 0,
+            "cloud->cloud": 0
+          },
+          "unreliable_share": 0.308,
+          "evidence_head_accuracy": 1.0
+        },
+        "mit_6_002_circuits/hard": {
+          "n": 6,
+          "accuracy": 0.833,
+          "head_only_accuracy": 0.833,
+          "cloud_share": 0.833,
+          "label_cloud_share": 1.0,
+          "cloud_recall": 0.833,
+          "local_recall": null,
+          "confusion": {
+            "local->local": 0,
+            "local->cloud": 0,
+            "cloud->local": 1,
+            "cloud->cloud": 5
+          },
+          "unreliable_share": 0.5,
+          "evidence_head_accuracy": 1.0
+        },
+        "mit_6_002_circuits/logistics": {
+          "n": 7,
+          "accuracy": 1.0,
+          "head_only_accuracy": 1.0,
+          "cloud_share": 0.0,
+          "label_cloud_share": 0.0,
+          "cloud_recall": null,
+          "local_recall": 1.0,
+          "confusion": {
+            "local->local": 7,
+            "local->cloud": 0,
+            "cloud->local": 0,
+            "cloud->cloud": 0
+          },
+          "unreliable_share": 0.0,
+          "evidence_head_accuracy": 0.286
+        },
+        "mit_6_006_algorithms/application": {
+          "n": 9,
+          "accuracy": 0.0,
+          "head_only_accuracy": 0.889,
+          "cloud_share": 1.0,
+          "label_cloud_share": 0.0,
+          "cloud_recall": null,
+          "local_recall": 0.0,
+          "confusion": {
+            "local->local": 0,
+            "local->cloud": 9,
+            "cloud->local": 0,
+            "cloud->cloud": 0
+          },
+          "unreliable_share": 1.0,
+          "evidence_head_accuracy": 0.889
+        },
+        "mit_6_006_algorithms/concept": {
+          "n": 13,
+          "accuracy": 0.615,
+          "head_only_accuracy": 1.0,
+          "cloud_share": 0.385,
+          "label_cloud_share": 0.0,
+          "cloud_recall": null,
+          "local_recall": 0.615,
+          "confusion": {
+            "local->local": 8,
+            "local->cloud": 5,
+            "cloud->local": 0,
+            "cloud->cloud": 0
+          },
+          "unreliable_share": 0.385,
+          "evidence_head_accuracy": 1.0
+        },
+        "mit_6_006_algorithms/hard": {
+          "n": 7,
+          "accuracy": 0.857,
+          "head_only_accuracy": 0.286,
+          "cloud_share": 0.857,
+          "label_cloud_share": 1.0,
+          "cloud_recall": 0.857,
+          "local_recall": null,
+          "confusion": {
+            "local->local": 0,
+            "local->cloud": 0,
+            "cloud->local": 1,
+            "cloud->cloud": 6
+          },
+          "unreliable_share": 0.857,
+          "evidence_head_accuracy": 1.0
+        },
+        "mit_6_006_algorithms/logistics": {
+          "n": 7,
+          "accuracy": 0.857,
+          "head_only_accuracy": 1.0,
+          "cloud_share": 0.143,
+          "label_cloud_share": 0.0,
+          "cloud_recall": null,
+          "local_recall": 0.857,
+          "confusion": {
+            "local->local": 6,
+            "local->cloud": 1,
+            "cloud->local": 0,
+            "cloud->cloud": 0
+          },
+          "unreliable_share": 0.143,
+          "evidence_head_accuracy": 0.571
+        },
+        "mit_res_6_007_signals/application": {
+          "n": 9,
+          "accuracy": 0.333,
+          "head_only_accuracy": 0.889,
+          "cloud_share": 0.667,
+          "label_cloud_share": 0.0,
+          "cloud_recall": null,
+          "local_recall": 0.333,
+          "confusion": {
+            "local->local": 3,
+            "local->cloud": 6,
+            "cloud->local": 0,
+            "cloud->cloud": 0
+          },
+          "unreliable_share": 0.667,
+          "evidence_head_accuracy": 1.0
+        },
+        "mit_res_6_007_signals/concept": {
+          "n": 13,
+          "accuracy": 0.769,
+          "head_only_accuracy": 1.0,
+          "cloud_share": 0.231,
+          "label_cloud_share": 0.0,
+          "cloud_recall": null,
+          "local_recall": 0.769,
+          "confusion": {
+            "local->local": 10,
+            "local->cloud": 3,
+            "cloud->local": 0,
+            "cloud->cloud": 0
+          },
+          "unreliable_share": 0.231,
+          "evidence_head_accuracy": 1.0
+        },
+        "mit_res_6_007_signals/hard": {
+          "n": 7,
+          "accuracy": 0.429,
+          "head_only_accuracy": 0.286,
+          "cloud_share": 0.429,
+          "label_cloud_share": 1.0,
+          "cloud_recall": 0.429,
+          "local_recall": null,
+          "confusion": {
+            "local->local": 0,
+            "local->cloud": 0,
+            "cloud->local": 4,
+            "cloud->cloud": 3
+          },
+          "unreliable_share": 0.143,
+          "evidence_head_accuracy": 1.0
+        },
+        "mit_res_6_007_signals/logistics": {
+          "n": 7,
+          "accuracy": 0.857,
+          "head_only_accuracy": 1.0,
+          "cloud_share": 0.143,
+          "label_cloud_share": 0.0,
+          "cloud_recall": null,
+          "local_recall": 0.857,
+          "confusion": {
+            "local->local": 6,
+            "local->cloud": 1,
+            "cloud->local": 0,
+            "cloud->cloud": 0
+          },
+          "unreliable_share": 0.143,
+          "evidence_head_accuracy": 0.714
+        }
+      },
+      "wrong": [
+        {
+          "id": "circ-002",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.014,
+          "nearest_similarity": 0.243
+        },
+        {
+          "id": "circ-007",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.004,
+          "nearest_similarity": 0.147
+        },
+        {
+          "id": "circ-009",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.015,
+          "nearest_similarity": 0.219
+        },
+        {
+          "id": "circ-013",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.282,
+          "nearest_similarity": 0.248
+        },
+        {
+          "id": "circ-014",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.006,
+          "nearest_similarity": 0.218
+        },
+        {
+          "id": "circ-017",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.027,
+          "nearest_similarity": 0.237
+        },
+        {
+          "id": "circ-018",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.094,
+          "nearest_similarity": 0.188
+        },
+        {
+          "id": "circ-019",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.485,
+          "nearest_similarity": 0.221
+        },
+        {
+          "id": "circ-020",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: capability score",
+          "cloud_probability": 0.644,
+          "nearest_similarity": 0.369
+        },
+        {
+          "id": "circ-021",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: capability score",
+          "cloud_probability": 0.64,
+          "nearest_similarity": 0.365
+        },
+        {
+          "id": "circ-022",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.005,
+          "nearest_similarity": 0.188
+        },
+        {
+          "id": "circ-028",
+          "label": "cloud",
+          "route": "local",
+          "reason": "local",
+          "cloud_probability": 0.087,
+          "nearest_similarity": 0.283
+        },
+        {
+          "id": "sig-002",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.002,
+          "nearest_similarity": 0.237
+        },
+        {
+          "id": "sig-004",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.006,
+          "nearest_similarity": 0.249
+        },
+        {
+          "id": "sig-011",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.002,
+          "nearest_similarity": 0.216
+        },
+        {
+          "id": "sig-014",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.003,
+          "nearest_similarity": 0.234
+        },
+        {
+          "id": "sig-016",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.04,
+          "nearest_similarity": 0.168
+        },
+        {
+          "id": "sig-018",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.044,
+          "nearest_similarity": 0.244
+        },
+        {
+          "id": "sig-019",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.022,
+          "nearest_similarity": 0.226
+        },
+        {
+          "id": "sig-020",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.003,
+          "nearest_similarity": 0.192
+        },
+        {
+          "id": "sig-022",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.691,
+          "nearest_similarity": 0.236
+        },
+        {
+          "id": "sig-023",
+          "label": "cloud",
+          "route": "local",
+          "reason": "local",
+          "cloud_probability": 0.044,
+          "nearest_similarity": 0.261
+        },
+        {
+          "id": "sig-026",
+          "label": "cloud",
+          "route": "local",
+          "reason": "local",
+          "cloud_probability": 0.178,
+          "nearest_similarity": 0.312
+        },
+        {
+          "id": "sig-028",
+          "label": "cloud",
+          "route": "local",
+          "reason": "local",
+          "cloud_probability": 0.131,
+          "nearest_similarity": 0.257
+        },
+        {
+          "id": "sig-030",
+          "label": "cloud",
+          "route": "local",
+          "reason": "local",
+          "cloud_probability": 0.065,
+          "nearest_similarity": 0.303
+        },
+        {
+          "id": "sig-035",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.118,
+          "nearest_similarity": 0.242
+        },
+        {
+          "id": "alg-002",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.002,
+          "nearest_similarity": 0.229
+        },
+        {
+          "id": "alg-007",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.003,
+          "nearest_similarity": 0.233
+        },
+        {
+          "id": "alg-008",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.026,
+          "nearest_similarity": 0.228
+        },
+        {
+          "id": "alg-010",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.024,
+          "nearest_similarity": 0.249
+        },
+        {
+          "id": "alg-011",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.486,
+          "nearest_similarity": 0.166
+        },
+        {
+          "id": "alg-014",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.374,
+          "nearest_similarity": 0.216
+        },
+        {
+          "id": "alg-015",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.388,
+          "nearest_similarity": 0.205
+        },
+        {
+          "id": "alg-016",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.013,
+          "nearest_similarity": 0.23
+        },
+        {
+          "id": "alg-017",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.001,
+          "nearest_similarity": 0.223
+        },
+        {
+          "id": "alg-018",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.296,
+          "nearest_similarity": 0.247
+        },
+        {
+          "id": "alg-019",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.01,
+          "nearest_similarity": 0.139
+        },
+        {
+          "id": "alg-020",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.086,
+          "nearest_similarity": 0.166
+        },
+        {
+          "id": "alg-021",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.023,
+          "nearest_similarity": 0.211
+        },
+        {
+          "id": "alg-022",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.95,
+          "nearest_similarity": 0.165
+        },
+        {
+          "id": "alg-029",
+          "label": "cloud",
+          "route": "local",
+          "reason": "local",
+          "cloud_probability": 0.238,
+          "nearest_similarity": 0.272
+        },
+        {
+          "id": "alg-034",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.007,
+          "nearest_similarity": 0.203
+        },
+        {
+          "id": "cs50-005",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.006,
+          "nearest_similarity": 0.221
+        },
+        {
+          "id": "cs50-007",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.001,
+          "nearest_similarity": 0.226
+        },
+        {
+          "id": "cs50-009",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.022,
+          "nearest_similarity": 0.124
+        },
+        {
+          "id": "cs50-010",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.018,
+          "nearest_similarity": 0.214
+        },
+        {
+          "id": "cs50-011",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.003,
+          "nearest_similarity": 0.201
+        },
+        {
+          "id": "cs50-012",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.001,
+          "nearest_similarity": 0.211
+        },
+        {
+          "id": "cs50-013",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.001,
+          "nearest_similarity": 0.21
+        },
+        {
+          "id": "cs50-015",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.004,
+          "nearest_similarity": 0.14
+        },
+        {
+          "id": "cs50-016",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.002,
+          "nearest_similarity": 0.161
+        },
+        {
+          "id": "cs50-018",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.25,
+          "nearest_similarity": 0.222
+        },
+        {
+          "id": "cs50-019",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.015,
+          "nearest_similarity": 0.134
+        },
+        {
+          "id": "cs50-020",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.0,
+          "nearest_similarity": 0.231
+        },
+        {
+          "id": "cs50-021",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.166,
+          "nearest_similarity": 0.213
+        },
+        {
+          "id": "cs50-035",
+          "label": "local",
+          "route": "cloud",
+          "reason": "cloud: unreliable (outside training support)",
+          "cloud_probability": 0.048,
+          "nearest_similarity": 0.186
+        }
+      ]
+    }
+  },
+  "experiment": {
+    "new_train": 92,
+    "new_test": 58,
+    "seed_train": 403,
+    "seed_test": 97,
+    "methods": {
+      "lr": {
+        "seed_only": {
+          "new_test": {
+            "n": 58,
+            "accuracy": 0.552,
+            "head_only_accuracy": 0.879,
+            "cloud_share": 0.517,
+            "label_cloud_share": 0.172,
+            "cloud_recall": 0.7,
+            "local_recall": 0.521,
+            "confusion": {
+              "local->local": 25,
+              "local->cloud": 23,
+              "cloud->local": 3,
+              "cloud->cloud": 7
+            },
+            "unreliable_share": 0.5,
+            "evidence_head_accuracy": 0.879
+          },
+          "seed_test": {
+            "n": 97,
+            "accuracy": 0.959,
+            "head_only_accuracy": 0.959,
+            "cloud_share": 0.268,
+            "label_cloud_share": 0.268,
+            "cloud_recall": 0.923,
+            "local_recall": 0.972,
+            "confusion": {
+              "local->local": 69,
+              "local->cloud": 2,
+              "cloud->local": 2,
+              "cloud->cloud": 24
+            },
+            "unreliable_share": 0.0,
+            "evidence_head_accuracy": 0.866
+          }
+        },
+        "seed_plus_new": {
+          "new_test": {
+            "n": 58,
+            "accuracy": 0.862,
+            "head_only_accuracy": 0.914,
+            "cloud_share": 0.172,
+            "label_cloud_share": 0.172,
+            "cloud_recall": 0.6,
+            "local_recall": 0.917,
+            "confusion": {
+              "local->local": 44,
+              "local->cloud": 4,
+              "cloud->local": 4,
+              "cloud->cloud": 6
+            },
+            "unreliable_share": 0.034,
+            "evidence_head_accuracy": 0.931
+          },
+          "seed_test": {
+            "n": 97,
+            "accuracy": 0.959,
+            "head_only_accuracy": 0.959,
+            "cloud_share": 0.268,
+            "label_cloud_share": 0.268,
+            "cloud_recall": 0.923,
+            "local_recall": 0.972,
+            "confusion": {
+              "local->local": 69,
+              "local->cloud": 2,
+              "cloud->local": 2,
+              "cloud->cloud": 24
+            },
+            "unreliable_share": 0.0,
+            "evidence_head_accuracy": 0.856
+          }
+        }
+      },
+      "svm": {
+        "seed_only": {
+          "new_test": {
+            "n": 58,
+            "accuracy": 0.552,
+            "head_only_accuracy": 0.828,
+            "cloud_share": 0.552,
+            "label_cloud_share": 0.172,
+            "cloud_recall": 0.8,
+            "local_recall": 0.5,
+            "confusion": {
+              "local->local": 24,
+              "local->cloud": 24,
+              "cloud->local": 2,
+              "cloud->cloud": 8
+            },
+            "unreliable_share": 0.5,
+            "evidence_head_accuracy": 0.879
+          },
+          "seed_test": {
+            "n": 97,
+            "accuracy": 0.959,
+            "head_only_accuracy": 0.959,
+            "cloud_share": 0.268,
+            "label_cloud_share": 0.268,
+            "cloud_recall": 0.923,
+            "local_recall": 0.972,
+            "confusion": {
+              "local->local": 69,
+              "local->cloud": 2,
+              "cloud->local": 2,
+              "cloud->cloud": 24
+            },
+            "unreliable_share": 0.0,
+            "evidence_head_accuracy": 0.876
+          }
+        },
+        "seed_plus_new": {
+          "new_test": {
+            "n": 58,
+            "accuracy": 0.845,
+            "head_only_accuracy": 0.897,
+            "cloud_share": 0.19,
+            "label_cloud_share": 0.172,
+            "cloud_recall": 0.6,
+            "local_recall": 0.896,
+            "confusion": {
+              "local->local": 43,
+              "local->cloud": 5,
+              "cloud->local": 4,
+              "cloud->cloud": 6
+            },
+            "unreliable_share": 0.034,
+            "evidence_head_accuracy": 0.931
+          },
+          "seed_test": {
+            "n": 97,
+            "accuracy": 0.969,
+            "head_only_accuracy": 0.969,
+            "cloud_share": 0.258,
+            "label_cloud_share": 0.268,
+            "cloud_recall": 0.923,
+            "local_recall": 0.986,
+            "confusion": {
+              "local->local": 70,
+              "local->cloud": 1,
+              "cloud->local": 2,
+              "cloud->cloud": 24
+            },
+            "unreliable_share": 0.0,
+            "evidence_head_accuracy": 0.866
+          }
+        }
+      }
+    },
+    "leave_one_pack_out": {
+      "lr": {
+        "harvard_cs50x": {
+          "n": 36,
+          "accuracy": 0.694,
+          "head_only_accuracy": 0.833,
+          "cloud_share": 0.167,
+          "label_cloud_share": 0.194,
+          "cloud_recall": 0.143,
+          "local_recall": 0.828,
+          "confusion": {
+            "local->local": 24,
+            "local->cloud": 5,
+            "cloud->local": 6,
+            "cloud->cloud": 1
+          },
+          "unreliable_share": 0.167,
+          "evidence_head_accuracy": 0.944
+        },
+        "mit_6_002_circuits": {
+          "n": 35,
+          "accuracy": 0.857,
+          "head_only_accuracy": 0.943,
+          "cloud_share": 0.314,
+          "label_cloud_share": 0.171,
+          "cloud_recall": 1.0,
+          "local_recall": 0.828,
+          "confusion": {
+            "local->local": 24,
+            "local->cloud": 5,
+            "cloud->local": 0,
+            "cloud->cloud": 6
+          },
+          "unreliable_share": 0.114,
+          "evidence_head_accuracy": 0.914
+        },
+        "mit_6_006_algorithms": {
+          "n": 36,
+          "accuracy": 0.861,
+          "head_only_accuracy": 0.944,
+          "cloud_share": 0.278,
+          "label_cloud_share": 0.194,
+          "cloud_recall": 0.857,
+          "local_recall": 0.862,
+          "confusion": {
+            "local->local": 25,
+            "local->cloud": 4,
+            "cloud->local": 1,
+            "cloud->cloud": 6
+          },
+          "unreliable_share": 0.111,
+          "evidence_head_accuracy": 0.944
+        },
+        "mit_res_6_007_signals": {
+          "n": 36,
+          "accuracy": 0.833,
+          "head_only_accuracy": 0.917,
+          "cloud_share": 0.25,
+          "label_cloud_share": 0.194,
+          "cloud_recall": 0.714,
+          "local_recall": 0.862,
+          "confusion": {
+            "local->local": 25,
+            "local->cloud": 4,
+            "cloud->local": 2,
+            "cloud->cloud": 5
+          },
+          "unreliable_share": 0.083,
+          "evidence_head_accuracy": 0.972
+        }
+      },
+      "svm": {
+        "harvard_cs50x": {
+          "n": 36,
+          "accuracy": 0.694,
+          "head_only_accuracy": 0.833,
+          "cloud_share": 0.167,
+          "label_cloud_share": 0.194,
+          "cloud_recall": 0.143,
+          "local_recall": 0.828,
+          "confusion": {
+            "local->local": 24,
+            "local->cloud": 5,
+            "cloud->local": 6,
+            "cloud->cloud": 1
+          },
+          "unreliable_share": 0.167,
+          "evidence_head_accuracy": 0.944
+        },
+        "mit_6_002_circuits": {
+          "n": 35,
+          "accuracy": 0.886,
+          "head_only_accuracy": 0.971,
+          "cloud_share": 0.286,
+          "label_cloud_share": 0.171,
+          "cloud_recall": 1.0,
+          "local_recall": 0.862,
+          "confusion": {
+            "local->local": 25,
+            "local->cloud": 4,
+            "cloud->local": 0,
+            "cloud->cloud": 6
+          },
+          "unreliable_share": 0.114,
+          "evidence_head_accuracy": 0.914
+        },
+        "mit_6_006_algorithms": {
+          "n": 36,
+          "accuracy": 0.861,
+          "head_only_accuracy": 0.944,
+          "cloud_share": 0.278,
+          "label_cloud_share": 0.194,
+          "cloud_recall": 0.857,
+          "local_recall": 0.862,
+          "confusion": {
+            "local->local": 25,
+            "local->cloud": 4,
+            "cloud->local": 1,
+            "cloud->cloud": 6
+          },
+          "unreliable_share": 0.111,
+          "evidence_head_accuracy": 0.917
+        },
+        "mit_res_6_007_signals": {
+          "n": 36,
+          "accuracy": 0.833,
+          "head_only_accuracy": 0.917,
+          "cloud_share": 0.25,
+          "label_cloud_share": 0.194,
+          "cloud_recall": 0.714,
+          "local_recall": 0.862,
+          "confusion": {
+            "local->local": 25,
+            "local->cloud": 4,
+            "cloud->local": 2,
+            "cloud->cloud": 5
+          },
+          "unreliable_share": 0.083,
+          "evidence_head_accuracy": 0.972
+        }
+      }
+    }
+  }
+}

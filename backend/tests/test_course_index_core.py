@@ -1,7 +1,7 @@
 """Stand-in v4 per-course retriever tests; no real course files or student data."""
 import pytest
 
-from app.rag.course_retriever import IndexedCourseRetriever
+from app.rag.course_retriever import COURSE_LEVEL_WEIGHT, IndexedCourseRetriever
 from app.rag.documents import DocumentError
 
 
@@ -190,3 +190,17 @@ def test_title_only_slides_are_course_passages(tmp_path):
     rag.rebuild(101)
     hit = rag.retrieve(101, 7, "Zephyrlens filters")[0]
     assert "Zephyrlens" in hit.text and hit.metadata["slide"] == 2
+
+
+def test_scoped_retrieval_prefers_the_module_over_equal_course_level_text(tmp_path):
+    same = "Glimmerwave sampling explained with a worked example."
+    _material(tmp_path, 303, "_course", "homework.md", f"# Homework\n{same}")
+    _material(tmp_path, 303, 9, "lecture.md", f"# Lecture\n{same}")
+    rag = IndexedCourseRetriever(tmp_path, scan=lambda _: True)
+    rag.rebuild(303)
+    scoped = rag.retrieve(303, 9, "Glimmerwave sampling", 2)
+    assert [x.source for x in scoped] == ["course/303/9/lecture.md", "course/303/_course/homework.md"]
+    whole = {x.source: x.score for x in rag.retrieve(303, None, "Glimmerwave sampling", 2)}
+    homework = "course/303/_course/homework.md"
+    assert scoped[1].score == pytest.approx(whole[homework] * COURSE_LEVEL_WEIGHT, abs=1e-5)  # weighted down
+    assert whole[homework] > 0.9 * whole["course/303/9/lecture.md"]  # course-wide: not weighted
