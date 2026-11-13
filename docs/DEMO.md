@@ -42,8 +42,8 @@ Default packs, one per area: `mit_hst151_pharmacology`, `mit_7_016_intro_biology
 
 It ends with a table: course, modules, uploaded, refused, index version. With the Docker Compose stack, run
 the script **on the host** from a checkout of the repository (the image holds neither the script nor the
-packs), pointing it at the stack's proxy, for example `--base-url https://localhost`; it only uses the HTTP
-API.
+packs), pointing it at the stack's proxy: `--base-url http://localhost:8080` for the local stack,
+`https://<domain>` in production; it only uses the HTTP API.
 
 The six-minute script below is the older single-course (high blood pressure) demo.
 
