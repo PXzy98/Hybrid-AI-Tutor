@@ -5,6 +5,7 @@ from app.core.schemas import RequestContext
 from app.pipeline.base import BaseStep
 from app.pipeline.settings_view import routing_threshold
 from app.pipeline.steps.analyze_route import route_input
+from app.platform import course_scope
 
 
 @steps.register("retrieve")
@@ -34,14 +35,15 @@ class RetrieveStep(BaseStep):
         t0 = perf_counter()
         await ctx.report("retrieval", "running", "Retrieving course material.")
         try:
-            ctx.passages = await asyncio.to_thread(
-                self.services.retriever.retrieve,
-                route_input(ctx).contextual_question,
-                ctx.request.topic,
-                cfg.rag.k,
-                ctx.understanding.kc_ids if ctx.understanding and ctx.understanding.kc_ids else None,
-                learner.focus_level if learner else None,
-            )
+            with course_scope.question_kind(ctx.question_type):  # logistics: course-level files first
+                ctx.passages = await asyncio.to_thread(
+                    self.services.retriever.retrieve,
+                    route_input(ctx).contextual_question,
+                    ctx.request.topic,
+                    cfg.rag.k,
+                    ctx.understanding.kc_ids if ctx.understanding and ctx.understanding.kc_ids else None,
+                    learner.focus_level if learner else None,
+                )
             ctx.retrieval_status = "returned" if ctx.passages else "empty"
             await ctx.report(
                 "retrieval",

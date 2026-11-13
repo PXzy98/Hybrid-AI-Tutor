@@ -26,6 +26,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from app.core.schemas import Chunk
 from app.rag.documents import SUFFIXES, DocumentError, extract_text
 from app.rag.medical_hybrid import _chunk_section, _segments, _slide_sections
+from app.rag.tables import split_tables
 
 MAX_COURSE_CHARS = 2_000_000
 MAX_FILES = 500
@@ -34,6 +35,9 @@ MAX_FILES = 500
 # eight open course packs (eval/course-rag-packs, S11): scoped hit@1 0.82 -> 0.92 and hit@4 0.94 -> 0.97,
 # with logistics questions asked from inside a module unchanged (hit@4 0.87 at weights 1.0 to 0.55).
 COURSE_LEVEL_WEIGHT = 0.55
+# Logistics questions search the course-level files first (T5): the weight above is not applied and their
+# scores are multiplied by this boost. Chosen on the same packs with the question types of S11.
+LOGISTICS_COURSE_LEVEL_BOOST = 1.5
 
 # Z11 will supply a wrapper around scan_document(text, privacy_profile(course_type)).
 # It returns True only when the full extracted document is accepted for indexing.
@@ -136,27 +140,33 @@ class IndexedCourseRetriever:
             total += len(content.replace("\f", ""))
             if total > MAX_COURSE_CHARS:
                 raise DocumentError("The course exceeds the two-million-character text budget.")
-            sections = content.split("\f") if pdf or pptx else [content]
-            for number, body in enumerate(sections, 1):
+            pages = content.split("\f") if pdf or pptx else [content]
+            for number, body in enumerate(pages, 1):
+                rows: list[tuple[str, str]] = []
+                if not (pdf or pptx):
+                    body, rows = split_tables(body)  # one passage per table row, with its column names
                 sections = _slide_sections(body) if pptx else _segments(body, course_headings=True)
+                texts = []
                 for heading, sentences in sections:
                     wrapped = [line for sentence in sentences for line in textwrap.wrap(
                         sentence, width=650, break_long_words=True, break_on_hyphens=False,
                     )]
-                    for text in _chunk_section(heading, wrapped, min_chars=1):
-                        meta = {"course_id": course_id, "module_id": module_id, "origin": "uploaded"}
-                        if pdf:
-                            meta["page"] = number
-                        elif pptx:
-                            meta["slide"] = number
-                        source_module = str(module_id) if module_id is not None else "_course"
-                        kc_ids, level = (self.kc_tagger(course_id, module_id, text)
-                                         if self.kc_tagger else ([], None))
-                        passages.append(Chunk(
-                            text=text, source=f"course/{course_id}/{source_module}/{path.name}",
-                            topic=f"course:{course_id}", score=0, metadata=meta,
-                            kc_ids=list(kc_ids), level=level,
-                        ))
+                    texts += _chunk_section(heading, wrapped, min_chars=1)
+                texts += [f"{heading}\n{row}" for heading, row in rows]
+                for text in texts:
+                    meta = {"course_id": course_id, "module_id": module_id, "origin": "uploaded"}
+                    if pdf:
+                        meta["page"] = number
+                    elif pptx:
+                        meta["slide"] = number
+                    source_module = str(module_id) if module_id is not None else "_course"
+                    kc_ids, level = (self.kc_tagger(course_id, module_id, text)
+                                     if self.kc_tagger else ([], None))
+                    passages.append(Chunk(
+                        text=text, source=f"course/{course_id}/{source_module}/{path.name}",
+                        topic=f"course:{course_id}", score=0, metadata=meta,
+                        kc_ids=list(kc_ids), level=level,
+                    ))
         return passages
 
     def rebuild(self, course_id: int) -> int:
@@ -249,8 +259,12 @@ class IndexedCourseRetriever:
         self._cache[course_id] = result
         return result
 
-    def retrieve(self, course_id: int, module_id: int | None, query: str, k: int = 4) -> list[Chunk]:
-        """Retrieve only from this course and, when selected, the active module + course-level files."""
+    def retrieve(self, course_id: int, module_id: int | None, query: str, k: int = 4,
+                 question_kind: str = "concept") -> list[Chunk]:
+        """Retrieve only from this course and, when selected, the active module + course-level files.
+
+        A `logistics` question (deadlines, grading, schedule; T5) is about the course itself: its course-level
+        files are not weighted down and get LOGISTICS_COURSE_LEVEL_BOOST, with or without a chosen module."""
         if k <= 0 or not query.strip():
             return []
         if module_id is not None and (type(module_id) is not int or module_id <= 0):
@@ -267,8 +281,11 @@ class IndexedCourseRetriever:
                     belongs = module_id is None or chunk.metadata["module_id"] in (None, module_id)
                     if belongs and (word[i] > 0.001 or char[i] >= 0.70):
                         score = 0.75 * word[i] + 0.25 * char[i]
-                        if module_id is not None and chunk.metadata["module_id"] is None:
-                            score *= COURSE_LEVEL_WEIGHT  # the chosen module's own material first
+                        if chunk.metadata["module_id"] is None:
+                            if question_kind == "logistics":
+                                score *= LOGISTICS_COURSE_LEVEL_BOOST
+                            elif module_id is not None:
+                                score *= COURSE_LEVEL_WEIGHT  # the chosen module's own material first
                         accepted.append((i, score))
                 ranked = sorted(accepted, key=lambda item: (-item[1], item[0]))[:k]
                 return [snap.passages[i].model_copy(update={"score": round(float(score), 6)})

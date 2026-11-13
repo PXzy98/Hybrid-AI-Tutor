@@ -46,6 +46,20 @@ def use(scope: CourseScope):
         _current.reset(token)
 
 
+_question_kind: ContextVar[str] = ContextVar("question_kind", default="concept")
+
+
+@contextlib.contextmanager
+def question_kind(kind: str):
+    """Tell the course retriever what the request asks (T5): "logistics" searches the course-level files
+    (syllabus, calendar, assignments) first. Like `use`, it follows the request into worker threads."""
+    token = _question_kind.set(kind)
+    try:
+        yield
+    finally:
+        _question_kind.reset(token)
+
+
 class CourseModuleRetriever:
     """The `Retriever` interface over the course index (S4): the topic is the module code; a question
     without a module searches the whole course. The demo course without an index of its own falls back to
@@ -59,7 +73,9 @@ class CourseModuleRetriever:
         chunks: list[Chunk] = []
         if indexed is not None:
             try:
-                chunks = indexed.retrieve(self.course_id, self.modules.get(topic), query, k)
+                # Retrievers that predate T5 take no question kind: only a logistics question passes it.
+                extra = {"question_kind": "logistics"} if _question_kind.get() == "logistics" else {}
+                chunks = indexed.retrieve(self.course_id, self.modules.get(topic), query, k, **extra)
             except Exception:  # noqa: BLE001 - no published index yet
                 chunks = []
         if not chunks and self.course_id == self.services.content.course_id and topic in self.modules:
