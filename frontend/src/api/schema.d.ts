@@ -1975,14 +1975,21 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /** AcceptIn */
-        AcceptIn: {
+        /** AdminConfig */
+        AdminConfig: {
+            values: components["schemas"]["RuntimeConfig"];
+            options: components["schemas"]["ConfigOptions"];
+            /** History */
+            history: components["schemas"]["ConfigChange"][];
+        };
+        /** AiDraftAcceptIn */
+        AiDraftAcceptIn: {
             /** Module Id */
             module_id?: number | null;
         };
-        /** AcceptOut */
-        AcceptOut: {
-            draft: components["schemas"]["app__api__v2__ai_drafts__DraftOut"];
+        /** AiDraftAcceptOut */
+        AiDraftAcceptOut: {
+            draft: components["schemas"]["AiDraftOut"];
             /** Created */
             created: {
                 [key: string]: number[];
@@ -1990,12 +1997,93 @@ export interface components {
             /** Rebuild Job Id */
             rebuild_job_id?: number | null;
         };
-        /** AdminConfig */
-        AdminConfig: {
-            values: components["schemas"]["RuntimeConfig"];
-            options: components["schemas"]["ConfigOptions"];
-            /** History */
-            history: components["schemas"]["ConfigChange"][];
+        /** AiDraftIn */
+        AiDraftIn: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "project_ideas" | "sample_proposal" | "faq" | "kcs" | "check_items" | "misconceptions";
+            /** Module Id */
+            module_id?: number | null;
+            /**
+             * Focus
+             * @default
+             */
+            focus?: string;
+        };
+        /** AiDraftOut */
+        AiDraftOut: {
+            /** Id */
+            id: number;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "project_ideas" | "sample_proposal" | "faq" | "kcs" | "check_items" | "misconceptions";
+            /** Module Id */
+            module_id: number | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "generating" | "draft" | "accepted" | "discarded" | "failed";
+            /** Content */
+            content: {
+                [key: string]: unknown;
+            };
+            /** Cited Sources */
+            cited_sources: string[];
+            /** Error */
+            error: string | null;
+            /** Created By */
+            created_by: number | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Job Id */
+            job_id?: number | null;
+        };
+        /** AiDraftPatch */
+        AiDraftPatch: {
+            /** Content */
+            content: {
+                [key: string]: unknown;
+            };
+        };
+        /** AiDraftSummary */
+        AiDraftSummary: {
+            /** Id */
+            id: number;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "project_ideas" | "sample_proposal" | "faq" | "kcs" | "check_items" | "misconceptions";
+            /** Module Id */
+            module_id: number | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "generating" | "draft" | "accepted" | "discarded" | "failed";
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
         };
         /** ApplyStatusOut */
         ApplyStatusOut: {
@@ -2540,39 +2628,22 @@ export interface components {
              */
             choice: "A" | "B" | "C" | "D";
         };
-        /** DraftPatch */
-        DraftPatch: {
-            /** Content */
-            content: {
-                [key: string]: unknown;
-            };
+        /** DraftIn */
+        DraftIn: {
+            /**
+             * Count
+             * @default 5
+             */
+            count?: number;
+            /** Kinds */
+            kinds?: ("mcq" | "true_false")[];
+            /** Kc Codes */
+            kc_codes?: string[] | null;
         };
-        /** DraftSummary */
-        DraftSummary: {
-            /** Id */
-            id: number;
-            /**
-             * Kind
-             * @enum {string}
-             */
-            kind: "project_ideas" | "sample_proposal" | "faq" | "kcs" | "check_items" | "misconceptions";
-            /** Module Id */
-            module_id: number | null;
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "generating" | "draft" | "accepted" | "discarded" | "failed";
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-            /**
-             * Updated At
-             * Format: date-time
-             */
-            updated_at: string;
+        /** DraftOut */
+        DraftOut: {
+            /** Job Id */
+            job_id: number;
         };
         /** EndTermIn */
         EndTermIn: {
@@ -4559,77 +4630,6 @@ export interface components {
              * Format: date-time
              */
             closes_at: string;
-        };
-        /** DraftIn */
-        app__api__v2__ai_drafts__DraftIn: {
-            /**
-             * Kind
-             * @enum {string}
-             */
-            kind: "project_ideas" | "sample_proposal" | "faq" | "kcs" | "check_items" | "misconceptions";
-            /** Module Id */
-            module_id?: number | null;
-            /**
-             * Focus
-             * @default
-             */
-            focus?: string;
-        };
-        /** DraftOut */
-        app__api__v2__ai_drafts__DraftOut: {
-            /** Id */
-            id: number;
-            /**
-             * Kind
-             * @enum {string}
-             */
-            kind: "project_ideas" | "sample_proposal" | "faq" | "kcs" | "check_items" | "misconceptions";
-            /** Module Id */
-            module_id: number | null;
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "generating" | "draft" | "accepted" | "discarded" | "failed";
-            /** Content */
-            content: {
-                [key: string]: unknown;
-            };
-            /** Cited Sources */
-            cited_sources: string[];
-            /** Error */
-            error: string | null;
-            /** Created By */
-            created_by: number | null;
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-            /**
-             * Updated At
-             * Format: date-time
-             */
-            updated_at: string;
-            /** Job Id */
-            job_id?: number | null;
-        };
-        /** DraftIn */
-        app__api__v2__quizzes__DraftIn: {
-            /**
-             * Count
-             * @default 5
-             */
-            count?: number;
-            /** Kinds */
-            kinds?: ("mcq" | "true_false")[];
-            /** Kc Codes */
-            kc_codes?: string[] | null;
-        };
-        /** DraftOut */
-        app__api__v2__quizzes__DraftOut: {
-            /** Job Id */
-            job_id: number;
         };
     };
     responses: never;
@@ -7972,7 +7972,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DraftSummary"][];
+                    "application/json": components["schemas"]["AiDraftSummary"][];
                 };
             };
             /** @description Validation Error */
@@ -7997,7 +7997,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["app__api__v2__ai_drafts__DraftIn"];
+                "application/json": components["schemas"]["AiDraftIn"];
             };
         };
         responses: {
@@ -8007,7 +8007,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["app__api__v2__ai_drafts__DraftOut"];
+                    "application/json": components["schemas"]["AiDraftOut"];
                 };
             };
             /** @description Validation Error */
@@ -8039,7 +8039,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["app__api__v2__ai_drafts__DraftOut"];
+                    "application/json": components["schemas"]["AiDraftOut"];
                 };
             };
             /** @description Validation Error */
@@ -8095,7 +8095,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["DraftPatch"];
+                "application/json": components["schemas"]["AiDraftPatch"];
             };
         };
         responses: {
@@ -8105,7 +8105,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["app__api__v2__ai_drafts__DraftOut"];
+                    "application/json": components["schemas"]["AiDraftOut"];
                 };
             };
             /** @description the draft is not in `draft` status */
@@ -8138,7 +8138,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["AcceptIn"];
+                "application/json": components["schemas"]["AiDraftAcceptIn"];
             };
         };
         responses: {
@@ -8148,7 +8148,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AcceptOut"];
+                    "application/json": components["schemas"]["AiDraftAcceptOut"];
                 };
             };
             /** @description the draft is not in `draft` status */
@@ -8857,7 +8857,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["app__api__v2__quizzes__DraftIn"];
+                "application/json": components["schemas"]["DraftIn"];
             };
         };
         responses: {
@@ -8867,7 +8867,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["app__api__v2__quizzes__DraftOut"];
+                    "application/json": components["schemas"]["DraftOut"];
                 };
             };
             /** @description Validation Error */
