@@ -5,7 +5,7 @@ import { api } from "@/api/endpoints";
 import { useMe, useResetSession } from "@/auth";
 import { ErrorNote } from "@/components/common";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LanguageSwitch, useI18n } from "@/i18n";
@@ -48,7 +48,7 @@ export default function Join() {
           <CardHeader>
             <div className="flex items-start justify-between gap-3">
               <div className="space-y-1.5">
-                <CardTitle><h1 id="join-title" className="text-xl">{t("join.title")}</h1></CardTitle>
+                <h1 id="join-title" className="text-xl leading-none font-semibold">{t("join.title")}</h1>
                 <CardDescription>{me ? t("join.introLoggedIn") : t("join.intro")}</CardDescription>
               </div>
               {!me && <LanguageSwitch />}
@@ -57,7 +57,7 @@ export default function Join() {
           <CardContent className="space-y-4">
             <div className="grid gap-1.5">
               <Label htmlFor="join-code">{t("join.code")}</Label>
-              <Input id="join-code" value={code} onChange={(e) => setCode(e.target.value)} autoComplete="off" required />
+              <Input id="join-code" aria-describedby={error ? "join-error" : undefined} aria-invalid={error ? true : undefined} value={code} onChange={(e) => setCode(e.target.value)} autoComplete="off" required />
             </div>
             {!me && (
               <>
@@ -76,7 +76,7 @@ export default function Join() {
                 </div>
               </>
             )}
-            <ErrorNote error={error} />
+            <ErrorNote error={error} id="join-error" />
             <Button type="submit" className="w-full" disabled={busy}>{busy ? t("join.busy") : t("join.submit")}</Button>
             <p className="text-center text-sm text-muted-foreground">
               {me ? <Link to="/courses" className="text-primary underline">{t("join.back")}</Link>

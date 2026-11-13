@@ -39,11 +39,13 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^4.3.2",
+    "axe-core": "^4.14.0",
     "jsdom": "^25.0.1",
     "openapi-typescript": "^7.4.1",
     "tailwindcss": "^4.3.5",
     "typescript": "~5.6.2",
     "vite": "^5.4.8",
-    "vitest": "^2.1.2"
+    "vitest": "^2.1.2",
+    "vitest-axe": "^0.1.0"
   }
 }

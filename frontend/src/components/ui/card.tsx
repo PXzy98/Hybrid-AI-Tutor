@@ -8,9 +8,10 @@ function Card({ className, ...props }: React.ComponentProps<"div">) {
 function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   return <div data-slot="card-header" className={cn("flex flex-col gap-1.5 px-5", className)} {...props} />;
 }
-// a div, as in current shadcn/ui: pages put their own heading inside when the title is one
+// A div (as in current shadcn/ui) that is announced as a level 3 heading: cards sit below the page's h1 and the
+// tab's h2. A page that needs another level puts its own heading element in the header instead of a CardTitle.
 function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
-  return <div data-slot="card-title" className={cn("leading-none font-semibold", className)} {...props} />;
+  return <div data-slot="card-title" role="heading" aria-level={3} className={cn("leading-none font-semibold", className)} {...props} />;
 }
 function CardDescription({ className, ...props }: React.ComponentProps<"p">) {
   return <p data-slot="card-description" className={cn("text-sm text-muted-foreground", className)} {...props} />;

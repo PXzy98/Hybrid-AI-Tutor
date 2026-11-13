@@ -11,6 +11,8 @@ export const en = {
   "theme.dark": "Switch to dark mode",
   "theme.light": "Switch to light mode",
 
+  "nav.skip": "Skip to the main content",
+  "nav.sidebar": "Courses, modules and conversations",
   "nav.main": "Main",
   "nav.courses": "Courses",
   "nav.noCourses": "You are not in a course yet.",

@@ -79,6 +79,7 @@ function Dashboard({ course, student, tab }: { course: Course; student: boolean;
         {tabs.map((x) => (
           <TabsContent key={x.id} value={x.id} forceMount={x.keepMounted ? true : undefined}
                        className={x.keepMounted ? "data-[state=inactive]:hidden" : undefined}>
+            <h2 className="sr-only">{t(x.label)}</h2>
             {x.node}
           </TabsContent>
         ))}

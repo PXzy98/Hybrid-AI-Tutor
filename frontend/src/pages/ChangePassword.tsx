@@ -6,7 +6,7 @@ import { useMe, useResetSession } from "@/auth";
 import { ErrorNote } from "@/components/common";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useI18n } from "@/i18n";
@@ -46,24 +46,24 @@ export default function ChangePassword() {
   return (
     <Card className="mx-auto max-w-md">
       <form onSubmit={submit} className="space-y-4">
-        <CardHeader><CardTitle><h1 className="text-xl">{t("pw.title")}</h1></CardTitle></CardHeader>
+        <CardHeader><h1 className="text-xl leading-none font-semibold">{t("pw.title")}</h1></CardHeader>
         <CardContent className="space-y-4">
           {me?.must_change_password && <Alert variant="info">{t("pw.temporary")}</Alert>}
           <div className="grid gap-1.5">
             <Label htmlFor="pw-current">{t("pw.current")}</Label>
-            <Input id="pw-current" type="password" autoComplete="current-password" value={current} onChange={(e) => setCurrent(e.target.value)} required />
+            <Input id="pw-current" aria-describedby={error ? "pw-error" : undefined} type="password" autoComplete="current-password" value={current} onChange={(e) => setCurrent(e.target.value)} required />
           </div>
           <div className="grid gap-1.5">
             <Label htmlFor="pw-new">{t("pw.new")}</Label>
-            <Input id="pw-new" type="password" autoComplete="new-password" value={next} onChange={(e) => setNext(e.target.value)} required />
-            <p className="text-xs text-muted-foreground">{t("pw.hint", { n: MIN_LENGTH })}</p>
+            <Input id="pw-new" aria-describedby={local ? "pw-local" : "pw-hint"} aria-invalid={local ? true : undefined} type="password" autoComplete="new-password" value={next} onChange={(e) => setNext(e.target.value)} required />
+            <p id="pw-hint" className="text-xs text-muted-foreground">{t("pw.hint", { n: MIN_LENGTH })}</p>
           </div>
           <div className="grid gap-1.5">
             <Label htmlFor="pw-repeat">{t("pw.repeat")}</Label>
             <Input id="pw-repeat" type="password" autoComplete="new-password" value={repeat} onChange={(e) => setRepeat(e.target.value)} required />
           </div>
-          {local && <Alert variant="destructive" role="alert">{local}</Alert>}
-          <ErrorNote error={error} />
+          {local && <Alert variant="destructive" role="alert" id="pw-local">{local}</Alert>}
+          <ErrorNote error={error} id="pw-error" />
           <Button type="submit" disabled={busy}>{busy ? t("pw.saving") : t("pw.save")}</Button>
         </CardContent>
       </form>
