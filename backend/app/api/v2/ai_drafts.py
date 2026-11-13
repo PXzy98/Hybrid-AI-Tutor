@@ -32,22 +32,22 @@ DraftKind = Literal["project_ideas", "sample_proposal", "faq", "kcs", "check_ite
 DraftStatus = Literal["generating", "draft", "accepted", "discarded", "failed"]
 
 
-class DraftIn(BaseModel):
+class AiDraftIn(BaseModel):
     kind: DraftKind
     module_id: int | None = None  # the material of this module (and the course-level files); None: all
     focus: str = Field("", max_length=300)  # what to look for in the material (instructor's words)
 
 
-class DraftPatch(BaseModel):
+class AiDraftPatch(BaseModel):
     # tier 1: {"title", "body"}; tier 2: {"items": [...]} (the shapes the draft was returned in)
     content: dict
 
 
-class AcceptIn(BaseModel):
+class AiDraftAcceptIn(BaseModel):
     module_id: int | None = None  # kcs: the module of the new KCs, when the draft has none
 
 
-class DraftOut(BaseModel):
+class AiDraftOut(BaseModel):
     id: int
     kind: DraftKind
     module_id: int | None
@@ -61,7 +61,7 @@ class DraftOut(BaseModel):
     job_id: int | None = None  # the generation job started by this request
 
 
-class DraftSummary(BaseModel):
+class AiDraftSummary(BaseModel):
     id: int
     kind: DraftKind
     module_id: int | None
@@ -70,8 +70,8 @@ class DraftSummary(BaseModel):
     updated_at: datetime
 
 
-class AcceptOut(BaseModel):
-    draft: DraftOut
+class AiDraftAcceptOut(BaseModel):
+    draft: AiDraftOut
     created: dict[str, list[int]]  # ids by table: kcs, check_items, misconceptions, materials
     rebuild_job_id: int | None = None  # tier 1: the index rebuild that makes the material searchable
 
@@ -93,8 +93,9 @@ def _engine(request: Request):
     return request.app.state.services.engine
 
 
-def _out(row: AiDraft, job_id: int | None = None) -> DraftOut:
-    return DraftOut(id=row.id, kind=row.kind, module_id=row.module_id, status=row.status, content=row.content,
+def _out(row: AiDraft, job_id: int | None = None) -> AiDraftOut:
+    return AiDraftOut(id=row.id, kind=row.kind, module_id=row.module_id, status=row.status,
+                      content=row.content,
                     cited_sources=row.cited_sources, error=row.error, created_by=row.created_by,
                     created_at=row.created_at, updated_at=row.updated_at, job_id=job_id)
 
@@ -115,9 +116,9 @@ def _module(db: Session, course_id: int, module_id: int | None) -> None:
 
 
 # ------------------------------------------------------------------------------------------ drafts
-@router.post("/courses/{course_id}/ai/drafts", response_model=DraftOut, status_code=202,
+@router.post("/courses/{course_id}/ai/drafts", response_model=AiDraftOut, status_code=202,
              operation_id="ai_drafts_create")
-def create(request: Request, body: DraftIn, access: CourseInstructor):
+def create(request: Request, body: AiDraftIn, access: CourseInstructor):
     """Start drafting from the course material with the local model (a job; the draft is `generating`)."""
     engine = _engine(request)
     with Session(engine, expire_on_commit=False) as db:
@@ -131,7 +132,7 @@ def create(request: Request, body: DraftIn, access: CourseInstructor):
     return _out(row, job.id)
 
 
-@router.get("/courses/{course_id}/ai/drafts", response_model=list[DraftSummary],
+@router.get("/courses/{course_id}/ai/drafts", response_model=list[AiDraftSummary],
             operation_id="ai_drafts_list")
 def list_drafts(request: Request, access: CourseInstructor, status: DraftStatus | None = None,
                 kind: DraftKind | None = None):
@@ -142,21 +143,21 @@ def list_drafts(request: Request, access: CourseInstructor, status: DraftStatus 
         if kind:
             q = q.where(AiDraft.kind == kind)
         rows = db.exec(q.order_by(col(AiDraft.id).desc())).all()
-        return [DraftSummary(id=r.id, kind=r.kind, module_id=r.module_id, status=r.status,
+        return [AiDraftSummary(id=r.id, kind=r.kind, module_id=r.module_id, status=r.status,
                              created_at=r.created_at, updated_at=r.updated_at) for r in rows]
 
 
-@router.get("/courses/{course_id}/ai/drafts/{draft_id}", response_model=DraftOut,
+@router.get("/courses/{course_id}/ai/drafts/{draft_id}", response_model=AiDraftOut,
             operation_id="ai_drafts_get")
 def get_draft(request: Request, draft_id: int, access: CourseInstructor):
     with Session(_engine(request)) as db:
         return _out(_get(db, access.course.id, draft_id))
 
 
-@router.patch("/courses/{course_id}/ai/drafts/{draft_id}", response_model=DraftOut,
+@router.patch("/courses/{course_id}/ai/drafts/{draft_id}", response_model=AiDraftOut,
               operation_id="ai_drafts_update",
               responses={409: {"description": "the draft is not in `draft` status"}})
-def update_draft(request: Request, draft_id: int, body: DraftPatch, access: CourseInstructor):
+def update_draft(request: Request, draft_id: int, body: AiDraftPatch, access: CourseInstructor):
     """Replace the content of a draft (the whole content, in the shape it was returned in)."""
     with Session(_engine(request), expire_on_commit=False) as db:
         row = _get(db, access.course.id, draft_id)
@@ -185,11 +186,11 @@ def discard(request: Request, draft_id: int, access: CourseInstructor):
     return Response(status_code=204)
 
 
-@router.post("/courses/{course_id}/ai/drafts/{draft_id}/accept", response_model=AcceptOut,
+@router.post("/courses/{course_id}/ai/drafts/{draft_id}/accept", response_model=AiDraftAcceptOut,
              operation_id="ai_drafts_accept",
              responses={409: {"description": "the draft is not in `draft` status"},
                         422: {"description": "the content checks or the material scan refused it"}})
-def accept(request: Request, draft_id: int, body: AcceptIn, access: CourseInstructor):
+def accept(request: Request, draft_id: int, body: AiDraftAcceptIn, access: CourseInstructor):
     """Publish the draft: tier 2 into the content tables (KCs, check items and misconceptions become
     `active`, all or none), tier 1 as a Markdown course material. Students see it only from here on."""
     services = request.app.state.services
@@ -214,7 +215,7 @@ def accept(request: Request, draft_id: int, body: AcceptIn, access: CourseInstru
         db.add(AuditLog(account_id=access.account_id, action="ai_draft.accept",
                         target=f"course:{course_id}", details={"draft_id": row.id, "kind": row.kind}))
         db.commit()
-    return AcceptOut(draft=_out(row), created=created, rebuild_job_id=rebuild.id if rebuild else None)
+    return AiDraftAcceptOut(draft=_out(row), created=created, rebuild_job_id=rebuild.id if rebuild else None)
 
 
 def _create_content(request: Request, row: AiDraft, module_id: int | None) -> dict[str, list[int]]:

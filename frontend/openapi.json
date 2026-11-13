@@ -4557,7 +4557,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__api__v2__ai_drafts__DraftIn"
+                "$ref": "#/components/schemas/AiDraftIn"
               }
             }
           }
@@ -4568,7 +4568,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__api__v2__ai_drafts__DraftOut"
+                  "$ref": "#/components/schemas/AiDraftOut"
                 }
               }
             }
@@ -4657,7 +4657,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/DraftSummary"
+                    "$ref": "#/components/schemas/AiDraftSummary"
                   },
                   "title": "Response Ai Drafts List"
                 }
@@ -4710,7 +4710,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__api__v2__ai_drafts__DraftOut"
+                  "$ref": "#/components/schemas/AiDraftOut"
                 }
               }
             }
@@ -4759,7 +4759,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DraftPatch"
+                "$ref": "#/components/schemas/AiDraftPatch"
               }
             }
           }
@@ -4770,7 +4770,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__api__v2__ai_drafts__DraftOut"
+                  "$ref": "#/components/schemas/AiDraftOut"
                 }
               }
             }
@@ -4867,7 +4867,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AcceptIn"
+                "$ref": "#/components/schemas/AiDraftAcceptIn"
               }
             }
           }
@@ -4878,7 +4878,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AcceptOut"
+                  "$ref": "#/components/schemas/AiDraftAcceptOut"
                 }
               }
             }
@@ -5965,7 +5965,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__api__v2__quizzes__DraftIn"
+                "$ref": "#/components/schemas/DraftIn"
               }
             }
           }
@@ -5976,7 +5976,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__api__v2__quizzes__DraftOut"
+                  "$ref": "#/components/schemas/DraftOut"
                 }
               }
             }
@@ -6256,7 +6256,31 @@
   },
   "components": {
     "schemas": {
-      "AcceptIn": {
+      "AdminConfig": {
+        "properties": {
+          "values": {
+            "$ref": "#/components/schemas/RuntimeConfig"
+          },
+          "options": {
+            "$ref": "#/components/schemas/ConfigOptions"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/ConfigChange"
+            },
+            "type": "array",
+            "title": "History"
+          }
+        },
+        "type": "object",
+        "required": [
+          "values",
+          "options",
+          "history"
+        ],
+        "title": "AdminConfig"
+      },
+      "AiDraftAcceptIn": {
         "properties": {
           "module_id": {
             "anyOf": [
@@ -6271,12 +6295,12 @@
           }
         },
         "type": "object",
-        "title": "AcceptIn"
+        "title": "AiDraftAcceptIn"
       },
-      "AcceptOut": {
+      "AiDraftAcceptOut": {
         "properties": {
           "draft": {
-            "$ref": "#/components/schemas/app__api__v2__ai_drafts__DraftOut"
+            "$ref": "#/components/schemas/AiDraftOut"
           },
           "created": {
             "additionalProperties": {
@@ -6305,31 +6329,232 @@
           "draft",
           "created"
         ],
-        "title": "AcceptOut"
+        "title": "AiDraftAcceptOut"
       },
-      "AdminConfig": {
+      "AiDraftIn": {
         "properties": {
-          "values": {
-            "$ref": "#/components/schemas/RuntimeConfig"
+          "kind": {
+            "type": "string",
+            "enum": [
+              "project_ideas",
+              "sample_proposal",
+              "faq",
+              "kcs",
+              "check_items",
+              "misconceptions"
+            ],
+            "title": "Kind"
           },
-          "options": {
-            "$ref": "#/components/schemas/ConfigOptions"
+          "module_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Module Id"
           },
-          "history": {
-            "items": {
-              "$ref": "#/components/schemas/ConfigChange"
-            },
-            "type": "array",
-            "title": "History"
+          "focus": {
+            "type": "string",
+            "maxLength": 300,
+            "title": "Focus",
+            "default": ""
           }
         },
         "type": "object",
         "required": [
-          "values",
-          "options",
-          "history"
+          "kind"
         ],
-        "title": "AdminConfig"
+        "title": "AiDraftIn"
+      },
+      "AiDraftOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "project_ideas",
+              "sample_proposal",
+              "faq",
+              "kcs",
+              "check_items",
+              "misconceptions"
+            ],
+            "title": "Kind"
+          },
+          "module_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Module Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "generating",
+              "draft",
+              "accepted",
+              "discarded",
+              "failed"
+            ],
+            "title": "Status"
+          },
+          "content": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Content"
+          },
+          "cited_sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Cited Sources"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "job_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Job Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "module_id",
+          "status",
+          "content",
+          "cited_sources",
+          "error",
+          "created_by",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "AiDraftOut"
+      },
+      "AiDraftPatch": {
+        "properties": {
+          "content": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Content"
+          }
+        },
+        "type": "object",
+        "required": [
+          "content"
+        ],
+        "title": "AiDraftPatch"
+      },
+      "AiDraftSummary": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "project_ideas",
+              "sample_proposal",
+              "faq",
+              "kcs",
+              "check_items",
+              "misconceptions"
+            ],
+            "title": "Kind"
+          },
+          "module_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Module Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "generating",
+              "draft",
+              "accepted",
+              "discarded",
+              "failed"
+            ],
+            "title": "Status"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "module_id",
+          "status",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "AiDraftSummary"
       },
       "ApplyStatusOut": {
         "properties": {
@@ -7812,81 +8037,58 @@
         ],
         "title": "DiagnosticAnswer"
       },
-      "DraftPatch": {
+      "DraftIn": {
         "properties": {
-          "content": {
-            "additionalProperties": true,
-            "type": "object",
-            "title": "Content"
-          }
-        },
-        "type": "object",
-        "required": [
-          "content"
-        ],
-        "title": "DraftPatch"
-      },
-      "DraftSummary": {
-        "properties": {
-          "id": {
+          "count": {
             "type": "integer",
-            "title": "Id"
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Count",
+            "default": 5
           },
-          "kind": {
-            "type": "string",
-            "enum": [
-              "project_ideas",
-              "sample_proposal",
-              "faq",
-              "kcs",
-              "check_items",
-              "misconceptions"
-            ],
-            "title": "Kind"
+          "kinds": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "mcq",
+                "true_false"
+              ]
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Kinds"
           },
-          "module_id": {
+          "kc_codes": {
             "anyOf": [
               {
-                "type": "integer"
+                "items": {
+                  "type": "string"
+                },
+                "type": "array",
+                "maxItems": 50
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Module Id"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "generating",
-              "draft",
-              "accepted",
-              "discarded",
-              "failed"
-            ],
-            "title": "Status"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Created At"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Updated At"
+            "title": "Kc Codes"
+          }
+        },
+        "type": "object",
+        "title": "DraftIn"
+      },
+      "DraftOut": {
+        "properties": {
+          "job_id": {
+            "type": "integer",
+            "title": "Job Id"
           }
         },
         "type": "object",
         "required": [
-          "id",
-          "kind",
-          "module_id",
-          "status",
-          "created_at",
-          "updated_at"
+          "job_id"
         ],
-        "title": "DraftSummary"
+        "title": "DraftOut"
       },
       "EndTermIn": {
         "properties": {
@@ -13461,208 +13663,6 @@
           "closes_at"
         ],
         "title": "WindowIn"
-      },
-      "app__api__v2__ai_drafts__DraftIn": {
-        "properties": {
-          "kind": {
-            "type": "string",
-            "enum": [
-              "project_ideas",
-              "sample_proposal",
-              "faq",
-              "kcs",
-              "check_items",
-              "misconceptions"
-            ],
-            "title": "Kind"
-          },
-          "module_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Module Id"
-          },
-          "focus": {
-            "type": "string",
-            "maxLength": 300,
-            "title": "Focus",
-            "default": ""
-          }
-        },
-        "type": "object",
-        "required": [
-          "kind"
-        ],
-        "title": "DraftIn"
-      },
-      "app__api__v2__ai_drafts__DraftOut": {
-        "properties": {
-          "id": {
-            "type": "integer",
-            "title": "Id"
-          },
-          "kind": {
-            "type": "string",
-            "enum": [
-              "project_ideas",
-              "sample_proposal",
-              "faq",
-              "kcs",
-              "check_items",
-              "misconceptions"
-            ],
-            "title": "Kind"
-          },
-          "module_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Module Id"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "generating",
-              "draft",
-              "accepted",
-              "discarded",
-              "failed"
-            ],
-            "title": "Status"
-          },
-          "content": {
-            "additionalProperties": true,
-            "type": "object",
-            "title": "Content"
-          },
-          "cited_sources": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Cited Sources"
-          },
-          "error": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Error"
-          },
-          "created_by": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Created By"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Created At"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Updated At"
-          },
-          "job_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Job Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "kind",
-          "module_id",
-          "status",
-          "content",
-          "cited_sources",
-          "error",
-          "created_by",
-          "created_at",
-          "updated_at"
-        ],
-        "title": "DraftOut"
-      },
-      "app__api__v2__quizzes__DraftIn": {
-        "properties": {
-          "count": {
-            "type": "integer",
-            "maximum": 20.0,
-            "minimum": 1.0,
-            "title": "Count",
-            "default": 5
-          },
-          "kinds": {
-            "items": {
-              "type": "string",
-              "enum": [
-                "mcq",
-                "true_false"
-              ]
-            },
-            "type": "array",
-            "minItems": 1,
-            "title": "Kinds"
-          },
-          "kc_codes": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array",
-                "maxItems": 50
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Kc Codes"
-          }
-        },
-        "type": "object",
-        "title": "DraftIn"
-      },
-      "app__api__v2__quizzes__DraftOut": {
-        "properties": {
-          "job_id": {
-            "type": "integer",
-            "title": "Job Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "job_id"
-        ],
-        "title": "DraftOut"
       }
     }
   }
