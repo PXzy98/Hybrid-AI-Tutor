@@ -17,8 +17,14 @@ const BANDS = ["basic", "intermediate", "advanced", "mastered"];
 export default function Overview({ course }: { course: Course }) {
   const { t } = useI18n();
   const modules = useQuery({ queryKey: ["modules", course.id], queryFn: () => api.modules(course.id) });
-  const [moduleId, setModuleId] = useState<number | undefined>(undefined);
-  const summary = useQuery({ queryKey: ["class-summary", course.id, moduleId ?? null], queryFn: () => api.classSummary(course.id, moduleId) });
+  const [chosen, setChosen] = useState<number | undefined>(undefined);
+  // the class summary is per module (the API needs module_id): the first module until another is chosen
+  const moduleId = chosen ?? modules.data?.[0]?.id;
+  const summary = useQuery({
+    queryKey: ["class-summary", course.id, moduleId ?? null],
+    queryFn: () => api.classSummary(course.id, moduleId as number),
+    enabled: moduleId !== undefined,
+  });
   const data = summary.data;
   return (
     <div className="space-y-4">
@@ -29,8 +35,7 @@ export default function Overview({ course }: { course: Course }) {
         </div>
         <div className="grid gap-1.5">
           <Label htmlFor="overview-module">{t("overview.module")}</Label>
-          <Select id="overview-module" value={moduleId ?? ""} onChange={(e) => setModuleId(e.target.value ? Number(e.target.value) : undefined)}>
-            <option value="">{t("nav.wholeCourse")}</option>
+          <Select id="overview-module" value={moduleId ?? ""} onChange={(e) => setChosen(Number(e.target.value))}>
             {modules.data?.map((m) => <option key={m.id} value={m.id}>{m.title}</option>)}
           </Select>
         </div>

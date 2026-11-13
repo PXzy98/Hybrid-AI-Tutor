@@ -8,8 +8,9 @@ function Card({ className, ...props }: React.ComponentProps<"div">) {
 function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   return <div data-slot="card-header" className={cn("flex flex-col gap-1.5 px-5", className)} {...props} />;
 }
-function CardTitle({ className, ...props }: React.ComponentProps<"h3">) {
-  return <h3 data-slot="card-title" className={cn("leading-none font-semibold", className)} {...props} />;
+// a div, as in current shadcn/ui: pages put their own heading inside when the title is one
+function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
+  return <div data-slot="card-title" className={cn("leading-none font-semibold", className)} {...props} />;
 }
 function CardDescription({ className, ...props }: React.ComponentProps<"p">) {
   return <p data-slot="card-description" className={cn("text-sm text-muted-foreground", className)} {...props} />;

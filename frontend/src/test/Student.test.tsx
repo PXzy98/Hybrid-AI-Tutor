@@ -113,7 +113,7 @@ describe("my progress", () => {
     renderApp("/courses/1/progress");
     expect(await screen.findByText("Resistance")).toBeInTheDocument();
     expect(screen.getByText("intermediate")).toBeInTheDocument();
-    const plan = screen.getByText("Learning plan").closest("div")!.parentElement!;
+    const plan = screen.getByText("Learning plan").closest("[data-slot=card]") as HTMLElement;
     expect(within(plan).getByText("Practise with circuits.")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Save plan/ })).not.toBeInTheDocument();
     await userEvent.setup().click(screen.getByRole("button", { name: "I understand and agree" }));

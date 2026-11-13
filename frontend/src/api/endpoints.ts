@@ -120,8 +120,8 @@ export const api = {
   setVisibility: (id: number, action: VisibilityAction) => request<Visibility>("POST", `${c(id)}/me/visibility`, { action }),
 
   // instructor views of learners
-  classSummary: (id: number, moduleId?: number) =>
-    request<ClassSummary>("GET", `${c(id)}/class-summary${moduleId ? `?module_id=${moduleId}` : ""}`),
+  classSummary: (id: number, moduleId: number) =>
+    request<ClassSummary>("GET", `${c(id)}/class-summary?module_id=${moduleId}`),
   studentOverview: (id: number, studentId: string) =>
     request<StudentOverview>("GET", `${c(id)}/students/${encodeURIComponent(studentId)}/overview`),
   studentPlan: (id: number, studentId: string) => request<Plan>("GET", `${c(id)}/students/${encodeURIComponent(studentId)}/plan`),
