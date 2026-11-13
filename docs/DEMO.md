@@ -108,14 +108,14 @@ The six-minute script below is the older single-course (high blood pressure) dem
 
 | Time | Do | Say |
 |---|---|---|
-| 0:00 | Log in as **demo.novice**. Point at "What I know": everything is *basic*. | "The tutor keeps a learning profile per knowledge component. This student missed the first diagnostic question, so the parts that build on it were not even assessed." |
+| 0:00 | Log in as **demo.novice**. Point at "My progress": everything is *basic*. | "The tutor keeps a learning profile per knowledge component. This student missed the first diagnostic question, so the parts that build on it were not even assessed." |
 | 0:45 | **Chat** (topic High Blood Pressure), ask: *What do the two numbers in a blood pressure reading mean?* | "The progress panel shows the router at work. Badge: *basic*, an everyday example first. Below the answer: the MedlinePlus source it used, then a check question for the weakest part." |
-| 1:30 | Answer the check question **wrongly**, then **correctly** on the next one. | "The answer is graded by the key, not by the model, so it is reliable evidence. The band of that part changes immediately." Show it in "What I know". |
+| 1:30 | Answer the check question **wrongly**, then **correctly** on the next one. | "The answer is graded by the key, not by the model, so it is reliable evidence. The band of that part changes immediately." Show it in "My progress". |
 | 2:15 | Log out and log in as **demo.advanced**. Ask the same question. | "Same question, different student: *advanced*, the idea first, precise terms. The check question is an advanced one." |
 | 3:00 | Ask: *Compare the long-term cardiovascular outcomes of SGLT2 inhibitors versus GLP-1 receptor agonists in adults with chronic kidney disease.* (topic Type 2 Diabetes) | "This needs more than the local model and the course material, so the router chooses the cloud. The cloud model only gets the sanitized question, the topic, course passages and three coarse labels." |
 | 3:45 | Ask the same with identity: *I'm Priya Raman, student 300418277, email priya.raman@uottawa.ca. Compare …* | "The cloud saw only `<PERSON_1>`, `<STUDENT_ID_1>`, `<EMAIL_ADDRESS_1>` (show the stored request below); the student sees the real values filled back in." |
 | 4:30 | Ask (topic Asthma): *I was diagnosed with asthma last week, can I still play soccer?* | "A personal health detail. The cloud never sees it as written: the local model rewrites it as *Can a person newly diagnosed with asthma still play soccer?*, the rewrite is checked again, and only then sent. The student is told: *For privacy, the cloud model received a general version of your question…* If a rewrite fails its checks, the question stays local with *A privacy check kept this question on the local model.* The safety check still refers to a clinician." |
-| 5:15 | Click **Rate this answer (optional)** and submit. | "Voluntary feedback: four 1–5 ratings, no student ID, no free text. The instructor only sees averages once three ratings exist." |
+| 5:15 | Open the **End-of-term survey** tab (instructor: set the window; student: five 1–5 ratings, answered once). | "Evaluation is only an end-of-term survey: five anonymous ratings, no student ID, no free text. The instructor sees averages once enough students have answered." |
 | 5:40 | Wrap up | "The privacy filter, the learner model, the router's models and the evidence check run locally. Only a sanitized, allow-listed request can reach the cloud, and the E4 audit checks every one." |
 
 ### Show what was stored
@@ -138,18 +138,21 @@ docker compose exec -T db psql -U tutor -d tutor -c "select target, sanitized_qu
 
 ## Instructor view
 
-Log in as the instructor; `/admin` has these tabs:
+Log in as the instructor and open a course; the course page has these tabs:
 
-- **Students**: add a student (the temporary password is shown once, with a copy button), reset a password,
-  deactivate, or delete with a typed confirmation.
-- **Class summary**: mastery bands per knowledge component and the most common misconceptions. Any group smaller
-  than 5 is hidden; with only the three demo students the whole summary is hidden, which shows the privacy rule.
-- **Settings**: the cloud threshold, whether students see the routing progress panel, answer checks, knowledge
-  model, weak evidence and level thresholds. Changes apply to the next question without a restart.
-- **Logs**: sanitized questions, the route, latency p50/p95 and the share routed to the cloud. No student IDs.
-- **Content**: review status per topic, and course-material uploads (PDF, DOCX, HTML, TXT, MD), indexed for RAG
-  on upload.
-- **Feedback**: average survey ratings per topic, shown only with three or more ratings.
+- **Class overview**: mastery bands per knowledge component and the most common misconceptions. Any group
+  smaller than the minimum group size is hidden, which shows the privacy rule.
+- **Students**: every student with the sharing state. A student's progress and learning plan can be opened only
+  when the student agreed (visibility mode B) and did not opt out; each view is audited.
+- **Course content**: modules, knowledge components and check items.
+- **Members**: the invitation code, CSV import of a class list, co-instructors, temporary passwords.
+- **Materials**: upload (privacy-scanned; a refused file names the finding types), delete, index rebuild state.
+- **Settings**: visibility mode, local only, routing preference, whether students see the routing steps.
+- **End of term**: export, then delete the course's student data (typed confirmation).
+- **Quizzes** and **End-of-term survey**: quizzes (with AI drafts that must be reviewed before publishing) and
+  the survey window with averages.
+
+Students can delete their own learning data in a course from the **My progress** tab.
 
 ## Reset after the demo
 

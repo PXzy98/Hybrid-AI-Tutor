@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { ApiError } from "./api/client";
-import { api, type Me } from "./api/endpoints";
+import { api, type Course, type Me } from "./api/endpoints";
 
 /** The logged-in account, from the server session (GET /auth/me). null = not logged in. */
 export function useMe() {
@@ -27,7 +27,15 @@ export function useResetSession() {
   };
 }
 
-export function homeFor(me: Me): string {
-  if (me.must_change_password) return "/change-password";
-  return me.role === "instructor" ? "/admin" : "/chat";
+/** The courses the caller can see (GET /courses). */
+export function useCourses() {
+  return useQuery({ queryKey: ["courses"], queryFn: api.courses });
+}
+
+export type CourseRole = "instructor" | "student";
+
+/** The caller's role in a course, as the server reports it. An admin without a membership gets the
+ * instructor view; what the API refuses stays refused. */
+export function roleIn(course: Course, me: Me): CourseRole {
+  return course.my_role ?? (me.system_role === "student" ? "student" : "instructor");
 }

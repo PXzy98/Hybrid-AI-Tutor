@@ -1,27 +1,23 @@
-import { ApiError, BASE, type Schemas } from "./client";
+import { ApiError, failure, send, V2, type Schemas } from "./client";
 
 export type RoutingProgress = Schemas["RoutingProgress"];
+export type AskOut = Schemas["AskOut"];
 export type RoutingEvent =
-  | { type: "meta"; data: { request_id: string; session_id: string; show_progress: boolean; method: string } }
+  | { type: "meta"; data: { request_id: string; conversation_id: string; show_progress: boolean; method: string } }
   | { type: "progress"; data: RoutingProgress }
-  | { type: "result"; data: Schemas["AskResponse"] };
+  | { type: "token"; data: { text?: string } }
+  | { type: "result"; data: AskOut };
 
 /** Incremental SSE parser: handles UTF-8, CRLF, comments and arbitrary network chunk boundaries. */
-export async function askStream(body: Schemas["AskBody"], onEvent: (event: RoutingEvent) => void,
-                                signal?: AbortSignal): Promise<Schemas["AskResponse"]> {
-  const res = await fetch(BASE + "/api/v1/ask/stream", {
-    method: "POST", credentials: "include", headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
-    body: JSON.stringify(body), signal,
-  });
-  if (!res.ok) {
-    const data = await res.json().catch(() => null);
-    throw new ApiError(res.status, typeof data?.detail === "string" ? data.detail : "Could not submit this question.");
-  }
+export async function askStream(courseId: number, body: Schemas["AskIn"], onEvent: (event: RoutingEvent) => void,
+                                signal?: AbortSignal): Promise<AskOut> {
+  const res = await send("POST", `${V2}/courses/${courseId}/ask/stream`, { json: body, accept: "text/event-stream" }, signal);
+  if (!res.ok) throw await failure(res);
   if (!res.body) throw new Error("Streaming is unavailable in this browser.");
   const reader = res.body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
-  let reply: Schemas["AskResponse"] | undefined;
+  let reply: AskOut | undefined;
   let doneEvent = false;
   const dispatch = (frame: string) => {
     let kind = "message";
@@ -32,10 +28,10 @@ export async function askStream(body: Schemas["AskBody"], onEvent: (event: Routi
     }
     if (!data.length) return;
     const parsed = JSON.parse(data.join("\n"));
-    if (kind === "error") throw new Error(parsed.detail ?? "The selected model could not answer.");
+    if (kind === "error") throw new ApiError(503, parsed.detail ?? "The selected model could not answer.");
     if (kind === "done") { doneEvent = true; return; }
     if (kind === "result") reply = parsed;
-    if (kind === "meta" || kind === "progress" || kind === "result") {
+    if (kind === "meta" || kind === "progress" || kind === "token" || kind === "result") {
       onEvent({ type: kind, data: parsed } as RoutingEvent);
     }
   };

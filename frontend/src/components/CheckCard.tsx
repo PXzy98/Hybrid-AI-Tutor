@@ -1,26 +1,28 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useId, useState } from "react";
 
-import { api, type CheckItem, type CheckResponse } from "../api/endpoints";
-import { useI18n } from "../i18n";
+import { api, type CheckItem, type CheckResponse } from "@/api/endpoints";
+import { Button } from "@/components/ui/button";
+import { useI18n } from "@/i18n";
 import Band from "./Band";
+import { ErrorNote } from "./common";
 
 type Props = {
+  courseId: number;
   item: CheckItem;
-  sessionId?: string;
   onAnswered?: (result: CheckResponse) => void;
 };
 
 /** A check question under a tutor answer. The item has no answer key: grading happens on the server. */
-export default function CheckCard({ item, sessionId = "", onAnswered }: Props) {
+export default function CheckCard({ courseId, item, onAnswered }: Props) {
   const [choice, setChoice] = useState<string | null>(null);
   const qc = useQueryClient();
   const id = useId();
   const { t } = useI18n();
   const answer = useMutation({
-    mutationFn: (c: string) => api.check(item.id, c, sessionId),
+    mutationFn: (c: string) => api.check(courseId, item.id, c),
     onSuccess: (result) => {
-      qc.invalidateQueries({ queryKey: ["profile"] });
+      qc.invalidateQueries({ queryKey: ["profile", courseId] });
       onAnswered?.(result);
     },
   });
@@ -29,7 +31,7 @@ export default function CheckCard({ item, sessionId = "", onAnswered }: Props) {
 
   return (
     <form
-      className="mt-3 rounded-lg border border-teal-200 bg-teal-50/40 p-4"
+      className="mt-3 rounded-lg border bg-muted/40 p-4"
       onSubmit={(e) => {
         e.preventDefault();
         if (choice) answer.mutate(choice);
@@ -37,8 +39,8 @@ export default function CheckCard({ item, sessionId = "", onAnswered }: Props) {
       aria-describedby={`${id}-hint`}
     >
       <fieldset disabled={!!result || answer.isPending}>
-        <legend className="mb-2 text-sm font-semibold text-teal-900">{t("check.legend")}</legend>
-        <p id={`${id}-stem`} className="mb-3 text-slate-900">{item.stem}</p>
+        <legend className="mb-2 text-sm font-semibold text-primary">{t("check.legend")}</legend>
+        <p id={`${id}-stem`} className="mb-3">{item.stem}</p>
         <div role="radiogroup" aria-labelledby={`${id}-stem`} className="space-y-2">
           {options.map(([key, text]) => {
             const isKey = result?.correct_choice === key;
@@ -47,20 +49,12 @@ export default function CheckCard({ item, sessionId = "", onAnswered }: Props) {
               <label
                 key={key}
                 className={`flex cursor-pointer items-start gap-2 rounded-md border px-3 py-2 text-sm ${
-                  isKey ? "border-emerald-500 bg-emerald-50" : isWrongChoice ? "border-rose-400 bg-rose-50" : "border-slate-200 bg-white"
+                  isKey ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950" : isWrongChoice ? "border-rose-400 bg-rose-50 dark:bg-rose-950" : "bg-card"
                 }`}
               >
-                <input
-                  type="radio"
-                  name={`${id}-choice`}
-                  value={key}
-                  checked={choice === key}
-                  onChange={() => setChoice(key)}
-                  className="mt-0.5 accent-teal-700"
-                />
-                <span>
-                  <span className="font-medium">{key}.</span> {text}
-                </span>
+                <input type="radio" name={`${id}-choice`} value={key} checked={choice === key}
+                       onChange={() => setChoice(key)} className="mt-0.5 accent-primary" />
+                <span><span className="font-medium">{key}.</span> {text}</span>
               </label>
             );
           })}
@@ -69,24 +63,20 @@ export default function CheckCard({ item, sessionId = "", onAnswered }: Props) {
       <p id={`${id}-hint`} className="sr-only">{t("check.hint")}</p>
 
       {!result && (
-        <button type="submit" className="btn-primary mt-3" disabled={!choice || answer.isPending}>
+        <Button type="submit" className="mt-3" disabled={!choice || answer.isPending}>
           {answer.isPending ? t("check.busy") : t("check.submit")}
-        </button>
+        </Button>
       )}
-      {answer.isError && (
-        <p role="alert" className="mt-2 text-sm text-rose-700">{(answer.error as Error).message}</p>
-      )}
+      {answer.isError && <div className="mt-2"><ErrorNote error={answer.error} /></div>}
       {result && (
         <div role="status" className="mt-3 space-y-2 text-sm">
-          <p className={`font-semibold ${result.correct ? "text-emerald-800" : "text-rose-800"}`}>
+          <p className={`font-semibold ${result.correct ? "text-emerald-700 dark:text-emerald-300" : "text-rose-700 dark:text-rose-300"}`}>
             {result.correct ? t("check.correct") : t("check.wrong", { choice: result.correct_choice })}
           </p>
-          {result.explanation && <p className="text-slate-800">{result.explanation}</p>}
+          {result.explanation && <p>{result.explanation}</p>}
           <div className="flex flex-wrap items-center gap-2">
             {result.kc_band && <Band band={result.kc_band} label={t("check.part")} />}
-            {result.next_kc && (
-              <span className="text-slate-700">{t("chat.suggestedNext")} <strong>{result.next_kc.name}</strong></span>
-            )}
+            {result.next_kc && <span>{t("chat.suggestedNext")} <strong>{result.next_kc.name}</strong></span>}
           </div>
         </div>
       )}
