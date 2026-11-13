@@ -481,6 +481,7 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | S 的一部分（bandit B314，Z13 扫描发现） | S | PubMed 返回的 XML 改用 `defusedxml` 解析 | #55 | 审查 |
 | 学习者数据按课程（course-structure.md 4.1、4.4） | S | `learner_kc_state`、`learner_topic_level`、`evidence_log`、`learner_misconception` 加 `course_id`（已有的行归到演示课程）；每门课一个 `LearnerRepository`；`app/learner/course_data.py` 导出和删除一门课的学习者数据 | #60 | 审查 |
 | S9（API v2 接口和数据库部分） | S | `app/api/v2/learner.py`：检查题、课程诊断、个人档案、可见性选择、删除自己在一门课的数据、班级汇总、个人概览、学习计划；`app/learner/course_views.py` 在数据库上实现 `LearnerViewStore`、可见性变更和计划（`learning_plan`，迁移 0012） | #62 | 审查 |
+| S5 的一部分（11-12 顾问会议） | S | `data/demo_courses/archives/` 里的 8 个公开课程包（讲义、大纲、日历、作业、考试；答案只给教师），带清单、署名和许可；`scripts/fetch_open_courses.py` 用来解压和重建；`tests/test_open_course_packs.py` | 本 PR | 审查；S5、S11、T4 都用这些课程包 |
 | Q1（新增：小测和学期末问卷；S9 的问卷、S6 的教师端 AI 里的小测起草） | S | `app/learner/quizzes.py`、`app/api/v2/quizzes.py`、`app/api/v2/survey.py`、`app/instructor_ai/quiz_drafts.py`、结束学期的导出和删除、迁移 0013；api-v2.md 3.9、3.10 | 分支 `feature/q1-quizzes-survey` | 审查 |
 | F1（前端 v2：学生端和教师端；包含 T6、T7 和 T8 的文字） | T | `frontend/` | 随 F1 | 审查 |
 
@@ -573,7 +574,7 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | 事项 | 决定 |
 |---|---|
 | 课程结构、账号、入学、数据范围、设置、数据库、迁移、API 版本 | [design/course-structure.md](design/course-structure.md) 第 1 节、[design/api-v2.md](design/api-v2.md) |
-| 示例课程 | "General Medical Knowledge" + ELG 5902；从 2026-11-12 起，所有测试和演示都用 `data/demo_courses/` 里的八个开放课程包 |
+| 示例和测试课程 | `data/demo_courses/` 里的 8 门公开课程（医学、生命科学、ECE、计算机科学各两门）；"General Medical Knowledge" 只用于 v3 迁移 |
 | 首批隐私档案 | 医学、生命科学、ECE |
 | 部署 | 一套 Docker Compose；vLLM 单独部署，通过 API 连接 |
 | 数据库 | 只用 PostgreSQL |

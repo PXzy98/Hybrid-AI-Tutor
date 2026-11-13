@@ -546,9 +546,9 @@ owner reviews and approves the PR, and the area stays the owner's afterwards (ru
 | part of S (bandit B314, found by the Z13 scans) | S | PubMed responses parsed with `defusedxml` | #55 | review |
 | learner data per course (course-structure.md 4.1, 4.4) | S | `course_id` on `learner_kc_state`, `learner_topic_level`, `evidence_log` and `learner_misconception` (existing rows go to the demo course); one `LearnerRepository` per course; `app/learner/course_data.py` exports and deletes one course's learner data | #60 | review |
 | S9 (API v2 endpoints and database side) | S | `app/api/v2/learner.py`: check, course diagnostic, profile, visibility choices, deleting own course data, class summary, individual overview, learning plan; `app/learner/course_views.py` implements `LearnerViewStore`, visibility changes and plans on the database (`learning_plan`, migration 0012) | #62 | review |
+| part of S5 (advisor meeting 2026-11-12) | S | eight open course packs (lectures, syllabi, calendars, assignments, exams; solutions kept instructor-only) as zips in `data/demo_courses/archives/` with manifests, attribution and license; `scripts/fetch_open_courses.py` to unpack and rebuild them; `tests/test_open_course_packs.py` | this PR | review; S5, S11 and T4 use the packs |
 | Q1 (new: quizzes and the end-of-term survey; the survey of S9, quiz drafts as instructor AI of S6) | S | `app/learner/quizzes.py`, `app/api/v2/quizzes.py`, `app/api/v2/survey.py`, `app/instructor_ai/quiz_drafts.py`, end of term export and deletion, migration 0013; api-v2.md 3.9, 3.10 | branch `feature/q1-quizzes-survey` | review |
 | F1 (frontend v2: student and instructor dashboards; carries T6, T7 and the strings of T8) | T | `frontend/` | with F1 | review |
-| part of S5 (advisor meeting 2026-11-12) | S | eight open course packs (lectures, syllabi, calendars, assignments, exams; solutions kept instructor-only) as zips in `data/demo_courses/archives/` with manifests, attribution and license; `scripts/fetch_open_courses.py` to unpack and rebuild them; `tests/test_open_course_packs.py` | this PR | review; S5, S11 and T4 use the packs |
 
 From 2026-11-11, by the same decision, Z also works on the remaining S and T tasks of sections 7.2 and 7.3 in
 this way (one PR per task, listed in the table above when it is opened). Not started yet: the API v2
@@ -655,7 +655,7 @@ the CI scans.
 | Topic | Decision |
 |---|---|
 | Course structure, accounts, enrollment, data scope, settings, database, migration, API version | [design/course-structure.md](design/course-structure.md) section 1, [design/api-v2.md](design/api-v2.md) |
-| Demo courses | "General Medical Knowledge" + ELG 5902; from 2026-11-12 the eight open course packs in `data/demo_courses/` are used for all tests and demos |
+| Demo and test courses | eight open courses in `data/demo_courses/` (two each: medical science, life science, ECE, computer science); "General Medical Knowledge" only for the v3 migration |
 | First privacy profiles | medical science, life science, ECE |
 | Deployment | one Docker Compose stack; vLLM deployed separately and reached by API |
 | Database | PostgreSQL only |

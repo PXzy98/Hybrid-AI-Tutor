@@ -484,6 +484,34 @@ class AiEvaluation(SQLModel, table=True):
     updated_at: datetime = _ts(default_factory=utcnow)
 
 
+class AiDraft(SQLModel, table=True):
+    """Instructor AI tiers 1 and 2: an editable draft made by the local model from the course material
+    (guide 4.9; tasks S6, S7). Instructor-only until accepted: acceptance turns it into normal course
+    content (KCs, check items, misconceptions) or a course Markdown material.
+
+    `content`: tier 1 {"title": str, "body": str}; tier 2 {"items": [...]} (shapes of
+    `app.api.v2.ai_drafts`). `cited_sources`: file names of the passages the model used."""
+
+    __tablename__ = "ai_draft"
+
+    id: int | None = Field(default=None, primary_key=True)
+    course_id: int = Field(sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=False,
+                                            index=True))
+    module_id: int | None = Field(default=None, sa_column=Column(ForeignKey("module.id", ondelete="SET NULL"),
+                                                                 nullable=True))
+    # project_ideas | sample_proposal | faq | kcs | check_items | misconceptions
+    kind: str
+    # generating -> draft -> accepted | discarded; failed
+    status: str = "generating"
+    focus: str = ""  # the instructor's hint for finding the material (never student text)
+    content: dict = Field(default_factory=dict, sa_column=Column(JSON, nullable=False))
+    cited_sources: list = Field(default_factory=list, sa_column=Column(JSON, nullable=False))
+    error: str | None = None
+    created_by: int | None = None
+    created_at: datetime = _ts(default_factory=utcnow)
+    updated_at: datetime = _ts(default_factory=utcnow)
+
+
 class ProcessStatus(SQLModel, table=True):
     """Heartbeat of every api/worker process (design §6.5): which component version it runs."""
 

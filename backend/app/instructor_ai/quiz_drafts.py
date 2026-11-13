@@ -15,7 +15,7 @@ from app.instructor_ai.drafts import parse_model_json
 from app.instructor_ai.eval import passages
 from app.learner.quizzes import MAX_QUESTIONS, QuizQuestion
 from app.platform import jobs
-from app.storage.models import Kc, Module, Quiz, utcnow
+from app.storage.models import Kc, Module, Quiz, QuizAttempt, utcnow
 
 DRAFT = "quiz.draft"
 SYSTEM = (
@@ -93,7 +93,12 @@ async def draft(services, job) -> None:
     if not written:
         raise RuntimeError("the local model wrote no usable question (is there indexed material?)")
     with Session(services.engine) as db:
-        quiz = db.get(Quiz, job.ref_id)
+        # locked and checked again: the quiz may have been published while the model was writing, and
+        # unreviewed questions must never reach students
+        quiz = db.exec(select(Quiz).where(Quiz.id == job.ref_id).with_for_update()).first()
+        answered = db.exec(select(QuizAttempt.id).where(QuizAttempt.quiz_id == job.ref_id)).first()
+        if quiz is None or quiz.status != "draft" or answered is not None:
+            raise RuntimeError("the quiz is no longer a draft: the drafted questions were not added")
         quiz.questions = [*quiz.questions, *written][:MAX_QUESTIONS]
         quiz.updated_at = utcnow()
         db.add(quiz)
