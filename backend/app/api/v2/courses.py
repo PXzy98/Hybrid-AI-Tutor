@@ -118,7 +118,7 @@ def list_course_types(request: Request, user: AnyUser):
     from app.platform.settings import course_types
 
     enabled = request.app.state.services.settings_service.system_values()[0].get("enabled_course_types")
-    return [t for t in course_types() if not enabled or t in enabled]
+    return [t for t in course_types() if enabled is None or t in enabled]  # []: course creation is off
 
 
 @router.get("/courses", response_model=list[CourseOut], operation_id="courses_list")
