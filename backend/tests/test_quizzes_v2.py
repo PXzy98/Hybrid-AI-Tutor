@@ -63,7 +63,8 @@ def test_students_answer_a_published_quiz_once_without_seeing_the_answers(world)
     again = alice.post(f"{world.url}/quizzes/{quiz['id']}/attempt", json={"answers": [0, 1]})
     assert again.status_code == 409
     after = alice.get(f"{world.url}/quizzes/{quiz['id']}").json()
-    assert after["questions"] == [] and after["attempt"]["score"] == 1  # the result, not the quiz again
+    assert after["attempt"]["score"] == 1
+    assert after["questions"][0]["stem"] == MCQ["stem"]  # shown again, to read the result
     # with consent the answer to the KC-linked question is evidence for the knowledge model
     quiz_evidence = [e for e in rows("evidence_log") if e["source"] == "quiz"]
     found = [(e["kc_id"], e["correct"], e["course_id"]) for e in quiz_evidence]
