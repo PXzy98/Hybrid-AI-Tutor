@@ -30,7 +30,7 @@ stand and where to look. Running the system: [OPERATIONS.md](OPERATIONS.md).
 | Z6 model gateway | merged; real vLLM load test not run (server unreachable) | `app/llm/`, `eval/load-test/` |
 | Z7 privacy profiles | merged | `app/privacy/profiles/` |
 | Z8 Docker Compose | merged | `docker-compose.yml`, `deploy/` |
-| Z9 API v2 (accounts, courses, members, invitations, content, settings, admin) | merged (#42–#45); main fix #47; viewable invitation code #52; end of term not built (section 4) | `app/api/v2/`, `app/platform/courses.py`, `app/catalog/editor.py` |
+| Z9 API v2 (accounts, courses, members, invitations, content, settings, admin) | merged (#42–#45); main fix #47; viewable invitation code #52; v2 ask #61; end of term and export #63 (`app/platform/end_of_term.py`) | `app/api/v2/`, `app/platform/courses.py`, `app/catalog/editor.py` |
 | Z10 usage, CSRF, login limits, access tests | merged (#46) | `app/platform/usage.py`, `app/auth/csrf.py`, `tests/test_access_every_endpoint.py` |
 | Z11 ECE profile, `scan_document`, `search_query`, consent text | merged (#48) | `app/privacy/recognizers/engineering.py`, `eval/privacy-filter/ece*.py` |
 | Z12 instructor AI tier 4 | merged (#53); background jobs in the `job` table, run by the worker | `app/instructor_ai/eval/`, `app/platform/jobs.py` |
@@ -69,11 +69,10 @@ What Z did in other owners' areas (for their review): guide section 7.5.
 
 | Owner | Task | Why it matters |
 |---|---|---|
-| S | API v2 endpoints for materials (S4), drafts (S6, S7), learner views (S9) and class insights (S10) | the modules are merged; nothing calls them yet |
+| S | API v2 endpoints for materials (S4), drafts (S6, S7), class insights (S10) and the per-course survey | the modules are merged; nothing calls them yet (learner views, S9: `app/api/v2/learner.py`) |
 | T | `transformers` 5 together with Z | 6 pip-audit advisories ignored with reason |
 | T | `react-router` 7 (moderate advisory), `vite`/`vitest` (dev tools); `README.md`, `frontend/README.md` and `docs/DEMO.md` still describe SQLite | CI reports the advisories |
 | T | frontend for API v2 (T6, T7); a v2 client sends `X-CSRF-Token` | course management is API-only until then |
-| Z | end of term and export | learner data is per course since #60 (`app/learner/course_data.py`); conversations and request logs carry `course_id` |
 | Z | deploy on the test host with the monitoring profile, the vLLM load test, Z2 local speed | needs access to the test host and the vLLM server |
 | Z | choose the alert receiver (`deploy/monitoring/alertmanager.yml`) | alerts are only visible in Alertmanager until then |
 | Others | Lavin's second review of the 30 revised items | content |

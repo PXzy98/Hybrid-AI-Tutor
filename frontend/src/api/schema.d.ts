@@ -648,6 +648,45 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/courses/{course_id}/end-term": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * End Term
+         * @description End the term: build the export (class summary; in visibility mode B also the overviews the
+         *     instructor may see), then delete the students' memberships and their data in this course. The course,
+         *     its content, materials and settings stay for the next class list.
+         */
+        post: operations["courses_end_term"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/exports/{export_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download Export */
+        get: operations["courses_export_download"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/courses/{course_id}/members": {
         parameters: {
             query?: never;
@@ -1467,6 +1506,172 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/courses/{course_id}/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Check
+         * @description Answer a check question of this course: graded by the key, applied as strong evidence.
+         */
+        post: operations["learner_check"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/onboarding": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Onboarding */
+        get: operations["learner_onboarding_get"];
+        put?: never;
+        /**
+         * Post Onboarding
+         * @description Consent and preferences are global; the diagnostic answers count in this course only.
+         */
+        post: operations["learner_onboarding_submit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/me/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My Profile
+         * @description "What I know" in this course (bands, never probabilities), what the instructor can see, and the
+         *     instructor's plan when there is one.
+         */
+        get: operations["learner_profile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/me/visibility": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * My Visibility
+         * @description Acknowledge visibility mode B (from then on the instructor can see new data), opt out, or opt back in
+         *     (a new start: earlier data stays hidden).
+         */
+        post: operations["learner_visibility"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/me/learning-data": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete My Course Data
+         * @description Forget what the tutor learned about the caller in this course, with the conversations and the plan.
+         *     Other courses, the preferences, the consent and the membership stay.
+         */
+        delete: operations["learner_delete_course_data"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/class-summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Class Summary
+         * @description Aggregates of one module over the course's consenting students; small groups are suppressed.
+         */
+        get: operations["learner_class_summary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/students/{student_id}/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Student Overview
+         * @description One student's overview: only in mode B, after the student's acknowledgement, without an opt-out, and
+         *     only data from after the acknowledgement. Each view is written to the audit log.
+         */
+        get: operations["learner_student_overview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/students/{student_id}/plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Plan */
+        get: operations["learner_plan_get"];
+        /**
+         * Put Plan
+         * @description Set the learning plan of a visible student: KCs of this course to focus on, a goal level, a note.
+         */
+        put: operations["learner_plan_update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1703,6 +1908,16 @@ export interface components {
              */
             choice: "A" | "B" | "C" | "D";
         };
+        /** CheckIn */
+        CheckIn: {
+            /** Item Id */
+            item_id: string;
+            /**
+             * Choice
+             * @enum {string}
+             */
+            choice: "A" | "B" | "C" | "D";
+        };
         /**
          * CheckItemPublic
          * @description A check question as sent to the student: deliberately has no answer key.
@@ -1902,6 +2117,19 @@ export interface components {
             /** Term Label */
             term_label?: string | null;
         };
+        /** CourseProfileOut */
+        CourseProfileOut: {
+            /** Personalized */
+            personalized: boolean;
+            preferences?: components["schemas"]["Preferences"] | null;
+            /**
+             * Modules
+             * @default []
+             */
+            modules: components["schemas"]["ModuleProfile"][];
+            visibility: components["schemas"]["VisibilityOut"];
+            plan?: components["schemas"]["PlanOut"] | null;
+        };
         /** CourseSettingsIn */
         CourseSettingsIn: {
             values: components["schemas"]["CourseValues"];
@@ -1966,6 +2194,32 @@ export interface components {
              * @enum {string}
              */
             choice: "A" | "B" | "C" | "D";
+        };
+        /** EndTermIn */
+        EndTermIn: {
+            /**
+             * Confirm
+             * @constant
+             */
+            confirm: true;
+        };
+        /** EndTermOut */
+        EndTermOut: {
+            /** Export Id */
+            export_id: string;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /** Students Removed */
+            students_removed: number;
+            /** Students Exported */
+            students_exported: number;
+            /** Deleted */
+            deleted: {
+                [key: string]: number;
+            };
         };
         /** EndpointIn */
         EndpointIn: {
@@ -2244,6 +2498,33 @@ export interface components {
             /** Email */
             email: string;
         };
+        /** InstructorProfileView */
+        InstructorProfileView: {
+            /** Student Id */
+            student_id: string;
+            /**
+             * Visible Since
+             * Format: date-time
+             */
+            visible_since: string;
+            /**
+             * Kcs
+             * @default []
+             */
+            kcs: components["schemas"]["KcView"][];
+            /**
+             * Open Misconceptions
+             * @default 0
+             */
+            open_misconceptions: number;
+            /**
+             * Checks Answered
+             * @default 0
+             */
+            checks_answered: number;
+            /** Last Active */
+            last_active?: string | null;
+        };
         /** InviteOut */
         InviteOut: {
             /** Expires At */
@@ -2485,6 +2766,18 @@ export interface components {
                 [key: string]: number | null;
             };
         };
+        /** KcView */
+        KcView: {
+            /** Kc Code */
+            kc_code: string;
+            /**
+             * Level
+             * @enum {string}
+             */
+            level: "basic" | "intermediate" | "advanced";
+            /** P Mastery */
+            p_mastery: number;
+        };
         /** LevelsConfig */
         LevelsConfig: {
             /**
@@ -2645,6 +2938,8 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+            /** Student Id */
+            student_id?: string | null;
         };
         /** MembershipOut */
         MembershipOut: {
@@ -2751,6 +3046,22 @@ export interface components {
             /** Guideline */
             guideline?: string | null;
         };
+        /** ModuleProfile */
+        ModuleProfile: {
+            /** Module Id */
+            module_id: number;
+            /** Code */
+            code: string;
+            /** Title */
+            title: string;
+            /** Kcs */
+            kcs: components["schemas"]["KcBand"][];
+            /**
+             * Misconceptions
+             * @default []
+             */
+            misconceptions: components["schemas"]["OpenMisconception"][];
+        };
         /** NewInviteOut */
         NewInviteOut: {
             /** Expires At */
@@ -2816,10 +3127,34 @@ export interface components {
             /** Answers */
             answers?: components["schemas"]["DiagnosticAnswer"][];
         };
+        /** OnboardingIn */
+        OnboardingIn: {
+            /** Module Id */
+            module_id: number;
+            /** Consent */
+            consent?: boolean | null;
+            /** @default {} */
+            preferences: components["schemas"]["PreferenceAnswers"];
+            /** Answers */
+            answers?: components["schemas"]["DiagnosticAnswer"][];
+        };
         /** OnboardingInfo */
         OnboardingInfo: {
             /** Topic */
             topic: string;
+            /** Consent Text */
+            consent_text: string;
+            /** Consent Given */
+            consent_given: boolean | null;
+            /** Preference Questions */
+            preference_questions: components["schemas"]["PreferenceQuestion"][];
+            /** Diagnostic */
+            diagnostic: components["schemas"]["CheckItemPublic"][];
+        };
+        /** OnboardingOut */
+        OnboardingOut: {
+            /** Module Id */
+            module_id: number;
             /** Consent Text */
             consent_text: string;
             /** Consent Given */
@@ -2874,6 +3209,38 @@ export interface components {
             text: string;
             /** Misconception */
             misconception?: string | null;
+        };
+        /** PlanIn */
+        PlanIn: {
+            /** Focus Kcs */
+            focus_kcs: string[];
+            /**
+             * Goal
+             * @enum {string}
+             */
+            goal: "basic" | "intermediate" | "advanced";
+            /**
+             * Notes
+             * @default
+             */
+            notes: string;
+        };
+        /** PlanOut */
+        PlanOut: {
+            /** Focus Kcs */
+            focus_kcs: string[];
+            /**
+             * Goal
+             * @enum {string}
+             */
+            goal: "basic" | "intermediate" | "advanced";
+            /** Notes */
+            notes: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
         };
         /** PreferenceAnswers */
         PreferenceAnswers: {
@@ -3454,6 +3821,33 @@ export interface components {
             input?: unknown;
             /** Context */
             ctx?: Record<string, never>;
+        };
+        /** VisibilityIn */
+        VisibilityIn: {
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "acknowledge" | "opt_out" | "opt_in";
+        };
+        /**
+         * VisibilityOut
+         * @description What the instructor can see of this student (course-structure.md 4.5).
+         */
+        VisibilityOut: {
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "A" | "B";
+            /** Acknowledged */
+            acknowledged: boolean;
+            /** Opted Out */
+            opted_out: boolean;
+            /** Visible To Instructor */
+            visible_to_instructor: boolean;
+            /** Visible Since */
+            visible_since?: string | null;
         };
     };
     responses: never;
@@ -4672,6 +5066,81 @@ export interface operations {
             };
             /** @description the course still has students (end the term first) */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    courses_end_term: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EndTermIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EndTermOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    courses_export_download: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                export_id: string;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                    "application/zip": unknown;
+                };
+            };
+            /** @description unknown or expired */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6717,6 +7186,344 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ConversationDetailOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    learner_check: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    learner_onboarding_get: {
+        parameters: {
+            query: {
+                module_id: number;
+            };
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OnboardingOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    learner_onboarding_submit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OnboardingIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OnboardingResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    learner_profile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseProfileOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    learner_visibility: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VisibilityIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VisibilityOut"];
+                };
+            };
+            /** @description not possible in this mode */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    learner_delete_course_data: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    learner_class_summary: {
+        parameters: {
+            query: {
+                module_id: number;
+            };
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClassSummary"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    learner_student_overview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                student_id: string;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InstructorProfileView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    learner_plan_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                student_id: string;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    learner_plan_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                student_id: string;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlanIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanOut"];
                 };
             };
             /** @description Validation Error */

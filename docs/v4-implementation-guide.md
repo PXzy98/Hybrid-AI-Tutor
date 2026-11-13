@@ -533,11 +533,12 @@ owner reviews and approves the PR, and the area stays the owner's afterwards (ru
 | part of S4 (follow-up of Z11) | S | indexing accepts a document unless its scan found student data (`ScanResult.blocking`): course material that names its instructor is no longer refused | #55 | review |
 | part of S (bandit B314, found by the Z13 scans) | S | PubMed responses parsed with `defusedxml` | #55 | review |
 | learner data per course (course-structure.md 4.1, 4.4) | S | `course_id` on `learner_kc_state`, `learner_topic_level`, `evidence_log` and `learner_misconception` (existing rows go to the demo course); one `LearnerRepository` per course; `app/learner/course_data.py` exports and deletes one course's learner data | #60 | review |
+| S9 (API v2 endpoints and database side) | S | `app/api/v2/learner.py`: check, course diagnostic, profile, visibility choices, deleting own course data, class summary, individual overview, learning plan; `app/learner/course_views.py` implements `LearnerViewStore`, visibility changes and plans on the database (`learning_plan`, migration 0012) | #62 | review |
 | part of S5 (advisor meeting 2026-11-12) | S | eight open course packs (lectures, syllabi, calendars, assignments, exams; solutions kept instructor-only) as zips in `data/demo_courses/archives/` with manifests, attribution and license; `scripts/fetch_open_courses.py` to unpack and rebuild them; `tests/test_open_course_packs.py` | this PR | review; S5, S11 and T4 use the packs |
 
 From 2026-11-11, by the same decision, Z also works on the remaining S and T tasks of sections 7.2 and 7.3 in
 this way (one PR per task, listed in the table above when it is opened). Not started yet: the API v2
-endpoints of S4, S6, S7, S9 and S10; T3 to T13; the `react-router` 7 and `vite`/`vitest` updates reported by
+endpoints of S4, S6, S7 and S10; the survey of S9; T3 to T13; the `react-router` 7 and `vite`/`vitest` updates reported by
 the CI scans.
 
 ## 8. Workflow

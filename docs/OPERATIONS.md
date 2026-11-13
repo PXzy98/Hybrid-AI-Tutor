@@ -110,6 +110,8 @@ Prometheus, alert rules and Grafana are ready to start (`--profile monitoring`, 
 | The only admin is locked out | on the host: `docker compose exec api python -m app.auth.cli set-password <username>` (also clears the lockout and ends all sessions) |
 | A student forgot the password | the course instructor: `POST /api/v2/courses/{id}/members/{member_id}/reset-password` |
 | Someone else may have the invitation code | the instructor rotates it (`POST .../invite/rotate`); the old code stops working at once |
+| The term is over | the instructor: `POST /api/v2/courses/{id}/end-term` with `{"confirm": true}`. It writes an export (ZIP: class summary; in visibility mode B also the overviews the instructor may see) and then deletes the students' memberships and their data in that course. Download: `GET .../exports/{export_id}` for `limits.courses.export_retention_hours` (72). Files: `courses/<id>/exports/` in the `tutor-data` volume |
+| A student gets 429 on questions | `limits.usage` per student and course (API v2). At the daily cloud limit the answers come from the local model |
 | A settings change made things worse | restore an earlier entry: `POST /api/v2/admin/settings/restore/{history_id}` (or the course's) |
 | Settings show 423 `settings_applying` for long | see apply-status; it rolls back at the timeout. A process that never reports runs the old version: restart it |
 | Many 429 on login | `limits.accounts.login_failures_per_hour` per client address. The api image starts uvicorn with `--proxy-headers`, so the address is the one Caddy reports; uvicorn started another way needs the same flag, or all users share the proxy's address |
@@ -127,8 +129,6 @@ Prometheus, alert rules and Grafana are ready to start (`--profile monitoring`, 
 
 | Missing | Effect for operations | Task |
 |---|---|---|
-| End of term and its export | student data of a finished course cannot be exported and deleted through the API yet; do not archive by deleting rows by hand | Z9 (needs per-course learner data, S) |
-| Usage limits enforced on questions | counters and limits exist; the ask endpoints do not call them yet | v2 ask |
 | Frontend for API v2 | the current frontend uses API v1 and the demo course; course management is API-only for now | T6, T7 |
 | Deployment on the test host; an alert receiver; the vLLM address for scraping | the monitoring stack is ready but not started anywhere yet | Z13 part 2 |
 | Measured capacity on the real vLLM server | sizing is not confirmed; `eval/load-test/run.py` is ready | Z6 load test |
