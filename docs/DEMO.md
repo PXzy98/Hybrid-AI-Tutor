@@ -40,9 +40,10 @@ Default packs, one per area: `mit_hst151_pharmacology`, `mit_7_016_intro_biology
    (the packs have none yet, so this is usually nothing) and asks two questions, which needs a working model
    connection; failures are reported, not fatal.
 
-It ends with a table: course, modules, uploaded, refused, index version. Docker:
-`docker compose exec -e DEMO_INSTRUCTOR_USERNAME=prof -e DEMO_INSTRUCTOR_PASSWORD=<...> api python /app/scripts/build_demo.py --base-url http://127.0.0.1:8000`
-(the packs must then be unpacked in the container's `data/demo_courses/`; run `unpack` there first).
+It ends with a table: course, modules, uploaded, refused, index version. With the Docker Compose stack, run
+the script **on the host** from a checkout of the repository (the image holds neither the script nor the
+packs), pointing it at the stack's proxy, for example `--base-url https://localhost`; it only uses the HTTP
+API.
 
 The six-minute script below is the older single-course (high blood pressure) demo.
 

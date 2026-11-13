@@ -10,6 +10,7 @@ import hashlib
 import tempfile
 from pathlib import Path
 
+from sqlalchemy import text
 from sqlmodel import Session, select
 
 from app.admin.materials import MAX_BYTES, clean_name
@@ -97,17 +98,29 @@ def index_version(engine, course_id: int) -> int:
         return row.version if row else 0
 
 
+LOCK_NAMESPACE = 7301  # pg_advisory_lock(namespace, course_id): one index build per course at a time
+
+
 @jobs.handler(REBUILD)
 async def rebuild(services, job) -> None:
+    """The whole read, build and publish sequence holds a per-course database lock, so two workers never
+    build the same course at once: a later build always starts after an earlier one published, and so
+    always sees the files as they are now (a deleted file cannot come back)."""
     with Session(services.engine) as db:
         course = db.get(Course, job.course_id)
         course_type = course.course_type
     builder = IndexedCourseRetriever(services.settings.data_path(),
                                      scan=privacy_scan_callback(privacy_profile(course_type)))
-    version = await builder.rebuild_in_worker(job.course_id)
-    with Session(services.engine) as db:
-        row = db.get(IndexVersion, job.course_id) or IndexVersion(course_id=job.course_id)
-        row.version, row.built_at = version, utcnow()
-        db.add(row)
-        db.commit()
-    builder.prune(job.course_id)
+    with services.engine.connect() as lock:
+        lock.execute(text("SELECT pg_advisory_lock(:n, :c)"), {"n": LOCK_NAMESPACE, "c": job.course_id})
+        try:
+            version = await builder.rebuild_in_worker(job.course_id)
+            with Session(services.engine) as db:
+                row = db.get(IndexVersion, job.course_id) or IndexVersion(course_id=job.course_id)
+                row.version, row.built_at = version, utcnow()
+                db.add(row)
+                db.commit()
+            builder.prune(job.course_id)
+        finally:
+            lock.execute(text("SELECT pg_advisory_unlock(:n, :c)"), {"n": LOCK_NAMESPACE, "c": job.course_id})
+            lock.commit()

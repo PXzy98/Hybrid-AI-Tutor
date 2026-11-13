@@ -4533,6 +4533,408 @@
         }
       }
     },
+    "/api/v2/courses/{course_id}/ai/drafts": {
+      "post": {
+        "tags": [
+          "instructor-ai"
+        ],
+        "summary": "Create",
+        "description": "Start drafting from the course material with the local model (a job; the draft is `generating`).",
+        "operationId": "ai_drafts_create",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__api__v2__ai_drafts__DraftIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__api__v2__ai_drafts__DraftOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "instructor-ai"
+        ],
+        "summary": "List Drafts",
+        "operationId": "ai_drafts_list",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "generating",
+                    "draft",
+                    "accepted",
+                    "discarded",
+                    "failed"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "project_ideas",
+                    "sample_proposal",
+                    "faq",
+                    "kcs",
+                    "check_items",
+                    "misconceptions"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kind"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DraftSummary"
+                  },
+                  "title": "Response Ai Drafts List"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/courses/{course_id}/ai/drafts/{draft_id}": {
+      "get": {
+        "tags": [
+          "instructor-ai"
+        ],
+        "summary": "Get Draft",
+        "operationId": "ai_drafts_get",
+        "parameters": [
+          {
+            "name": "draft_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Draft Id"
+            }
+          },
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__api__v2__ai_drafts__DraftOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "instructor-ai"
+        ],
+        "summary": "Update Draft",
+        "description": "Replace the content of a draft (the whole content, in the shape it was returned in).",
+        "operationId": "ai_drafts_update",
+        "parameters": [
+          {
+            "name": "draft_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Draft Id"
+            }
+          },
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DraftPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__api__v2__ai_drafts__DraftOut"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "the draft is not in `draft` status"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "instructor-ai"
+        ],
+        "summary": "Discard",
+        "description": "Discard a draft that was not accepted (accepted content is edited as normal content).",
+        "operationId": "ai_drafts_discard",
+        "parameters": [
+          {
+            "name": "draft_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Draft Id"
+            }
+          },
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/courses/{course_id}/ai/drafts/{draft_id}/accept": {
+      "post": {
+        "tags": [
+          "instructor-ai"
+        ],
+        "summary": "Accept",
+        "description": "Publish the draft: tier 2 into the content tables (KCs, check items and misconceptions become\n`active`, all or none), tier 1 as a Markdown course material. Students see it only from here on.",
+        "operationId": "ai_drafts_accept",
+        "parameters": [
+          {
+            "name": "draft_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Draft Id"
+            }
+          },
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AcceptOut"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "the draft is not in `draft` status"
+          },
+          "422": {
+            "description": "the content checks or the material scan refused it"
+          }
+        }
+      }
+    },
+    "/api/v2/courses/{course_id}/insights": {
+      "get": {
+        "tags": [
+          "instructor-ai"
+        ],
+        "summary": "Insights",
+        "description": "Tier 3: which KCs the students asked about most and the most common misconceptions. Counts of KC and\nmisconception codes only, never question text; a label is shown only when at least\n`learner.class_summary_min_group` different students contributed to it (and to the whole result).",
+        "operationId": "insights_get",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsightsOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/courses/{course_id}/ask": {
       "post": {
         "tags": [
@@ -5563,7 +5965,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DraftIn"
+                "$ref": "#/components/schemas/app__api__v2__quizzes__DraftIn"
               }
             }
           }
@@ -5574,7 +5976,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DraftOut"
+                  "$ref": "#/components/schemas/app__api__v2__quizzes__DraftOut"
                 }
               }
             }
@@ -5854,6 +6256,57 @@
   },
   "components": {
     "schemas": {
+      "AcceptIn": {
+        "properties": {
+          "module_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Module Id"
+          }
+        },
+        "type": "object",
+        "title": "AcceptIn"
+      },
+      "AcceptOut": {
+        "properties": {
+          "draft": {
+            "$ref": "#/components/schemas/app__api__v2__ai_drafts__DraftOut"
+          },
+          "created": {
+            "additionalProperties": {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            "type": "object",
+            "title": "Created"
+          },
+          "rebuild_job_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rebuild Job Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "draft",
+          "created"
+        ],
+        "title": "AcceptOut"
+      },
       "AdminConfig": {
         "properties": {
           "values": {
@@ -7359,58 +7812,81 @@
         ],
         "title": "DiagnosticAnswer"
       },
-      "DraftIn": {
+      "DraftPatch": {
         "properties": {
-          "count": {
+          "content": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Content"
+          }
+        },
+        "type": "object",
+        "required": [
+          "content"
+        ],
+        "title": "DraftPatch"
+      },
+      "DraftSummary": {
+        "properties": {
+          "id": {
             "type": "integer",
-            "maximum": 20.0,
-            "minimum": 1.0,
-            "title": "Count",
-            "default": 5
+            "title": "Id"
           },
-          "kinds": {
-            "items": {
-              "type": "string",
-              "enum": [
-                "mcq",
-                "true_false"
-              ]
-            },
-            "type": "array",
-            "minItems": 1,
-            "title": "Kinds"
+          "kind": {
+            "type": "string",
+            "enum": [
+              "project_ideas",
+              "sample_proposal",
+              "faq",
+              "kcs",
+              "check_items",
+              "misconceptions"
+            ],
+            "title": "Kind"
           },
-          "kc_codes": {
+          "module_id": {
             "anyOf": [
               {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array",
-                "maxItems": 50
+                "type": "integer"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Kc Codes"
-          }
-        },
-        "type": "object",
-        "title": "DraftIn"
-      },
-      "DraftOut": {
-        "properties": {
-          "job_id": {
-            "type": "integer",
-            "title": "Job Id"
+            "title": "Module Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "generating",
+              "draft",
+              "accepted",
+              "discarded",
+              "failed"
+            ],
+            "title": "Status"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
           }
         },
         "type": "object",
         "required": [
-          "job_id"
+          "id",
+          "kind",
+          "module_id",
+          "status",
+          "created_at",
+          "updated_at"
         ],
-        "title": "DraftOut"
+        "title": "DraftSummary"
       },
       "EndTermIn": {
         "properties": {
@@ -8163,6 +8639,40 @@
           "rejected"
         ],
         "title": "ImportReportOut"
+      },
+      "InsightsOut": {
+        "properties": {
+          "min_group": {
+            "type": "integer",
+            "title": "Min Group"
+          },
+          "suppressed": {
+            "type": "boolean",
+            "title": "Suppressed"
+          },
+          "kc_question_counts": {
+            "items": {
+              "$ref": "#/components/schemas/LabelCountOut"
+            },
+            "type": "array",
+            "title": "Kc Question Counts"
+          },
+          "misconception_counts": {
+            "items": {
+              "$ref": "#/components/schemas/LabelCountOut"
+            },
+            "type": "array",
+            "title": "Misconception Counts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "min_group",
+          "suppressed",
+          "kc_question_counts",
+          "misconception_counts"
+        ],
+        "title": "InsightsOut"
       },
       "InstructorIn": {
         "properties": {
@@ -9019,6 +9529,36 @@
           "p_mastery"
         ],
         "title": "KcView"
+      },
+      "LabelCountOut": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "name",
+          "count"
+        ],
+        "title": "LabelCountOut"
       },
       "LevelsConfig": {
         "properties": {
@@ -12921,6 +13461,208 @@
           "closes_at"
         ],
         "title": "WindowIn"
+      },
+      "app__api__v2__ai_drafts__DraftIn": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "project_ideas",
+              "sample_proposal",
+              "faq",
+              "kcs",
+              "check_items",
+              "misconceptions"
+            ],
+            "title": "Kind"
+          },
+          "module_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Module Id"
+          },
+          "focus": {
+            "type": "string",
+            "maxLength": 300,
+            "title": "Focus",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind"
+        ],
+        "title": "DraftIn"
+      },
+      "app__api__v2__ai_drafts__DraftOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "project_ideas",
+              "sample_proposal",
+              "faq",
+              "kcs",
+              "check_items",
+              "misconceptions"
+            ],
+            "title": "Kind"
+          },
+          "module_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Module Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "generating",
+              "draft",
+              "accepted",
+              "discarded",
+              "failed"
+            ],
+            "title": "Status"
+          },
+          "content": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Content"
+          },
+          "cited_sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Cited Sources"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "job_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Job Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "module_id",
+          "status",
+          "content",
+          "cited_sources",
+          "error",
+          "created_by",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "DraftOut"
+      },
+      "app__api__v2__quizzes__DraftIn": {
+        "properties": {
+          "count": {
+            "type": "integer",
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Count",
+            "default": 5
+          },
+          "kinds": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "mcq",
+                "true_false"
+              ]
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Kinds"
+          },
+          "kc_codes": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array",
+                "maxItems": 50
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kc Codes"
+          }
+        },
+        "type": "object",
+        "title": "DraftIn"
+      },
+      "app__api__v2__quizzes__DraftOut": {
+        "properties": {
+          "job_id": {
+            "type": "integer",
+            "title": "Job Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "job_id"
+        ],
+        "title": "DraftOut"
       }
     }
   }

@@ -251,12 +251,16 @@ def build_course(api: Api, pack: str, packs_dir: Path = PACKS_DIR,
             continue
         last_job = upload(api, course["id"], path, document_name(relative), None, report) or last_job
 
-    job = ok(api.get(f"{url}/materials"), "listing materials")
-    last_job = job["rebuild_job_id"] or last_job
-    if last_job is not None:
+    # wait for the last upload's rebuild, then for any rebuild still outstanding (a worker may have started
+    # one while files were still arriving, so a newer one can be queued behind it)
+    seen: set[int] = set()
+    while last_job is not None and last_job not in seen and len(seen) < 20:
+        seen.add(last_job)
         state = wait_for_job(api, course["id"], last_job, sleep)
         if state != "done":
             report.failed.append(f"index rebuild: {state}")
+            break
+        last_job = ok(api.get(f"{url}/materials"), "listing materials")["rebuild_job_id"]
     report.index_version = ok(api.get(f"{url}/materials"), "listing materials")["index_version"]
     return report
 
