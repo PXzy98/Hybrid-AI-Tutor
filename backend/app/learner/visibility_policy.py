@@ -71,6 +71,19 @@ class ActivityRecord:
     kind: Literal["question", "check", "session"]
 
 
+@dataclass(frozen=True)
+class PreferenceRecord:
+    """The student's answer preferences (global, not per course); `created_at` is when they last changed, so
+    preferences set before the acknowledgement stay hidden like every other record."""
+
+    course_id: int
+    student_id: str
+    created_at: datetime
+    sequencing: str
+    detail: str
+    source: str  # onboarding | feedback | implicit
+
+
 
 
 def _aware(value: datetime | None) -> bool:

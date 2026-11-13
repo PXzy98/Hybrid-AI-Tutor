@@ -98,7 +98,8 @@ chat banner and during **Personalize**.
 
 In mode B:
 - **I understand and agree** starts the sharing. The instructor then sees your progress bands, open
-  misconceptions, check-question counts, quiz results and when you were last active, **only from that moment on**
+  misconceptions, check-question counts, quiz results, your answer style (example or idea first, short or
+  detailed) if you set or change it afterwards, and when you were last active, **only from that moment on**
   (older data stays hidden).
 - **Stop sharing with my instructor** (opt out): "Your instructor cannot see your progress." The instructor sees
   that you chose not to share, nothing individual, and cannot write a plan for you. Your data still counts in

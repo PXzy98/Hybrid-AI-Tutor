@@ -212,6 +212,8 @@ Rules:
 - Mode A → B: `visible_since` stays null until the student acknowledges (then it is set to the
   acknowledgement time).
 - The overview shows only data created after `visible_since`.
+- Preferences are global (D1) and have one time, `learner_preference.updated_at`: the overview shows them only
+  when they were set or changed after `visible_since`.
 
 ### 4.6 Quizzes
 

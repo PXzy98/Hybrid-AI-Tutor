@@ -23,6 +23,7 @@ from app.learner.visibility_policy import (
     CheckAnswerRecord,
     LearnerSignal,
     MisconceptionRecord,
+    PreferenceRecord,
     VisibilityState,
 )
 from app.platform.settings import effective_settings
@@ -32,6 +33,7 @@ from app.storage.models import (
     CourseMember,
     EvidenceLog,
     LearnerMisconception,
+    LearnerPreference,
     QuizAttempt,
     RequestLog,
     SessionTurn,
@@ -169,6 +171,16 @@ class DbLearnerViewStore:
     def activity(self, course_id: int, student_id: str) -> Sequence[ActivityRecord]:
         return [ActivityRecord(course_id, student_id, r.created_at, "question")
                 for r in self._rows(RequestLog, course_id, student_id)]
+
+    def preferences(self, course_id: int, student_id: str) -> Sequence[PreferenceRecord]:
+        """The student's preferences once the student has set them (the default is not shown)."""
+        with Session(self.engine) as db:
+            stmt = select(LearnerPreference).where(LearnerPreference.student_id == student_id)
+            row = db.exec(stmt).first()
+        if row is None or row.source == "default":
+            return []
+        return [PreferenceRecord(course_id, student_id, row.updated_at, row.sequencing, row.detail,
+                                 row.source)]
 
     def audit_view(self, course_id: int, student_id: str, viewer_account_id: int,
                    action: str = "learner.overview.view") -> bool:

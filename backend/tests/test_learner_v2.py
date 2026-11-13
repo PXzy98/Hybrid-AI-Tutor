@@ -142,6 +142,18 @@ def test_instructor_plan_reads_are_audited(world):
     assert len(views) == 2 and views[0]["details"] == {"student_id": world.sid}
 
 
+def test_preferences_show_in_the_overview_only_when_set_after_the_acknowledgement(world):
+    alice = _login(world.app, "alice")
+    alice.put(f"{V2}/me/preferences", json={"detail": "detailed"})  # before: stays hidden
+    set_mode(world, "B")
+    alice.post(f"{world.url}/me/visibility", json={"action": "acknowledge"})
+    overview = f"{world.url}/students/{world.sid}/overview"
+    assert world.prof.get(overview).json()["preferences"] is None
+    alice.put(f"{V2}/me/preferences", json={"sequencing": "concept_first"})
+    prefs = world.prof.get(overview).json()["preferences"]
+    assert prefs == {"sequencing": "concept_first", "detail": "detailed", "source": "feedback"}
+
+
 def test_other_people_cannot_use_the_learner_endpoints(world):
     world.accounts = world.services.accounts
     world.accounts.create_instructor("other", "correct-horse-battery", must_change=False)

@@ -2973,6 +2973,7 @@ export interface components {
              * @default []
              */
             kcs?: components["schemas"]["KcView"][];
+            preferences?: components["schemas"]["PreferencesView"] | null;
             /**
              * Open Misconceptions
              * @default 0
@@ -3801,6 +3802,15 @@ export interface components {
             sequencing?: ("example_first" | "concept_first") | null;
             /** Detail */
             detail?: ("concise" | "detailed") | null;
+        };
+        /** PreferencesView */
+        PreferencesView: {
+            /** Sequencing */
+            sequencing: string;
+            /** Detail */
+            detail: string;
+            /** Source */
+            source: string;
         };
         /** ProcessOut */
         ProcessOut: {

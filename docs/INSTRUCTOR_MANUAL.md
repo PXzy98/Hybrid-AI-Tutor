@@ -113,7 +113,7 @@ agrees, and then only data after that moment is shown. Tell your students when y
 
 **Students** lists students with **Progress sharing**: **Visible**, **Not visible** or **Not shared**.
 **View progress** opens one student: levels per topic, check questions answered, open misconceptions, last
-active. This works **only in mode B, after the student agreed, while they have not opted out, and only for data
+active, and **Answer style** (shown only when the student set or changed it after agreeing). This works **only in mode B, after the student agreed, while they have not opted out, and only for data
 after they agreed**; otherwise "This student's progress is not visible." **Every view is written to the audit
 log.** Question text is never stored, so it cannot be shown.
 
