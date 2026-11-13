@@ -38,3 +38,7 @@ def test_course_types_need_a_login(make_client):
         types = world.prof.get(f"{V2}/course-types").json()
         assert {"general", "ece", "life_science", "medical_science"} <= set(types)
         assert csrf_client(world.app).get(f"{V2}/course-types").status_code == 401
+        service = world.services.settings_service
+        values, version = service.system_values()[0], service.system_values()[1]
+        service.save_system({**values, "enabled_course_types": []}, expected_version=version, account_id=None)
+        assert world.prof.get(f"{V2}/course-types").json() == []  # creation is switched off

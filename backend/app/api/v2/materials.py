@@ -1,5 +1,6 @@
 """Course material (api-v2.md 3.4; course-structure.md 7): upload, list, delete. Each upload is scanned
 before it is stored (`app.rag.index_jobs`); a change starts an index rebuild job (`GET .../jobs/{id}`)."""
+import asyncio
 from datetime import datetime
 from typing import Annotated
 
@@ -55,7 +56,8 @@ def list_materials(access: CourseInstructor, request: Request):
         rows = db.exec(select(Material).where(Material.course_id == access.course.id)
                        .order_by(col(Material.module_id), col(Material.filename))).all()
         job = db.exec(select(Job).where(Job.kind == index_jobs.REBUILD, Job.course_id == access.course.id,
-                                        col(Job.status).in_(["queued", "running"]))).first()
+                                        col(Job.status).in_(["queued", "running"]))
+                     .order_by(col(Job.id).desc())).first()  # the newest: it sees every file
     return MaterialsOut(index_version=index_jobs.index_version(services.engine, access.course.id),
                         rebuild_job_id=job.id if job else None, materials=[_out(r) for r in rows])
 
@@ -75,7 +77,9 @@ async def upload(access: CourseInstructor, request: Request,
             raise ApiError(404, ErrorCode.not_found, "module not found")
     data = await file.read(MAX_BYTES + 1)
     try:
-        name = index_jobs.check_upload(file.filename or "", data, access.course.course_type)
+        # extraction and the privacy scan take seconds on a large file: off the event loop
+        name = await asyncio.to_thread(index_jobs.check_upload, file.filename or "", data,
+                                       access.course.course_type)
     except index_jobs.MaterialRefused as e:
         raise ApiError(422, ErrorCode.invalid, str(e)) from None
     try:
