@@ -119,8 +119,9 @@ def end_term(engine: Engine, data_root: Path, scope: CourseScope, access: Course
 
     deleted = delete_course_data(engine, course_id)  # learner state, levels, evidence, misconceptions
     with Session(engine) as db:
-        for table in (LearningPlan, SessionTurn, RequestLog, UsageCounter, QuizAttempt, CourseSurveyResponse,
-                      CourseSurveySubmission, SurveyWindow):
+        # the survey window first: its row lock orders this against answers in flight (api/v2/survey.py)
+        for table in (SurveyWindow, LearningPlan, SessionTurn, RequestLog, UsageCounter, QuizAttempt,
+                      CourseSurveyResponse, CourseSurveySubmission):
             deleted[table.__tablename__] = db.exec(delete(table).where(table.course_id == course_id)).rowcount
         db.exec(update(Quiz).where(Quiz.course_id == course_id, Quiz.status == "published")
                 .values(status="closed"))
