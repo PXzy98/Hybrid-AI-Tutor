@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -8,8 +8,8 @@ afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 const members = [
   { id: 1, role: "instructor", status: "active", account_id: 2, username: "ida", display_name: "Ida Instructor", email: "ida@example.test", created_at: "2026-09-01T00:00:00Z", student_id: null },
-  { id: 2, role: "student", status: "active", account_id: 3, username: "ana", display_name: "Ana Example", email: "ana@example.test", created_at: "2026-09-02T00:00:00Z", student_id: "stu-ana" },
-  { id: 3, role: "student", status: "active", account_id: 4, username: "ben", display_name: "Ben Example", email: "ben@example.test", created_at: "2026-09-02T00:00:00Z", student_id: "stu-ben" },
+  { id: 2, role: "student", status: "active", account_id: 3, username: "ana", display_name: "Ana Example", email: "ana@example.test", created_at: "2026-09-02T00:00:00Z", student_id: "stu-ana", visible_to_instructor: true },
+  { id: 3, role: "student", status: "active", account_id: 4, username: "ben", display_name: "Ben Example", email: "ben@example.test", created_at: "2026-09-02T00:00:00Z", student_id: "stu-ben", visible_to_instructor: false },
   { id: 4, role: "student", status: "pending", account_id: null, username: null, display_name: null, email: "cy@example.test", created_at: "2026-09-03T00:00:00Z", student_id: null },
 ];
 
@@ -23,14 +23,25 @@ describe("instructor students", () => {
     ...extra,
   });
 
-  it("shows a clear not-visible state when the API answers 404, and requests nothing for students not opened", async () => {
+  it("shows each student's visibility state and only offers the overview when the API says it is visible", async () => {
     const calls = mockApi(routes());
     renderApp("/courses/1/students");
-    const user = userEvent.setup();
     await screen.findByText("Ben Example");
+    const row = (name: string) => screen.getByText(name).closest("tr")!;
+    expect(within(row("Ana Example")).getByText("Visible")).toBeInTheDocument();
+    expect(within(row("Ben Example")).getByText("Not visible")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "View progress of Ana Example" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "View progress of Ben Example" })).not.toBeInTheDocument();
     expect(screen.getByText("Not joined yet")).toBeInTheDocument();
     expect(calls.some((c) => c.path.includes("/overview"))).toBe(false);
-    await user.click(screen.getByRole("button", { name: "View progress of Ben Example" }));
+  });
+
+  it("still explains a 404 from the overview as not visible", async () => {
+    mockApi(routes({
+      "GET /courses/1/members": members.map((m) => (m.student_id === "stu-ben" ? { ...m, visible_to_instructor: true } : m)),
+    }));
+    renderApp("/courses/1/students");
+    await userEvent.setup().click(await screen.findByRole("button", { name: "View progress of Ben Example" }));
     expect(await screen.findByText("This student's progress is not visible.")).toBeInTheDocument();
     expect(screen.getByText(/visibility mode B/)).toBeInTheDocument();
     expect(screen.queryByRole("form", { name: "Learning plan" })).not.toBeInTheDocument();
@@ -108,5 +119,69 @@ describe("class overview", () => {
     mockApi(instructorRoutes({ "GET /courses/1/class-summary": { topic: "t", min_group: 5, suppressed: true } }));
     renderApp("/courses/1/overview");
     expect(await screen.findByText(/Fewer than 5 students have a learning profile/)).toBeInTheDocument();
+  });
+});
+
+describe("materials", () => {
+  const file = { id: 1, module_id: null as number | null, filename: "syllabus.pdf", size_bytes: 20480, scan_status: "clean", uploaded_at: "2026-11-01T00:00:00Z" };
+
+  it("uploads with a module, shows the index rebuild until the job is done", async () => {
+    let list = { index_version: 1, rebuild_job_id: null as number | null, materials: [file] };
+    let polls = 0;
+    const calls = mockApi(instructorRoutes({
+      "GET /courses/1/materials": () => list,
+      "POST /courses/1/materials": () => {
+        list = { index_version: 1, rebuild_job_id: 5, materials: [file, { ...file, id: 2, module_id: 10, filename: "week1.md" }] };
+        return reply({ material: list.materials[1], job_id: 5 }, 201);
+      },
+      "GET /courses/1/jobs/5": () => {
+        polls += 1;
+        const done = polls > 1;
+        if (done) list = { ...list, index_version: 2, rebuild_job_id: null };
+        return { id: 5, kind: "index.rebuild", status: done ? "done" : "running", progress: 0, error: null, created_at: "", started_at: null, finished_at: null };
+      },
+    }));
+    renderApp("/courses/1/materials");
+    const user = userEvent.setup();
+    expect(await screen.findByText("syllabus.pdf")).toBeInTheDocument();
+    await user.selectOptions(screen.getByLabelText("Module"), "10");
+    await user.upload(screen.getByLabelText("File"), new File(["# Week 1"], "week1.md", { type: "text/markdown" }));
+    await user.click(screen.getByRole("button", { name: "Upload" }));
+    expect(await screen.findByText(/Rebuilding the search index/)).toBeInTheDocument();
+    const post = calls.find((c) => c.method === "POST" && c.path === "/courses/1/materials")!;
+    expect((post.form!.get("file") as File).name).toBe("week1.md");
+    expect(post.form!.get("module_id")).toBe("10");
+    expect(post.headers["X-CSRF-Token"]).toBe("test-token");
+    expect(await screen.findByText("week1.md")).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByText(/Rebuilding the search index/)).not.toBeInTheDocument(), { timeout: 5000 });
+    expect(await screen.findByText("Index version 2")).toBeInTheDocument();
+  });
+
+  it("shows the server's message naming the privacy findings when a file is refused", async () => {
+    mockApi(instructorRoutes({
+      "GET /courses/1/materials": { index_version: 1, rebuild_job_id: null, materials: [] },
+      "POST /courses/1/materials": () => reply({ detail: "The file looks like it contains student data (STUDENT_ID, PERSON).", code: "invalid" }, 422),
+    }));
+    renderApp("/courses/1/materials");
+    const user = userEvent.setup();
+    await user.upload(await screen.findByLabelText("File"), new File(["x"], "grades.txt", { type: "text/plain" }));
+    await user.click(screen.getByRole("button", { name: "Upload" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("STUDENT_ID, PERSON");
+  });
+
+  it("asks for confirmation before deleting a file", async () => {
+    let list = { index_version: 1, rebuild_job_id: null as number | null, materials: [file] };
+    const calls = mockApi(instructorRoutes({
+      "GET /courses/1/materials": () => list,
+      "DELETE /courses/1/materials/1": () => { list = { ...list, materials: [] }; return new Response(null, { status: 204 }); },
+    }));
+    renderApp("/courses/1/materials");
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: "Delete syllabus.pdf" }));
+    expect(calls.some((c) => c.method === "DELETE")).toBe(false);
+    expect(await screen.findByText(/search index is rebuilt without it/)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Delete file" }));
+    await waitFor(() => expect(calls.some((c) => c.method === "DELETE" && c.path === "/courses/1/materials/1")).toBe(true));
+    expect(await screen.findByText("No files yet.")).toBeInTheDocument();
   });
 });

@@ -130,6 +130,31 @@ describe("my progress", () => {
   });
 });
 
+describe("cloud notice", () => {
+  it("is not shown when the course is local-only", async () => {
+    mockApi(studentRoutes({ "GET /courses": [{ ...COURSE, local_only: true }] }));
+    renderApp("/courses/1/chat");
+    await screen.findByLabelText("Your question");
+    expect(screen.queryByText(/may be sent to a cloud model/)).not.toBeInTheDocument();
+  });
+});
+
+describe("delete my learning data", () => {
+  it("explains what is deleted and calls the endpoint only after confirming", async () => {
+    const calls = mockApi(studentRoutes({ "DELETE /courses/1/me/learning-data": () => new Response(null, { status: 204 }) }));
+    renderApp("/courses/1/progress");
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: "Delete my learning data in this course" }));
+    expect(await screen.findByText(/Other courses are not affected/)).toBeInTheDocument();
+    expect(calls.some((c) => c.method === "DELETE")).toBe(false);
+    await user.click(screen.getByRole("button", { name: "Delete my data" }));
+    expect(await screen.findByText("Your learning data in this course was deleted.")).toBeInTheDocument();
+    const del = calls.find((c) => c.method === "DELETE")!;
+    expect(del.path).toBe("/courses/1/me/learning-data");
+    expect(del.headers["X-CSRF-Token"]).toBe("test-token");
+  });
+});
+
 describe("SSE client", () => {
   it("parses split UTF-8, CRLF frames, progress and a final result", async () => {
     resetCsrf(`t`);

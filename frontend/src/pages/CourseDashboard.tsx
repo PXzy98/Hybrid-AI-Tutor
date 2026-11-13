@@ -10,6 +10,7 @@ import { useI18n } from "@/i18n";
 import type { MessageKey } from "@/i18n/en";
 import Content from "./instructor/Content";
 import EndOfTerm from "./instructor/EndOfTerm";
+import Materials from "./instructor/Materials";
 import Members from "./instructor/Members";
 import InstructorQuizzes from "./instructor/Quizzes";
 import Overview from "./instructor/Overview";
@@ -55,6 +56,7 @@ function Dashboard({ course, student, tab }: { course: Course; student: boolean;
         { id: "students", label: "tab.students", node: <Students course={course} /> },
         { id: "content", label: "tab.content", node: <Content course={course} /> },
         { id: "members", label: "tab.members", node: <Members course={course} /> },
+        { id: "materials", label: "tab.materials", node: <Materials course={course} /> },
         { id: "settings", label: "tab.settings", node: <Settings course={course} /> },
         { id: "endterm", label: "tab.endterm", node: <EndOfTerm course={course} /> },
         { id: "quizzes", label: "tab.quizzes", node: <InstructorQuizzes course={course} /> },

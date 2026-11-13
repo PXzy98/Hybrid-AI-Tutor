@@ -16,9 +16,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ErrorNote, ThemeToggle } from "./common";
 import ErrorBoundary from "./ErrorBoundary";
 
-// course types are the privacy profiles of the backend (backend/app/privacy/profiles)
-const COURSE_TYPES = ["general", "ece", "life_science", "medical_science"];
-
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   cn("block truncate rounded-md px-3 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring",
     isActive ? "bg-accent font-medium text-accent-foreground" : "hover:bg-muted");
@@ -145,8 +142,10 @@ function NewCourse() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ code: "", title: "", course_type: "general", term_label: "" });
+  const types = useQuery({ queryKey: ["course-types"], queryFn: api.courseTypes, enabled: open });
+  const courseType = types.data?.includes(form.course_type) ? form.course_type : types.data?.[0] ?? form.course_type;
   const create = useMutation({
-    mutationFn: () => api.createCourse(form),
+    mutationFn: () => api.createCourse({ ...form, course_type: courseType }),
     onSuccess: async (course) => {
       await qc.invalidateQueries({ queryKey: ["courses"] });
       setOpen(false);
@@ -172,8 +171,8 @@ function NewCourse() {
           <div className="grid gap-1.5"><Label htmlFor="nc-title">{t("course.title")}</Label>
             <Input id="nc-title" value={form.title} onChange={set("title")} required /></div>
           <div className="grid gap-1.5"><Label htmlFor="nc-type">{t("course.type")}</Label>
-            <Select id="nc-type" value={form.course_type} onChange={set("course_type")}>
-              {COURSE_TYPES.map((c) => <option key={c} value={c}>{c}</option>)}
+            <Select id="nc-type" value={courseType} onChange={set("course_type")}>
+              {(types.data ?? []).map((c) => <option key={c} value={c}>{c}</option>)}
             </Select></div>
           <div className="grid gap-1.5"><Label htmlFor="nc-term">{t("course.term")}</Label>
             <Input id="nc-term" value={form.term_label} onChange={set("term_label")} /></div>

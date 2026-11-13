@@ -1920,12 +1920,12 @@ export interface components {
              * Session Id
              * @default
              */
-            session_id: string;
+            session_id?: string;
             /**
              * Course Id
              * @default default
              */
-            course_id: string;
+            course_id?: string;
             /** Topic */
             topic: string;
             /** Question */
@@ -1934,7 +1934,7 @@ export interface components {
              * Language
              * @default en
              */
-            language: string;
+            language?: string;
             /** Routing Method */
             routing_method?: ("lr" | "svm") | null;
         };
@@ -1957,14 +1957,14 @@ export interface components {
              * Conversation Id
              * @default
              */
-            conversation_id: string;
+            conversation_id?: string;
             /** Routing Method */
             routing_method?: ("lr" | "svm") | null;
             /**
              * Language
              * @default en
              */
-            language: string;
+            language?: string;
         };
         /** AskOut */
         AskOut: {
@@ -1976,7 +1976,7 @@ export interface components {
              * Sources
              * @default []
              */
-            sources: components["schemas"]["Source"][];
+            sources?: components["schemas"]["Source"][];
             /** Model Used */
             model_used: string;
             /**
@@ -1994,17 +1994,17 @@ export interface components {
              * Checks
              * @default []
              */
-            checks: components["schemas"]["CheckResult"][];
+            checks?: components["schemas"]["CheckResult"][];
             /**
              * Warnings
              * @default []
              */
-            warnings: string[];
+            warnings?: string[];
             /**
              * Timings Ms
              * @default {}
              */
-            timings_ms: {
+            timings_ms?: {
                 [key: string]: number;
             };
             /** Routing Method */
@@ -2014,7 +2014,7 @@ export interface components {
              * Routing Progress
              * @default []
              */
-            routing_progress: components["schemas"]["RoutingProgress"][];
+            routing_progress?: components["schemas"]["RoutingProgress"][];
             /** Conversation Id */
             conversation_id: string;
         };
@@ -2028,7 +2028,7 @@ export interface components {
              * Sources
              * @default []
              */
-            sources: components["schemas"]["Source"][];
+            sources?: components["schemas"]["Source"][];
             /** Model Used */
             model_used: string;
             /**
@@ -2046,17 +2046,17 @@ export interface components {
              * Checks
              * @default []
              */
-            checks: components["schemas"]["CheckResult"][];
+            checks?: components["schemas"]["CheckResult"][];
             /**
              * Warnings
              * @default []
              */
-            warnings: string[];
+            warnings?: string[];
             /**
              * Timings Ms
              * @default {}
              */
-            timings_ms: {
+            timings_ms?: {
                 [key: string]: number;
             };
             /** Routing Method */
@@ -2066,7 +2066,7 @@ export interface components {
              * Routing Progress
              * @default []
              */
-            routing_progress: components["schemas"]["RoutingProgress"][];
+            routing_progress?: components["schemas"]["RoutingProgress"][];
         };
         /** AttemptIn */
         AttemptIn: {
@@ -2135,7 +2135,7 @@ export interface components {
              * Session Id
              * @default
              */
-            session_id: string;
+            session_id?: string;
             /** Item Id */
             item_id: string;
             /**
@@ -2199,7 +2199,7 @@ export interface components {
              * Detail
              * @default
              */
-            detail: string;
+            detail?: string;
         };
         /** Choice */
         Choice: {
@@ -2222,17 +2222,17 @@ export interface components {
              * Kcs
              * @default []
              */
-            kcs: components["schemas"]["KcSummary"][];
+            kcs?: components["schemas"]["KcSummary"][];
             /**
              * Misconceptions
              * @default []
              */
-            misconceptions: components["schemas"]["MisconceptionSummary"][];
+            misconceptions?: components["schemas"]["MisconceptionSummary"][];
             /**
              * Misconceptions Hidden
              * @default 0
              */
-            misconceptions_hidden: number;
+            misconceptions_hidden?: number;
         };
         /** ConfigChange */
         ConfigChange: {
@@ -2269,7 +2269,7 @@ export interface components {
              * Serve Unreviewed
              * @default false
              */
-            serve_unreviewed: boolean;
+            serve_unreviewed?: boolean;
             /** Topics */
             topics: components["schemas"]["TopicContentStatus"][];
         };
@@ -2313,7 +2313,7 @@ export interface components {
              * Term Label
              * @default
              */
-            term_label: string;
+            term_label?: string;
         };
         /** CourseOut */
         CourseOut: {
@@ -2347,7 +2347,7 @@ export interface components {
              * Local Only
              * @default false
              */
-            local_only: boolean;
+            local_only?: boolean;
         };
         /** CoursePatch */
         CoursePatch: {
@@ -2367,7 +2367,7 @@ export interface components {
              * Modules
              * @default []
              */
-            modules: components["schemas"]["ModuleProfile"][];
+            modules?: components["schemas"]["ModuleProfile"][];
             visibility: components["schemas"]["VisibilityOut"];
             plan?: components["schemas"]["PlanOut"] | null;
         };
@@ -2413,7 +2413,7 @@ export interface components {
              * Display Name
              * @default
              */
-            display_name: string;
+            display_name?: string;
         };
         /** CreatedStudent */
         CreatedStudent: {
@@ -2442,7 +2442,7 @@ export interface components {
              * Count
              * @default 5
              */
-            count: number;
+            count?: number;
             /** Kinds */
             kinds?: ("mcq" | "true_false")[];
             /** Kc Codes */
@@ -2497,14 +2497,14 @@ export interface components {
              * @default external
              * @enum {string}
              */
-            trust: "trusted_local" | "external";
+            trust?: "trusted_local" | "external";
             /** Api Key */
             api_key?: string | null;
             /**
              * Confirm Controlled
              * @default false
              */
-            confirm_controlled: boolean;
+            confirm_controlled?: boolean;
         };
         /** EndpointOut */
         EndpointOut: {
@@ -2551,7 +2551,7 @@ export interface components {
              * Confirm Controlled
              * @default false
              */
-            confirm_controlled: boolean;
+            confirm_controlled?: boolean;
         };
         /** ErrorBody */
         ErrorBody: {
@@ -2570,7 +2570,7 @@ export interface components {
              * Questions Per Module
              * @default 5
              */
-            questions_per_module: number;
+            questions_per_module?: number;
             /** Question Types */
             question_types?: ("concept" | "application" | "logistics")[] | null;
         };
@@ -2644,37 +2644,37 @@ export interface components {
              * Retrieved Count
              * @default 0
              */
-            retrieved_count: number;
+            retrieved_count?: number;
             /**
              * Accepted Indices
              * @default []
              */
-            accepted_indices: number[];
+            accepted_indices?: number[];
             /**
              * Relevant Indices
              * @default []
              */
-            relevant_indices: number[];
+            relevant_indices?: number[];
             /**
              * Checked
              * @default false
              */
-            checked: boolean;
+            checked?: boolean;
             /**
              * Coverage
              * @default 0
              */
-            coverage: number;
+            coverage?: number;
             /**
              * Support Scores
              * @default []
              */
-            support_scores: number[];
+            support_scores?: number[];
             /**
              * Reason
              * @default
              */
-            reason: string;
+            reason?: string;
         };
         /** FeedbackBody */
         FeedbackBody: {
@@ -2769,17 +2769,17 @@ export interface components {
              * Kcs
              * @default []
              */
-            kcs: components["schemas"]["KcView"][];
+            kcs?: components["schemas"]["KcView"][];
             /**
              * Open Misconceptions
              * @default 0
              */
-            open_misconceptions: number;
+            open_misconceptions?: number;
             /**
              * Checks Answered
              * @default 0
              */
-            checks_answered: number;
+            checks_answered?: number;
             /** Last Active */
             last_active?: string | null;
         };
@@ -2827,13 +2827,13 @@ export interface components {
              * Explanation
              * @default
              */
-            explanation: string;
+            explanation?: string;
             /**
              * Status
              * @default active
              * @enum {string}
              */
-            status: "draft" | "active";
+            status?: "draft" | "active";
         };
         /** ItemOut */
         ItemOut: {
@@ -2952,7 +2952,7 @@ export interface components {
              * Definition
              * @default
              */
-            definition: string;
+            definition?: string;
             /**
              * Difficulty
              * @enum {string}
@@ -2962,7 +2962,7 @@ export interface components {
              * Prerequisite Ids
              * @default []
              */
-            prerequisite_ids: number[];
+            prerequisite_ids?: number[];
         };
         /** KcOut */
         KcOut: {
@@ -3042,17 +3042,17 @@ export interface components {
              * Basic Below
              * @default 0.4
              */
-            basic_below: number;
+            basic_below?: number;
             /**
              * Advanced Above
              * @default 0.7
              */
-            advanced_above: number;
+            advanced_above?: number;
             /**
              * Hysteresis
              * @default 0.05
              */
-            hysteresis: number;
+            hysteresis?: number;
         };
         /** LogEntry */
         LogEntry: {
@@ -3259,7 +3259,7 @@ export interface components {
              * @default active
              * @enum {string}
              */
-            status: "draft" | "active";
+            status?: "draft" | "active";
         };
         /** MisconceptionOut */
         MisconceptionOut: {
@@ -3311,7 +3311,7 @@ export interface components {
              * Guideline
              * @default
              */
-            guideline: string;
+            guideline?: string;
         };
         /** ModuleOut */
         ModuleOut: {
@@ -3347,7 +3347,7 @@ export interface components {
              * Misconceptions
              * @default []
              */
-            misconceptions: components["schemas"]["OpenMisconception"][];
+            misconceptions?: components["schemas"]["OpenMisconception"][];
         };
         /** NewInviteOut */
         NewInviteOut: {
@@ -3401,7 +3401,7 @@ export interface components {
              * Model Available
              * @default false
              */
-            model_available: boolean;
+            model_available?: boolean;
         };
         /** OnboardingBody */
         OnboardingBody: {
@@ -3410,7 +3410,7 @@ export interface components {
             /** Consent */
             consent?: boolean | null;
             /** @default {} */
-            preferences: components["schemas"]["PreferenceAnswers"];
+            preferences?: components["schemas"]["PreferenceAnswers"];
             /** Answers */
             answers?: components["schemas"]["DiagnosticAnswer"][];
         };
@@ -3421,7 +3421,7 @@ export interface components {
             /** Consent */
             consent?: boolean | null;
             /** @default {} */
-            preferences: components["schemas"]["PreferenceAnswers"];
+            preferences?: components["schemas"]["PreferenceAnswers"];
             /** Answers */
             answers?: components["schemas"]["DiagnosticAnswer"][];
         };
@@ -3459,19 +3459,19 @@ export interface components {
              * Assessed
              * @default {}
              */
-            assessed: {
+            assessed?: {
                 [key: string]: boolean;
             };
             /**
              * Skipped
              * @default []
              */
-            skipped: string[];
+            skipped?: string[];
             /**
              * Kcs
              * @default []
              */
-            kcs: components["schemas"]["KcBand"][];
+            kcs?: components["schemas"]["KcBand"][];
         };
         /**
          * OpenMisconception
@@ -3524,7 +3524,7 @@ export interface components {
              * Notes
              * @default
              */
-            notes: string;
+            notes?: string;
         };
         /** PlanOut */
         PlanOut: {
@@ -3569,19 +3569,19 @@ export interface components {
              * @default example_first
              * @enum {string}
              */
-            sequencing: "example_first" | "concept_first";
+            sequencing?: "example_first" | "concept_first";
             /**
              * Detail
              * @default concise
              * @enum {string}
              */
-            detail: "concise" | "detailed";
+            detail?: "concise" | "detailed";
             /**
              * Source
              * @default default
              * @enum {string}
              */
-            source: "default" | "onboarding" | "feedback";
+            source?: "default" | "onboarding" | "feedback";
         };
         /** PreferencesIn */
         PreferencesIn: {
@@ -3613,7 +3613,7 @@ export interface components {
              * Topics
              * @default []
              */
-            topics: components["schemas"]["TopicProfile"][];
+            topics?: components["schemas"]["TopicProfile"][];
         };
         /**
          * PublicQuestion
@@ -3645,7 +3645,7 @@ export interface components {
              * Reference
              * @default
              */
-            reference: string;
+            reference?: string;
         };
         /** QuestionStat */
         QuestionStat: {
@@ -3672,7 +3672,7 @@ export interface components {
              * @default practice
              * @enum {string}
              */
-            kind: "practice" | "final";
+            kind?: "practice" | "final";
             /** Opens At */
             opens_at?: string | null;
             /** Closes At */
@@ -3765,14 +3765,14 @@ export interface components {
              * Explanation
              * @default
              */
-            explanation: string;
+            explanation?: string;
             /** Sources */
             sources?: string[];
             /**
              * Reviewed
              * @default true
              */
-            reviewed: boolean;
+            reviewed?: boolean;
         };
         /** QuizResults */
         QuizResults: {
@@ -3790,7 +3790,7 @@ export interface components {
              * Questions
              * @default []
              */
-            questions: components["schemas"]["QuestionStat"][];
+            questions?: components["schemas"]["QuestionStat"][];
             /** Pre Post */
             pre_post?: {
                 [key: string]: unknown;
@@ -3799,7 +3799,7 @@ export interface components {
              * Students
              * @default []
              */
-            students: components["schemas"]["StudentResult"][];
+            students?: components["schemas"]["StudentResult"][];
         };
         /** RagMaterial */
         RagMaterial: {
@@ -3818,7 +3818,7 @@ export interface components {
              * Passage Count
              * @default 0
              */
-            passage_count: number;
+            passage_count?: number;
             /** Message */
             message?: string | null;
         };
@@ -3844,7 +3844,7 @@ export interface components {
              * Reasons
              * @default []
              */
-            reasons: string[];
+            reasons?: string[];
             /** Target */
             target?: ("local" | "cloud") | null;
             /** Method */
@@ -3855,7 +3855,7 @@ export interface components {
              * Accepted Indices
              * @default []
              */
-            accepted_indices: number[];
+            accepted_indices?: number[];
         };
         /** RoutingMethodOption */
         RoutingMethodOption: {
@@ -3890,7 +3890,7 @@ export interface components {
              * Detail
              * @default
              */
-            detail: string;
+            detail?: string;
         };
         /** RunIn */
         RunIn: {
@@ -3898,7 +3898,7 @@ export interface components {
              * Confirm Cloud
              * @default false
              */
-            confirm_cloud: boolean;
+            confirm_cloud?: boolean;
         };
         /** RuntimeConfig */
         RuntimeConfig: {
@@ -3908,7 +3908,7 @@ export interface components {
              * Show Routing Progress
              * @default true
              */
-            show_routing_progress: boolean;
+            show_routing_progress?: boolean;
             /** Checkers */
             checkers: string[];
             /** Knowledge */
@@ -3929,53 +3929,53 @@ export interface components {
              * Cloud Probability
              * @default 1
              */
-            cloud_probability: number;
+            cloud_probability?: number;
             /**
              * Evidence Probability
              * @default 1
              */
-            evidence_probability: number;
+            evidence_probability?: number;
             /**
              * Freshness Probability
              * @default 0
              */
-            freshness_probability: number;
+            freshness_probability?: number;
             /**
              * Nearest Similarity
              * @default 0
              */
-            nearest_similarity: number;
+            nearest_similarity?: number;
             /**
              * Requires Evidence
              * @default true
              */
-            requires_evidence: boolean;
+            requires_evidence?: boolean;
             /**
              * Requires Fresh Evidence
              * @default false
              */
-            requires_fresh_evidence: boolean;
+            requires_fresh_evidence?: boolean;
             /**
              * Reliable
              * @default false
              */
-            reliable: boolean;
+            reliable?: boolean;
             /**
              * Label Origin
              * @default unavailable
              */
-            label_origin: string;
+            label_origin?: string;
             /**
              * Reason
              * @default semantic models unavailable
              */
-            reason: string;
+            reason?: string;
             /**
              * Question Kind
              * @default concept
              * @enum {string}
              */
-            question_kind: "concept" | "logistics";
+            question_kind?: "concept" | "logistics";
         };
         /** ServerStatus */
         ServerStatus: {
@@ -3987,7 +3987,7 @@ export interface components {
              * Models
              * @default []
              */
-            models: string[];
+            models?: string[];
             /** Latency Ms */
             latency_ms?: number | null;
             /** Error */
@@ -4017,7 +4017,7 @@ export interface components {
              * Kc Ids
              * @default []
              */
-            kc_ids: string[];
+            kc_ids?: string[];
         };
         /** SpotCheckIn */
         SpotCheckIn: {
@@ -4027,7 +4027,7 @@ export interface components {
              * Note
              * @default
              */
-            note: string;
+            note?: string;
         };
         /** StaffIn */
         StaffIn: {
@@ -4040,7 +4040,7 @@ export interface components {
              * @default instructor
              * @enum {string}
              */
-            role: "instructor" | "admin";
+            role?: "instructor" | "admin";
         };
         /** StaffOut */
         StaffOut: {
@@ -4119,7 +4119,7 @@ export interface components {
              * Questions
              * @default []
              */
-            questions: components["schemas"]["PublicQuestion"][];
+            questions?: components["schemas"]["PublicQuestion"][];
             attempt?: components["schemas"]["OwnAttempt"] | null;
         };
         /** StudentResult */
@@ -4297,7 +4297,7 @@ export interface components {
              * Rag Materials
              * @default []
              */
-            rag_materials: components["schemas"]["RagMaterial"][];
+            rag_materials?: components["schemas"]["RagMaterial"][];
         };
         /** TopicInfo */
         TopicInfo: {
@@ -4309,12 +4309,12 @@ export interface components {
              * Kc Count
              * @default 0
              */
-            kc_count: number;
+            kc_count?: number;
             /**
              * Reviewed Item Count
              * @default 0
              */
-            reviewed_item_count: number;
+            reviewed_item_count?: number;
         };
         /** TopicProfile */
         TopicProfile: {
@@ -4328,7 +4328,7 @@ export interface components {
              * Misconceptions
              * @default []
              */
-            misconceptions: components["schemas"]["OpenMisconception"][];
+            misconceptions?: components["schemas"]["OpenMisconception"][];
         };
         /** Turn */
         Turn: {

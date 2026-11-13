@@ -32,9 +32,8 @@ export default function Quizzes({ course }: { course: Course }) {
 function QuizCard({ course, quiz }: { course: Course; quiz: StudentQuiz }) {
   const { t } = useI18n();
   const qc = useQueryClient();
-  const [answers, setAnswers] = useState<(number | null)[]>(() => quiz.questions.map(() => null));
-  // the questions are only sent before the first answer, so they are kept to show next to the result
-  const [asked] = useState(quiz.questions);
+  const questions = quiz.questions ?? [];
+  const [answers, setAnswers] = useState<(number | null)[]>(() => questions.map(() => null));
   const submit = useMutation({
     mutationFn: () => api.attemptQuiz(course.id, quiz.id, answers as number[]),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["quizzes", course.id] }),
@@ -63,7 +62,7 @@ function QuizCard({ course, quiz }: { course: Course; quiz: StudentQuiz }) {
             <p className="font-medium">{t("quiz.score", { })}: {attempt.score} / {attempt.total}</p>
             <ol className="space-y-3">
               {attempt.results.map((r, i) => {
-                const q = asked[i];
+                const q = questions[i];
                 return (
                   <li key={i} className="rounded-md border p-3 text-sm">
                     <p className="flex items-center gap-2 font-medium">
@@ -72,7 +71,7 @@ function QuizCard({ course, quiz }: { course: Course; quiz: StudentQuiz }) {
                     </p>
                     {q && <p className="mt-1">{q.stem}</p>}
                     <p className="text-muted-foreground">
-                      {t("quiz.yourAnswer")}: {q ? q.options[r.chosen] : r.chosen + 1} · {t("quiz.rightAnswer")}: {q ? q.options[r.answer] : r.answer + 1}
+                      {t("quiz.yourAnswer")}: {q ? (q.options ?? [])[r.chosen] : r.chosen + 1} · {t("quiz.rightAnswer")}: {q ? (q.options ?? [])[r.answer] : r.answer + 1}
                     </p>
                     {r.explanation && <p className="mt-1">{r.explanation}</p>}
                   </li>
@@ -82,10 +81,10 @@ function QuizCard({ course, quiz }: { course: Course; quiz: StudentQuiz }) {
           </div>
         ) : quiz.open ? (
           <form onSubmit={send} className="space-y-4" aria-label={quiz.title}>
-            {quiz.questions.map((q, i) => (
+            {questions.map((q, i) => (
               <fieldset key={i} className="space-y-2">
                 <legend className="text-sm"><span className="font-medium">{i + 1}.</span> {q.stem}</legend>
-                {q.options.map((o, j) => (
+                {(q.options ?? []).map((o, j) => (
                   <label key={j} className="flex cursor-pointer items-start gap-2 rounded-md border bg-card px-3 py-2 text-sm">
                     <input type="radio" name={`quiz-${quiz.id}-${i}`} className="mt-0.5 accent-primary" checked={answers[i] === j}
                            onChange={() => setAnswers(answers.map((a, k) => (k === i ? j : a)))} />

@@ -106,7 +106,7 @@ function KcsCard({ course }: { course: Course }) {
   const [form, setForm] = useState({ module_id: 0, code: "", name: "", definition: "", difficulty: "basic" as Difficulty });
   const moduleId = form.module_id || modules.data?.[0]?.id || 0;
   const create = useMutation({
-    mutationFn: () => api.createKc(course.id, { ...form, module_id: moduleId, prerequisite_ids: [] }),
+    mutationFn: () => api.createKc(course.id, { ...form, module_id: moduleId }),
     onSuccess: () => { setForm({ ...form, code: "", name: "", definition: "" }); refresh(); },
   });
   const retire = useMutation({ mutationFn: (id: number) => api.updateKc(course.id, id, { status: "retired" }), onSuccess: refresh });
@@ -158,7 +158,7 @@ function ItemsCard({ course }: { course: Course }) {
   const kcId = form.kc_id || kcs.data?.[0]?.id || 0;
   const create = useMutation({
     mutationFn: () => api.createCheckItem(course.id, {
-      kc_id: kcId, code: form.code, level: form.level, stem: form.stem, answer: form.answer, explanation: form.explanation, status: "active",
+      kc_id: kcId, code: form.code, level: form.level, stem: form.stem, answer: form.answer, explanation: form.explanation,
       options: Object.fromEntries(CHOICES.map((c) => [c, { text: form.options[c] }])),
     }),
     onSuccess: () => { setForm({ ...blank, kc_id: kcId }); refresh(); },

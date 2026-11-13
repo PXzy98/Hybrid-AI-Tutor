@@ -16,7 +16,7 @@ describe("student quiz", () => {
     const calls = mockApi(studentRoutes({
       "GET /courses/1/quizzes": () => [{
         id: 3, title: "Week 1 check", module_id: null, kind: "practice", open: attempt === null, opens_at: null, closes_at: null,
-        questions: attempt ? [] : [
+        questions: [
           { kind: "mcq", stem: "Unit of resistance?", options: ["Ohm", "Volt"] },
           { kind: "true_false", stem: "Current is measured in amperes.", options: ["True", "False"] },
         ],
@@ -46,6 +46,23 @@ describe("student quiz", () => {
     expect(post.body).toEqual({ answers: [0, 1] });
     expect(post.headers["X-CSRF-Token"]).toBe("test-token");
     await waitFor(() => expect(screen.queryByRole("button", { name: "Submit answers" })).not.toBeInTheDocument());
+  });
+});
+
+describe("student quiz after a reload", () => {
+  it("shows the question text and options next to the stored result", async () => {
+    mockApi(studentRoutes({
+      "GET /courses/1/quizzes": [{
+        id: 3, title: "Week 1 check", module_id: null, kind: "practice", open: false, opens_at: null, closes_at: null,
+        questions: [{ kind: "mcq", stem: "Unit of resistance?", options: ["Ohm", "Volt"] }],
+        attempt: { score: 0, total: 1, submitted_at: "2026-11-10T00:00:00Z", results: [{ correct: false, chosen: 1, answer: 0, explanation: "Ohm is the unit." }] },
+      }],
+    }));
+    renderApp("/courses/1/quizzes");
+    const status = await screen.findByRole("status");
+    expect(within(status).getByText("Unit of resistance?")).toBeInTheDocument();
+    expect(status).toHaveTextContent("Your answer: Volt");
+    expect(status).toHaveTextContent("Correct answer: Ohm");
   });
 });
 

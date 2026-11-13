@@ -328,7 +328,7 @@ function ResultsView({ course, id, onClose }: { course: Course; id: number; onCl
                 <CardContent>
                   <Table>
                     <TableHeader><TableRow><TableHead>{t("quiz.question")}</TableHead><TableHead>KC</TableHead><TableHead>{t("quiz.correctRate")}</TableHead></TableRow></TableHeader>
-                    <TableBody>{r.questions.map((q) => (
+                    <TableBody>{(r.questions ?? []).map((q) => (
                       <TableRow key={q.position}><TableCell>{q.position + 1}</TableCell><TableCell>{q.kc ?? "—"}</TableCell><TableCell className="tabular-nums">{pct(q.correct_rate)}</TableCell></TableRow>
                     ))}</TableBody>
                   </Table>
@@ -348,12 +348,12 @@ function ResultsView({ course, id, onClose }: { course: Course; id: number; onCl
           <Card>
             <CardHeader><CardTitle>{t("quiz.students")}</CardTitle><CardDescription>{t("quiz.studentsHint")}</CardDescription></CardHeader>
             <CardContent>
-              {r.students.length === 0 ? <p className="text-sm text-muted-foreground">{t("quiz.noStudents")}</p> : (
+              {(r.students ?? []).length === 0 ? <p className="text-sm text-muted-foreground">{t("quiz.noStudents")}</p> : (
                 <Table>
-                  <TableHeader><TableRow><TableHead>{t("members.name")}</TableHead><TableHead>{t("quiz.score")}</TableHead>{r.students.some((s) => s.pre_test != null) && <TableHead>{t("quiz.pre")}</TableHead>}</TableRow></TableHeader>
-                  <TableBody>{r.students.map((s) => (
+                  <TableHeader><TableRow><TableHead>{t("members.name")}</TableHead><TableHead>{t("quiz.score")}</TableHead>{(r.students ?? []).some((s) => s.pre_test != null) && <TableHead>{t("quiz.pre")}</TableHead>}</TableRow></TableHeader>
+                  <TableBody>{(r.students ?? []).map((s) => (
                     <TableRow key={s.student_id}><TableCell>{name(s.student_id)}</TableCell><TableCell className="tabular-nums">{s.score}/{s.total}</TableCell>
-                      {r.students.some((x) => x.pre_test != null) && <TableCell className="tabular-nums">{pct(s.pre_test)}</TableCell>}</TableRow>
+                      {(r.students ?? []).some((x) => x.pre_test != null) && <TableCell className="tabular-nums">{pct(s.pre_test)}</TableCell>}</TableRow>
                   ))}</TableBody>
                 </Table>
               )}

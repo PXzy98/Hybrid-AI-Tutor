@@ -1,11 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 import { api, type Course, type CourseProfile, type VisibilityAction } from "@/api/endpoints";
 import Band from "@/components/Band";
 import { ErrorNote } from "@/components/common";
 import { Alert } from "@/components/ui/alert";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -73,7 +75,10 @@ export default function Progress({ course }: { course: Course }) {
           </>
         )}
       </div>
-      <VisibilityCard course={course} profile={data} />
+      <div className="space-y-4">
+        <VisibilityCard course={course} profile={data} />
+        <DeleteData course={course} />
+      </div>
     </div>
   );
 }
@@ -139,6 +144,43 @@ function VisibilityCard({ course, profile }: { course: Course; profile: CoursePr
           </>
         )}
         <ErrorNote error={change.error} />
+      </CardContent>
+    </Card>
+  );
+}
+
+/** Deletes the student's own learning data in this course, after a confirmation that says what goes. */
+function DeleteData({ course }: { course: Course }) {
+  const { t } = useI18n();
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const remove = useMutation({
+    mutationFn: () => api.deleteLearningData(course.id),
+    onSuccess: async () => {
+      setOpen(false);
+      await qc.invalidateQueries({ queryKey: ["profile", course.id] });
+      qc.invalidateQueries({ queryKey: ["conversations", course.id] });
+    },
+  });
+  return (
+    <Card>
+      <CardHeader><CardTitle>{t("del.title")}</CardTitle><CardDescription>{t("del.hint")}</CardDescription></CardHeader>
+      <CardContent className="space-y-3">
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild><Button type="button" variant="destructive">{t("del.button")}</Button></DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t("del.confirmTitle")}</DialogTitle>
+              <DialogDescription>{t("del.confirmBody")}</DialogDescription>
+            </DialogHeader>
+            <ErrorNote error={remove.error} />
+            <DialogFooter>
+              <DialogClose asChild><Button type="button" variant="outline">{t("end.cancel")}</Button></DialogClose>
+              <Button type="button" variant="destructive" disabled={remove.isPending} onClick={() => remove.mutate()}>{t("del.confirm")}</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        {remove.isSuccess && <p role="status" className="text-sm text-emerald-700 dark:text-emerald-300">{t("del.done")}</p>}
       </CardContent>
     </Card>
   );

@@ -25,9 +25,6 @@ type Message =
 
 type SendInput = { question: string; traceId: string };
 
-/** Students cannot read the course settings, so the notice is shown unless the course is known to be local-only. */
-const COURSE_KNOWN_LOCAL_ONLY = false;
-
 export default function Chat({ course }: { course: Course }) {
   const [params] = useSearchParams();
   const conversationId = params.get("c");
@@ -71,7 +68,7 @@ function ChatPane({ course, initialConversation, moduleId }: { course: Course; i
       setPartial("");
       return api.askStream(course.id, {
         question: input.question, module_id: moduleId, language: "en",
-        conversation_id: conversation ?? "",
+        ...(conversation ? { conversation_id: conversation } : {}),
       }, (event) => {
         if (event.type === "meta") updateTrace(input.traceId, { visible: event.data.show_progress, method: event.data.method });
         if (event.type === "progress") updateTrace(input.traceId, {}, event.data);
@@ -158,7 +155,7 @@ function ChatPane({ course, initialConversation, moduleId }: { course: Course; i
         </div>
       )}
       <form onSubmit={send} className="sticky bottom-0 flex flex-col gap-2 rounded-2xl border bg-card p-3 shadow-sm">
-        {!COURSE_KNOWN_LOCAL_ONLY && <CloudNotice />}
+        {!course.local_only && <CloudNotice />}
         <label htmlFor="question" className="sr-only">{t("chat.question")}</label>
         <div className="flex gap-2">
           <Textarea id="question" rows={2} className="resize-y border-0 shadow-none focus-visible:ring-0" placeholder={t("chat.placeholder")}

@@ -39,7 +39,7 @@ export default function Students({ course }: { course: Course }) {
             <Table>
               <TableHeader><TableRow>
                 <TableHead>{t("members.name")}</TableHead><TableHead>{t("members.email")}</TableHead>
-                <TableHead>{t("members.status")}</TableHead><TableHead><span className="sr-only">{t("students.actions")}</span></TableHead>
+                <TableHead>{t("members.status")}</TableHead><TableHead>{t("students.visibility")}</TableHead><TableHead><span className="sr-only">{t("students.actions")}</span></TableHead>
               </TableRow></TableHeader>
               <TableBody>
                 {students.map((m) => (
@@ -47,17 +47,24 @@ export default function Students({ course }: { course: Course }) {
                     <TableCell className="font-medium">{m.display_name ?? "—"}</TableCell>
                     <TableCell>{m.email ?? "—"}</TableCell>
                     <TableCell><Badge variant={m.status === "active" ? "success" : "secondary"}>{t(`members.status.${m.status}`)}</Badge></TableCell>
+                    <TableCell>
+                      {m.student_id && m.status === "active" && (
+                        <Badge variant={m.visible_to_instructor ? "warning" : "secondary"}>
+                          {t(m.visible_to_instructor ? "students.visible" : "students.hidden")}
+                        </Badge>
+                      )}
+                    </TableCell>
                     <TableCell className="text-right">
-                      {m.student_id && m.status === "active" ? (
+                      {m.student_id && m.status === "active" && m.visible_to_instructor ? (
                         <Button type="button" size="sm" variant="outline" aria-label={t("students.viewFor", { name: m.display_name ?? "" })}
                                 onClick={() => setOpen(open === m.student_id ? null : m.student_id ?? null)}>
                           {open === m.student_id ? t("students.hide") : t("students.view")}
                         </Button>
-                      ) : <span className="text-xs text-muted-foreground">{t("students.notJoined")}</span>}
+                      ) : <span className="text-xs text-muted-foreground">{t(m.status === "active" ? "students.notShared" : "students.notJoined")}</span>}
                     </TableCell>
                   </TableRow>
                 ))}
-                {students.length === 0 && <TableRow><TableCell colSpan={4} className="text-muted-foreground">{t("students.none")}</TableCell></TableRow>}
+                {students.length === 0 && <TableRow><TableCell colSpan={5} className="text-muted-foreground">{t("students.none")}</TableCell></TableRow>}
               </TableBody>
             </Table>
           </CardContent>

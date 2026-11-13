@@ -61,8 +61,8 @@ export default function RoutingProgress({ trace }: { trace: RoutingTrace }) {
       {trace.details && (
         <div className="mt-3 border-t pt-2 text-xs">
           <strong>{t("routing.selected", { target: trace.details.target?.toUpperCase() ?? "" })}</strong>
-          {trace.details.analysis && <span>{t("routing.cloudNeed", { p: (trace.details.analysis.cloud_probability * 100).toFixed(1) })}</span>}
-          {trace.details.evidence && <p>{t("routing.evidence", { status: trace.details.evidence.status, p: (trace.details.evidence.coverage * 100).toFixed(0) })}</p>}
+          {trace.details.analysis && <span>{t("routing.cloudNeed", { p: ((trace.details.analysis.cloud_probability ?? 0) * 100).toFixed(1) })}</span>}
+          {trace.details.evidence && <p>{t("routing.evidence", { status: trace.details.evidence.status, p: ((trace.details.evidence.coverage ?? 0) * 100).toFixed(0) })}</p>}
           {trace.details.analysis?.label_origin === "prototype_policy" && <p className="mt-1 text-amber-700 dark:text-amber-300">{t("routing.prototype")}</p>}
         </div>
       )}

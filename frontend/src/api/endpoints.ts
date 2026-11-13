@@ -39,6 +39,8 @@ export type DraftBody = Schemas["DraftIn"];
 export type Job = Schemas["JobOut"];
 export type Survey = Schemas["SurveyOut"];
 export type SurveyAnswers = Schemas["SurveyAnswers"];
+export type Materials = Schemas["MaterialsOut"];
+export type Material = Schemas["MaterialOut"];
 export type Difficulty = Schemas["KcOut"]["difficulty"];
 
 const c = (id: number) => `/courses/${id}`;
@@ -58,6 +60,7 @@ export const api = {
   join: (input: Schemas["JoinIn"]) => request<Schemas["JoinOut"]>("POST", "/auth/join", input),
 
   // courses and content
+  courseTypes: () => request<string[]>("GET", "/course-types"),
   courses: () => request<Course[]>("GET", "/courses"),
   createCourse: (input: Schemas["CourseIn"]) => request<Course>("POST", "/courses", input),
   course: (id: number) => request<Course>("GET", c(id)),
@@ -115,6 +118,17 @@ export const api = {
   studentPlan: (id: number, studentId: string) => request<Plan>("GET", `${c(id)}/students/${encodeURIComponent(studentId)}/plan`),
   savePlan: (id: number, studentId: string, plan: PlanBody) =>
     request<Plan>("PUT", `${c(id)}/students/${encodeURIComponent(studentId)}/plan`, plan),
+
+  // materials
+  materials: (id: number) => request<Materials>("GET", `${c(id)}/materials`),
+  uploadMaterial: (id: number, file: File, moduleId: number | null) => {
+    const form = new FormData();
+    form.append("file", file);
+    if (moduleId !== null) form.append("module_id", String(moduleId));
+    return upload<Schemas["UploadOut"]>(`${c(id)}/materials`, form);
+  },
+  deleteMaterial: (id: number, materialId: number) => request<void>("DELETE", `${c(id)}/materials/${materialId}`),
+  deleteLearningData: (id: number) => request<void>("DELETE", `${c(id)}/me/learning-data`),
 
   // quizzes
   quizzes: (id: number) => request<Quiz[]>("GET", `${c(id)}/quizzes`),
