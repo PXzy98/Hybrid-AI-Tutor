@@ -15,6 +15,7 @@ import { Select } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/i18n";
+import type { MessageKey } from "@/i18n/en";
 
 const GOALS = ["basic", "intermediate", "advanced"] as const;
 
@@ -113,6 +114,15 @@ function StudentDetail({ course, studentId, name }: { course: Course; studentId:
               <p><span className="text-muted-foreground">{t("students.misconceptions")}</span> <strong>{shown.open_misconceptions ?? 0}</strong></p>
               <p><span className="text-muted-foreground">{t("students.lastActive")}</span> <strong>{shown.last_active ? new Date(shown.last_active).toLocaleDateString() : "—"}</strong></p>
             </div>
+            <p className="text-sm">
+              <span className="text-muted-foreground">{t("students.preferences")}</span>{" "}
+              <strong>{shown.preferences
+                ? t("students.preferencesValue", {
+                    sequencing: t(`me.pref.${shown.preferences.sequencing}` as MessageKey),
+                    detail: t(`me.pref.${shown.preferences.detail}` as MessageKey),
+                  })
+                : t("students.preferencesNone")}</strong>
+            </p>
             <ul className="space-y-1.5">
               {shown.kcs?.map((k) => (
                 <li key={k.kc_code} className="flex items-center justify-between gap-3 text-sm">

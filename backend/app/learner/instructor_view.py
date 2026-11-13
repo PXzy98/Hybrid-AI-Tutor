@@ -18,6 +18,7 @@ from app.learner.visibility_policy import (
     CheckAnswerRecord,
     LearnerSignal,
     MisconceptionRecord,
+    PreferenceRecord,
     VisibilityDenied,
     VisibilityState,
     instructor_visible_records,
@@ -36,10 +37,17 @@ class KcView(BaseModel):
     p_mastery: float
 
 
+class PreferencesView(BaseModel):
+    sequencing: str  # example_first | concept_first
+    detail: str  # concise | detailed
+    source: str  # how they were set: onboarding | feedback | implicit
+
+
 class InstructorProfileView(BaseModel):
     student_id: str
     visible_since: datetime
     kcs: list[KcView] = []
+    preferences: PreferencesView | None = None  # only when set or changed after visible_since
     open_misconceptions: int = 0
     checks_answered: int = 0
     last_active: datetime | None = None
@@ -53,6 +61,7 @@ class LearnerViewStore(Protocol):
     def check_answers(self, course_id: int, student_id: str) -> Sequence[CheckAnswerRecord]: ...
     def misconceptions(self, course_id: int, student_id: str) -> Sequence[MisconceptionRecord]: ...
     def activity(self, course_id: int, student_id: str) -> Sequence[ActivityRecord]: ...
+    # optional: `preferences(course_id, student_id) -> Sequence[PreferenceRecord]`
 
     def audit_view(self, course_id: int, student_id: str, viewer_account_id: int) -> bool:
         """Durably record the view; return exactly True on success."""
@@ -79,8 +88,10 @@ def profile_for_instructor(viewer: CourseAccess, student_id: str, *,
     state = store.visibility(course_id, student_id)
     if state is None or (state.course_id, state.student_id) != (course_id, student_id):
         raise NotVisible("individual overviews are not available")
+    prefs = getattr(store, "preferences", None)
     records = [*store.kc_signals(course_id, student_id), *store.check_answers(course_id, student_id),
-               *store.misconceptions(course_id, student_id), *store.activity(course_id, student_id)]
+               *store.misconceptions(course_id, student_id), *store.activity(course_id, student_id),
+               *(prefs(course_id, student_id) if prefs else ())]
     try:
         # One gate and one audit for every part of the overview.
         shown = instructor_visible_records(
@@ -104,11 +115,15 @@ def profile_for_instructor(viewer: CourseAccess, student_id: str, *,
     misconceptions = [r for r in shown if isinstance(r, MisconceptionRecord)]
     for record in sorted(misconceptions, key=lambda r: r.created_at):  # the latest state of each
         open_mc[record.misconception_id] = record
+    prefs_shown = [r for r in shown if isinstance(r, PreferenceRecord)]
+    pref = max(prefs_shown, key=lambda r: r.created_at, default=None)
     return InstructorProfileView(
         student_id=student_id, visible_since=state.visible_since, kcs=kcs,
+        preferences=PreferencesView(sequencing=pref.sequencing, detail=pref.detail, source=pref.source)
+        if pref else None,
         open_misconceptions=sum(not r.resolved for r in open_mc.values()),
         checks_answered=sum(isinstance(r, CheckAnswerRecord) for r in shown),
-        last_active=max((r.created_at for r in shown), default=None),
+        last_active=max((r.created_at for r in shown if not isinstance(r, PreferenceRecord)), default=None),
     )
 
 

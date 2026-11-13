@@ -3,6 +3,7 @@ in a course, and what the instructor may see. Rule 9: what must not be seen is n
 import pytest
 from sqlmodel import Session
 
+from app.learner.preference import PreferenceSignal
 from app.storage.models import CourseMember
 from tests.test_ask_v2 import V2, World, _login, rows
 
@@ -140,6 +141,29 @@ def test_instructor_plan_reads_are_audited(world):
     alice.get(f"{world.url}/me/profile")  # the student's own read is not an instructor view
     views = [a for a in rows("audit_log") if a["action"] == "learner.plan.view"]
     assert len(views) == 2 and views[0]["details"] == {"student_id": world.sid}
+
+
+def test_preferences_show_in_the_overview_only_when_set_after_the_acknowledgement(world):
+    alice = _login(world.app, "alice")
+    alice.put(f"{V2}/me/preferences", json={"detail": "detailed"})  # before: stays hidden
+    set_mode(world, "B")
+    alice.post(f"{world.url}/me/visibility", json={"action": "acknowledge"})
+    overview = f"{world.url}/students/{world.sid}/overview"
+    assert world.prof.get(overview).json()["preferences"] is None
+    alice.put(f"{V2}/me/preferences", json={"sequencing": "concept_first"})
+    prefs = world.prof.get(overview).json()["preferences"]
+    assert prefs == {"sequencing": "concept_first", "detail": "detailed", "source": "feedback"}
+
+
+def test_implicit_hints_do_not_reveal_preferences_set_before_the_acknowledgement(world):
+    alice = _login(world.app, "alice")
+    alice.put(f"{V2}/me/preferences", json={"detail": "detailed"})  # before: stays hidden
+    set_mode(world, "B")
+    alice.post(f"{world.url}/me/visibility", json={"action": "acknowledge"})
+    # a hint below the streak threshold only updates the counters, not the preferences
+    world.services.learner.update_preferences(world.sid, PreferenceSignal(
+        dimension="detail", value="detailed", explicit=False, source="implicit"))
+    assert world.prof.get(f"{world.url}/students/{world.sid}/overview").json()["preferences"] is None
 
 
 def test_other_people_cannot_use_the_learner_endpoints(world):

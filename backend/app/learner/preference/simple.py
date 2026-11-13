@@ -23,7 +23,7 @@ class SimplePreferenceModel:
 
     def update(self, student_id: str, signal: PreferenceSignal) -> Preferences:
         row = self.repo.preference_row(student_id)
-        prefs = self.get(student_id)
+        prefs = before = self.get(student_id)
         implicit: dict = dict(row.implicit) if row else {}
         dim = signal.dimension
         if signal.explicit:
@@ -38,5 +38,5 @@ class SimplePreferenceModel:
                 prefs = prefs.model_copy(update={dim: signal.value, "source": "feedback"})
                 streak = {"value": None, "count": 0}
             implicit[dim] = streak
-        self.repo.save_preferences(student_id, prefs, implicit)
+        self.repo.save_preferences(student_id, prefs, implicit, changed=signal.explicit or prefs != before)
         return prefs

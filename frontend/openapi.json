@@ -8977,6 +8977,16 @@
             "title": "Kcs",
             "default": []
           },
+          "preferences": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PreferencesView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "open_misconceptions": {
             "type": "integer",
             "title": "Open Misconceptions",
@@ -11367,6 +11377,29 @@
         },
         "type": "object",
         "title": "PreferencesIn"
+      },
+      "PreferencesView": {
+        "properties": {
+          "sequencing": {
+            "type": "string",
+            "title": "Sequencing"
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sequencing",
+          "detail",
+          "source"
+        ],
+        "title": "PreferencesView"
       },
       "ProcessOut": {
         "properties": {

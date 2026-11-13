@@ -36,6 +36,15 @@ describe("instructor students", () => {
     expect(calls.some((c) => c.path.includes("/overview"))).toBe(false);
   });
 
+  it("shows the student's answer style when it was set after sharing started", async () => {
+    mockApi(routes({
+      "GET /courses/1/students/stu-ana/overview": { student_id: "stu-ana", visible_since: "2026-11-01T00:00:00Z", kcs: [], open_misconceptions: 0, checks_answered: 0, last_active: null, preferences: { sequencing: "concept_first", detail: "detailed", source: "feedback" } },
+    }));
+    renderApp("/courses/1/students");
+    await userEvent.setup().click(await screen.findByRole("button", { name: "View progress of Ana Example" }));
+    expect(await screen.findByText("idea first, detailed answers")).toBeInTheDocument();
+  });
+
   it("still explains a 404 from the overview as not visible", async () => {
     mockApi(routes({
       "GET /courses/1/members": members.map((m) => (m.student_id === "stu-ben" ? { ...m, visible_to_instructor: true } : m)),
