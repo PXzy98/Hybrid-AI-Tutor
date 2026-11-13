@@ -84,7 +84,7 @@ What Z did in other owners' areas (for their review): guide section 7.5.
 | T | frontend for API v2 (T6, T7, now F1): a student dashboard (chat, my progress, quizzes, survey) and an instructor dashboard (class overview, each student's progress under the visibility rules, quizzes, materials, settings); no per-answer rating or style buttons; a v2 client sends `X-CSRF-Token` | course management, quizzes and the survey are API-only until then |
 | Z | deploy on the test host with the monitoring profile, the vLLM load test, Z2 local speed | needs access to the test host and the vLLM server |
 | Z | choose the alert receiver (`deploy/monitoring/alertmanager.yml`) | alerts are only visible in Alertmanager until then |
-| Others | Lavin's second review of the 30 revised items; permission for the ELG 5902 materials | content |
+| Others | Lavin's second review of the 30 revised items | content |
 
 ## 5. Working on the code
 

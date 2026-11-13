@@ -150,9 +150,16 @@ def _edits(a: str, b: str, limit: int) -> int:
     return prev[-1]
 
 
+# correctly spelled words within one or two edits of a term, which are not misspellings of it ("A[:i] is
+# sorted by induction", "you are using pronuclear injection"; found by scanning open course material)
+NOT_FUZZY = {"induction", "injection", "inspection", "invention", "intention", "inflection", "cancel"}
+
+
 def fuzzy_term(word: str) -> bool:
     """True for a misspelling of a condition or medicine (not for the exact term, which TERM_RE handles)."""
     w = word.lower()
+    if w in NOT_FUZZY:
+        return False
     for term in FUZZY_TERMS:
         if w == term or w[0] != term[0]:
             continue

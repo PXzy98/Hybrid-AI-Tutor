@@ -39,6 +39,19 @@ profiles. Any change to a profile's recognizers re-runs E6 (rule 5).
   `ScanResult.blocking` lists the found types that are student data (`BLOCKING_TYPES`: student IDs, grades,
   ID and health-card numbers, dates of birth, credentials, personal health details). Names, e-mail addresses
   and phone numbers are reported but do not block, because course documents name their staff and authors.
+- **Grades and health details block only when they belong to someone the document identifies** (2026-11-12):
+  a direct identifier (student ID, e-mail, phone, ID or health-card number, date of birth) within 300
+  characters; for a grade, a name also counts ("Ann Lee got a B+"). Otherwise they are listed in
+  `ScanResult.unattached`, reported but not blocking: course material is full of fictional patients ("a 29
+  year old male ... believes he has diabetes") and worked examples. The rule applies to documents only; the
+  question filter treats every finding as before. Found by scanning the open course packs
+  (`data/demo_courses/`): 16 of 295 files were refused before, none after; tests in
+  `backend/tests/test_scan_false_positives.py`.
+- Recognizer fixes from the same scan (they apply to questions too; E6 re-run, not worse): an ISBN, a run of
+  one repeated digit and digits split by more than one kind of separator ("30.0-34.9 25.0") are not student
+  numbers; a placeholder ("token=API_KEY", "YOUR_PASSWORD", "<your-api-key>") is not a credential; an A or B
+  inherited from a parent is not a grade; "induction", "injection" and similar words are not misspellings of
+  "infection".
 - `search_query(ctx)` is the only source of web search queries (guide rule 5). It reads only the privacy
   filter's sanitized text, returns None for a local-only question, drops every sentence that held personal
   data (a placeholder) and returns None when fewer than three words are left; at most 200 characters.
