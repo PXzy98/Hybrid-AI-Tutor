@@ -107,6 +107,35 @@ describe("axe: no serious or critical violations", () => {
     expect(await violations(instructor.container)).toEqual([]);
   });
 
+  it("system administration", async () => {
+    mockApi({ "GET /auth/me": { account_id: 9, username: "ada", email: null, display_name: "Ada Admin", system_role: "admin", must_change_password: false, memberships: [] },
+      "GET /courses": [],
+      "GET /admin/instructors": [{ account_id: 2, username: "ida@example.test", email: "ida@example.test", display_name: "Ida Instructor", role: "instructor", active: true, must_change_password: false, last_login_at: null }],
+      "GET /admin/settings": { values: { weak_evidence: true, level_basic_below: 0.4, level_advanced_above: 0.8, level_hysteresis: 0.05, default_routing_method: "lr", enabled_course_types: ["ece"] }, version: 1, apply_state: "applied" },
+      "GET /admin/model-endpoints": [{ id: 4, course_id: null, name: "Lab server", kind: "ollama", base_url: "http://localhost:11434", model: "fictional", trust: "trusted_local", api_key_last4: null, last_test_ok_at: null }] });
+    const { container } = renderApp("/admin");
+    await screen.findByText("Lab server");
+    expect(await violations(container)).toEqual([]);
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Edit Lab server" }));
+    const dialog = await screen.findByRole("dialog");
+    expect(await violations(dialog)).toEqual([]);
+  });
+
+  it("course content and settings with the new cards", async () => {
+    mockApi(instructorRoutes({ "GET /courses/1/kcs": [], "GET /courses/1/check-items": [],
+      "GET /courses/1/misconceptions": [{ id: 7, kc_id: 5, code: "MC1", statement: "Wrong idea", correction: "Right idea", status: "active" }] }));
+    const content = renderApp("/courses/1/content");
+    await screen.findByText("Wrong idea");
+    expect(await violations(content.container)).toEqual([]);
+    content.unmount();
+    mockApi(instructorRoutes({ "GET /courses/1/settings": { values: {}, version: 1 }, "GET /courses/1/model-endpoints": [] }));
+    const settings = renderApp("/courses/1/settings");
+    await screen.findByRole("button", { name: "Archive course" });
+    expect(await violations(settings.container)).toEqual([]);
+  });
+
   it("the end of term dialog is labelled and returns focus", async () => {
     mockApi(instructorRoutes());
     renderApp("/courses/1/endterm");

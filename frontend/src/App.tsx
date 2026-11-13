@@ -3,6 +3,7 @@ import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { useMe } from "./auth";
 import AppShell from "./components/AppShell";
 import { useI18n } from "./i18n";
+import Admin from "./pages/Admin";
 import ChangePassword from "./pages/ChangePassword";
 import CourseDashboard from "./pages/CourseDashboard";
 import CoursePicker from "./pages/CoursePicker";
@@ -30,6 +31,7 @@ export default function App() {
       <Route path="/join" element={<Join />} />
       <Route element={<Guard />}>
         <Route path="/change-password" element={<ChangePassword />} />
+        <Route path="/admin" element={<Admin />} />
         <Route path="/courses" element={<CoursePicker />} />
         <Route path="/courses/:courseId/:tab?" element={<CourseDashboard />} />
       </Route>

@@ -32,8 +32,9 @@ After a backend API change: from `backend/`, run `..\.venv\Scripts\python -m app
 | `/join` | everyone | Join a course with an invitation code (new students also create their account) |
 | `/change-password` | everyone | Forced after a temporary password |
 | `/courses` | logged in | Course picker; the left sidebar lists courses, modules and the student's conversations |
+| `/admin` | administrators | Instructor accounts, system settings (versioned save), model connections (the link is only shown to administrators; the API enforces the role) |
 | `/courses/:id/:tab` | students | Tabs: chat, my progress (bands, visibility choices, read-only plan), personalize, quizzes, end-of-term survey; delete my learning data in this course |
-| `/courses/:id/:tab` | instructors | Tabs: class overview (with class insights), students (progress, plan editor), course content, AI assistant (drafts, cloud evaluation), members (invitation code, CSV import), materials (upload, delete, index rebuild), settings, end of term, quizzes, end-of-term survey |
+| `/courses/:id/:tab` | instructors | Tabs: class overview (with class insights), students (progress, plan editor), course content (modules, KCs, check items, misconceptions, YAML import and export), AI assistant (drafts, cloud evaluation), members (invitation code, CSV import), materials (upload, delete, index rebuild), settings (with the course's model connections and archiving), end of term, quizzes, end-of-term survey |
 
 Everything uses `/api/v2`; every non-GET request sends `X-CSRF-Token` (`src/api/client.ts`). UI components are
 shadcn/ui, copied into `src/components/ui/`. Answers are rendered as Markdown with KaTeX.
