@@ -16,6 +16,8 @@ stand and where to look. Running the system: [OPERATIONS.md](OPERATIONS.md).
 | Privacy profiles, document scanning, web search queries | [PRIVACY_PROFILES.md](PRIVACY_PROFILES.md) |
 | Containers, proxy, metrics, CI scans | [../deploy/README.md](../deploy/README.md) |
 | Deploying and running | [OPERATIONS.md](OPERATIONS.md) |
+| Using the app (students) | [STUDENT_MANUAL.md](STUDENT_MANUAL.md) |
+| Using the app (instructors, TA note) | [INSTRUCTOR_MANUAL.md](INSTRUCTOR_MANUAL.md) |
 | How the code came about | [IMPLEMENTATION_LOG.md](IMPLEMENTATION_LOG.md) |
 
 ## 2. State per area (Z tasks)
