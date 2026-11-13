@@ -147,7 +147,14 @@ async def test_endpoint(engine, endpoint_id: int, *, course_id: int | None, acco
         row = db.get(ModelEndpoint, endpoint_id)
         if row is None or row.course_id != course_id:
             raise EndpointError("unknown connection")
-        await tester(row, encryption_key)
+        try:
+            # the stored address is checked again: it may resolve to a refused address by now
+            check_endpoint_url(row.base_url, trust=row.trust)
+            await tester(row, encryption_key)
+        except EndpointError:
+            raise
+        except (ValueError, OSError) as e:  # UnsafeEndpoint is a ValueError; name resolution errors
+            raise EndpointError(f"the connection test failed ({type(e).__name__}: {e})") from e
         row.last_test_ok_at = utcnow()
         db.add(row)
         db.add(AuditLog(account_id=account_id, action="model_endpoint.test",
