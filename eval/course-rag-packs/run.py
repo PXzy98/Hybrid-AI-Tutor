@@ -12,8 +12,14 @@ whose gold files the privacy scan refused cannot be answered and are left out of
 report). Questions with `gold: []` are not in the material; for them only the top score is reported, to
 check that it stays low.
 
+Questions of type `logistics` are retrieved with `question_kind="logistics"` (the T5 classifier does this in
+the product); `--question-kind none` retrieves them as concept questions. Logistics questions are also asked
+once from inside a module ("in module": the middle one of the pack), where course-level files used to be
+weighted down.
+
 Usage (repository root):
     python eval/course-rag-packs/run.py [--smoke] [--packs a,b] [--k 4] [--out DIR] [--check]
+                                        [--question-kind gold|none]
 `--check` only verifies the question files: every `evidence` pattern must occur in a gold file.
 """
 import argparse
@@ -127,9 +133,11 @@ def metrics(ranks: list[int | None], k: int) -> dict:
             "mrr": round(sum(1 / r for r in ranks if r) / n, 3)}
 
 
-def evaluate_pack(pack: str, rows: list[dict], k: int) -> dict:
+def evaluate_pack(pack: str, rows: list[dict], k: int, question_kind: str = "gold") -> dict:
     pack_dir = PACKS_DIR / pack
     manifest = json.loads((pack_dir / "manifest.json").read_text(encoding="utf-8"))
+    orders = sorted(m["module_order"] for m in manifest["modules"])
+    middle_module = orders[len(orders) // 2]
     mapping = file_map(pack_dir, manifest)
     with tempfile.TemporaryDirectory(prefix="pack-eval-") as tmp:
         retriever, refused, how = build_index(pack_dir, manifest, Path(tmp))
@@ -139,11 +147,15 @@ def evaluate_pack(pack: str, rows: list[dict], k: int) -> dict:
             gold = set(row["gold"])
             entry = {"id": row["id"], "type": row["type"], "module_order": row["module_order"],
                      "gold": sorted(gold), "gold_refused": sorted(gold & set(refused))}
-            for mode, module in (("scoped", row["module_order"]), ("course", None)):
+            kind = "logistics" if row["type"] == "logistics" and question_kind == "gold" else "concept"
+            modes = [("scoped", row["module_order"]), ("course", None)]
+            if row["type"] == "logistics":
+                modes.append(("in_module", middle_module))  # asked from inside a module, as a student does
+            for mode, module in modes:
                 if mode == "course" and row["module_order"] is None:
                     entry["course"] = entry["scoped"]
                     continue
-                hits = retriever.retrieve(COURSE_ID, module, row["question"], k=k)
+                hits = retriever.retrieve(COURSE_ID, module, row["question"], k=k, question_kind=kind)
                 files = [source_to_pack_path(h.source, mapping) for h in hits]
                 entry[mode] = {"files": files, "scores": [h.score for h in hits],
                                "rank": rank_of(files, gold) if gold else None,
@@ -162,6 +174,9 @@ def summarize(pack_result: dict, k: int) -> dict:
         per_type = {t: metrics([r[mode]["rank"] for r in answerable if r["type"] == t], k) for t in TYPES}
         per_type["all"] = metrics([r[mode]["rank"] for r in answerable], k)
         out[mode] = per_type
+    logistics = [r for r in answerable if r["type"] == "logistics"]
+    out["logistics_in_module"] = metrics([r["in_module"]["rank"] for r in logistics], k)
+    for mode in ("scoped", "course"):
         top = [r[mode]["top_score"] for r in answerable]
         none = [r[mode]["top_score"] for r in pack_result["results"] if not r["gold"]]
         out[f"{mode}_top_score"] = {
@@ -233,6 +248,9 @@ def write_report(summary: dict, packs: list[dict], k: int, smoke: bool, path: Pa
             lines.append(f"| {t} | {a['n']} | {fmt(a['hit@1'])} | {fmt(a[f'hit@{k}'])} | {fmt(a['mrr'])} | "
                          f"{fmt(b['hit@1'])} | {fmt(b[f'hit@{k}'])} | {fmt(b['mrr'])} |")
         c = s["course_top_score"]
+        m = s["logistics_in_module"]
+        lines += ["", f"Logistics questions asked from inside a module (the middle one): n={m['n']}, "
+                  f"hit@1 {fmt(m['hit@1'])}, hit@{k} {fmt(m[f'hit@{k}'])}, MRR {fmt(m['mrr'])}."]
         lines += ["", f"Top score (course-wide): answerable median {fmt(c['answerable_median'])}, 10th "
                   f"percentile {fmt(c['answerable_p10'])}; {c['unanswerable_n']} questions not in the "
                   "material: "
@@ -267,6 +285,9 @@ def main() -> int:
     parser.add_argument("--k", type=int, default=4)
     parser.add_argument("--out", type=Path, help="output folder (default: results/; none for --smoke)")
     parser.add_argument("--check", action="store_true", help="verify the question files and stop")
+    parser.add_argument("--question-kind", choices=["gold", "none"], default="gold",
+                        help="gold: logistics questions are retrieved as logistics (T5, the labels of the "
+                        "question files); none: every question as a concept question (before T5)")
     args = parser.parse_args()
     packs = args.packs.split(",") if args.packs else sorted(
         p.stem for p in (HERE / "questions").glob("*.jsonl"))
@@ -282,7 +303,7 @@ def main() -> int:
         rows = load_questions(pack)
         if args.smoke:
             rows = smoke_subset(rows)
-        result = evaluate_pack(pack, rows, args.k)
+        result = evaluate_pack(pack, rows, args.k, args.question_kind)
         results.append(result)
         summary[pack] = summarize(result, args.k)
         a = summary[pack]["course"]["all"]

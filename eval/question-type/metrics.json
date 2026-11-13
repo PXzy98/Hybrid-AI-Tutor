@@ -1,0 +1,410 @@
+{
+  "rows": 749,
+  "logistics_rows": 175,
+  "test_courses": [
+    "mit_hst151_pharmacology",
+    "mit_6_006_algorithms",
+    "migraine",
+    "supp_economics",
+    "supp_nursing"
+  ],
+  "held_out": {
+    "n": 193,
+    "accuracy": 0.933,
+    "logistics_precision": 0.828,
+    "logistics_recall": 0.941,
+    "confusion": {
+      "concept->concept": 132,
+      "concept->logistics": 10,
+      "logistics->concept": 3,
+      "logistics->logistics": 48
+    },
+    "majority_baseline_accuracy": 0.736,
+    "per_course": {
+      "mit_hst151_pharmacology": {
+        "n": 30,
+        "accuracy": 1.0,
+        "logistics_precision": 1.0,
+        "logistics_recall": 1.0,
+        "confusion": {
+          "concept->concept": 23,
+          "concept->logistics": 0,
+          "logistics->concept": 0,
+          "logistics->logistics": 7
+        }
+      },
+      "mit_6_006_algorithms": {
+        "n": 66,
+        "accuracy": 0.939,
+        "logistics_precision": 0.786,
+        "logistics_recall": 0.917,
+        "confusion": {
+          "concept->concept": 51,
+          "concept->logistics": 3,
+          "logistics->concept": 1,
+          "logistics->logistics": 11
+        }
+      },
+      "migraine": {
+        "n": 33,
+        "accuracy": 0.818,
+        "logistics_precision": 0.0,
+        "logistics_recall": null,
+        "confusion": {
+          "concept->concept": 27,
+          "concept->logistics": 6,
+          "logistics->concept": 0,
+          "logistics->logistics": 0
+        }
+      },
+      "supp_economics": {
+        "n": 32,
+        "accuracy": 1.0,
+        "logistics_precision": 1.0,
+        "logistics_recall": 1.0,
+        "confusion": {
+          "concept->concept": 16,
+          "concept->logistics": 0,
+          "logistics->concept": 0,
+          "logistics->logistics": 16
+        }
+      },
+      "supp_nursing": {
+        "n": 32,
+        "accuracy": 0.906,
+        "logistics_precision": 0.933,
+        "logistics_recall": 0.875,
+        "confusion": {
+          "concept->concept": 15,
+          "concept->logistics": 1,
+          "logistics->concept": 2,
+          "logistics->logistics": 14
+        }
+      }
+    }
+  },
+  "leave_one_course_out": {
+    "overall": {
+      "n": 749,
+      "accuracy": 0.967,
+      "logistics_precision": 0.899,
+      "logistics_recall": 0.966,
+      "confusion": {
+        "concept->concept": 555,
+        "concept->logistics": 19,
+        "logistics->concept": 6,
+        "logistics->logistics": 169
+      }
+    },
+    "per_course": {
+      "asthma": {
+        "n": 33,
+        "accuracy": 0.97,
+        "logistics_precision": 0.0,
+        "logistics_recall": null,
+        "confusion": {
+          "concept->concept": 32,
+          "concept->logistics": 1,
+          "logistics->concept": 0,
+          "logistics->logistics": 0
+        }
+      },
+      "harvard_cs50x": {
+        "n": 70,
+        "accuracy": 0.957,
+        "logistics_precision": 0.812,
+        "logistics_recall": 1.0,
+        "confusion": {
+          "concept->concept": 54,
+          "concept->logistics": 3,
+          "logistics->concept": 0,
+          "logistics->logistics": 13
+        }
+      },
+      "high_blood_pressure": {
+        "n": 33,
+        "accuracy": 0.939,
+        "logistics_precision": 0.0,
+        "logistics_recall": null,
+        "confusion": {
+          "concept->concept": 31,
+          "concept->logistics": 2,
+          "logistics->concept": 0,
+          "logistics->logistics": 0
+        }
+      },
+      "migraine": {
+        "n": 33,
+        "accuracy": 0.848,
+        "logistics_precision": 0.0,
+        "logistics_recall": null,
+        "confusion": {
+          "concept->concept": 28,
+          "concept->logistics": 5,
+          "logistics->concept": 0,
+          "logistics->logistics": 0
+        }
+      },
+      "mit_6_002_circuits": {
+        "n": 71,
+        "accuracy": 0.986,
+        "logistics_precision": 0.933,
+        "logistics_recall": 1.0,
+        "confusion": {
+          "concept->concept": 56,
+          "concept->logistics": 1,
+          "logistics->concept": 0,
+          "logistics->logistics": 14
+        }
+      },
+      "mit_6_006_algorithms": {
+        "n": 66,
+        "accuracy": 0.939,
+        "logistics_precision": 0.786,
+        "logistics_recall": 0.917,
+        "confusion": {
+          "concept->concept": 51,
+          "concept->logistics": 3,
+          "logistics->concept": 1,
+          "logistics->logistics": 11
+        }
+      },
+      "mit_7_016_intro_biology": {
+        "n": 31,
+        "accuracy": 1.0,
+        "logistics_precision": 1.0,
+        "logistics_recall": 1.0,
+        "confusion": {
+          "concept->concept": 24,
+          "concept->logistics": 0,
+          "logistics->concept": 0,
+          "logistics->logistics": 7
+        }
+      },
+      "mit_7_03_genetics": {
+        "n": 29,
+        "accuracy": 1.0,
+        "logistics_precision": 1.0,
+        "logistics_recall": 1.0,
+        "confusion": {
+          "concept->concept": 22,
+          "concept->logistics": 0,
+          "logistics->concept": 0,
+          "logistics->logistics": 7
+        }
+      },
+      "mit_hst035_pathology": {
+        "n": 29,
+        "accuracy": 1.0,
+        "logistics_precision": 1.0,
+        "logistics_recall": 1.0,
+        "confusion": {
+          "concept->concept": 22,
+          "concept->logistics": 0,
+          "logistics->concept": 0,
+          "logistics->logistics": 7
+        }
+      },
+      "mit_hst151_pharmacology": {
+        "n": 30,
+        "accuracy": 1.0,
+        "logistics_precision": 1.0,
+        "logistics_recall": 1.0,
+        "confusion": {
+          "concept->concept": 23,
+          "concept->logistics": 0,
+          "logistics->concept": 0,
+          "logistics->logistics": 7
+        }
+      },
+      "mit_res_6_007_signals": {
+        "n": 66,
+        "accuracy": 0.985,
+        "logistics_precision": 1.0,
+        "logistics_recall": 0.917,
+        "confusion": {
+          "concept->concept": 54,
+          "concept->logistics": 0,
+          "logistics->concept": 1,
+          "logistics->logistics": 11
+        }
+      },
+      "pneumonia": {
+        "n": 33,
+        "accuracy": 0.97,
+        "logistics_precision": 0.0,
+        "logistics_recall": null,
+        "confusion": {
+          "concept->concept": 32,
+          "concept->logistics": 1,
+          "logistics->concept": 0,
+          "logistics->logistics": 0
+        }
+      },
+      "supp_chemistry": {
+        "n": 32,
+        "accuracy": 0.969,
+        "logistics_precision": 1.0,
+        "logistics_recall": 0.938,
+        "confusion": {
+          "concept->concept": 16,
+          "concept->logistics": 0,
+          "logistics->concept": 1,
+          "logistics->logistics": 15
+        }
+      },
+      "supp_economics": {
+        "n": 32,
+        "accuracy": 1.0,
+        "logistics_precision": 1.0,
+        "logistics_recall": 1.0,
+        "confusion": {
+          "concept->concept": 16,
+          "concept->logistics": 0,
+          "logistics->concept": 0,
+          "logistics->logistics": 16
+        }
+      },
+      "supp_history": {
+        "n": 32,
+        "accuracy": 0.906,
+        "logistics_precision": 0.882,
+        "logistics_recall": 0.938,
+        "confusion": {
+          "concept->concept": 14,
+          "concept->logistics": 2,
+          "logistics->concept": 1,
+          "logistics->logistics": 15
+        }
+      },
+      "supp_nursing": {
+        "n": 32,
+        "accuracy": 0.938,
+        "logistics_precision": 0.938,
+        "logistics_recall": 0.938,
+        "confusion": {
+          "concept->concept": 15,
+          "concept->logistics": 1,
+          "logistics->concept": 1,
+          "logistics->logistics": 15
+        }
+      },
+      "supp_software": {
+        "n": 32,
+        "accuracy": 0.969,
+        "logistics_precision": 1.0,
+        "logistics_recall": 0.938,
+        "confusion": {
+          "concept->concept": 16,
+          "concept->logistics": 0,
+          "logistics->concept": 1,
+          "logistics->logistics": 15
+        }
+      },
+      "supp_statistics": {
+        "n": 32,
+        "accuracy": 1.0,
+        "logistics_precision": 1.0,
+        "logistics_recall": 1.0,
+        "confusion": {
+          "concept->concept": 16,
+          "concept->logistics": 0,
+          "logistics->concept": 0,
+          "logistics->logistics": 16
+        }
+      },
+      "type2_diabetes": {
+        "n": 33,
+        "accuracy": 1.0,
+        "logistics_precision": null,
+        "logistics_recall": null,
+        "confusion": {
+          "concept->concept": 33,
+          "concept->logistics": 0,
+          "logistics->concept": 0,
+          "logistics->logistics": 0
+        }
+      }
+    }
+  },
+  "held_out_errors": [
+    {
+      "question": "how do I use depth first search to order tasks with dependencies?",
+      "course": "mit_6_006_algorithms",
+      "label": "concept",
+      "p_logistics": 0.618
+    },
+    {
+      "question": "what should I review for the final, what topics does the review lecture list?",
+      "course": "mit_6_006_algorithms",
+      "label": "concept",
+      "p_logistics": 0.974
+    },
+    {
+      "question": "Show how to reduce a scheduling problem with precedence constraints to a shortest path problem in a DAG, handle ties and resource limits, and explain which part makes the general problem NP-hard.",
+      "course": "mit_6_006_algorithms",
+      "label": "concept",
+      "p_logistics": 0.623
+    },
+    {
+      "question": "What happens if I get a C on problem set 0?",
+      "course": "mit_6_006_algorithms",
+      "label": "logistics",
+      "p_logistics": 0.408
+    },
+    {
+      "question": "For a classroom diary graph, distinguish the number of headache days from a rating of pain intensity.",
+      "course": "migraine",
+      "label": "concept",
+      "p_logistics": 0.545
+    },
+    {
+      "question": "Find and cite the migraine classification criteria reproduced in the course handout.",
+      "course": "migraine",
+      "label": "concept",
+      "p_logistics": 0.528
+    },
+    {
+      "question": "List the trigger examples actually included in the course material.",
+      "course": "migraine",
+      "label": "concept",
+      "p_logistics": 0.585
+    },
+    {
+      "question": "Which participants were eligible for the uploaded migraine study?",
+      "course": "migraine",
+      "label": "concept",
+      "p_logistics": 0.654
+    },
+    {
+      "question": "Walk through the instructor's worked example of interpreting a headache diary.",
+      "course": "migraine",
+      "label": "concept",
+      "p_logistics": 0.531
+    },
+    {
+      "question": "For an abstract diary-sampling exercise, minimize x^2+4y^2 subject to x+y=B, x>=L and y>=0, where B>=L>=0. Derive the optimal allocation, all boundary regimes and sensitivity to L without clinical interpretation.",
+      "course": "migraine",
+      "label": "concept",
+      "p_logistics": 0.815
+    },
+    {
+      "question": "What happens if I fail the dosage calculation test, can I retake it?",
+      "course": "supp_nursing",
+      "label": "logistics",
+      "p_logistics": 0.5
+    },
+    {
+      "question": "Is the pharmacology midterm in person?",
+      "course": "supp_nursing",
+      "label": "logistics",
+      "p_logistics": 0.383
+    },
+    {
+      "question": "How is the Glasgow Coma Scale graded?",
+      "course": "supp_nursing",
+      "label": "concept",
+      "p_logistics": 0.754
+    }
+  ]
+}
