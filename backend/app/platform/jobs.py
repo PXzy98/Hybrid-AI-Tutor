@@ -22,7 +22,8 @@ from app.storage.models import Job, utcnow
 log = logging.getLogger("app.jobs")
 
 HANDLERS: dict[str, Callable] = {}
-HANDLER_MODULES = ("app.instructor_ai.eval",)  # imported before a job runs, so their handlers are known
+# imported before a job runs, so their handlers are known
+HANDLER_MODULES = ("app.instructor_ai.eval", "app.instructor_ai.quiz_drafts")
 STALE_AFTER = timedelta(hours=6)  # a running job without an end after this is failed (a worker was stopped)
 
 

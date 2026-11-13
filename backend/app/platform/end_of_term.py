@@ -4,10 +4,14 @@ The export is a ZIP in the data volume (`courses/<course_id>/exports/<export_id>
 `limits.courses.export_retention_hours`:
 - `class_summary.json`: the aggregates of every module (small groups suppressed, as on the dashboard);
 - `students.json`: only in visibility mode B, the individual overviews the instructor may see, built by the
-  same function as the overview endpoint (`export_course_profiles`), so the two can never differ.
+  same function as the overview endpoint (`export_course_profiles`), so the two can never differ;
+- `quizzes.json`: each quiz's results as the results endpoint gives them (aggregates; individual results
+  only of visible students);
+- `survey.json`: the end-of-term survey averages (none below the minimum group).
 
 Then, for that course: student memberships, learner state, evidence, misconceptions, plans, conversations,
-request logs and usage counters are deleted. The course, its content, materials, settings and instructors
+request logs, usage counters, quiz attempts and the survey (window, answers, who answered) are deleted;
+published quizzes are closed. The course, its content, materials, settings and instructors
 stay; accounts stay. Nothing here reads or writes question text.
 
 `maintenance()` runs in the worker: it deletes expired exports of every course (also courses nobody opens
@@ -23,7 +27,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from sqlalchemy import Engine, delete
+from sqlalchemy import Engine, delete, update
 from sqlmodel import Session, col, select
 
 from app.admin.summary import class_summary
@@ -38,15 +42,21 @@ from app.storage.models import (
     AuditLog,
     CourseInvite,
     CourseMember,
+    CourseSurveyResponse,
+    CourseSurveySubmission,
     LearningPlan,
+    Quiz,
+    QuizAttempt,
     RequestLog,
     SessionTurn,
+    SurveyWindow,
     UsageCounter,
     utcnow,
 )
 
 EXPORT_ID = re.compile(r"^[0-9]{8}T[0-9]{6}Z-[0-9a-f]{12}$")
-STUDENT_TABLES = (*COURSE_TABLES, LearningPlan, SessionTurn, RequestLog, UsageCounter)
+STUDENT_TABLES = (*COURSE_TABLES, LearningPlan, SessionTurn, RequestLog, UsageCounter, QuizAttempt,
+                  CourseSurveySubmission)
 SWEEP_HOURS = 24  # how long after an end of term late writes are looked for (far above any request timeout)
 DELETED = "deleted"  # student_id of request logs kept after a student deleted their own data
 
@@ -72,6 +82,14 @@ def _build_export(engine: Engine, scope: CourseScope, access: CourseAccess, min_
                  for code in scope.content.topics()]
     store = course_views.DbLearnerViewStore(engine, settings, scope.content)
     profiles = [p.model_dump(mode="json") for p in export_course_profiles(access, students, store=store)]
+    from app.api.v2.survey import survey_results
+    from app.learner.quizzes import quiz_results
+
+    with Session(engine) as db:
+        quizzes = db.exec(select(Quiz).where(Quiz.course_id == access.course.id).order_by(col(Quiz.id))).all()
+    quiz_out = [{"title": q.title, "kind": q.kind, **quiz_results(
+        engine, q, viewer_account_id=access.account_id, min_group=min_group).model_dump(mode="json")}
+        for q in quizzes]
     meta = {"course_code": access.course.code, "course_title": access.course.title,
             "exported_at": utcnow().isoformat(), "students": len(students),
             "individual_overviews": len(profiles)}
@@ -81,6 +99,8 @@ def _build_export(engine: Engine, scope: CourseScope, access: CourseAccess, min_
         archive.writestr("class_summary.json", json.dumps(summaries, indent=2))
         if profiles:
             archive.writestr("students.json", json.dumps(profiles, indent=2))
+        archive.writestr("quizzes.json", json.dumps(quiz_out, indent=2))
+        archive.writestr("survey.json", survey_results(engine, access.course.id).model_dump_json(indent=2))
     return buffer.getvalue(), len(profiles)
 
 
@@ -99,8 +119,12 @@ def end_term(engine: Engine, data_root: Path, scope: CourseScope, access: Course
 
     deleted = delete_course_data(engine, course_id)  # learner state, levels, evidence, misconceptions
     with Session(engine) as db:
-        for table in (LearningPlan, SessionTurn, RequestLog, UsageCounter):
+        # the survey window first: its row lock orders this against answers in flight (api/v2/survey.py)
+        for table in (SurveyWindow, LearningPlan, SessionTurn, RequestLog, UsageCounter, QuizAttempt,
+                      CourseSurveyResponse, CourseSurveySubmission):
             deleted[table.__tablename__] = db.exec(delete(table).where(table.course_id == course_id)).rowcount
+        db.exec(update(Quiz).where(Quiz.course_id == course_id, Quiz.status == "published")
+                .values(status="closed"))
         removed = db.exec(delete(CourseMember).where(CourseMember.course_id == course_id,
                                                      CourseMember.role == "student")).rowcount
         db.exec(delete(CourseInvite).where(CourseInvite.course_id == course_id))  # the old code is void

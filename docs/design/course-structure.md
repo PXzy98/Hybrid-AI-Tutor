@@ -150,10 +150,16 @@ changed after the term; a TA sees everything the instructor sees (including indi
    `visible_since` are included. The export calls the same function as the overview
    (`profile_for_instructor`), so the two can never differ. The instructor downloads it; the file is kept for
    a limited time (`limits.courses.export_retention_hours`) and then deleted.
+   The export also has `quizzes.json` (each quiz's results as the results endpoint gives them: class
+   aggregates, the pre/post comparison of a `final` quiz, and individual results only of students visible
+   under the same conditions) and `survey.json` (the end-of-term survey averages; none below the minimum
+   group). Both are aggregates.
 2. Deletes, for that course: all student memberships, learner state, evidence, misconceptions, plans,
-   conversations, request logs, usage counters and survey responses.
-3. Keeps: the course, modules, KCs, items, misconceptions, materials, index, settings and instructor
-   members. The course is ready for the next import.
+   conversations, request logs, usage counters, quiz attempts and the end-of-term survey (window, answers and
+   the record of who answered). Published quizzes are closed.
+3. Keeps: the course, modules, KCs, items, misconceptions, materials, index, settings, instructor members
+   and the quizzes themselves (course content, with their questions). The course is ready for the next
+   import.
 4. Accounts stay. An admin can deactivate accounts that have no memberships.
 
 **Archive** (`status = archived`) hides a course that will not run again; it requires an ended term first.
@@ -169,7 +175,7 @@ Every learner table has `student_id` **and** `course_id` (decision Z1-b), except
 | Table | Scope |
 |---|---|
 | `learner_kc_state` | student + course + KC (+ course-level ability row, section 4.3) |
-| `evidence_log`, `learner_misconception`, `learning_plan` | student + course |
+| `evidence_log`, `learner_misconception`, `learning_plan`, `quiz_attempt`, `course_survey_submission` | student + course |
 | `learner_module_level` (v3 `learner_topic_level`) | student + course + module |
 | `learner_preference` | **student only** (global, D1) |
 | `consent` | **student only** (global, D2) |
@@ -187,7 +193,10 @@ documents it. The `KnowledgeModel` interface gains a `course_id` argument on `st
 
 ### 4.4 Deletion
 
-- Student: `DELETE /api/v2/courses/{course_id}/me/learning-data` deletes his data in that course only.
+- Student: `DELETE /api/v2/courses/{course_id}/me/learning-data` deletes his data in that course only,
+  including his quiz attempts. His answer to the end-of-term survey cannot be found again (section 4.7) and
+  stays among the anonymous answers until the end of term; the record that he answered stays too, so he
+  cannot answer twice.
 - Instructor: end of term (section 3.5).
 - Global data (account, preferences, consent) is not deleted by either.
 
@@ -203,6 +212,78 @@ Rules:
 - Mode A → B: `visible_since` stays null until the student acknowledges (then it is set to the
   acknowledgement time).
 - The overview shows only data created after `visible_since`.
+
+### 4.6 Quizzes
+
+Progress checks the instructor writes, or the local model drafts from the course material and the instructor
+reviews. **This term: multiple choice and true/false only**, graded automatically, **not a grade** (progress
+only). Targeted material for single students is not part of this term; the learning plan with notes (S9) is
+the instructor's tool for that. API: [api-v2.md](api-v2.md) 3.9.
+
+| Table | Content |
+|---|---|
+| `quiz` | `course_id`, `module_id` (null: whole course; set null if the module is deleted), `title`, `kind` (`practice` or `final`), `status` (`draft`, `published`, `closed`), `opens_at`, `closes_at`, `assigned_to` (JSON list of `student_id`, null: all students), `questions` (JSON), `draft_request` (the last AI draft request), `created_by`, `created_at`, `updated_at` |
+| `quiz_attempt` | `quiz_id`, `course_id`, `student_id`, `answers` (chosen indexes), `correct` (per question), `score`, `total`, `submitted_at`; unique on (`quiz_id`, `student_id`); no text |
+
+A question in `quiz.questions`: `kind`, `kc` (KC code or null), `stem`, `options`, `answer` (index),
+`explanation`, `sources` (material file names), `reviewed`. Quizzes are **course content** like items and
+misconceptions: they stay at the end of term.
+
+Flow:
+1. The instructor creates a quiz (a draft) and writes the questions, or asks for AI drafts
+   (`POST .../quizzes/{quiz_id}/drafts`): the job `quiz.draft` calls the **local** model only, with passages of
+   the course material (the quiz's module, or every module) and the KC codes, never student data. Drafted
+   questions are added with `reviewed: false`.
+2. The instructor edits the questions; saving them marks them reviewed. A quiz is published only when it has
+   a question and every question is reviewed (AI-drafted content stays a draft until the instructor
+   accepts it, decision E).
+3. A published quiz is open between `opens_at` and `closes_at` (unset: no limit) for the students it is
+   assigned to. The student sees the questions without answers or explanations and answers **once**; the
+   grading comes back at once, with the correct answers and explanations. Before answering, a closed quiz
+   shows nothing.
+4. With the student's consent the answers also update the knowledge model: one piece of strong evidence per
+   question linked to a KC (source `quiz`). Without consent nothing is stored there; the attempt itself is
+   stored either way (it is the student's own progress).
+5. After the first answer the questions cannot change and the quiz cannot be deleted or become a draft again
+   (close it instead).
+
+**Results for the instructor** follow the overview rules (section 4.5, guide rule 9):
+- class aggregates (attempts, mean score, correct rate per question) only when at least
+  `learner.class_summary_min_group` students answered; below that only the number of attempts, no means;
+- individual results (`student_id`, score, time) only for a student in visibility mode B who acknowledged it,
+  did not opt out, and only for attempts after `visible_since`; each view is written to the audit log
+  (`learner.quiz_results.view`); in mode A the instructor sees aggregates only;
+- a student always sees his own attempt.
+
+**Pre/post**: the course diagnostic (section 4.2, onboarding answers in `evidence_log` with kind
+`diagnostic`) is the pre-test. A quiz of kind `final` is the post-test. The results of a `final` quiz carry
+`pre_post` (number of students with both, mean pre and mean post share correct), suppressed below the
+minimum group, and for each visible student his own pre-test share next to the score (only diagnostic answers
+that the visibility rules allow).
+
+### 4.7 End-of-term survey
+
+Evaluation of the tutor is **only** this survey. The rating after each answer and the "more detail",
+"shorter", "example first", "concept first" buttons are removed from the new frontend; `/api/v1/survey` stays
+because API v1 is frozen. API: [api-v2.md](api-v2.md) 3.10.
+
+| Table | Content |
+|---|---|
+| `survey_window` | one row per course: `opens_at`, `closes_at`, `updated_by`, `updated_at` |
+| `course_survey_response` | random key `id`, `course_id`, five ratings (1 to 5): `helpfulness`, `material_relevance`, `clarity`, `source_confidence`, `learning_effect`. **No student ID, no time.** |
+| `course_survey_submission` | random key `id`, `course_id`, `student_id`; unique on (`course_id`, `student_id`). Records only that the student answered, not what. |
+
+Flow: the instructor sets the window (usually the last week of term); each student answers once inside it;
+the instructor sees the averages once at least `MIN_AGGREGATE_SIZE` (3) students answered. The end of term
+exports the averages in `survey.json` and deletes all three tables' rows of the course (section 3.5).
+
+Anonymity design:
+- the answer row and the submission row are written in the same transaction but share no key, and the
+  answer row has neither a student ID nor a timestamp, and its key is random (not a sequence), so neither the
+  order of rows nor the time links an answer to a submission;
+- the submission row is only what prevents a second answer;
+- ratings only: no free text, so an answer cannot name anyone; unknown fields are rejected;
+- students never see results; instructors see only averages, only above the minimum group.
 
 ---
 
@@ -398,7 +479,7 @@ columns, so switching between them keeps every student's state.
   `session_turn` and `request_log` carry `course_id` (migration 0011).
   History sent to the models comes only from the same conversation, so never from another course (G2).
 - `request_log`, `survey_response`, `usage_counter`, `audit_log` and `config_history` have `course_id`
-  (null only for system-level actions). The class summary, logs and survey summary are per course (G3).
+  (null only for system-level actions). The class summary and logs are per course (G3); the end-of-term survey of API v2 has its own tables (4.7).
 - `privacy.log_raw_text` stays false; nothing in this section stores question text.
 
 ---
@@ -471,8 +552,9 @@ async def web_search(query: str, allowlist: list[str]) -> list[Chunk]: ...
 | Courses | `course`, `course_member` (`course_id`, `account_id` or pending `email`, `role`, `status` pending/active, visibility fields), `course_invite`, `course_settings`, `module` |
 | Content | `kc`, `kc_prerequisite`, `check_item`, `misconception`, `material`, `index_version` |
 | Learner | `learner_kc_state`, `learner_module_level`, `learner_preference`, `evidence_log`, `learner_misconception`, `learning_plan`, `consent` |
+| Quizzes and survey | `quiz`, `quiz_attempt`, `survey_window`, `course_survey_response`, `course_survey_submission` |
 | Conversations | `conversation`, `session_turn` |
-| Operations | `request_log`, `usage_counter`, `job`, `audit_log`, `model_endpoint`, `system_settings`, `config_history`, `process_status`, `survey_response` |
+| Operations | `request_log`, `usage_counter`, `job`, `audit_log`, `model_endpoint`, `system_settings`, `config_history`, `process_status`, `survey_response` (API v1 only) |
 | Instructor AI | `ai_draft`, `eval_run` |
 
 - Foreign keys with `ON DELETE CASCADE` from course-scoped learner tables to `course_member`, so the end of

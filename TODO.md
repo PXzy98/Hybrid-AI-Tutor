@@ -32,6 +32,16 @@ Beta 11/11 · Reflection #2 (ethics, individual) 11/18 · video 11/25 · Design 
 Next for Z: the v2 ask endpoint (pipeline per course, usage checks) and end of term, after S's per-course
 learner-data interface.
 
+## Added 2026-11-12 (advisor meeting)
+
+| ID | Task | Status |
+|---|---|---|
+| Q1 | Quizzes (multiple choice and true/false, AI drafts reviewed by the instructor, auto-graded, results under the visibility rules, `final` = post-test) and the end-of-term survey (replaces the rating after each answer) | backend done on branch `feature/q1-quizzes-survey`; docs updated |
+| F1 | Frontend on API v2 (carries T6, T7): student dashboard (chat, my progress, quizzes, survey) and instructor dashboard (class overview, each student's progress under the visibility rules, quizzes, materials, settings); no per-answer rating or style buttons | in progress |
+
+Not this term: targeted material for single students (next term; only the learning plan with notes now). Tests and
+demos use the eight open course packs in `data/demo_courses/`.
+
 ## Siyun (S)
 
 S1–S12 in guide section 7.2. Open items that other tasks wait for:
@@ -43,7 +53,7 @@ S1–S12 in guide section 7.2. Open items that other tasks wait for:
 ## Tongkai (T)
 
 T1–T14 in guide section 7.3. Open items that other tasks wait for:
-- frontend pages for API v2 (T6, T7); a v2 client sends `X-CSRF-Token` (api-v2.md section 2);
+- frontend pages for API v2 (T6, T7, now F1: student and instructor dashboards, quizzes, end-of-term survey); a v2 client sends `X-CSRF-Token` (api-v2.md section 2);
 - pinned Hugging Face revisions for the routing models and the move to `transformers` 5 together with Z
   (PR for the pins by Z for T's review);
 - T14 (this file in English, the Chinese guide moved to `docs/`): PR by Z for T's review.
