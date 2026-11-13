@@ -95,11 +95,28 @@ class ScanFinding:
 class ScanResult:
     scanned: bool
     findings: tuple[ScanFinding, ...] = field(default_factory=tuple)
+    # attribute types (ATTRIBUTE_TYPES) that scan_document found only away from anyone's identifier: course
+    # material about a fictional patient or a grading example, reported but not blocking
+    unattached: tuple[str, ...] = ()
 
     @property
     def blocking(self) -> tuple[str, ...]:
         """The found types that are student data (BLOCKING_TYPES); empty when the document may be indexed."""
-        return tuple(f.type for f in self.findings if f.type in BLOCKING_TYPES)
+        return tuple(f.type for f in self.findings
+                     if f.type in BLOCKING_TYPES and f.type not in self.unattached)
+
+
+# A grade or a health detail is student data in a course document only when it belongs to someone the
+# document identifies: a direct identifier within ATTACH_CHARS characters. Course material is full of
+# fictional patients ("a 29 year old male ... believes he has diabetes") and worked examples; the open course
+# packs (data/demo_courses/) had 23 such findings, none near a direct identifier. A grade next to a name also
+# counts ("Ann Lee got a B+"); a health detail next to a name does not, because teaching cases name their
+# patients and medicine names are often taken for names. Questions are unaffected: the question filter
+# handles every finding as before.
+DIRECT_IDENTIFIERS = frozenset({"STUDENT_ID", "EMAIL_ADDRESS", "PHONE_NUMBER", "ID_NUMBER", "HEALTH_CARD",
+                                "DATE_OF_BIRTH"})
+ATTRIBUTE_TYPES = {"GRADE": DIRECT_IDENTIFIERS | {"PERSON"}, "HEALTH_DETAIL": DIRECT_IDENTIFIERS}
+ATTACH_CHARS = 300
 
 
 @cache
@@ -128,7 +145,7 @@ def scan_document(text: str, profile: PrivacyProfile) -> ScanResult:
 
     Findings are collected over overlapping windows in document positions; overlapping findings of the same
     type are one finding, so a value cut at a window edge, and also found whole in the next window, counts
-    once."""
+    once. A grade or health detail with no identifier near it is listed in `unattached` (ATTRIBUTE_TYPES)."""
     analyzer = _scanner(profile.name, tuple(profile.recognizers))
     spans: dict[str, list[tuple[int, int]]] = {}
     for offset, piece in _windows(text or ""):
@@ -141,7 +158,14 @@ def scan_document(text: str, profile: PrivacyProfile) -> ScanResult:
             if start >= merged_end:  # not overlapping the previous finding: a new one
                 counts[kind] = counts.get(kind, 0) + 1
             merged_end = max(merged_end, end)
-    return ScanResult(scanned=True, findings=tuple(ScanFinding(t, n) for t, n in sorted(counts.items())))
+
+    def attached(kind: str) -> bool:
+        ids = [s for t in ATTRIBUTE_TYPES[kind] for s in spans.get(t, ())]
+        return any(a - ATTACH_CHARS < e and s < b + ATTACH_CHARS for a, b in spans[kind] for s, e in ids)
+
+    unattached = tuple(sorted(k for k in ATTRIBUTE_TYPES if k in spans and not attached(k)))
+    return ScanResult(scanned=True, findings=tuple(ScanFinding(t, n) for t, n in sorted(counts.items())),
+                      unattached=unattached)
 
 
 PLACEHOLDER_RE = re.compile(r"<[A-Z_]+_\d+>")
