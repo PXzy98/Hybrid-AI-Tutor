@@ -34,7 +34,7 @@ export default function RoutingProgress({ trace }: { trace: RoutingTrace }) {
   const eventEnd = Math.max(0, ...events.map((e) => e.elapsed_ms));
   const elapsed = trace.running ? Math.max(total, eventEnd) : eventEnd || total;
   return (
-    <section aria-label={t("routing.region")} className="w-full rounded-lg border bg-muted/40 px-4 py-3">
+    <section aria-label={t("routing.region")} aria-live="off" className="w-full rounded-lg border bg-muted/40 px-4 py-3">
       <div className="mb-3 flex items-center justify-between gap-3 text-sm">
         <strong>{t("routing.title", { method: trace.method.toUpperCase() })}</strong>
         <span className="tabular-nums text-muted-foreground">{t(trace.running ? "routing.running" : trace.error ? "routing.failed" : "routing.finished")} · {(elapsed / 1000).toFixed(2)} s</span>

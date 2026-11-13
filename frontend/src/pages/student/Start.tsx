@@ -70,7 +70,7 @@ function OnboardingForm({ course, moduleId }: { course: Course; moduleId: number
   return (
     <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); submit.mutate(); }}>
       <Card aria-labelledby="consent-title">
-        <CardHeader><CardTitle><h3 id="consent-title">{t("onb.consentTitle")}</h3></CardTitle></CardHeader>
+        <CardHeader><h3 id="consent-title" className="leading-none font-semibold">{t("onb.consentTitle")}</h3></CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm leading-relaxed">{data.consent_text}</p>
           <label className="flex items-start gap-2 text-sm">
@@ -83,7 +83,7 @@ function OnboardingForm({ course, moduleId }: { course: Course; moduleId: number
       <Card aria-labelledby="prefs-title">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle><h3 id="prefs-title">{t("onb.prefsTitle")}</h3></CardTitle>
+            <h3 id="prefs-title" className="leading-none font-semibold">{t("onb.prefsTitle")}</h3>
             <Button type="button" variant="link" size="sm" onClick={() => setSkipPrefs(!skipPrefs)} aria-pressed={skipPrefs}>
               {skipPrefs ? t("onb.answer") : t("onb.skip")}
             </Button>
@@ -110,7 +110,7 @@ function OnboardingForm({ course, moduleId }: { course: Course; moduleId: number
       <Card aria-labelledby="diag-title">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle><h3 id="diag-title">{t("onb.diagTitle")}</h3></CardTitle>
+            <h3 id="diag-title" className="leading-none font-semibold">{t("onb.diagTitle")}</h3>
             <Button type="button" variant="link" size="sm" onClick={() => setSkipDiagnostic(!skipDiagnostic)} aria-pressed={skipDiagnostic}>
               {skipDiagnostic ? t("onb.answer") : t("onb.skip")}
             </Button>

@@ -11,6 +11,8 @@ export const fr: Messages = {
   "theme.dark": "Passer au mode sombre",
   "theme.light": "Passer au mode clair",
 
+  "nav.skip": "Passer au contenu principal",
+  "nav.sidebar": "Cours, modules et conversations",
   "nav.main": "Principal",
   "nav.courses": "Cours",
   "nav.noCourses": "Vous n’êtes pas encore inscrit à un cours.",

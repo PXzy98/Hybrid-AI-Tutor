@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n";
 
 /** A failed request, shown with the server's English sentence (the codes below get a translated one). */
-export function ErrorNote({ error }: { error: unknown }) {
+export function ErrorNote({ error, id }: { error: unknown; id?: string }) {
   const { t } = useI18n();
   if (!error) return null;
   let text = error instanceof Error ? error.message : t("app.serverUnreachable");
@@ -16,7 +16,7 @@ export function ErrorNote({ error }: { error: unknown }) {
     if (error.code === "settings_applying") text = t("error.settingsApplying");
     if (error.code === "conflict") text = `${t("error.conflict")} ${error.message}`;
   }
-  return <Alert variant="destructive" role="alert">{text}</Alert>;
+  return <Alert variant="destructive" role="alert" id={id}>{text}</Alert>;
 }
 
 /** Page or section heading with an optional description. */

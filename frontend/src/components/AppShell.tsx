@@ -40,6 +40,7 @@ export default function AppShell({ me }: { me: Me }) {
 
   return (
     <div className="flex min-h-screen flex-col">
+      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground">{t("nav.skip")}</a>
       <header className="border-b bg-card">
         <div className="flex flex-wrap items-center gap-2 px-4 py-2">
           <Link to="/courses" className="mr-4 flex items-center gap-2 font-semibold text-primary">
@@ -55,9 +56,9 @@ export default function AppShell({ me }: { me: Me }) {
       </header>
       <div className="flex flex-1 flex-col md:flex-row">
         {showSidebar && (
-          <aside aria-label={t("nav.main")} className="w-full shrink-0 space-y-5 border-b bg-card/60 p-4 md:w-64 md:border-r md:border-b-0">
+          <aside aria-label={t("nav.sidebar")} className="w-full shrink-0 space-y-5 border-b bg-card/60 p-4 md:w-64 md:border-r md:border-b-0">
             <nav aria-label={t("nav.courses")} className="space-y-1">
-              <h2 className="px-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">{t("nav.courses")}</h2>
+              <p className="px-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">{t("nav.courses")}</p>
               {courses.data?.map((c) => (
                 <NavLink key={c.id} to={`/courses/${c.id}`} className={() => linkClass({ isActive: c.id === courseId })}>
                   <span className="font-medium">{c.code}</span> <span className="text-muted-foreground">{c.title}</span>
@@ -72,7 +73,7 @@ export default function AppShell({ me }: { me: Me }) {
             {current && courseId !== null && <CourseNav courseId={courseId} student={isStudent} />}
           </aside>
         )}
-        <main className="mx-auto w-full max-w-6xl min-w-0 flex-1 px-4 py-6">
+        <main id="main" tabIndex={-1} className="mx-auto w-full max-w-6xl min-w-0 flex-1 px-4 py-6 [overflow-wrap:anywhere] outline-none">
           <ErrorBoundary><Outlet /></ErrorBoundary>
         </main>
       </div>
@@ -102,7 +103,7 @@ function CourseNav({ courseId, student }: { courseId: number; student: boolean }
   return (
     <>
       <nav aria-label={t("nav.modules")} className="space-y-1">
-        <h2 className="px-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">{t("nav.modules")}</h2>
+        <p className="px-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">{t("nav.modules")}</p>
         {student && (
           <button type="button" className={cn(linkClass({ isActive: !activeModule }), "w-full text-left")} onClick={() => open({ module: null })}>
             {t("nav.wholeCourse")}
@@ -118,7 +119,7 @@ function CourseNav({ courseId, student }: { courseId: number; student: boolean }
       </nav>
       {student && (
         <nav aria-label={t("nav.conversations")} className="space-y-1">
-          <h2 className="px-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">{t("nav.conversations")}</h2>
+          <p className="px-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">{t("nav.conversations")}</p>
           <Button type="button" variant="outline" size="sm" className="mx-1" onClick={() => open({ c: null })}>
             <MessageSquarePlus aria-hidden />{t("nav.newChat")}
           </Button>
