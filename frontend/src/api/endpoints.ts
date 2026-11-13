@@ -41,6 +41,15 @@ export type Survey = Schemas["SurveyOut"];
 export type SurveyAnswers = Schemas["SurveyAnswers"];
 export type Materials = Schemas["MaterialsOut"];
 export type Material = Schemas["MaterialOut"];
+export type AiDraft = Schemas["AiDraftOut"];
+export type AiDraftAccept = Schemas["AiDraftAcceptOut"];
+export type AiDraftSummary = Schemas["AiDraftSummary"];
+export type AiDraftKind = Schemas["AiDraftIn"]["kind"];
+export type AiDraftStatus = Schemas["AiDraftSummary"]["status"];
+export type Insights = Schemas["InsightsOut"];
+export type Evaluation = Schemas["EvaluationOut"];
+export type EvaluationSummary = Schemas["EvaluationSummary"];
+export type EvaluationQuestion = Schemas["QuestionIn"];
 export type Difficulty = Schemas["KcOut"]["difficulty"];
 
 const c = (id: number) => `/courses/${id}`;
@@ -148,4 +157,25 @@ export const api = {
   setSurveyWindow: (id: number, opens_at: string, closes_at: string) =>
     request<Survey>("PUT", `${c(id)}/survey`, { opens_at, closes_at }),
   answerSurvey: (id: number, answers: SurveyAnswers) => request<Survey>("POST", `${c(id)}/survey/responses`, answers),
+
+  // instructor AI (tiers 1 to 4) and class insights
+  aiDrafts: (id: number, status?: AiDraftStatus) =>
+    request<AiDraftSummary[]>("GET", `${c(id)}/ai/drafts${status ? `?status=${status}` : ""}`),
+  aiDraft: (id: number, draftId: number) => request<AiDraft>("GET", `${c(id)}/ai/drafts/${draftId}`),
+  createAiDraft: (id: number, input: Schemas["AiDraftIn"]) => request<AiDraft>("POST", `${c(id)}/ai/drafts`, input),
+  updateAiDraft: (id: number, draftId: number, content: Record<string, unknown>) =>
+    request<AiDraft>("PATCH", `${c(id)}/ai/drafts/${draftId}`, { content }),
+  acceptAiDraft: (id: number, draftId: number, moduleId: number | null) =>
+    request<Schemas["AiDraftAcceptOut"]>("POST", `${c(id)}/ai/drafts/${draftId}/accept`, moduleId === null ? {} : { module_id: moduleId }),
+  discardAiDraft: (id: number, draftId: number) => request<void>("DELETE", `${c(id)}/ai/drafts/${draftId}`),
+  insights: (id: number) => request<Insights>("GET", `${c(id)}/insights`),
+  evaluations: (id: number) => request<EvaluationSummary[]>("GET", `${c(id)}/ai/evaluations`),
+  evaluation: (id: number, evalId: number) => request<Evaluation>("GET", `${c(id)}/ai/evaluations/${evalId}`),
+  createEvaluation: (id: number, input: Schemas["EvaluationIn"]) => request<Evaluation>("POST", `${c(id)}/ai/evaluations`, input),
+  setEvaluationQuestions: (id: number, evalId: number, questions: EvaluationQuestion[]) =>
+    request<Evaluation>("PUT", `${c(id)}/ai/evaluations/${evalId}/questions`, { questions }),
+  runEvaluation: (id: number, evalId: number, confirm_cloud: boolean) =>
+    request<Evaluation>("POST", `${c(id)}/ai/evaluations/${evalId}/run`, { confirm_cloud }),
+  spotCheck: (id: number, evalId: number, questionId: number, agrees_with_judge: boolean) =>
+    request<Evaluation>("PATCH", `${c(id)}/ai/evaluations/${evalId}/results/${questionId}`, { agrees_with_judge }),
 };

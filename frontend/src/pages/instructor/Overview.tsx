@@ -36,6 +36,7 @@ export default function Overview({ course }: { course: Course }) {
         </div>
       </div>
       <ErrorNote error={summary.error} />
+      <InsightsCard course={course} />
       {summary.isLoading && <p className="text-muted-foreground">{t("app.loading")}</p>}
       {data?.suppressed && <Alert variant="info" role="status">{t("overview.suppressed", { n: data.min_group })}</Alert>}
       {data && !data.suppressed && (
@@ -82,5 +83,43 @@ export default function Overview({ course }: { course: Course }) {
         </>
       )}
     </div>
+  );
+}
+
+/** Tier 3: which topics students asked about most and the most common misconceptions (counts only). */
+function InsightsCard({ course }: { course: Course }) {
+  const { t } = useI18n();
+  const insights = useQuery({ queryKey: ["insights", course.id], queryFn: () => api.insights(course.id) });
+  const data = insights.data;
+  return (
+    <Card aria-label={t("insights.title")}>
+      <CardHeader><CardTitle>{t("insights.title")}</CardTitle><CardDescription>{t("insights.hint")}</CardDescription></CardHeader>
+      <CardContent className="space-y-4">
+        <ErrorNote error={insights.error} />
+        {data?.suppressed && <Alert variant="info" role="status">{t("insights.suppressed", { n: data.min_group })}</Alert>}
+        {data && !data.suppressed && (
+          <div className="grid gap-6 md:grid-cols-2">
+            <div>
+              <h3 className="mb-2 text-sm font-medium">{t("insights.kcs")}</h3>
+              <ul className="space-y-1 text-sm">
+                {data.kc_question_counts.map((k) => (
+                  <li key={k.label} className="flex justify-between gap-3"><span>{k.name ?? k.label}</span><span className="tabular-nums text-muted-foreground">{k.count}</span></li>
+                ))}
+                {data.kc_question_counts.length === 0 && <li className="text-muted-foreground">{t("insights.none")}</li>}
+              </ul>
+            </div>
+            <div>
+              <h3 className="mb-2 text-sm font-medium">{t("insights.misconceptions")}</h3>
+              <ul className="space-y-1 text-sm">
+                {data.misconception_counts.map((k) => (
+                  <li key={k.label} className="flex justify-between gap-3"><span>{k.name ?? k.label}</span><span className="tabular-nums text-muted-foreground">{k.count}</span></li>
+                ))}
+                {data.misconception_counts.length === 0 && <li className="text-muted-foreground">{t("insights.none")}</li>}
+              </ul>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
