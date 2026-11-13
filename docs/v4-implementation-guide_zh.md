@@ -423,7 +423,7 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | T1 | Beta 路由评估（G1-105）和 Beta 报告（G1-108） | S4 | — | `eval/` | 按时交付 |
 | T2 | 前端改版设计稿：用 v0 出几版；选定 AI Elements 或 assistant-ui（7.4） | S4–S5 | 独立 | 设计稿 | Z、S 和客户认可 |
 | T3 | 升级到 Tailwind 4 和 React 19，引入 shadcn/ui；现有页面改版；回答用 Markdown 渲染（修好粗体） | S5 | T2 | `frontend/` | 现有前端测试通过；截图对比 |
-| T4 | ECE 和计算机科学的路由评估：用 `data/demo_courses/` 里 ECE 和计算机科学的课程包写问题并标注，做评估；需要时补训练数据、重新训练 | S5–S6 | S5 | `backend/app/routing/`、`data/routing/`、`eval/` | 报告；工程问题不会全部被送云端 |
+| T4 | ECE 和计算机科学的路由评估：用 `data/demo_courses/` 里 ECE 和计算机科学的课程包写问题并标注，做评估；需要时补训练数据、重新训练。评估部分已完成：`data/routing/ece_cs_questions.jsonl` 里有 160 个问题，程序和报告在 `eval/routing-ece/`（现有路由把 48% 到 50% 的问题送云端，标注为云端的只有 19%，主要原因是分布外检查；用新数据重新训练的候选权重在两个评估集上都更好，放在 `eval/routing-ece/results/candidate/`，等负责人决定是否采用） | S5–S6 | S5 | `backend/app/routing/`、`data/routing/`、`eval/` | 报告；工程问题不会全部被送云端（已满足） |
 | T5 | 问题类型分类（concept / logistics）：标注数据，路由模型多一个输出 | S6 | T4 | `backend/app/routing/` | 准确率报告 |
 | T6 | 新页面：选课程、加入页（邀请码）、课程管理、成员导入、课程设置 | S6 | Z9 的 OpenAPI | `frontend/src/pages/` | 主要流程有界面测试 |
 | T7 | 新页面：教师端 AI（四档）、个人概览、学习计划、可见性方案和不公开。新前端**没有每条回答后的评分**，回答下面也**没有"更详细 / 更简短 / 先举例 / 先讲概念"按钮**（决定见第 9 节）：评价只有学期末问卷 | S6–S7 | S6～S10、Z12 的 OpenAPI | `frontend/src/pages/` | 同上 |
