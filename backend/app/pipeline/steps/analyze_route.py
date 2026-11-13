@@ -24,6 +24,21 @@ def route_input(ctx: RequestContext) -> RouteInput:
     )
 
 
+def question_kind_of(router, ctx: RequestContext, vector) -> str:
+    """Course logistics or concept (T5), from the current question alone; "concept" when the router has no
+    such head. It never changes the route decision."""
+    kind = getattr(router, "question_kind", None)
+    if kind is None:
+        return "concept"
+    try:
+        x = route_input(ctx)
+        if x.conversation_context:  # `vector` also holds the earlier questions: embed this one by itself
+            vector = router.embed(x.sanitized_question)
+        return kind(vector)
+    except Exception:  # noqa: BLE001 - a failing head must not stop the request
+        return "concept"
+
+
 @steps.register("analyze_route")
 class AnalyzeRouteStep(BaseStep):
     name = "analyze_route"
@@ -63,6 +78,7 @@ class AnalyzeRouteStep(BaseStep):
                 f"Cloud need {a.cloud_probability:.1%}; evidence required: {a.requires_evidence}.",
                 (perf_counter() - t0) * 1000,
             )
+            a.question_kind = await asyncio.to_thread(question_kind_of, router, ctx, vector)
         except Exception:
             ctx.semantic_analysis = SemanticAnalysis(
                 method=method, reason="Classifier weights unavailable or incompatible."

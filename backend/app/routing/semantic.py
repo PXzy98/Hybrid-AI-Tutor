@@ -3,6 +3,7 @@
 from app.core.config import get_settings
 from app.core.registry import routers
 from app.core.schemas import EvidenceAssessment, RouteInput, RouteScore, SemanticAnalysis
+from app.routing import question_type
 from app.routing.evidence import assess_evidence
 from app.routing.models import encode, load_weights, predict_heads
 
@@ -14,6 +15,10 @@ class SemanticRouter:
 
     def embed(self, question: str):
         return encode([question], self.cfg)[0]
+
+    def question_kind(self, vector) -> str:
+        """Course logistics or concept (T5); independent of the route decision."""
+        return question_type.classify(vector, self.cfg)
 
     def classify(self, vector, method: str) -> SemanticAnalysis:
         if method not in self.cfg.enabled_methods:
