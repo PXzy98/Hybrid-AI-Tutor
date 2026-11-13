@@ -12,8 +12,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useI18n } from "@/i18n";
 
-/** End of term: the server writes an export of the course's student data and then deletes that data. The
- * instructor confirms by typing the course code; the export can be downloaded until it expires. */
+/** End of term: the instructor can first take an export and check it (nothing is deleted); ending the term
+ * writes a final export and then deletes the course's student data. The instructor confirms by typing the
+ * course code; exports can be downloaded until they expire. */
 export default function EndOfTerm({ course }: { course: Course }) {
   const { t } = useI18n();
   const qc = useQueryClient();
@@ -38,9 +39,33 @@ export default function EndOfTerm({ course }: { course: Course }) {
       URL.revokeObjectURL(url);
     },
   });
+  const early = useMutation({ mutationFn: () => api.createExport(course.id) });
   const done = end.data;
   return (
     <div className="space-y-4">
+      {!done && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("end.previewTitle")}</CardTitle>
+            <CardDescription>{t("end.previewIntro")}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button type="button" variant="outline" onClick={() => early.mutate()} disabled={early.isPending}>
+              {early.isPending ? t("end.working") : t("end.previewCreate")}
+            </Button>
+            <ErrorNote error={early.error} />
+            {early.data && (
+              <div role="status" className="space-y-2 text-sm">
+                <p>{t("end.previewReady", { exported: early.data.students_exported })}</p>
+                <p>{t("end.expires", { date: new Date(early.data.expires_at).toLocaleString() })}</p>
+                <Button type="button" onClick={() => save.mutate(early.data.export_id)} disabled={save.isPending}>
+                  <Download aria-hidden />{t("end.download")}
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
       <Card>
         <CardHeader>
           <CardTitle>{t("end.title")}</CardTitle>

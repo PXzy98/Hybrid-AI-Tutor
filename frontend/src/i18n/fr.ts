@@ -343,6 +343,10 @@ export const fr: Messages = {
   "settings.saving": "Enregistrement…",
   "settings.saved": "Enregistré.",
 
+  "end.previewTitle": "Vérifiez d’abord l’exportation",
+  "end.previewIntro": "Créez une exportation du cours dans son état actuel et téléchargez-la. Rien n’est supprimé; la session continue.",
+  "end.previewCreate": "Créer une exportation",
+  "end.previewReady": "Exportation prête : {exported} aperçus individuels (mode de visibilité B seulement).",
   "end.title": "Fin de session",
   "end.intro": "Fermez les données du cours à la fin de la session.",
   "end.step1": "Le serveur écrit une exportation des données étudiantes du cours.",

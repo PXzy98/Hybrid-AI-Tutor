@@ -137,3 +137,28 @@ def test_maintenance_removes_late_writes_and_expired_exports(world):
     assert {r["student_id"] for r in rows("request_log")} == {current}
     assert {r["student_id"] for r in rows("session_turn")} == {current}
     assert not path.exists()  # deleted although nobody opened the course again
+
+
+def test_an_export_can_be_taken_before_the_term_ends_without_deleting(world):
+    alice = _login(world.app, "alice")
+    alice.post(f"{world.url}/check", json=Q1)
+    r = world.prof.post(f"{world.url}/exports")
+    assert r.status_code == 201, r.text
+    early = r.json()
+    files = _export(world, early["export_id"])
+    assert {"export.json", "class_summary.json", "quizzes.json", "survey.json"} <= set(files)
+    assert len(rows("evidence_log")) == 1  # nothing deleted, the student is still a member
+    assert alice.get(f"{world.url}/me/profile").status_code == 200
+    audit = [a for a in rows("audit_log") if a["action"] == "course.export"]
+    assert audit[0]["details"]["export_id"] == early["export_id"]
+    done = world.prof.post(f"{world.url}/end-term", json={"confirm": True}).json()
+    assert done["export_id"] != early["export_id"]  # the end of term takes its own, final export
+    _export(world, early["export_id"])  # the early one stays downloadable until it expires
+
+
+def test_only_the_course_instructors_take_an_export(world):
+    world.services.accounts.create_instructor("other", "correct-horse-battery", must_change=False)
+    for client, code in ((_login(world.app, "other"), 404), (_login(world.app, "alice"), 404),
+                         (csrf_client(world.app), 401)):
+        assert client.post(f"{world.url}/exports").status_code == code
+    assert [a for a in rows("audit_log") if a["action"] == "course.export"] == []

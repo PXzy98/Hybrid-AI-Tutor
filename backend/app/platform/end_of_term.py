@@ -104,10 +104,17 @@ def _build_export(engine: Engine, scope: CourseScope, access: CourseAccess, min_
     return buffer.getvalue(), len(profiles)
 
 
-def end_term(engine: Engine, data_root: Path, scope: CourseScope, access: CourseAccess, *, min_group: int,
-             retention_hours: int, settings) -> TermEnded:
-    """Build the export, write it, then delete the student data of the course. If the export cannot be
-    written, nothing is deleted."""
+@dataclass(frozen=True)
+class Exported:
+    export_id: str
+    expires_at: datetime
+    students_exported: int
+
+
+def write_export(engine: Engine, data_root: Path, scope: CourseScope, access: CourseAccess, *, min_group: int,
+                 retention_hours: int, settings) -> Exported:
+    """Build the export and write it; nothing is deleted. Used by the end of term and on its own, so the
+    instructor can download and check the export before ending the term."""
     course_id = access.course.id
     purge_expired(data_root, course_id, retention_hours)
     data, exported = _build_export(engine, scope, access, min_group, settings)
@@ -116,6 +123,31 @@ def end_term(engine: Engine, data_root: Path, scope: CourseScope, access: Course
     folder = exports_dir(data_root, course_id)
     folder.mkdir(parents=True, exist_ok=True)
     (folder / f"{export_id}.zip").write_bytes(data)
+    return Exported(export_id, now + timedelta(hours=retention_hours), exported)
+
+
+def export_only(engine: Engine, data_root: Path, scope: CourseScope, access: CourseAccess, *, min_group: int,
+                retention_hours: int, settings) -> Exported:
+    """`POST .../exports`: an export of the course as it is now, audited; the term goes on."""
+    done = write_export(engine, data_root, scope, access, min_group=min_group,
+                        retention_hours=retention_hours, settings=settings)
+    with Session(engine) as db:
+        db.add(AuditLog(account_id=access.account_id, action="course.export",
+                        target=f"course:{access.course.id}",
+                        details={"export_id": done.export_id, "students_exported": done.students_exported}))
+        db.commit()
+    return done
+
+
+def end_term(engine: Engine, data_root: Path, scope: CourseScope, access: CourseAccess, *, min_group: int,
+             retention_hours: int, settings) -> TermEnded:
+    """Build the export, write it, then delete the student data of the course. If the export cannot be
+    written, nothing is deleted. The final export is taken here, after any earlier `export_only`, so it
+    holds the data exactly as it was deleted."""
+    course_id = access.course.id
+    done = write_export(engine, data_root, scope, access, min_group=min_group,
+                        retention_hours=retention_hours, settings=settings)
+    export_id, exported = done.export_id, done.students_exported
 
     deleted = delete_course_data(engine, course_id)  # learner state, levels, evidence, misconceptions
     with Session(engine) as db:
@@ -132,7 +164,7 @@ def end_term(engine: Engine, data_root: Path, scope: CourseScope, access: Course
                         details={"export_id": export_id, "students_removed": removed,
                                  "students_exported": exported, "deleted": deleted}))
         db.commit()
-    return TermEnded(export_id, now + timedelta(hours=retention_hours), removed, exported, deleted)
+    return TermEnded(export_id, done.expires_at, removed, exported, deleted)
 
 
 def purge_expired(data_root: Path, course_id: int, retention_hours: int) -> None:

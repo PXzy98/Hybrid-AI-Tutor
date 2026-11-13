@@ -167,7 +167,9 @@ the evaluation of the tutor.
 
 ## 12. End of term
 
-**End of term** > **End the term…** Type the course code to confirm, then **Export and delete**:
+First, under **Check the export first**, choose **Create an export** and **Download the export**: it holds what
+the end of term will export, and nothing is deleted. Then **End of term** > **End the term…** Type the course
+code to confirm, then **Export and delete**:
 1. The server first writes the **export** (a ZIP): class summary, quiz results (`quizzes.json`), survey averages
    (`survey.json`) and, only in mode B, the individual overviews you may see under exactly the same rules as the
    Students tab (agreed, not opted out, data after agreeing).

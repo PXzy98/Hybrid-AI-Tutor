@@ -690,6 +690,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/courses/{course_id}/exports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create Export
+         * @description An export of the course as it is now (the same content as at the end of term), without deleting
+         *     anything: download and check it before ending the term. Individual overviews follow the visibility rules
+         *     and each is audited.
+         */
+        post: operations["courses_export_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/courses/{course_id}/exports/{export_id}": {
         parameters: {
             query?: never;
@@ -2867,6 +2889,18 @@ export interface components {
              * @default
              */
             reason?: string;
+        };
+        /** ExportOut */
+        ExportOut: {
+            /** Export Id */
+            export_id: string;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /** Students Exported */
+            students_exported: number;
         };
         /** FeedbackBody */
         FeedbackBody: {
@@ -5906,6 +5940,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EndTermOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    courses_export_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExportOut"];
                 };
             };
             /** @description Validation Error */

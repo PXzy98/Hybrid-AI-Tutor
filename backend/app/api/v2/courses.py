@@ -176,6 +176,28 @@ def end_term(request: Request, body: EndTermIn, access: CourseInstructor):
     return EndTermOut(**done.__dict__)
 
 
+class ExportOut(BaseModel):
+    export_id: str
+    expires_at: datetime  # the export can be downloaded until then
+    students_exported: int  # individual overviews in the export (visibility mode B only)
+
+
+@router.post("/courses/{course_id}/exports", response_model=ExportOut, status_code=201,
+             operation_id="courses_export_create")
+def create_export(request: Request, access: CourseInstructor):
+    """An export of the course as it is now (the same content as at the end of term), without deleting
+    anything: download and check it before ending the term. Individual overviews follow the visibility rules
+    and each is audited."""
+    from app.api.v2.ask import _scope
+
+    services = request.app.state.services
+    done = end_of_term.export_only(
+        services.engine, services.settings.data_path(), _scope(services, access.course.id), access,
+        min_group=services.settings.learner.class_summary_min_group,
+        retention_hours=services.settings.limits.courses.export_retention_hours, settings=services.settings)
+    return ExportOut(**done.__dict__)
+
+
 @router.get("/courses/{course_id}/exports/{export_id}", operation_id="courses_export_download",
             responses={200: {"content": {"application/zip": {}}}, 404: {"description": "unknown or expired"}})
 def download_export(request: Request, export_id: str, access: CourseInstructor):

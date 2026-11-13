@@ -343,6 +343,10 @@ export const en = {
   "settings.saving": "Saving…",
   "settings.saved": "Saved.",
 
+  "end.previewTitle": "Check the export first",
+  "end.previewIntro": "Take an export of the course as it is now and download it. Nothing is deleted; the term goes on.",
+  "end.previewCreate": "Create an export",
+  "end.previewReady": "Export ready: {exported} individual overviews (visibility mode B only).",
   "end.title": "End of term",
   "end.intro": "Close the course data at the end of the term.",
   "end.step1": "The server writes an export of the course's student data.",
