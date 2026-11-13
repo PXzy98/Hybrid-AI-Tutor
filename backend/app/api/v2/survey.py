@@ -116,9 +116,13 @@ def set_window(body: WindowIn, access: CourseInstructor, request: Request):
              operation_id="survey_answer")
 def answer(body: SurveyAnswers, access: CourseStudent, request: Request):
     engine = _engine(request)
-    if not _is_open(_window(engine, access.course.id)):
-        raise ApiError(409, ErrorCode.conflict, "the survey is not open")
     with Session(engine) as db:
+        # the window row is locked until the commit: the end of term deletes it first, so an answer either
+        # commits before that deletion (and is deleted with the rest) or finds no open survey afterwards
+        window = db.exec(select(SurveyWindow).where(SurveyWindow.course_id == access.course.id)
+                         .with_for_update()).first()
+        if not _is_open(window):
+            raise ApiError(409, ErrorCode.conflict, "the survey is not open")
         db.add(CourseSurveySubmission(course_id=access.course.id, student_id=access.student_id))
         db.add(CourseSurveyResponse(course_id=access.course.id, **body.model_dump()))
         try:
