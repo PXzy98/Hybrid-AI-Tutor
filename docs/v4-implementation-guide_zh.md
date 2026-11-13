@@ -410,7 +410,7 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | S8 | 课程级知识模型（4.10） | S6–S7 | Z4 | `backend/app/learner/knowledge/` | 和现有 BKT 的对比评估（`eval/learner-sim/`） |
 | S9 | 可见性方案 A/B、个人概览、学习计划、不公开、审计；结束学期导出的内容 | S6–S7 | Z4、Z10 | `backend/app/learner/`、`backend/app/api/v2/` | 测试覆盖"不该看到的不返回" |
 | S10 | 教师端 AI 第三档：班级洞察后端 | S7 | S8 | `backend/app/instructor_ai/` | 不返回原文 |
-| S11 | 公开课程包的检索评估，每个领域至少一门（`eval/course_rag_benchmark.py`） | S7 | S5 | `eval/` | 每个领域都有结果 |
+| S11 | 公开课程包的检索评估，每个领域至少一门：前四门（HST.151、7.016、6.002、CS50x）已在 `eval/course-rag-packs/` 完成（题集、`run.py`、`results/report.md`）；其余四门课程包和 `eval/course_rag_benchmark.py`（人工标注段落）待做 | S7 | S5 | `eval/` | 每个领域都有结果（目前八门中的四门） |
 | S12 | 自查和交接文档 | S8 | — | `docs/` | 自查清单 |
 | Q1 | 小测和学期末问卷，2026-11-12 导师会议后新增（第 9 节）：小测（选择题和判断题，本地模型起草，审阅，发布，自动评分，结果遵守可见性规则，`final` 小测 = 后测，和课程诊断（前测）对比）；学期末问卷（时间窗口、匿名打分、最小组人数）；结束学期时两者都以汇总形式导出，然后删除 | S7 | S9、S6 | `backend/app/learner/quizzes.py`、`backend/app/api/v2/quizzes.py`、`backend/app/api/v2/survey.py`、`backend/app/instructor_ai/quiz_drafts.py`、`backend/app/platform/end_of_term.py`、迁移 0013 | `backend/tests/test_quizzes_v2.py` 通过；每个接口都有访问测试；api-v2.md 3.9、3.10 |
 
