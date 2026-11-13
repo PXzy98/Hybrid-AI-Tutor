@@ -23,7 +23,7 @@ log = logging.getLogger("app.jobs")
 
 HANDLERS: dict[str, Callable] = {}
 # imported before a job runs, so their handlers are known
-HANDLER_MODULES = ("app.instructor_ai.eval", "app.instructor_ai.quiz_drafts")
+HANDLER_MODULES = ("app.instructor_ai.eval", "app.instructor_ai.quiz_drafts", "app.rag.index_jobs")
 STALE_AFTER = timedelta(hours=6)  # a running job without an end after this is failed (a worker was stopped)
 
 
