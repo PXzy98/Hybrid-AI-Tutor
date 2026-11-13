@@ -140,10 +140,9 @@ def test_tier1_material_with_student_data_is_refused(world):
     body = "Student 300418277 got 87% on the midterm."
     content = {"title": "Class list", "body": body}
     r = prof.patch(f"{url}/ai/drafts/{created['id']}", json={"content": content})
-    assert r.status_code == 200
-    r = prof.post(f"{url}/ai/drafts/{created['id']}/accept", json={})
     assert r.status_code == 422 and "STUDENT_ID" in r.json()["detail"] and "300418277" not in r.text
-    assert _draft(world, created["id"])["status"] == "draft"  # still a draft, nothing stored
+    assert "300418277" not in str(_draft(world, created["id"])["content"])  # never stored
+    assert _draft(world, created["id"])["status"] == "draft"
     assert prof.get(f"{url}/materials").json()["materials"] == []
 
 

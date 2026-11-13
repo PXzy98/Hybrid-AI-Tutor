@@ -9,6 +9,7 @@ and indexed like an upload). `DELETE` discards a draft.
 
 Tier 3: `GET .../insights` returns KC and misconception counts only, suppressed for small groups.
 """
+import json
 import re
 from datetime import datetime
 from typing import Annotated, Literal
@@ -23,6 +24,7 @@ from app.instructor_ai import draft_jobs
 from app.instructor_ai.insights_source import course_insights
 from app.platform import jobs
 from app.platform.access import CourseAccess, require_course_role
+from app.privacy.profiles import privacy_profile, scan_document
 from app.rag import index_jobs
 from app.storage.models import AiDraft, AuditLog, CatalogMisconception, Kc, Module, utcnow
 
@@ -160,13 +162,21 @@ def get_draft(request: Request, draft_id: int, access: CourseInstructor):
 def update_draft(request: Request, draft_id: int, body: AiDraftPatch, access: CourseInstructor):
     """Replace the content of a draft (the whole content, in the shape it was returned in)."""
     with Session(_engine(request), expire_on_commit=False) as db:
-        row = _get(db, access.course.id, draft_id)
+        _get(db, access.course.id, draft_id)
+        row = db.exec(select(AiDraft).where(AiDraft.id == draft_id).with_for_update()).one()
         if row.status != "draft":
             raise ApiError(409, ErrorCode.conflict, "only a draft can be edited")
         try:
-            row.content = draft_jobs.parse_content(row.kind, body.content)
+            content = draft_jobs.parse_content(row.kind, body.content)
         except ValueError as e:
             raise ApiError(422, ErrorCode.invalid, str(e)) from None
+        # the instructor's text is scanned before it is stored: student data never reaches the table
+        found = scan_document(json.dumps(content, ensure_ascii=False),
+                              privacy_profile(access.course.course_type)).blocking
+        if found:
+            raise ApiError(422, ErrorCode.invalid,
+                           "the privacy scan found student data: " + ", ".join(found))
+        row.content = content
         row.updated_at = utcnow()
         db.add(row)
         db.commit()
@@ -177,7 +187,9 @@ def update_draft(request: Request, draft_id: int, body: AiDraftPatch, access: Co
 def discard(request: Request, draft_id: int, access: CourseInstructor):
     """Discard a draft that was not accepted (accepted content is edited as normal content)."""
     with Session(_engine(request)) as db:
-        row = _get(db, access.course.id, draft_id)
+        _get(db, access.course.id, draft_id)
+        # locked like accept: a discard waiting on an accept then sees `accepted` and refuses
+        row = db.exec(select(AiDraft).where(AiDraft.id == draft_id).with_for_update()).one()
         if row.status == "accepted":
             raise ApiError(409, ErrorCode.conflict, "an accepted draft is already course content")
         row.status, row.updated_at = "discarded", utcnow()
