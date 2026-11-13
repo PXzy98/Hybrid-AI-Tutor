@@ -1143,6 +1143,26 @@ export interface paths {
         patch: operations["model_endpoints_update"];
         trace?: never;
     };
+    "/api/v2/admin/model-endpoints/{endpoint_id}/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Test System
+         * @description Test the connection again (422 with the reason when it fails; nothing is changed then).
+         */
+        post: operations["model_endpoints_test"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/courses/{course_id}/model-endpoints": {
         parameters: {
             query?: never;
@@ -1177,6 +1197,23 @@ export interface paths {
         head?: never;
         /** Update Course Endpoint */
         patch: operations["course_model_endpoints_update"];
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/model-endpoints/{endpoint_id}/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Test Course Endpoint */
+        post: operations["course_model_endpoints_test"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v2/admin/instructors": {
@@ -7113,6 +7150,37 @@ export interface operations {
             };
         };
     };
+    model_endpoints_test: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                endpoint_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EndpointOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     course_model_endpoints_list: {
         parameters: {
             query?: never;
@@ -7224,6 +7292,38 @@ export interface operations {
                 "application/json": components["schemas"]["EndpointPatch"];
             };
         };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EndpointOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    course_model_endpoints_test: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                endpoint_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             200: {

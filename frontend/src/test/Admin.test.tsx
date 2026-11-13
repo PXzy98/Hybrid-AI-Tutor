@@ -121,6 +121,24 @@ describe("system administration", () => {
     expect(patch.body).not.toHaveProperty("api_key"); // an empty field keeps the stored key
   });
 
+  it("tests a stored connection again and shows a failure from the server", async () => {
+    let tries = 0;
+    const calls = mockApi(adminRoutes({
+      "POST /admin/model-endpoints/4/test": () => {
+        tries += 1;
+        return tries === 1 ? { ...endpoint, last_test_ok_at: "2026-11-13T10:00:00Z" }
+          : reply({ detail: "the connection test failed (LLMUnavailable)" }, 422);
+      },
+    }));
+    renderApp("/admin");
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: "Test Lab server" }));
+    expect(await screen.findByText("Lab server answered.")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Test Lab server" }));
+    expect(await screen.findByText(/connection test failed/)).toBeInTheDocument();
+    expect(calls.filter((c) => c.path === "/admin/model-endpoints/4/test")).toHaveLength(2);
+  });
+
   it("asks to confirm control of a trusted local connection and shows the server's refusal", async () => {
     const calls = mockApi(adminRoutes({
       "POST /admin/model-endpoints": () => reply({ detail: "connection test failed: connection refused", code: "invalid" }, 422),
