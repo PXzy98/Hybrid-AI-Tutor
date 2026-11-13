@@ -94,6 +94,28 @@ def _tags_known(db: Session, course_id: int, options: dict) -> None:
         raise CatalogError(f"unknown misconception tag(s): {', '.join(unknown)}")
 
 
+def _free_code(taken: set[str], prefix: str, start: int) -> str:
+    """The first unused `<prefix><n>`; the code is added to `taken`."""
+    n = start
+    while f"{prefix}{n}" in taken:
+        n += 1
+    taken.add(f"{prefix}{n}")
+    return f"{prefix}{n}"
+
+
+def _kcs_by_name(db: Session, course_id: int) -> dict[str, Kc]:
+    """The course's active KCs by lower-cased name."""
+    rows = db.exec(select(Kc).where(Kc.course_id == course_id, Kc.status == "active").order_by(Kc.id)).all()
+    return {k.name.casefold(): k for k in rows}
+
+
+def _resolve_kc(kcs: dict[str, Kc], names: list[str]) -> Kc:
+    for name in names:
+        if name.casefold() in kcs:
+            return kcs[name.casefold()]
+    raise CatalogError(f"unknown KC: {names[0]}" if names else "a KC is required")
+
+
 class CatalogEditor:
     def __init__(self, engine, on_change=None) -> None:
         self.engine = engine
@@ -277,6 +299,68 @@ class CatalogEditor:
             db.add(row)
             self._commit(db, course_id)
             return row
+
+    # ------------------------------------------------------------ accepted AI drafts (api-v2.md 3.7)
+    # One transaction and one content check for a whole draft: either every row is created or none.
+    # Codes are generated (`<module>.<n>`, `<kc>-q<n>`, `<kc>.MC<n>`); the rows are `active`.
+    def create_drafted_kcs(self, course_id: int, module_id: int, drafts: list[dict]) -> list[Kc]:
+        with self._db() as db:
+            module = _get(db, Module, course_id, module_id, "module")
+            taken = set(db.exec(select(Kc.code).where(Kc.course_id == course_id)))
+            by_name = {k.name.casefold(): k for k in db.exec(select(Kc).where(Kc.course_id == course_id))}
+            created: list[Kc] = []
+            for d in drafts:
+                code = _free_code(taken, f"{module.code}.", 1)
+                kc = Kc(course_id=course_id, module_id=module_id, code=code, name=d["name"].strip(),
+                        definition=d["definition"], difficulty=d.get("difficulty", "basic"), status="active")
+                db.add(kc)
+                created.append(kc)
+                by_name.setdefault(kc.name.casefold(), kc)
+            db.flush()
+            for d, kc in zip(drafts, created, strict=True):
+                for name in d.get("prerequisite_names", []):
+                    prerequisite = by_name.get(name.casefold())
+                    if prerequisite is None:
+                        raise CatalogError(f"unknown prerequisite KC: {name}")
+                    db.add(KcPrerequisite(kc_id=kc.id, prerequisite_id=prerequisite.id))
+            self._commit(db, course_id)
+            return created
+
+    def create_drafted_items(self, course_id: int, drafts: list[dict]) -> list[CheckItem]:
+        """`drafts`: {"kc_names", "question", "options" (4), "correct_index", "explanation"}."""
+        with self._db() as db:
+            kcs = _kcs_by_name(db, course_id)
+            taken = set(db.exec(select(CheckItem.code).where(CheckItem.course_id == course_id)))
+            created = []
+            for d in drafts:
+                kc = _resolve_kc(kcs, d["kc_names"])
+                options = {letter: {"text": text_, "misconception": None}
+                           for letter, text_ in zip("ABCD", d["options"], strict=True)}
+                item = CheckItem(course_id=course_id, kc_id=kc.id, code=_free_code(taken, f"{kc.code}-q", 1),
+                                 level=kc.difficulty, stem=d["question"], options=options,
+                                 answer="ABCD"[d["correct_index"]], explanation=d["explanation"],
+                                 status="active")
+                db.add(item)
+                created.append(item)
+            self._commit(db, course_id)
+            return created
+
+    def create_drafted_misconceptions(self, course_id: int, drafts: list[dict]) -> list[CatalogMisconception]:
+        """`drafts`: {"kc_name", "incorrect_belief", "correction"}."""
+        with self._db() as db:
+            kcs = _kcs_by_name(db, course_id)
+            taken = set(db.exec(select(CatalogMisconception.code)
+                                .where(CatalogMisconception.course_id == course_id)))
+            created = []
+            for d in drafts:
+                kc = _resolve_kc(kcs, [d["kc_name"]])
+                row = CatalogMisconception(course_id=course_id, kc_id=kc.id, status="active",
+                                           code=_free_code(taken, f"{kc.code}.MC", 1),
+                                           statement=d["incorrect_belief"], correction=d["correction"])
+                db.add(row)
+                created.append(row)
+            self._commit(db, course_id)
+            return created
 
     # ----------------------------------------------------------------------------- YAML import/export
     def export_zip(self, course_id: int) -> bytes:

@@ -135,18 +135,20 @@ Notes on ask (implemented in `backend/app/api/v2/ask.py`):
 | `GET /courses/{course_id}/class-summary` | I | aggregates (all modes) |
 | `GET /courses/{course_id}/students/{student_id}/overview` | I | individual overview (mode B, not opted out, since `visible_since`; audited) |
 | `GET/PUT /courses/{course_id}/students/{student_id}/plan` | I | learning plan (same conditions) |
-| `GET /courses/{course_id}/insights` | I | class insights, tier 3 (labels and counts only) |
+| `GET /courses/{course_id}/insights` | I | class insights, tier 3: `{min_group, suppressed, kc_question_counts[], misconception_counts[]}`, each entry `{label (KC or misconception code), name, count}`. Built from the consenting students' `evidence_log` (understand-step KC signals, misconception codes), never question text; a label needs `learner.class_summary_min_group` (at least 5) different students, and `suppressed` is true below that many students overall |
 | `GET /courses/{course_id}/survey-summary` | I | survey averages (minimum group size from `limits`) |
 
 ### 3.7 Instructor AI (owner S for tiers 1–3, Z for tier 4)
 
+Draft statuses: `generating`, `draft`, `accepted`, `discarded`, `failed` (with `error`). Drafts are visible to the course's instructors only; students see the content after acceptance, as normal content. `GET .../ai/drafts` takes `status` and `kind` filters.
+
 | Method and path | Who | Owner | Purpose |
 |---|---|---|---|
-| `POST /courses/{course_id}/ai/drafts` | I | S | start a generation job (`kind`: `project_ideas`, `sample_proposal`, `faq`, `kcs`, `check_items`, `misconceptions`); returns a job |
+| `POST /courses/{course_id}/ai/drafts` | I | S | start a generation job (`kind`: `project_ideas`, `sample_proposal`, `faq`, `kcs`, `check_items`, `misconceptions`; optional `module_id`, `focus`); 202 with the draft (`status: generating`) and its `job_id` (`GET .../jobs/{id}`); the local model only |
 | `GET /courses/{course_id}/ai/drafts`, `GET .../ai/drafts/{draft_id}` | I | S | drafts |
-| `PATCH /courses/{course_id}/ai/drafts/{draft_id}` | I | S | edit a draft |
-| `POST /courses/{course_id}/ai/drafts/{draft_id}/accept` | I | S | publish into the normal tables (or as a course document) |
-| `DELETE /courses/{course_id}/ai/drafts/{draft_id}` | I | S | discard |
+| `PATCH /courses/{course_id}/ai/drafts/{draft_id}` | I | S | replace the `content` of a draft (tier 1 `{title, body}`, tier 2 `{items: [...]}`); 409 unless `draft` |
+| `POST /courses/{course_id}/ai/drafts/{draft_id}/accept` | I | S | tier 2: create the KCs (need `module_id` in the draft or the body), check items and misconceptions as `active` rows, all or none, with the content checks; tier 1: store a Markdown material (scanned, indexed by a rebuild job). Returns `{draft, created, rebuild_job_id}`; 409 unless `draft` |
+| `DELETE /courses/{course_id}/ai/drafts/{draft_id}` | I | S | discard (status `discarded`; 409 for an accepted draft) |
 | `POST /courses/{course_id}/ai/evaluations` | I | Z | start a local vs cloud evaluation (tier 4); returns a job |
 | `GET /courses/{course_id}/ai/evaluations[/{eval_id}]` | I | Z | reports |
 | `PUT /courses/{course_id}/ai/evaluations/{eval_id}/questions` | I | Z | the instructor's review of the generated questions (while `review`) |

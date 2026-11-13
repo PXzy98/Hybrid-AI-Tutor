@@ -1470,6 +1470,95 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/courses/{course_id}/ai/drafts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Drafts */
+        get: operations["ai_drafts_list"];
+        put?: never;
+        /**
+         * Create
+         * @description Start drafting from the course material with the local model (a job; the draft is `generating`).
+         */
+        post: operations["ai_drafts_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/ai/drafts/{draft_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Draft */
+        get: operations["ai_drafts_get"];
+        put?: never;
+        post?: never;
+        /**
+         * Discard
+         * @description Discard a draft that was not accepted (accepted content is edited as normal content).
+         */
+        delete: operations["ai_drafts_discard"];
+        options?: never;
+        head?: never;
+        /**
+         * Update Draft
+         * @description Replace the content of a draft (the whole content, in the shape it was returned in).
+         */
+        patch: operations["ai_drafts_update"];
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/ai/drafts/{draft_id}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Accept
+         * @description Publish the draft: tier 2 into the content tables (KCs, check items and misconceptions become
+         *     `active`, all or none), tier 1 as a Markdown course material. Students see it only from here on.
+         */
+        post: operations["ai_drafts_accept"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/insights": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Insights
+         * @description Tier 3: which KCs the students asked about most and the most common misconceptions. Counts of KC and
+         *     misconception codes only, never question text; a label is shown only when at least
+         *     `learner.class_summary_min_group` different students contributed to it (and to the whole result).
+         */
+        get: operations["insights_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/courses/{course_id}/ask": {
         parameters: {
             query?: never;
@@ -1866,6 +1955,21 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AcceptIn */
+        AcceptIn: {
+            /** Module Id */
+            module_id?: number | null;
+        };
+        /** AcceptOut */
+        AcceptOut: {
+            draft: components["schemas"]["app__api__v2__ai_drafts__DraftOut"];
+            /** Created */
+            created: {
+                [key: string]: number[];
+            };
+            /** Rebuild Job Id */
+            rebuild_job_id?: number | null;
+        };
         /** AdminConfig */
         AdminConfig: {
             values: components["schemas"]["RuntimeConfig"];
@@ -2411,22 +2515,39 @@ export interface components {
              */
             choice: "A" | "B" | "C" | "D";
         };
-        /** DraftIn */
-        DraftIn: {
-            /**
-             * Count
-             * @default 5
-             */
-            count: number;
-            /** Kinds */
-            kinds?: ("mcq" | "true_false")[];
-            /** Kc Codes */
-            kc_codes?: string[] | null;
+        /** DraftPatch */
+        DraftPatch: {
+            /** Content */
+            content: {
+                [key: string]: unknown;
+            };
         };
-        /** DraftOut */
-        DraftOut: {
-            /** Job Id */
-            job_id: number;
+        /** DraftSummary */
+        DraftSummary: {
+            /** Id */
+            id: number;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "project_ideas" | "sample_proposal" | "faq" | "kcs" | "check_items" | "misconceptions";
+            /** Module Id */
+            module_id: number | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "generating" | "draft" | "accepted" | "discarded" | "failed";
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
         };
         /** EndTermIn */
         EndTermIn: {
@@ -2726,6 +2847,17 @@ export interface components {
             /** Rejected */
             rejected: components["schemas"]["RejectedRow"][];
         };
+        /** InsightsOut */
+        InsightsOut: {
+            /** Min Group */
+            min_group: number;
+            /** Suppressed */
+            suppressed: boolean;
+            /** Kc Question Counts */
+            kc_question_counts: components["schemas"]["LabelCountOut"][];
+            /** Misconception Counts */
+            misconception_counts: components["schemas"]["LabelCountOut"][];
+        };
         /** InstructorIn */
         InstructorIn: {
             /** Email */
@@ -3010,6 +3142,15 @@ export interface components {
             level: "basic" | "intermediate" | "advanced";
             /** P Mastery */
             p_mastery: number;
+        };
+        /** LabelCountOut */
+        LabelCountOut: {
+            /** Label */
+            label: string;
+            /** Name */
+            name: string | null;
+            /** Count */
+            count: number;
         };
         /** LevelsConfig */
         LevelsConfig: {
@@ -4391,6 +4532,77 @@ export interface components {
              * Format: date-time
              */
             closes_at: string;
+        };
+        /** DraftIn */
+        app__api__v2__ai_drafts__DraftIn: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "project_ideas" | "sample_proposal" | "faq" | "kcs" | "check_items" | "misconceptions";
+            /** Module Id */
+            module_id?: number | null;
+            /**
+             * Focus
+             * @default
+             */
+            focus: string;
+        };
+        /** DraftOut */
+        app__api__v2__ai_drafts__DraftOut: {
+            /** Id */
+            id: number;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "project_ideas" | "sample_proposal" | "faq" | "kcs" | "check_items" | "misconceptions";
+            /** Module Id */
+            module_id: number | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "generating" | "draft" | "accepted" | "discarded" | "failed";
+            /** Content */
+            content: {
+                [key: string]: unknown;
+            };
+            /** Cited Sources */
+            cited_sources: string[];
+            /** Error */
+            error: string | null;
+            /** Created By */
+            created_by: number | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Job Id */
+            job_id?: number | null;
+        };
+        /** DraftIn */
+        app__api__v2__quizzes__DraftIn: {
+            /**
+             * Count
+             * @default 5
+             */
+            count: number;
+            /** Kinds */
+            kinds?: ("mcq" | "true_false")[];
+            /** Kc Codes */
+            kc_codes?: string[] | null;
+        };
+        /** DraftOut */
+        app__api__v2__quizzes__DraftOut: {
+            /** Job Id */
+            job_id: number;
         };
     };
     responses: never;
@@ -7693,6 +7905,252 @@ export interface operations {
             };
         };
     };
+    ai_drafts_list: {
+        parameters: {
+            query?: {
+                status?: ("generating" | "draft" | "accepted" | "discarded" | "failed") | null;
+                kind?: ("project_ideas" | "sample_proposal" | "faq" | "kcs" | "check_items" | "misconceptions") | null;
+            };
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DraftSummary"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ai_drafts_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["app__api__v2__ai_drafts__DraftIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["app__api__v2__ai_drafts__DraftOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ai_drafts_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                draft_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["app__api__v2__ai_drafts__DraftOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ai_drafts_discard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                draft_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ai_drafts_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                draft_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DraftPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["app__api__v2__ai_drafts__DraftOut"];
+                };
+            };
+            /** @description the draft is not in `draft` status */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ai_drafts_accept: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                draft_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AcceptIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AcceptOut"];
+                };
+            };
+            /** @description the draft is not in `draft` status */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description the content checks or the material scan refused it */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    insights_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InsightsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     ask_api_v2_courses__course_id__ask_post: {
         parameters: {
             query?: never;
@@ -8352,7 +8810,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["DraftIn"];
+                "application/json": components["schemas"]["app__api__v2__quizzes__DraftIn"];
             };
         };
         responses: {
@@ -8362,7 +8820,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DraftOut"];
+                    "application/json": components["schemas"]["app__api__v2__quizzes__DraftOut"];
                 };
             };
             /** @description Validation Error */
