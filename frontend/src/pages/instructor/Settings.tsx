@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
+import ModelEndpoints from "@/components/ModelEndpoints";
 import { useI18n } from "@/i18n";
 
 /** Course settings: title and term, then the privacy and routing values. The save sends the version that was
@@ -23,7 +24,32 @@ export default function Settings({ course }: { course: Course }) {
       <ErrorNote error={settings.error} />
       {settings.isLoading && <p className="text-muted-foreground">{t("app.loading")}</p>}
       {settings.data && <SettingsForm key={settings.data.version} course={course} initial={settings.data} />}
+      <ModelEndpoints courseId={course.id} />
+      <ArchiveCourse course={course} />
     </div>
+  );
+}
+
+/** Archive the course. The server refuses (409) while the course still has students: end the term first. */
+function ArchiveCourse({ course }: { course: Course }) {
+  const { t } = useI18n();
+  const qc = useQueryClient();
+  const archive = useMutation({
+    mutationFn: () => api.archiveCourse(course.id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["courses"] }),
+  });
+  const refused = archive.error instanceof ApiError && archive.error.status === 409;
+  return (
+    <Card>
+      <CardHeader><CardTitle>{t("archive.title")}</CardTitle><CardDescription>{t("archive.hint")}</CardDescription></CardHeader>
+      <CardContent className="space-y-3">
+        {refused && <Alert variant="warning" role="alert">{t("archive.refused")} {(archive.error as ApiError).message}</Alert>}
+        <ErrorNote error={refused ? null : archive.error} />
+        {course.status === "archived"
+          ? <p className="text-sm text-muted-foreground">{t("archive.done")}</p>
+          : <Button type="button" variant="outline" onClick={() => archive.mutate()} disabled={archive.isPending}>{t("archive.button")}</Button>}
+      </CardContent>
+    </Card>
   );
 }
 

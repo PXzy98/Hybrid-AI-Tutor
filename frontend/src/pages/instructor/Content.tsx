@@ -12,17 +12,21 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/i18n";
+import ContentTransfer from "./ContentTransfer";
+import Misconceptions from "./Misconceptions";
 
 const LEVELS: Difficulty[] = ["basic", "intermediate", "advanced"];
 const CHOICES = ["A", "B", "C", "D"] as const;
 
-/** Course management: modules, knowledge components (KCs) and check items. */
+/** Course management: modules, knowledge components (KCs), check items, misconceptions and YAML import/export. */
 export default function Content({ course }: { course: Course }) {
   return (
     <div className="space-y-4">
       <ModulesCard course={course} />
       <KcsCard course={course} />
       <ItemsCard course={course} />
+      <Misconceptions course={course} />
+      <ContentTransfer course={course} />
     </div>
   );
 }

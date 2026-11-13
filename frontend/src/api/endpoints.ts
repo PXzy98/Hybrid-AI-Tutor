@@ -5,6 +5,16 @@ export type Me = Schemas["MeOut"];
 export type Course = Schemas["CourseOut"];
 export type Module = Schemas["ModuleOut"];
 export type Kc = Schemas["KcOut"];
+export type Misconception = Schemas["MisconceptionOut"];
+export type MisconceptionBody = Schemas["MisconceptionIn"];
+export type MisconceptionPatch = Schemas["MisconceptionPatch"];
+export type ImportCounts = Schemas["ImportCountsOut"];
+export type Staff = Schemas["StaffOut"];
+export type SystemSettings = Schemas["SystemSettingsOut"];
+export type SystemValues = Schemas["SystemValues"];
+export type ModelEndpoint = Schemas["EndpointOut"];
+export type ModelEndpointBody = Schemas["EndpointIn"];
+export type ModelEndpointPatch = Schemas["EndpointPatch"];
 export type CheckItemFull = Schemas["ItemOut"];
 export type Member = Schemas["MemberOut"];
 export type ImportReport = Schemas["ImportReportOut"];
@@ -53,6 +63,7 @@ export type EvaluationQuestion = Schemas["QuestionIn"];
 export type Difficulty = Schemas["KcOut"]["difficulty"];
 
 const c = (id: number) => `/courses/${id}`;
+const endpoints = (courseId: number | null) => (courseId === null ? "/admin/model-endpoints" : `${c(courseId)}/model-endpoints`);
 const body = <T>(value: T) => value;
 
 export const api = {
@@ -83,6 +94,17 @@ export const api = {
   kcs: (id: number) => request<Kc[]>("GET", `${c(id)}/kcs`),
   createKc: (id: number, input: Schemas["KcIn"]) => request<Kc>("POST", `${c(id)}/kcs`, input),
   updateKc: (id: number, kcId: number, changes: Schemas["KcPatch"]) => request<Kc>("PATCH", `${c(id)}/kcs/${kcId}`, changes),
+  misconceptions: (id: number) => request<Misconception[]>("GET", `${c(id)}/misconceptions`),
+  createMisconception: (id: number, input: MisconceptionBody) => request<Misconception>("POST", `${c(id)}/misconceptions`, input),
+  updateMisconception: (id: number, mcId: number, changes: MisconceptionPatch) =>
+    request<Misconception>("PATCH", `${c(id)}/misconceptions/${mcId}`, changes),
+  exportContent: (id: number) => download(`${c(id)}/content/export`),
+  importContent: (id: number, file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+    return upload<ImportCounts>(`${c(id)}/content/import`, form);
+  },
+  archiveCourse: (id: number) => request<Course>("POST", `${c(id)}/archive`),
   checkItems: (id: number) => request<CheckItemFull[]>("GET", `${c(id)}/check-items`),
   createCheckItem: (id: number, input: Schemas["ItemIn"]) => request<CheckItemFull>("POST", `${c(id)}/check-items`, input),
   updateCheckItem: (id: number, itemId: number, changes: Schemas["ItemPatch"]) =>
@@ -179,4 +201,19 @@ export const api = {
     request<Evaluation>("POST", `${c(id)}/ai/evaluations/${evalId}/run`, { confirm_cloud }),
   spotCheck: (id: number, evalId: number, questionId: number, agrees_with_judge: boolean) =>
     request<Evaluation>("PATCH", `${c(id)}/ai/evaluations/${evalId}/results/${questionId}`, { agrees_with_judge }),
+
+  // system administration (admin only; the server enforces it)
+  staff: () => request<Staff[]>("GET", "/admin/instructors"),
+  createStaff: (input: Schemas["StaffIn"]) => request<Schemas["NewStaffOut"]>("POST", "/admin/instructors", input),
+  updateStaff: (accountId: number, changes: Schemas["StaffPatch"]) => request<Staff>("PATCH", `/admin/instructors/${accountId}`, changes),
+  resetStaffPassword: (accountId: number) =>
+    request<Schemas["TemporaryPasswordOut"]>("POST", `/admin/instructors/${accountId}/reset-password`),
+  systemSettings: () => request<SystemSettings>("GET", "/admin/settings"),
+  saveSystemSettings: (values: SystemValues, version: number) => request<SystemSettings>("PUT", "/admin/settings", { values, version }),
+  // model connections: system scope (courseId null, admin) or one course (instructors)
+  modelEndpoints: (courseId: number | null) => request<ModelEndpoint[]>("GET", endpoints(courseId)),
+  createModelEndpoint: (courseId: number | null, input: ModelEndpointBody) => request<ModelEndpoint>("POST", endpoints(courseId), input),
+  updateModelEndpoint: (courseId: number | null, id: number, changes: ModelEndpointPatch) =>
+    request<ModelEndpoint>("PATCH", `${endpoints(courseId)}/${id}`, changes),
+  deleteModelEndpoint: (courseId: number | null, id: number) => request<void>("DELETE", `${endpoints(courseId)}/${id}`),
 };

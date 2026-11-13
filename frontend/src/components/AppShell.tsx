@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { GraduationCap, KeyRound, MessageSquarePlus, Plus } from "lucide-react";
+import { GraduationCap, KeyRound, MessageSquarePlus, Plus, Settings2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { Link, NavLink, Outlet, useMatch, useNavigate, useSearchParams } from "react-router-dom";
 
@@ -68,6 +68,7 @@ export default function AppShell({ me }: { me: Me }) {
               <div className="flex flex-wrap gap-2 px-1 pt-2">
                 <Button asChild variant="outline" size="sm"><Link to="/join"><KeyRound aria-hidden />{t("nav.join")}</Link></Button>
                 {me.system_role !== "student" && <NewCourse />}
+                {me.system_role === "admin" && <Button asChild variant="outline" size="sm"><Link to="/admin"><Settings2 aria-hidden />{t("nav.admin")}</Link></Button>}
               </div>
             </nav>
             {current && courseId !== null && <CourseNav courseId={courseId} student={isStudent} />}
