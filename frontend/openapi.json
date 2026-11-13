@@ -1524,6 +1524,112 @@
         }
       }
     },
+    "/api/v2/courses/{course_id}/end-term": {
+      "post": {
+        "tags": [
+          "courses"
+        ],
+        "summary": "End Term",
+        "description": "End the term: build the export (class summary; in visibility mode B also the overviews the\ninstructor may see), then delete the students' memberships and their data in this course. The course,\nits content, materials and settings stay for the next class list.",
+        "operationId": "courses_end_term",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EndTermIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EndTermOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/courses/{course_id}/exports/{export_id}": {
+      "get": {
+        "tags": [
+          "courses"
+        ],
+        "summary": "Download Export",
+        "operationId": "courses_export_download",
+        "parameters": [
+          {
+            "name": "export_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Export Id"
+            }
+          },
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              },
+              "application/zip": {}
+            }
+          },
+          "404": {
+            "description": "unknown or expired"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/courses/{course_id}/members": {
       "get": {
         "tags": [
@@ -6422,6 +6528,57 @@
           "choice"
         ],
         "title": "DiagnosticAnswer"
+      },
+      "EndTermIn": {
+        "properties": {
+          "confirm": {
+            "type": "boolean",
+            "const": true,
+            "title": "Confirm"
+          }
+        },
+        "type": "object",
+        "required": [
+          "confirm"
+        ],
+        "title": "EndTermIn"
+      },
+      "EndTermOut": {
+        "properties": {
+          "export_id": {
+            "type": "string",
+            "title": "Export Id"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expires At"
+          },
+          "students_removed": {
+            "type": "integer",
+            "title": "Students Removed"
+          },
+          "students_exported": {
+            "type": "integer",
+            "title": "Students Exported"
+          },
+          "deleted": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Deleted"
+          }
+        },
+        "type": "object",
+        "required": [
+          "export_id",
+          "expires_at",
+          "students_removed",
+          "students_exported",
+          "deleted"
+        ],
+        "title": "EndTermOut"
       },
       "EndpointIn": {
         "properties": {
