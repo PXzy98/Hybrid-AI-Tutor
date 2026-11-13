@@ -12,6 +12,13 @@ hit@4 is 0.9 or better in every course. Scoping matters most between neighbourin
 `bio7016-08` (proofreading by DNA polymerase) the right recitation is rank 4 course-wide and rank 1 scoped, and
 for `bio7016-22` (HIV, helper T cells) likewise.
 
+**Change made from this evaluation.** In module-scoped retrieval, course-level files now count 0.55 of their
+score (`COURSE_LEVEL_WEIGHT` in `backend/app/rag/course_retriever.py`). Over all eight courses, scoped hit@1
+went from 0.82 to 0.92 and hit@4 from 0.94 to 0.97 (weights 1.0, 0.85, 0.7 and 0.55 compared). Logistics
+questions asked from inside every module still find their course-level answer as often as before (hit@4 0.87
+at every weight). The examples below were written before that change; pattern 1 is now much rarer in scoped
+retrieval, and unchanged course-wide.
+
 **Failure patterns, with examples.**
 
 1. **Course-level documents and practice exams outrank the lecture.** They are always searched, and homework
@@ -45,7 +52,8 @@ for `bio7016-22` (HIV, helper T cells) likewise.
    before 23; `alg-17`: lecture 18 before 17 course-wide, though scoped it is rank 1). Scoping by module
    fixes this when the student has chosen one.
 
-**Suggestions (not done here).** Down-weight practice exams and homework (or search them only when asked for);
+**Suggestions (not done here).** Down-weight practice exams and homework in course-wide retrieval too (or search
+them only when asked for);
 index calendar rows with their session and date words; add a semantic or query-expansion step before the
 lexical score; fix the scan false positives.
 """

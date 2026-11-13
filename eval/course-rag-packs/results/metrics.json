@@ -9,9 +9,9 @@
       "scoped": {
         "concept": {
           "n": 12,
-          "hit@1": 0.667,
-          "hit@4": 0.917,
-          "mrr": 0.792
+          "hit@1": 1.0,
+          "hit@4": 1.0,
+          "mrr": 1.0
         },
         "application": {
           "n": 9,
@@ -27,18 +27,18 @@
         },
         "all": {
           "n": 27,
-          "hit@1": 0.704,
-          "hit@4": 0.889,
-          "mrr": 0.787
+          "hit@1": 0.852,
+          "hit@4": 0.926,
+          "mrr": 0.88
         }
       },
       "scoped_top_score": {
-        "answerable_median": 0.224,
-        "answerable_p10": 0.151,
+        "answerable_median": 0.222,
+        "answerable_p10": 0.109,
         "unanswerable_n": 3,
         "unanswerable_mean": 0.104,
         "unanswerable_max": 0.11,
-        "auc": 0.963
+        "auc": 0.926
       },
       "course": {
         "concept": {
@@ -80,15 +80,15 @@
       "scoped": {
         "concept": {
           "n": 15,
-          "hit@1": 0.867,
+          "hit@1": 1.0,
           "hit@4": 1.0,
-          "mrr": 0.911
+          "mrr": 1.0
         },
         "application": {
           "n": 7,
-          "hit@1": 0.857,
+          "hit@1": 1.0,
           "hit@4": 1.0,
-          "mrr": 0.893
+          "mrr": 1.0
         },
         "logistics": {
           "n": 6,
@@ -98,18 +98,18 @@
         },
         "all": {
           "n": 28,
-          "hit@1": 0.857,
+          "hit@1": 0.964,
           "hit@4": 0.964,
-          "mrr": 0.89
+          "mrr": 0.964
         }
       },
       "scoped_top_score": {
-        "answerable_median": 0.265,
-        "answerable_p10": 0.162,
+        "answerable_median": 0.262,
+        "answerable_p10": 0.155,
         "unanswerable_n": 3,
         "unanswerable_mean": 0.167,
         "unanswerable_max": 0.249,
-        "auc": 0.881
+        "auc": 0.857
       },
       "course": {
         "concept": {
@@ -153,15 +153,15 @@
       "scoped": {
         "concept": {
           "n": 13,
-          "hit@1": 0.769,
+          "hit@1": 1.0,
           "hit@4": 1.0,
-          "mrr": 0.872
+          "mrr": 1.0
         },
         "application": {
           "n": 5,
-          "hit@1": 0.8,
-          "hit@4": 0.8,
-          "mrr": 0.8
+          "hit@1": 1.0,
+          "hit@4": 1.0,
+          "mrr": 1.0
         },
         "logistics": {
           "n": 6,
@@ -171,18 +171,18 @@
         },
         "all": {
           "n": 24,
-          "hit@1": 0.75,
-          "hit@4": 0.958,
-          "mrr": 0.83
+          "hit@1": 0.917,
+          "hit@4": 1.0,
+          "mrr": 0.941
         }
       },
       "scoped_top_score": {
-        "answerable_median": 0.206,
-        "answerable_p10": 0.146,
+        "answerable_median": 0.203,
+        "answerable_p10": 0.125,
         "unanswerable_n": 3,
         "unanswerable_mean": 0.132,
         "unanswerable_max": 0.137,
-        "auc": 0.917
+        "auc": 0.875
       },
       "course": {
         "concept": {
@@ -224,9 +224,9 @@
       "scoped": {
         "concept": {
           "n": 19,
-          "hit@1": 0.842,
-          "hit@4": 0.947,
-          "mrr": 0.877
+          "hit@1": 0.947,
+          "hit@4": 1.0,
+          "mrr": 0.961
         },
         "application": {
           "n": 3,
@@ -242,18 +242,18 @@
         },
         "all": {
           "n": 28,
-          "hit@1": 0.857,
-          "hit@4": 0.929,
-          "mrr": 0.881
+          "hit@1": 0.929,
+          "hit@4": 0.964,
+          "mrr": 0.938
         }
       },
       "scoped_top_score": {
         "answerable_median": 0.203,
-        "answerable_p10": 0.123,
+        "answerable_p10": 0.107,
         "unanswerable_n": 3,
         "unanswerable_mean": 0.18,
         "unanswerable_max": 0.297,
-        "auc": 0.667
+        "auc": 0.655
       },
       "course": {
         "concept": {
@@ -295,15 +295,15 @@
       "scoped": {
         "concept": {
           "n": 15,
-          "hit@1": 0.8,
-          "hit@4": 0.933,
-          "mrr": 0.856
+          "hit@1": 1.0,
+          "hit@4": 1.0,
+          "mrr": 1.0
         },
         "application": {
           "n": 5,
-          "hit@1": 0.8,
+          "hit@1": 1.0,
           "hit@4": 1.0,
-          "mrr": 0.867
+          "mrr": 1.0
         },
         "logistics": {
           "n": 6,
@@ -313,18 +313,18 @@
         },
         "all": {
           "n": 26,
-          "hit@1": 0.769,
-          "hit@4": 0.923,
-          "mrr": 0.833
+          "hit@1": 0.923,
+          "hit@4": 0.962,
+          "mrr": 0.942
         }
       },
       "scoped_top_score": {
-        "answerable_median": 0.2,
-        "answerable_p10": 0.125,
+        "answerable_median": 0.198,
+        "answerable_p10": 0.118,
         "unanswerable_n": 3,
         "unanswerable_mean": 0.17,
         "unanswerable_max": 0.259,
-        "auc": 0.667
+        "auc": 0.615
       },
       "course": {
         "concept": {
@@ -372,9 +372,9 @@
       "scoped": {
         "concept": {
           "n": 13,
-          "hit@1": 0.846,
+          "hit@1": 0.923,
           "hit@4": 1.0,
-          "mrr": 0.904
+          "mrr": 0.962
         },
         "application": {
           "n": 2,
@@ -390,18 +390,18 @@
         },
         "all": {
           "n": 21,
-          "hit@1": 0.81,
+          "hit@1": 0.857,
           "hit@4": 1.0,
-          "mrr": 0.877
+          "mrr": 0.913
         }
       },
       "scoped_top_score": {
         "answerable_median": 0.234,
-        "answerable_p10": 0.137,
+        "answerable_p10": 0.12,
         "unanswerable_n": 3,
         "unanswerable_mean": 0.167,
         "unanswerable_max": 0.196,
-        "auc": 0.714
+        "auc": 0.698
       },
       "course": {
         "concept": {
@@ -516,15 +516,15 @@
       "scoped": {
         "concept": {
           "n": 14,
-          "hit@1": 0.929,
+          "hit@1": 1.0,
           "hit@4": 1.0,
-          "mrr": 0.964
+          "mrr": 1.0
         },
         "application": {
           "n": 5,
-          "hit@1": 0.8,
-          "hit@4": 0.8,
-          "mrr": 0.8
+          "hit@1": 1.0,
+          "hit@4": 1.0,
+          "mrr": 1.0
         },
         "logistics": {
           "n": 6,
@@ -534,18 +534,18 @@
         },
         "all": {
           "n": 25,
-          "hit@1": 0.88,
-          "hit@4": 0.92,
-          "mrr": 0.9
+          "hit@1": 0.96,
+          "hit@4": 0.96,
+          "mrr": 0.96
         }
       },
       "scoped_top_score": {
-        "answerable_median": 0.222,
+        "answerable_median": 0.218,
         "answerable_p10": 0.137,
         "unanswerable_n": 3,
         "unanswerable_mean": 0.151,
         "unanswerable_max": 0.202,
-        "auc": 0.88
+        "auc": 0.853
       },
       "course": {
         "concept": {
@@ -605,13 +605,13 @@
               "modules/01_week_0_scratch.md",
               "modules/01_week_0_scratch.md",
               "modules/01_week_0_scratch.md",
-              "assignments/pset_2.md"
+              "modules/01_week_0_scratch.md"
             ],
             "scores": [
               0.295854,
               0.273851,
               0.17452,
-              0.165329
+              0.164272
             ],
             "rank": 1,
             "top_score": 0.295854
@@ -643,19 +643,19 @@
           "gold_refused": [],
           "scoped": {
             "files": [
+              "modules/01_week_0_scratch.md",
+              "modules/01_week_0_scratch.md",
               "assignments/pset_2.md",
-              "modules/01_week_0_scratch.md",
-              "modules/01_week_0_scratch.md",
-              "assignments/pset_1.md"
+              "modules/01_week_0_scratch.md"
             ],
             "scores": [
-              0.19707,
               0.180737,
               0.139076,
-              0.136079
+              0.108389,
+              0.079274
             ],
-            "rank": 2,
-            "top_score": 0.19707
+            "rank": 1,
+            "top_score": 0.180737
           },
           "course": {
             "files": [
@@ -726,15 +726,15 @@
           "scoped": {
             "files": [
               "modules/03_week_2_arrays.md",
-              "assignments/pset_6.md",
-              "assignments/pset_6.md",
-              "assignments/pset_6.md"
+              "modules/03_week_2_arrays.md",
+              "modules/03_week_2_arrays.md",
+              "modules/03_week_2_arrays.md"
             ],
             "scores": [
               0.125534,
-              0.110313,
-              0.108211,
-              0.108066
+              0.067683,
+              0.062012,
+              0.061585
             ],
             "rank": 1,
             "top_score": 0.125534
@@ -848,19 +848,19 @@
           "gold_refused": [],
           "scoped": {
             "files": [
-              "assignments/pset_3.md",
+              "modules/04_week_3_algorithms.md",
               "modules/04_week_3_algorithms.md",
               "modules/04_week_3_algorithms.md",
               "modules/04_week_3_algorithms.md"
             ],
             "scores": [
-              0.368657,
               0.358194,
               0.350982,
-              0.291321
+              0.291321,
+              0.255039
             ],
-            "rank": 2,
-            "top_score": 0.368657
+            "rank": 1,
+            "top_score": 0.358194
           },
           "course": {
             "files": [
@@ -971,19 +971,19 @@
           "gold_refused": [],
           "scoped": {
             "files": [
-              "assignments/pset_4.md",
               "modules/05_week_4_memory.md",
               "assignments/pset_4.md",
+              "modules/05_week_4_memory.md",
               "assignments/pset_4.md"
             ],
             "scores": [
-              0.197003,
               0.187168,
-              0.074642,
-              0.074568
+              0.108352,
+              0.042446,
+              0.041053
             ],
-            "rank": 2,
-            "top_score": 0.197003
+            "rank": 1,
+            "top_score": 0.187168
           },
           "course": {
             "files": [
@@ -1097,13 +1097,13 @@
               "modules/07_week_6_python.md",
               "modules/07_week_6_python.md",
               "modules/07_week_6_python.md",
-              "assignments/pset_4.md"
+              "modules/07_week_6_python.md"
             ],
             "scores": [
               0.150539,
               0.128166,
               0.095122,
-              0.09143
+              0.089669
             ],
             "rank": 1,
             "top_score": 0.150539
@@ -1136,14 +1136,14 @@
           "scoped": {
             "files": [
               "modules/08_week_7_sql.md",
-              "assignments/pset_6.md",
-              "assignments/pset_6.md",
+              "modules/08_week_7_sql.md",
+              "modules/08_week_7_sql.md",
               "modules/08_week_7_sql.md"
             ],
             "scores": [
               0.331188,
-              0.241679,
-              0.2166,
+              0.214557,
+              0.214557,
               0.214557
             ],
             "rank": 1,
@@ -1177,15 +1177,15 @@
           "scoped": {
             "files": [
               "modules/08_week_7_sql.md",
-              "assignments/pset_7.md",
+              "modules/08_week_7_sql.md",
               "modules/08_week_7_sql.md",
               "assignments/pset_7.md"
             ],
             "scores": [
               0.281328,
-              0.126036,
               0.120779,
-              0.112465
+              0.110224,
+              0.06932
             ],
             "rank": 1,
             "top_score": 0.281328
@@ -1217,19 +1217,19 @@
           "gold_refused": [],
           "scoped": {
             "files": [
+              "modules/08_week_7_sql.md",
               "assignments/pset_6.md",
-              "assignments/pset_8.md",
-              "assignments/pset_1.md",
-              "assignments/pset_1.md"
+              "modules/08_week_7_sql.md",
+              "modules/08_week_7_sql.md"
             ],
             "scores": [
-              0.184449,
-              0.142902,
-              0.141292,
-              0.109078
+              0.103969,
+              0.101447,
+              0.099371,
+              0.093268
             ],
-            "rank": null,
-            "top_score": 0.184449
+            "rank": 1,
+            "top_score": 0.103969
           },
           "course": {
             "files": [
@@ -1343,13 +1343,13 @@
               "modules/10_week_9_flask.md",
               "modules/10_week_9_flask.md",
               "modules/10_week_9_flask.md",
-              "assignments/pset_7.md"
+              "modules/10_week_9_flask.md"
             ],
             "scores": [
               0.235251,
               0.104669,
               0.102863,
-              0.096349
+              0.074191
             ],
             "rank": 1,
             "top_score": 0.235251
@@ -1387,13 +1387,13 @@
               "assignments/pset_1.md"
             ],
             "scores": [
-              0.268975,
-              0.225868,
-              0.128529,
-              0.127202
+              0.147936,
+              0.124227,
+              0.070691,
+              0.069961
             ],
             "rank": 1,
-            "top_score": 0.268975
+            "top_score": 0.147936
           },
           "course": {
             "files": [
@@ -1428,13 +1428,13 @@
               "assignments/pset_4.md"
             ],
             "scores": [
-              0.198616,
-              0.192836,
-              0.172576,
-              0.159421
+              0.109239,
+              0.10606,
+              0.094917,
+              0.087681
             ],
             "rank": 1,
-            "top_score": 0.198616
+            "top_score": 0.109239
           },
           "course": {
             "files": [
@@ -1471,13 +1471,13 @@
               "assignments/pset_3.md"
             ],
             "scores": [
-              0.113172,
-              0.110018,
-              0.101441,
-              0.100107
+              0.062245,
+              0.06051,
+              0.055792,
+              0.055059
             ],
             "rank": null,
-            "top_score": 0.113172
+            "top_score": 0.062245
           },
           "course": {
             "files": [
@@ -1909,14 +1909,14 @@
             "files": [
               "modules/01_lecture_1_introduction_and_lumped_abstraction.pdf",
               "modules/01_lecture_1_introduction_and_lumped_abstraction.pdf",
-              "exams/quiz_1_fall_2003.pdf",
-              "exams/final_exam_spring_2007.pdf"
+              "modules/01_lecture_1_introduction_and_lumped_abstraction.pdf",
+              "modules/01_lecture_1_introduction_and_lumped_abstraction.pdf"
             ],
             "scores": [
               0.321756,
               0.214645,
-              0.091821,
-              0.091049
+              0.074223,
+              0.054909
             ],
             "rank": 1,
             "top_score": 0.321756
@@ -1948,19 +1948,19 @@
           "gold_refused": [],
           "scoped": {
             "files": [
+              "modules/02_lecture_2_basic_circuit_analysis_method.pdf",
               "exams/quiz_1_spring_2007.pdf",
               "exams/quiz_1_fall_2006.pdf",
-              "assignments/homework_2.pdf",
               "modules/02_lecture_2_basic_circuit_analysis_method.pdf"
             ],
             "scores": [
-              0.275672,
-              0.241336,
-              0.19208,
-              0.190279
+              0.190279,
+              0.15162,
+              0.132735,
+              0.115431
             ],
-            "rank": 4,
-            "top_score": 0.275672
+            "rank": 1,
+            "top_score": 0.190279
           },
           "course": {
             "files": [
@@ -1990,15 +1990,15 @@
           "scoped": {
             "files": [
               "modules/03_lecture_3_superposition_th_venin_and_norton.pdf",
-              "syllabus.md",
+              "modules/03_lecture_3_superposition_th_venin_and_norton.pdf",
               "modules/03_lecture_3_superposition_th_venin_and_norton.pdf",
               "modules/03_lecture_3_superposition_th_venin_and_norton.pdf"
             ],
             "scores": [
               0.181026,
-              0.147882,
               0.139111,
-              0.134714
+              0.134714,
+              0.128267
             ],
             "rank": 1,
             "top_score": 0.181026
@@ -2031,15 +2031,15 @@
           "scoped": {
             "files": [
               "modules/03_lecture_3_superposition_th_venin_and_norton.pdf",
+              "modules/03_lecture_3_superposition_th_venin_and_norton.pdf",
               "exams/quiz_1_spring_2007.pdf",
-              "assignments/homework_9.pdf",
-              "assignments/homework_2.pdf"
+              "modules/03_lecture_3_superposition_th_venin_and_norton.pdf"
             ],
             "scores": [
               0.26713,
-              0.147659,
-              0.12724,
-              0.126782
+              0.12575,
+              0.081212,
+              0.078218
             ],
             "rank": 1,
             "top_score": 0.26713
@@ -2115,13 +2115,13 @@
               "modules/04_lecture_4_the_digital_abstraction.pdf",
               "modules/04_lecture_4_the_digital_abstraction.pdf",
               "modules/04_lecture_4_the_digital_abstraction.pdf",
-              "assignments/homework_3.pdf"
+              "modules/04_lecture_4_the_digital_abstraction.pdf"
             ],
             "scores": [
               0.494798,
               0.29651,
               0.225495,
-              0.181652
+              0.159016
             ],
             "rank": 1,
             "top_score": 0.494798
@@ -2156,13 +2156,13 @@
               "modules/04_lecture_4_the_digital_abstraction.pdf",
               "modules/04_lecture_4_the_digital_abstraction.pdf",
               "exams/quiz_1_spring_2007.pdf",
-              "exams/quiz_1_spring_2007.pdf"
+              "modules/04_lecture_4_the_digital_abstraction.pdf"
             ],
             "scores": [
               0.222481,
               0.163881,
-              0.157058,
-              0.101539
+              0.086382,
+              0.085066
             ],
             "rank": 1,
             "top_score": 0.222481
@@ -2195,15 +2195,15 @@
           "scoped": {
             "files": [
               "modules/05_lecture_5_inside_the_digital_gate.pdf",
-              "exams/quiz_1_spring_2007.pdf",
-              "assignments/homework_8.pdf",
-              "exams/quiz_2_spring_2007.pdf"
+              "modules/05_lecture_5_inside_the_digital_gate.pdf",
+              "modules/05_lecture_5_inside_the_digital_gate.pdf",
+              "exams/quiz_1_spring_2007.pdf"
             ],
             "scores": [
               0.154898,
-              0.135341,
-              0.120855,
-              0.110395
+              0.097994,
+              0.080761,
+              0.074437
             ],
             "rank": 1,
             "top_score": 0.154898
@@ -2235,19 +2235,19 @@
           "gold_refused": [],
           "scoped": {
             "files": [
-              "exams/quiz_2_spring_2007.pdf",
-              "exams/final_exam_spring_2007.pdf",
+              "modules/09_lecture_9_mosfet_amplifier_large_signal_analysis.pdf",
+              "modules/09_lecture_9_mosfet_amplifier_large_signal_analysis.pdf",
               "modules/09_lecture_9_mosfet_amplifier_large_signal_analysis.pdf",
               "modules/09_lecture_9_mosfet_amplifier_large_signal_analysis.pdf"
             ],
             "scores": [
-              0.197166,
-              0.196625,
               0.185067,
-              0.176332
+              0.176332,
+              0.169389,
+              0.167685
             ],
-            "rank": 3,
-            "top_score": 0.197166
+            "rank": 1,
+            "top_score": 0.185067
           },
           "course": {
             "files": [
@@ -2277,15 +2277,15 @@
           "scoped": {
             "files": [
               "modules/07_lecture_7_incremental_analysis.pdf",
-              "exams/quiz_2_fall_2004.pdf",
-              "calendar.md",
+              "modules/07_lecture_7_incremental_analysis.pdf",
+              "modules/07_lecture_7_incremental_analysis.pdf",
               "modules/07_lecture_7_incremental_analysis.pdf"
             ],
             "scores": [
               0.300205,
-              0.206932,
-              0.196828,
-              0.190406
+              0.190406,
+              0.175952,
+              0.160486
             ],
             "rank": 1,
             "top_score": 0.300205
@@ -2358,19 +2358,19 @@
           "gold_refused": [],
           "scoped": {
             "files": [
+              "modules/12_lecture_12_capacitors_and_first_order_systems.pdf",
               "assignments/homework_8.pdf",
               "exams/quiz_2_spring_2007.pdf",
-              "modules/12_lecture_12_capacitors_and_first_order_systems.pdf",
-              "assignments/homework_8.pdf"
+              "modules/12_lecture_12_capacitors_and_first_order_systems.pdf"
             ],
             "scores": [
-              0.168269,
-              0.163641,
               0.116704,
-              0.100346
+              0.092548,
+              0.090003,
+              0.081502
             ],
-            "rank": 3,
-            "top_score": 0.168269
+            "rank": 1,
+            "top_score": 0.116704
           },
           "course": {
             "files": [
@@ -2400,15 +2400,15 @@
           "scoped": {
             "files": [
               "modules/13_lecture_13_digital_circuit_speed.pdf",
-              "assignments/homework_8.pdf",
-              "exams/quiz_2_fall_2004.pdf",
+              "modules/13_lecture_13_digital_circuit_speed.pdf",
+              "modules/13_lecture_13_digital_circuit_speed.pdf",
               "modules/13_lecture_13_digital_circuit_speed.pdf"
             ],
             "scores": [
               0.150734,
-              0.144164,
-              0.137506,
-              0.129435
+              0.129435,
+              0.096739,
+              0.09376
             ],
             "rank": 1,
             "top_score": 0.150734
@@ -2488,9 +2488,9 @@
             ],
             "scores": [
               0.441419,
-              0.206719,
-              0.198416,
-              0.150723
+              0.113695,
+              0.109129,
+              0.082898
             ],
             "rank": 1,
             "top_score": 0.441419
@@ -2612,8 +2612,8 @@
             "scores": [
               0.334592,
               0.27719,
-              0.216152,
-              0.210382
+              0.118884,
+              0.11571
             ],
             "rank": 1,
             "top_score": 0.334592
@@ -2728,15 +2728,15 @@
           "scoped": {
             "files": [
               "modules/24_lecture_23_energy_cmos.pdf",
-              "exams/quiz_2_spring_2004.pdf",
-              "calendar.md",
-              "modules/24_lecture_23_energy_cmos.pdf"
+              "modules/24_lecture_23_energy_cmos.pdf",
+              "modules/24_lecture_23_energy_cmos.pdf",
+              "exams/quiz_2_spring_2004.pdf"
             ],
             "scores": [
               0.219954,
-              0.133159,
-              0.112201,
-              0.10954
+              0.10954,
+              0.091558,
+              0.073237
             ],
             "rank": 1,
             "top_score": 0.219954
@@ -3189,13 +3189,13 @@
               "assignments/problem_set_6.pdf"
             ],
             "scores": [
-              0.123275,
-              0.121655,
-              0.110671,
-              0.052982
+              0.067801,
+              0.06691,
+              0.060869,
+              0.02914
             ],
             "rank": null,
-            "top_score": 0.123275
+            "top_score": 0.067801
           },
           "course": {
             "files": [
@@ -3224,19 +3224,19 @@
           "gold_refused": [],
           "scoped": {
             "files": [
+              "modules/04_lecture_4_hashing.pdf",
               "assignments/problem_set_3.pdf",
               "modules/04_lecture_4_hashing.pdf",
-              "modules/04_lecture_4_hashing.pdf",
-              "syllabus.md"
+              "modules/04_lecture_4_hashing.pdf"
             ],
             "scores": [
-              0.200114,
               0.124558,
+              0.110063,
               0.101739,
-              0.095762
+              0.088223
             ],
-            "rank": 2,
-            "top_score": 0.200114
+            "rank": 1,
+            "top_score": 0.124558
           },
           "course": {
             "files": [
@@ -3274,7 +3274,7 @@
               0.23613,
               0.229771,
               0.216766,
-              0.198599
+              0.109229
             ],
             "rank": 1,
             "top_score": 0.23613
@@ -3309,13 +3309,13 @@
               "modules/07_lecture_7_binary_trees_part_2_avl.pdf",
               "modules/07_lecture_7_binary_trees_part_2_avl.pdf",
               "modules/07_lecture_7_binary_trees_part_2_avl.pdf",
-              "assignments/problem_set_4.pdf"
+              "modules/07_lecture_7_binary_trees_part_2_avl.pdf"
             ],
             "scores": [
               0.149974,
               0.135205,
               0.130256,
-              0.128013
+              0.12492
             ],
             "rank": 1,
             "top_score": 0.149974
@@ -3388,19 +3388,19 @@
           "gold_refused": [],
           "scoped": {
             "files": [
+              "modules/09_lecture_9_breadth_first_search.pdf",
+              "modules/09_lecture_9_breadth_first_search.pdf",
               "quizzes/quiz_2_review.pdf",
-              "quizzes/final_exam.pdf",
-              "quizzes/quiz_2.pdf",
-              "assignments/problem_set_5.pdf"
+              "quizzes/final_exam.pdf"
             ],
             "scores": [
-              0.09314,
-              0.076796,
-              0.060644,
-              0.059878
+              0.055317,
+              0.0542,
+              0.051227,
+              0.042238
             ],
-            "rank": null,
-            "top_score": 0.09314
+            "rank": 1,
+            "top_score": 0.055317
           },
           "course": {
             "files": [
@@ -3514,13 +3514,13 @@
               "modules/12_lecture_12_bellman_ford.pdf",
               "modules/12_lecture_12_bellman_ford.pdf",
               "modules/12_lecture_12_bellman_ford.pdf",
-              "quizzes/quiz_2_review.pdf"
+              "modules/12_lecture_12_bellman_ford.pdf"
             ],
             "scores": [
               0.256693,
               0.224815,
               0.222521,
-              0.20128
+              0.198934
             ],
             "rank": 1,
             "top_score": 0.256693
@@ -3553,15 +3553,15 @@
           "scoped": {
             "files": [
               "modules/13_lecture_13_dijkstra_s_algorithm.pdf",
-              "assignments/problem_set_6.pdf",
-              "quizzes/quiz_2.pdf",
+              "modules/13_lecture_13_dijkstra_s_algorithm.pdf",
+              "modules/13_lecture_13_dijkstra_s_algorithm.pdf",
               "modules/13_lecture_13_dijkstra_s_algorithm.pdf"
             ],
             "scores": [
               0.194303,
-              0.178977,
-              0.127538,
-              0.126293
+              0.126293,
+              0.124337,
+              0.109097
             ],
             "rank": 1,
             "top_score": 0.194303
@@ -3595,14 +3595,14 @@
             "files": [
               "modules/14_lecture_14_johnson_s_algorithm.pdf",
               "modules/14_lecture_14_johnson_s_algorithm.pdf",
-              "assignments/problem_set_6.pdf",
+              "modules/14_lecture_14_johnson_s_algorithm.pdf",
               "modules/14_lecture_14_johnson_s_algorithm.pdf"
             ],
             "scores": [
               0.185341,
               0.110063,
-              0.106928,
-              0.089388
+              0.089388,
+              0.066673
             ],
             "rank": 1,
             "top_score": 0.185341
@@ -3637,13 +3637,13 @@
               "modules/15_lecture_15_recursive_algorithms.pdf",
               "modules/15_lecture_15_recursive_algorithms.pdf",
               "modules/15_lecture_15_recursive_algorithms.pdf",
-              "quizzes/quiz_3_review.pdf"
+              "modules/15_lecture_15_recursive_algorithms.pdf"
             ],
             "scores": [
               0.235287,
               0.218972,
               0.194533,
-              0.171288
+              0.123572
             ],
             "rank": 1,
             "top_score": 0.235287
@@ -3676,15 +3676,15 @@
           "scoped": {
             "files": [
               "modules/17_lecture_18_pseudopolynomial.pdf",
-              "quizzes/final_exam.pdf",
-              "quizzes/quiz_3.pdf",
+              "modules/17_lecture_18_pseudopolynomial.pdf",
+              "modules/17_lecture_18_pseudopolynomial.pdf",
               "modules/17_lecture_18_pseudopolynomial.pdf"
             ],
             "scores": [
               0.235829,
-              0.197304,
-              0.182887,
-              0.179012
+              0.179012,
+              0.147083,
+              0.133267
             ],
             "rank": 1,
             "top_score": 0.235829
@@ -3757,19 +3757,19 @@
           "gold_refused": [],
           "scoped": {
             "files": [
+              "modules/06_lecture_6_binary_trees_part_1.pdf",
+              "modules/06_lecture_6_binary_trees_part_1.pdf",
               "assignments/problem_set_4.pdf",
-              "modules/06_lecture_6_binary_trees_part_1.pdf",
-              "modules/06_lecture_6_binary_trees_part_1.pdf",
-              "quizzes/quiz_1_review.pdf"
+              "modules/06_lecture_6_binary_trees_part_1.pdf"
             ],
             "scores": [
-              0.194617,
               0.18397,
               0.142047,
-              0.110534
+              0.107039,
+              0.086198
             ],
-            "rank": 2,
-            "top_score": 0.194617
+            "rank": 1,
+            "top_score": 0.18397
           },
           "course": {
             "files": [
@@ -3801,13 +3801,13 @@
               "modules/16_lecture_17_dynamic_programming_part_3.pdf",
               "modules/16_lecture_17_dynamic_programming_part_3.pdf",
               "modules/16_lecture_17_dynamic_programming_part_3.pdf",
-              "quizzes/quiz_2_review.pdf"
+              "modules/16_lecture_17_dynamic_programming_part_3.pdf"
             ],
             "scores": [
               0.119054,
               0.115637,
               0.113597,
-              0.104122
+              0.087589
             ],
             "rank": 1,
             "top_score": 0.119054
@@ -3839,19 +3839,19 @@
           "gold_refused": [],
           "scoped": {
             "files": [
-              "calendar.md",
-              "quizzes.md",
               "modules/19_lecture_20_course_review.pdf",
-              "calendar.md"
+              "modules/19_lecture_20_course_review.pdf",
+              "calendar.md",
+              "quizzes.md"
             ],
             "scores": [
-              0.154915,
-              0.148023,
               0.145264,
-              0.120503
+              0.112933,
+              0.085203,
+              0.081413
             ],
-            "rank": 3,
-            "top_score": 0.154915
+            "rank": 1,
+            "top_score": 0.145264
           },
           "course": {
             "files": [
@@ -3887,9 +3887,9 @@
             ],
             "scores": [
               0.296362,
-              0.249288,
-              0.125095,
-              0.095153
+              0.137109,
+              0.068802,
+              0.052334
             ],
             "rank": 1,
             "top_score": 0.296362
@@ -4336,16 +4336,16 @@
               "assignments/assignment_1.pdf",
               "exams/exam_1.pdf",
               "assignments/assignment_1.pdf",
-              "assignments/assignment_5.pdf"
+              "modules/02_recitation_2.pdf"
             ],
             "scores": [
-              0.13572,
-              0.11837,
-              0.09716,
-              0.075976
+              0.074646,
+              0.065103,
+              0.053438,
+              0.052508
             ],
-            "rank": null,
-            "top_score": 0.13572
+            "rank": 4,
+            "top_score": 0.074646
           },
           "course": {
             "files": [
@@ -4374,19 +4374,19 @@
           "gold_refused": [],
           "scoped": {
             "files": [
-              "assignments/assignment_5.pdf",
-              "exams/exam_1.pdf",
+              "modules/03_recitation_3.pdf",
+              "modules/03_recitation_3.pdf",
               "modules/03_recitation_3.pdf",
               "modules/03_recitation_3.pdf"
             ],
             "scores": [
-              0.140529,
-              0.140147,
               0.135981,
-              0.134884
+              0.134884,
+              0.133775,
+              0.084281
             ],
-            "rank": 3,
-            "top_score": 0.140529
+            "rank": 1,
+            "top_score": 0.135981
           },
           "course": {
             "files": [
@@ -4504,9 +4504,9 @@
             ],
             "scores": [
               0.261678,
-              0.101199,
-              0.101199,
-              0.082924
+              0.055659,
+              0.055659,
+              0.045608
             ],
             "rank": 1,
             "top_score": 0.261678
@@ -4541,13 +4541,13 @@
               "modules/05_recitation_5.pdf",
               "modules/05_recitation_5.pdf",
               "modules/05_recitation_5.pdf",
-              "exams/exam_1.pdf"
+              "modules/05_recitation_5.pdf"
             ],
             "scores": [
               0.148408,
               0.127045,
               0.115049,
-              0.102656
+              0.095512
             ],
             "rank": 1,
             "top_score": 0.148408
@@ -4582,13 +4582,13 @@
               "modules/06_recitation_6.pdf",
               "modules/06_recitation_6.pdf",
               "modules/06_recitation_6.pdf",
-              "assignments/assignment_2.pdf"
+              "modules/06_recitation_6.pdf"
             ],
             "scores": [
               0.122618,
               0.116246,
               0.104588,
-              0.091886
+              0.064992
             ],
             "rank": 1,
             "top_score": 0.122618
@@ -4663,14 +4663,14 @@
             "files": [
               "modules/08_recitation_8.pdf",
               "modules/08_recitation_8.pdf",
-              "assignments/assignment_2.pdf",
+              "modules/08_recitation_8.pdf",
               "modules/08_recitation_8.pdf"
             ],
             "scores": [
               0.297289,
               0.203435,
-              0.19551,
-              0.157452
+              0.157452,
+              0.145346
             ],
             "rank": 1,
             "top_score": 0.297289
@@ -4786,14 +4786,14 @@
             "files": [
               "modules/12_recitation_12.pdf",
               "modules/12_recitation_12.pdf",
-              "assignments/assignment_4.pdf",
-              "exams/exam_2.pdf"
+              "modules/12_recitation_12.pdf",
+              "modules/12_recitation_12.pdf"
             ],
             "scores": [
               0.234213,
               0.126232,
-              0.108253,
-              0.088363
+              0.07619,
+              0.070632
             ],
             "rank": 1,
             "top_score": 0.234213
@@ -4869,13 +4869,13 @@
               "modules/14_recitation_14.pdf",
               "modules/14_recitation_14.pdf",
               "modules/14_recitation_14.pdf",
-              "assignments/assignment_5.pdf"
+              "modules/14_recitation_14.pdf"
             ],
             "scores": [
               0.172658,
               0.172658,
               0.140371,
-              0.096249
+              0.092151
             ],
             "rank": 1,
             "top_score": 0.172658
@@ -4907,19 +4907,19 @@
           "gold_refused": [],
           "scoped": {
             "files": [
-              "exams/exam_3.pdf",
-              "exams/exam_3.pdf",
+              "modules/15_recitation_15.pdf",
+              "modules/15_recitation_15.pdf",
               "modules/15_recitation_15.pdf",
               "modules/15_recitation_15.pdf"
             ],
             "scores": [
-              0.110037,
-              0.104871,
               0.100093,
-              0.094331
+              0.094331,
+              0.075774,
+              0.071854
             ],
-            "rank": 3,
-            "top_score": 0.110037
+            "rank": 1,
+            "top_score": 0.100093
           },
           "course": {
             "files": [
@@ -4951,13 +4951,13 @@
               "modules/16_recitation_16.pdf",
               "modules/16_recitation_16.pdf",
               "modules/16_recitation_16.pdf",
-              "assignments/assignment_5.pdf"
+              "modules/16_recitation_16.pdf"
             ],
             "scores": [
               0.240341,
               0.164224,
               0.157718,
-              0.146858
+              0.134637
             ],
             "rank": 1,
             "top_score": 0.240341
@@ -5032,14 +5032,14 @@
             "files": [
               "modules/18_recitation_18.pdf",
               "modules/18_recitation_18.pdf",
-              "assignments/assignment_6.pdf",
+              "modules/18_recitation_18.pdf",
               "modules/18_recitation_18.pdf"
             ],
             "scores": [
               0.248564,
               0.173541,
-              0.102621,
-              0.069806
+              0.069806,
+              0.061368
             ],
             "rank": 1,
             "top_score": 0.248564
@@ -5156,13 +5156,13 @@
               "modules/22_recitation_22.pdf",
               "modules/22_recitation_22.pdf",
               "modules/22_recitation_22.pdf",
-              "assignments/assignment_6.pdf"
+              "modules/22_recitation_22.pdf"
             ],
             "scores": [
               0.106719,
               0.104598,
               0.097622,
-              0.095688
+              0.092334
             ],
             "rank": 1,
             "top_score": 0.106719
@@ -5569,14 +5569,14 @@
             "files": [
               "modules/02_lecture_2_the_complementation_test_and_gene_func.pdf",
               "modules/02_lecture_2_the_complementation_test_and_gene_func.pdf",
-              "assignments/pset1.pdf",
-              "assignments/pset1.pdf"
+              "modules/02_lecture_2_the_complementation_test_and_gene_func.pdf",
+              "modules/02_lecture_2_the_complementation_test_and_gene_func.pdf"
             ],
             "scores": [
               0.253838,
               0.222195,
-              0.174833,
-              0.147319
+              0.12052,
+              0.105839
             ],
             "rank": 1,
             "top_score": 0.253838
@@ -5608,19 +5608,19 @@
           "gold_refused": [],
           "scoped": {
             "files": [
-              "assignments/pset7.pdf",
-              "exams/exam1_2004.pdf",
               "modules/04_lecture_4_probability_and_pedigrees.pdf",
-              "exams/exam1_2004.pdf"
+              "modules/04_lecture_4_probability_and_pedigrees.pdf",
+              "modules/04_lecture_4_probability_and_pedigrees.pdf",
+              "modules/04_lecture_4_probability_and_pedigrees.pdf"
             ],
             "scores": [
-              0.139516,
-              0.137654,
               0.120476,
-              0.112913
+              0.095177,
+              0.093327,
+              0.086112
             ],
-            "rank": 3,
-            "top_score": 0.139516
+            "rank": 1,
+            "top_score": 0.120476
           },
           "course": {
             "files": [
@@ -5691,15 +5691,15 @@
           "scoped": {
             "files": [
               "modules/07_lecture_7_three_factor_crosses.pdf",
-              "assignments/pset2.pdf",
               "modules/07_lecture_7_three_factor_crosses.pdf",
-              "assignments/pset2.pdf"
+              "assignments/pset2.pdf",
+              "modules/07_lecture_7_three_factor_crosses.pdf"
             ],
             "scores": [
               0.153213,
-              0.127458,
               0.0896,
-              0.083656
+              0.070102,
+              0.068104
             ],
             "rank": 1,
             "top_score": 0.153213
@@ -5733,14 +5733,14 @@
             "files": [
               "modules/08_lecture_8_tetrad_analysis.pdf",
               "modules/08_lecture_8_tetrad_analysis.pdf",
-              "assignments/pset5.pdf",
-              "assignments/pset7.pdf"
+              "modules/08_lecture_8_tetrad_analysis.pdf",
+              "assignments/pset5.pdf"
             ],
             "scores": [
               0.340892,
               0.173154,
-              0.071967,
-              0.071737
+              0.065883,
+              0.039582
             ],
             "rank": 1,
             "top_score": 0.340892
@@ -5773,15 +5773,15 @@
           "scoped": {
             "files": [
               "modules/09_lecture_9_phage_genetics.pdf",
+              "modules/09_lecture_9_phage_genetics.pdf",
               "assignments/pset3.pdf",
-              "assignments/pset1.pdf",
-              "calendar.md"
+              "assignments/pset1.pdf"
             ],
             "scores": [
               0.124875,
-              0.070133,
-              0.0649,
-              0.060704
+              0.044074,
+              0.038573,
+              0.035695
             ],
             "rank": 1,
             "top_score": 0.124875
@@ -5854,19 +5854,19 @@
           "gold_refused": [],
           "scoped": {
             "files": [
+              "modules/12_lecture_12_bacterial_genetics_transposition.pdf",
+              "modules/12_lecture_12_bacterial_genetics_transposition.pdf",
               "exams/exam1_2004.pdf",
-              "exams/exam1_2004.pdf",
-              "exams/exam2_2004.pdf",
-              "exams/exam2_2004.pdf"
+              "exams/exam1_2004.pdf"
             ],
             "scores": [
-              0.100623,
-              0.098054,
-              0.090451,
-              0.090321
+              0.057831,
+              0.055655,
+              0.055343,
+              0.05393
             ],
-            "rank": null,
-            "top_score": 0.100623
+            "rank": 1,
+            "top_score": 0.057831
           },
           "course": {
             "files": [
@@ -5895,19 +5895,19 @@
           "gold_refused": [],
           "scoped": {
             "files": [
-              "exams/exam2_2004.pdf",
+              "modules/13_lecture_13_bacterial_genetics_transduction.pdf",
               "exams/exam2_2004.pdf",
               "modules/13_lecture_13_bacterial_genetics_transduction.pdf",
               "exams/exam2_2004.pdf"
             ],
             "scores": [
-              0.140736,
-              0.126677,
               0.117823,
-              0.094529
+              0.077405,
+              0.076134,
+              0.069672
             ],
-            "rank": 3,
-            "top_score": 0.140736
+            "rank": 1,
+            "top_score": 0.117823
           },
           "course": {
             "files": [
@@ -5938,14 +5938,14 @@
             "files": [
               "modules/16_lecture_16_prokaryotic_regulation_negative_contr.pdf",
               "modules/16_lecture_16_prokaryotic_regulation_negative_contr.pdf",
-              "assignments/pset4.pdf",
+              "modules/16_lecture_16_prokaryotic_regulation_negative_contr.pdf",
               "modules/16_lecture_16_prokaryotic_regulation_negative_contr.pdf"
             ],
             "scores": [
               0.214222,
               0.18647,
-              0.164714,
-              0.151033
+              0.151033,
+              0.092384
             ],
             "rank": 1,
             "top_score": 0.214222
@@ -5978,15 +5978,15 @@
           "scoped": {
             "files": [
               "modules/25_lecture_25_population_genetics_hardy_weinberg.pdf",
-              "assignments/pset6.pdf",
+              "modules/25_lecture_25_population_genetics_hardy_weinberg.pdf",
               "modules/25_lecture_25_population_genetics_hardy_weinberg.pdf",
               "modules/25_lecture_25_population_genetics_hardy_weinberg.pdf"
             ],
             "scores": [
               0.246164,
-              0.181572,
               0.133308,
-              0.127891
+              0.127891,
+              0.117807
             ],
             "rank": 1,
             "top_score": 0.246164
@@ -6019,15 +6019,15 @@
           "scoped": {
             "files": [
               "modules/27_lecture_27_population_genetics_inbreeding.pdf",
-              "assignments/pset6.pdf",
+              "modules/27_lecture_27_population_genetics_inbreeding.pdf",
               "modules/27_lecture_27_population_genetics_inbreeding.pdf",
               "assignments/pset6.pdf"
             ],
             "scores": [
               0.168358,
-              0.159498,
               0.115538,
-              0.098672
+              0.098086,
+              0.087724
             ],
             "rank": 1,
             "top_score": 0.168358
@@ -6062,13 +6062,13 @@
               "modules/29_lectures_29_30_statistical_evaluation_of_linkage.pdf",
               "modules/29_lectures_29_30_statistical_evaluation_of_linkage.pdf",
               "modules/29_lectures_29_30_statistical_evaluation_of_linkage.pdf",
-              "assignments/pset7.pdf"
+              "modules/29_lectures_29_30_statistical_evaluation_of_linkage.pdf"
             ],
             "scores": [
               0.200294,
               0.167398,
               0.147042,
-              0.096173
+              0.054112
             ],
             "rank": 1,
             "top_score": 0.200294
@@ -6100,19 +6100,19 @@
           "gold_refused": [],
           "scoped": {
             "files": [
-              "assignments/pset7.pdf",
+              "modules/31_lecture_32_chromosome_anomalies_i.pdf",
               "modules/31_lecture_32_chromosome_anomalies_i.pdf",
               "modules/31_lecture_32_chromosome_anomalies_i.pdf",
               "modules/31_lecture_32_chromosome_anomalies_i.pdf"
             ],
             "scores": [
-              0.211841,
               0.196633,
               0.194692,
-              0.194692
+              0.194692,
+              0.184448
             ],
-            "rank": 2,
-            "top_score": 0.211841
+            "rank": 1,
+            "top_score": 0.196633
           },
           "course": {
             "files": [
@@ -6144,13 +6144,13 @@
               "modules/32_lecture_34_genetics_of_cancer_i.pdf",
               "modules/32_lecture_34_genetics_of_cancer_i.pdf",
               "modules/32_lecture_34_genetics_of_cancer_i.pdf",
-              "exams/exam2_2004.pdf"
+              "modules/32_lecture_34_genetics_of_cancer_i.pdf"
             ],
             "scores": [
               0.174098,
               0.174098,
               0.131299,
-              0.126588
+              0.098858
             ],
             "rank": 1,
             "top_score": 0.174098
@@ -6226,13 +6226,13 @@
               "modules/28_lecture_28_human_polymorphisms.pdf",
               "modules/28_lecture_28_human_polymorphisms.pdf",
               "modules/28_lecture_28_human_polymorphisms.pdf",
-              "assignments/pset3.pdf"
+              "modules/28_lecture_28_human_polymorphisms.pdf"
             ],
             "scores": [
               0.388675,
               0.109033,
               0.104077,
-              0.0771
+              0.072143
             ],
             "rank": 1,
             "top_score": 0.388675
@@ -6266,14 +6266,14 @@
             "files": [
               "modules/30_lecture_31_complex_traits.pdf",
               "modules/30_lecture_31_complex_traits.pdf",
-              "assignments/pset1.pdf",
+              "modules/30_lecture_31_complex_traits.pdf",
               "modules/30_lecture_31_complex_traits.pdf"
             ],
             "scores": [
               0.264671,
               0.141306,
-              0.097628,
-              0.096905
+              0.096905,
+              0.059285
             ],
             "rank": 1,
             "top_score": 0.264671
@@ -6306,15 +6306,15 @@
           "scoped": {
             "files": [
               "modules/26_lecture_26_population_genetics_mutation_and_sele.pdf",
-              "assignments/pset6.pdf",
+              "modules/26_lecture_26_population_genetics_mutation_and_sele.pdf",
               "modules/26_lecture_26_population_genetics_mutation_and_sele.pdf",
               "assignments/pset6.pdf"
             ],
             "scores": [
               0.199922,
-              0.187164,
               0.172704,
-              0.156283
+              0.144934,
+              0.10294
             ],
             "rank": 1,
             "top_score": 0.199922
@@ -6349,13 +6349,13 @@
               "modules/01_lecture_1_physical_structure_of_the_gene.pdf",
               "calendar.md",
               "modules/01_lecture_1_physical_structure_of_the_gene.pdf",
-              "exams/exam1_2004.pdf"
+              "modules/01_lecture_1_physical_structure_of_the_gene.pdf"
             ],
             "scores": [
               0.114515,
-              0.109015,
+              0.059958,
               0.054413,
-              0.044698
+              0.03808
             ],
             "rank": 1,
             "top_score": 0.114515
@@ -6762,13 +6762,13 @@
               "modules/04_cell_injury_adaptation_and_death.pdf",
               "modules/04_cell_injury_adaptation_and_death.pdf",
               "modules/04_cell_injury_adaptation_and_death.pdf",
-              "assignments/homework2.pdf"
+              "modules/04_cell_injury_adaptation_and_death.pdf"
             ],
             "scores": [
               0.282999,
               0.233996,
               0.15174,
-              0.139617
+              0.128259
             ],
             "rank": 1,
             "top_score": 0.282999
@@ -6801,15 +6801,15 @@
           "scoped": {
             "files": [
               "modules/04_cell_injury_adaptation_and_death.pdf",
+              "modules/04_cell_injury_adaptation_and_death.pdf",
               "assignments/homework2.pdf",
-              "assignments/homework2.pdf",
-              "modules/04_cell_injury_adaptation_and_death.pdf"
+              "assignments/homework2.pdf"
             ],
             "scores": [
               0.680216,
-              0.172643,
-              0.172081,
-              0.156023
+              0.156023,
+              0.094954,
+              0.094644
             ],
             "rank": 1,
             "top_score": 0.680216
@@ -6883,15 +6883,15 @@
           "scoped": {
             "files": [
               "modules/05_acute_and_chronic_inflammation.pdf",
-              "assignments/homework2.pdf",
               "modules/05_acute_and_chronic_inflammation.pdf",
-              "modules/05_acute_and_chronic_inflammation.pdf"
+              "modules/05_acute_and_chronic_inflammation.pdf",
+              "assignments/homework2.pdf"
             ],
             "scores": [
               0.529654,
-              0.198629,
               0.197071,
-              0.189352
+              0.189352,
+              0.109246
             ],
             "rank": 1,
             "top_score": 0.529654
@@ -6924,18 +6924,18 @@
           "scoped": {
             "files": [
               "syllabus.md",
+              "modules/05_acute_and_chronic_inflammation.pdf",
               "calendar.md",
-              "assignments/homework6.pdf",
               "modules/05_acute_and_chronic_inflammation.pdf"
             ],
             "scores": [
-              0.158013,
-              0.115707,
-              0.071267,
-              0.065156
+              0.086907,
+              0.065156,
+              0.063639,
+              0.060984
             ],
-            "rank": 4,
-            "top_score": 0.158013
+            "rank": 2,
+            "top_score": 0.086907
           },
           "course": {
             "files": [
@@ -6967,13 +6967,13 @@
               "modules/06_tissue_repair_fibrosis_and_healing.pdf",
               "modules/06_tissue_repair_fibrosis_and_healing.pdf",
               "modules/06_tissue_repair_fibrosis_and_healing.pdf",
-              "calendar.md"
+              "modules/06_tissue_repair_fibrosis_and_healing.pdf"
             ],
             "scores": [
               0.167731,
               0.095183,
               0.085957,
-              0.050242
+              0.042884
             ],
             "rank": 1,
             "top_score": 0.167731
@@ -7006,15 +7006,15 @@
           "scoped": {
             "files": [
               "modules/06_tissue_repair_fibrosis_and_healing.pdf",
-              "calendar.md",
+              "modules/06_tissue_repair_fibrosis_and_healing.pdf",
               "modules/06_tissue_repair_fibrosis_and_healing.pdf",
               "modules/06_tissue_repair_fibrosis_and_healing.pdf"
             ],
             "scores": [
               0.251386,
-              0.116256,
               0.07947,
-              0.076109
+              0.076109,
+              0.070641
             ],
             "rank": 1,
             "top_score": 0.251386
@@ -7174,10 +7174,10 @@
               "assignments/homework4.pdf"
             ],
             "scores": [
-              0.094156
+              0.051786
             ],
             "rank": null,
-            "top_score": 0.094156
+            "top_score": 0.051786
           },
           "course": {
             "files": [
@@ -7214,13 +7214,13 @@
               "assignments/homework6.pdf"
             ],
             "scores": [
-              0.103624,
-              0.091214,
-              0.070691,
-              0.051872
+              0.056993,
+              0.050168,
+              0.03888,
+              0.02853
             ],
             "rank": null,
-            "top_score": 0.103624
+            "top_score": 0.056993
           },
           "course": {
             "files": [
@@ -7257,13 +7257,13 @@
               "syllabus.md"
             ],
             "scores": [
-              0.06989,
-              0.060152,
-              0.044858,
-              0.040381
+              0.038439,
+              0.033084,
+              0.024672,
+              0.022209
             ],
             "rank": null,
-            "top_score": 0.06989
+            "top_score": 0.038439
           },
           "course": {
             "files": [
@@ -7379,10 +7379,10 @@
               "calendar.md"
             ],
             "scores": [
-              0.068621
+              0.037741
             ],
             "rank": null,
-            "top_score": 0.068621
+            "top_score": 0.037741
           },
           "course": {
             "files": [
@@ -7419,13 +7419,13 @@
               "assignments/homework2.pdf"
             ],
             "scores": [
-              0.110246,
-              0.074607,
-              0.058938,
-              0.049607
+              0.060635,
+              0.041034,
+              0.032416,
+              0.027284
             ],
             "rank": null,
-            "top_score": 0.110246
+            "top_score": 0.060635
           },
           "course": {
             "files": [
@@ -7457,13 +7457,13 @@
               "modules/03_the_immune_system.pdf",
               "modules/03_the_immune_system.pdf",
               "modules/03_the_immune_system.pdf",
-              "assignments/homework6.pdf"
+              "modules/03_the_immune_system.pdf"
             ],
             "scores": [
               0.119712,
               0.097667,
               0.082552,
-              0.0545
+              0.053717
             ],
             "rank": 1,
             "top_score": 0.119712
@@ -7536,19 +7536,19 @@
           "gold_refused": [],
           "scoped": {
             "files": [
-              "syllabus.md",
               "modules/07_infectious_diseases.pdf",
-              "syllabus.md",
+              "modules/07_infectious_diseases.pdf",
+              "modules/07_infectious_diseases.pdf",
               "modules/07_infectious_diseases.pdf"
             ],
             "scores": [
-              0.083386,
               0.081211,
-              0.077426,
-              0.071621
+              0.071621,
+              0.067183,
+              0.058144
             ],
-            "rank": 2,
-            "top_score": 0.083386
+            "rank": 1,
+            "top_score": 0.081211
           },
           "course": {
             "files": [
@@ -7999,14 +7999,14 @@
             "files": [
               "modules/01_introduction_receptors_and_dose_response.pdf",
               "modules/01_introduction_receptors_and_dose_response.pdf",
-              "assignments/0208_sulfa_slide.pdf",
-              "assignments.md"
+              "modules/01_introduction_receptors_and_dose_response.pdf",
+              "modules/01_introduction_receptors_and_dose_response.pdf"
             ],
             "scores": [
               0.221289,
               0.067132,
-              0.061251,
-              0.059529
+              0.058279,
+              0.057572
             ],
             "rank": 1,
             "top_score": 0.221289
@@ -8039,15 +8039,15 @@
           "scoped": {
             "files": [
               "modules/01_introduction_receptors_and_dose_response.pdf",
-              "exams/2005_midterm.pdf",
               "modules/01_introduction_receptors_and_dose_response.pdf",
-              "exams/2005_midterm.pdf"
+              "exams/2005_midterm.pdf",
+              "modules/01_introduction_receptors_and_dose_response.pdf"
             ],
             "scores": [
               0.247915,
-              0.229296,
               0.147217,
-              0.07699
+              0.126113,
+              0.062249
             ],
             "rank": 1,
             "top_score": 0.247915
@@ -8211,7 +8211,7 @@
               0.17662,
               0.070831,
               0.065713,
-              0.038905
+              0.021397
             ],
             "rank": 1,
             "top_score": 0.17662
@@ -8246,13 +8246,13 @@
               "modules/03_case_anticholinesterase.pdf",
               "modules/03_case_anticholinesterase.pdf",
               "modules/03_case_anticholinesterase.pdf",
-              "assignments.md"
+              "modules/03_case_anticholinesterase.pdf"
             ],
             "scores": [
               0.119888,
               0.094451,
               0.076919,
-              0.075145
+              0.055304
             ],
             "rank": 1,
             "top_score": 0.119888
@@ -8292,13 +8292,13 @@
               "assignments.md"
             ],
             "scores": [
-              0.079271,
-              0.070445,
-              0.053039,
-              0.035599
+              0.043599,
+              0.038745,
+              0.029171,
+              0.01958
             ],
             "rank": null,
-            "top_score": 0.079271
+            "top_score": 0.043599
           },
           "course": {
             "files": [
@@ -8369,15 +8369,15 @@
           "scoped": {
             "files": [
               "modules/08_lipid_lowering_drugs.pdf",
-              "exams/2005_midterm.pdf",
+              "modules/08_lipid_lowering_drugs.pdf",
               "modules/08_lipid_lowering_drugs.pdf",
               "modules/08_lipid_lowering_drugs.pdf"
             ],
             "scores": [
               0.178197,
-              0.165479,
               0.143656,
-              0.142451
+              0.142451,
+              0.122713
             ],
             "rank": 1,
             "top_score": 0.178197
@@ -8451,15 +8451,15 @@
           "scoped": {
             "files": [
               "modules/08_lipid_lowering_drugs.pdf",
-              "exams/2005_midterm.pdf",
               "modules/08_lipid_lowering_drugs.pdf",
+              "exams/2005_midterm.pdf",
               "assignments/0208_sulfa_slide.pdf"
             ],
             "scores": [
               0.222366,
-              0.062567,
               0.057841,
-              0.049077
+              0.034412,
+              0.026993
             ],
             "rank": 1,
             "top_score": 0.222366
@@ -9193,15 +9193,15 @@
           "scoped": {
             "files": [
               "modules/04_lecture_4_convolution.pdf",
-              "assignments/problem_set_3.pdf",
+              "modules/04_lecture_4_convolution.pdf",
               "modules/04_lecture_4_convolution.pdf",
               "modules/04_lecture_4_convolution.pdf"
             ],
             "scores": [
               0.202239,
-              0.190124,
               0.163129,
-              0.143825
+              0.143825,
+              0.13983
             ],
             "rank": 1,
             "top_score": 0.202239
@@ -9400,13 +9400,13 @@
               "modules/09_lecture_9_fourier_transform_properties.pdf",
               "modules/09_lecture_9_fourier_transform_properties.pdf",
               "modules/09_lecture_9_fourier_transform_properties.pdf",
-              "assignments/problem_set_9.pdf"
+              "modules/09_lecture_9_fourier_transform_properties.pdf"
             ],
             "scores": [
               0.188249,
               0.174974,
               0.159554,
-              0.152228
+              0.123211
             ],
             "rank": 1,
             "top_score": 0.188249
@@ -9440,14 +9440,14 @@
             "files": [
               "modules/12_lecture_12_filtering.pdf",
               "modules/12_lecture_12_filtering.pdf",
-              "assignments/problem_set_21.pdf",
-              "assignments/problem_set_23.pdf"
+              "modules/12_lecture_12_filtering.pdf",
+              "modules/12_lecture_12_filtering.pdf"
             ],
             "scores": [
               0.221761,
               0.119967,
-              0.11143,
-              0.109299
+              0.085305,
+              0.063835
             ],
             "rank": 1,
             "top_score": 0.221761
@@ -9520,19 +9520,19 @@
           "gold_refused": [],
           "scoped": {
             "files": [
-              "assignments/problem_set_16.pdf",
               "modules/16_lecture_16_sampling.pdf",
               "modules/16_lecture_16_sampling.pdf",
-              "assignments/problem_set_17.pdf"
+              "modules/16_lecture_16_sampling.pdf",
+              "assignments/problem_set_16.pdf"
             ],
             "scores": [
-              0.203268,
               0.168802,
               0.16273,
-              0.151149
+              0.115659,
+              0.111797
             ],
-            "rank": 2,
-            "top_score": 0.203268
+            "rank": 1,
+            "top_score": 0.168802
           },
           "course": {
             "files": [
@@ -9562,15 +9562,15 @@
           "scoped": {
             "files": [
               "modules/17_lecture_17_interpolation.pdf",
-              "assignments/problem_set_18.pdf",
-              "assignments/problem_set_18.pdf",
+              "modules/17_lecture_17_interpolation.pdf",
+              "modules/17_lecture_17_interpolation.pdf",
               "modules/17_lecture_17_interpolation.pdf"
             ],
             "scores": [
               0.178602,
-              0.171735,
-              0.152088,
-              0.144391
+              0.144391,
+              0.13934,
+              0.115557
             ],
             "rank": 1,
             "top_score": 0.178602
@@ -9605,13 +9605,13 @@
               "modules/20_lecture_20_the_laplace_transform.pdf",
               "modules/20_lecture_20_the_laplace_transform.pdf",
               "modules/20_lecture_20_the_laplace_transform.pdf",
-              "assignments/problem_set_20.pdf"
+              "modules/20_lecture_20_the_laplace_transform.pdf"
             ],
             "scores": [
               0.310384,
               0.260979,
               0.257039,
-              0.203249
+              0.170296
             ],
             "rank": 1,
             "top_score": 0.310384
@@ -9645,14 +9645,14 @@
             "files": [
               "modules/22_lecture_22_the_z_transform.pdf",
               "modules/22_lecture_22_the_z_transform.pdf",
-              "assignments/problem_set_21.pdf",
-              "assignments/problem_set_11.pdf"
+              "modules/22_lecture_22_the_z_transform.pdf",
+              "modules/22_lecture_22_the_z_transform.pdf"
             ],
             "scores": [
               0.217789,
               0.200488,
-              0.178026,
-              0.139915
+              0.133444,
+              0.116324
             ],
             "rank": 1,
             "top_score": 0.217789
@@ -9727,14 +9727,14 @@
             "files": [
               "modules/26_lecture_26_feedback_example_the_inverted_pendulu.pdf",
               "modules/26_lecture_26_feedback_example_the_inverted_pendulu.pdf",
-              "assignments/problem_set_26.pdf",
+              "modules/26_lecture_26_feedback_example_the_inverted_pendulu.pdf",
               "modules/26_lecture_26_feedback_example_the_inverted_pendulu.pdf"
             ],
             "scores": [
               0.189838,
               0.177244,
-              0.149712,
-              0.138617
+              0.138617,
+              0.138011
             ],
             "rank": 1,
             "top_score": 0.189838
@@ -9769,13 +9769,13 @@
               "modules/21_lecture_21_continuous_time_second_order_systems.pdf",
               "modules/21_lecture_21_continuous_time_second_order_systems.pdf",
               "modules/21_lecture_21_continuous_time_second_order_systems.pdf",
-              "assignments/problem_set_26.pdf"
+              "modules/21_lecture_21_continuous_time_second_order_systems.pdf"
             ],
             "scores": [
               0.222151,
               0.218909,
               0.213523,
-              0.207697
+              0.195602
             ],
             "rank": 1,
             "top_score": 0.222151
@@ -9807,19 +9807,19 @@
           "gold_refused": [],
           "scoped": {
             "files": [
-              "assignments/problem_set_23.pdf",
-              "assignments/problem_set_24.pdf",
-              "assignments/problem_set_23.pdf",
-              "assignments/problem_set_24.pdf"
+              "modules/23_lecture_23_mapping_continuous_time_filters_to_di.pdf",
+              "modules/23_lecture_23_mapping_continuous_time_filters_to_di.pdf",
+              "modules/23_lecture_23_mapping_continuous_time_filters_to_di.pdf",
+              "assignments/problem_set_23.pdf"
             ],
             "scores": [
-              0.240496,
-              0.209613,
-              0.204123,
-              0.185166
+              0.178587,
+              0.153527,
+              0.140592,
+              0.132273
             ],
-            "rank": null,
-            "top_score": 0.240496
+            "rank": 1,
+            "top_score": 0.178587
           },
           "course": {
             "files": [
@@ -9892,13 +9892,13 @@
               "modules/18_lecture_18_mapping_continuous_time_filters_to_di.pdf",
               "modules/18_lecture_18_mapping_continuous_time_filters_to_di.pdf",
               "modules/18_lecture_18_mapping_continuous_time_filters_to_di.pdf",
-              "assignments/problem_set_18.pdf"
+              "modules/18_lecture_18_mapping_continuous_time_filters_to_di.pdf"
             ],
             "scores": [
               0.242168,
               0.219275,
               0.194126,
-              0.164848
+              0.163356
             ],
             "rank": 1,
             "top_score": 0.242168
@@ -9931,15 +9931,15 @@
           "scoped": {
             "files": [
               "modules/03_lecture_3_signals_and_systems_part_ii.pdf",
+              "modules/03_lecture_3_signals_and_systems_part_ii.pdf",
               "assignments/problem_set_4.pdf",
-              "assignments/problem_set_3.pdf",
-              "modules/03_lecture_3_signals_and_systems_part_ii.pdf"
+              "assignments/problem_set_3.pdf"
             ],
             "scores": [
               0.264277,
-              0.213037,
-              0.149492,
-              0.125232
+              0.125232,
+              0.11717,
+              0.082221
             ],
             "rank": 1,
             "top_score": 0.264277
