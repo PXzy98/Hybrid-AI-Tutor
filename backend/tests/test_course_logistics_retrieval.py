@@ -141,3 +141,30 @@ def test_default_kind_is_concept(tmp_path):
     rag = _same_text_course(tmp_path)
     assert rag.retrieve(303, 9, "Glimmerwave sampling", 2) == rag.retrieve(
         303, 9, "Glimmerwave sampling", 2, question_kind="concept")
+
+
+# ------------------------------------------------------------- regressions (review of PR #80)
+
+
+def test_escaped_pipes_and_code_spans_stay_inside_their_cell():
+    text = "| Task | When |\n|---|---|\n| Compute a \\| b | Friday 5pm |\n| Run `x | y` | Monday |"
+    _, rows = split_tables(text)
+    assert [r for _, r in rows] == ["Task: Compute a | b. When: Friday 5pm",
+                                    "Task: Run `x | y`. When: Monday"]
+
+
+def test_two_tables_separated_by_a_blank_line_keep_their_own_headers():
+    text = ("| Week | Topic |\n|---|---|\n| 1 | Sets |\n\n"
+            "| Item | Weight | Notes |\n|---|---|---|\n| Quiz | 10% | best of 3 |")
+    _, rows = split_tables(text)
+    assert [r for _, r in rows] == ["Week 1. Topic: Sets", "Item: Quiz. Weight: 10%. Notes: best of 3"]
+
+
+def test_calendar_rows_without_separator_still_use_the_first_row_as_header():
+    _, rows = split_tables("| LEC # | TOPICS |\n\n| 1 | Intro |\n\n| 2 | Limits |")
+    assert [r for _, r in rows] == ["Lecture 1. TOPICS: Intro", "Lecture 2. TOPICS: Limits"]
+
+
+def test_no_cell_is_dropped_when_a_row_is_longer_or_shorter_than_the_header():
+    _, rows = split_tables("| A | B |\n|---|---|\n| 1 | two | three | four |\n| solo | |")
+    assert [r for _, r in rows] == ["A 1. B: two | three | four", "A: solo"]

@@ -15,12 +15,36 @@ _ABBREVIATIONS = {"lec": "Lecture", "ses": "Session", "rec": "Recitation", "no":
 MAX_ROW_CHARS = 650
 
 
+def _split(inner: str) -> list[str]:
+    """Split a row on unescaped pipes outside backtick code spans; a backslash before a pipe keeps it."""
+    cells, current, code, i = [], [], False, 0
+    while i < len(inner):
+        ch = inner[i]
+        if ch == "\\" and i + 1 < len(inner) and inner[i + 1] == "|":
+            current.append("|")
+            i += 2
+            continue
+        if ch == "`":
+            code = not code
+        if ch == "|" and not code:
+            cells.append("".join(current))
+            current = []
+        else:
+            current.append(ch)
+        i += 1
+    cells.append("".join(current))
+    return cells
+
+
 def _cells(line: str) -> list[str] | None:
     """The cells of a Markdown table row, or None when the line is not one."""
     line = line.strip()
-    if not (line.startswith("|") and line.endswith("|")) or line.count("|") < 3:
+    if not (line.startswith("|") and line.endswith("|")) or len(line) < 3:
         return None
-    return [" ".join(cell.split()) for cell in line[1:-1].split("|")]
+    cells = _split(line[1:-1])
+    if len(cells) < 2:
+        return None
+    return [" ".join(cell.split()) for cell in cells]
 
 
 def _is_separator(cells: list[str]) -> bool:
@@ -35,6 +59,8 @@ def _label(header: str) -> str:
 
 def _row_parts(headers: list[str], values: list[str]) -> list[str]:
     parts = []
+    if headers and len(values) > len(headers):  # never drop a cell: the extra ones join the last column
+        values = [*values[:len(headers) - 1], " | ".join(v for v in values[len(headers) - 1:] if v)]
     for position, (header, value) in enumerate(zip(headers, values, strict=False)):
         if not value or set(value) <= {"-", " "}:
             continue
@@ -93,14 +119,23 @@ def split_tables(body: str) -> tuple[str, list[tuple[str, str]]]:
         end = j
         while end > start and not lines[end - 1].strip():
             end -= 1
-        separator = next((n for n, cells in enumerate(table) if n and _is_separator(cells)), None)
-        header_at = 0 if separator is None else separator - 1
-        data = [c for n, c in enumerate(table) if n > header_at and n != separator]
-        if not data:
+        emitted = False
+        headers: list[str] | None = None
+        n = 0
+        while n < len(table):
+            row = table[n]
+            if n + 1 < len(table) and _is_separator(table[n + 1]) and not _is_separator(row):
+                headers, n = row, n + 2  # a header row and its separator start a (new) table
+            elif _is_separator(row):
+                n += 1
+            elif headers is None:
+                headers, n = row, n + 1  # no separator row: the first row names the columns
+            else:
+                for text in _row_passages(_row_parts(headers, row)):
+                    rows.append((heading, text))
+                    emitted = True
+                n += 1
+        if not emitted:
             kept.extend(lines[start:end])
-        else:
-            headers = table[header_at]
-            for values in data:
-                rows.extend((heading, text) for text in _row_passages(_row_parts(headers, values)))
         i = max(end, start + 1)
     return "\n".join(kept), rows
