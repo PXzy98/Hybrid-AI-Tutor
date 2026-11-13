@@ -3,13 +3,13 @@
 `data/routing/ece_cs_questions.jsonl` holds questions written from the four ECE/CS course packs of
 `data/demo_courses/`, labelled with the labelling rule of `data/routing/seed.jsonl` (cloud_required,
 requires_evidence, requires_fresh_evidence; `label_origin` prototype_policy: intended policy, not measured
-local-model ability). Rows whose label depends on a model judgement are marked `uncertain` and left out of the
-accuracy figures (they are listed in the report).
+local-model ability). Rows whose label depends on a model judgement are marked `uncertain` and left out of
+the accuracy figures (they are listed in the report).
 
-1. Shipped routers (`data/routing/models`, lr and svm): the capability gate of `SemanticRouter` (route is cloud
-   unless the question is in the training support and cloud_probability < threshold - margin), compared with
-   the label (cloud iff cloud_required). The evidence step needs the course index and the cross-encoders and is
-   not simulated; the evidence head is reported on its own.
+1. Shipped routers (`data/routing/models`, lr and svm): the capability gate of `SemanticRouter` (route is
+   cloud unless the question is in the training support and cloud_probability < threshold - margin),
+   compared with the label (cloud iff cloud_required). The evidence step needs the course index and the
+   cross-encoders and is not simulated; the evidence head is reported on its own.
 2. Retraining experiment (in memory, shipped files untouched): seed training split + a training share of the
    new rows, evaluated on the held-out share of the new rows and on the seed hold-out of the training script
    (GroupShuffleSplit 0.2, seed 42), plus leave-one-pack-out.
@@ -30,7 +30,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "backend"))
 
 from app.core.config import get_settings  # noqa: E402
-from app.routing.models import HEADS, encode, load_weights, predict_heads  # noqa: E402
+from app.routing.models import encode, load_weights, predict_heads  # noqa: E402
 from app.routing.train import fit_heads, portable_arrays, read_rows  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
@@ -102,10 +102,10 @@ def grouped(rows: list[dict], preds: list[dict], key) -> dict:
 
 
 def split_new(rows: list[dict], share: float = 0.4):
-    """Deterministic hold-out of `share` of each (pack, type) cell: every 5th row goes to a 2-of-5 test share."""
+    """Deterministic hold-out: 2 of every 5 rows of each (pack, type) cell go to the test share."""
     test = []
     per_cell = Counter()
-    for i, r in enumerate(rows):
+    for r in rows:
         cell = (r["pack"], r["type"])
         per_cell[cell] += 1
         test.append(per_cell[cell] % 5 in (2, 4))  # 2 of every 5 rows of a cell
@@ -178,17 +178,21 @@ def write_report(res: dict, path: Path) -> None:
         L += table("All scored rows", {"all": m["all"]}) + table("Per pack", m["by_pack"]) \
             + table("Per type", m["by_type"])
         c = m["all"]["confusion"]
-        L += [f"Confusion (label -> route): local->local {c['local->local']}, local->cloud {c['local->cloud']}, "
-              f"cloud->local {c['cloud->local']}, cloud->cloud {c['cloud->cloud']}. Head only (no unreliability "
-              f"gate, cloud_probability >= 0.5): accuracy {fmt(m['all']['head_only_accuracy'])}.", ""]
+        L += [f"Confusion (label -> route): local->local {c['local->local']}, "
+              f"local->cloud {c['local->cloud']}, cloud->local {c['cloud->local']}, "
+              f"cloud->cloud {c['cloud->cloud']}. Head only (no unreliability gate, "
+              f"cloud_probability >= 0.5): accuracy {fmt(m['all']['head_only_accuracy'])}.", ""]
     ex = res["experiment"]
     L += ["## Retraining experiment (in memory)", "",
-          f"Seed training split ({ex['seed_train']} rows) alone versus plus the training share of the new data "
-          f"({ex['new_train']} rows); evaluated on the held-out new rows ({ex['new_test']} scored) and on the seed "
-          f"hold-out of the training script ({ex['seed_test']} rows). Shipped files are not touched.", ""]
+          f"Seed training split ({ex['seed_train']} rows) alone versus plus the training share of the new "
+          f"data ({ex['new_train']} rows); evaluated on the held-out new rows ({ex['new_test']} scored) and "
+          f"on the seed hold-out of the training script ({ex['seed_test']} rows). Shipped files are not "
+          "touched.", ""]
     for method in METHODS:
-        L += [f"**{method.upper()}**", "", "| Training data | new held-out accuracy | new cloud share | new local recall | "
-              "new cloud recall | seed held-out accuracy | seed cloud share |", "|---|---|---|---|---|---|---|"]
+        L += [f"**{method.upper()}**", "",
+              "| Training data | new held-out accuracy | new cloud share | new local recall | "
+              "new cloud recall | seed held-out accuracy | seed cloud share |",
+              "|---|---|---|---|---|---|---|"]
         for name, label in (("seed_only", "seed only"), ("seed_plus_new", "seed + new")):
             r = ex["methods"][method][name]
             L.append(f"| {label} | {fmt(r['new_test']['accuracy'])} | {fmt(r['new_test']['cloud_share'])} | "
@@ -196,10 +200,11 @@ def write_report(res: dict, path: Path) -> None:
                      f"{fmt(r['seed_test']['accuracy'])} | {fmt(r['seed_test']['cloud_share'])} |")
         L.append("")
         L += ["Leave-one-pack-out (seed train + the other three packs, tested on the fourth):", "",
-              "| Held-out pack | accuracy | cloud share | local recall | cloud recall |", "|---|---|---|---|---|"]
+              "| Held-out pack | accuracy | cloud share | local recall | cloud recall |",
+              "|---|---|---|---|---|"]
         for pack, s in ex["leave_one_pack_out"][method].items():
-            L.append(f"| {pack} | {fmt(s['accuracy'])} | {fmt(s['cloud_share'])} | {fmt(s['local_recall'])} | "
-                     f"{fmt(s['cloud_recall'])} |")
+            L.append(f"| {pack} | {fmt(s['accuracy'])} | {fmt(s['cloud_share'])} | "
+                     f"{fmt(s['local_recall'])} | {fmt(s['cloud_recall'])} |")
         L.append("")
     L += ["## Uncertain rows (not scored)", ""] + [f"- `{i}`" for i in res["uncertain_ids"]] + [""]
     L += ["", ANALYSIS.rstrip(), ""]
@@ -210,7 +215,17 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--out", type=Path, default=HERE / "results")
     parser.add_argument("--save-candidate", action="store_true")
+    parser.add_argument("--write-training-file", action="store_true",
+                        help="write data/routing/seed_plus_ece_cs.jsonl (seed + scored new rows) and stop")
     args = parser.parse_args()
+    if args.write_training_file:
+        lines = (DATA / "seed.jsonl").read_text(encoding="utf-8").splitlines()
+        for line in (DATA / "ece_cs_questions.jsonl").read_text(encoding="utf-8").splitlines():
+            if line.strip() and not json.loads(line)["uncertain"]:
+                lines.append(line)
+        (DATA / "seed_plus_ece_cs.jsonl").write_text("\n".join(lines) + "\n", encoding="utf-8")
+        print(f"wrote {len(lines)} rows")
+        return 0
     cfg = get_settings().routing
     new_rows = [json.loads(line) for line in (DATA / "ece_cs_questions.jsonl").read_text(
         encoding="utf-8").splitlines() if line.strip()]
