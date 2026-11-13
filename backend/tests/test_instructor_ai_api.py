@@ -1,5 +1,7 @@
 """Tasks S6, S7, S10: instructor AI tiers 1 to 3 over the API (drafts, accept, insights), fake models only."""
 import json
+import zipfile
+from pathlib import Path
 
 import pytest
 from sqlmodel import Session
@@ -13,6 +15,25 @@ from app.storage.models import CourseMember, EvidenceLog, Job, RequestLog
 from tests.conftest import PASSWORD, csrf_client
 
 V2 = "/api/v2"
+ARCHIVES = Path(__file__).resolve().parents[2] / "data" / "demo_courses" / "archives"
+PACK, OTHER_PACK = "mit_6_002_circuits", "mit_res_6_007_signals"  # open course packs (AGENTS.md)
+SOURCE = "syllabus.md"
+
+
+def _pack_course(name: str) -> dict:
+    """The course of an open course pack, as the body of POST /courses."""
+    with zipfile.ZipFile(ARCHIVES / f"{name}.zip") as z:
+        m = json.loads(z.read(f"{name}/manifest.json"))
+    return {"code": m["course_code"], "title": m["course_title"], "course_type": m["course_type"]}
+
+
+def _pack_passage(name: str, document: str, starts: str) -> str:
+    with zipfile.ZipFile(ARCHIVES / f"{name}.zip") as z:
+        text = z.read(f"{name}/{document}").decode("utf-8")
+    return next(line[2:] for line in text.splitlines() if line.startswith("- " + starts))
+
+
+PASSAGE = _pack_passage(PACK, SOURCE, "Understand the basic electrical engineering principles")
 SECRET_QUESTION = "zq-private-question-text-4471"
 TIER1 = json.dumps({"title": "Pull-up projects", "body": "Build an I2C sensor board.", "citations": [1]})
 KCS = json.dumps({"items": [
@@ -47,8 +68,7 @@ def world(make_client, tmp_path, monkeypatch):
         alice, _ = services.accounts.create_student("alice", "Alice")
         services.accounts.set_password(alice.id, PASSWORD, must_change=False)
         prof = _login(client.app, "prof")
-        body = {"code": "ELG 5902", "title": "F", "course_type": "ece"}
-        course = prof.post(f"{V2}/courses", json=body).json()
+        course = prof.post(f"{V2}/courses", json=_pack_course(PACK)).json()
         url = f"{V2}/courses/{course['id']}"
         module = prof.post(f"{url}/modules", json={"code": "circuits", "title": "Circuits"}).json()
         prof.post(f"{url}/kcs", json={"module_id": module["id"], "code": "C.1", "name": "Pull-up resistors",
@@ -57,8 +77,7 @@ def world(make_client, tmp_path, monkeypatch):
             db.add(CourseMember(course_id=course["id"], account_id=alice.id, role="student", status="active"))
             db.commit()
         services.course_retriever = FakeCourseRetriever([
-            Chunk(text="A pull-up resistor holds a line high.", source="notes.md", topic="circuits",
-                  score=1.0)])
+            Chunk(text=PASSAGE, source=SOURCE, topic="circuits", score=1.0)])
         cloud = FakeLLMClient("CLOUD must not be called", model="cloud-x", backend="cloud")
 
         def use(reply) -> FakeLLMClient:
@@ -91,9 +110,9 @@ def test_tier1_kinds_generate_with_the_local_model_only(world, kind):
     draft = _draft(world, created["id"])
     assert draft["status"] == "draft" and draft["kind"] == kind
     assert draft["content"] == {"title": "Pull-up projects", "body": "Build an I2C sensor board."}
-    assert draft["cited_sources"] == ["notes.md"]
+    assert draft["cited_sources"] == [SOURCE]
     assert len(local.calls) == 1 and world["cloud"].calls == []
-    assert "pull-up resistor holds a line high" in local.sent_text()
+    assert PASSAGE in local.sent_text()
 
 
 @pytest.mark.parametrize(("kind", "reply", "field"), [
@@ -103,7 +122,7 @@ def test_tier2_kinds_generate_with_the_local_model_only(world, kind, reply, fiel
     draft = _draft(world, created["id"])
     assert draft["status"] == "draft" and field in draft["content"]["items"][0]
     assert "citations" not in draft["content"]["items"][0]
-    assert draft["cited_sources"] == ["notes.md"]
+    assert draft["cited_sources"] == [SOURCE]
     assert len(local.calls) == 1 and world["cloud"].calls == []
     if kind != "kcs":  # the model is told which KCs exist
         assert "Pull-up resistors" in local.sent_text()
@@ -125,7 +144,7 @@ def test_tier1_edit_then_accept_stores_a_scanned_material(world):
     assert row["scan_status"] == "accepted"
     path = world["tmp"] / "courses" / str(world["course_id"]) / "materials" / "_course" / row["filename"]
     text = path.read_text(encoding="utf-8")
-    assert text.startswith("# Course FAQ") and "Office hours" in text and "notes.md" in text
+    assert text.startswith("# Course FAQ") and "Office hours" in text and SOURCE in text
     with Session(services.engine) as db:  # indexed like an upload: a rebuild job waits
         assert db.get(Job, r.json()["rebuild_job_id"]).kind == "index.rebuild"
     # accepted: no more edits, accepting or discarding
@@ -140,10 +159,9 @@ def test_tier1_material_with_student_data_is_refused(world):
     body = "Student 300418277 got 87% on the midterm."
     content = {"title": "Class list", "body": body}
     r = prof.patch(f"{url}/ai/drafts/{created['id']}", json={"content": content})
-    assert r.status_code == 200
-    r = prof.post(f"{url}/ai/drafts/{created['id']}/accept", json={})
     assert r.status_code == 422 and "STUDENT_ID" in r.json()["detail"] and "300418277" not in r.text
-    assert _draft(world, created["id"])["status"] == "draft"  # still a draft, nothing stored
+    assert "300418277" not in str(_draft(world, created["id"])["content"])  # never stored
+    assert _draft(world, created["id"])["status"] == "draft"
     assert prof.get(f"{url}/materials").json()["materials"] == []
 
 
@@ -241,9 +259,9 @@ def test_no_material_and_no_kcs_fail_with_a_reason(world):
     assert draft["status"] == "failed" and "no indexed course material" in draft["error"]
     assert local.calls == []  # the model is not asked without material
     world["services"].course_retriever = FakeCourseRetriever([
-        Chunk(text="Notes.", source="notes.md", topic="x", score=1.0)])
+        Chunk(text=PASSAGE, source=SOURCE, topic="x", score=1.0)])
     prof, url = world["prof"], world["url"]
-    other = prof.post(f"{V2}/courses", json={"code": "ELG 1", "title": "O", "course_type": "ece"}).json()
+    other = prof.post(f"{V2}/courses", json=_pack_course(OTHER_PACK)).json()
     world["use"](ITEMS)
     r = prof.post(f"{V2}/courses/{other['id']}/ai/drafts", json={"kind": "check_items"})
     jobs.run_pending(world["services"])
@@ -295,7 +313,7 @@ def test_insights_are_suppressed_for_small_groups_and_have_no_question_text(worl
 
 def test_insights_only_count_this_course(world):
     prof, url, services = world["prof"], world["url"], world["services"]
-    other = prof.post(f"{V2}/courses", json={"code": "ELG 1", "title": "O", "course_type": "ece"}).json()
+    other = prof.post(f"{V2}/courses", json=_pack_course(OTHER_PACK)).json()
     _evidence(services, other["id"], [f"p{i}" for i in range(6)], "C.1", "understand")
     assert prof.get(f"{url}/insights").json()["kc_question_counts"] == []
     assert len(prof.get(f"{V2}/courses/{other['id']}/insights").json()["kc_question_counts"]) == 1
@@ -306,8 +324,7 @@ def test_only_the_course_instructors_reach_drafts_and_insights(world):
     prof, url, app = world["prof"], world["url"], world["app"]
     created, _ = _generate(world, "faq", TIER1)
     draft_url = f"{url}/ai/drafts/{created['id']}"
-    body = {"code": "ELG 1", "title": "O", "course_type": "ece"}
-    other_course = prof.post(f"{V2}/courses", json=body).json()
+    other_course = prof.post(f"{V2}/courses", json=_pack_course(OTHER_PACK)).json()
     calls = [("post", f"{url}/ai/drafts", {"kind": "faq"}), ("get", f"{url}/ai/drafts", None),
              ("get", draft_url, None), ("patch", draft_url, {"content": {"title": "a", "body": "b"}}),
              ("post", f"{draft_url}/accept", {}), ("delete", draft_url, None),

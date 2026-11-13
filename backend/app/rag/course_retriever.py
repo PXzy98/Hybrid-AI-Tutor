@@ -29,6 +29,11 @@ from app.rag.medical_hybrid import _chunk_section, _segments, _slide_sections
 
 MAX_COURSE_CHARS = 2_000_000
 MAX_FILES = 500
+# In module-scoped retrieval, course-level files (syllabus, homework, exams) compete with the module's own
+# material; their scores are weighted down so they win only when they match clearly better. Chosen on the
+# eight open course packs (eval/course-rag-packs, S11): scoped hit@1 0.82 -> 0.92 and hit@4 0.94 -> 0.97,
+# with logistics questions asked from inside a module unchanged (hit@4 0.87 at weights 1.0 to 0.55).
+COURSE_LEVEL_WEIGHT = 0.55
 
 # Z11 will supply a wrapper around scan_document(text, privacy_profile(course_type)).
 # It returns True only when the full extracted document is accepted for indexing.
@@ -261,7 +266,10 @@ class IndexedCourseRetriever:
                 for i, chunk in enumerate(snap.passages):
                     belongs = module_id is None or chunk.metadata["module_id"] in (None, module_id)
                     if belongs and (word[i] > 0.001 or char[i] >= 0.70):
-                        accepted.append((i, 0.75 * word[i] + 0.25 * char[i]))
+                        score = 0.75 * word[i] + 0.25 * char[i]
+                        if module_id is not None and chunk.metadata["module_id"] is None:
+                            score *= COURSE_LEVEL_WEIGHT  # the chosen module's own material first
+                        accepted.append((i, score))
                 ranked = sorted(accepted, key=lambda item: (-item[1], item[0]))[:k]
                 return [snap.passages[i].model_copy(update={"score": round(float(score), 6)})
                         for i, score in ranked]

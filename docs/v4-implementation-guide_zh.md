@@ -410,7 +410,7 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | S8 | 课程级知识模型（4.10） | S6–S7 | Z4 | `backend/app/learner/knowledge/` | 和现有 BKT 的对比评估（`eval/learner-sim/`） |
 | S9 | 可见性方案 A/B、个人概览、学习计划、不公开、审计；结束学期导出的内容 | S6–S7 | Z4、Z10 | `backend/app/learner/`、`backend/app/api/v2/` | 测试覆盖"不该看到的不返回" |
 | S10 | 教师端 AI 第三档：班级洞察后端 | S7 | S8 | `backend/app/instructor_ai/` | 不返回原文 |
-| S11 | 公开课程包的检索评估，每个领域至少一门（`eval/course_rag_benchmark.py`） | S7 | S5 | `eval/` | 每个领域都有结果 |
+| S11 | 公开课程包的检索评估，八个课程包都已在 `eval/course-rag-packs/` 完成（题集、`run.py`、`results/report.md`）；`eval/course_rag_benchmark.py`（人工标注段落）是另一个独立的评估程序，不属于这一项 | S7 | S5 | `eval/` | 八个课程包都有结果 |
 | S12 | 自查和交接文档 | S8 | — | `docs/` | 自查清单 |
 | Q1 | 小测和学期末问卷，2026-11-12 导师会议后新增（第 9 节）：小测（选择题和判断题，本地模型起草，审阅，发布，自动评分，结果遵守可见性规则，`final` 小测 = 后测，和课程诊断（前测）对比）；学期末问卷（时间窗口、匿名打分、最小组人数）；结束学期时两者都以汇总形式导出，然后删除 | S7 | S9、S6 | `backend/app/learner/quizzes.py`、`backend/app/api/v2/quizzes.py`、`backend/app/api/v2/survey.py`、`backend/app/instructor_ai/quiz_drafts.py`、`backend/app/platform/end_of_term.py`、迁移 0013 | `backend/tests/test_quizzes_v2.py` 通过；每个接口都有访问测试；api-v2.md 3.9、3.10 |
 
@@ -431,7 +431,7 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | T9 | 演示账号和示例数据脚本（只通过 API）；两门课的演示流程 | S6 | Z9、S5 | `scripts/` | 一条命令建好演示环境 |
 | T10 | 视频（11/25）；把法语界面截图发给 Lavin 审核并改回 | S6 | T3 | — | 按时交付 |
 | T11 | 改名（定名后，**未完成**）；无障碍自查（键盘、屏幕阅读器、对比度、放大）（**已完成**，见 [ACCESSIBILITY.md](ACCESSIBILITY.md)；axe 测试在 `frontend/src/test/Accessibility.test.tsx`） | S7 | 定名 | `frontend/` | 自查清单 |
-| T12 | 学生使用手册、教师使用手册（含 course-structure.md 3.4 关于助教的说明）；路由、前端、网络搜索的交接文档 | S8 | — | `docs/` | 新教师照着能用 |
+| T12 | **进行中**：学生使用手册（[STUDENT_MANUAL.md](STUDENT_MANUAL.md)）和教师使用手册（[INSTRUCTOR_MANUAL.md](INSTRUCTOR_MANUAL.md)，含 course-structure.md 3.4 关于助教的说明）已完成；路由、前端、网络搜索的交接文档未完成 | S8 | — | `docs/` | 新教师照着能用 |
 | T13 | 网络搜索（G1-92）+ 评估（G1-106）：搜索 API、白名单、清洗结果、作为资料交给生成步骤；查询只用 `search_query()`；出网只走统一的出网函数 | S7 | Z11、Z6 | 新的 `backend/app/websearch/`、`config.yaml` 的 pipeline | E4 审计：搜索请求里没有个人信息；评估报告 |
 | T14 | 清除 `docs/` 以外 Markdown 里的中文（规则 14）：按第 7 节用英文重写 `TODO.md`；把仓库根目录的中文版入门文档挪到 `docs/GETTING_STARTED_zh.md` 并修好链接；删掉 `README.md`、`GETTING_STARTED.md` 里的中文行。`frontend/src/test/Routing.test.tsx` 里的中文测试文本保留（它测试的是中文输入） | S5 | — | 上述文件 | `docs/` 以外的 Markdown 里没有中文 |
 
@@ -481,7 +481,7 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | S 的一部分（bandit B314，Z13 扫描发现） | S | PubMed 返回的 XML 改用 `defusedxml` 解析 | #55 | 审查 |
 | 学习者数据按课程（course-structure.md 4.1、4.4） | S | `learner_kc_state`、`learner_topic_level`、`evidence_log`、`learner_misconception` 加 `course_id`（已有的行归到演示课程）；每门课一个 `LearnerRepository`；`app/learner/course_data.py` 导出和删除一门课的学习者数据 | #60 | 审查 |
 | S9（API v2 接口和数据库部分） | S | `app/api/v2/learner.py`：检查题、课程诊断、个人档案、可见性选择、删除自己在一门课的数据、班级汇总、个人概览、学习计划；`app/learner/course_views.py` 在数据库上实现 `LearnerViewStore`、可见性变更和计划（`learning_plan`，迁移 0012） | #62 | 审查 |
-| S5 的一部分（11-12 顾问会议） | S | `data/demo_courses/archives/` 里的 8 个公开课程包（讲义、大纲、日历、作业、考试；答案只给教师），带清单、署名和许可；`scripts/fetch_open_courses.py` 用来解压和重建；`tests/test_open_course_packs.py` | 本 PR | 审查；S5、S11、T4 都用这些课程包 |
+| S5 的一部分（11-12 顾问会议） | S | `data/demo_courses/archives/` 里的 8 个公开课程包（讲义、大纲、日历、作业、考试；答案只给教师），带清单、署名和许可；`scripts/fetch_open_courses.py` 用来解压和重建；`tests/test_open_course_packs.py` | #64 | 审查；S5、S11、T4 都用这些课程包 |
 | Q1（新增：小测和学期末问卷；S9 的问卷、S6 的教师端 AI 里的小测起草） | S | `app/learner/quizzes.py`、`app/api/v2/quizzes.py`、`app/api/v2/survey.py`、`app/instructor_ai/quiz_drafts.py`、结束学期的导出和删除、迁移 0013；api-v2.md 3.9、3.10 | 分支 `feature/q1-quizzes-survey` | 审查 |
 | F1（前端 v2：学生端和教师端；包含 T6、T7 和 T8 的文字） | T | `frontend/` | 随 F1 | 审查 |
 

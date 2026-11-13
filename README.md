@@ -19,6 +19,8 @@ A health-education tutor (ELG 5902, Group 1). Students pick one of five topics (
 - Progress log: [docs/IMPLEMENTATION_LOG.md](docs/IMPLEMENTATION_LOG.md)
 - For teammates (routing, RAG): [docs/INTERFACES.md](docs/INTERFACES.md)
 - Demo script: [docs/DEMO.md](docs/DEMO.md)
+- Student manual: [docs/STUDENT_MANUAL.md](docs/STUDENT_MANUAL.md)
+- Instructor manual: [docs/INSTRUCTOR_MANUAL.md](docs/INSTRUCTOR_MANUAL.md)
 - Privacy: [docs/report/privacy_subsystem.md](docs/report/privacy_subsystem.md) (evaluation, design, test results)
 - Routing and RAG as integrated: [docs/ROUTING_PATCH.md](docs/ROUTING_PATCH.md), course-material RAG: [docs/RAG_COURSE_BETA.md](docs/RAG_COURSE_BETA.md); differences from the design: [System_Design_v3.md §16](docs/System_Design_v3.md)
 - Older plans, checklists and one-off integration notes: [docs/history/](docs/history/)
