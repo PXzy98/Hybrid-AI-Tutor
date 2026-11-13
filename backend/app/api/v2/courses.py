@@ -55,6 +55,7 @@ class MemberOut(BaseModel):
     display_name: str | None
     email: str | None
     created_at: datetime
+    student_id: str | None = None  # students: the ID used by the overview and plan endpoints
 
 
 class RejectedRow(BaseModel):

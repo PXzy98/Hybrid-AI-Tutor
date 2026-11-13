@@ -69,7 +69,7 @@ What Z did in other owners' areas (for their review): guide section 7.5.
 
 | Owner | Task | Why it matters |
 |---|---|---|
-| S | API v2 endpoints for materials (S4), drafts (S6, S7), learner views (S9) and class insights (S10) | the modules are merged; nothing calls them yet |
+| S | API v2 endpoints for materials (S4), drafts (S6, S7), class insights (S10) and the per-course survey | the modules are merged; nothing calls them yet (learner views, S9: `app/api/v2/learner.py`) |
 | T | `transformers` 5 together with Z | 6 pip-audit advisories ignored with reason |
 | T | `react-router` 7 (moderate advisory), `vite`/`vitest` (dev tools); `README.md`, `frontend/README.md` and `docs/DEMO.md` still describe SQLite | CI reports the advisories |
 | T | frontend for API v2 (T6, T7); a v2 client sends `X-CSRF-Token` | course management is API-only until then |

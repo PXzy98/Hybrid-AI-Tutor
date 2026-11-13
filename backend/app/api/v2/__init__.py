@@ -6,7 +6,18 @@ instructor_ai, ...) and include its router below. Course-scoped routes live unde
 """
 from fastapi import APIRouter
 
-from app.api.v2 import admin, ai_evaluations, ask, auth, content, courses, me, model_endpoints, settings
+from app.api.v2 import (
+    admin,
+    ai_evaluations,
+    ask,
+    auth,
+    content,
+    courses,
+    learner,
+    me,
+    model_endpoints,
+    settings,
+)
 
 api_router_v2 = APIRouter(prefix="/api/v2")
 api_router_v2.include_router(auth.router)
@@ -18,3 +29,4 @@ api_router_v2.include_router(settings.router)
 api_router_v2.include_router(me.router)
 api_router_v2.include_router(ai_evaluations.router)
 api_router_v2.include_router(ask.router)
+api_router_v2.include_router(learner.router)

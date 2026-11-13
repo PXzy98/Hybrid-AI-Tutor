@@ -174,6 +174,23 @@ class Consent(SQLModel, table=True):
     updated_at: datetime = _ts(default_factory=utcnow)
 
 
+class LearningPlan(SQLModel, table=True):
+    """The instructor's plan for one student in one course (design §4.5; visibility mode B only). The
+    note is the instructor's own text; nothing here comes from the student."""
+
+    __tablename__ = "learning_plan"
+    __table_args__ = (UniqueConstraint("course_id", "student_id"),)
+
+    id: int | None = Field(default=None, primary_key=True)
+    student_id: str = Field(index=True)
+    course_id: int = Field(sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=False,
+                                            index=True))
+    focus_kcs: list = Field(default_factory=list, sa_column=Column(JSON))  # KC codes
+    goal: str  # basic | intermediate | advanced
+    notes: str = ""
+    updated_at: datetime = _ts(default_factory=utcnow)
+
+
 class LearnerMisconception(SQLModel, table=True):
     """Tracked catalog misconceptions (design §5.1): IDs and counts only, never text."""
 
