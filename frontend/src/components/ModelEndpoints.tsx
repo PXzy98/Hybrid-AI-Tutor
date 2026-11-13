@@ -26,6 +26,10 @@ export default function ModelEndpoints({ courseId }: { courseId: number | null }
     mutationFn: (id: number) => api.deleteModelEndpoint(courseId, id),
     onSuccess: () => qc.invalidateQueries({ queryKey: endpointsKey(courseId) }),
   });
+  const check = useMutation({
+    mutationFn: (id: number) => api.testModelEndpoint(courseId, id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: endpointsKey(courseId) }),
+  });
   return (
     <Card>
       <CardHeader>
@@ -33,7 +37,8 @@ export default function ModelEndpoints({ courseId }: { courseId: number | null }
         <CardDescription>{t(courseId === null ? "models.hintSystem" : "models.hintCourse")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <ErrorNote error={list.error ?? remove.error} />
+        <ErrorNote error={list.error ?? remove.error ?? check.error} />
+        {check.isSuccess && <p role="status" className="text-sm">{t("models.testOk", { name: check.data.name })}</p>}
         {list.data?.length === 0 && <p className="text-sm text-muted-foreground">{t("models.none")}</p>}
         {!!list.data?.length && (
           <Table>
@@ -50,8 +55,15 @@ export default function ModelEndpoints({ courseId }: { courseId: number | null }
                   <TableCell>
                     <Badge variant={e.trust === "trusted_local" ? "success" : "warning"}>{t(`models.trust.${e.trust}`)}</Badge>
                   </TableCell>
-                  <TableCell>{e.api_key_last4 ? t("models.keySet", { last4: e.api_key_last4 }) : t("models.keyNone")}</TableCell>
+                  <TableCell>
+                    {e.api_key_last4 ? t("models.keySet", { last4: e.api_key_last4 }) : t("models.keyNone")}
+                    <br /><span className="text-xs text-muted-foreground">{e.last_test_ok_at
+                      ? t("models.lastTest", { date: new Date(e.last_test_ok_at).toLocaleString() })
+                      : t("models.neverTested")}</span>
+                  </TableCell>
                   <TableCell className="space-x-1 text-right">
+                    <Button type="button" size="sm" variant="outline" aria-label={t("models.testFor", { name: e.name })}
+                            disabled={check.isPending} onClick={() => check.mutate(e.id)}>{t("models.test")}</Button>
                     <EndpointDialog courseId={courseId} endpoint={e} />
                     <Button type="button" size="sm" variant="outline" aria-label={t("models.deleteFor", { name: e.name })}
                             onClick={() => remove.mutate(e.id)}><Trash2 aria-hidden />{t("models.delete")}</Button>

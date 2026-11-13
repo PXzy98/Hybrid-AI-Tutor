@@ -3315,6 +3315,49 @@
         }
       }
     },
+    "/api/v2/admin/model-endpoints/{endpoint_id}/test": {
+      "post": {
+        "tags": [
+          "model-endpoints"
+        ],
+        "summary": "Test System",
+        "description": "Test the connection again (422 with the reason when it fails; nothing is changed then).",
+        "operationId": "model_endpoints_test",
+        "parameters": [
+          {
+            "name": "endpoint_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Endpoint Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EndpointOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/courses/{course_id}/model-endpoints": {
       "get": {
         "tags": [
@@ -3500,6 +3543,57 @@
         "responses": {
           "204": {
             "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/courses/{course_id}/model-endpoints/{endpoint_id}/test": {
+      "post": {
+        "tags": [
+          "model-endpoints"
+        ],
+        "summary": "Test Course Endpoint",
+        "operationId": "course_model_endpoints_test",
+        "parameters": [
+          {
+            "name": "endpoint_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Endpoint Id"
+            }
+          },
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EndpointOut"
+                }
+              }
+            }
           },
           "422": {
             "description": "Validation Error",

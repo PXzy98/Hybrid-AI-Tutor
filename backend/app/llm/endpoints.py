@@ -139,6 +139,32 @@ async def update_endpoint(engine, endpoint_id: int, *, course_id: int | None, ch
         return view(row)
 
 
+async def test_endpoint(engine, endpoint_id: int, *, course_id: int | None, account_id: int | None,
+                        encryption_key: str | None, tester: Tester = default_tester) -> EndpointView:
+    """Test a stored connection again (a five-token request, no course or student text); on success its
+    `last_test_ok_at` moves on. Raises EndpointError (unknown connection, or the test failed)."""
+    with Session(engine) as db:
+        row = db.get(ModelEndpoint, endpoint_id)
+        if row is None or row.course_id != course_id:
+            raise EndpointError("unknown connection")
+        try:
+            # the stored address is checked again: it may resolve to a refused address by now
+            check_endpoint_url(row.base_url, trust=row.trust)
+            await tester(row, encryption_key)
+        except EndpointError:
+            raise
+        except (ValueError, OSError) as e:  # UnsafeEndpoint is a ValueError; name resolution errors
+            raise EndpointError(f"the connection test failed ({type(e).__name__}: {e})") from e
+        row.last_test_ok_at = utcnow()
+        db.add(row)
+        db.add(AuditLog(account_id=account_id, action="model_endpoint.test",
+                        target=f"model_endpoint:{row.id}",
+                        details={"course_id": course_id}))
+        db.commit()
+        db.refresh(row)
+        return view(row)
+
+
 def delete_endpoint(engine, endpoint_id: int, *, course_id: int | None, account_id: int | None) -> None:
     """Settings that referred to it fall back to the next layer (foreign keys ON DELETE SET NULL)."""
     with Session(engine) as db:

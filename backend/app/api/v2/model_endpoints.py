@@ -97,6 +97,19 @@ def _delete(request: Request, endpoint_id: int, course_id: int | None, account_i
         raise HTTPException(status.HTTP_404_NOT_FOUND, "connection not found") from None
 
 
+async def _test(request: Request, endpoint_id: int, course_id: int | None, account_id: int) -> EndpointOut:
+    try:
+        return _out(await registry.test_endpoint(request.app.state.services.engine, endpoint_id,
+                                                 course_id=course_id, account_id=account_id,
+                                                 encryption_key=_key(request)))
+    except registry.EndpointError as e:
+        if "unknown" in str(e):
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "connection not found") from None
+        raise _unprocessable(e) from None
+    except registry.secrets.MissingEncryptionKey as e:
+        raise _unprocessable(e) from None
+
+
 # ------------------------------------------------------------------------------------------ system (admin)
 @router.get("/admin/model-endpoints", response_model=list[EndpointOut], operation_id="model_endpoints_list")
 def list_system(request: Request, _: Admin):
@@ -118,6 +131,13 @@ async def update_system(request: Request, endpoint_id: int, body: EndpointPatch,
 @router.delete("/admin/model-endpoints/{endpoint_id}", status_code=204, operation_id="model_endpoints_delete")
 def delete_system(request: Request, endpoint_id: int, user: Admin):
     _delete(request, endpoint_id, None, user.account_id)
+
+
+@router.post("/admin/model-endpoints/{endpoint_id}/test", response_model=EndpointOut,
+             operation_id="model_endpoints_test")
+async def test_system(request: Request, endpoint_id: int, user: Admin):
+    """Test the connection again (422 with the reason when it fails; nothing is changed then)."""
+    return await _test(request, endpoint_id, None, user.account_id)
 
 
 # --------------------------------------------------------------------------------- course (instructors)
@@ -145,3 +165,9 @@ async def update_course_endpoint(request: Request, endpoint_id: int, body: Endpo
                operation_id="course_model_endpoints_delete")
 def delete_course_endpoint(request: Request, endpoint_id: int, access: CourseInstructor):
     _delete(request, endpoint_id, access.course.id, access.account_id)
+
+
+@router.post("/courses/{course_id}/model-endpoints/{endpoint_id}/test", response_model=EndpointOut,
+             operation_id="course_model_endpoints_test")
+async def test_course_endpoint(request: Request, endpoint_id: int, access: CourseInstructor):
+    return await _test(request, endpoint_id, access.course.id, access.account_id)

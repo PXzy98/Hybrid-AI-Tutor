@@ -27,6 +27,8 @@ def client(make_client, monkeypatch):
                         {**endpoints.create_endpoint.__kwdefaults__, "tester": passes})
     monkeypatch.setattr(endpoints.update_endpoint, "__kwdefaults__",
                         {**endpoints.update_endpoint.__kwdefaults__, "tester": passes})
+    monkeypatch.setattr(endpoints.test_endpoint, "__kwdefaults__",
+                        {**endpoints.test_endpoint.__kwdefaults__, "tester": passes})
     with make_client() as c:
         yield c
 
@@ -71,3 +73,35 @@ def test_course_connections_belong_to_the_course_instructors(client):
     assert _as(client, _user("instructor", 9)).get(url).status_code == 404  # not a member
     other = _as(client, _user("admin")).get("/api/v2/admin/model-endpoints").json()
     assert other == []  # course connections are not system connections
+
+
+def test_a_stored_connection_can_be_tested_again(client, monkeypatch):
+    admin = _as(client, _user("admin"))
+    created = admin.post("/api/v2/admin/model-endpoints", json=BODY).json()
+    r = admin.post(f"/api/v2/admin/model-endpoints/{created['id']}/test")
+    assert r.status_code == 200 and r.json()["last_test_ok_at"] >= created["last_test_ok_at"]
+    assert "sk-secret" not in r.text
+    assert admin.post("/api/v2/admin/model-endpoints/999999/test").status_code == 404
+
+    async def fails(row, key):
+        raise endpoints.EndpointError("the connection test failed (LLMUnavailable)")
+
+    monkeypatch.setattr(endpoints.test_endpoint, "__kwdefaults__",
+                        {**endpoints.test_endpoint.__kwdefaults__, "tester": fails})
+    r = admin.post(f"/api/v2/admin/model-endpoints/{created['id']}/test")
+    assert r.status_code == 422 and "LLMUnavailable" in r.text
+    assert _as(client, _user("instructor")).post(
+        f"/api/v2/admin/model-endpoints/{created['id']}/test").status_code == 403
+
+
+def test_testing_a_connection_whose_address_is_now_refused_gives_422(client, monkeypatch):
+    admin = _as(client, _user("admin"))
+    created = admin.post("/api/v2/admin/model-endpoints", json=BODY).json()
+
+    async def unsafe(row, key):
+        raise ValueError("the address resolves to a private network")  # what PinnedTransport raises
+
+    monkeypatch.setattr(endpoints.test_endpoint, "__kwdefaults__",
+                        {**endpoints.test_endpoint.__kwdefaults__, "tester": unsafe})
+    r = admin.post(f"/api/v2/admin/model-endpoints/{created['id']}/test")
+    assert r.status_code == 422 and "private network" in r.text

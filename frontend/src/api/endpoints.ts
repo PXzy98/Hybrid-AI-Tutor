@@ -216,5 +216,6 @@ export const api = {
   createModelEndpoint: (courseId: number | null, input: ModelEndpointBody) => request<ModelEndpoint>("POST", endpoints(courseId), input),
   updateModelEndpoint: (courseId: number | null, id: number, changes: ModelEndpointPatch) =>
     request<ModelEndpoint>("PATCH", `${endpoints(courseId)}/${id}`, changes),
+  testModelEndpoint: (courseId: number | null, id: number) => request<ModelEndpoint>("POST", `${endpoints(courseId)}/${id}/test`),
   deleteModelEndpoint: (courseId: number | null, id: number) => request<void>("DELETE", `${endpoints(courseId)}/${id}`),
 };
