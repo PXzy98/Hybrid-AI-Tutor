@@ -283,3 +283,19 @@ def test_a_student_deleting_their_data_removes_their_attempts(world):
     _login(world.app, "bob").post(f"{world.url}/quizzes/{quiz['id']}/attempt", json={"answers": [0, 1]})
     assert alice.delete(f"{world.url}/me/learning-data").status_code == 204
     assert [a["student_id"] for a in rows("quiz_attempt")] == [world.sid["bob"]]
+
+
+def test_ai_drafts_are_not_added_once_the_quiz_is_published(world):
+    reply = json.dumps({"questions": [{"kind": "true_false", "stem": "Current is measured in amperes.",
+                                       "answer": 0, "explanation": "The notes say so.", "passage": 1}]})
+    world.services.gateway = FakeGateway({"local": FakeLLMClient(reply, model="local-9b")})
+    world.services.course_retriever = FakeCourseRetriever([Chunk(text="Current is measured in amperes.",
+                                                                 source="notes.md", topic="circuits",
+                                                                 score=1.0)])
+    quiz = _quiz(world)
+    job = world.prof.post(f"{world.url}/quizzes/{quiz['id']}/drafts", json={"count": 1}).json()["job_id"]
+    _publish(world, quiz["id"])  # before the worker ran the job
+    jobs.run_pending(world.services)
+    assert world.prof.get(f"{world.url}/jobs/{job}").json()["status"] == "failed"
+    after = world.prof.get(f"{world.url}/quizzes/{quiz['id']}").json()["questions"]
+    assert len(after) == 2 and all(q["reviewed"] for q in after)
