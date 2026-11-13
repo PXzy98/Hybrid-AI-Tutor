@@ -11,11 +11,13 @@ The tutor is for learning only. It can make mistakes: check important facts agai
 1. Get the **invitation code** from your instructor.
 2. Open the **Join a course** page (the link "Have an invitation code?" on the login page).
 3. New to the system: fill in **Invitation code**, **E-mail address**, **Your name** and **Choose a password**,
-   then **Join**. Use your university e-mail address (the server only accepts the addresses of the allowed
-   domains, `uottawa.ca` by default). The password needs at least 10 characters.
+   then **Join**. This step creates your account. Your e-mail address must already be on the class list your
+   instructor imported: the code alone, or an address of an allowed domain (`uottawa.ca` by default), is not
+   enough. The password needs at least 10 characters.
 4. Already have an account: log in, use **Join a course** in the sidebar and enter only the code.
-5. If your instructor imported the class list, your account exists already and waits for the code. If you
-   logged in with a temporary password you must choose your own first ("Choose your password").
+5. Importing the class list does not create accounts; it only reserves a place for each e-mail address until
+   the student joins. If you logged in with a temporary password (after a reset) you must choose your own first
+   ("Choose your password").
 
 Your instructor can reset your password; you then get a temporary one and choose a new one at the next login.
 Codes expire (120 days by default); ask for a new one if yours does not work.
@@ -46,8 +48,14 @@ Each answer has a label:
 
 | Label | Meaning |
 |---|---|
-| **Local model** | Written on the course's own server. Nothing left it. |
+| **Local model** | The answer was written by the course's own model. |
 | **Cloud model** | Came from a cloud model. Personal details were removed from the question first. |
+
+The label tells you which model wrote the answer, not whether anything left the server. For example, if the
+tutor sent the (privacy-filtered) question to the cloud model and the cloud call failed, the local model
+answers instead and the label shows **Local model**; a warning under the answer then says "The cloud model was
+unavailable, so the local model answers" (other warnings explain, for example, a privacy check or a local-only
+course). Only a course set to **local only** guarantees that no question is sent to a cloud model.
 
 The permanent notice in the chat says: your question goes through a **privacy filter** first; depending on the
 question it may be sent to a cloud model with personal details removed. **Do not type personal or health

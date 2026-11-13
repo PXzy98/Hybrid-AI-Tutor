@@ -78,7 +78,9 @@ On **Course content**:
 **Members** lists everyone with **Name**, **E-mail**, **Role**, **Status** (active, or pending until the student
 joins).
 - **Import a class list**: a CSV with an `email` column and an optional `display_name` column (others are
-  ignored). The username is the part of the e-mail before the `@`. The **Import report** shows how many were
+  ignored). Importing creates **no accounts**: it only reserves a pending place for each e-mail address. A new
+  student creates the account on the Join page with the invitation code, e-mail (which must be on your list),
+  name and password; a student who already has an account logs in and enters only the code. The username is the part of the e-mail before the `@`. The **Import report** shows how many were
   added, are waiting for their invitation code, are unchanged or were rejected (with the row).
 - **Invitation code**: students join with it on the Join page. Shown with its expiry (120 days by default) and
   how often it was used. **Create a new code** voids the old one. If the server cannot show an old code
@@ -92,7 +94,10 @@ joins).
 **Settings** ("Privacy and routing"; changes apply to new questions after you save):
 - **What instructors see of students**: **Mode A: class totals only**, or **Mode B: individual progress after
   the student agrees**.
-- **Local only**: every answer is written on the course's own server; no question goes to a cloud model.
+- **Local only**: every answer is written on the course's own server; no question goes to a cloud model. This
+  is the only setting that guarantees it: with other settings the **Local model** label on an answer only says
+  which model answered, and a question may have been sent to the cloud before a failed call fell back to local
+  (the answer then carries the warning "The cloud model was unavailable, so the local model answered.").
 - **Routing preference**: **Let the router decide**, **Prefer the local model** or **Prefer the cloud model**.
 - **Show routing steps in the student chat**.
 If someone else saved at the same time you see "Someone else changed the settings"; review and save again.
