@@ -1490,6 +1490,95 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/courses/{course_id}/ai/drafts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Drafts */
+        get: operations["ai_drafts_list"];
+        put?: never;
+        /**
+         * Create
+         * @description Start drafting from the course material with the local model (a job; the draft is `generating`).
+         */
+        post: operations["ai_drafts_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/ai/drafts/{draft_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Draft */
+        get: operations["ai_drafts_get"];
+        put?: never;
+        post?: never;
+        /**
+         * Discard
+         * @description Discard a draft that was not accepted (accepted content is edited as normal content).
+         */
+        delete: operations["ai_drafts_discard"];
+        options?: never;
+        head?: never;
+        /**
+         * Update Draft
+         * @description Replace the content of a draft (the whole content, in the shape it was returned in).
+         */
+        patch: operations["ai_drafts_update"];
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/ai/drafts/{draft_id}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Accept
+         * @description Publish the draft: tier 2 into the content tables (KCs, check items and misconceptions become
+         *     `active`, all or none), tier 1 as a Markdown course material. Students see it only from here on.
+         */
+        post: operations["ai_drafts_accept"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/insights": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Insights
+         * @description Tier 3: which KCs the students asked about most and the most common misconceptions. Counts of KC and
+         *     misconception codes only, never question text; a label is shown only when at least
+         *     `learner.class_summary_min_group` different students contributed to it (and to the whole result).
+         */
+        get: operations["insights_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/courses/{course_id}/ask": {
         parameters: {
             query?: never;
@@ -1892,6 +1981,109 @@ export interface components {
             options: components["schemas"]["ConfigOptions"];
             /** History */
             history: components["schemas"]["ConfigChange"][];
+        };
+        /** AiDraftAcceptIn */
+        AiDraftAcceptIn: {
+            /** Module Id */
+            module_id?: number | null;
+        };
+        /** AiDraftAcceptOut */
+        AiDraftAcceptOut: {
+            draft: components["schemas"]["AiDraftOut"];
+            /** Created */
+            created: {
+                [key: string]: number[];
+            };
+            /** Rebuild Job Id */
+            rebuild_job_id?: number | null;
+        };
+        /** AiDraftIn */
+        AiDraftIn: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "project_ideas" | "sample_proposal" | "faq" | "kcs" | "check_items" | "misconceptions";
+            /** Module Id */
+            module_id?: number | null;
+            /**
+             * Focus
+             * @default
+             */
+            focus: string;
+        };
+        /** AiDraftOut */
+        AiDraftOut: {
+            /** Id */
+            id: number;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "project_ideas" | "sample_proposal" | "faq" | "kcs" | "check_items" | "misconceptions";
+            /** Module Id */
+            module_id: number | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "generating" | "draft" | "accepted" | "discarded" | "failed";
+            /** Content */
+            content: {
+                [key: string]: unknown;
+            };
+            /** Cited Sources */
+            cited_sources: string[];
+            /** Error */
+            error: string | null;
+            /** Created By */
+            created_by: number | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Job Id */
+            job_id?: number | null;
+        };
+        /** AiDraftPatch */
+        AiDraftPatch: {
+            /** Content */
+            content: {
+                [key: string]: unknown;
+            };
+        };
+        /** AiDraftSummary */
+        AiDraftSummary: {
+            /** Id */
+            id: number;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "project_ideas" | "sample_proposal" | "faq" | "kcs" | "check_items" | "misconceptions";
+            /** Module Id */
+            module_id: number | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "generating" | "draft" | "accepted" | "discarded" | "failed";
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
         };
         /** ApplyStatusOut */
         ApplyStatusOut: {
@@ -2751,6 +2943,17 @@ export interface components {
             /** Rejected */
             rejected: components["schemas"]["RejectedRow"][];
         };
+        /** InsightsOut */
+        InsightsOut: {
+            /** Min Group */
+            min_group: number;
+            /** Suppressed */
+            suppressed: boolean;
+            /** Kc Question Counts */
+            kc_question_counts: components["schemas"]["LabelCountOut"][];
+            /** Misconception Counts */
+            misconception_counts: components["schemas"]["LabelCountOut"][];
+        };
         /** InstructorIn */
         InstructorIn: {
             /** Email */
@@ -3035,6 +3238,15 @@ export interface components {
             level: "basic" | "intermediate" | "advanced";
             /** P Mastery */
             p_mastery: number;
+        };
+        /** LabelCountOut */
+        LabelCountOut: {
+            /** Label */
+            label: string;
+            /** Name */
+            name: string | null;
+            /** Count */
+            count: number;
         };
         /** LevelsConfig */
         LevelsConfig: {
@@ -7727,6 +7939,252 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["JobOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ai_drafts_list: {
+        parameters: {
+            query?: {
+                status?: ("generating" | "draft" | "accepted" | "discarded" | "failed") | null;
+                kind?: ("project_ideas" | "sample_proposal" | "faq" | "kcs" | "check_items" | "misconceptions") | null;
+            };
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiDraftSummary"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ai_drafts_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AiDraftIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiDraftOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ai_drafts_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                draft_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiDraftOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ai_drafts_discard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                draft_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ai_drafts_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                draft_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AiDraftPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiDraftOut"];
+                };
+            };
+            /** @description the draft is not in `draft` status */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ai_drafts_accept: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                draft_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AiDraftAcceptIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiDraftAcceptOut"];
+                };
+            };
+            /** @description the draft is not in `draft` status */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description the content checks or the material scan refused it */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    insights_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InsightsOut"];
                 };
             };
             /** @description Validation Error */

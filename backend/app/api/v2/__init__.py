@@ -8,6 +8,7 @@ from fastapi import APIRouter
 
 from app.api.v2 import (
     admin,
+    ai_drafts,
     ai_evaluations,
     ask,
     auth,
@@ -32,6 +33,7 @@ api_router_v2.include_router(admin.router)
 api_router_v2.include_router(settings.router)
 api_router_v2.include_router(me.router)
 api_router_v2.include_router(ai_evaluations.router)
+api_router_v2.include_router(ai_drafts.router)
 api_router_v2.include_router(ask.router)
 api_router_v2.include_router(learner.router)
 api_router_v2.include_router(quizzes.router)
