@@ -89,6 +89,50 @@ describe("chat", () => {
     expect(await screen.findByText("Cloud model")).toBeInTheDocument();
   });
 
+  it("starts a new conversation after New chat, even when the first one began without a c parameter", async () => {
+    const calls = mockApi(studentRoutes({
+      "POST /courses/1/ask/stream": () => sse(["result", answer], ["done", {}]),
+    }));
+    renderApp("/courses/1/chat");
+    const user = userEvent.setup();
+    const ask = async (text: string) => {
+      await user.type(await screen.findByLabelText("Your question"), text);
+      await user.click(screen.getByRole("button", { name: "Send" }));
+      await waitFor(() => expect(screen.queryByText("The tutor is thinking…")).not.toBeInTheDocument());
+    };
+    await ask("First question");
+    await ask("Second question");
+    await user.click(screen.getByRole("button", { name: "New chat" }));
+    await waitFor(() => expect(screen.queryByText("First question")).not.toBeInTheDocument());
+    await ask("Third question");
+    const bodies = calls.filter((c) => c.path === "/courses/1/ask/stream").map((c) => c.body as Record<string, unknown>);
+    expect(bodies).toHaveLength(3);
+    expect(bodies[0]).not.toHaveProperty("conversation_id");
+    expect(bodies[1].conversation_id).toBe("c-1");
+    expect(bodies[2]).not.toHaveProperty("conversation_id");
+  });
+
+  it("loads a reopened conversation once and keeps live messages when the history is refetched", async () => {
+    let historyCalls = 0;
+    mockApi(studentRoutes({
+      "GET /courses/1/conversations/c-9": () => { historyCalls += 1; return { conversation_id: "c-9", turns: [{ role: "student", text: "Earlier question" }, { role: "tutor", text: "Earlier answer" }] }; },
+      "POST /courses/1/ask/stream": () => sse(["result", { ...answer, conversation_id: "c-9" }], ["done", {}]),
+    }));
+    renderApp("/courses/1/chat?c=c-9");
+    const user = userEvent.setup();
+    expect(await screen.findByText("Earlier answer")).toBeInTheDocument();
+    await user.type(screen.getByLabelText("Your question"), "Live question");
+    await user.click(screen.getByRole("button", { name: "Send" }));
+    expect(await screen.findByText("Local model")).toBeInTheDocument();
+    window.dispatchEvent(new Event("focus"));
+    document.dispatchEvent(new Event("visibilitychange"));
+    await new Promise((r) => setTimeout(r, 100));
+    expect(historyCalls).toBe(1);
+    expect(screen.getByText("Local model")).toBeInTheDocument();
+    expect(screen.getByText("Live question")).toBeInTheDocument();
+    expect(screen.getByText("Earlier question")).toBeInTheDocument();
+  });
+
   it("shows a stream error as an alert", async () => {
     mockApi(studentRoutes({ "POST /courses/1/ask/stream": () => sse(["error", { detail: "The model is busy." }], ["done", {}]) }));
     renderApp("/courses/1/chat");

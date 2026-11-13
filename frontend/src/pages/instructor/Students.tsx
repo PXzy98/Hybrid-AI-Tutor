@@ -82,13 +82,17 @@ function StudentDetail({ course, studentId, name }: { course: Course; studentId:
     queryKey: ["overview", course.id, studentId],
     queryFn: () => api.studentOverview(course.id, studentId),
     retry: false,
+    // every open asks the backend again: it is the visibility and audit boundary, so nothing is cached
+    staleTime: 0, gcTime: 0, refetchOnMount: "always", refetchOnWindowFocus: false,
   });
+  // after a refusal, data from an earlier answer is never shown
+  const shown = overview.isError ? undefined : overview.data;
   const notVisible = overview.error instanceof ApiError && overview.error.status === 404;
   return (
     <Card aria-label={t("students.detail", { name })}>
       <CardHeader>
         <CardTitle>{name || t("students.detailFallback")}</CardTitle>
-        {overview.data && <CardDescription>{t("students.since", { date: new Date(overview.data.visible_since).toLocaleDateString() })}</CardDescription>}
+        {shown && <CardDescription>{t("students.since", { date: new Date(shown.visible_since).toLocaleDateString() })}</CardDescription>}
       </CardHeader>
       <CardContent className="space-y-4">
         {overview.isLoading && <p className="text-muted-foreground">{t("app.loading")}</p>}
@@ -102,20 +106,20 @@ function StudentDetail({ course, studentId, name }: { course: Course; studentId:
           </Alert>
         )}
         {!notVisible && <ErrorNote error={overview.error} />}
-        {overview.data && (
+        {shown && (
           <>
             <div className="grid gap-3 text-sm sm:grid-cols-3">
-              <p><span className="text-muted-foreground">{t("students.checks")}</span> <strong>{overview.data.checks_answered ?? 0}</strong></p>
-              <p><span className="text-muted-foreground">{t("students.misconceptions")}</span> <strong>{overview.data.open_misconceptions ?? 0}</strong></p>
-              <p><span className="text-muted-foreground">{t("students.lastActive")}</span> <strong>{overview.data.last_active ? new Date(overview.data.last_active).toLocaleDateString() : "—"}</strong></p>
+              <p><span className="text-muted-foreground">{t("students.checks")}</span> <strong>{shown.checks_answered ?? 0}</strong></p>
+              <p><span className="text-muted-foreground">{t("students.misconceptions")}</span> <strong>{shown.open_misconceptions ?? 0}</strong></p>
+              <p><span className="text-muted-foreground">{t("students.lastActive")}</span> <strong>{shown.last_active ? new Date(shown.last_active).toLocaleDateString() : "—"}</strong></p>
             </div>
             <ul className="space-y-1.5">
-              {overview.data.kcs?.map((k) => (
+              {shown.kcs?.map((k) => (
                 <li key={k.kc_code} className="flex items-center justify-between gap-3 text-sm">
                   <span>{k.kc_code}</span><Band band={k.level} />
                 </li>
               ))}
-              {!overview.data.kcs?.length && <li className="text-sm text-muted-foreground">{t("students.noKcs")}</li>}
+              {!shown.kcs?.length && <li className="text-sm text-muted-foreground">{t("students.noKcs")}</li>}
             </ul>
             <PlanEditor course={course} studentId={studentId} />
           </>
@@ -130,13 +134,16 @@ export function PlanEditor({ course, studentId }: { course: Course; studentId: s
   const { t } = useI18n();
   const qc = useQueryClient();
   const kcs = useQuery({ queryKey: ["kcs", course.id], queryFn: () => api.kcs(course.id) });
-  const plan = useQuery({ queryKey: ["plan", course.id, studentId], queryFn: () => api.studentPlan(course.id, studentId), retry: false });
+  const plan = useQuery({
+    queryKey: ["plan", course.id, studentId], queryFn: () => api.studentPlan(course.id, studentId), retry: false,
+    staleTime: 0, gcTime: 0, refetchOnMount: "always", refetchOnWindowFocus: false,
+  });
   if (plan.isLoading || kcs.isLoading) return <p className="text-muted-foreground">{t("app.loading")}</p>;
   const missing = plan.error instanceof ApiError && plan.error.status === 404;
   return (
     <>
       {!missing && <ErrorNote error={plan.error} />}
-      <PlanForm initial={plan.data} codes={(kcs.data ?? []).filter((k) => k.status === "active")}
+      <PlanForm initial={plan.isError ? undefined : plan.data} codes={(kcs.data ?? []).filter((k) => k.status === "active")}
                 courseId={course.id} studentId={studentId} onSaved={(p) => qc.setQueryData(["plan", course.id, studentId], p)} />
     </>
   );

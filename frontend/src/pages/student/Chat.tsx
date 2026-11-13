@@ -26,14 +26,27 @@ type Message =
 type SendInput = { question: string; traceId: string };
 
 export default function Chat({ course }: { course: Course }) {
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const conversationId = params.get("c");
   const moduleParam = params.get("module");
-  return <ChatPane key={`${course.id}:${conversationId ?? "new"}`} course={course} initialConversation={conversationId}
-                   moduleId={moduleParam ? Number(moduleParam) : null} />;
+  // The pane is rebuilt when the sidebar changes `c` (a past conversation, or New chat). A conversation the pane
+  // itself starts is written to the URL, and must not rebuild it.
+  const shown = useRef<string | null>(conversationId);
+  const [epoch, setEpoch] = useState(0);
+  if (conversationId !== shown.current) {
+    shown.current = conversationId;
+    setEpoch((e) => e + 1);
+  }
+  const started = (id: string) => {
+    shown.current = id;
+    setParams((prev) => { const next = new URLSearchParams(prev); next.set("c", id); return next; }, { replace: true });
+  };
+  return <ChatPane key={`${course.id}:${epoch}`} course={course} initialConversation={shown.current}
+                   moduleId={moduleParam ? Number(moduleParam) : null} onStarted={started} />;
 }
 
-function ChatPane({ course, initialConversation, moduleId }: { course: Course; initialConversation: string | null; moduleId: number | null }) {
+function ChatPane({ course, initialConversation: initial, moduleId, onStarted }: { course: Course; initialConversation: string | null; moduleId: number | null; onStarted: (id: string) => void }) {
+  const [initialConversation] = useState(initial); // fixed for the life of the pane
   const { t } = useI18n();
   const qc = useQueryClient();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -51,9 +64,15 @@ function ChatPane({ course, initialConversation, moduleId }: { course: Course; i
     queryKey: ["conversation", course.id, initialConversation],
     queryFn: () => api.conversation(course.id, initialConversation as string),
     enabled: !!initialConversation,
+    staleTime: Infinity, refetchOnWindowFocus: false, refetchOnReconnect: false,
   });
+  // the stored history is loaded once per conversation; a later refetch must not overwrite live messages
+  const hydrated = useRef(false);
   useEffect(() => {
-    if (history.data) setMessages(history.data.turns.map((x) => x.role === "student" ? { role: "student", text: x.text } : { role: "history", text: x.text }));
+    if (!history.data || hydrated.current) return;
+    hydrated.current = true;
+    const past: Message[] = history.data.turns.map((x) => x.role === "student" ? { role: "student", text: x.text } : { role: "history", text: x.text });
+    setMessages((live) => [...past, ...live]);
   }, [history.data]);
   const scope = modules.data?.find((m) => m.id === moduleId);
 
@@ -80,6 +99,7 @@ function ChatPane({ course, initialConversation, moduleId }: { course: Course; i
       setPartial("");
       updateTrace(input.traceId, { running: false, finishedAt: Date.now(), details: reply.routing_details });
       setConversation(reply.conversation_id);
+      if (!conversation) onStarted(reply.conversation_id);
       setMessages((prev) => [...prev, { role: "tutor", reply }]);
       qc.invalidateQueries({ queryKey: ["conversations", course.id] });
     },

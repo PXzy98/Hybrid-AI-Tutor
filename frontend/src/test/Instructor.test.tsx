@@ -47,6 +47,29 @@ describe("instructor students", () => {
     expect(screen.queryByRole("form", { name: "Learning plan" })).not.toBeInTheDocument();
   });
 
+  it("asks the backend on every open and never shows earlier data after a refusal", async () => {
+    let overviewCalls = 0;
+    const calls = mockApi(routes({
+      "GET /courses/1/students/stu-ana/overview": () => {
+        overviewCalls += 1;
+        return overviewCalls === 1
+          ? { student_id: "stu-ana", visible_since: "2026-11-01T00:00:00Z", kcs: [{ kc_code: "K1", level: "basic", p_mastery: 0.3 }], open_misconceptions: 1, checks_answered: 4, last_active: null }
+          : reply({ detail: "This student's individual data is not available.", code: "not_found" }, 404);
+      },
+    }));
+    renderApp("/courses/1/students");
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: "View progress of Ana Example" }));
+    expect(await screen.findByText("Check questions answered:")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "View progress of Ana Example" }));
+    await waitFor(() => expect(screen.queryByText("Check questions answered:")).not.toBeInTheDocument());
+    await user.click(screen.getByRole("button", { name: "View progress of Ana Example" }));
+    expect(await screen.findByText("This student's progress is not visible.")).toBeInTheDocument();
+    expect(screen.queryByText("Check questions answered:")).not.toBeInTheDocument();
+    expect(screen.queryByRole("form", { name: "Learning plan" })).not.toBeInTheDocument();
+    expect(calls.filter((c) => c.path.endsWith("/overview"))).toHaveLength(2);
+  });
+
   it("shows a visible student's overview and saves the learning plan", async () => {
     const calls = mockApi(routes({
       "PUT /courses/1/students/stu-ana/plan": (c: { body: unknown }) => ({ ...(c.body as object), updated_at: "2026-11-05T00:00:00Z" }),
