@@ -104,6 +104,7 @@ export const api = {
   courseSettings: (id: number) => request<CourseSettings>("GET", `${c(id)}/settings`),
   saveCourseSettings: (id: number, values: CourseValues, version: number) =>
     request<CourseSettings>("PUT", `${c(id)}/settings`, { values, version }),
+  createExport: (id: number) => request<Schemas["ExportOut"]>("POST", `${c(id)}/exports`),
   endTerm: (id: number) => request<EndTermResult>("POST", `${c(id)}/end-term`, { confirm: true }),
   downloadExport: (id: number, exportId: string) => download(`${c(id)}/exports/${encodeURIComponent(exportId)}`),
 

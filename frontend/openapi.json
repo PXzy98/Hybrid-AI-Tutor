@@ -1603,6 +1603,49 @@
         }
       }
     },
+    "/api/v2/courses/{course_id}/exports": {
+      "post": {
+        "tags": [
+          "courses"
+        ],
+        "summary": "Create Export",
+        "description": "An export of the course as it is now (the same content as at the end of term), without deleting\nanything: download and check it before ending the term. Individual overviews follow the visibility rules\nand each is audited.",
+        "operationId": "courses_export_create",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/courses/{course_id}/exports/{export_id}": {
       "get": {
         "tags": [
@@ -8636,6 +8679,30 @@
           "status"
         ],
         "title": "EvidenceAssessment"
+      },
+      "ExportOut": {
+        "properties": {
+          "export_id": {
+            "type": "string",
+            "title": "Export Id"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expires At"
+          },
+          "students_exported": {
+            "type": "integer",
+            "title": "Students Exported"
+          }
+        },
+        "type": "object",
+        "required": [
+          "export_id",
+          "expires_at",
+          "students_exported"
+        ],
+        "title": "ExportOut"
       },
       "FeedbackBody": {
         "properties": {

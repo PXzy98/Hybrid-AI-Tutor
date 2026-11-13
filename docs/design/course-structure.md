@@ -143,7 +143,9 @@ changed after the term; a TA sees everything the instructor sees (including indi
 
 ### 3.5 End of term
 
-`POST .../courses/{course_id}/end-term` (instructor):
+Before ending the term the instructor can take the same export without deleting anything
+(`POST .../courses/{course_id}/exports`), download it and check it. `POST .../courses/{course_id}/end-term`
+(instructor) then writes its own, final export:
 1. Builds an export (ZIP of CSV/JSON): the class summary, and, only in visibility mode B, per-student data
    under **exactly the same conditions as the individual overview** (section 4.5, guide rule 9): the student
    acknowledged mode B (`visible_since` is set), did not opt out, and only records created after

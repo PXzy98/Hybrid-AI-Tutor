@@ -137,6 +137,24 @@ describe("end of term", () => {
   });
 });
 
+describe("export before the end of term", () => {
+  it("creates an export and offers the download without ending the term", async () => {
+    vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => undefined);
+    vi.stubGlobal("URL", Object.assign(URL, { createObjectURL: () => "blob:x", revokeObjectURL: () => undefined }));
+    const calls = mockApi(instructorRoutes({
+      "POST /courses/1/exports": { export_id: "exp-0", expires_at: "2026-12-30T00:00:00Z", students_exported: 2 },
+      "GET /courses/1/exports/exp-0": () => new Response("zip", { headers: { "Content-Disposition": 'attachment; filename="ECE 1000-exp-0.zip"' } }),
+    }));
+    renderApp("/courses/1/endterm");
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: "Create an export" }));
+    expect(await screen.findByText("Export ready: 2 individual overviews (visibility mode B only).")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Download the export" }));
+    await waitFor(() => expect(calls.some((c) => c.path === "/courses/1/exports/exp-0")).toBe(true));
+    expect(calls.some((c) => c.path.endsWith("/end-term"))).toBe(false); // nothing was deleted
+  });
+});
+
 describe("class overview", () => {
   it("shows suppression returned by the API instead of numbers", async () => {
     mockApi(instructorRoutes({ "GET /courses/1/class-summary": { topic: "t", min_group: 5, suppressed: true } }));

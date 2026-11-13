@@ -74,6 +74,7 @@ logged in. Owner = component owner who implements it.
 | `GET /courses` | any | courses the caller can see |
 | `POST /courses` | A, instructor | create (creator becomes instructor member) |
 | `GET /courses/{course_id}`, `PATCH /courses/{course_id}` | I (GET also S) | details, edit code/title/term label |
+| `POST /courses/{course_id}/exports` | I | an export of the course as it is now, without deleting anything (to check it before ending the term; audited `course.export`) |
 | `POST /courses/{course_id}/end-term` | I | export then delete student data (course-structure 3.5) |
 | `GET /courses/{course_id}/exports/{export_id}` | I | download the export |
 | `POST /courses/{course_id}/archive` | I | archive |
