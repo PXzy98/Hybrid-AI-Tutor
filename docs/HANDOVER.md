@@ -52,7 +52,10 @@ stand and where to look. Running the system: [OPERATIONS.md](OPERATIONS.md).
 - **Course types are the privacy profile files**: a new `profiles/<name>.yaml` is a new course type. The API
   validates against the files, not a fixed list (#47).
 - **Usage limits**: config only for now (`limits.usage`); the `usage_*` course settings stay null and are not
-  exposed (guide 4.4). Counters exist; the v2 ask endpoint will call them.
+  exposed (guide 4.4). The v2 ask endpoints check and count them; API v1 has no limits.
+- **One pipeline for every course**: API v2 ask runs the same runner inside a course scope
+  (`app/platform/course_scope.py`), which gives the steps the course's content, learner model, retriever and
+  conversations. A question without a module uses the topic `general`.
 - **CSRF**: on API v2 only; API v1 is frozen and its frontend predates it. The session token is derived from
   the HttpOnly session cookie; before login a double-submit cookie is used.
 - **Credentials are redacted in every course** (`secret_token` in the base profile); lab addresses and
@@ -66,11 +69,11 @@ What Z did in other owners' areas (for their review): guide section 7.5.
 
 | Owner | Task | Why it matters |
 |---|---|---|
-| S | `course_id` on the learner tables + an interface to export and delete one course's learner data | needed by end of term and export (Z9) and the v2 ask endpoint |
+| S | API v2 endpoints for materials (S4), drafts (S6, S7), learner views (S9) and class insights (S10) | the modules are merged; nothing calls them yet |
 | T | `transformers` 5 together with Z | 6 pip-audit advisories ignored with reason |
 | T | `react-router` 7 (moderate advisory), `vite`/`vitest` (dev tools); `README.md`, `frontend/README.md` and `docs/DEMO.md` still describe SQLite | CI reports the advisories |
 | T | frontend for API v2 (T6, T7); a v2 client sends `X-CSRF-Token` | course management is API-only until then |
-| Z | v2 ask endpoint (pipeline per course, usage checks); end of term and export | after S's interface |
+| Z | end of term and export | learner data is per course since #60 (`app/learner/course_data.py`); conversations and request logs carry `course_id` |
 | Z | deploy on the test host with the monitoring profile, the vLLM load test, Z2 local speed | needs access to the test host and the vLLM server |
 | Z | choose the alert receiver (`deploy/monitoring/alertmanager.yml`) | alerts are only visible in Alertmanager until then |
 | Others | Lavin's second review of the 30 revised items | content |

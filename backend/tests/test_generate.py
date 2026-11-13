@@ -7,6 +7,7 @@ from app.llm.cloud_guard import CloudClient
 from app.llm.fake import FakeLLMClient
 from app.pipeline.steps.generate import (
     CLOUD_FALLBACK_WARNING,
+    CLOUD_LIMIT_NOTE,
     CLOUD_MISSING_WARNING,
     GENERALIZED_NOTE,
     LOCAL_CAPABILITY_NOTE,
@@ -260,3 +261,28 @@ async def test_llm_check_then_generalize(use_config):
     ctx = await GenerateStep(s).run(llm_check_ctx("Is a cough at night a sign of asthma?"))
     assert ctx.answer == "cloud answer" and GENERALIZED_NOTE in ctx.warnings
     assert ctx.cloud_request.sanitized_question == "Is a cough at night a sign of asthma in a young adult?"
+
+
+class _Meter:
+    def __init__(self, allowed: int) -> None:
+        self.allowed, self.reserved, self.tokens = allowed, 0, []
+
+    def reserve(self) -> bool:
+        if self.reserved >= self.allowed:
+            return False
+        self.reserved += 1
+        return True
+
+    def used(self, tokens: int) -> None:
+        self.tokens.append(tokens)
+
+
+async def test_every_cloud_call_is_metered_and_the_limit_falls_back_locally(services):
+    s = services()
+    s.cloud_llm = CloudClient(FakeLLMClient("cloud answer", model="gpt-test", backend="cloud"))
+    step, ctx, meter = GenerateStep(s), make_ctx("cloud"), _Meter(allowed=1)
+    ctx.set_cloud_meter(meter)
+    assert (await step.produce(ctx)).backend == "cloud"
+    retry = await step.produce(ctx, safety_retry=True)  # a safety retry is a second cloud call
+    assert meter.reserved == 1 and len(meter.tokens) == 1
+    assert retry.backend == "local" and retry.fell_back and CLOUD_LIMIT_NOTE in ctx.warnings

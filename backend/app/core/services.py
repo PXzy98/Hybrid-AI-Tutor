@@ -41,6 +41,7 @@ class Services:
     courses: CourseService | None = None  # courses, members, invitation codes (task Z9)
     usage: object | None = None  # the usage meter (task Z10; app.platform.usage)
     course_retriever: object | None = None  # per-course index (S4; app.rag.course_retriever), read-only here
+    course_scopes: object | None = None  # content, learner model and retriever per course (API v2 ask)
 
     # the current component set; one reference, swapped as a whole
     @property
@@ -83,7 +84,25 @@ def load_demo_content(engine, settings: Settings) -> ContentStore:
 
     status = "active" if settings.content.seed_status == "active" else None
     course_id = ensure_demo_course(engine, load_yaml_topics(settings.content_dir()), status)
+    adopt_rows_without_course(engine, course_id)
     return load_course_content(engine, course_id)
+
+
+def adopt_rows_without_course(engine, course_id: int) -> None:
+    """Rows written before learner data had a course belong to the demo course (the one API v1 served).
+
+    The migration assigns them when the course exists; a database upgraded from before the course catalog
+    gets its demo course only at this start, after the migrations, so they are assigned here.
+    """
+    from sqlalchemy import update
+    from sqlmodel import SQLModel
+
+    from app.storage.models import ROWS_OF_A_COURSE
+
+    with engine.begin() as conn:
+        for name in ROWS_OF_A_COURSE:
+            table = SQLModel.metadata.tables[name]
+            conn.execute(update(table).where(table.c.course_id.is_(None)).values(course_id=course_id))
 
 
 def build_services(settings: Settings | None = None) -> Services:
@@ -110,6 +129,7 @@ def build_services(settings: Settings | None = None) -> Services:
     check_keys_readable(engine, secret)  # stored API keys need SETTINGS_ENCRYPTION_KEY (design 6.3)
     services.gateway = Gateway(services)
     services.accounts.default_course_id = content.course_id  # API v1 = the demo course
+    services.sessions.course_id = content.course_id  # its conversations belong to that course
     from app.platform import usage
 
     services.usage = usage.DbUsageMeter(engine, settings.limits.usage, settings_service.effective)
@@ -122,6 +142,9 @@ def build_services(settings: Settings | None = None) -> Services:
     # retrieval from the published course indexes (index/current.json); no scanner here, so this object can
     # never publish an index (rebuilds belong to the worker job with scan_document, S4/Z11)
     services.course_retriever = IndexedCourseRetriever(settings.data_path())
+    from app.platform.course_scope import CourseScopes
+
+    services.course_scopes = CourseScopes(services)
     services.component_manager = ComponentManager(services, settings)
     services.components = services.component_manager.initial()
     return services

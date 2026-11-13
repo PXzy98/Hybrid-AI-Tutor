@@ -470,9 +470,10 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | T 的一部分（bandit B615，Z13 扫描发现） | T | 路由和证据模型固定到 Hugging Face 的 commit（`app/routing/revisions.py`，Docker 构建也用它） | #56 | 审查；和 Z 一起升级到 `transformers` 5 |
 | S4 的一部分（Z11 的后续） | S | 资料索引只在扫描发现学生数据时拒绝（`ScanResult.blocking`）：写了老师名字的课程资料不再被拒 | #55 | 审查 |
 | S 的一部分（bandit B314，Z13 扫描发现） | S | PubMed 返回的 XML 改用 `defusedxml` 解析 | #55 | 审查 |
+| 学习者数据按课程（course-structure.md 4.1、4.4） | S | `learner_kc_state`、`learner_topic_level`、`evidence_log`、`learner_misconception` 加 `course_id`（已有的行归到演示课程）；每门课一个 `LearnerRepository`；`app/learner/course_data.py` 导出和删除一门课的学习者数据 | #60 | 审查 |
 | S5 的一部分（11-12 顾问会议） | S | `data/demo_courses/archives/` 里的 8 个公开课程包（讲义、大纲、日历、作业、考试；答案只给教师），带清单、署名和许可；`scripts/fetch_open_courses.py` 用来解压和重建；`tests/test_open_course_packs.py` | 本 PR | 审查；S5、S11、T4 都用这些课程包 |
 
-仍由负责人自己完成：S 在学习者数据表加 `course_id`，并提供按课程导出和删除学习者数据的接口（学期结束和 v2 提问接口要用）；T6/T7（API v2 的前端，要发送 `X-CSRF-Token`）；CI 扫描报告的 `react-router` 7 和 `vite`/`vitest` 升级。
+从 2026-11-11 起，按同样的决定，Z 也用这种方式做 7.2 和 7.3 里 S 和 T 剩下的任务（每个任务一个 PR，开 PR 时加到上表）。还没开始的：S4、S6、S7、S9、S10 的 API v2 接口；T3 到 T13；CI 扫描报告的 `react-router` 7 和 `vite`/`vitest` 升级。
 
 ## 8. 开发流程
 

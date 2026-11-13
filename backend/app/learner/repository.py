@@ -1,4 +1,8 @@
-"""All database access of the learner model. Rows are keyed by the pseudonymous student_id."""
+"""All database access of the learner model.
+
+One repository serves one course: knowledge state, module levels, evidence and misconceptions are keyed by
+the pseudonymous student_id and the course (course-structure.md 4.1). Preferences and consent are global.
+"""
 from datetime import datetime
 
 from sqlalchemy import Engine, delete
@@ -15,13 +19,20 @@ from app.storage.models import (
     utcnow,
 )
 
-# what reset() clears; consent and the account stay (design §7.4)
-LEARNING_TABLES = (LearnerKcState, LearnerTopicLevel, LearnerPreference, EvidenceLog, LearnerMisconception)
+# one student's data in one course; preferences and consent are global and not part of it
+COURSE_TABLES = (LearnerKcState, LearnerTopicLevel, EvidenceLog, LearnerMisconception)
 
 
 class LearnerRepository:
-    def __init__(self, engine: Engine) -> None:
+    def __init__(self, engine: Engine, course_id: int | None = None) -> None:
         self.engine = engine
+        self.course_id = course_id  # None: the YAML seed without a course row (offline simulations)
+
+    def _mine(self, table, student_id: str):
+        """The student's rows of `table` in this repository's course."""
+        if self.course_id is None:
+            return (table.student_id == student_id, col(table.course_id).is_(None))
+        return (table.student_id == student_id, table.course_id == self.course_id)
 
     def _db(self) -> Session:
         return Session(self.engine, expire_on_commit=False)
@@ -30,16 +41,17 @@ class LearnerRepository:
     def states(self, student_id: str, kc_ids: list[str]) -> dict[str, KcState]:
         """Stored states for the given KCs (KCs never observed are simply missing)."""
         with self._db() as db:
-            rows = db.exec(select(LearnerKcState).where(LearnerKcState.student_id == student_id,
+            rows = db.exec(select(LearnerKcState).where(*self._mine(LearnerKcState, student_id),
                                                         col(LearnerKcState.kc_id).in_(kc_ids))).all()
         return {r.kc_id: KcState(kc_id=r.kc_id, p_mastery=r.p_mastery, level=r.level, n_obs=r.n_obs,
                                  last_seen=r.last_seen) for r in rows}
 
     def save_state(self, student_id: str, state: KcState) -> None:
         with self._db() as db:
-            row = db.exec(select(LearnerKcState).where(LearnerKcState.student_id == student_id,
+            row = db.exec(select(LearnerKcState).where(*self._mine(LearnerKcState, student_id),
                                                        LearnerKcState.kc_id == state.kc_id)).first()
-            row = row or LearnerKcState(student_id=student_id, kc_id=state.kc_id, p_mastery=0, level="basic")
+            row = row or LearnerKcState(student_id=student_id, course_id=self.course_id, kc_id=state.kc_id,
+                                        p_mastery=0, level="basic")
             row.p_mastery, row.level, row.n_obs, row.last_seen = (state.p_mastery, state.level, state.n_obs,
                                                                   state.last_seen)
             db.add(row)
@@ -47,8 +59,8 @@ class LearnerRepository:
 
     # ------------------------------------------------------------------- evidence
     def log_evidence(self, student_id: str, ev: Evidence, weight: float = 1.0) -> datetime:
-        row = EvidenceLog(student_id=student_id, kc_id=ev.kc_id, kind=ev.kind, source=ev.source,
-                          item_id=ev.item_id, correct=ev.correct, signal=ev.signal,
+        row = EvidenceLog(student_id=student_id, course_id=self.course_id, kc_id=ev.kc_id, kind=ev.kind,
+                          source=ev.source, item_id=ev.item_id, correct=ev.correct, signal=ev.signal,
                           misconception_id=ev.misconception_id, weight=weight)
         with self._db() as db:
             db.add(row)
@@ -57,7 +69,7 @@ class LearnerRepository:
 
     def evidence(self, student_id: str, kc_id: str | None = None) -> list[EvidenceLog]:
         """Evidence rows, oldest first."""
-        stmt = select(EvidenceLog).where(EvidenceLog.student_id == student_id)
+        stmt = select(EvidenceLog).where(*self._mine(EvidenceLog, student_id))
         if kc_id:
             stmt = stmt.where(EvidenceLog.kc_id == kc_id)
         with self._db() as db:
@@ -74,15 +86,16 @@ class LearnerRepository:
     # ---------------------------------------------------------------- topic level
     def topic_level(self, student_id: str, topic: str) -> str | None:
         with self._db() as db:
-            row = db.exec(select(LearnerTopicLevel).where(LearnerTopicLevel.student_id == student_id,
+            row = db.exec(select(LearnerTopicLevel).where(*self._mine(LearnerTopicLevel, student_id),
                                                           LearnerTopicLevel.topic == topic)).first()
         return row.level if row else None
 
     def save_topic_level(self, student_id: str, topic: str, level: str) -> None:
         with self._db() as db:
-            row = db.exec(select(LearnerTopicLevel).where(LearnerTopicLevel.student_id == student_id,
+            row = db.exec(select(LearnerTopicLevel).where(*self._mine(LearnerTopicLevel, student_id),
                                                           LearnerTopicLevel.topic == topic)).first()
-            row = row or LearnerTopicLevel(student_id=student_id, topic=topic, level=level)
+            row = row or LearnerTopicLevel(student_id=student_id, course_id=self.course_id, topic=topic,
+                                           level=level)
             row.level, row.updated_at = level, utcnow()
             db.add(row)
             db.commit()
@@ -106,7 +119,7 @@ class LearnerRepository:
     def misconceptions(self, student_id: str, statuses: tuple[str, ...] | None = None
                        ) -> list[LearnerMisconception]:
         """Tracked misconceptions, most recently updated first."""
-        stmt = select(LearnerMisconception).where(LearnerMisconception.student_id == student_id)
+        stmt = select(LearnerMisconception).where(*self._mine(LearnerMisconception, student_id))
         if statuses:
             stmt = stmt.where(col(LearnerMisconception.status).in_(statuses))
         with self._db() as db:
@@ -116,11 +129,11 @@ class LearnerRepository:
     def misconception(self, student_id: str, misconception_id: str) -> LearnerMisconception | None:
         with self._db() as db:
             return db.exec(select(LearnerMisconception).where(
-                LearnerMisconception.student_id == student_id,
+                *self._mine(LearnerMisconception, student_id),
                 LearnerMisconception.misconception_id == misconception_id)).first()
 
     def save_misconception(self, row: LearnerMisconception) -> None:
-        row.updated_at = utcnow()
+        row.course_id, row.updated_at = self.course_id, utcnow()
         with self._db() as db:
             db.add(row)
             db.commit()
@@ -140,9 +153,23 @@ class LearnerRepository:
             db.commit()
 
     # ---------------------------------------------------------------------- reset
-    def reset(self, student_id: str) -> None:
-        """Forget the learning profile (state, evidence, preferences); keep consent and the account."""
+    def delete_course_data(self, student_id: str) -> None:
+        """Forget what the student learned in this course; preferences and consent stay (4.4)."""
         with self._db() as db:
-            for table in LEARNING_TABLES:
+            for table in COURSE_TABLES:
+                db.exec(delete(table).where(*self._mine(table, student_id)))
+            db.commit()
+
+    def reset(self, student_id: str) -> None:
+        """API v1 "reset my profile": this course's data and the preferences; consent and the account stay."""
+        self.delete_course_data(student_id)
+        with self._db() as db:
+            db.exec(delete(LearnerPreference).where(LearnerPreference.student_id == student_id))
+            db.commit()
+
+    def forget(self, student_id: str) -> None:
+        """Consent withdrawn (it is global): the learning data of every course and the preferences."""
+        with self._db() as db:
+            for table in (*COURSE_TABLES, LearnerPreference):
                 db.exec(delete(table).where(table.student_id == student_id))
             db.commit()

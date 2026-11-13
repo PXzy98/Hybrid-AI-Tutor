@@ -108,8 +108,8 @@ def test_evidence_log_has_ids_and_numbers_only(make):
     log = rows("evidence_log")
     assert [(r["kind"], r["item_id"], r["misconception_id"], r["weight"]) for r in log] == [
         ("strong", "HBP.6-q1", None, 1.0), ("weak", None, "HBP.MC2", 2.0)]
-    assert set(log[0]) == {"id", "student_id", "kc_id", "kind", "source", "item_id", "correct", "signal",
-                           "misconception_id", "weight", "created_at"}  # no free-text column
+    assert set(log[0]) == {"id", "student_id", "course_id", "kc_id", "kind", "source", "item_id", "correct",
+                           "signal", "misconception_id", "weight", "created_at"}  # no free-text column
 
 
 def test_observe_request_caps_weak_updates_per_kc(make):

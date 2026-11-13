@@ -19,6 +19,7 @@ CLOUD_FALLBACK_WARNING = "The cloud model was unavailable, so the local model an
 CLOUD_MISSING_WARNING = "No cloud model is connected, so the local model answered this question."
 PRIVACY_BLOCK_WARNING = "A privacy check kept this question on the local model."
 LOCAL_ONLY_WARNING = "This course uses the local model only."
+CLOUD_LIMIT_NOTE = "Today's limit of cloud answers is reached: this answer comes from the local model."
 GENERALIZED_NOTE = ("For privacy, the cloud model received a general version of your question, without your "
                     "personal health details.")
 LOCAL_CAPABILITY_NOTE = ("This question may be beyond what the local model does well; "
@@ -39,7 +40,7 @@ class GenerateStep(BaseStep):
 
     def __init__(self, services) -> None:
         super().__init__(services)
-        self.leaks = CloudLeakGuard(PIIAnalyzer(services.settings.privacy), services.content)
+        self.leaks = CloudLeakGuard(PIIAnalyzer(services.settings.privacy), lambda: services.content)
 
     async def run(self, ctx: RequestContext) -> RequestContext:
         result = await self.produce(ctx)
@@ -90,9 +91,13 @@ class GenerateStep(BaseStep):
             if not self.services.settings.llm.cloud.fallback_to_local:
                 raise LLMError("cloud route chosen but no cloud model is configured")
             return await self._fallback(ctx, safety_retry, CLOUD_MISSING_WARNING)
+        if not ctx.reserve_cloud_call():  # every invocation counts, safety retries included
+            return await self._fallback(ctx, safety_retry, CLOUD_LIMIT_NOTE)
         ctx.cloud_request = req  # what was actually sent: audited by the leak checkers and E4
         try:
-            return await cloud.complete(req, safety_retry=safety_retry)
+            result = await cloud.complete(req, safety_retry=safety_retry)
+            ctx.cloud_call_done((result.prompt_tokens or 0) + (result.completion_tokens or 0))
+            return result
         except LLMError as e:
             log.warning("cloud model failed (%s), request=%s", type(e).__name__, ctx.request_id)
             if not self.services.settings.llm.cloud.fallback_to_local:

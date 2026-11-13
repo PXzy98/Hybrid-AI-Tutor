@@ -394,6 +394,8 @@ columns, so switching between them keeps every student's state.
 ## 8. Conversations, logs, statistics
 
 - `conversation` (`id`, `student_id`, `course_id`, `created_at`); `session_turn` gets `conversation_id`.
+  As built: there is no separate table; `session_turn.session_id` is the conversation ID and
+  `session_turn` and `request_log` carry `course_id` (migration 0011).
   History sent to the models comes only from the same conversation, so never from another course (G2).
 - `request_log`, `survey_response`, `usage_counter`, `audit_log` and `config_history` have `course_id`
   (null only for system-level actions). The class summary, logs and survey summary are per course (G3).

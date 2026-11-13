@@ -4262,6 +4262,229 @@
           }
         }
       }
+    },
+    "/api/v2/courses/{course_id}/ask": {
+      "post": {
+        "tags": [
+          "ask"
+        ],
+        "summary": "Ask",
+        "operationId": "ask_api_v2_courses__course_id__ask_post",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AskIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AskOut"
+                }
+              }
+            }
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AskErrorOut"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/courses/{course_id}/ask/stream": {
+      "post": {
+        "tags": [
+          "ask"
+        ],
+        "summary": "Ask Stream",
+        "description": "Server-sent events: `meta`, `progress` (fixed status text and scores, never question or passage\ntext), then `result` or `error`, then `done`.",
+        "operationId": "ask_stream_api_v2_courses__course_id__ask_stream_post",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AskIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              },
+              "text/event-stream": {}
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/courses/{course_id}/conversations": {
+      "get": {
+        "tags": [
+          "ask"
+        ],
+        "summary": "Conversations",
+        "description": "The caller's own conversations in this course, newest first.",
+        "operationId": "conversations_api_v2_courses__course_id__conversations_get",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ConversationOut"
+                  },
+                  "title": "Response Conversations Api V2 Courses  Course Id  Conversations Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/courses/{course_id}/conversations/{conversation_id}": {
+      "get": {
+        "tags": [
+          "ask"
+        ],
+        "summary": "Conversation",
+        "description": "Sanitized turns of one of the caller's conversations in this course (oldest first).",
+        "operationId": "conversation_api_v2_courses__course_id__conversations__conversation_id__get",
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Conversation Id"
+            }
+          },
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "last",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "title": "Last"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationDetailOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -4410,6 +4633,227 @@
         ],
         "title": "AskBody",
         "description": "Identity comes from the login session. Routing method is per question, never global."
+      },
+      "AskErrorOut": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          },
+          "step": {
+            "type": "string",
+            "title": "Step"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail",
+          "step",
+          "request_id"
+        ],
+        "title": "AskErrorOut"
+      },
+      "AskIn": {
+        "properties": {
+          "question": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Question"
+          },
+          "module_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Module Id"
+          },
+          "conversation_id": {
+            "type": "string",
+            "maxLength": 64,
+            "title": "Conversation Id",
+            "default": ""
+          },
+          "routing_method": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "lr",
+                  "svm"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Routing Method"
+          },
+          "language": {
+            "type": "string",
+            "maxLength": 8,
+            "title": "Language",
+            "default": "en"
+          }
+        },
+        "type": "object",
+        "required": [
+          "question"
+        ],
+        "title": "AskIn"
+      },
+      "AskOut": {
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          },
+          "answer": {
+            "type": "string",
+            "title": "Answer"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/Source"
+            },
+            "type": "array",
+            "title": "Sources",
+            "default": []
+          },
+          "model_used": {
+            "type": "string",
+            "title": "Model Used"
+          },
+          "route_target": {
+            "type": "string",
+            "enum": [
+              "local",
+              "cloud"
+            ],
+            "title": "Route Target"
+          },
+          "route_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Route Score"
+          },
+          "check_item": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CheckItemPublic"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "kc_level": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "basic",
+                  "intermediate",
+                  "advanced"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kc Level"
+          },
+          "next_kc": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/KcRecommendation"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/CheckResult"
+            },
+            "type": "array",
+            "title": "Checks",
+            "default": []
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings",
+            "default": []
+          },
+          "timings_ms": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Timings Ms",
+            "default": {}
+          },
+          "routing_method": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Routing Method"
+          },
+          "routing_details": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RouteScore"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "routing_progress": {
+            "items": {
+              "$ref": "#/components/schemas/RoutingProgress"
+            },
+            "type": "array",
+            "title": "Routing Progress",
+            "default": []
+          },
+          "conversation_id": {
+            "type": "string",
+            "title": "Conversation Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "session_id",
+          "answer",
+          "model_used",
+          "route_target",
+          "conversation_id"
+        ],
+        "title": "AskOut"
       },
       "AskResponse": {
         "properties": {
@@ -4975,6 +5419,57 @@
           "topics"
         ],
         "title": "ContentStatus"
+      },
+      "ConversationDetailOut": {
+        "properties": {
+          "conversation_id": {
+            "type": "string",
+            "title": "Conversation Id"
+          },
+          "turns": {
+            "items": {
+              "$ref": "#/components/schemas/Turn"
+            },
+            "type": "array",
+            "title": "Turns"
+          }
+        },
+        "type": "object",
+        "required": [
+          "conversation_id",
+          "turns"
+        ],
+        "title": "ConversationDetailOut"
+      },
+      "ConversationOut": {
+        "properties": {
+          "conversation_id": {
+            "type": "string",
+            "title": "Conversation Id"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Started At"
+          },
+          "last_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Last At"
+          },
+          "turns": {
+            "type": "integer",
+            "title": "Turns"
+          }
+        },
+        "type": "object",
+        "required": [
+          "conversation_id",
+          "started_at",
+          "last_at",
+          "turns"
+        ],
+        "title": "ConversationOut"
       },
       "CourseIn": {
         "properties": {

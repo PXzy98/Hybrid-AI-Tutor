@@ -1389,6 +1389,84 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/courses/{course_id}/ask": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ask */
+        post: operations["ask_api_v2_courses__course_id__ask_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/ask/stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ask Stream
+         * @description Server-sent events: `meta`, `progress` (fixed status text and scores, never question or passage
+         *     text), then `result` or `error`, then `done`.
+         */
+        post: operations["ask_stream_api_v2_courses__course_id__ask_stream_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/conversations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Conversations
+         * @description The caller's own conversations in this course, newest first.
+         */
+        get: operations["conversations_api_v2_courses__course_id__conversations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/conversations/{conversation_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Conversation
+         * @description Sanitized turns of one of the caller's conversations in this course (oldest first).
+         */
+        get: operations["conversation_api_v2_courses__course_id__conversations__conversation_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1444,6 +1522,86 @@ export interface components {
             language: string;
             /** Routing Method */
             routing_method?: ("lr" | "svm") | null;
+        };
+        /** AskErrorOut */
+        AskErrorOut: {
+            /** Detail */
+            detail: string;
+            /** Step */
+            step: string;
+            /** Request Id */
+            request_id: string;
+        };
+        /** AskIn */
+        AskIn: {
+            /** Question */
+            question: string;
+            /** Module Id */
+            module_id?: number | null;
+            /**
+             * Conversation Id
+             * @default
+             */
+            conversation_id: string;
+            /** Routing Method */
+            routing_method?: ("lr" | "svm") | null;
+            /**
+             * Language
+             * @default en
+             */
+            language: string;
+        };
+        /** AskOut */
+        AskOut: {
+            /** Session Id */
+            session_id: string;
+            /** Answer */
+            answer: string;
+            /**
+             * Sources
+             * @default []
+             */
+            sources: components["schemas"]["Source"][];
+            /** Model Used */
+            model_used: string;
+            /**
+             * Route Target
+             * @enum {string}
+             */
+            route_target: "local" | "cloud";
+            /** Route Score */
+            route_score?: number | null;
+            check_item?: components["schemas"]["CheckItemPublic"] | null;
+            /** Kc Level */
+            kc_level?: ("basic" | "intermediate" | "advanced") | null;
+            next_kc?: components["schemas"]["KcRecommendation"] | null;
+            /**
+             * Checks
+             * @default []
+             */
+            checks: components["schemas"]["CheckResult"][];
+            /**
+             * Warnings
+             * @default []
+             */
+            warnings: string[];
+            /**
+             * Timings Ms
+             * @default {}
+             */
+            timings_ms: {
+                [key: string]: number;
+            };
+            /** Routing Method */
+            routing_method?: string | null;
+            routing_details?: components["schemas"]["RouteScore"] | null;
+            /**
+             * Routing Progress
+             * @default []
+             */
+            routing_progress: components["schemas"]["RoutingProgress"][];
+            /** Conversation Id */
+            conversation_id: string;
         };
         /** AskResponse */
         AskResponse: {
@@ -1663,6 +1821,30 @@ export interface components {
             serve_unreviewed: boolean;
             /** Topics */
             topics: components["schemas"]["TopicContentStatus"][];
+        };
+        /** ConversationDetailOut */
+        ConversationDetailOut: {
+            /** Conversation Id */
+            conversation_id: string;
+            /** Turns */
+            turns: components["schemas"]["Turn"][];
+        };
+        /** ConversationOut */
+        ConversationOut: {
+            /** Conversation Id */
+            conversation_id: string;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
+            /**
+             * Last At
+             * Format: date-time
+             */
+            last_at: string;
+            /** Turns */
+            turns: number;
         };
         /** CourseIn */
         CourseIn: {
@@ -6390,6 +6572,151 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["JobOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ask_api_v2_courses__course_id__ask_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AskIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AskOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AskErrorOut"];
+                };
+            };
+        };
+    };
+    ask_stream_api_v2_courses__course_id__ask_stream_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AskIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                    "text/event-stream": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    conversations_api_v2_courses__course_id__conversations_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConversationOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    conversation_api_v2_courses__course_id__conversations__conversation_id__get: {
+        parameters: {
+            query?: {
+                last?: number;
+            };
+            header?: never;
+            path: {
+                conversation_id: string;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConversationDetailOut"];
                 };
             };
             /** @description Validation Error */

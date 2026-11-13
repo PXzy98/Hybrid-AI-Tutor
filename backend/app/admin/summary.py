@@ -73,7 +73,9 @@ def class_summary(engine, learner: LearnerModel, content: ContentStore, topic: s
             band = "not_assessed" if state.n_obs == 0 else learner.band(state)
             raw[kc_id][band] += 1
     with Session(engine) as db:
-        rows = db.exec(select(LearnerMisconception).where(LearnerMisconception.status.in_(OPEN))).all()
+        rows = db.exec(select(LearnerMisconception).where(
+            LearnerMisconception.status.in_(OPEN),
+            LearnerMisconception.course_id == content.course_id)).all()  # this course only
     holders: dict[str, set[str]] = {}
     consenting = set(students)
     for r in rows:
