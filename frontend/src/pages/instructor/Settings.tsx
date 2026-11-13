@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
-import ModelEndpoints from "@/components/ModelEndpoints";
+import ModelEndpoints, { endpointsKey } from "@/components/ModelEndpoints";
 import { useI18n } from "@/i18n";
 
 /** Course settings: title and term, then the privacy and routing values. The save sends the version that was
@@ -85,6 +85,8 @@ function SettingsForm({ course, initial }: { course: Course; initial: CourseSett
   const { t } = useI18n();
   const qc = useQueryClient();
   const [values, setValues] = useState<CourseValues>(initial.values);
+  const endpoints = useQuery({ queryKey: endpointsKey(course.id), queryFn: () => api.modelEndpoints(course.id) });
+  const pick = (trust: "trusted_local" | "external") => (endpoints.data ?? []).filter((e) => e.trust === trust);
   const save = useMutation({
     mutationFn: () => api.saveCourseSettings(course.id, values, initial.version),
     onSuccess: (fresh) => {
@@ -122,6 +124,22 @@ function SettingsForm({ course, initial }: { course: Course; initial: CourseSett
               <option value="default">{t("settings.routingDefault")}</option>
               <option value="prefer_local">{t("settings.routingLocal")}</option>
               <option value="prefer_cloud">{t("settings.routingCloud")}</option>
+            </Select>
+          </div>
+          <div className="grid gap-1.5 sm:max-w-sm">
+            <Label htmlFor="set-local-endpoint">{t("settings.localEndpoint")}</Label>
+            <Select id="set-local-endpoint" value={values.local_endpoint_id ?? ""}
+                    onChange={(e) => setValues({ ...values, local_endpoint_id: e.target.value === "" ? null : Number(e.target.value) })}>
+              <option value="">{t("settings.useDefault")}</option>
+              {pick("trusted_local").map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
+            </Select>
+          </div>
+          <div className="grid gap-1.5 sm:max-w-sm">
+            <Label htmlFor="set-cloud-endpoint">{t("settings.cloudEndpoint")}</Label>
+            <Select id="set-cloud-endpoint" value={values.cloud_endpoint_id ?? ""}
+                    onChange={(e) => setValues({ ...values, cloud_endpoint_id: e.target.value === "" ? null : Number(e.target.value) })}>
+              <option value="">{t("settings.useDefault")}</option>
+              {pick("external").map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
             </Select>
           </div>
           <label className="flex items-start gap-2 text-sm">

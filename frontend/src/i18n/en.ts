@@ -678,6 +678,11 @@ export const en = {
   "archive.refused": "The course was not archived. End the term first.",
   "archive.done": "This course is archived.",
   "archive.button": "Archive course",
+  "admin.applying": "The change is being applied to every process. Saving is disabled until it is done.",
+  "admin.rolledBack": "The last change could not be applied and was rolled back. {reason}",
+  "settings.localEndpoint": "Local model connection",
+  "settings.cloudEndpoint": "Cloud model connection",
+  "settings.useDefault": "Use the default",
 } as const satisfies Record<string, string>;
 
 export type MessageKey = keyof typeof en;
