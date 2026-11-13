@@ -12,8 +12,9 @@ multi-course product ("v4").
    settings, the database or the HTTP API.
 3. [docs/IMPLEMENTATION_LOG.md](docs/IMPLEMENTATION_LOG.md) for how the current code came about.
 
-**Test and demo courses**: every test, evaluation and demo uses the eight open courses of
-[data/demo_courses/README.md](data/demo_courses/README.md). They are stored as zips; run
+**Test and demo courses**: evaluations, test question sets, integration tests that need real course
+material, and demos use the eight open courses of [data/demo_courses/README.md](data/demo_courses/README.md);
+unit tests keep using short fictional texts and fake models (rule 6). They are stored as zips; run
 `python scripts/fetch_open_courses.py unpack` once before using them, never commit the unpacked folders, and
 never upload their `instructor_only/` files (solutions) as course material.
 

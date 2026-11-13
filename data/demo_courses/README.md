@@ -1,6 +1,6 @@
 # Demo and test courses
 
-**Every test, evaluation and demo of v4 uses the eight open courses below** (decided 2026-11-12, after the
+**Evaluations, test question sets, integration tests with real course material and demos of v4 use the eight open courses below** (unit tests keep short fictional texts) (decided 2026-11-12, after the
 advisor suggested using open online course material). They replace ELG 5902, whose material needed
 permission.
 
