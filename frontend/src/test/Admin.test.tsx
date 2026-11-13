@@ -243,3 +243,55 @@ describe("course settings", () => {
     expect(await screen.findByText("Course server")).toBeInTheDocument();
   });
 });
+
+describe("follow-up fixes", () => {
+  it("selects the course's local and cloud connections in the course settings", async () => {
+    const local = { ...endpoint, id: 8, course_id: 1, name: "Course local", trust: "trusted_local", kind: "ollama" };
+    const cloud = { ...endpoint, id: 9, course_id: 1, name: "Course cloud" };
+    const calls = mockApi(instructorRoutes({
+      "GET /courses/1/settings": { values: { visibility_mode: "B", local_only: false, routing_preference: "default", show_routing_progress: true, local_endpoint_id: null, cloud_endpoint_id: null }, version: 2 },
+      "GET /courses/1/model-endpoints": [local, cloud],
+      "PUT /courses/1/settings": (c: { body: { values: unknown } }) => ({ values: c.body.values, version: 3 }),
+    }));
+    renderApp("/courses/1/settings");
+    const user = userEvent.setup();
+    const localSelect = await screen.findByLabelText("Local model connection");
+    expect(within(localSelect).queryByRole("option", { name: "Course cloud" })).not.toBeInTheDocument();
+    await user.selectOptions(localSelect, "Course local");
+    await user.selectOptions(screen.getByLabelText("Cloud model connection"), "Course cloud");
+    await user.click(screen.getAllByRole("button", { name: "Save" })[1]);
+    await waitFor(() => expect(calls.some((c) => c.method === "PUT")).toBe(true));
+    expect(calls.find((c) => c.method === "PUT")!.body).toMatchObject({ version: 2, values: { local_endpoint_id: 8, cloud_endpoint_id: 9 } });
+  });
+
+  it("polls while a change is applying, keeps Save disabled, then shows the result", async () => {
+    let polls = 0;
+    mockApi(adminRoutes({
+      "GET /admin/settings": () => {
+        polls += 1;
+        return polls < 3 ? { ...settings, apply_state: "applying" } : { ...settings, version: 4, apply_state: "failed" };
+      },
+      "GET /admin/settings/apply-status": { apply_state: "failed", version: 3, target_version: 4, started_at: null, error: "worker did not switch in time", processes: [] },
+    }));
+    renderApp("/admin");
+    expect(await screen.findByText(/The change is being applied/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+    expect(await screen.findByText(/rolled back. worker did not switch in time/, undefined, { timeout: 6000 })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Save" })).toBeEnabled();
+  }, 10000);
+
+  it("lets the course types be typed with commas without losing separators", async () => {
+    const calls = mockApi(adminRoutes({ "PUT /admin/settings": (c: { body: { values: unknown } }) => ({ ...settings, values: c.body.values, version: 4 }) }));
+    renderApp("/admin");
+    const user = userEvent.setup();
+    const field = await screen.findByLabelText("Enabled course types");
+    await user.clear(field);
+    await user.type(field, "ece,");
+    expect(field).toHaveValue("ece,");
+    await user.type(field, " general");
+    expect(field).toHaveValue("ece, general");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+    await waitFor(() => expect(calls.some((c) => c.method === "PUT")).toBe(true));
+    expect(calls.find((c) => c.method === "PUT")!.body).toMatchObject({ values: { enabled_course_types: ["ece", "general"] } });
+  });
+});

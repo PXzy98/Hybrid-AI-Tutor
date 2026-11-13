@@ -118,18 +118,31 @@ function StaffCard({ selfId }: { selfId?: number }) {
 
 function SystemSettingsCard() {
   const { t } = useI18n();
-  const settings = useQuery({ queryKey: ["admin-settings"], queryFn: api.systemSettings });
+  const settings = useQuery({
+    queryKey: ["admin-settings"], queryFn: api.systemSettings,
+    refetchInterval: (q) => (q.state.data?.apply_state === "applying" ? APPLY_POLL_MS : false),
+  });
+  const state = settings.data?.apply_state;
+  // the apply status gives the reason of a rollback and keeps polling while a change is applying
+  const status = useQuery({
+    queryKey: ["admin-apply-status"], queryFn: api.applyStatus, enabled: state === "applying" || state === "failed",
+    refetchInterval: state === "applying" ? APPLY_POLL_MS : false,
+  });
   const [conflict, setConflict] = useState(false);
   return (
     <>
       <ErrorNote error={settings.error} />
       {conflict && <Alert variant="warning" role="alert">{t("settings.conflict")}</Alert>}
       {settings.isLoading && <p className="text-muted-foreground">{t("app.loading")}</p>}
-      {settings.data && <SystemSettingsForm key={settings.data.version} initial={settings.data} onConflict={setConflict} />}
+      {state === "applying" && <Alert variant="info" role="status">{t("admin.applying")}</Alert>}
+      {state === "failed" && <Alert variant="destructive" role="alert">{t("admin.rolledBack", { reason: status.data?.error ?? "" })}</Alert>}
+      {settings.data && <SystemSettingsForm key={`${settings.data.version}-${state}`} initial={settings.data} onConflict={setConflict} />}
     </>
   );
 }
 
+const APPLY_POLL_MS = 1500;
+const splitTypes = (v: string) => v.split(",").map((s) => s.trim()).filter(Boolean);
 const num = (v: string) => (v === "" ? null : Number(v));
 
 /** Saves with the version that was read; a 409 means someone else saved first and the latest values are loaded. */
@@ -137,9 +150,10 @@ function SystemSettingsForm({ initial, onConflict }: { initial: SystemSettings; 
   const { t } = useI18n();
   const qc = useQueryClient();
   const [values, setValues] = useState<SystemValues>(initial.values);
+  const [types, setTypes] = useState((initial.values.enabled_course_types ?? []).join(", "));
   const endpoints = useQuery({ queryKey: endpointsKey(null), queryFn: () => api.modelEndpoints(null) });
   const save = useMutation({
-    mutationFn: () => api.saveSystemSettings(values, initial.version),
+    mutationFn: () => api.saveSystemSettings({ ...values, enabled_course_types: splitTypes(types) }, initial.version),
     onSuccess: (fresh) => { onConflict(false); qc.setQueryData(["admin-settings"], fresh); },
     onError: (e) => {
       const stale = e instanceof ApiError && e.status === 409;
@@ -185,15 +199,14 @@ function SystemSettingsForm({ initial, onConflict }: { initial: SystemSettings; 
           <div className="grid gap-1.5"><Label htmlFor="sys-llm">{t("admin.localModel")}</Label>
             <Input id="sys-llm" value={values.local_llm_model ?? ""} onChange={(e) => set({ local_llm_model: e.target.value })} /></div>
           <div className="grid gap-1.5 sm:col-span-2"><Label htmlFor="sys-types">{t("admin.courseTypes")}</Label>
-            <Input id="sys-types" value={(values.enabled_course_types ?? []).join(", ")}
-                   onChange={(e) => set({ enabled_course_types: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })} />
+            <Input id="sys-types" value={types} onChange={(e) => setTypes(e.target.value)} />
             <p className="text-xs text-muted-foreground">{t("admin.courseTypesHint")}</p></div>
           <div className="grid gap-1.5"><Label htmlFor="sys-dlocal">{t("admin.defaultLocal")}</Label>{endpointSelect("sys-dlocal", "default_local_endpoint_id", "trusted_local")}</div>
           <div className="grid gap-1.5"><Label htmlFor="sys-dcloud">{t("admin.defaultCloud")}</Label>{endpointSelect("sys-dcloud", "default_cloud_endpoint_id", "external")}</div>
           <div className="space-y-2 sm:col-span-2">
             <ErrorNote error={save.error instanceof ApiError && save.error.status === 409 ? null : save.error} />
             {save.isSuccess && <p role="status" className="text-sm text-emerald-700 dark:text-emerald-300">{t("settings.saved")}</p>}
-            <Button type="submit" disabled={save.isPending}>{save.isPending ? t("settings.saving") : t("settings.save")}</Button>
+            <Button type="submit" disabled={save.isPending || initial.apply_state === "applying"}>{save.isPending ? t("settings.saving") : t("settings.save")}</Button>
           </div>
         </form>
       </CardContent>

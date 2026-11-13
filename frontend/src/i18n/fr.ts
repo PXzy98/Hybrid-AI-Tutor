@@ -673,4 +673,9 @@ export const fr: Messages = {
   "archive.refused": "Le cours n’a pas été archivé. Terminez d’abord la session.",
   "archive.done": "Ce cours est archivé.",
   "archive.button": "Archiver le cours",
+  "admin.applying": "Le changement est en cours d’application dans tous les processus. L’enregistrement est désactivé jusqu’à la fin.",
+  "admin.rolledBack": "Le dernier changement n’a pas pu être appliqué et a été annulé. {reason}",
+  "settings.localEndpoint": "Connexion au modèle local",
+  "settings.cloudEndpoint": "Connexion au modèle cloud",
+  "settings.useDefault": "Utiliser la valeur par défaut",
 };

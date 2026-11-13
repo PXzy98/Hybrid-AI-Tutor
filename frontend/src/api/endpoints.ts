@@ -209,6 +209,7 @@ export const api = {
   resetStaffPassword: (accountId: number) =>
     request<Schemas["TemporaryPasswordOut"]>("POST", `/admin/instructors/${accountId}/reset-password`),
   systemSettings: () => request<SystemSettings>("GET", "/admin/settings"),
+  applyStatus: () => request<Schemas["ApplyStatusOut"]>("GET", "/admin/settings/apply-status"),
   saveSystemSettings: (values: SystemValues, version: number) => request<SystemSettings>("PUT", "/admin/settings", { values, version }),
   // model connections: system scope (courseId null, admin) or one course (instructors)
   modelEndpoints: (courseId: number | null) => request<ModelEndpoint[]>("GET", endpoints(courseId)),
