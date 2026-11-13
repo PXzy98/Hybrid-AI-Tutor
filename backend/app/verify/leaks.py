@@ -4,6 +4,7 @@ Used twice: by the generate step BEFORE a request is sent (a leak blocks it), an
 profile_leak checkers afterwards (audit, defence in depth).
 """
 import re
+from collections.abc import Callable
 
 from app.core.schemas import CloudRequest, RequestContext
 from app.learner.content import ContentStore
@@ -41,9 +42,9 @@ def profile_problems(req: CloudRequest, ctx: RequestContext, content: ContentSto
 
 
 class CloudLeakGuard:
-    def __init__(self, analyzer: PIIAnalyzer, content: ContentStore) -> None:
+    def __init__(self, analyzer: PIIAnalyzer, content: Callable[[], ContentStore]) -> None:
         self.analyzer = analyzer
-        self.content = content
+        self.content = content  # called per request: the content of the request's course
 
     def problems(self, req: CloudRequest, ctx: RequestContext) -> list[str]:
-        return pii_problems(self.analyzer, req) + profile_problems(req, ctx, self.content)
+        return pii_problems(self.analyzer, req) + profile_problems(req, ctx, self.content())

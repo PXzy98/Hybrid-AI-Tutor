@@ -61,6 +61,11 @@ class SurveyResponse(SQLModel, table=True):
     source_confidence: int = Field(ge=1, le=5)
 
 
+def _course_scope() -> Column:
+    """course_id of a row that belongs to one course and goes with it (end of term, course deletion)."""
+    return Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=True, index=True)
+
+
 class RequestLog(SQLModel, table=True):
     __tablename__ = "request_log"
 
@@ -69,6 +74,7 @@ class RequestLog(SQLModel, table=True):
     created_at: datetime = _ts(default_factory=utcnow)
     session_id: str = Field(index=True)
     student_id: str = Field(index=True)  # pseudonymous; "deleted" after the account is deleted
+    course_id: int | None = Field(default=None, sa_column=_course_scope())
     topic: str
     sanitized_question: str
     target: str | None = None
@@ -87,6 +93,7 @@ class SessionTurn(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     session_id: str = Field(index=True)
     student_id: str = Field(index=True)  # owner of the session
+    course_id: int | None = Field(default=None, sa_column=_course_scope())  # conversations are per course
     role: str
     text: str  # sanitized
     created_at: datetime = _ts(default_factory=utcnow)
@@ -94,14 +101,12 @@ class SessionTurn(SQLModel, table=True):
 
 # ---------------------------------------------------------------------- learner model (design §5, §9)
 # Keyed by student_id and course_id (course-structure.md 4.1); preferences and consent are global. No
-# free-text columns: evidence holds IDs, flags and numbers, never question text.
-def _learner_course() -> Column:
-    # NULL only in offline simulations that run on the YAML seed without a course row
-    return Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=True, index=True)
-
+# free-text columns: evidence holds IDs, flags and numbers, never question text. course_id is NULL only in
+# offline simulations that run on the YAML seed without a course row.
 
 # tables whose rows belong to one course and had no course_id before (assigned to the demo course)
-ROWS_OF_A_COURSE = ("learner_kc_state", "learner_topic_level", "evidence_log", "learner_misconception")
+ROWS_OF_A_COURSE = ("learner_kc_state", "learner_topic_level", "evidence_log", "learner_misconception",
+                    "request_log", "session_turn")
 
 
 class LearnerKcState(SQLModel, table=True):
@@ -109,7 +114,7 @@ class LearnerKcState(SQLModel, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     student_id: str = Field(index=True)
-    course_id: int | None = Field(default=None, sa_column=_learner_course())
+    course_id: int | None = Field(default=None, sa_column=_course_scope())
     kc_id: str = Field(index=True)
     p_mastery: float
     level: str  # basic | intermediate | advanced (with hysteresis)
@@ -124,7 +129,7 @@ class LearnerTopicLevel(SQLModel, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     student_id: str = Field(index=True)
-    course_id: int | None = Field(default=None, sa_column=_learner_course())
+    course_id: int | None = Field(default=None, sa_column=_course_scope())
     topic: str
     level: str
     updated_at: datetime = _ts(default_factory=utcnow)
@@ -147,7 +152,7 @@ class EvidenceLog(SQLModel, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     student_id: str = Field(index=True)
-    course_id: int | None = Field(default=None, sa_column=_learner_course())
+    course_id: int | None = Field(default=None, sa_column=_course_scope())
     kc_id: str = Field(index=True)
     kind: str  # strong | weak | diagnostic
     source: str  # check | understand | onboarding
@@ -176,7 +181,7 @@ class LearnerMisconception(SQLModel, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     student_id: str = Field(index=True)
-    course_id: int | None = Field(default=None, sa_column=_learner_course())
+    course_id: int | None = Field(default=None, sa_column=_course_scope())
     misconception_id: str = Field(index=True)
     kc_id: str
     status: str  # suspected | confirmed | resolved

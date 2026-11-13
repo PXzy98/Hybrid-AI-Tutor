@@ -11,6 +11,12 @@ from app.storage.models import SessionTurn
 class DatabaseSessionStore:
     def __init__(self, engine: Engine) -> None:
         self.engine = engine
+        self.course_id: int | None = None  # set: this store reads and writes one course's conversations
+
+    def _where(self, session_id: str):
+        if self.course_id is None:
+            return (SessionTurn.session_id == session_id,)
+        return (SessionTurn.session_id == session_id, SessionTurn.course_id == self.course_id)
 
     def history(self, session_id: str, last: int = 6) -> list[Turn]:
         if last <= 0:
@@ -18,7 +24,7 @@ class DatabaseSessionStore:
         with Session(self.engine) as s:
             rows = s.exec(
                 select(SessionTurn)
-                .where(SessionTurn.session_id == session_id)
+                .where(*self._where(session_id))
                 .order_by(col(SessionTurn.id).desc())
                 .limit(last)
             ).all()
@@ -26,11 +32,11 @@ class DatabaseSessionStore:
 
     def append(self, session_id: str, student_id: str, turn: Turn) -> None:
         with Session(self.engine) as s:
-            s.add(SessionTurn(session_id=session_id, student_id=student_id, role=turn.role, text=turn.text,
-                              created_at=turn.created_at))
+            s.add(SessionTurn(session_id=session_id, student_id=student_id, course_id=self.course_id,
+                              role=turn.role, text=turn.text, created_at=turn.created_at))
             s.commit()
 
     def owner(self, session_id: str) -> str | None:
         with Session(self.engine) as s:
-            row = s.exec(select(SessionTurn.student_id).where(SessionTurn.session_id == session_id)).first()
+            row = s.exec(select(SessionTurn.student_id).where(*self._where(session_id))).first()
         return row

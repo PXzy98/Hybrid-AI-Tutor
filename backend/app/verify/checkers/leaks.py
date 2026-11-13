@@ -24,10 +24,10 @@ class ProfileLeakChecker:
     name = "profile_leak"
 
     def __init__(self, services) -> None:
-        self.content = services.content
+        self.services = services
 
     def check(self, ctx: RequestContext) -> CheckResult:
         if ctx.cloud_request is None:
             return CheckResult(name=self.name, status="pass", detail="nothing sent to the cloud")
-        found = profile_problems(ctx.cloud_request, ctx, self.content)
+        found = profile_problems(ctx.cloud_request, ctx, self.services.content)
         return CheckResult(name=self.name, status="fail" if found else "pass", detail="; ".join(found))

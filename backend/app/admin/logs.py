@@ -60,9 +60,11 @@ def entry(row: RequestLog) -> LogEntry:
                     warnings=list(row.warnings or []))
 
 
-def log_page(engine, page: int = 1, page_size: int = 20, topic: str | None = None) -> LogPage:
+def log_page(engine, page: int = 1, page_size: int = 20, topic: str | None = None, *,
+             course_id: int) -> LogPage:
+    """One course's requests only: the log table holds every course's requests."""
     page, page_size = max(page, 1), min(max(page_size, 1), MAX_PAGE_SIZE)
-    where = [RequestLog.topic == topic] if topic else []
+    where = [RequestLog.course_id == course_id] + ([RequestLog.topic == topic] if topic else [])
     with Session(engine) as db:
         total = db.exec(select(func.count()).select_from(RequestLog).where(*where)).one()
         rows = db.exec(select(RequestLog).where(*where).order_by(col(RequestLog.id).desc())

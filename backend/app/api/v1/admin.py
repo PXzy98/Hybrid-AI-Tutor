@@ -96,7 +96,8 @@ def get_class_summary(topic: str, _: Instructor, services: ServicesDep):
 @router.get("/logs", response_model=LogPage)
 def get_logs(_: Instructor, services: ServicesDep, page: int = 1, page_size: int = 20,
              topic: str | None = None):
-    return log_page(services.engine, page, page_size, topic)
+    # API v1 serves the demo course only; other courses' requests stay out of it
+    return log_page(services.engine, page, page_size, topic, course_id=services.content.course_id)
 
 
 @router.get("/content", response_model=ContentStatus)

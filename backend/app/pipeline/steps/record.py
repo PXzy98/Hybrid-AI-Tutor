@@ -26,6 +26,7 @@ class RecordStep(BaseStep):
                 request_id=ctx.request_id,
                 session_id=req.session_id,
                 student_id=req.student_id,
+                course_id=self.services.content.course_id,
                 topic=req.topic,
                 sanitized_question=question,
                 target=ctx.target,
