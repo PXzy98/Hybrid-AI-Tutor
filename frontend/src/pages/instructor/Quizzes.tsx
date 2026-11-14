@@ -3,7 +3,7 @@ import { Plus, Sparkles, Trash2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
 import { api, type Course, type DraftBody, type Quiz, type QuizQuestion, type QuizResults } from "@/api/endpoints";
-import { ErrorNote, StatusText } from "@/components/common";
+import { ErrorNote, Loading, StatusText } from "@/components/common";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -56,7 +56,7 @@ function QuizList({ course, onOpen }: { course: Course; onOpen: (v: View) => voi
         <Button type="button" onClick={() => onOpen({ kind: "edit", id: null })}><Plus aria-hidden />{t("quiz.new")}</Button>
       </div>
       <ErrorNote error={quizzes.error ?? change.error ?? remove.error} />
-      {quizzes.isLoading && <p className="text-muted-foreground">{t("app.loading")}</p>}
+      {quizzes.isLoading && <Loading variant="list" />}
       {quizzes.data?.length === 0 && <p className="text-muted-foreground">{t("quiz.none")}</p>}
       <ul className="space-y-3">
         {quizzes.data?.map((q) => {
@@ -102,9 +102,8 @@ function QuizList({ course, onOpen }: { course: Course; onOpen: (v: View) => voi
 const blankQuestion = (): QuizQuestion => ({ kind: "mcq", kc: null, stem: "", options: ["", "", "", ""], answer: 0, explanation: "", sources: [], reviewed: true });
 
 function QuizEditor({ course, id, onClose, onCreated }: { course: Course; id: number | null; onClose: () => void; onCreated: (id: number) => void }) {
-  const { t } = useI18n();
   const quizzes = useQuery({ queryKey: ["quizzes", course.id], queryFn: () => api.quizzes(course.id) });
-  if (quizzes.isLoading) return <p className="text-muted-foreground">{t("app.loading")}</p>;
+  if (quizzes.isLoading) return <Loading variant="list" />;
   const quiz = id === null ? undefined : quizzes.data?.find((q) => q.id === id);
   // a new form every time the server copy changes (after a save or after the AI draft arrives)
   return <EditorForm key={quiz ? `${quiz.id}:${quiz.updated_at}` : "new"} course={course} quiz={quiz} onClose={onClose} onCreated={onCreated} />;
@@ -314,7 +313,7 @@ function ResultsView({ course, id, onClose }: { course: Course; id: number; onCl
         <Button type="button" variant="outline" onClick={onClose}>{t("quiz.back")}</Button>
       </div>
       <ErrorNote error={results.error} />
-      {results.isLoading && <p className="text-muted-foreground">{t("app.loading")}</p>}
+      {results.isLoading && <Loading variant="list" />}
       {r && (
         <>
           <p className="text-sm text-muted-foreground">{t("quiz.attemptsN", { n: r.attempts })}</p>

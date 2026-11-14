@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { ApiError } from "@/api/client";
 import { api, type Staff, type SystemSettings, type SystemValues } from "@/api/endpoints";
 import { useMe } from "@/auth";
-import { ErrorNote, StatusText } from "@/components/common";
+import { ErrorNote, Loading, StatusText } from "@/components/common";
 import ModelEndpoints, { endpointsKey } from "@/components/ModelEndpoints";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -133,7 +133,7 @@ function SystemSettingsCard() {
     <>
       <ErrorNote error={settings.error} />
       {conflict && <Alert variant="warning" role="alert">{t("settings.conflict")}</Alert>}
-      {settings.isLoading && <p className="text-muted-foreground">{t("app.loading")}</p>}
+      {settings.isLoading && <Loading variant="form" />}
       {state === "applying" && <Alert variant="info" role="status">{t("admin.applying")}</Alert>}
       {state === "failed" && <Alert variant="destructive" role="alert">{t("admin.rolledBack", { reason: status.data?.error ?? "" })}</Alert>}
       {settings.data && <SystemSettingsForm key={`${settings.data.version}-${state}`} initial={settings.data} onConflict={setConflict} />}

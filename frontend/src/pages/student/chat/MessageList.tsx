@@ -2,11 +2,10 @@ import { ArrowDown } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 
 import type { AskResponse } from "@/api/endpoints";
-import { ErrorNote } from "@/components/common";
+import { ErrorNote, Loading } from "@/components/common";
 import Markdown from "@/components/Markdown";
 import type { RoutingTrace } from "@/components/RoutingProgress";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/i18n";
 import EmptyChat from "./EmptyChat";
 import RoutingPanel from "./RoutingPanel";
@@ -75,13 +74,7 @@ export default function MessageList({ courseId, messages, partial, pending, load
   return (
     <div className="flex flex-col">
       <section aria-label={t("chat.conversation")} aria-live="polite" className="flex flex-col gap-6 pb-4">
-        {loadingHistory && (
-          <div aria-busy="true" className="space-y-6">
-            <span className="sr-only">{t("app.loading")}</span>
-            <Skeleton className="ml-auto h-10 w-2/5 rounded-2xl" />
-            <div className="space-y-2"><Skeleton className="h-4 w-1/4" /><Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-5/6" /></div>
-          </div>
-        )}
+        {loadingHistory && <Loading variant="chat" />}
         <ErrorNote error={historyError} />
         {empty && <EmptyChat onSuggest={onSuggest} />}
         {messages.map((m, i) =>

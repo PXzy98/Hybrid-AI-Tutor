@@ -59,7 +59,8 @@ describe("student quiz after a reload", () => {
       }],
     }));
     renderApp("/courses/1/quizzes");
-    const status = await screen.findByRole("status");
+    await screen.findByText("Week 1 check");  // the loading skeleton is a status too: wait until it is gone
+    const status = screen.getByRole("status");
     expect(within(status).getByText("Unit of resistance?")).toBeInTheDocument();
     expect(status).toHaveTextContent("Your answer: Volt");
     expect(status).toHaveTextContent("Correct answer: Ohm");

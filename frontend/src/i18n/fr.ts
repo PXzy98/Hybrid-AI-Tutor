@@ -22,6 +22,11 @@ export const fr: Messages = {
   "nav.account": "Menu du compte",
   "nav.changePassword": "Changer le mot de passe",
   "theme.system": "Suivre le réglage du système",
+  "empty.profile.title": "Aucun profil d’apprentissage",
+  "empty.progress.title": "Rien pour l’instant",
+  "empty.quizzes.title": "Aucun quiz pour l’instant",
+  "empty.modules.title": "Aucun module pour l’instant",
+  "quiz.answeredN": "{n} sur {m} répondues",
   "dialog.close": "Fermer",
 
   "nav.skip": "Passer au contenu principal",

@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api, type Course } from "@/api/endpoints";
-import { ErrorNote } from "@/components/common";
+import { ErrorNote, Loading } from "@/components/common";
 import { Alert } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -42,7 +42,7 @@ export default function Overview({ course }: { course: Course }) {
       </div>
       <ErrorNote error={summary.error} />
       <InsightsCard course={course} />
-      {summary.isLoading && <p className="text-muted-foreground">{t("app.loading")}</p>}
+      {summary.isLoading && <Loading variant="cards" />}
       {data?.suppressed && <Alert variant="info" role="status">{t("overview.suppressed", { n: data.min_group })}</Alert>}
       {data && !data.suppressed && (
         <>

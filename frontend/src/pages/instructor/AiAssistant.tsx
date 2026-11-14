@@ -3,7 +3,7 @@ import { Loader2, Sparkles } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
 import { api, type AiDraft, type AiDraftAccept, type AiDraftKind, type AiDraftStatus, type Course } from "@/api/endpoints";
-import { ErrorNote, StatusText } from "@/components/common";
+import { ErrorNote, Loading, StatusText } from "@/components/common";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -134,7 +134,7 @@ function DraftDetail({ course, id, onGone }: { course: Course; id: number; onGon
   const [acceptedMsg, setAcceptedMsg] = useState("");
   const d = draft.data;
   if (draft.error) return <ErrorNote error={draft.error} />;
-  if (!d) return <p className="text-muted-foreground">{t("app.loading")}</p>;
+  if (!d) return <Loading variant="form" />;
   const refresh = (fresh: AiDraft) => {
     qc.setQueryData(["ai-draft", course.id, id], fresh);
     qc.invalidateQueries({ queryKey: ["ai-drafts", course.id] });

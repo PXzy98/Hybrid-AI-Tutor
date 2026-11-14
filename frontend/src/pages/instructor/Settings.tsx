@@ -3,7 +3,7 @@ import { useState, type FormEvent } from "react";
 
 import { ApiError } from "@/api/client";
 import { api, type Course, type CourseSettings, type CourseValues } from "@/api/endpoints";
-import { ErrorNote, StatusText } from "@/components/common";
+import { ErrorNote, Loading, StatusText } from "@/components/common";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,13 +16,12 @@ import { useI18n } from "@/i18n";
 /** Course settings: title and term, then the privacy and routing values. The save sends the version that was
  * read; the server answers 409 if someone else changed it. */
 export default function Settings({ course }: { course: Course }) {
-  const { t } = useI18n();
   const settings = useQuery({ queryKey: ["settings", course.id], queryFn: () => api.courseSettings(course.id) });
   return (
     <div className="space-y-4">
       <CourseInfo course={course} />
       <ErrorNote error={settings.error} />
-      {settings.isLoading && <p className="text-muted-foreground">{t("app.loading")}</p>}
+      {settings.isLoading && <Loading variant="form" />}
       {settings.data && <SettingsForm key={settings.data.version} course={course} initial={settings.data} />}
       <ModelEndpoints courseId={course.id} />
       <ArchiveCourse course={course} />

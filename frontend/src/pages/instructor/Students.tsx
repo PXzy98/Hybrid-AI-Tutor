@@ -5,7 +5,7 @@ import { useState, type FormEvent } from "react";
 import { ApiError } from "@/api/client";
 import { api, type Course, type Plan } from "@/api/endpoints";
 import Band from "@/components/Band";
-import { ErrorNote, StatusText } from "@/components/common";
+import { ErrorNote, Loading, StatusText } from "@/components/common";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,7 @@ export default function Students({ course }: { course: Course }) {
         <p className="text-sm text-muted-foreground">{t("students.intro")}</p>
       </div>
       <ErrorNote error={members.error} />
-      {members.isLoading && <p className="text-muted-foreground">{t("app.loading")}</p>}
+      {members.isLoading && <Loading variant="table" />}
       {members.data && (
         <Card>
           <CardContent>
@@ -96,7 +96,7 @@ function StudentDetail({ course, studentId, name }: { course: Course; studentId:
         {shown && <CardDescription>{t("students.since", { date: new Date(shown.visible_since).toLocaleDateString() })}</CardDescription>}
       </CardHeader>
       <CardContent className="space-y-4">
-        {overview.isLoading && <p className="text-muted-foreground">{t("app.loading")}</p>}
+        {overview.isLoading && <Loading variant="table" />}
         {notVisible && (
           <Alert variant="info" role="status" className="flex gap-3">
             <EyeOff aria-hidden className="mt-0.5 size-4 shrink-0" />
@@ -141,14 +141,13 @@ function StudentDetail({ course, studentId, name }: { course: Course; studentId:
 
 /** The learning plan of one visible student. The student sees it on the "My progress" tab. */
 export function PlanEditor({ course, studentId }: { course: Course; studentId: string }) {
-  const { t } = useI18n();
   const qc = useQueryClient();
   const kcs = useQuery({ queryKey: ["kcs", course.id], queryFn: () => api.kcs(course.id) });
   const plan = useQuery({
     queryKey: ["plan", course.id, studentId], queryFn: () => api.studentPlan(course.id, studentId), retry: false,
     staleTime: 0, gcTime: 0, refetchOnMount: "always", refetchOnWindowFocus: false,
   });
-  if (plan.isLoading || kcs.isLoading) return <p className="text-muted-foreground">{t("app.loading")}</p>;
+  if (plan.isLoading || kcs.isLoading) return <Loading variant="table" />;
   const missing = plan.error instanceof ApiError && plan.error.status === 404;
   return (
     <>

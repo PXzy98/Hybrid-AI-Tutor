@@ -22,6 +22,11 @@ export const en = {
   "nav.account": "Account menu",
   "nav.changePassword": "Change password",
   "theme.system": "Use the system setting",
+  "empty.profile.title": "No learning profile",
+  "empty.progress.title": "Nothing here yet",
+  "empty.quizzes.title": "No quizzes yet",
+  "empty.modules.title": "No modules yet",
+  "quiz.answeredN": "{n} of {m} answered",
   "dialog.close": "Close",
 
   "nav.skip": "Skip to the main content",
