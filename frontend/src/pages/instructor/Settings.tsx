@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 
 import { ApiError } from "@/api/client";
 import { api, type Course, type CourseSettings, type CourseValues } from "@/api/endpoints";
@@ -99,72 +99,80 @@ function SettingsForm({ course, initial }: { course: Course; initial: CourseSett
     e.preventDefault();
     save.mutate();
   }
+  const field = "grid gap-1.5 sm:max-w-sm";
+  return (
+    <form onSubmit={submit} className="space-y-4" aria-labelledby="set-title">
+      <div className="space-y-1">
+        <h3 id="set-title" className="text-base font-semibold">{t("settings.title")}</h3>
+        <p className="text-sm text-muted-foreground">{t("settings.hint")}</p>
+      </div>
+      <SettingsGroup title={t("settings.group.visibility")}>
+        <div className={field}>
+          <Label htmlFor="set-visibility">{t("settings.visibility")}</Label>
+          <Select id="set-visibility" value={values.visibility_mode ?? course.visibility_mode}
+                  onChange={(e) => setValues({ ...values, visibility_mode: e.target.value as "A" | "B" })}>
+            <option value="A">{t("settings.visibilityA")}</option>
+            <option value="B">{t("settings.visibilityB")}</option>
+          </Select>
+        </div>
+        <label className="flex items-start gap-2 text-sm">
+          <input type="checkbox" className="mt-0.5 accent-primary" checked={!!values.local_only}
+                 onChange={(e) => setValues({ ...values, local_only: e.target.checked })} />
+          <span><span className="font-medium">{t("settings.localOnly")}</span><br /><span className="text-muted-foreground">{t("settings.localOnlyHint")}</span></span>
+        </label>
+      </SettingsGroup>
+      <SettingsGroup title={t("settings.group.models")}>
+        <div className={field}>
+          <Label htmlFor="set-routing">{t("settings.routing")}</Label>
+          <Select id="set-routing" value={values.routing_preference ?? "default"}
+                  onChange={(e) => setValues({ ...values, routing_preference: e.target.value as CourseValues["routing_preference"] })}>
+            <option value="default">{t("settings.routingDefault")}</option>
+            <option value="prefer_local">{t("settings.routingLocal")}</option>
+            <option value="prefer_cloud">{t("settings.routingCloud")}</option>
+          </Select>
+        </div>
+        <div className={field}>
+          <Label htmlFor="set-local-endpoint">{t("settings.localEndpoint")}</Label>
+          <Select id="set-local-endpoint" value={values.local_endpoint_id ?? ""}
+                  onChange={(e) => setValues({ ...values, local_endpoint_id: e.target.value === "" ? null : Number(e.target.value) })}>
+            <option value="">{t("settings.useDefault")}</option>
+            {pick("trusted_local").map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
+          </Select>
+        </div>
+        <div className={field}>
+          <Label htmlFor="set-cloud-endpoint">{t("settings.cloudEndpoint")}</Label>
+          <Select id="set-cloud-endpoint" value={values.cloud_endpoint_id ?? ""}
+                  onChange={(e) => setValues({ ...values, cloud_endpoint_id: e.target.value === "" ? null : Number(e.target.value) })}>
+            <option value="">{t("settings.useDefault")}</option>
+            {pick("external").map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
+          </Select>
+        </div>
+      </SettingsGroup>
+      <SettingsGroup title={t("settings.group.display")}>
+        <label className="flex items-start gap-2 text-sm">
+          <input type="checkbox" className="mt-0.5 accent-primary" checked={values.show_routing_progress ?? true}
+                 onChange={(e) => setValues({ ...values, show_routing_progress: e.target.checked })} />
+          <span className="font-medium">{t("settings.showProgress")}</span>
+        </label>
+      </SettingsGroup>
+      {conflict && <Alert variant="warning" icon>{t("settings.conflict")}</Alert>}
+      <ErrorNote error={conflict ? null : save.error} />
+      {/* stays at the bottom of the content area while the groups scroll */}
+      <div className="sticky bottom-0 z-10 flex flex-wrap items-center gap-3 border-t bg-background py-3">
+        <Button loading={save.isPending} type="submit" disabled={save.isPending}>{save.isPending ? t("settings.saving") : t("settings.save")}</Button>
+        {dirty && !save.isPending && <span className="text-xs text-muted-foreground">{t("form.unsaved")}</span>}
+        {!dirty && save.isSuccess && <StatusText>{t("settings.saved")}</StatusText>}
+      </div>
+    </form>
+  );
+}
+
+/** One titled group of the settings form, in its own card. */
+function SettingsGroup({ title, children }: { title: string; children: ReactNode }) {
   return (
     <Card>
-      <CardHeader><CardTitle>{t("settings.title")}</CardTitle><CardDescription>{t("settings.hint")}</CardDescription></CardHeader>
-      <CardContent>
-        <form onSubmit={submit} className="space-y-6">
-          <fieldset className="space-y-4">
-          <legend className="mb-3 text-xs font-medium text-muted-foreground">{t("settings.group.visibility")}</legend>
-          <div className="grid gap-1.5 sm:max-w-sm">
-            <Label htmlFor="set-visibility">{t("settings.visibility")}</Label>
-            <Select id="set-visibility" value={values.visibility_mode ?? course.visibility_mode}
-                    onChange={(e) => setValues({ ...values, visibility_mode: e.target.value as "A" | "B" })}>
-              <option value="A">{t("settings.visibilityA")}</option>
-              <option value="B">{t("settings.visibilityB")}</option>
-            </Select>
-          </div>
-          <label className="flex items-start gap-2 text-sm">
-            <input type="checkbox" className="mt-0.5 accent-primary" checked={!!values.local_only}
-                   onChange={(e) => setValues({ ...values, local_only: e.target.checked })} />
-            <span><span className="font-medium">{t("settings.localOnly")}</span><br /><span className="text-muted-foreground">{t("settings.localOnlyHint")}</span></span>
-          </label>
-          </fieldset>
-          <fieldset className="space-y-4 border-t pt-5">
-          <legend className="float-left mb-3 w-full text-xs font-medium text-muted-foreground">{t("settings.group.models")}</legend>
-          <div className="grid gap-1.5 sm:max-w-sm">
-            <Label htmlFor="set-routing">{t("settings.routing")}</Label>
-            <Select id="set-routing" value={values.routing_preference ?? "default"}
-                    onChange={(e) => setValues({ ...values, routing_preference: e.target.value as CourseValues["routing_preference"] })}>
-              <option value="default">{t("settings.routingDefault")}</option>
-              <option value="prefer_local">{t("settings.routingLocal")}</option>
-              <option value="prefer_cloud">{t("settings.routingCloud")}</option>
-            </Select>
-          </div>
-          <div className="grid gap-1.5 sm:max-w-sm">
-            <Label htmlFor="set-local-endpoint">{t("settings.localEndpoint")}</Label>
-            <Select id="set-local-endpoint" value={values.local_endpoint_id ?? ""}
-                    onChange={(e) => setValues({ ...values, local_endpoint_id: e.target.value === "" ? null : Number(e.target.value) })}>
-              <option value="">{t("settings.useDefault")}</option>
-              {pick("trusted_local").map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
-            </Select>
-          </div>
-          <div className="grid gap-1.5 sm:max-w-sm">
-            <Label htmlFor="set-cloud-endpoint">{t("settings.cloudEndpoint")}</Label>
-            <Select id="set-cloud-endpoint" value={values.cloud_endpoint_id ?? ""}
-                    onChange={(e) => setValues({ ...values, cloud_endpoint_id: e.target.value === "" ? null : Number(e.target.value) })}>
-              <option value="">{t("settings.useDefault")}</option>
-              {pick("external").map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
-            </Select>
-          </div>
-          </fieldset>
-          <fieldset className="space-y-4 border-t pt-5">
-          <legend className="float-left mb-3 w-full text-xs font-medium text-muted-foreground">{t("settings.group.display")}</legend>
-          <label className="clear-left flex items-start gap-2 text-sm">
-            <input type="checkbox" className="mt-0.5 accent-primary" checked={values.show_routing_progress ?? true}
-                   onChange={(e) => setValues({ ...values, show_routing_progress: e.target.checked })} />
-            <span className="font-medium">{t("settings.showProgress")}</span>
-          </label>
-          </fieldset>
-          {conflict && <Alert variant="warning" icon>{t("settings.conflict")}</Alert>}
-          <ErrorNote error={conflict ? null : save.error} />
-          <div className="sticky bottom-0 z-10 -mx-5 -mb-5 flex flex-wrap items-center gap-3 rounded-b-xl border-t bg-card px-5 py-3">
-            <Button loading={save.isPending} type="submit" disabled={save.isPending}>{save.isPending ? t("settings.saving") : t("settings.save")}</Button>
-            {dirty && !save.isPending && <span className="text-xs text-muted-foreground">{t("form.unsaved")}</span>}
-            {!dirty && save.isSuccess && <StatusText>{t("settings.saved")}</StatusText>}
-          </div>
-        </form>
-      </CardContent>
+      <CardHeader><CardTitle aria-level={4}>{title}</CardTitle></CardHeader>
+      <CardContent className="space-y-4">{children}</CardContent>
     </Card>
   );
 }

@@ -7,6 +7,7 @@ import { EmptyState, ErrorNote, Loading, PageHeader, StatusText } from "@/compon
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,12 +46,16 @@ function QuizList({ course, onOpen }: { course: Course; onOpen: (v: View) => voi
     mutationFn: (v: { id: number; status: "published" | "closed" }) => api.updateQuiz(course.id, v.id, { status: v.status }),
     onSuccess: refresh,
   });
-  const remove = useMutation({ mutationFn: (id: number) => api.deleteQuiz(course.id, id), onSuccess: refresh });
+  const [pendingDelete, setPendingDelete] = useState<Quiz | null>(null);
+  const remove = useMutation({
+    mutationFn: (id: number) => api.deleteQuiz(course.id, id),
+    onSuccess: () => { setPendingDelete(null); refresh(); },
+  });
   return (
     <div className="space-y-4">
       <PageHeader title={t("quiz.title")} description={t("quiz.intro")}
                   actions={<Button type="button" onClick={() => onOpen({ kind: "edit", id: null })}><Plus aria-hidden />{t("quiz.new")}</Button>} />
-      <ErrorNote error={quizzes.error ?? change.error ?? remove.error} />
+      <ErrorNote error={quizzes.error ?? change.error} />
       {quizzes.isLoading && <Loading variant="list" />}
       {quizzes.data?.length === 0 && <EmptyState icon={ListChecks} title={t("empty.quizzes.title")}>{t("quiz.none")}</EmptyState>}
       <ul className="space-y-3">
@@ -82,7 +87,7 @@ function QuizList({ course, onOpen }: { course: Course; onOpen: (v: View) => voi
                     <Button type="button" size="sm" variant="outline" aria-label={t("quiz.closeFor", { name: q.title })} onClick={() => change.mutate({ id: q.id, status: "closed" })}>{t("quiz.close")}</Button>
                   )}
                   {q.attempts === 0 && (
-                    <Button type="button" size="sm" variant="ghost" aria-label={t("quiz.deleteFor", { name: q.title })} onClick={() => remove.mutate(q.id)}><Trash2 aria-hidden /></Button>
+                    <Button type="button" size="sm" variant="ghost" aria-label={t("quiz.deleteFor", { name: q.title })} onClick={() => setPendingDelete(q)}><Trash2 aria-hidden /></Button>
                   )}
                 </CardContent>
               </Card>
@@ -90,6 +95,20 @@ function QuizList({ course, onOpen }: { course: Course; onOpen: (v: View) => voi
           );
         })}
       </ul>
+      <Dialog open={!!pendingDelete} onOpenChange={(o) => { if (!o) setPendingDelete(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("quiz.deleteTitle")}</DialogTitle>
+            <DialogDescription>{t("quiz.deleteBody", { name: pendingDelete?.title ?? "" })}</DialogDescription>
+          </DialogHeader>
+          <ErrorNote error={remove.error} />
+          <DialogFooter>
+            <DialogClose asChild><Button type="button" variant="outline">{t("end.cancel")}</Button></DialogClose>
+            <Button type="button" variant="destructive" loading={remove.isPending}
+                    onClick={() => pendingDelete && remove.mutate(pendingDelete.id)}>{t("quiz.deleteConfirm")}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
