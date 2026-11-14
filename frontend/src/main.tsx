@@ -5,9 +5,13 @@ import { BrowserRouter } from "react-router-dom";
 
 import App from "./App";
 import { ApiError } from "./api/client";
+import { applyTheme, themePref } from "./components/theme";
 import { I18nProvider } from "./i18n";
 import "@fontsource-variable/inter";
 import "./index.css";
+
+// before the first paint, so the login page also opens in the chosen theme
+applyTheme(themePref());
 
 const queryClient = new QueryClient({
   defaultOptions: {

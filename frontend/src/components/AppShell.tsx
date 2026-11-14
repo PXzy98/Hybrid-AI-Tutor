@@ -1,187 +1,107 @@
-import { useQuery } from "@tanstack/react-query";
-import { GraduationCap, KeyRound, MessageSquarePlus, Plus, Settings2 } from "lucide-react";
-import { useState, type FormEvent } from "react";
-import { Link, NavLink, Outlet, useMatch, useNavigate, useSearchParams } from "react-router-dom";
+import { PanelLeft } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { Outlet, useLocation, useMatch } from "react-router-dom";
 
-import { api, type Me } from "@/api/endpoints";
-import { roleIn, useCourses, useResetSession } from "@/auth";
+import type { Me } from "@/api/endpoints";
+import { roleIn, useCourses } from "@/auth";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
-import { LanguageSwitch, useI18n } from "@/i18n";
-import { cn } from "@/lib/utils";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ErrorNote, ThemeToggle } from "./common";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { Tooltip } from "@/components/ui/tooltip";
+import { useI18n } from "@/i18n";
 import ErrorBoundary from "./ErrorBoundary";
+import Sidebar from "./shell/Sidebar";
+import UserMenu from "./shell/UserMenu";
 
-const linkClass = ({ isActive }: { isActive: boolean }) =>
-  cn("block truncate rounded-md px-3 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring",
-    isActive ? "bg-primary-soft font-medium text-primary-soft-foreground" : "hover:bg-accent");
+const SIDEBAR_KEY = "tutor.sidebar";  // interface preference only
 
-/** Header, left sidebar (courses, and for the open course its modules and the student's conversations) and the page. */
+function storedCollapsed() {
+  try {
+    return window.localStorage.getItem(SIDEBAR_KEY) === "collapsed";
+  } catch {
+    return false;
+  }
+}
+
+/** Full-height shell: sidebar (a sheet on small screens), a quiet top bar with the page h1, the scrolling content
+ *  and the disclaimer. Only the content scrolls. */
 export default function AppShell({ me }: { me: Me }) {
-  const navigate = useNavigate();
-  const resetSession = useResetSession();
   const { t } = useI18n();
   const courses = useCourses();
+  const location = useLocation();
   const match = useMatch("/courses/:courseId/*");
   const courseId = match ? Number(match.params.courseId) : null;
+  const tab = match?.params["*"]?.split("/")[0] || undefined;
   const current = courses.data?.find((c) => c.id === courseId);
-  const isStudent = !!current && roleIn(current, me) === "student";
+  const student = !!current && roleIn(current, me) === "student";
   const showSidebar = !me.must_change_password;
+  const [collapsed, setCollapsedState] = useState(storedCollapsed);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-  async function logout() {
-    await api.logout().catch(() => undefined);
-    resetSession(null);
-    navigate("/login", { replace: true });
-  }
+  const setCollapsed = useCallback((next: boolean) => {
+    setCollapsedState(next);
+    try {
+      if (next) window.localStorage.setItem(SIDEBAR_KEY, "collapsed");
+      else window.localStorage.removeItem(SIDEBAR_KEY);
+    } catch {
+      // not saved; the choice still applies until the page is reloaded
+    }
+  }, []);
+
+  // the mobile sheet closes on navigation
+  useEffect(() => setMobileOpen(false), [location.pathname, location.search]);
+
+  const sidebarProps = { me, current, student, tab };
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex h-dvh overflow-hidden">
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground">{t("nav.skip")}</a>
-      <header className="border-b bg-card">
-        <div className="flex flex-wrap items-center gap-2 px-4 py-2">
-          <Link to="/courses" className="mr-4 flex items-center gap-2 font-semibold text-primary">
-            <GraduationCap aria-hidden className="size-5" />{t("app.name")}
-          </Link>
-          <div className="ml-auto flex items-center gap-2 text-sm text-muted-foreground">
-            <LanguageSwitch />
-            <ThemeToggle />
-            <span>{me.display_name}</span>
-            <Button type="button" variant="outline" size="sm" onClick={logout}>{t("nav.logout")}</Button>
-          </div>
-        </div>
-      </header>
-      <div className="flex flex-1 flex-col md:flex-row">
-        {showSidebar && (
-          <aside aria-label={t("nav.sidebar")} className="w-full shrink-0 space-y-5 border-b bg-card/60 p-4 md:w-64 md:border-r md:border-b-0">
-            <nav aria-label={t("nav.courses")} className="space-y-1">
-              <p className="px-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">{t("nav.courses")}</p>
-              {courses.data?.map((c) => (
-                <NavLink key={c.id} to={`/courses/${c.id}`} className={() => linkClass({ isActive: c.id === courseId })}>
-                  <span className="font-medium">{c.code}</span> <span className="text-muted-foreground">{c.title}</span>
-                </NavLink>
-              ))}
-              {courses.data?.length === 0 && <p className="px-3 text-sm text-muted-foreground">{t("nav.noCourses")}</p>}
-              <div className="flex flex-wrap gap-2 px-1 pt-2">
-                <Button asChild variant="outline" size="sm"><Link to="/join"><KeyRound aria-hidden />{t("nav.join")}</Link></Button>
-                {me.system_role !== "student" && <NewCourse />}
-                {me.system_role === "admin" && <Button asChild variant="outline" size="sm"><Link to="/admin"><Settings2 aria-hidden />{t("nav.admin")}</Link></Button>}
-              </div>
-            </nav>
-            {current && courseId !== null && <CourseNav courseId={courseId} student={isStudent} />}
-          </aside>
-        )}
-        <main id="main" tabIndex={-1} className="mx-auto w-full max-w-6xl min-w-0 flex-1 px-4 py-6 [overflow-wrap:anywhere] outline-none">
-          <ErrorBoundary><Outlet /></ErrorBoundary>
-        </main>
-      </div>
-      <footer role="note" className="border-t border-warning-border bg-warning-soft py-2 text-center text-sm text-foreground">
-        {t("app.disclaimer")}
-      </footer>
-    </div>
-  );
-}
-
-/** Modules (pick one to scope the chat) and past conversations of the open course. */
-function CourseNav({ courseId, student }: { courseId: number; student: boolean }) {
-  const { t } = useI18n();
-  const [params, setParams] = useSearchParams();
-  const modules = useQuery({ queryKey: ["modules", courseId], queryFn: () => api.modules(courseId) });
-  const conversations = useQuery({ queryKey: ["conversations", courseId], queryFn: () => api.conversations(courseId), enabled: student });
-  const activeModule = params.get("module");
-  const activeConversation = params.get("c");
-  const chatPath = `/courses/${courseId}/chat`;
-  const navigate = useNavigate();
-  function open(next: Record<string, string | null>) {
-    const search = new URLSearchParams(params);
-    for (const [k, v] of Object.entries(next)) v === null ? search.delete(k) : search.set(k, v);
-    if (student) navigate({ pathname: chatPath, search: search.toString() });
-    else setParams(search);
-  }
-  return (
-    <>
-      <nav aria-label={t("nav.modules")} className="space-y-1">
-        <p className="px-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">{t("nav.modules")}</p>
-        {student && (
-          <button type="button" className={cn(linkClass({ isActive: !activeModule }), "w-full text-left")} onClick={() => open({ module: null })}>
-            {t("nav.wholeCourse")}
-          </button>
-        )}
-        {modules.data?.map((m) => student ? (
-          <button key={m.id} type="button" className={cn(linkClass({ isActive: activeModule === String(m.id) }), "w-full text-left")}
-                  aria-current={activeModule === String(m.id) ? "true" : undefined} onClick={() => open({ module: String(m.id) })}>
-            {m.title}
-          </button>
-        ) : <p key={m.id} className="truncate px-3 py-1.5 text-sm">{m.title}</p>)}
-        {modules.data?.length === 0 && <p className="px-3 text-sm text-muted-foreground">{t("nav.noModules")}</p>}
-      </nav>
-      {student && (
-        <nav aria-label={t("nav.conversations")} className="space-y-1">
-          <p className="px-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">{t("nav.conversations")}</p>
-          <Button type="button" variant="outline" size="sm" className="mx-1" onClick={() => open({ c: null })}>
-            <MessageSquarePlus aria-hidden />{t("nav.newChat")}
-          </Button>
-          {conversations.data?.map((c) => (
-            <button key={c.conversation_id} type="button"
-                    className={cn(linkClass({ isActive: activeConversation === c.conversation_id }), "w-full text-left")}
-                    onClick={() => open({ c: c.conversation_id })}>
-              {new Date(c.last_at).toLocaleDateString()} · {t("nav.turns", { n: c.turns })}
-            </button>
-          ))}
-        </nav>
+      {showSidebar && !collapsed && (
+        <aside aria-label={t("nav.sidebar")} className="hidden w-66 shrink-0 border-r bg-sidebar md:block">
+          <Sidebar {...sidebarProps} onCollapse={() => setCollapsed(true)} />
+        </aside>
       )}
-    </>
-  );
-}
+      {showSidebar && (
+        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+          <SheetContent side="left" aria-describedby={undefined} className="bg-sidebar p-0 md:hidden">
+            <SheetTitle className="sr-only">{t("nav.sidebar")}</SheetTitle>
+            <Sidebar {...sidebarProps} />
+          </SheetContent>
+        </Sheet>
+      )}
 
-/** Create a course: the creator becomes its instructor. */
-function NewCourse() {
-  const { t } = useI18n();
-  const qc = useQueryClient();
-  const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ code: "", title: "", course_type: "general", term_label: "" });
-  const types = useQuery({ queryKey: ["course-types"], queryFn: api.courseTypes, enabled: open });
-  const courseType = types.data?.includes(form.course_type) ? form.course_type : types.data?.[0] ?? form.course_type;
-  const create = useMutation({
-    mutationFn: () => api.createCourse({ ...form, course_type: courseType }),
-    onSuccess: async (course) => {
-      await qc.invalidateQueries({ queryKey: ["courses"] });
-      setOpen(false);
-      navigate(`/courses/${course.id}`);
-    },
-  });
-  const set = (k: keyof typeof form) => (e: { target: { value: string } }) => setForm({ ...form, [k]: e.target.value });
-  function submit(e: FormEvent) {
-    e.preventDefault();
-    create.mutate();
-  }
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild><Button type="button" size="sm"><Plus aria-hidden />{t("course.new")}</Button></DialogTrigger>
-      <DialogContent>
-        <form onSubmit={submit} className="grid gap-4">
-          <DialogHeader>
-            <DialogTitle>{t("course.new")}</DialogTitle>
-            <DialogDescription>{t("course.newHint")}</DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-1.5"><Label htmlFor="nc-code">{t("course.code")}</Label>
-            <Input id="nc-code" value={form.code} onChange={set("code")} required /></div>
-          <div className="grid gap-1.5"><Label htmlFor="nc-title">{t("course.title")}</Label>
-            <Input id="nc-title" value={form.title} onChange={set("title")} required /></div>
-          <div className="grid gap-1.5"><Label htmlFor="nc-type">{t("course.type")}</Label>
-            <Select id="nc-type" value={courseType} onChange={set("course_type")}>
-              {(types.data ?? []).map((c) => <option key={c} value={c}>{c}</option>)}
-            </Select></div>
-          <div className="grid gap-1.5"><Label htmlFor="nc-term">{t("course.term")}</Label>
-            <Input id="nc-term" value={form.term_label} onChange={set("term_label")} /></div>
-          <ErrorNote error={create.error} />
-          <DialogFooter><Button type="submit" disabled={create.isPending}>{t("course.create")}</Button></DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="flex h-12 shrink-0 items-center gap-2 border-b bg-background px-3 sm:px-4">
+          {showSidebar && (
+            <Tooltip content={t("nav.expand")}>
+              <Button type="button" variant="ghost" size="icon-sm" className={collapsed ? "text-muted-foreground" : "text-muted-foreground md:hidden"}
+                      aria-label={t("nav.expand")} aria-expanded={false}
+                      onClick={() => (window.matchMedia?.("(min-width: 48rem)").matches ? setCollapsed(false) : setMobileOpen(true))}>
+                <PanelLeft aria-hidden />
+              </Button>
+            </Tooltip>
+          )}
+          {current && (
+            <>
+              <h1 className="min-w-0 truncate text-base">
+                <span className="font-semibold">{current.code}</span>{" "}
+                <span className="text-muted-foreground">{current.title}</span>
+              </h1>
+              <Badge variant="secondary" className="shrink-0">{t(student ? "role.student" : "role.instructor")}</Badge>
+              {current.status === "archived" && <Badge variant="warning" className="shrink-0">{t("course.archived")}</Badge>}
+            </>
+          )}
+          {!showSidebar && <div className="ml-auto"><UserMenu me={me} compact /></div>}
+        </header>
+        <main id="main" tabIndex={-1} className="min-h-0 flex-1 overflow-y-auto outline-none">
+          <div className="mx-auto w-full max-w-6xl min-w-0 px-4 py-6 [overflow-wrap:anywhere] sm:px-6">
+            <ErrorBoundary><Outlet /></ErrorBoundary>
+          </div>
+        </main>
+        <div role="note" className="shrink-0 px-4 py-1.5 text-center text-xs text-muted-foreground">
+          {t("app.disclaimer")}
+        </div>
+      </div>
+    </div>
   );
 }
