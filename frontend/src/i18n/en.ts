@@ -10,6 +10,7 @@ export const en = {
   "lang.label": "Language",
   "theme.dark": "Switch to dark mode",
   "theme.light": "Switch to light mode",
+  "dialog.close": "Close",
 
   "nav.skip": "Skip to the main content",
   "nav.sidebar": "Courses, modules and conversations",

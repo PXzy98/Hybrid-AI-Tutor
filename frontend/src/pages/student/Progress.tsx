@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 
 import { api, type Course, type CourseProfile, type VisibilityAction } from "@/api/endpoints";
 import Band from "@/components/Band";
-import { ErrorNote } from "@/components/common";
+import { ErrorNote, StatusText } from "@/components/common";
 import { Alert } from "@/components/ui/alert";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
@@ -180,7 +180,7 @@ function DeleteData({ course }: { course: Course }) {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-        {remove.isSuccess && <p role="status" className="text-sm text-emerald-700 dark:text-emerald-300">{t("del.done")}</p>}
+        {remove.isSuccess && <StatusText>{t("del.done")}</StatusText>}
       </CardContent>
     </Card>
   );

@@ -3,7 +3,7 @@ import { useState, type FormEvent } from "react";
 
 import { ApiError } from "@/api/client";
 import { api, type Course, type CourseSettings, type CourseValues } from "@/api/endpoints";
-import { ErrorNote } from "@/components/common";
+import { ErrorNote, StatusText } from "@/components/common";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -72,7 +72,7 @@ function CourseInfo({ course }: { course: Course }) {
           <div className="grid gap-1.5"><Label htmlFor="ci-term">{t("course.term")}</Label><Input id="ci-term" value={form.term_label} onChange={set("term_label")} /></div>
           <div className="sm:col-span-3 space-y-2">
             <ErrorNote error={save.error} />
-            {save.isSuccess && <p role="status" className="text-sm text-emerald-700 dark:text-emerald-300">{t("settings.saved")}</p>}
+            {save.isSuccess && <StatusText>{t("settings.saved")}</StatusText>}
             <Button type="submit" disabled={save.isPending}>{t("settings.save")}</Button>
           </div>
         </form>
@@ -149,8 +149,8 @@ function SettingsForm({ course, initial }: { course: Course; initial: CourseSett
           </label>
           {conflict && <Alert variant="warning">{t("settings.conflict")}</Alert>}
           <ErrorNote error={conflict ? null : save.error} />
-          {save.isSuccess && <p role="status" className="text-sm text-emerald-700 dark:text-emerald-300">{t("settings.saved")}</p>}
-          <Button type="submit" disabled={save.isPending}>{save.isPending ? t("settings.saving") : t("settings.save")}</Button>
+          {save.isSuccess && <StatusText>{t("settings.saved")}</StatusText>}
+          <Button loading={save.isPending} type="submit" disabled={save.isPending}>{save.isPending ? t("settings.saving") : t("settings.save")}</Button>
         </form>
       </CardContent>
     </Card>

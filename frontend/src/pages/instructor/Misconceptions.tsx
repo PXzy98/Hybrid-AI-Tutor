@@ -113,7 +113,7 @@ function MisconceptionDialog({ course, misconception }: { course: Course; miscon
               </Select></div>
           )}
           <ErrorNote error={save.error} />
-          <DialogFooter><Button type="submit" disabled={save.isPending || !kcId}>{save.isPending ? t("settings.saving") : t("settings.save")}</Button></DialogFooter>
+          <DialogFooter><Button loading={save.isPending} type="submit" disabled={save.isPending || !kcId}>{save.isPending ? t("settings.saving") : t("settings.save")}</Button></DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

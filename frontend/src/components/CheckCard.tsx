@@ -49,7 +49,7 @@ export default function CheckCard({ courseId, item, onAnswered }: Props) {
               <label
                 key={key}
                 className={`flex cursor-pointer items-start gap-2 rounded-md border px-3 py-2 text-sm ${
-                  isKey ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950" : isWrongChoice ? "border-rose-400 bg-rose-50 dark:bg-rose-950" : "bg-card"
+                  isKey ? "border-success-border bg-success-soft" : isWrongChoice ? "border-destructive/40 bg-destructive-soft" : "bg-card"
                 }`}
               >
                 <input type="radio" name={`${id}-choice`} value={key} checked={choice === key}
@@ -63,14 +63,14 @@ export default function CheckCard({ courseId, item, onAnswered }: Props) {
       <p id={`${id}-hint`} className="sr-only">{t("check.hint")}</p>
 
       {!result && (
-        <Button type="submit" className="mt-3" disabled={!choice || answer.isPending}>
+        <Button loading={answer.isPending} type="submit" className="mt-3" disabled={!choice || answer.isPending}>
           {answer.isPending ? t("check.busy") : t("check.submit")}
         </Button>
       )}
       {answer.isError && <div className="mt-2"><ErrorNote error={answer.error} /></div>}
       {result && (
         <div role="status" className="mt-3 space-y-2 text-sm">
-          <p className={`font-semibold ${result.correct ? "text-emerald-700 dark:text-emerald-300" : "text-rose-700 dark:text-rose-300"}`}>
+          <p className={`font-semibold ${result.correct ? "text-success" : "text-destructive"}`}>
             {result.correct ? t("check.correct") : t("check.wrong", { choice: result.correct_choice })}
           </p>
           {result.explanation && <p>{result.explanation}</p>}

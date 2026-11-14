@@ -1,4 +1,4 @@
-import { Moon, Sun } from "lucide-react";
+import { Check, Moon, Sun } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 
 import { ApiError } from "@/api/client";
@@ -16,7 +16,7 @@ export function ErrorNote({ error, id }: { error: unknown; id?: string }) {
     if (error.code === "settings_applying") text = t("error.settingsApplying");
     if (error.code === "conflict") text = `${t("error.conflict")} ${error.message}`;
   }
-  return <Alert variant="destructive" role="alert" id={id}>{text}</Alert>;
+  return <Alert variant="destructive" role="alert" id={id} icon>{text}</Alert>;
 }
 
 /** Page or section heading with an optional description. */
@@ -26,6 +26,16 @@ export function SectionTitle({ title, children }: { title: string; children?: Re
       <h2 className="text-lg font-semibold">{title}</h2>
       {children && <p className="text-sm text-muted-foreground">{children}</p>}
     </div>
+  );
+}
+
+/** A success line ("Saved", "Plan saved"): an icon and the text, announced politely. */
+export function StatusText({ children }: { children: ReactNode }) {
+  return (
+    <p role="status" className="flex items-center gap-1.5 text-sm text-success">
+      <Check aria-hidden className="size-4 shrink-0" />
+      <span>{children}</span>
+    </p>
   );
 }
 

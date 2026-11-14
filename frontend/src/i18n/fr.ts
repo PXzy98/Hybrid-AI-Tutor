@@ -10,6 +10,7 @@ export const fr: Messages = {
   "lang.label": "Langue",
   "theme.dark": "Passer au mode sombre",
   "theme.light": "Passer au mode clair",
+  "dialog.close": "Fermer",
 
   "nav.skip": "Passer au contenu principal",
   "nav.sidebar": "Cours, modules et conversations",

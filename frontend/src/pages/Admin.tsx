@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { ApiError } from "@/api/client";
 import { api, type Staff, type SystemSettings, type SystemValues } from "@/api/endpoints";
 import { useMe } from "@/auth";
-import { ErrorNote } from "@/components/common";
+import { ErrorNote, StatusText } from "@/components/common";
 import ModelEndpoints, { endpointsKey } from "@/components/ModelEndpoints";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -205,8 +205,8 @@ function SystemSettingsForm({ initial, onConflict }: { initial: SystemSettings; 
           <div className="grid gap-1.5"><Label htmlFor="sys-dcloud">{t("admin.defaultCloud")}</Label>{endpointSelect("sys-dcloud", "default_cloud_endpoint_id", "external")}</div>
           <div className="space-y-2 sm:col-span-2">
             <ErrorNote error={save.error instanceof ApiError && save.error.status === 409 ? null : save.error} />
-            {save.isSuccess && <p role="status" className="text-sm text-emerald-700 dark:text-emerald-300">{t("settings.saved")}</p>}
-            <Button type="submit" disabled={save.isPending || initial.apply_state === "applying"}>{save.isPending ? t("settings.saving") : t("settings.save")}</Button>
+            {save.isSuccess && <StatusText>{t("settings.saved")}</StatusText>}
+            <Button loading={save.isPending} type="submit" disabled={save.isPending || initial.apply_state === "applying"}>{save.isPending ? t("settings.saving") : t("settings.save")}</Button>
           </div>
         </form>
       </CardContent>

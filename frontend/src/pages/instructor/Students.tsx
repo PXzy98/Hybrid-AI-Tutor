@@ -5,7 +5,7 @@ import { useState, type FormEvent } from "react";
 import { ApiError } from "@/api/client";
 import { api, type Course, type Plan } from "@/api/endpoints";
 import Band from "@/components/Band";
-import { ErrorNote } from "@/components/common";
+import { ErrorNote, StatusText } from "@/components/common";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -200,8 +200,8 @@ function PlanForm({ initial, codes, courseId, studentId, onSaved }: {
         <Textarea id="plan-notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
       </div>
       <ErrorNote error={save.error} />
-      {save.isSuccess && <p role="status" className="text-sm text-emerald-700 dark:text-emerald-300">{t("plan.saved")}</p>}
-      <Button type="submit" disabled={save.isPending}>{save.isPending ? t("settings.saving") : t("plan.save")}</Button>
+      {save.isSuccess && <StatusText>{t("plan.saved")}</StatusText>}
+      <Button loading={save.isPending} type="submit" disabled={save.isPending}>{save.isPending ? t("settings.saving") : t("plan.save")}</Button>
     </form>
   );
 }

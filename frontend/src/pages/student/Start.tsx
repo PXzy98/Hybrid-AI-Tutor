@@ -138,7 +138,7 @@ function OnboardingForm({ course, moduleId }: { course: Course; moduleId: number
 
       <ErrorNote error={submit.error} />
       <div className="flex gap-3">
-        <Button type="submit" disabled={submit.isPending}>{submit.isPending ? t("onb.saving") : t("onb.save")}</Button>
+        <Button loading={submit.isPending} type="submit" disabled={submit.isPending}>{submit.isPending ? t("onb.saving") : t("onb.save")}</Button>
         <Button asChild variant="outline"><Link to={`/courses/${course.id}/chat`}>{t("onb.skipAll")}</Link></Button>
       </div>
     </form>

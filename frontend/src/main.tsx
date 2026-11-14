@@ -6,6 +6,7 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import { ApiError } from "./api/client";
 import { I18nProvider } from "./i18n";
+import "@fontsource-variable/inter";
 import "./index.css";
 
 const queryClient = new QueryClient({

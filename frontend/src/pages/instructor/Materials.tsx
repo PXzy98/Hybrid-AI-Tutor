@@ -136,7 +136,7 @@ function UploadCard({ course, modules, onDone }: { course: Course; modules: { id
             </div>
           </div>
           <ErrorNote error={upload.error} />
-          <Button type="submit" disabled={!file || upload.isPending}>{upload.isPending ? t("materials.uploading") : t("materials.uploadButton")}</Button>
+          <Button loading={upload.isPending} type="submit" disabled={!file || upload.isPending}>{upload.isPending ? t("materials.uploading") : t("materials.uploadButton")}</Button>
         </form>
       </CardContent>
     </Card>

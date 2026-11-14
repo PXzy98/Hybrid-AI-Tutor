@@ -3,7 +3,7 @@ import { Plus, Sparkles, Trash2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
 import { api, type Course, type DraftBody, type Quiz, type QuizQuestion, type QuizResults } from "@/api/endpoints";
-import { ErrorNote } from "@/components/common";
+import { ErrorNote, StatusText } from "@/components/common";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -247,9 +247,9 @@ function EditorForm({ course, quiz, onClose, onCreated }: { course: Course; quiz
       </section>
 
       <ErrorNote error={save.error} />
-      {save.isSuccess && <p role="status" className="text-sm text-emerald-700 dark:text-emerald-300">{t("settings.saved")}</p>}
+      {save.isSuccess && <StatusText>{t("settings.saved")}</StatusText>}
       <div className="flex flex-wrap gap-3">
-        <Button type="submit" disabled={save.isPending}>{save.isPending ? t("settings.saving") : t("quiz.save")}</Button>
+        <Button loading={save.isPending} type="submit" disabled={save.isPending}>{save.isPending ? t("settings.saving") : t("quiz.save")}</Button>
       </div>
       {quiz && quiz.status === "draft" && !locked && <AiDraft course={course} quiz={quiz} />}
     </form>
@@ -292,7 +292,7 @@ function AiDraft({ course, quiz }: { course: Course; quiz: Quiz }) {
         </div>
         <ErrorNote error={start.error ?? job.error} />
         {running && <p role="status" className="text-sm text-muted-foreground">{t("quiz.aiRunning")}</p>}
-        {job.data?.status === "done" && <p role="status" className="text-sm text-emerald-700 dark:text-emerald-300">{t("quiz.aiDone")}</p>}
+        {job.data?.status === "done" && <StatusText>{t("quiz.aiDone")}</StatusText>}
         {job.data?.status === "failed" && <Alert variant="destructive" role="alert">{t("quiz.aiFailed")}</Alert>}
       </CardContent>
     </Card>

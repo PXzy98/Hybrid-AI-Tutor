@@ -54,10 +54,10 @@ export const useI18n = () => useContext(Context);
 export function LanguageSwitch() {
   const { lang, setLang, t } = useI18n();
   return (
-    <label className="flex items-center gap-1.5 text-sm text-slate-600">
+    <label className="flex items-center gap-1.5 text-sm text-muted-foreground">
       <span className="sr-only">{t("lang.label")}</span>
-      <select className="rounded border border-slate-300 bg-white px-1.5 py-1 text-sm" value={lang} aria-label={t("lang.label")}
-              onChange={(e) => setLang(e.target.value as Lang)}>
+      <select className="select-chevron h-8 appearance-none rounded-md border border-input bg-background py-1 pr-7 pl-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/30"
+              value={lang} aria-label={t("lang.label")} onChange={(e) => setLang(e.target.value as Lang)}>
         {LANGS.map((l) => <option key={l.id} value={l.id} lang={l.id}>{l.label}</option>)}
       </select>
     </label>

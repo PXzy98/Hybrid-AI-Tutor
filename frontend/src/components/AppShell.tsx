@@ -18,7 +18,7 @@ import ErrorBoundary from "./ErrorBoundary";
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   cn("block truncate rounded-md px-3 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring",
-    isActive ? "bg-accent font-medium text-accent-foreground" : "hover:bg-muted");
+    isActive ? "bg-primary-soft font-medium text-primary-soft-foreground" : "hover:bg-accent");
 
 /** Header, left sidebar (courses, and for the open course its modules and the student's conversations) and the page. */
 export default function AppShell({ me }: { me: Me }) {
@@ -78,7 +78,7 @@ export default function AppShell({ me }: { me: Me }) {
           <ErrorBoundary><Outlet /></ErrorBoundary>
         </main>
       </div>
-      <footer role="note" className="border-t border-amber-200 bg-amber-50 py-2 text-center text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-100">
+      <footer role="note" className="border-t border-warning-border bg-warning-soft py-2 text-center text-sm text-foreground">
         {t("app.disclaimer")}
       </footer>
     </div>

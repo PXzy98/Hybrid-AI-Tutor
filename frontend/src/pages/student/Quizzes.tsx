@@ -66,7 +66,7 @@ function QuizCard({ course, quiz }: { course: Course; quiz: StudentQuiz }) {
                 return (
                   <li key={i} className="rounded-md border p-3 text-sm">
                     <p className="flex items-center gap-2 font-medium">
-                      {r.correct ? <CheckCircle2 aria-hidden className="size-4 text-emerald-600" /> : <XCircle aria-hidden className="size-4 text-rose-600" />}
+                      {r.correct ? <CheckCircle2 aria-hidden className="size-4 text-success" /> : <XCircle aria-hidden className="size-4 text-destructive" />}
                       {t("quiz.questionN", { n: i + 1 })}: {t(r.correct ? "quiz.correct" : "quiz.incorrect")}
                     </p>
                     {q && <p className="mt-1">{q.stem}</p>}
@@ -95,7 +95,7 @@ function QuizCard({ course, quiz }: { course: Course; quiz: StudentQuiz }) {
             ))}
             <p className="text-xs text-muted-foreground">{t("quiz.onceHint")}</p>
             <ErrorNote error={submit.error} />
-            <Button type="submit" disabled={!complete || submit.isPending}>{submit.isPending ? t("check.busy") : t("quiz.submit")}</Button>
+            <Button loading={submit.isPending} type="submit" disabled={!complete || submit.isPending}>{submit.isPending ? t("check.busy") : t("quiz.submit")}</Button>
           </form>
         ) : <p className="text-sm text-muted-foreground">{t("quiz.notAvailable")}</p>}
       </CardContent>

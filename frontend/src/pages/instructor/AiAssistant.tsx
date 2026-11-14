@@ -3,7 +3,7 @@ import { Loader2, Sparkles } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
 import { api, type AiDraft, type AiDraftAccept, type AiDraftKind, type AiDraftStatus, type Course } from "@/api/endpoints";
-import { ErrorNote } from "@/components/common";
+import { ErrorNote, StatusText } from "@/components/common";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -158,7 +158,7 @@ function DraftDetail({ course, id, onGone }: { course: Course; id: number; onGon
         {(d.status === "draft" || d.status === "accepted" || d.status === "discarded") && (
           <ContentEditor key={d.updated_at} course={course} draft={d} onSaved={refresh} />
         )}
-        {acceptedMsg && <p role="status" className="text-sm text-emerald-700 dark:text-emerald-300">{acceptedMsg}</p>}
+        {acceptedMsg && <StatusText>{acceptedMsg}</StatusText>}
         {d.status === "draft" && <Actions course={course} draft={d} onAccepted={(out) => { setAcceptedMsg(`${t("ai.accepted", { n: Object.values(out.created).reduce((a, b) => a + b.length, 0) })}${out.rebuild_job_id ? ` ${t("ai.reindexing")}` : ""}`); refresh(out.draft); }} onGone={() => { qc.invalidateQueries({ queryKey: ["ai-drafts", course.id] }); onGone(); }} />}
       </CardContent>
     </Card>
@@ -205,7 +205,7 @@ function ContentEditor({ course, draft, onSaved }: { course: Course; draft: AiDr
       )}
       {parseError && <Alert variant="destructive" role="alert">{parseError}</Alert>}
       <ErrorNote error={save.error} />
-      {save.isSuccess && <p role="status" className="text-sm text-emerald-700 dark:text-emerald-300">{t("settings.saved")}</p>}
+      {save.isSuccess && <StatusText>{t("settings.saved")}</StatusText>}
       {editable && <Button type="submit" variant="outline" disabled={save.isPending}>{t("ai.saveChanges")}</Button>}
     </form>
   );

@@ -241,7 +241,7 @@ function TutorMessage({ reply, courseId }: { reply: AskResponse; courseId: numbe
       </div>
       <Markdown>{reply.answer}</Markdown>
       {!!reply.warnings?.length && (
-        <ul className="mt-2 space-y-0.5 text-xs text-amber-800 dark:text-amber-300">
+        <ul className="mt-2 space-y-0.5 text-xs text-warning">
           {reply.warnings.map((w) => <li key={w}>⚠ {w}</li>)}
         </ul>
       )}
