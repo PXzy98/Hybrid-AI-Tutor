@@ -71,7 +71,7 @@ export default function AppShell({ me }: { me: Me }) {
       )}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-12 shrink-0 items-center gap-2 border-b bg-background px-3 sm:px-4">
+        <header className={`flex h-12 shrink-0 items-center gap-2 border-b bg-background px-3 sm:px-4 ${showSidebar && !current && !collapsed ? "md:hidden" : ""}`}>
           {showSidebar && (
             <Tooltip content={t("nav.expand")}>
               <Button type="button" variant="ghost" size="icon-sm" className={collapsed ? "text-muted-foreground" : "text-muted-foreground md:hidden"}

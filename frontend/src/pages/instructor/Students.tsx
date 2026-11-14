@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { EyeOff, Users } from "lucide-react";
-import { useRef, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 
 import { ApiError } from "@/api/client";
 import { api, type Course, type Plan } from "@/api/endpoints";
@@ -25,7 +25,6 @@ export default function Students({ course }: { course: Course }) {
   const { t } = useI18n();
   const members = useQuery({ queryKey: ["members", course.id], queryFn: () => api.members(course.id) });
   const [open, setOpen] = useState<string | null>(null);
-  const opener = useRef<HTMLButtonElement | null>(null);  // focus goes back here when the sheet closes
   const students = members.data?.filter((m) => m.role === "student") ?? [];
   return (
     <div className="space-y-6">
@@ -55,7 +54,7 @@ export default function Students({ course }: { course: Course }) {
                     <TableCell className="text-right">
                       {m.student_id && m.status === "active" && m.visible_to_instructor ? (
                         <Button type="button" size="sm" variant="outline" aria-label={t("students.viewFor", { name: m.display_name ?? "" })}
-                                onClick={(e) => { opener.current = e.currentTarget; setOpen(m.student_id ?? null); }}>
+                                onClick={() => setOpen(m.student_id ?? null)}>
                           {t("students.view")}
                         </Button>
                       ) : <span className="text-xs text-muted-foreground">{t(m.status === "active" ? "students.notShared" : "students.notJoined")}</span>}
@@ -69,8 +68,7 @@ export default function Students({ course }: { course: Course }) {
           open asks the backend again (one audited overview request per open) */}
       <Sheet open={open !== null} onOpenChange={(o) => { if (!o) setOpen(null); }}>
         {open && (
-          <SheetContent side="right" aria-describedby={undefined} className="overflow-y-auto"
-                        onCloseAutoFocus={(e) => { e.preventDefault(); opener.current?.focus(); }}>
+          <SheetContent side="right" aria-describedby={undefined} className="overflow-y-auto">
             <StudentDetail key={open} course={course} studentId={open}
                            name={students.find((s) => s.student_id === open)?.display_name ?? ""} />
           </SheetContent>
@@ -89,6 +87,8 @@ function StudentDetail({ course, studentId, name }: { course: Course; studentId:
     // every open asks the backend again: it is the visibility and audit boundary, so nothing is cached
     staleTime: 0, gcTime: 0, refetchOnMount: "always", refetchOnWindowFocus: false,
   });
+  const kcs = useQuery({ queryKey: ["kcs", course.id], queryFn: () => api.kcs(course.id) });
+  const kcName = new Map((kcs.data ?? []).map((k) => [k.code, k.name]));
   // after a refusal, data from an earlier answer is never shown
   const shown = overview.isError ? undefined : overview.data;
   const notVisible = overview.error instanceof ApiError && overview.error.status === 404;
@@ -128,7 +128,8 @@ function StudentDetail({ course, studentId, name }: { course: Course; studentId:
             <ul className="divide-y rounded-lg border px-3">
               {shown.kcs?.map((k) => (
                 <li key={k.kc_code} className="flex items-center justify-between gap-3 py-2 text-sm">
-                  <span>{k.kc_code}</span><Band band={k.level} />
+                  <span className="min-w-0">{kcName.get(k.kc_code) ?? k.kc_code} <span className="text-xs text-muted-foreground">{k.kc_code}</span></span>
+                  <Band band={k.level} />
                 </li>
               ))}
               {!shown.kcs?.length && <li className="py-2 text-sm text-muted-foreground">{t("students.noKcs")}</li>}

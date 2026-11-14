@@ -25,7 +25,7 @@ export default function Start({ course }: { course: Course }) {
   if (modules.isLoading) return <Loading variant="form" />;
   if (moduleId === null) return <EmptyState icon={BookOpen} title={t("empty.modules.title")}>{t("nav.noModules")}</EmptyState>;
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
+    <div className="mx-auto max-w-3xl space-y-6">
       <PageHeader title={t("onb.title")} description={t("onb.intro")} actions={
         <div className="grid gap-1.5">
           <Label htmlFor="onb-module">{t("onb.module")}</Label>
@@ -150,7 +150,7 @@ function Step({ id, title, action, children }: { id: string; title: string; acti
 function Done({ result, courseId }: { result: OnboardingResult; courseId: number }) {
   const { t } = useI18n();
   return (
-    <Card role="status" className="mx-auto max-w-2xl">
+    <Card role="status" className="mx-auto max-w-3xl">
       <CardHeader><CardTitle>{result.personalized ? t("onb.ready") : t("onb.saved")}</CardTitle></CardHeader>
       <CardContent className="space-y-4">
         {result.personalized ? (

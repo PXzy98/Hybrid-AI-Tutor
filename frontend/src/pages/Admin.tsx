@@ -76,7 +76,7 @@ function StaffCard({ selfId }: { selfId?: number }) {
                   <TableCell className="font-medium">{a.display_name}</TableCell>
                   <TableCell>{a.email ?? "—"}</TableCell>
                   <TableCell>
-                    <Select aria-label={t("admin.roleOf", { name: a.display_name })} value={a.role} disabled={a.account_id === selfId}
+                    <Select aria-label={t("admin.roleOf", { name: a.display_name })} className="min-w-36" value={a.role} disabled={a.account_id === selfId}
                             onChange={(e) => update.mutate({ id: a.account_id, changes: { role: e.target.value as Staff["role"] } })}>
                       <option value="instructor">{t("role.instructor")}</option>
                       <option value="admin">{t("role.admin")}</option>

@@ -1,4 +1,4 @@
-import { ArrowDown } from "lucide-react";
+import { ArrowDown, RotateCw } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 
 import type { AskResponse } from "@/api/endpoints";
@@ -15,7 +15,7 @@ export type Message =
   | { role: "student"; text: string }
   | { role: "tutor"; reply: AskResponse }
   | { role: "history"; text: string }
-  | { role: "error"; error: unknown }
+  | { role: "error"; error: unknown; question?: string }
   | { role: "routing"; trace: RoutingTrace };
 
 const NEAR_BOTTOM = 80;  // px: closer than this to the end counts as "reading the latest"
@@ -28,11 +28,12 @@ type Props = {
   loadingHistory: boolean;
   historyError: unknown;
   onSuggest: (text: string) => void;
+  onRetry: (question: string) => void;
   children: ReactNode;  // the composer
 };
 
 /** The conversation and, pinned under it, the composer. Follows new text only while the reader is at the end. */
-export default function MessageList({ courseId, messages, partial, pending, loadingHistory, historyError, onSuggest, children }: Props) {
+export default function MessageList({ courseId, messages, partial, pending, loadingHistory, historyError, onSuggest, onRetry, children }: Props) {
   const { t } = useI18n();
   const endRef = useRef<HTMLDivElement>(null);
   const atEnd = useRef(true);
@@ -73,7 +74,7 @@ export default function MessageList({ courseId, messages, partial, pending, load
 
   return (
     <div className="flex flex-col">
-      <section aria-label={t("chat.conversation")} aria-live="polite" className="flex flex-col gap-6 pb-4">
+      <section aria-label={t("chat.conversation")} aria-live="polite" className="flex flex-col gap-6 pb-6">
         {loadingHistory && <Loading variant="chat" />}
         <ErrorNote error={historyError} />
         {empty && <EmptyChat onSuggest={onSuggest} />}
@@ -83,7 +84,14 @@ export default function MessageList({ courseId, messages, partial, pending, load
           ) : m.role === "routing" ? (
             m.trace.visible ? <RoutingPanel key={m.trace.id} trace={m.trace} /> : null
           ) : m.role === "error" ? (
-            <div key={i}><ErrorNote error={m.error} /></div>
+            <div key={i} className="space-y-2">
+              <ErrorNote error={m.error} />
+              {m.question && i === messages.length - 1 && !pending && (
+                <Button type="button" variant="outline" size="sm" onClick={() => onRetry(m.question as string)}>
+                  <RotateCw aria-hidden />{t("app.retry")}
+                </Button>
+              )}
+            </div>
           ) : m.role === "history" ? (
             <TutorFrame key={i}>
               <div className={answerBody}><Markdown>{m.text}</Markdown></div>

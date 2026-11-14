@@ -135,7 +135,13 @@ describe("instructor quiz delete", () => {
     }));
     renderApp("/courses/1/quizzes");
     const user = userEvent.setup();
-    await user.click(await screen.findByRole("button", { name: "Delete Quiz A" }));
+    const trash = await screen.findByRole("button", { name: "Delete Quiz A" });
+    await user.click(trash);
+    await screen.findByRole("dialog", { name: "Delete this quiz?" });
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(trash).toHaveFocus();  // no Radix trigger: the dialog returns focus itself
+    await user.click(trash);
     const dialog = await screen.findByRole("dialog", { name: "Delete this quiz?" });
     expect(calls.some((c) => c.method === "DELETE")).toBe(false);
     await user.click(within(dialog).getByRole("button", { name: "Delete quiz" }));

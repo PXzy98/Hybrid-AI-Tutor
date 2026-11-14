@@ -17,12 +17,14 @@ import { useI18n } from "@/i18n";
  * read; the server answers 409 if someone else changed it. */
 export default function Settings({ course }: { course: Course }) {
   const settings = useQuery({ queryKey: ["settings", course.id], queryFn: () => api.courseSettings(course.id) });
+  const [savedVersion, setSavedVersion] = useState<number | null>(null);  // survives the remount after a save
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="mx-auto max-w-3xl space-y-6">
       <CourseInfo course={course} />
       <ErrorNote error={settings.error} />
       {settings.isLoading && <Loading variant="form" />}
-      {settings.data && <SettingsForm key={settings.data.version} course={course} initial={settings.data} />}
+      {settings.data && <SettingsForm key={settings.data.version} course={course} initial={settings.data}
+                                       justSaved={savedVersion === settings.data.version} onSaved={setSavedVersion} />}
       <ModelEndpoints courseId={course.id} />
       <ArchiveCourse course={course} />
     </div>
@@ -61,6 +63,7 @@ function CourseInfo({ course }: { course: Course }) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["courses"] }),
   });
   const set = (k: keyof typeof form) => (e: { target: { value: string } }) => setForm({ ...form, [k]: e.target.value });
+  const dirty = form.code !== course.code || form.title !== course.title || form.term_label !== course.term_label;
   return (
     <Card>
       <CardHeader><CardTitle>{t("course.info")}</CardTitle></CardHeader>
@@ -71,8 +74,11 @@ function CourseInfo({ course }: { course: Course }) {
           <div className="grid gap-1.5"><Label htmlFor="ci-term">{t("course.term")}</Label><Input id="ci-term" value={form.term_label} onChange={set("term_label")} /></div>
           <div className="sm:col-span-3 space-y-2">
             <ErrorNote error={save.error} />
-            {save.isSuccess && <StatusText>{t("settings.saved")}</StatusText>}
-            <Button type="submit" loading={save.isPending}>{t("settings.save")}</Button>
+            <div className="flex flex-wrap items-center gap-3">
+              <Button type="submit" loading={save.isPending}>{t("settings.save")}</Button>
+              {dirty && !save.isPending && <span className="text-xs text-muted-foreground">{t("form.unsaved")}</span>}
+              {!dirty && save.isSuccess && <StatusText>{t("settings.saved")}</StatusText>}
+            </div>
           </div>
         </form>
       </CardContent>
@@ -80,7 +86,8 @@ function CourseInfo({ course }: { course: Course }) {
   );
 }
 
-function SettingsForm({ course, initial }: { course: Course; initial: CourseSettings }) {
+function SettingsForm({ course, initial, justSaved, onSaved }:
+  { course: Course; initial: CourseSettings; justSaved: boolean; onSaved: (version: number) => void }) {
   const { t } = useI18n();
   const qc = useQueryClient();
   const [values, setValues] = useState<CourseValues>(initial.values);
@@ -89,6 +96,7 @@ function SettingsForm({ course, initial }: { course: Course; initial: CourseSett
   const save = useMutation({
     mutationFn: () => api.saveCourseSettings(course.id, values, initial.version),
     onSuccess: (fresh) => {
+      onSaved(fresh.version);
       qc.setQueryData(["settings", course.id], fresh);
       qc.invalidateQueries({ queryKey: ["courses"] });
     },
@@ -161,7 +169,7 @@ function SettingsForm({ course, initial }: { course: Course; initial: CourseSett
       <div className="sticky bottom-0 z-10 flex flex-wrap items-center gap-3 border-t bg-background py-3">
         <Button loading={save.isPending} type="submit" disabled={save.isPending}>{save.isPending ? t("settings.saving") : t("settings.save")}</Button>
         {dirty && !save.isPending && <span className="text-xs text-muted-foreground">{t("form.unsaved")}</span>}
-        {!dirty && save.isSuccess && <StatusText>{t("settings.saved")}</StatusText>}
+        {!dirty && (save.isSuccess || justSaved) && <StatusText>{t("settings.saved")}</StatusText>}
       </div>
     </form>
   );

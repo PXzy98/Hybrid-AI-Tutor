@@ -103,19 +103,28 @@ function ChatPane({ course, initialConversation: initial, moduleId, onStarted }:
         return;
       }
       updateTrace(input.traceId, { running: false, finishedAt: Date.now(), error: (error as Error).message });
-      setMessages((prev) => [...prev, { role: "error", error }]);
+      setMessages((prev) => [...prev, { role: "error", error, question: input.question }]);
     },
   });
+
+  function submitQuestion(q: string) {
+    const traceId = `routing-${++traceSequence.current}`;
+    setMessages((prev) => [...prev, { role: "student", text: q },
+      { role: "routing", trace: { id: traceId, method: "", visible: true, events: [], running: true, startedAt: Date.now() } }]);
+    ask.mutate({ question: q, traceId });
+  }
 
   function send(e: FormEvent | { preventDefault: () => void }) {
     e.preventDefault();
     const q = question.trim();
     if (!q || ask.isPending) return;
-    const traceId = `routing-${++traceSequence.current}`;
-    setMessages((prev) => [...prev, { role: "student", text: q },
-      { role: "routing", trace: { id: traceId, method: "", visible: true, events: [], running: true, startedAt: Date.now() } }]);
     setQuestion("");
-    ask.mutate({ question: q, traceId });
+    submitQuestion(q);
+  }
+
+  // the question is still in this page's memory only (never stored by the browser); sending it again is a new turn
+  function retry(q: string) {
+    if (!ask.isPending) submitQuestion(q);
   }
 
   function suggest(text: string) {
@@ -140,7 +149,7 @@ function ChatPane({ course, initialConversation: initial, moduleId, onStarted }:
         {lastTutor?.reply.kc_level && <Band band={lastTutor.reply.kc_level} label={t("chat.levelLabel")} />}
       </div>
       <MessageList courseId={course.id} messages={messages} partial={partial} pending={ask.isPending}
-                   loadingHistory={history.isLoading} historyError={history.error} onSuggest={suggest}>
+                   loadingHistory={history.isLoading} historyError={history.error} onSuggest={suggest} onRetry={retry}>
         <Composer ref={inputRef} value={question} onChange={setQuestion} onSubmit={send} pending={ask.isPending}
                   onStop={() => controller.current?.abort()} scopeLabel={scopeLabel} localOnly={!!course.local_only} />
       </MessageList>

@@ -42,7 +42,7 @@ export default function EndOfTerm({ course }: { course: Course }) {
   const early = useMutation({ mutationFn: () => api.createExport(course.id) });
   const done = end.data;
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="mx-auto max-w-3xl space-y-6">
       {!done && (
         <Card>
           <CardHeader>

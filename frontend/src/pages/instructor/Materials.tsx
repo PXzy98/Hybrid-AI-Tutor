@@ -72,7 +72,7 @@ export default function Materials({ course }: { course: Course }) {
                   <TableCell>
                     <span className="flex items-center gap-2.5 font-medium">
                       <span aria-hidden className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground"><FileText className="size-4" /></span>
-                      <span className="min-w-0 break-all">{m.filename}</span>
+                      <span className="max-w-64 min-w-0 break-words">{m.filename}</span>
                     </span>
                   </TableCell>
                   <TableCell>{moduleName(m.module_id)}</TableCell>
