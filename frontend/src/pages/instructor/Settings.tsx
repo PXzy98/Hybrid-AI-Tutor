@@ -18,7 +18,7 @@ import { useI18n } from "@/i18n";
 export default function Settings({ course }: { course: Course }) {
   const settings = useQuery({ queryKey: ["settings", course.id], queryFn: () => api.courseSettings(course.id) });
   return (
-    <div className="space-y-4">
+    <div className="max-w-3xl space-y-6">
       <CourseInfo course={course} />
       <ErrorNote error={settings.error} />
       {settings.isLoading && <Loading variant="form" />}
@@ -42,11 +42,11 @@ function ArchiveCourse({ course }: { course: Course }) {
     <Card>
       <CardHeader><CardTitle>{t("archive.title")}</CardTitle><CardDescription>{t("archive.hint")}</CardDescription></CardHeader>
       <CardContent className="space-y-3">
-        {refused && <Alert variant="warning" role="alert">{t("archive.refused")} {(archive.error as ApiError).message}</Alert>}
+        {refused && <Alert variant="warning" role="alert" icon>{t("archive.refused")} {(archive.error as ApiError).message}</Alert>}
         <ErrorNote error={refused ? null : archive.error} />
         {course.status === "archived"
           ? <p className="text-sm text-muted-foreground">{t("archive.done")}</p>
-          : <Button type="button" variant="outline" onClick={() => archive.mutate()} disabled={archive.isPending}>{t("archive.button")}</Button>}
+          : <Button type="button" variant="outline" onClick={() => archive.mutate()} loading={archive.isPending}>{t("archive.button")}</Button>}
       </CardContent>
     </Card>
   );
@@ -72,7 +72,7 @@ function CourseInfo({ course }: { course: Course }) {
           <div className="sm:col-span-3 space-y-2">
             <ErrorNote error={save.error} />
             {save.isSuccess && <StatusText>{t("settings.saved")}</StatusText>}
-            <Button type="submit" disabled={save.isPending}>{t("settings.save")}</Button>
+            <Button type="submit" loading={save.isPending}>{t("settings.save")}</Button>
           </div>
         </form>
       </CardContent>
@@ -94,6 +94,7 @@ function SettingsForm({ course, initial }: { course: Course; initial: CourseSett
     },
   });
   const conflict = save.error instanceof ApiError && save.error.status === 409;
+  const dirty = JSON.stringify(values) !== JSON.stringify(initial.values);
   function submit(e: FormEvent) {
     e.preventDefault();
     save.mutate();
@@ -102,7 +103,9 @@ function SettingsForm({ course, initial }: { course: Course; initial: CourseSett
     <Card>
       <CardHeader><CardTitle>{t("settings.title")}</CardTitle><CardDescription>{t("settings.hint")}</CardDescription></CardHeader>
       <CardContent>
-        <form onSubmit={submit} className="space-y-4">
+        <form onSubmit={submit} className="space-y-6">
+          <fieldset className="space-y-4">
+          <legend className="mb-3 text-xs font-medium text-muted-foreground">{t("settings.group.visibility")}</legend>
           <div className="grid gap-1.5 sm:max-w-sm">
             <Label htmlFor="set-visibility">{t("settings.visibility")}</Label>
             <Select id="set-visibility" value={values.visibility_mode ?? course.visibility_mode}
@@ -116,6 +119,9 @@ function SettingsForm({ course, initial }: { course: Course; initial: CourseSett
                    onChange={(e) => setValues({ ...values, local_only: e.target.checked })} />
             <span><span className="font-medium">{t("settings.localOnly")}</span><br /><span className="text-muted-foreground">{t("settings.localOnlyHint")}</span></span>
           </label>
+          </fieldset>
+          <fieldset className="space-y-4 border-t pt-5">
+          <legend className="float-left mb-3 w-full text-xs font-medium text-muted-foreground">{t("settings.group.models")}</legend>
           <div className="grid gap-1.5 sm:max-w-sm">
             <Label htmlFor="set-routing">{t("settings.routing")}</Label>
             <Select id="set-routing" value={values.routing_preference ?? "default"}
@@ -141,15 +147,22 @@ function SettingsForm({ course, initial }: { course: Course; initial: CourseSett
               {pick("external").map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
             </Select>
           </div>
-          <label className="flex items-start gap-2 text-sm">
+          </fieldset>
+          <fieldset className="space-y-4 border-t pt-5">
+          <legend className="float-left mb-3 w-full text-xs font-medium text-muted-foreground">{t("settings.group.display")}</legend>
+          <label className="clear-left flex items-start gap-2 text-sm">
             <input type="checkbox" className="mt-0.5 accent-primary" checked={values.show_routing_progress ?? true}
                    onChange={(e) => setValues({ ...values, show_routing_progress: e.target.checked })} />
             <span className="font-medium">{t("settings.showProgress")}</span>
           </label>
-          {conflict && <Alert variant="warning">{t("settings.conflict")}</Alert>}
+          </fieldset>
+          {conflict && <Alert variant="warning" icon>{t("settings.conflict")}</Alert>}
           <ErrorNote error={conflict ? null : save.error} />
-          {save.isSuccess && <StatusText>{t("settings.saved")}</StatusText>}
-          <Button loading={save.isPending} type="submit" disabled={save.isPending}>{save.isPending ? t("settings.saving") : t("settings.save")}</Button>
+          <div className="sticky bottom-0 z-10 -mx-5 -mb-5 flex flex-wrap items-center gap-3 rounded-b-xl border-t bg-card px-5 py-3">
+            <Button loading={save.isPending} type="submit" disabled={save.isPending}>{save.isPending ? t("settings.saving") : t("settings.save")}</Button>
+            {dirty && !save.isPending && <span className="text-xs text-muted-foreground">{t("form.unsaved")}</span>}
+            {!dirty && save.isSuccess && <StatusText>{t("settings.saved")}</StatusText>}
+          </div>
         </form>
       </CardContent>
     </Card>

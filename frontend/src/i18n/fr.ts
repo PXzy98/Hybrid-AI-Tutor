@@ -27,6 +27,12 @@ export const fr: Messages = {
   "empty.quizzes.title": "Aucun quiz pour l’instant",
   "empty.modules.title": "Aucun module pour l’instant",
   "quiz.answeredN": "{n} sur {m} répondues",
+  "empty.students.title": "Aucun étudiant pour l’instant",
+  "empty.materials.title": "Aucun document pour l’instant",
+  "form.unsaved": "Modifications non enregistrées",
+  "settings.group.visibility": "Qui voit quoi",
+  "settings.group.models": "Modèles et routage",
+  "settings.group.display": "Ce que voient les étudiants",
   "dialog.close": "Fermer",
 
   "nav.skip": "Passer au contenu principal",

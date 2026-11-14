@@ -1,17 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { EyeOff } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { EyeOff, Users } from "lucide-react";
+import { useRef, useState, type FormEvent } from "react";
 
 import { ApiError } from "@/api/client";
 import { api, type Course, type Plan } from "@/api/endpoints";
 import Band from "@/components/Band";
-import { ErrorNote, Loading, StatusText } from "@/components/common";
+import { EmptyState, ErrorNote, Loading, PageHeader, StatusText } from "@/components/common";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/i18n";
@@ -25,18 +25,15 @@ export default function Students({ course }: { course: Course }) {
   const { t } = useI18n();
   const members = useQuery({ queryKey: ["members", course.id], queryFn: () => api.members(course.id) });
   const [open, setOpen] = useState<string | null>(null);
+  const opener = useRef<HTMLButtonElement | null>(null);  // focus goes back here when the sheet closes
   const students = members.data?.filter((m) => m.role === "student") ?? [];
   return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-lg font-semibold">{t("students.title")}</h2>
-        <p className="text-sm text-muted-foreground">{t("students.intro")}</p>
-      </div>
+    <div className="space-y-6">
+      <PageHeader title={t("students.title")} description={t("students.intro")} />
       <ErrorNote error={members.error} />
       {members.isLoading && <Loading variant="table" />}
-      {members.data && (
-        <Card>
-          <CardContent>
+      {members.data && students.length === 0 && <EmptyState icon={Users} title={t("empty.students.title")}>{t("students.none")}</EmptyState>}
+      {members.data && students.length > 0 && (
             <Table>
               <TableHeader><TableRow>
                 <TableHead>{t("members.name")}</TableHead><TableHead>{t("members.email")}</TableHead>
@@ -50,7 +47,7 @@ export default function Students({ course }: { course: Course }) {
                     <TableCell><Badge variant={m.status === "active" ? "success" : "secondary"}>{t(`members.status.${m.status}`)}</Badge></TableCell>
                     <TableCell>
                       {m.student_id && m.status === "active" && (
-                        <Badge variant={m.visible_to_instructor ? "warning" : "secondary"}>
+                        <Badge variant={m.visible_to_instructor ? "info" : "secondary"}>
                           {t(m.visible_to_instructor ? "students.visible" : "students.hidden")}
                         </Badge>
                       )}
@@ -58,21 +55,27 @@ export default function Students({ course }: { course: Course }) {
                     <TableCell className="text-right">
                       {m.student_id && m.status === "active" && m.visible_to_instructor ? (
                         <Button type="button" size="sm" variant="outline" aria-label={t("students.viewFor", { name: m.display_name ?? "" })}
-                                onClick={() => setOpen(open === m.student_id ? null : m.student_id ?? null)}>
-                          {open === m.student_id ? t("students.hide") : t("students.view")}
+                                onClick={(e) => { opener.current = e.currentTarget; setOpen(m.student_id ?? null); }}>
+                          {t("students.view")}
                         </Button>
                       ) : <span className="text-xs text-muted-foreground">{t(m.status === "active" ? "students.notShared" : "students.notJoined")}</span>}
                     </TableCell>
                   </TableRow>
                 ))}
-                {students.length === 0 && <TableRow><TableCell colSpan={5} className="text-muted-foreground">{t("students.none")}</TableCell></TableRow>}
               </TableBody>
             </Table>
-          </CardContent>
-        </Card>
       )}
-      {open && <StudentDetail key={open} course={course} studentId={open}
-                              name={students.find((s) => s.student_id === open)?.display_name ?? ""} />}
+      {/* the detail opens beside the list, so the list stays in place; closing it unmounts the detail, so the next
+          open asks the backend again (one audited overview request per open) */}
+      <Sheet open={open !== null} onOpenChange={(o) => { if (!o) setOpen(null); }}>
+        {open && (
+          <SheetContent side="right" aria-describedby={undefined} className="overflow-y-auto"
+                        onCloseAutoFocus={(e) => { e.preventDefault(); opener.current?.focus(); }}>
+            <StudentDetail key={open} course={course} studentId={open}
+                           name={students.find((s) => s.student_id === open)?.display_name ?? ""} />
+          </SheetContent>
+        )}
+      </Sheet>
     </div>
   );
 }
@@ -90,12 +93,11 @@ function StudentDetail({ course, studentId, name }: { course: Course; studentId:
   const shown = overview.isError ? undefined : overview.data;
   const notVisible = overview.error instanceof ApiError && overview.error.status === 404;
   return (
-    <Card aria-label={t("students.detail", { name })}>
-      <CardHeader>
-        <CardTitle>{name || t("students.detailFallback")}</CardTitle>
-        {shown && <CardDescription>{t("students.since", { date: new Date(shown.visible_since).toLocaleDateString() })}</CardDescription>}
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <section aria-label={t("students.detail", { name })} className="space-y-5 p-6">
+      <div className="space-y-1 pr-8">
+        <SheetTitle className="text-base font-semibold">{name || t("students.detailFallback")}</SheetTitle>
+        {shown && <p className="text-sm text-muted-foreground">{t("students.since", { date: new Date(shown.visible_since).toLocaleDateString() })}</p>}
+      </div>
         {overview.isLoading && <Loading variant="table" />}
         {notVisible && (
           <Alert variant="info" role="status" className="flex gap-3">
@@ -110,9 +112,9 @@ function StudentDetail({ course, studentId, name }: { course: Course; studentId:
         {shown && (
           <>
             <div className="grid gap-3 text-sm sm:grid-cols-3">
-              <p><span className="text-muted-foreground">{t("students.checks")}</span> <strong>{shown.checks_answered ?? 0}</strong></p>
-              <p><span className="text-muted-foreground">{t("students.misconceptions")}</span> <strong>{shown.open_misconceptions ?? 0}</strong></p>
-              <p><span className="text-muted-foreground">{t("students.lastActive")}</span> <strong>{shown.last_active ? new Date(shown.last_active).toLocaleDateString() : "—"}</strong></p>
+              <p className="rounded-lg border p-3"><span className="block text-xs text-muted-foreground">{t("students.checks")}</span> <strong className="text-lg tabular-nums">{shown.checks_answered ?? 0}</strong></p>
+              <p className="rounded-lg border p-3"><span className="block text-xs text-muted-foreground">{t("students.misconceptions")}</span> <strong className="text-lg tabular-nums">{shown.open_misconceptions ?? 0}</strong></p>
+              <p className="rounded-lg border p-3"><span className="block text-xs text-muted-foreground">{t("students.lastActive")}</span> <strong className="text-lg">{shown.last_active ? new Date(shown.last_active).toLocaleDateString() : "—"}</strong></p>
             </div>
             <p className="text-sm">
               <span className="text-muted-foreground">{t("students.preferences")}</span>{" "}
@@ -123,19 +125,18 @@ function StudentDetail({ course, studentId, name }: { course: Course; studentId:
                   })
                 : t("students.preferencesNone")}</strong>
             </p>
-            <ul className="space-y-1.5">
+            <ul className="divide-y rounded-lg border px-3">
               {shown.kcs?.map((k) => (
-                <li key={k.kc_code} className="flex items-center justify-between gap-3 text-sm">
+                <li key={k.kc_code} className="flex items-center justify-between gap-3 py-2 text-sm">
                   <span>{k.kc_code}</span><Band band={k.level} />
                 </li>
               ))}
-              {!shown.kcs?.length && <li className="text-sm text-muted-foreground">{t("students.noKcs")}</li>}
+              {!shown.kcs?.length && <li className="py-2 text-sm text-muted-foreground">{t("students.noKcs")}</li>}
             </ul>
             <PlanEditor course={course} studentId={studentId} />
           </>
         )}
-      </CardContent>
-    </Card>
+    </section>
   );
 }
 
@@ -187,7 +188,7 @@ function PlanForm({ initial, codes, courseId, studentId, onSaved }: {
       <fieldset className="space-y-1.5">
         <legend className="mb-1 text-sm font-medium">{t("plan.focus")}</legend>
         {codes.map((k) => (
-          <label key={k.code} className="flex items-center gap-2 text-sm">
+          <label key={k.code} className="flex items-center gap-2 rounded-md px-1 py-0.5 text-sm hover:bg-accent">
             <input type="checkbox" className="accent-primary" checked={focus.includes(k.code)} onChange={() => toggle(k.code)} />
             <span><span className="font-medium">{k.code}</span> {k.name}</span>
           </label>

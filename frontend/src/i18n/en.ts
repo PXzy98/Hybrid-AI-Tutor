@@ -27,6 +27,12 @@ export const en = {
   "empty.quizzes.title": "No quizzes yet",
   "empty.modules.title": "No modules yet",
   "quiz.answeredN": "{n} of {m} answered",
+  "empty.students.title": "No students yet",
+  "empty.materials.title": "No materials yet",
+  "form.unsaved": "Unsaved changes",
+  "settings.group.visibility": "Who sees what",
+  "settings.group.models": "Models and routing",
+  "settings.group.display": "What students see",
   "dialog.close": "Close",
 
   "nav.skip": "Skip to the main content",

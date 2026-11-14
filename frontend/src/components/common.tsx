@@ -90,6 +90,19 @@ export function EmptyState({ icon: Icon, title, children, action }:
   );
 }
 
+/** A single number with its label, for the class overview. */
+export function StatCard({ label, value, icon: Icon }: { label: string; value: ReactNode; icon?: LucideIcon }) {
+  return (
+    <div className="rounded-xl border bg-card p-4">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-xs text-muted-foreground">{label}</p>
+        {Icon && <Icon aria-hidden className="size-4 text-muted-foreground" />}
+      </div>
+      <p className="mt-2 text-2xl font-semibold tabular-nums">{value}</p>
+    </div>
+  );
+}
+
 /** A radio or checkbox option as a full-width selectable row; the native input stays visible. */
 export const choiceRow = (selected: boolean) =>
   `flex cursor-pointer items-start gap-2.5 rounded-lg border px-3 py-2.5 text-sm transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring ${

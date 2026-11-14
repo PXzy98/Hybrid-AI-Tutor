@@ -42,7 +42,7 @@ export default function EndOfTerm({ course }: { course: Course }) {
   const early = useMutation({ mutationFn: () => api.createExport(course.id) });
   const done = end.data;
   return (
-    <div className="space-y-4">
+    <div className="max-w-3xl space-y-6">
       {!done && (
         <Card>
           <CardHeader>
@@ -67,9 +67,9 @@ export default function EndOfTerm({ course }: { course: Course }) {
           </CardContent>
         </Card>
       )}
-      <Card>
+      <Card className="border-destructive/30">
         <CardHeader>
-          <CardTitle>{t("end.title")}</CardTitle>
+          <CardTitle className="flex items-center gap-2"><TriangleAlert aria-hidden className="size-4 text-destructive" />{t("end.title")}</CardTitle>
           <CardDescription>{t("end.intro")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

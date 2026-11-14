@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Sparkles, Trash2 } from "lucide-react";
+import { ListChecks, Plus, Sparkles, Trash2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
 import { api, type Course, type DraftBody, type Quiz, type QuizQuestion, type QuizResults } from "@/api/endpoints";
-import { ErrorNote, Loading, StatusText } from "@/components/common";
+import { EmptyState, ErrorNote, Loading, PageHeader, StatusText } from "@/components/common";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -48,16 +48,11 @@ function QuizList({ course, onOpen }: { course: Course; onOpen: (v: View) => voi
   const remove = useMutation({ mutationFn: (id: number) => api.deleteQuiz(course.id, id), onSuccess: refresh });
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold">{t("quiz.title")}</h2>
-          <p className="text-sm text-muted-foreground">{t("quiz.intro")}</p>
-        </div>
-        <Button type="button" onClick={() => onOpen({ kind: "edit", id: null })}><Plus aria-hidden />{t("quiz.new")}</Button>
-      </div>
+      <PageHeader title={t("quiz.title")} description={t("quiz.intro")}
+                  actions={<Button type="button" onClick={() => onOpen({ kind: "edit", id: null })}><Plus aria-hidden />{t("quiz.new")}</Button>} />
       <ErrorNote error={quizzes.error ?? change.error ?? remove.error} />
       {quizzes.isLoading && <Loading variant="list" />}
-      {quizzes.data?.length === 0 && <p className="text-muted-foreground">{t("quiz.none")}</p>}
+      {quizzes.data?.length === 0 && <EmptyState icon={ListChecks} title={t("empty.quizzes.title")}>{t("quiz.none")}</EmptyState>}
       <ul className="space-y-3">
         {quizzes.data?.map((q) => {
           const pending = unreviewed(q);
@@ -150,7 +145,7 @@ function EditorForm({ course, quiz, onClose, onCreated }: { course: Course; quiz
         <h2 className="text-lg font-semibold">{quiz ? t("quiz.editTitle") : t("quiz.new")}</h2>
         <Button type="button" variant="outline" onClick={onClose}>{t("quiz.back")}</Button>
       </div>
-      {locked && <Alert variant="info">{t("quiz.locked")}</Alert>}
+      {locked && <Alert variant="info" icon>{t("quiz.locked")}</Alert>}
       <Card>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="grid gap-1.5 sm:col-span-2"><Label htmlFor="q-title">{t("course.title")}</Label>
