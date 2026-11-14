@@ -117,7 +117,6 @@ export default function MessageList({ courseId, messages, partial, pending, load
             </div>
           </TutorFrame>
         )}
-        <div ref={endRef} />
       </section>
 
       <div className="sticky bottom-0 z-10 -mx-1 bg-background px-1 pt-1 pb-2">
@@ -131,6 +130,8 @@ export default function MessageList({ courseId, messages, partial, pending, load
         )}
         {children}
       </div>
+      {/* below the sticky composer: scrolling this into view shows the whole conversation, none of it under the composer */}
+      <div ref={endRef} />
     </div>
   );
 }

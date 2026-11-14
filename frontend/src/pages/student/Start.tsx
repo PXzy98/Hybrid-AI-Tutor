@@ -102,18 +102,20 @@ function OnboardingForm({ course, moduleId }: { course: Course; moduleId: number
       }>
         {data.diagnostic.length === 0 && <p className="text-sm text-muted-foreground">{t("onb.noItems")}</p>}
         {!skipDiagnostic && data.diagnostic.map((item, n) => (
-          <fieldset key={item.id} className="border-t pt-4 first:border-0 first:pt-0">
-            <legend className="mb-2 text-sm"><span className="font-medium">{n + 1}.</span> {item.stem}</legend>
-            <div className="space-y-2">
-              {Object.entries(item.options).sort(([a], [b]) => a.localeCompare(b)).map(([key, text]) => (
-                <label key={key} className={choiceRow(answers[item.id] === key)}>
-                  <input type="radio" name={item.id} value={key} className="mt-0.5 accent-primary" checked={answers[item.id] === key}
-                         onChange={() => setAnswers({ ...answers, [item.id]: key })} />
-                  <span><span className="font-medium">{key}.</span> {text}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
+          <div key={item.id} className="border-t pt-4 first:border-0 first:pt-0">
+            <fieldset>
+              <legend className="mb-2 text-sm"><span className="font-medium">{n + 1}.</span> {item.stem}</legend>
+              <div className="space-y-2">
+                {Object.entries(item.options).sort(([a], [b]) => a.localeCompare(b)).map(([key, text]) => (
+                  <label key={key} className={choiceRow(answers[item.id] === key)}>
+                    <input type="radio" name={item.id} value={key} className="mt-0.5 accent-primary" checked={answers[item.id] === key}
+                           onChange={() => setAnswers({ ...answers, [item.id]: key })} />
+                    <span><span className="font-medium">{key}.</span> {text}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          </div>
         ))}
         {!agreed && data.diagnostic.length > 0 && !skipDiagnostic && <Alert variant="warning" icon>{t("onb.noConsent")}</Alert>}
       </Step>

@@ -170,6 +170,26 @@ describe("chat composer and scrolling", () => {
     expect(screen.queryByRole("button", { name: "Try again" })).not.toBeInTheDocument();
   });
 
+  it("scrolls past the composer to the latest error, so nothing is left under it", async () => {
+    mockApi(studentRoutes({ "POST /courses/1/ask/stream": () => sse(["error", { detail: "The model is busy." }], ["done", {}]) }));
+    const targets: Element[] = [];
+    Element.prototype.scrollIntoView = function (this: Element) { targets.push(this); };
+    try {
+      renderApp("/courses/1/chat");
+      const user = userEvent.setup();
+      const field = await screen.findByLabelText("Your question");
+      await user.type(field, "Explain resonance");
+      await user.click(screen.getByRole("button", { name: "Send" }));
+      await user.click(await screen.findByRole("button", { name: "Try again" }));
+      await waitFor(() => expect(screen.getAllByRole("alert")).toHaveLength(2));
+      const anchor = targets[targets.length - 1];
+      expect(field.compareDocumentPosition(anchor) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      expect(screen.getAllByRole("alert")[1].compareDocumentPosition(anchor) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    } finally {
+      delete (Element.prototype as Partial<Element>).scrollIntoView;
+    }
+  });
+
   it("stops a running answer quietly with the Stop button", async () => {
     mockApi(studentRoutes());
     interceptFetch("/ask/stream", async (init) => {
