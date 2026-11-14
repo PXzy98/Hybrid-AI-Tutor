@@ -1,3 +1,4 @@
+import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import type { RoutingProgress as Progress } from "@/api/askStream";
@@ -34,20 +35,21 @@ export default function RoutingProgress({ trace }: { trace: RoutingTrace }) {
   const eventEnd = Math.max(0, ...events.map((e) => e.elapsed_ms));
   const elapsed = trace.running ? Math.max(total, eventEnd) : eventEnd || total;
   return (
-    <section aria-label={t("routing.region")} aria-live="off" className="w-full rounded-lg border bg-muted/40 px-4 py-3">
+    <section aria-label={t("routing.region")} aria-live="off" className="w-full rounded-xl border bg-card px-4 py-3">
       <div className="mb-3 flex items-center justify-between gap-3 text-sm">
         <strong>{t("routing.title", { method: trace.method.toUpperCase() })}</strong>
         <span className="tabular-nums text-muted-foreground">{t(trace.running ? "routing.running" : trace.error ? "routing.failed" : "routing.finished")} · {(elapsed / 1000).toFixed(2)} s</span>
       </div>
-      <ol className="space-y-2">
+      <ol className="relative space-y-2.5 before:absolute before:top-1.5 before:bottom-1.5 before:left-[5px] before:w-px before:bg-border">
         {STAGES.map((id) => {
           const e = events.find((p) => p.stage === id);
           const state = e?.status ?? "pending";
           const duration = e?.duration_ms ?? (state === "running" ? Math.max(0, elapsed - (e?.elapsed_ms ?? 0)) : null);
           return (
-            <li key={id} className="text-xs">
+            <li key={id} className="relative pl-6 text-xs">
+              <StageDot state={state} />
               <div className="flex items-center justify-between gap-3">
-                <span className={state === "running" ? "font-semibold text-primary" : ""}>
+                <span className={state === "running" ? "font-semibold text-foreground" : state === "pending" ? "text-muted-foreground" : ""}>
                   {t(`routing.stage.${id}`)}{" "}
                   <span className="ml-1 text-muted-foreground">{STATUSES.includes(state) ? t(`routing.status.${state}` as MessageKey) : state}</span>
                 </span>
@@ -69,4 +71,14 @@ export default function RoutingProgress({ trace }: { trace: RoutingTrace }) {
       {trace.error && <p className="mt-2 text-xs text-destructive">{trace.error}</p>}
     </section>
   );
+}
+
+/** The timeline dot of a stage. The status word next to it carries the meaning; the dot only repeats it. */
+function StageDot({ state }: { state: string }) {
+  const base = "absolute top-0.5 left-0 flex size-[11px] items-center justify-center rounded-full";
+  if (state === "running") return <Loader2 aria-hidden className={`${base} animate-spin bg-card text-primary`} />;
+  if (state === "completed") return <span aria-hidden className={`${base} bg-primary`} />;
+  if (state === "failed") return <span aria-hidden className={`${base} bg-destructive`} />;
+  if (state === "skipped") return <span aria-hidden className={`${base} bg-card`}><span className="h-px w-1.5 bg-muted-foreground" /></span>;
+  return <span aria-hidden className={`${base} border border-input bg-card`} />;
 }

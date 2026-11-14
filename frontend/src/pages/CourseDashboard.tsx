@@ -16,7 +16,7 @@ import Settings from "./instructor/Settings";
 import Students from "./instructor/Students";
 import { activeSection } from "./sections";
 import Survey from "./Survey";
-import Chat from "./student/Chat";
+import Chat from "./student/chat/Chat";
 import StudentQuizzes from "./student/Quizzes";
 import Progress from "./student/Progress";
 import Start from "./student/Start";

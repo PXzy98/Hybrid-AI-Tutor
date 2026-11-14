@@ -48,7 +48,10 @@ Not done: a test with a real screen reader (NVDA, VoiceOver) and an automated co
   progress updates are not announced one by one; status messages (saved, imported, plan saved, answers
   submitted) are `role="status"`; errors are `role="alert"`.
 - Icons are `aria-hidden` when next to text; icon-only buttons have an `aria-label`.
-- The local/cloud label on an answer is text plus an icon (not colour alone); its hint is in `title`. Bands
+- The local/cloud label on an answer is text plus an icon (not colour alone); it is a button whose hint opens as a
+  tooltip on hover and on keyboard focus. The chat's icon-only buttons (send, stop, copy, jump to the latest
+  message) have an `aria-label` and a tooltip; "The tutor is thinking…" is visually hidden text in a `role="status"`.
+  The page follows new text only while the reader is at the end of the conversation. Bands
   (basic, intermediate, advanced, mastered) are always written out.
 - The page language is set on `<html lang>` and follows the language switch.
 
