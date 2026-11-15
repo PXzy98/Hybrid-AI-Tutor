@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { BookOpen } from "lucide-react";
+import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 
 import { api, type Course, type OnboardingResult } from "@/api/endpoints";
 import Band from "@/components/Band";
-import { ErrorNote } from "@/components/common";
+import { choiceRow, EmptyState, ErrorNote, Loading, PageHeader } from "@/components/common";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,22 +22,18 @@ export default function Start({ course }: { course: Course }) {
   const modules = useQuery({ queryKey: ["modules", course.id], queryFn: () => api.modules(course.id) });
   const [chosen, setChosen] = useState<number | null>(null);
   const moduleId = chosen ?? modules.data?.[0]?.id ?? null;
-  if (modules.isLoading) return <p className="text-muted-foreground">{t("app.loading")}</p>;
-  if (moduleId === null) return <p className="text-muted-foreground">{t("nav.noModules")}</p>;
+  if (modules.isLoading) return <Loading variant="form" />;
+  if (moduleId === null) return <EmptyState icon={BookOpen} title={t("empty.modules.title")}>{t("nav.noModules")}</EmptyState>;
   return (
-    <div className="mx-auto max-w-3xl space-y-4">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 className="text-xl font-semibold">{t("onb.title")}</h2>
-          <p className="text-sm text-muted-foreground">{t("onb.intro")}</p>
-        </div>
+    <div className="mx-auto max-w-3xl space-y-6">
+      <PageHeader title={t("onb.title")} description={t("onb.intro")} actions={
         <div className="grid gap-1.5">
           <Label htmlFor="onb-module">{t("onb.module")}</Label>
           <Select id="onb-module" value={moduleId} onChange={(e) => setChosen(Number(e.target.value))}>
             {modules.data?.map((m) => <option key={m.id} value={m.id}>{m.title}</option>)}
           </Select>
         </div>
-      </div>
+      } />
       <OnboardingForm key={moduleId} course={course} moduleId={moduleId} />
     </div>
   );
@@ -62,68 +59,55 @@ function OnboardingForm({ course, moduleId }: { course: Course; moduleId: number
   });
 
   if (submit.data) return <Done result={submit.data} courseId={course.id} />;
-  if (info.isLoading) return <p className="text-muted-foreground">{t("app.loading")}</p>;
+  if (info.isLoading) return <Loading variant="form" />;
   if (info.isError || !info.data) return <ErrorNote error={info.error ?? new Error(t("onb.loadError"))} />;
   const data = info.data;
   const agreed = consent ?? data.consent_given ?? false;
 
   return (
     <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); submit.mutate(); }}>
-      <Card aria-labelledby="consent-title">
-        <CardHeader><h3 id="consent-title" className="leading-none font-semibold">{t("onb.consentTitle")}</h3></CardHeader>
-        <CardContent className="space-y-3">
-          <p className="text-sm leading-relaxed">{data.consent_text}</p>
-          <label className="flex items-start gap-2 text-sm">
-            <input type="checkbox" className="mt-1 accent-primary" checked={agreed} onChange={(e) => setConsent(e.target.checked)} />
-            <span>{t("onb.consentAgree")}</span>
-          </label>
-        </CardContent>
-      </Card>
+      <Step id="consent-title" title={t("onb.consentTitle")}>
+        <p className="text-sm leading-relaxed">{data.consent_text}</p>
+        <label className={choiceRow(agreed)}>
+          <input type="checkbox" className="mt-0.5 accent-primary" checked={agreed} onChange={(e) => setConsent(e.target.checked)} />
+          <span>{t("onb.consentAgree")}</span>
+        </label>
+      </Step>
 
-      <Card aria-labelledby="prefs-title">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <h3 id="prefs-title" className="leading-none font-semibold">{t("onb.prefsTitle")}</h3>
-            <Button type="button" variant="link" size="sm" onClick={() => setSkipPrefs(!skipPrefs)} aria-pressed={skipPrefs}>
-              {skipPrefs ? t("onb.answer") : t("onb.skip")}
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {!skipPrefs && data.preference_questions.map((q) => (
-            <fieldset key={q.id}>
-              <legend className="mb-2 text-sm font-medium">{q.question}</legend>
-              <div className="flex flex-wrap gap-2">
-                {q.options.map((o) => (
-                  <label key={o.value} className="flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm">
-                    <input type="radio" name={q.id} value={o.value} className="accent-primary" checked={prefs[q.id] === o.value}
-                           onChange={() => setPrefs({ ...prefs, [q.id]: o.value } as Prefs)} />
-                    {o.label}
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-          ))}
-        </CardContent>
-      </Card>
+      <Step id="prefs-title" title={t("onb.prefsTitle")} action={
+        <Button type="button" variant="ghost" size="sm" onClick={() => setSkipPrefs(!skipPrefs)} aria-pressed={skipPrefs}>
+          {skipPrefs ? t("onb.answer") : t("onb.skip")}
+        </Button>
+      }>
+        {!skipPrefs && data.preference_questions.map((q) => (
+          <fieldset key={q.id}>
+            <legend className="mb-2 text-sm font-medium">{q.question}</legend>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {q.options.map((o) => (
+                <label key={o.value} className={choiceRow(prefs[q.id] === o.value)}>
+                  <input type="radio" name={q.id} value={o.value} className="mt-0.5 accent-primary" checked={prefs[q.id] === o.value}
+                         onChange={() => setPrefs({ ...prefs, [q.id]: o.value } as Prefs)} />
+                  <span>{o.label}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        ))}
+      </Step>
 
-      <Card aria-labelledby="diag-title">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <h3 id="diag-title" className="leading-none font-semibold">{t("onb.diagTitle")}</h3>
-            <Button type="button" variant="link" size="sm" onClick={() => setSkipDiagnostic(!skipDiagnostic)} aria-pressed={skipDiagnostic}>
-              {skipDiagnostic ? t("onb.answer") : t("onb.skip")}
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {data.diagnostic.length === 0 && <p className="text-sm text-muted-foreground">{t("onb.noItems")}</p>}
-          {!skipDiagnostic && data.diagnostic.map((item, n) => (
-            <fieldset key={item.id} className="border-t pt-3 first:border-0 first:pt-0">
+      <Step id="diag-title" title={t("onb.diagTitle")} action={
+        <Button type="button" variant="ghost" size="sm" onClick={() => setSkipDiagnostic(!skipDiagnostic)} aria-pressed={skipDiagnostic}>
+          {skipDiagnostic ? t("onb.answer") : t("onb.skip")}
+        </Button>
+      }>
+        {data.diagnostic.length === 0 && <p className="text-sm text-muted-foreground">{t("onb.noItems")}</p>}
+        {!skipDiagnostic && data.diagnostic.map((item, n) => (
+          <div key={item.id} className="border-t pt-4 first:border-0 first:pt-0">
+            <fieldset>
               <legend className="mb-2 text-sm"><span className="font-medium">{n + 1}.</span> {item.stem}</legend>
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 {Object.entries(item.options).sort(([a], [b]) => a.localeCompare(b)).map(([key, text]) => (
-                  <label key={key} className="flex cursor-pointer items-start gap-2 text-sm">
+                  <label key={key} className={choiceRow(answers[item.id] === key)}>
                     <input type="radio" name={item.id} value={key} className="mt-0.5 accent-primary" checked={answers[item.id] === key}
                            onChange={() => setAnswers({ ...answers, [item.id]: key })} />
                     <span><span className="font-medium">{key}.</span> {text}</span>
@@ -131,13 +115,13 @@ function OnboardingForm({ course, moduleId }: { course: Course; moduleId: number
                 ))}
               </div>
             </fieldset>
-          ))}
-          {!agreed && data.diagnostic.length > 0 && !skipDiagnostic && <Alert variant="warning">{t("onb.noConsent")}</Alert>}
-        </CardContent>
-      </Card>
+          </div>
+        ))}
+        {!agreed && data.diagnostic.length > 0 && !skipDiagnostic && <Alert variant="warning" icon>{t("onb.noConsent")}</Alert>}
+      </Step>
 
       <ErrorNote error={submit.error} />
-      <div className="flex gap-3">
+      <div className="sticky bottom-0 z-10 -mx-1 flex flex-wrap gap-3 border-t bg-background px-1 py-3">
         <Button loading={submit.isPending} type="submit" disabled={submit.isPending}>{submit.isPending ? t("onb.saving") : t("onb.save")}</Button>
         <Button asChild variant="outline"><Link to={`/courses/${course.id}/chat`}>{t("onb.skipAll")}</Link></Button>
       </div>
@@ -145,10 +129,30 @@ function OnboardingForm({ course, moduleId }: { course: Course; moduleId: number
   );
 }
 
+/** One part of the form, numbered down the left edge. The number comes from the title ("1. ..."), so the text
+ *  read aloud stays the same. */
+function Step({ id, title, action, children }: { id: string; title: string; action?: ReactNode; children: ReactNode }) {
+  const m = /^(\d+)\.\s*(.*)$/.exec(title);
+  return (
+    <section aria-labelledby={id} className="grid grid-cols-[1.75rem_minmax(0,1fr)] gap-x-3 sm:gap-x-4">
+      <span aria-hidden className="mt-4 flex size-7 items-center justify-center rounded-full border bg-background text-xs font-semibold tabular-nums text-muted-foreground">
+        {m?.[1]}
+      </span>
+      <div className="space-y-4 rounded-xl border bg-card p-4 sm:p-5">
+        <div className="flex items-center justify-between gap-3">
+          <h3 id={id} className="text-sm font-semibold">{m ? <><span className="sr-only">{m[1]}. </span>{m[2]}</> : title}</h3>
+          {action}
+        </div>
+        {children}
+      </div>
+    </section>
+  );
+}
+
 function Done({ result, courseId }: { result: OnboardingResult; courseId: number }) {
   const { t } = useI18n();
   return (
-    <Card role="status">
+    <Card role="status" className="mx-auto max-w-3xl">
       <CardHeader><CardTitle>{result.personalized ? t("onb.ready") : t("onb.saved")}</CardTitle></CardHeader>
       <CardContent className="space-y-4">
         {result.personalized ? (

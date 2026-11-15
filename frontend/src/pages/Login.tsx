@@ -3,12 +3,12 @@ import { Link, Navigate, useNavigate } from "react-router-dom";
 
 import { api } from "@/api/endpoints";
 import { useMe, useResetSession } from "@/auth";
+import AuthLayout from "@/components/AuthLayout";
 import { ErrorNote } from "@/components/common";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LanguageSwitch, useI18n } from "@/i18n";
+import { useI18n } from "@/i18n";
 
 export default function Login() {
   const { data: me } = useMe();
@@ -38,36 +38,24 @@ export default function Login() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4">
-      <Card className="w-full max-w-sm">
-        <form onSubmit={submit} className="space-y-4" aria-labelledby="login-title">
-          <CardHeader>
-            <div className="flex items-start justify-between gap-3">
-              <div className="space-y-1.5">
-                <h1 id="login-title" className="text-xl leading-none font-semibold">{t("app.name")}</h1>
-                <CardDescription>{t("login.intro")}</CardDescription>
-              </div>
-              <LanguageSwitch />
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-1.5">
-              <Label htmlFor="username">{t("login.username")}</Label>
-              <Input id="username" aria-describedby={error ? "login-error" : undefined} autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} required />
-            </div>
-            <div className="grid gap-1.5">
-              <Label htmlFor="password">{t("login.password")}</Label>
-              <Input id="password" aria-describedby={error ? "login-error" : undefined} aria-invalid={error ? true : undefined} type="password" autoComplete="current-password" value={password}
-                     onChange={(e) => setPassword(e.target.value)} required />
-            </div>
-            <ErrorNote error={error} id="login-error" />
-            <Button type="submit" className="w-full" disabled={busy}>{busy ? t("login.busy") : t("login.submit")}</Button>
-            <p className="text-center text-sm text-muted-foreground">
-              {t("login.noAccount")} <Link to="/join" className="text-primary underline">{t("login.joinLink")}</Link>
-            </p>
-          </CardContent>
-        </form>
-      </Card>
-    </main>
+    <AuthLayout title={t("app.name")} titleId="login-title"
+                below={<p className="px-2 text-center text-xs leading-relaxed text-muted-foreground">{t("login.intro")}</p>}>
+      <form onSubmit={submit} className="space-y-4" aria-labelledby="login-title">
+        <div className="grid gap-1.5">
+          <Label htmlFor="username">{t("login.username")}</Label>
+          <Input id="username" className="h-10" aria-describedby={error ? "login-error" : undefined} autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} required />
+        </div>
+        <div className="grid gap-1.5">
+          <Label htmlFor="password">{t("login.password")}</Label>
+          <Input id="password" className="h-10" aria-describedby={error ? "login-error" : undefined} aria-invalid={error ? true : undefined} type="password" autoComplete="current-password" value={password}
+                 onChange={(e) => setPassword(e.target.value)} required />
+        </div>
+        <ErrorNote error={error} id="login-error" />
+        <Button type="submit" size="lg" className="w-full" loading={busy}>{busy ? t("login.busy") : t("login.submit")}</Button>
+        <p className="text-center text-sm text-muted-foreground">
+          {t("login.noAccount")} <Link to="/join" className="font-medium text-primary underline-offset-4 hover:underline">{t("login.joinLink")}</Link>
+        </p>
+      </form>
+    </AuthLayout>
   );
 }

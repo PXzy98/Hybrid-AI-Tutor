@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 
 import { api, type Course, type Survey as SurveyData, type SurveyAnswers } from "@/api/endpoints";
-import { ErrorNote } from "@/components/common";
+import { choiceRow, ErrorNote, Loading, PageHeader, StatusText } from "@/components/common";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,13 +21,10 @@ export default function Survey({ course, student }: { course: Course; student: b
   const { t } = useI18n();
   const survey = useQuery({ queryKey: ["survey", course.id], queryFn: () => api.survey(course.id) });
   return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-lg font-semibold">{t("survey.title")}</h2>
-        <p className="text-sm text-muted-foreground">{t(student ? "survey.studentIntro" : "survey.intro")}</p>
-      </div>
+    <div className="mx-auto max-w-3xl space-y-6">
+      <PageHeader title={t("survey.title")} description={t(student ? "survey.studentIntro" : "survey.intro")} />
       <ErrorNote error={survey.error} />
-      {survey.isLoading && <p className="text-muted-foreground">{t("app.loading")}</p>}
+      {survey.isLoading && <Loading variant="form" />}
       {survey.data && (student ? <StudentSurvey course={course} survey={survey.data} /> : <InstructorSurvey course={course} survey={survey.data} />)}
     </div>
   );
@@ -59,7 +56,7 @@ function InstructorSurvey({ course, survey }: { course: Course; survey: SurveyDa
               <Input id="sv-opens" type="datetime-local" value={opens} onChange={(e) => setOpens(e.target.value)} required /></div>
             <div className="grid gap-1.5"><Label htmlFor="sv-closes">{t("quiz.closes")}</Label>
               <Input id="sv-closes" type="datetime-local" value={closes} onChange={(e) => setCloses(e.target.value)} required /></div>
-            <Button type="submit" disabled={save.isPending}>{t("settings.save")}</Button>
+            <Button type="submit" loading={save.isPending}>{t("settings.save")}</Button>
           </form>
           <div className="mt-3"><ErrorNote error={save.error} /></div>
         </CardContent>
@@ -69,7 +66,7 @@ function InstructorSurvey({ course, survey }: { course: Course; survey: SurveyDa
           <CardHeader><CardTitle>{t("survey.results")}</CardTitle><CardDescription>{t("survey.responsesN", { n: r.responses })}</CardDescription></CardHeader>
           <CardContent>
             {!r.sufficient_sample || !r.means ? (
-              <Alert variant="info" role="status">{t("survey.notEnough", { n: r.min_group_size })}</Alert>
+              <Alert variant="info" role="status" icon>{t("survey.notEnough", { n: r.min_group_size })}</Alert>
             ) : (
               <Table>
                 <TableHeader><TableRow><TableHead>{t("survey.item")}</TableHead><TableHead>{t("survey.mean")}</TableHead></TableRow></TableHeader>
@@ -93,8 +90,8 @@ function StudentSurvey({ course, survey }: { course: Course; survey: SurveyData 
     mutationFn: () => api.answerSurvey(course.id, ratings as SurveyAnswers),
     onSuccess: (fresh) => qc.setQueryData(["survey", course.id], fresh),
   });
-  if (survey.answered) return <Alert variant="info" role="status">{t("survey.thanks")}</Alert>;
-  if (!survey.open) return <Alert variant="info" role="status">{t("survey.notOpenStudent")}</Alert>;
+  if (survey.answered) return <StatusText>{t("survey.thanks")}</StatusText>;
+  if (!survey.open) return <Alert variant="info" role="status" icon>{t("survey.notOpenStudent")}</Alert>;
   const complete = ITEMS.every((k) => ratings[k]);
   return (
     <Card>
@@ -102,22 +99,30 @@ function StudentSurvey({ course, survey }: { course: Course; survey: SurveyData 
       <CardContent>
         <form className="space-y-5" onSubmit={(e: FormEvent) => { e.preventDefault(); if (complete) send.mutate(); }} aria-label={t("survey.title")}>
           {ITEMS.map((k) => (
-            <fieldset key={k} role="radiogroup" aria-label={t(`survey.q.${k}` as MessageKey)} className="space-y-2">
-              <legend className="text-sm font-medium">{t(`survey.q.${k}` as MessageKey)}</legend>
-              <div className="flex items-center gap-3 text-sm">
-                <span className="text-xs text-muted-foreground">{t("survey.low")}</span>
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <label key={n} className="flex items-center gap-1">
-                    <input type="radio" name={`sv-${k}`} value={n} className="accent-primary" checked={ratings[k] === n}
-                           onChange={() => setRatings({ ...ratings, [k]: n })} />{n}
-                  </label>
-                ))}
-                <span className="text-xs text-muted-foreground">{t("survey.high")}</span>
-              </div>
-            </fieldset>
+            <div key={k} className="border-t pt-5 first:border-0 first:pt-0">
+              <fieldset role="radiogroup" aria-label={t(`survey.q.${k}` as MessageKey)} className="space-y-2">
+                <legend className="text-sm font-medium">{t(`survey.q.${k}` as MessageKey)}</legend>
+                <div className="max-w-md space-y-1.5">
+                  <div className="grid grid-cols-5 gap-2 text-sm">
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <label key={n} className={`${choiceRow(ratings[k] === n)} items-center justify-center px-2 py-1.5 tabular-nums`}>
+                        <input type="radio" name={`sv-${k}`} value={n} className="accent-primary" checked={ratings[k] === n}
+                               onChange={() => setRatings({ ...ratings, [k]: n })} />{n}
+                      </label>
+                    ))}
+                  </div>
+                  <div className="flex justify-between gap-3 text-xs text-muted-foreground">
+                    <span>{t("survey.low")}</span><span className="text-right">{t("survey.high")}</span>
+                  </div>
+                </div>
+              </fieldset>
+            </div>
           ))}
           <ErrorNote error={send.error} />
-          <Button type="submit" disabled={!complete || send.isPending}>{t("survey.submit")}</Button>
+          <div className="flex flex-wrap items-center gap-3">
+            <Button type="submit" loading={send.isPending} disabled={!complete}>{t("survey.submit")}</Button>
+            <span className="text-xs tabular-nums text-muted-foreground">{t("quiz.answeredN", { n: ITEMS.filter((x) => ratings[x]).length, m: ITEMS.length })}</span>
+          </div>
         </form>
       </CardContent>
     </Card>

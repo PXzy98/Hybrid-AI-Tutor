@@ -41,18 +41,18 @@ describe("language switch", () => {
   it("shows the student dashboard, the cloud notice and the English-only note in French", async () => {
     mockApi(studentRoutes());
     renderApp("/courses/1/chat", "fr");
-    expect(await screen.findByRole("tab", { name: "Ma progression" })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: "Quiz" })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: "Sondage de fin de session" })).toBeInTheDocument();
+    expect(await screen.findByRole("link", { name: "Ma progression" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Quiz" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Sondage de fin de session" })).toBeInTheDocument();
     expect(screen.getByText(/peut être envoyée à un modèle infonuagique/)).toBeInTheDocument();
     expect(screen.getByText(/Posez vos questions en anglais/)).toBeInTheDocument();
   });
 
-  it("shows the instructor dashboard tabs in French", async () => {
+  it("shows the instructor dashboard sections in French", async () => {
     mockApi(instructorRoutes({ "GET /courses/1/class-summary": { topic: "t", min_group: 5, suppressed: true } }));
     renderApp("/courses/1/overview", "fr");
     for (const name of ["Aperçu de la classe", "Étudiants", "Membres", "Fin de session", "Quiz", "Sondage de fin de session"]) {
-      expect(await screen.findByRole("tab", { name })).toBeInTheDocument();
+      expect(await screen.findByRole("link", { name })).toBeInTheDocument();
     }
   });
 });

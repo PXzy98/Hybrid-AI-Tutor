@@ -8,7 +8,7 @@ open part of T11.
 | Method | What it covers |
 |---|---|
 | Code review of every page and shared component | Keyboard operation, headings, landmarks, labels, live regions, icons |
-| `frontend/src/test/Accessibility.test.tsx` (vitest, `vitest-axe` with axe-core) | No serious or critical axe violation on: login (also with an error), course picker, student chat, my progress, instructor students, materials, quizzes (student and instructor), the end-of-term dialog. Also checks one `h1` on the login and chat pages, the skip link, dialog name and focus return, and arrow keys in tabs. A canary test proves the checker finds a missing label. |
+| `frontend/src/test/Accessibility.test.tsx` (vitest, `vitest-axe` with axe-core) | No serious or critical axe violation on: login (also with an error), course picker, student chat, my progress, instructor students, materials, quizzes (student and instructor), the end-of-term dialog. Also checks one `h1` on the login and chat pages, the skip link, dialog name and focus return, the named section navigation with `aria-current="page"` and Tab order, and that the chat stays mounted when another section is open. A canary test proves the checker finds a missing label. |
 | Contrast calculation on the theme tokens (`frontend/src/index.css`) | Text 4.5:1, UI boundaries 3:1, light and dark. The tokens are `oklch`; `npm run check:contrast` (`frontend/scripts/contrast.mjs`) converts each pair to sRGB, prints the WCAG ratios and fails when a pair is under its minimum. |
 | Layout reasoning | Reflow at 320 px and zoom to 200%, see below. jsdom has no layout, so this is not automated. |
 
@@ -24,16 +24,26 @@ Not done: a test with a real screen reader (NVDA, VoiceOver) and an automated co
   against the page; form fields also turn their border to `--ring` with a 3 px ring); sidebar buttons and links have the same ring; native checkboxes, radios, file inputs and
   selects keep the browser outline.
 - Dialogs (new course, end of term, material delete, data delete, cloud confirmation) are Radix `Dialog`: focus is
-  trapped, Escape closes, focus returns to the button that opened it (tested for the end-of-term dialog).
-- Tabs are Radix `Tabs`: arrow keys move between tabs (tested), the tab panel is reachable with Tab.
+  trapped, Escape closes, focus returns to the button that opened it (tested for the end-of-term dialog). A student's detail on the
+  instructor's Students page opens in a sheet (a Radix dialog from the right, named after the student) with the same
+  behaviour; tested, including that one open sends exactly one overview request.
+- The level-by-knowledge-component table on the class overview stays the accessible data; the stacked bar next to
+  it (from `md` up) is an image with a sentence as its name, and a row with a suppressed count has no bar.
+- Course sections are links in a named `nav` in the sidebar; the current one has `aria-current="page"` (tested).
+  Inner tabs (AI assistant) are Radix `Tabs`: arrow keys move between them.
+- The account menu (language, theme, password, log out) is a Radix dropdown menu: Enter or Space opens it, arrow
+  keys move, Escape closes and returns focus. On small screens the sidebar is a Radix dialog (sheet) with the same
+  focus behaviour; the top-bar button that opens it and the desktop hide / show button have an `aria-label` and a
+  tooltip.
 - Added a "Skip to the main content" link as the first focusable element; `main` has `id="main"` and is a focus
   target.
 
 ### Screen reader
-- Landmarks: `header`, `aside` (named "Courses, modules and conversations"), `nav` (courses, modules,
-  conversations, each named), `main`, and the footer note.
-- Headings: one `h1` per page (the page, or the course title on a dashboard). Each dashboard tab has a visually
-  hidden `h2` with the tab name. Card titles are announced as level 3 headings (`role="heading" aria-level=3`).
+- Landmarks: `aside` (named "Courses, modules and conversations"), `nav` (courses, course sections named
+  "Student dashboard" or "Instructor dashboard", modules, conversations, each named), `header` (top bar), `main`,
+  and the disclaimer note.
+- Headings: one `h1` per page (the page, or the course code and title in the top bar on a course page). Each
+  course section is a `section` labelled by a visually hidden `h2` with the section name. Card titles are announced as level 3 headings (`role="heading" aria-level=3`).
   The sidebar group labels are no longer headings.
 - Forms: every field has a visible `label` (or an `aria-label` where the label is the context, for example module
   titles in the course editor). Login, join and password errors are `role="alert"` and referenced from the fields
@@ -42,7 +52,10 @@ Not done: a test with a real screen reader (NVDA, VoiceOver) and an automated co
   progress updates are not announced one by one; status messages (saved, imported, plan saved, answers
   submitted) are `role="status"`; errors are `role="alert"`.
 - Icons are `aria-hidden` when next to text; icon-only buttons have an `aria-label`.
-- The local/cloud label on an answer is text plus an icon (not colour alone); its hint is in `title`. Bands
+- The local/cloud label on an answer is text plus an icon (not colour alone); it is a button whose hint opens as a
+  tooltip on hover and on keyboard focus. The chat's icon-only buttons (send, stop, copy, jump to the latest
+  message) have an `aria-label` and a tooltip; "The tutor is thinking…" is visually hidden text in a `role="status"`.
+  The page follows new text only while the reader is at the end of the conversation. Bands
   (basic, intermediate, advanced, mastered) are always written out.
 - The page language is set on `<html lang>` and follows the language switch.
 
@@ -73,8 +86,8 @@ Decorative card borders stay light (not required).
 
 ### Zoom and reflow
 - Sizes use `rem`, so browser zoom and text size settings scale the layout.
-- At 320 px the sidebar stacks above the content (`flex-col`, `md:flex-row`), the header wraps, tab lists wrap
-  (`flex-wrap`), grids collapse to one column (`sm:` and `lg:` breakpoints), wide tables sit in an
+- Below `md` the sidebar is a sheet opened from the top bar and the content is full width; the top-bar title
+  truncates, inner tab lists wrap (`flex-wrap`), grids collapse to one column (`sm:` and `lg:` breakpoints), wide tables sit in an
   `overflow-x-auto` wrapper (the table scrolls, not the page), and `main` allows long words and codes to wrap
   (`overflow-wrap:anywhere`, `min-w-0`). Dialogs are `max-w-[calc(100%-2rem)]`.
 - 200% zoom is equivalent to a 640 px wide viewport at the same layout; the `sm:` layout applies.

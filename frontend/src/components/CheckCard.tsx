@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Check, X } from "lucide-react";
 import { useId, useState } from "react";
 
 import { api, type CheckItem, type CheckResponse } from "@/api/endpoints";
@@ -31,7 +32,7 @@ export default function CheckCard({ courseId, item, onAnswered }: Props) {
 
   return (
     <form
-      className="mt-3 rounded-lg border bg-muted/40 p-4"
+      className="rounded-xl border bg-card p-4"
       onSubmit={(e) => {
         e.preventDefault();
         if (choice) answer.mutate(choice);
@@ -39,8 +40,8 @@ export default function CheckCard({ courseId, item, onAnswered }: Props) {
       aria-describedby={`${id}-hint`}
     >
       <fieldset disabled={!!result || answer.isPending}>
-        <legend className="mb-2 text-sm font-semibold text-primary">{t("check.legend")}</legend>
-        <p id={`${id}-stem`} className="mb-3">{item.stem}</p>
+        <legend className="mb-2 text-xs font-medium text-muted-foreground">{t("check.legend")}</legend>
+        <p id={`${id}-stem`} className="mb-3 text-[0.9375rem]">{item.stem}</p>
         <div role="radiogroup" aria-labelledby={`${id}-stem`} className="space-y-2">
           {options.map(([key, text]) => {
             const isKey = result?.correct_choice === key;
@@ -48,13 +49,16 @@ export default function CheckCard({ courseId, item, onAnswered }: Props) {
             return (
               <label
                 key={key}
-                className={`flex cursor-pointer items-start gap-2 rounded-md border px-3 py-2 text-sm ${
-                  isKey ? "border-success-border bg-success-soft" : isWrongChoice ? "border-destructive/40 bg-destructive-soft" : "bg-card"
+                className={`flex cursor-pointer items-start gap-2.5 rounded-lg border px-3 py-2.5 text-sm transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring ${
+                  isKey ? "border-success-border bg-success-soft" : isWrongChoice ? "border-destructive/40 bg-destructive-soft"
+                    : choice === key && !result ? "border-primary bg-primary-soft" : "bg-card hover:bg-accent"
                 }`}
               >
                 <input type="radio" name={`${id}-choice`} value={key} checked={choice === key}
                        onChange={() => setChoice(key)} className="mt-0.5 accent-primary" />
-                <span><span className="font-medium">{key}.</span> {text}</span>
+                <span className="flex-1"><span className="font-medium">{key}.</span> {text}</span>
+                {isKey && <Check aria-hidden className="mt-0.5 size-4 shrink-0 text-success" />}
+                {isWrongChoice && <X aria-hidden className="mt-0.5 size-4 shrink-0 text-destructive" />}
               </label>
             );
           })}

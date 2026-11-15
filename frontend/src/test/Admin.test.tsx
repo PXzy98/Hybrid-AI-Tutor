@@ -277,9 +277,13 @@ describe("follow-up fixes", () => {
     expect(within(localSelect).queryByRole("option", { name: "Course cloud" })).not.toBeInTheDocument();
     await user.selectOptions(localSelect, "Course local");
     await user.selectOptions(screen.getByLabelText("Cloud model connection"), "Course cloud");
+    expect(screen.getByText("Unsaved changes")).toBeInTheDocument();
     await user.click(screen.getAllByRole("button", { name: "Save" })[1]);
     await waitFor(() => expect(calls.some((c) => c.method === "PUT")).toBe(true));
     expect(calls.find((c) => c.method === "PUT")!.body).toMatchObject({ version: 2, values: { local_endpoint_id: 8, cloud_endpoint_id: 9 } });
+    // the form is rebuilt with the new version and still confirms the save
+    expect(await screen.findByText("Saved.")).toBeInTheDocument();
+    expect(screen.queryByText("Unsaved changes")).not.toBeInTheDocument();
   });
 
   it("polls while a change is applying, keeps Save disabled, then shows the result", async () => {
