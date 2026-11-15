@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { ApiError } from "@/api/client";
 import { api, type Staff, type SystemSettings, type SystemValues } from "@/api/endpoints";
 import { useMe } from "@/auth";
-import { ErrorNote, Loading, StatusText } from "@/components/common";
+import { ErrorNote, Loading, PageHeader, StatusText } from "@/components/common";
 import ModelEndpoints, { endpointsKey } from "@/components/ModelEndpoints";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -23,8 +23,8 @@ export default function Admin() {
   const { data: me } = useMe();
   if (me && me.system_role !== "admin") return <p role="alert" className="text-destructive">{t("admin.forbidden")}</p>;
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">{t("admin.title")}</h1>
+    <div className="space-y-6">
+      <PageHeader level={1} title={t("admin.title")} />
       <StaffCard selfId={me?.account_id} />
       <SystemSettingsCard />
       <ModelEndpoints courseId={null} />
@@ -76,7 +76,7 @@ function StaffCard({ selfId }: { selfId?: number }) {
                   <TableCell className="font-medium">{a.display_name}</TableCell>
                   <TableCell>{a.email ?? "—"}</TableCell>
                   <TableCell>
-                    <Select aria-label={t("admin.roleOf", { name: a.display_name })} value={a.role} disabled={a.account_id === selfId}
+                    <Select aria-label={t("admin.roleOf", { name: a.display_name })} className="min-w-36" value={a.role} disabled={a.account_id === selfId}
                             onChange={(e) => update.mutate({ id: a.account_id, changes: { role: e.target.value as Staff["role"] } })}>
                       <option value="instructor">{t("role.instructor")}</option>
                       <option value="admin">{t("role.admin")}</option>

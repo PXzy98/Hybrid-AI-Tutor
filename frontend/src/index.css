@@ -8,6 +8,7 @@
    --info are text colours that pass on the page and on their own -soft background. Run `npm run check:contrast`
    after changing a value. */
 :root {
+  color-scheme: light;
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.2 0.01 260);
@@ -45,6 +46,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   --background: oklch(0.17 0.004 260);
   --foreground: oklch(0.95 0.003 250);
   --sidebar: oklch(0.145 0.004 260);

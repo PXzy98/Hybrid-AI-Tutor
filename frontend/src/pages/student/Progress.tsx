@@ -120,7 +120,7 @@ function VisibilityCard({ course, profile }: { course: Course; profile: CoursePr
           <span aria-hidden className={`flex size-9 shrink-0 items-center justify-center rounded-full ${v.visible_to_instructor ? "bg-info-soft text-info" : "bg-success-soft text-success"}`}>
             {v.visible_to_instructor ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
           </span>
-          <Badge variant={v.visible_to_instructor ? "info" : "success"} className="whitespace-normal text-left">
+          <Badge variant={v.visible_to_instructor ? "info" : "success"} className="min-w-0 shrink whitespace-normal text-left">
             {t(v.visible_to_instructor ? "vis.visible" : "vis.hidden")}
           </Badge>
         </div>
@@ -168,7 +168,7 @@ function DeleteData({ course }: { course: Course }) {
       <CardHeader><CardTitle>{t("del.title")}</CardTitle><CardDescription>{t("del.hint")}</CardDescription></CardHeader>
       <CardContent className="space-y-3">
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild><Button type="button" variant="destructive">{t("del.button")}</Button></DialogTrigger>
+          <DialogTrigger asChild><Button type="button" variant="destructive" className="h-auto min-h-9 max-w-full py-2 whitespace-normal">{t("del.button")}</Button></DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{t("del.confirmTitle")}</DialogTitle>

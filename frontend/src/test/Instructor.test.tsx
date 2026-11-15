@@ -70,13 +70,29 @@ describe("instructor students", () => {
     const user = userEvent.setup();
     await user.click(await screen.findByRole("button", { name: "View progress of Ana Example" }));
     expect(await screen.findByText("Check questions answered:")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "View progress of Ana Example" }));
+    // the detail is a sheet beside the list: close it, then open it again
+    await user.click(screen.getByRole("button", { name: "Close" }));
     await waitFor(() => expect(screen.queryByText("Check questions answered:")).not.toBeInTheDocument());
     await user.click(screen.getByRole("button", { name: "View progress of Ana Example" }));
     expect(await screen.findByText("This student's progress is not visible.")).toBeInTheDocument();
     expect(screen.queryByText("Check questions answered:")).not.toBeInTheDocument();
     expect(screen.queryByRole("form", { name: "Learning plan" })).not.toBeInTheDocument();
     expect(calls.filter((c) => c.path.endsWith("/overview"))).toHaveLength(2);
+  });
+
+  it("opens the detail in a sheet named after the student with exactly one overview request", async () => {
+    const calls = mockApi(routes());
+    renderApp("/courses/1/students");
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: "View progress of Ana Example" }));
+    const sheet = await screen.findByRole("dialog", { name: "Ana Example" });
+    expect(await within(sheet).findByText("Check questions answered:")).toBeInTheDocument();
+    window.dispatchEvent(new Event("focus"));
+    await new Promise((r) => setTimeout(r, 50));
+    expect(calls.filter((c) => c.path.endsWith("/overview"))).toHaveLength(1);
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(screen.getByRole("button", { name: "View progress of Ana Example" })).toHaveFocus();
   });
 
   it("shows a visible student's overview and saves the learning plan", async () => {

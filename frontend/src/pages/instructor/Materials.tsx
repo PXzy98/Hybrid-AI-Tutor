@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FileText, Loader2, Trash2 } from "lucide-react";
+import { FileStack, FileText, Loader2, Trash2, Upload } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import { api, type Course, type Material } from "@/api/endpoints";
-import { ErrorNote } from "@/components/common";
+import { EmptyState, ErrorNote, Loading, PageHeader } from "@/components/common";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,50 +43,51 @@ export default function Materials({ course }: { course: Course }) {
   const moduleName = (id: number | null) => (id === null ? t("materials.courseLevel") : modules.data?.find((m) => m.id === id)?.title ?? String(id));
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-lg font-semibold">{t("materials.title")}</h2>
-        <p className="text-sm text-muted-foreground">{t("materials.intro")}</p>
-      </div>
-      <UploadCard course={course} modules={modules.data ?? []} onDone={refresh} />
+    <div className="space-y-6">
+      <PageHeader title={t("materials.title")} description={t("materials.intro")} />
       <ErrorNote error={materials.error} />
       {rebuilding && (
         <Alert variant="info" role="status" className="flex items-center gap-2">
-          <Loader2 aria-hidden className="size-4 animate-spin" />{t("materials.rebuilding")}
+          <Loader2 aria-hidden className="size-4 animate-spin text-info" />{t("materials.rebuilding")}
         </Alert>
       )}
-      {jobStatus === "failed" && <Alert variant="destructive" role="alert">{t("materials.rebuildFailed")}</Alert>}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("materials.list", { n: materials.data?.materials.length ?? 0 })}</CardTitle>
-          {materials.data && <CardDescription>{t("materials.indexVersion", { n: materials.data.index_version })}</CardDescription>}
-        </CardHeader>
-        <CardContent>
-          {materials.data?.materials.length === 0 && <p className="text-sm text-muted-foreground">{t("materials.none")}</p>}
-          {!!materials.data?.materials.length && (
-            <Table>
-              <TableHeader><TableRow>
-                <TableHead>{t("materials.file")}</TableHead><TableHead>{t("content.module")}</TableHead>
-                <TableHead>{t("materials.size")}</TableHead><TableHead>{t("members.status")}</TableHead>
-                <TableHead><span className="sr-only">{t("students.actions")}</span></TableHead>
-              </TableRow></TableHeader>
-              <TableBody>
-                {materials.data.materials.map((m) => (
-                  <TableRow key={m.id}>
-                    <TableCell className="font-medium"><FileText aria-hidden className="mr-1 inline size-4 text-muted-foreground" />{m.filename}</TableCell>
-                    <TableCell>{moduleName(m.module_id)}</TableCell>
-                    <TableCell className="tabular-nums">{Math.max(1, Math.round(m.size_bytes / 1024))} KB</TableCell>
-                    <TableCell><Badge variant={m.scan_status === "clean" ? "success" : "secondary"}>{m.scan_status}</Badge></TableCell>
-                    <TableCell className="text-right">
-                      <Button type="button" size="icon" variant="ghost" aria-label={t("materials.deleteFor", { name: m.filename })} onClick={() => setPendingDelete(m)}><Trash2 aria-hidden /></Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+      {jobStatus === "failed" && <Alert variant="destructive" role="alert" icon>{t("materials.rebuildFailed")}</Alert>}
+      <section aria-labelledby="mat-list" className="space-y-3">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h3 id="mat-list" className="text-sm font-semibold">{t("materials.list", { n: materials.data?.materials.length ?? 0 })}</h3>
+          {materials.data && <p className="text-xs text-muted-foreground">{t("materials.indexVersion", { n: materials.data.index_version })}</p>}
+        </div>
+        {materials.isLoading && <Loading variant="table" />}
+        {materials.data?.materials.length === 0 && <EmptyState icon={FileStack} title={t("empty.materials.title")}>{t("materials.none")}</EmptyState>}
+        {!!materials.data?.materials.length && (
+          <Table>
+            <TableHeader><TableRow>
+              <TableHead>{t("materials.file")}</TableHead><TableHead>{t("content.module")}</TableHead>
+              <TableHead>{t("materials.size")}</TableHead><TableHead>{t("members.status")}</TableHead>
+              <TableHead><span className="sr-only">{t("students.actions")}</span></TableHead>
+            </TableRow></TableHeader>
+            <TableBody>
+              {materials.data.materials.map((m) => (
+                <TableRow key={m.id}>
+                  <TableCell>
+                    <span className="flex items-center gap-2.5 font-medium">
+                      <span aria-hidden className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground"><FileText className="size-4" /></span>
+                      <span className="max-w-64 min-w-0 break-words">{m.filename}</span>
+                    </span>
+                  </TableCell>
+                  <TableCell>{moduleName(m.module_id)}</TableCell>
+                  <TableCell className="tabular-nums text-muted-foreground">{Math.max(1, Math.round(m.size_bytes / 1024))} KB</TableCell>
+                  <TableCell><Badge variant={scanVariant(m.scan_status)}>{m.scan_status}</Badge></TableCell>
+                  <TableCell className="text-right">
+                    <Button type="button" size="icon-sm" variant="ghost" className="text-muted-foreground hover:text-destructive" aria-label={t("materials.deleteFor", { name: m.filename })} onClick={() => setPendingDelete(m)}><Trash2 aria-hidden /></Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </section>
+      <UploadCard course={course} modules={modules.data ?? []} onDone={refresh} />
       <Dialog open={!!pendingDelete} onOpenChange={(o) => { if (!o) setPendingDelete(null); }}>
         <DialogContent>
           <DialogHeader>
@@ -96,7 +97,7 @@ export default function Materials({ course }: { course: Course }) {
           <ErrorNote error={remove.error} />
           <DialogFooter>
             <DialogClose asChild><Button type="button" variant="outline">{t("end.cancel")}</Button></DialogClose>
-            <Button type="button" variant="destructive" disabled={remove.isPending} onClick={() => pendingDelete && remove.mutate(pendingDelete)}>{t("materials.delete")}</Button>
+            <Button type="button" variant="destructive" loading={remove.isPending} onClick={() => pendingDelete && remove.mutate(pendingDelete)}>{t("materials.delete")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -109,6 +110,7 @@ function UploadCard({ course, modules, onDone }: { course: Course; modules: { id
   const input = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [moduleId, setModuleId] = useState<number | null>(null);
+  const [over, setOver] = useState(false);
   const upload = useMutation({
     mutationFn: (f: File) => api.uploadMaterial(course.id, f, moduleId),
     onSuccess: () => { setFile(null); if (input.current) input.current.value = ""; onDone(); },
@@ -123,9 +125,23 @@ function UploadCard({ course, modules, onDone }: { course: Course; modules: { id
       <CardContent>
         <form onSubmit={submit} className="space-y-3">
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="grid gap-1.5">
+            <div className="grid gap-1.5 sm:col-span-2">
               <Label htmlFor="mat-file">{t("materials.file")}</Label>
-              <Input id="mat-file" ref={input} type="file" accept=".pdf,.pptx,.docx,.md,.txt,.html,.htm" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+              <div onDragOver={(e) => { e.preventDefault(); setOver(true); }} onDragLeave={() => setOver(false)}
+                   onDrop={(e) => {
+                     e.preventDefault();
+                     setOver(false);
+                     const dropped = e.dataTransfer.files?.[0];
+                     if (!dropped) return;
+                     if (input.current) input.current.files = e.dataTransfer.files;
+                     setFile(dropped);
+                   }}
+                   className={`flex flex-col items-center gap-2 rounded-lg border-2 border-dashed px-4 py-6 text-center transition-colors ${over ? "border-primary bg-primary-soft" : "border-input"}`}>
+                <Upload aria-hidden className="size-5 text-muted-foreground" />
+                <Input id="mat-file" ref={input} type="file" accept=".pdf,.pptx,.docx,.md,.txt,.html,.htm"
+                       className="h-auto max-w-sm cursor-pointer border-0 bg-transparent p-0 text-center file:mr-3 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-sm file:font-medium"
+                       onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+              </div>
             </div>
             <div className="grid gap-1.5">
               <Label htmlFor="mat-module">{t("content.module")}</Label>
@@ -141,4 +157,10 @@ function UploadCard({ course, modules, onDone }: { course: Course; modules: { id
       </CardContent>
     </Card>
   );
+}
+
+function scanVariant(status: string): "success" | "secondary" | "destructive" {
+  if (status === "clean") return "success";
+  if (status === "infected" || status === "failed" || status === "rejected") return "destructive";
+  return "secondary";
 }

@@ -3,7 +3,7 @@ import { Loader2, Sparkles } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
 import { api, type AiDraft, type AiDraftAccept, type AiDraftKind, type AiDraftStatus, type Course } from "@/api/endpoints";
-import { ErrorNote, Loading, StatusText } from "@/components/common";
+import { ErrorNote, Loading, PageHeader, StatusText } from "@/components/common";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,12 +25,9 @@ const TIER1: AiDraftKind[] = ["faq", "project_ideas", "sample_proposal"];
 export default function AiAssistant({ course }: { course: Course }) {
   const { t } = useI18n();
   return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-lg font-semibold">{t("ai.title")}</h2>
-        <p className="text-sm text-muted-foreground">{t("ai.intro")}</p>
-      </div>
-      <Alert variant="info" role="note">{t("ai.privacy")}</Alert>
+    <div className="space-y-6">
+      <PageHeader title={t("ai.title")} description={t("ai.intro")} />
+      <Alert variant="info" role="note" icon>{t("ai.privacy")}</Alert>
       <Tabs defaultValue="drafts">
         <TabsList aria-label={t("ai.title")}>
           <TabsTrigger value="drafts">{t("ai.drafts")}</TabsTrigger>
@@ -71,7 +68,7 @@ function Drafts({ course }: { course: Course }) {
           <ul className="divide-y">
             {drafts.data?.map((d) => (
               <li key={d.id} className="flex flex-wrap items-center justify-between gap-2 py-2 text-sm">
-                <span>#{d.id} {t(`ai.kind.${d.kind}` as MessageKey)} <Badge variant={d.status === "accepted" ? "success" : "secondary"}>{t(`ai.status.${d.status}` as MessageKey)}</Badge></span>
+                <span>#{d.id} {t(`ai.kind.${d.kind}` as MessageKey)} <DraftStatus status={d.status} /></span>
                 <Button type="button" size="sm" variant="outline" aria-label={t("ai.openFor", { id: d.id })} onClick={() => setSelected(d.id)}>{t("ai.open")}</Button>
               </li>
             ))}
@@ -143,12 +140,12 @@ function DraftDetail({ course, id, onGone }: { course: Course; id: number; onGon
     <Card aria-label={t("ai.detail", { id })}>
       <CardHeader>
         <CardTitle className="flex flex-wrap items-center gap-2">#{d.id} {t(`ai.kind.${d.kind}` as MessageKey)}
-          <Badge variant={d.status === "accepted" ? "success" : d.status === "failed" ? "warning" : "secondary"}>{t(`ai.status.${d.status}` as MessageKey)}</Badge></CardTitle>
+          <DraftStatus status={d.status} /></CardTitle>
         <CardDescription>{d.status === "draft" ? t("ai.notVisible") : d.status === "accepted" ? t("ai.acceptedNote") : ""}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {d.status === "generating" && <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 aria-hidden className="size-4 animate-spin" />{t("ai.generating")}</p>}
-        {d.status === "failed" && <Alert variant="destructive" role="alert">{t("ai.failed")}{d.error ? ` ${d.error}` : ""}</Alert>}
+        {d.status === "failed" && <Alert variant="destructive" role="alert" icon>{t("ai.failed")}{d.error ? ` ${d.error}` : ""}</Alert>}
         {!!d.cited_sources.length && (
           <div className="text-sm">
             <p className="font-medium">{t("ai.sources")}</p>
@@ -240,5 +237,20 @@ function Actions({ course, draft, onAccepted, onGone }: { course: Course; draft:
         <Button type="button" variant="outline" onClick={() => discard.mutate()} disabled={discard.isPending}>{t("ai.discard")}</Button>
       </div>
     </div>
+  );
+}
+
+const DRAFT_VARIANT: Record<AiDraftStatus, "secondary" | "info" | "success" | "destructive"> = {
+  generating: "secondary", draft: "info", accepted: "success", discarded: "secondary", failed: "destructive",
+};
+
+/** The state of a draft: text, with a spinner while it is being written. */
+function DraftStatus({ status }: { status: AiDraftStatus }) {
+  const { t } = useI18n();
+  return (
+    <Badge variant={DRAFT_VARIANT[status]}>
+      {status === "generating" && <Loader2 aria-hidden className="animate-spin" />}
+      {t(`ai.status.${status}` as MessageKey)}
+    </Badge>
   );
 }

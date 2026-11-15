@@ -24,7 +24,11 @@ Not done: a test with a real screen reader (NVDA, VoiceOver) and an automated co
   against the page; form fields also turn their border to `--ring` with a 3 px ring); sidebar buttons and links have the same ring; native checkboxes, radios, file inputs and
   selects keep the browser outline.
 - Dialogs (new course, end of term, material delete, data delete, cloud confirmation) are Radix `Dialog`: focus is
-  trapped, Escape closes, focus returns to the button that opened it (tested for the end-of-term dialog).
+  trapped, Escape closes, focus returns to the button that opened it (tested for the end-of-term dialog). A student's detail on the
+  instructor's Students page opens in a sheet (a Radix dialog from the right, named after the student) with the same
+  behaviour; tested, including that one open sends exactly one overview request.
+- The level-by-knowledge-component table on the class overview stays the accessible data; the stacked bar next to
+  it (from `md` up) is an image with a sentence as its name, and a row with a suppressed count has no bar.
 - Course sections are links in a named `nav` in the sidebar; the current one has `aria-current="page"` (tested).
   Inner tabs (AI assistant) are Radix `Tabs`: arrow keys move between them.
 - The account menu (language, theme, password, log out) is a Radix dropdown menu: Enter or Space opens it, arrow

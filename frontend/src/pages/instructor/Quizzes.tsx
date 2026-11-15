@@ -1,12 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Sparkles, Trash2 } from "lucide-react";
+import { ListChecks, Plus, Sparkles, Trash2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
 import { api, type Course, type DraftBody, type Quiz, type QuizQuestion, type QuizResults } from "@/api/endpoints";
-import { ErrorNote, Loading, StatusText } from "@/components/common";
+import { EmptyState, ErrorNote, Loading, PageHeader, StatusText } from "@/components/common";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,19 +46,18 @@ function QuizList({ course, onOpen }: { course: Course; onOpen: (v: View) => voi
     mutationFn: (v: { id: number; status: "published" | "closed" }) => api.updateQuiz(course.id, v.id, { status: v.status }),
     onSuccess: refresh,
   });
-  const remove = useMutation({ mutationFn: (id: number) => api.deleteQuiz(course.id, id), onSuccess: refresh });
+  const [pendingDelete, setPendingDelete] = useState<Quiz | null>(null);
+  const remove = useMutation({
+    mutationFn: (id: number) => api.deleteQuiz(course.id, id),
+    onSuccess: () => { setPendingDelete(null); refresh(); },
+  });
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold">{t("quiz.title")}</h2>
-          <p className="text-sm text-muted-foreground">{t("quiz.intro")}</p>
-        </div>
-        <Button type="button" onClick={() => onOpen({ kind: "edit", id: null })}><Plus aria-hidden />{t("quiz.new")}</Button>
-      </div>
-      <ErrorNote error={quizzes.error ?? change.error ?? remove.error} />
+      <PageHeader title={t("quiz.title")} description={t("quiz.intro")}
+                  actions={<Button type="button" onClick={() => onOpen({ kind: "edit", id: null })}><Plus aria-hidden />{t("quiz.new")}</Button>} />
+      <ErrorNote error={quizzes.error ?? change.error} />
       {quizzes.isLoading && <Loading variant="list" />}
-      {quizzes.data?.length === 0 && <p className="text-muted-foreground">{t("quiz.none")}</p>}
+      {quizzes.data?.length === 0 && <EmptyState icon={ListChecks} title={t("empty.quizzes.title")}>{t("quiz.none")}</EmptyState>}
       <ul className="space-y-3">
         {quizzes.data?.map((q) => {
           const pending = unreviewed(q);
@@ -87,7 +87,7 @@ function QuizList({ course, onOpen }: { course: Course; onOpen: (v: View) => voi
                     <Button type="button" size="sm" variant="outline" aria-label={t("quiz.closeFor", { name: q.title })} onClick={() => change.mutate({ id: q.id, status: "closed" })}>{t("quiz.close")}</Button>
                   )}
                   {q.attempts === 0 && (
-                    <Button type="button" size="sm" variant="ghost" aria-label={t("quiz.deleteFor", { name: q.title })} onClick={() => remove.mutate(q.id)}><Trash2 aria-hidden /></Button>
+                    <Button type="button" size="sm" variant="ghost" aria-label={t("quiz.deleteFor", { name: q.title })} onClick={() => setPendingDelete(q)}><Trash2 aria-hidden /></Button>
                   )}
                 </CardContent>
               </Card>
@@ -95,6 +95,20 @@ function QuizList({ course, onOpen }: { course: Course; onOpen: (v: View) => voi
           );
         })}
       </ul>
+      <Dialog open={!!pendingDelete} onOpenChange={(o) => { if (!o) setPendingDelete(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("quiz.deleteTitle")}</DialogTitle>
+            <DialogDescription>{t("quiz.deleteBody", { name: pendingDelete?.title ?? "" })}</DialogDescription>
+          </DialogHeader>
+          <ErrorNote error={remove.error} />
+          <DialogFooter>
+            <DialogClose asChild><Button type="button" variant="outline">{t("end.cancel")}</Button></DialogClose>
+            <Button type="button" variant="destructive" loading={remove.isPending}
+                    onClick={() => pendingDelete && remove.mutate(pendingDelete.id)}>{t("quiz.deleteConfirm")}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -150,7 +164,7 @@ function EditorForm({ course, quiz, onClose, onCreated }: { course: Course; quiz
         <h2 className="text-lg font-semibold">{quiz ? t("quiz.editTitle") : t("quiz.new")}</h2>
         <Button type="button" variant="outline" onClick={onClose}>{t("quiz.back")}</Button>
       </div>
-      {locked && <Alert variant="info">{t("quiz.locked")}</Alert>}
+      {locked && <Alert variant="info" icon>{t("quiz.locked")}</Alert>}
       <Card>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="grid gap-1.5 sm:col-span-2"><Label htmlFor="q-title">{t("course.title")}</Label>

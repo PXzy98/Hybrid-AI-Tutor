@@ -99,19 +99,24 @@ function StudentSurvey({ course, survey }: { course: Course; survey: SurveyData 
       <CardContent>
         <form className="space-y-5" onSubmit={(e: FormEvent) => { e.preventDefault(); if (complete) send.mutate(); }} aria-label={t("survey.title")}>
           {ITEMS.map((k) => (
-            <fieldset key={k} role="radiogroup" aria-label={t(`survey.q.${k}` as MessageKey)} className="space-y-2 border-t pt-5 first:border-0 first:pt-0">
-              <legend className="text-sm font-medium">{t(`survey.q.${k}` as MessageKey)}</legend>
-              <div className="flex flex-wrap items-center gap-2 text-sm">
-                <span className="text-xs text-muted-foreground">{t("survey.low")}</span>
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <label key={n} className={`${choiceRow(ratings[k] === n)} items-center px-3 py-1.5 tabular-nums`}>
-                    <input type="radio" name={`sv-${k}`} value={n} className="accent-primary" checked={ratings[k] === n}
-                           onChange={() => setRatings({ ...ratings, [k]: n })} />{n}
-                  </label>
-                ))}
-                <span className="text-xs text-muted-foreground">{t("survey.high")}</span>
-              </div>
-            </fieldset>
+            <div key={k} className="border-t pt-5 first:border-0 first:pt-0">
+              <fieldset role="radiogroup" aria-label={t(`survey.q.${k}` as MessageKey)} className="space-y-2">
+                <legend className="text-sm font-medium">{t(`survey.q.${k}` as MessageKey)}</legend>
+                <div className="max-w-md space-y-1.5">
+                  <div className="grid grid-cols-5 gap-2 text-sm">
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <label key={n} className={`${choiceRow(ratings[k] === n)} items-center justify-center px-2 py-1.5 tabular-nums`}>
+                        <input type="radio" name={`sv-${k}`} value={n} className="accent-primary" checked={ratings[k] === n}
+                               onChange={() => setRatings({ ...ratings, [k]: n })} />{n}
+                      </label>
+                    ))}
+                  </div>
+                  <div className="flex justify-between gap-3 text-xs text-muted-foreground">
+                    <span>{t("survey.low")}</span><span className="text-right">{t("survey.high")}</span>
+                  </div>
+                </div>
+              </fieldset>
+            </div>
           ))}
           <ErrorNote error={send.error} />
           <div className="flex flex-wrap items-center gap-3">

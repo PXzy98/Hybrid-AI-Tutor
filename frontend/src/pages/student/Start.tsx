@@ -25,7 +25,7 @@ export default function Start({ course }: { course: Course }) {
   if (modules.isLoading) return <Loading variant="form" />;
   if (moduleId === null) return <EmptyState icon={BookOpen} title={t("empty.modules.title")}>{t("nav.noModules")}</EmptyState>;
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
+    <div className="mx-auto max-w-3xl space-y-6">
       <PageHeader title={t("onb.title")} description={t("onb.intro")} actions={
         <div className="grid gap-1.5">
           <Label htmlFor="onb-module">{t("onb.module")}</Label>
@@ -102,18 +102,20 @@ function OnboardingForm({ course, moduleId }: { course: Course; moduleId: number
       }>
         {data.diagnostic.length === 0 && <p className="text-sm text-muted-foreground">{t("onb.noItems")}</p>}
         {!skipDiagnostic && data.diagnostic.map((item, n) => (
-          <fieldset key={item.id} className="border-t pt-4 first:border-0 first:pt-0">
-            <legend className="mb-2 text-sm"><span className="font-medium">{n + 1}.</span> {item.stem}</legend>
-            <div className="space-y-2">
-              {Object.entries(item.options).sort(([a], [b]) => a.localeCompare(b)).map(([key, text]) => (
-                <label key={key} className={choiceRow(answers[item.id] === key)}>
-                  <input type="radio" name={item.id} value={key} className="mt-0.5 accent-primary" checked={answers[item.id] === key}
-                         onChange={() => setAnswers({ ...answers, [item.id]: key })} />
-                  <span><span className="font-medium">{key}.</span> {text}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
+          <div key={item.id} className="border-t pt-4 first:border-0 first:pt-0">
+            <fieldset>
+              <legend className="mb-2 text-sm"><span className="font-medium">{n + 1}.</span> {item.stem}</legend>
+              <div className="space-y-2">
+                {Object.entries(item.options).sort(([a], [b]) => a.localeCompare(b)).map(([key, text]) => (
+                  <label key={key} className={choiceRow(answers[item.id] === key)}>
+                    <input type="radio" name={item.id} value={key} className="mt-0.5 accent-primary" checked={answers[item.id] === key}
+                           onChange={() => setAnswers({ ...answers, [item.id]: key })} />
+                    <span><span className="font-medium">{key}.</span> {text}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          </div>
         ))}
         {!agreed && data.diagnostic.length > 0 && !skipDiagnostic && <Alert variant="warning" icon>{t("onb.noConsent")}</Alert>}
       </Step>
@@ -150,7 +152,7 @@ function Step({ id, title, action, children }: { id: string; title: string; acti
 function Done({ result, courseId }: { result: OnboardingResult; courseId: number }) {
   const { t } = useI18n();
   return (
-    <Card role="status" className="mx-auto max-w-2xl">
+    <Card role="status" className="mx-auto max-w-3xl">
       <CardHeader><CardTitle>{result.personalized ? t("onb.ready") : t("onb.saved")}</CardTitle></CardHeader>
       <CardContent className="space-y-4">
         {result.personalized ? (

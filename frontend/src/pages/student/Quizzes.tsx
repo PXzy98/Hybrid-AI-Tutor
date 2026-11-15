@@ -79,16 +79,18 @@ function QuizCard({ course, quiz }: { course: Course; quiz: StudentQuiz }) {
         ) : quiz.open ? (
           <form onSubmit={send} className="space-y-4" aria-label={quiz.title}>
             {questions.map((q, i) => (
-              <fieldset key={i} className="space-y-2 border-t pt-4 first:border-0 first:pt-0">
-                <legend className="text-sm"><span className="font-medium">{i + 1}.</span> {q.stem}</legend>
-                {(q.options ?? []).map((o, j) => (
-                  <label key={j} className={choiceRow(answers[i] === j)}>
-                    <input type="radio" name={`quiz-${quiz.id}-${i}`} className="mt-0.5 accent-primary" checked={answers[i] === j}
-                           onChange={() => setAnswers(answers.map((a, k) => (k === i ? j : a)))} />
-                    <span>{o}</span>
-                  </label>
-                ))}
-              </fieldset>
+              <div key={i} className="border-t pt-4 first:border-0 first:pt-0">
+                <fieldset className="space-y-2">
+                  <legend className="text-sm"><span className="font-medium">{i + 1}.</span> {q.stem}</legend>
+                  {(q.options ?? []).map((o, j) => (
+                    <label key={j} className={choiceRow(answers[i] === j)}>
+                      <input type="radio" name={`quiz-${quiz.id}-${i}`} className="mt-0.5 accent-primary" checked={answers[i] === j}
+                             onChange={() => setAnswers(answers.map((a, k) => (k === i ? j : a)))} />
+                      <span>{o}</span>
+                    </label>
+                  ))}
+                </fieldset>
+              </div>
             ))}
             <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
               <span>{t("quiz.onceHint")}</span>
