@@ -89,10 +89,10 @@ function ModuleRow({ course, module, onSaved, actions }: { course: Course; modul
   const changed = title !== module.title || guideline !== (module.guideline ?? "");
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <Badge variant="outline">{module.code}</Badge>
-        <Input aria-label={t("content.titleOf", { name: module.title })} value={title} onChange={(e) => setTitle(e.target.value)} />
-        <div className="flex shrink-0">{actions}</div>
+        <Input aria-label={t("content.titleOf", { name: module.title })} className="min-w-0 flex-1 basis-48" value={title} onChange={(e) => setTitle(e.target.value)} />
+        <div className="ml-auto flex shrink-0">{actions}</div>
       </div>
       <Textarea aria-label={t("content.guidelineOf", { name: module.title })} value={guideline} onChange={(e) => setGuideline(e.target.value)} />
       <ErrorNote error={save.error} />

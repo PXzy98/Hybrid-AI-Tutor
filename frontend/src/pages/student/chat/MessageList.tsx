@@ -1,12 +1,11 @@
-import { ArrowDown } from "lucide-react";
+import { ArrowDown, RotateCw } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 
 import type { AskResponse } from "@/api/endpoints";
-import { ErrorNote } from "@/components/common";
+import { ErrorNote, Loading } from "@/components/common";
 import Markdown from "@/components/Markdown";
 import type { RoutingTrace } from "@/components/RoutingProgress";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/i18n";
 import EmptyChat from "./EmptyChat";
 import RoutingPanel from "./RoutingPanel";
@@ -16,7 +15,7 @@ export type Message =
   | { role: "student"; text: string }
   | { role: "tutor"; reply: AskResponse }
   | { role: "history"; text: string }
-  | { role: "error"; error: unknown }
+  | { role: "error"; error: unknown; question?: string }
   | { role: "routing"; trace: RoutingTrace };
 
 const NEAR_BOTTOM = 80;  // px: closer than this to the end counts as "reading the latest"
@@ -29,11 +28,12 @@ type Props = {
   loadingHistory: boolean;
   historyError: unknown;
   onSuggest: (text: string) => void;
+  onRetry: (question: string) => void;
   children: ReactNode;  // the composer
 };
 
 /** The conversation and, pinned under it, the composer. Follows new text only while the reader is at the end. */
-export default function MessageList({ courseId, messages, partial, pending, loadingHistory, historyError, onSuggest, children }: Props) {
+export default function MessageList({ courseId, messages, partial, pending, loadingHistory, historyError, onSuggest, onRetry, children }: Props) {
   const { t } = useI18n();
   const endRef = useRef<HTMLDivElement>(null);
   const atEnd = useRef(true);
@@ -74,14 +74,8 @@ export default function MessageList({ courseId, messages, partial, pending, load
 
   return (
     <div className="flex flex-col">
-      <section aria-label={t("chat.conversation")} aria-live="polite" className="flex flex-col gap-6 pb-4">
-        {loadingHistory && (
-          <div aria-busy="true" className="space-y-6">
-            <span className="sr-only">{t("app.loading")}</span>
-            <Skeleton className="ml-auto h-10 w-2/5 rounded-2xl" />
-            <div className="space-y-2"><Skeleton className="h-4 w-1/4" /><Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-5/6" /></div>
-          </div>
-        )}
+      <section aria-label={t("chat.conversation")} aria-live="polite" className="flex flex-col gap-6 pb-6">
+        {loadingHistory && <Loading variant="chat" />}
         <ErrorNote error={historyError} />
         {empty && <EmptyChat onSuggest={onSuggest} />}
         {messages.map((m, i) =>
@@ -90,7 +84,14 @@ export default function MessageList({ courseId, messages, partial, pending, load
           ) : m.role === "routing" ? (
             m.trace.visible ? <RoutingPanel key={m.trace.id} trace={m.trace} /> : null
           ) : m.role === "error" ? (
-            <div key={i}><ErrorNote error={m.error} /></div>
+            <div key={i} className="space-y-2">
+              <ErrorNote error={m.error} />
+              {m.question && i === messages.length - 1 && !pending && (
+                <Button type="button" variant="outline" size="sm" onClick={() => onRetry(m.question as string)}>
+                  <RotateCw aria-hidden />{t("app.retry")}
+                </Button>
+              )}
+            </div>
           ) : m.role === "history" ? (
             <TutorFrame key={i}>
               <div className={answerBody}><Markdown>{m.text}</Markdown></div>
@@ -116,7 +117,6 @@ export default function MessageList({ courseId, messages, partial, pending, load
             </div>
           </TutorFrame>
         )}
-        <div ref={endRef} />
       </section>
 
       <div className="sticky bottom-0 z-10 -mx-1 bg-background px-1 pt-1 pb-2">
@@ -130,6 +130,8 @@ export default function MessageList({ courseId, messages, partial, pending, load
         )}
         {children}
       </div>
+      {/* below the sticky composer: scrolling this into view shows the whole conversation, none of it under the composer */}
+      <div ref={endRef} />
     </div>
   );
 }

@@ -1,9 +1,10 @@
-import { Check, Moon, Sun } from "lucide-react";
+import { Check, Moon, Sun, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { ApiError } from "@/api/client";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/i18n";
 import { useTheme } from "./theme";
 
@@ -20,15 +21,92 @@ export function ErrorNote({ error, id }: { error: unknown; id?: string }) {
   return <Alert variant="destructive" role="alert" id={id} icon>{text}</Alert>;
 }
 
-/** Page or section heading with an optional description. */
-export function SectionTitle({ title, children }: { title: string; children?: ReactNode }) {
+/** The head of a page or section: title, one line of description, actions on the right. The course sections are
+ *  level 2 (the h1 is in the top bar); a page outside a course passes level 1. */
+export function PageHeader({ title, description, actions, level = 2 }:
+  { title: ReactNode; description?: ReactNode; actions?: ReactNode; level?: 1 | 2 }) {
+  const Heading = level === 1 ? "h1" : "h2";
   return (
-    <div className="space-y-1">
-      <h2 className="text-lg font-semibold">{title}</h2>
-      {children && <p className="text-sm text-muted-foreground">{children}</p>}
+    <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+      <div className="min-w-0 space-y-1">
+        <Heading className={level === 1 ? "text-xl font-semibold tracking-tight" : "text-base font-semibold"}>{title}</Heading>
+        {description && <p className="max-w-prose text-sm text-muted-foreground">{description}</p>}
+      </div>
+      {actions && <div className="flex flex-wrap items-end gap-2">{actions}</div>}
     </div>
   );
 }
+
+const SKELETONS = {
+  list: () => (
+    <div className="space-y-2">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-12 w-full rounded-lg" />)}</div>
+  ),
+  table: () => (
+    <div className="space-y-px overflow-hidden rounded-lg border">
+      <Skeleton className="h-9 w-full rounded-none" />
+      {[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-11 w-full rounded-none opacity-60" />)}
+    </div>
+  ),
+  cards: () => (
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-28 rounded-xl" />)}</div>
+  ),
+  form: () => (
+    <div className="max-w-2xl space-y-4">
+      {[0, 1, 2].map((i) => <div key={i} className="space-y-2"><Skeleton className="h-4 w-32" /><Skeleton className="h-9 w-full" /></div>)}
+    </div>
+  ),
+  chat: () => (
+    <div className="space-y-6">
+      <Skeleton className="ml-auto h-10 w-2/5 rounded-2xl" />
+      <div className="space-y-2"><Skeleton className="h-4 w-1/4" /><Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-5/6" /></div>
+    </div>
+  ),
+};
+
+/** Loading state: skeletons shaped like the content, and the loading text for assistive technology. */
+export function Loading({ variant = "list" }: { variant?: keyof typeof SKELETONS }) {
+  const { t } = useI18n();
+  const Shape = SKELETONS[variant];
+  return (
+    <div role="status" aria-busy="true">
+      <span className="sr-only">{t("app.loading")}</span>
+      <Shape />
+    </div>
+  );
+}
+
+/** Nothing to show yet: an icon, a short title, the explaining sentence and, where there is one, the next step. */
+export function EmptyState({ icon: Icon, title, children, action }:
+  { icon: LucideIcon; title: string; children?: ReactNode; action?: ReactNode }) {
+  return (
+    <div className="flex flex-col items-center gap-1.5 rounded-xl border border-dashed px-6 py-10 text-center">
+      <span aria-hidden className="mb-2 flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
+        <Icon className="size-5" />
+      </span>
+      <p className="text-sm font-semibold">{title}</p>
+      {children && <p className="max-w-sm text-sm text-muted-foreground">{children}</p>}
+      {action && <div className="mt-3">{action}</div>}
+    </div>
+  );
+}
+
+/** A single number with its label, for the class overview. */
+export function StatCard({ label, value, icon: Icon }: { label: string; value: ReactNode; icon?: LucideIcon }) {
+  return (
+    <div className="rounded-xl border bg-card p-4">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-xs text-muted-foreground">{label}</p>
+        {Icon && <Icon aria-hidden className="size-4 text-muted-foreground" />}
+      </div>
+      <p className="mt-2 text-2xl font-semibold tabular-nums">{value}</p>
+    </div>
+  );
+}
+
+/** A radio or checkbox option as a full-width selectable row; the native input stays visible. */
+export const choiceRow = (selected: boolean) =>
+  `flex cursor-pointer items-start gap-2.5 rounded-lg border px-3 py-2.5 text-sm transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring ${
+    selected ? "border-primary bg-primary-soft" : "bg-card hover:bg-accent"}`;
 
 /** A success line ("Saved", "Plan saved"): an icon and the text, announced politely. */
 export function StatusText({ children }: { children: ReactNode }) {

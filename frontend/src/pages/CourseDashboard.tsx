@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 
 import type { Course } from "@/api/endpoints";
 import { roleIn, useCourses, useMe } from "@/auth";
-import { ErrorNote } from "@/components/common";
+import { ErrorNote, Loading } from "@/components/common";
 import { useI18n } from "@/i18n";
 import AiAssistant from "./instructor/AiAssistant";
 import Content from "./instructor/Content";
@@ -29,7 +29,7 @@ export default function CourseDashboard() {
   const courses = useCourses();
   const { data: me } = useMe();
   const { t } = useI18n();
-  if (courses.isLoading || !me) return <p className="text-muted-foreground">{t("app.loading")}</p>;
+  if (courses.isLoading || !me) return <Loading variant="list" />;
   if (courses.isError) return <ErrorNote error={courses.error} />;
   const course = courses.data?.find((c) => c.id === id);
   if (!course) return <p role="alert" className="text-destructive">{t("course.notFound")}</p>;
