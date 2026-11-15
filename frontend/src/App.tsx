@@ -5,6 +5,7 @@ import { useMe } from "./auth";
 import AppShell from "./components/AppShell";
 import { BrandMark } from "./components/shell/Sidebar";
 import { Button } from "./components/ui/button";
+import { Toaster } from "./components/ui/sonner";
 import { useI18n } from "./i18n";
 import Admin from "./pages/Admin";
 import ChangePassword from "./pages/ChangePassword";
@@ -47,6 +48,8 @@ function Guard() {
 
 export default function App() {
   return (
+    <>
+    <Toaster />
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/join" element={<Join />} />
@@ -58,5 +61,6 @@ export default function App() {
       </Route>
       <Route path="*" element={<Navigate to="/courses" replace />} />
     </Routes>
+    </>
   );
 }

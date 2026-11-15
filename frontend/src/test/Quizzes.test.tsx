@@ -2,7 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { instructorRoutes, mockApi, renderApp, studentRoutes } from "./helpers";
+import { instructorRoutes, mockApi, renderApp, reply, studentRoutes } from "./helpers";
 
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
@@ -59,7 +59,8 @@ describe("student quiz after a reload", () => {
       }],
     }));
     renderApp("/courses/1/quizzes");
-    const status = await screen.findByRole("status");
+    await screen.findByText("Week 1 check");  // the loading skeleton is a status too: wait until it is gone
+    const status = screen.getByRole("status");
     expect(within(status).getByText("Unit of resistance?")).toBeInTheDocument();
     expect(status).toHaveTextContent("Your answer: Volt");
     expect(status).toHaveTextContent("Correct answer: Ohm");
@@ -121,6 +122,31 @@ describe("instructor quiz review gate", () => {
     await userEvent.setup().click(await screen.findByRole("button", { name: "Results of Quiz A" }));
     expect(await screen.findByText(/Not enough answers yet/)).toHaveTextContent("at least 5");
     expect(screen.getByText("No individual results are visible.")).toBeInTheDocument();
+  });
+});
+
+describe("instructor quiz delete", () => {
+  it("asks before deleting a quiz and deletes only after the confirmation", async () => {
+    let quizzes = [{ id: 4, title: "Quiz A", module_id: null, kind: "practice", status: "published", opens_at: null, closes_at: null,
+      assigned_to: null, questions: [question("Typed by hand", true)], attempts: 0, created_at: "2026-11-01T00:00:00Z", updated_at: "2026-11-01T00:00:00Z" }];
+    const calls = mockApi(instructorRoutes({
+      "GET /courses/1/quizzes": () => quizzes,
+      "DELETE /courses/1/quizzes/4": () => { quizzes = []; return reply(undefined, 204); },
+    }));
+    renderApp("/courses/1/quizzes");
+    const user = userEvent.setup();
+    const trash = await screen.findByRole("button", { name: "Delete Quiz A" });
+    await user.click(trash);
+    await screen.findByRole("dialog", { name: "Delete this quiz?" });
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(trash).toHaveFocus();  // no Radix trigger: the dialog returns focus itself
+    await user.click(trash);
+    const dialog = await screen.findByRole("dialog", { name: "Delete this quiz?" });
+    expect(calls.some((c) => c.method === "DELETE")).toBe(false);
+    await user.click(within(dialog).getByRole("button", { name: "Delete quiz" }));
+    await waitFor(() => expect(calls.some((c) => c.method === "DELETE" && c.path === "/courses/1/quizzes/4")).toBe(true));
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
   });
 });
 

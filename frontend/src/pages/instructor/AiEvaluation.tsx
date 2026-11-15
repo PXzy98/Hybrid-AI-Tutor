@@ -3,7 +3,7 @@ import { Loader2, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 import { api, type Course, type Evaluation, type EvaluationQuestion } from "@/api/endpoints";
-import { ErrorNote } from "@/components/common";
+import { ErrorNote, Loading } from "@/components/common";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -71,7 +71,7 @@ function EvaluationDetail({ course, id }: { course: Course; id: number }) {
   });
   const e = evaluation.data;
   if (evaluation.error) return <ErrorNote error={evaluation.error} />;
-  if (!e) return <p className="text-muted-foreground">{t("app.loading")}</p>;
+  if (!e) return <Loading variant="list" />;
   const update = (fresh: Evaluation) => {
     qc.setQueryData(["ai-eval", course.id, id], fresh);
     qc.invalidateQueries({ queryKey: ["ai-evals", course.id] });

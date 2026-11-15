@@ -14,6 +14,7 @@ import Sidebar from "./shell/Sidebar";
 import UserMenu from "./shell/UserMenu";
 
 const SIDEBAR_KEY = "tutor.sidebar";  // interface preference only
+const DESKTOP_QUERY = "(min-width: 48rem)";  // Tailwind md: the sidebar instead of the sheet
 
 function storedCollapsed() {
   try {
@@ -51,6 +52,17 @@ export default function AppShell({ me }: { me: Me }) {
   // the mobile sheet closes on navigation
   useEffect(() => setMobileOpen(false), [location.pathname, location.search]);
 
+  // and when the window grows to the desktop layout: md:hidden hides only its content, not its overlay
+  useEffect(() => {
+    const desktop = window.matchMedia?.(DESKTOP_QUERY);
+    if (!desktop) return;
+    const close = () => {
+      if (desktop.matches) setMobileOpen(false);
+    };
+    desktop.addEventListener?.("change", close);
+    return () => desktop.removeEventListener?.("change", close);
+  }, []);
+
   const sidebarProps = { me, current, student, tab };
 
   return (
@@ -71,12 +83,12 @@ export default function AppShell({ me }: { me: Me }) {
       )}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-12 shrink-0 items-center gap-2 border-b bg-background px-3 sm:px-4">
+        <header className={`flex h-12 shrink-0 items-center gap-2 border-b bg-background px-3 sm:px-4 ${showSidebar && !current && !collapsed ? "md:hidden" : ""}`}>
           {showSidebar && (
             <Tooltip content={t("nav.expand")}>
               <Button type="button" variant="ghost" size="icon-sm" className={collapsed ? "text-muted-foreground" : "text-muted-foreground md:hidden"}
                       aria-label={t("nav.expand")} aria-expanded={false}
-                      onClick={() => (window.matchMedia?.("(min-width: 48rem)").matches ? setCollapsed(false) : setMobileOpen(true))}>
+                      onClick={() => (window.matchMedia?.(DESKTOP_QUERY).matches ? setCollapsed(false) : setMobileOpen(true))}>
                 <PanelLeft aria-hidden />
               </Button>
             </Tooltip>

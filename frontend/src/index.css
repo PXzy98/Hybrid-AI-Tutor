@@ -8,6 +8,7 @@
    --info are text colours that pass on the page and on their own -soft background. Run `npm run check:contrast`
    after changing a value. */
 :root {
+  color-scheme: light;
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.2 0.01 260);
@@ -45,6 +46,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   --background: oklch(0.17 0.004 260);
   --foreground: oklch(0.95 0.003 250);
   --sidebar: oklch(0.145 0.004 260);
@@ -176,4 +178,52 @@
   background-position: right 0.6rem center;
   background-repeat: no-repeat;
   background-size: 1rem;
+}
+
+/* Markdown answers (components/Markdown.tsx) */
+@layer components {
+  .markdown {
+    overflow-wrap: anywhere;
+    & > * + * { margin-top: 0.75em; }
+    & h1, & h2, & h3, & h4 { font-weight: 600; line-height: 1.4; margin-top: 1.25em; }
+    & h1 { font-size: 1.25em; }
+    & h2 { font-size: 1.125em; }
+    & h3, & h4 { font-size: 1em; }
+    & > :first-child { margin-top: 0; }
+    & ul { list-style: disc; padding-left: 1.5em; }
+    & ol { list-style: decimal; padding-left: 1.5em; }
+    & li + li { margin-top: 0.25em; }
+    & li > ul, & li > ol { margin-top: 0.25em; }
+    & a { color: var(--primary); text-decoration: underline; text-underline-offset: 2px; }
+    & strong { font-weight: 600; }
+    & blockquote { border-left: 2px solid var(--border); padding-left: 1em; color: var(--muted-foreground); }
+    & hr { border-top: 1px solid var(--border); margin: 1.5em 0; }
+    & :not(pre) > code { border-radius: 0.25rem; background: var(--muted); padding: 0.1em 0.3em; font-size: 0.85em; }
+    & pre {
+      overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--muted);
+      padding: 0.75rem; font-size: 0.875rem; line-height: 1.6;
+    }
+    & table { display: block; max-width: 100%; overflow-x: auto; border-collapse: separate; border-spacing: 0;
+      border: 1px solid var(--border); border-radius: var(--radius); font-size: 0.875rem; }
+    & th { background: var(--muted); font-weight: 500; text-align: left; }
+    & th, & td { padding: 0.375rem 0.75rem; border-bottom: 1px solid var(--border); }
+    & tr:last-child td { border-bottom: 0; }
+    & .katex-display { overflow-x: auto; overflow-y: hidden; padding: 0.25em 0; }
+  }
+
+  /* streaming answer: a caret after the last block */
+  .streaming .markdown > :last-child::after {
+    content: "";
+    display: inline-block;
+    width: 0.45em;
+    height: 1.1em;
+    margin-left: 0.15em;
+    vertical-align: text-bottom;
+    border-radius: 1px;
+    background: currentColor;
+    opacity: 0.6;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .streaming .markdown > :last-child::after { animation: caret 1s steps(1) infinite; }
+  }
 }

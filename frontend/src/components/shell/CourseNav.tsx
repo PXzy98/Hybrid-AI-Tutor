@@ -22,7 +22,7 @@ export default function CourseNav({ course, student, tab }: { course: Course; st
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
   const courseId = course.id;
-  const modules = useQuery({ queryKey: ["modules", courseId], queryFn: () => api.modules(courseId) });
+  const modules = useQuery({ queryKey: ["modules", courseId], queryFn: () => api.modules(courseId), enabled: student });
   const conversations = useQuery({ queryKey: ["conversations", courseId], queryFn: () => api.conversations(courseId), enabled: student });
   const activeModule = params.get("module");
   const activeConversation = params.get("c");
@@ -61,23 +61,21 @@ export default function CourseNav({ course, student, tab }: { course: Course; st
           </div>
         ))}
       </nav>
-      <nav aria-label={t("nav.modules")}>
+      {student && <nav aria-label={t("nav.modules")}>
         <GroupLabel>{t("nav.modules")}</GroupLabel>
         <div className="space-y-0.5">
-          {student && (
-            <button type="button" className={itemClass(!activeModule)} onClick={() => open({ module: null })}>
-              <span className="truncate">{t("nav.wholeCourse")}</span>
-            </button>
-          )}
-          {modules.data?.map((m) => student ? (
+          <button type="button" className={itemClass(!activeModule)} onClick={() => open({ module: null })}>
+            <span className="truncate">{t("nav.wholeCourse")}</span>
+          </button>
+          {modules.data?.map((m) => (
             <button key={m.id} type="button" className={itemClass(activeModule === String(m.id))}
                     aria-current={activeModule === String(m.id) ? "true" : undefined} onClick={() => open({ module: String(m.id) })}>
               <span className="truncate">{m.title}</span>
             </button>
-          ) : <p key={m.id} className="truncate px-2.5 py-1.5 text-sm text-foreground/80">{m.title}</p>)}
+          ))}
           {modules.data?.length === 0 && <p className="px-2.5 text-sm text-muted-foreground">{t("nav.noModules")}</p>}
         </div>
-      </nav>
+      </nav>}
       {student && !!conversations.data?.length && (
         <nav aria-label={t("nav.conversations")}>
           {byDay(conversations.data).map(([label, rows]) => (

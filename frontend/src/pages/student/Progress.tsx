@@ -1,11 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Eye, EyeOff } from "lucide-react";
+import { ChartNoAxesColumn, Eye, EyeOff, Lightbulb, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
 import { api, type Course, type CourseProfile, type VisibilityAction } from "@/api/endpoints";
 import Band from "@/components/Band";
-import { ErrorNote, StatusText } from "@/components/common";
+import { EmptyState, ErrorNote, Loading, PageHeader, StatusText } from "@/components/common";
 import { Alert } from "@/components/ui/alert";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
@@ -19,43 +19,39 @@ import type { MessageKey } from "@/i18n/en";
 export default function Progress({ course }: { course: Course }) {
   const { t } = useI18n();
   const profile = useQuery({ queryKey: ["profile", course.id], queryFn: () => api.profile(course.id) });
-  if (profile.isLoading) return <p className="text-muted-foreground">{t("app.loading")}</p>;
+  if (profile.isLoading) return <Loading variant="cards" />;
   if (profile.isError || !profile.data) return <ErrorNote error={profile.error ?? new Error(t("me.loadError"))} />;
   const data = profile.data;
+  const explanations = data.preferences?.sequencing && data.preferences.detail
+    ? t("me.explanations", { sequencing: t(`me.pref.${data.preferences.sequencing}` as MessageKey), detail: t(`me.pref.${data.preferences.detail}` as MessageKey) })
+    : undefined;
   return (
-    <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
-      <div className="space-y-4">
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+      <div className="min-w-0 space-y-4">
+        <PageHeader title={t("me.title")} description={data.personalized ? explanations : undefined} />
         {!data.personalized ? (
-          <Card>
-            <CardHeader><CardTitle>{t("me.title")}</CardTitle><CardDescription>{t("me.noProfile")}</CardDescription></CardHeader>
-            <CardContent><Button asChild><Link to={`/courses/${course.id}/start`}>{t("me.personalize")}</Link></Button></CardContent>
-          </Card>
+          <EmptyState icon={Sparkles} title={t("empty.profile.title")}
+                      action={<Button asChild><Link to={`/courses/${course.id}/start`}>{t("me.personalize")}</Link></Button>}>
+            {t("me.noProfile")}
+          </EmptyState>
         ) : (
           <>
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("me.title")}</CardTitle>
-                {data.preferences?.sequencing && data.preferences.detail && (
-                  <CardDescription>
-                    {t("me.explanations", { sequencing: t(`me.pref.${data.preferences.sequencing}` as MessageKey), detail: t(`me.pref.${data.preferences.detail}` as MessageKey) })}
-                  </CardDescription>
-                )}
-              </CardHeader>
-              <CardContent className="space-y-5">
-                {data.modules?.length === 0 && <p className="text-sm text-muted-foreground">{t("me.empty")}</p>}
-                {data.modules?.map((m) => (
-                  <section key={m.module_id} aria-label={m.title} className="space-y-2">
-                    <h3 className="font-medium">{m.title}</h3>
-                    <ul className="space-y-1.5">
+            {data.modules?.length === 0 && <EmptyState icon={ChartNoAxesColumn} title={t("empty.progress.title")}>{t("me.empty")}</EmptyState>}
+            {data.modules?.map((m) => (
+              <section key={m.module_id} aria-label={m.title}>
+                <Card>
+                  <CardHeader><CardTitle>{m.title}</CardTitle></CardHeader>
+                  <CardContent className="space-y-4">
+                    <ul className="divide-y">
                       {m.kcs.map((k) => (
-                        <li key={k.kc_id} className="flex items-center justify-between gap-3 text-sm">
-                          <span>{k.name}</span><Band band={k.band} />
+                        <li key={k.kc_id} className="flex items-center justify-between gap-3 py-2.5 text-sm first:pt-0 last:pb-0">
+                          <span className="min-w-0">{k.name}</span><Band band={k.band} />
                         </li>
                       ))}
                     </ul>
                     {!!m.misconceptions?.length && (
-                      <div className="rounded-md border bg-muted/40 p-3 text-sm">
-                        <p className="mb-1 font-medium">{t("me.working")}</p>
+                      <div className="rounded-lg border border-info-border bg-info-soft p-3 text-sm">
+                        <p className="mb-2 flex items-center gap-1.5 font-medium"><Lightbulb aria-hidden className="size-4 text-info" />{t("me.working")}</p>
                         <ul className="space-y-2">
                           {m.misconceptions.map((x) => (
                             <li key={`${x.kc_id}:${x.statement}`}>
@@ -67,15 +63,15 @@ export default function Progress({ course }: { course: Course }) {
                         </ul>
                       </div>
                     )}
-                  </section>
-                ))}
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+              </section>
+            ))}
             <PlanCard plan={data.plan} />
           </>
         )}
       </div>
-      <div className="space-y-4">
+      <div className="min-w-0 space-y-4">
         <VisibilityCard course={course} profile={data} />
         <DeleteData course={course} />
       </div>
@@ -93,11 +89,11 @@ function PlanCard({ plan }: { plan: CourseProfile["plan"] }) {
       </CardHeader>
       <CardContent>
         {!plan ? <p className="text-sm text-muted-foreground">{t("plan.none")}</p> : (
-          <dl className="space-y-2 text-sm">
-            <div><dt className="font-medium">{t("plan.goal")}</dt><dd><Band band={plan.goal} /></dd></div>
-            <div><dt className="font-medium">{t("plan.focus")}</dt>
+          <dl className="grid gap-3 text-sm">
+            <div><dt className="mb-1 text-xs text-muted-foreground">{t("plan.goal")}</dt><dd><Band band={plan.goal} /></dd></div>
+            <div><dt className="mb-1 text-xs text-muted-foreground">{t("plan.focus")}</dt>
               <dd>{plan.focus_kcs.length ? plan.focus_kcs.join(", ") : "—"}</dd></div>
-            {plan.notes && <div><dt className="font-medium">{t("plan.notes")}</dt><dd className="whitespace-pre-wrap">{plan.notes}</dd></div>}
+            {plan.notes && <div><dt className="mb-1 text-xs text-muted-foreground">{t("plan.notes")}</dt><dd className="whitespace-pre-wrap">{plan.notes}</dd></div>}
           </dl>
         )}
       </CardContent>
@@ -116,29 +112,34 @@ function VisibilityCard({ course, profile }: { course: Course; profile: CoursePr
   return (
     <Card aria-label={t("vis.title")}>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">{v.visible_to_instructor ? <Eye aria-hidden className="size-4" /> : <EyeOff aria-hidden className="size-4" />}{t("vis.title")}</CardTitle>
+        <CardTitle>{t("vis.title")}</CardTitle>
         <CardDescription>{t(v.mode === "A" ? "vis.modeA" : "vis.modeB")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3 text-sm">
-        <Badge variant={v.visible_to_instructor ? "warning" : "success"}>
-          {t(v.visible_to_instructor ? "vis.visible" : "vis.hidden")}
-        </Badge>
+        <div className="flex items-center gap-3 rounded-lg border bg-muted/40 p-3">
+          <span aria-hidden className={`flex size-9 shrink-0 items-center justify-center rounded-full ${v.visible_to_instructor ? "bg-info-soft text-info" : "bg-success-soft text-success"}`}>
+            {v.visible_to_instructor ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
+          </span>
+          <Badge variant={v.visible_to_instructor ? "info" : "success"} className="min-w-0 shrink whitespace-normal text-left">
+            {t(v.visible_to_instructor ? "vis.visible" : "vis.hidden")}
+          </Badge>
+        </div>
         {v.mode === "B" && (
           <>
             {v.visible_since && <p className="text-muted-foreground">{t("vis.since", { date: new Date(v.visible_since).toLocaleDateString() })}</p>}
             {!v.acknowledged && !v.opted_out && (
               <>
-                <Alert variant="warning">{t("vis.ackText")}</Alert>
-                <Button type="button" onClick={() => change.mutate("acknowledge")} disabled={change.isPending}>{t("vis.acknowledge")}</Button>
+                <Alert variant="warning" icon>{t("vis.ackText")}</Alert>
+                <Button type="button" className="w-full" onClick={() => change.mutate("acknowledge")} loading={change.isPending}>{t("vis.acknowledge")}</Button>
               </>
             )}
             {v.acknowledged && !v.opted_out && (
-              <Button type="button" variant="outline" onClick={() => change.mutate("opt_out")} disabled={change.isPending}>{t("vis.optOut")}</Button>
+              <Button type="button" variant="outline" className="w-full" onClick={() => change.mutate("opt_out")} loading={change.isPending}>{t("vis.optOut")}</Button>
             )}
             {v.opted_out && (
               <>
                 <p>{t("vis.optedOut")}</p>
-                <Button type="button" variant="outline" onClick={() => change.mutate("opt_in")} disabled={change.isPending}>{t("vis.optIn")}</Button>
+                <Button type="button" variant="outline" className="w-full" onClick={() => change.mutate("opt_in")} loading={change.isPending}>{t("vis.optIn")}</Button>
               </>
             )}
           </>
@@ -163,11 +164,11 @@ function DeleteData({ course }: { course: Course }) {
     },
   });
   return (
-    <Card>
+    <Card className="border-destructive/30">
       <CardHeader><CardTitle>{t("del.title")}</CardTitle><CardDescription>{t("del.hint")}</CardDescription></CardHeader>
       <CardContent className="space-y-3">
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild><Button type="button" variant="destructive">{t("del.button")}</Button></DialogTrigger>
+          <DialogTrigger asChild><Button type="button" variant="destructive" className="h-auto min-h-9 max-w-full py-2 whitespace-normal">{t("del.button")}</Button></DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{t("del.confirmTitle")}</DialogTitle>
@@ -176,7 +177,7 @@ function DeleteData({ course }: { course: Course }) {
             <ErrorNote error={remove.error} />
             <DialogFooter>
               <DialogClose asChild><Button type="button" variant="outline">{t("end.cancel")}</Button></DialogClose>
-              <Button type="button" variant="destructive" disabled={remove.isPending} onClick={() => remove.mutate()}>{t("del.confirm")}</Button>
+              <Button type="button" variant="destructive" loading={remove.isPending} onClick={() => remove.mutate()}>{t("del.confirm")}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
