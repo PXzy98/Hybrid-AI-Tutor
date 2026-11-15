@@ -439,7 +439,7 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 
 | ID | 任务 | Sprint | 依赖 | 主要文件 | 完成标准 |
 |---|---|---|---|---|---|
-| F1 | 基于 API v2 的前端，正在做（包含 T6、T7 和 T8 的文字）：**学生端**（聊天、我的进度、小测、问卷）和**教师端**（班级概览、每个学生的进度（遵守可见性规则）、小测、资料、设置）。没有每条回答后的评分，没有回答风格按钮；不使用 `/api/v1/survey`。用 `data/demo_courses/` 里的八个开放课程包测试 | S7 | Z9、Q1、S6～S10、Z12 的 OpenAPI | `frontend/` | `npm run build && npm test`；两个端在演示课程包上都能用 |
+| F1 | 基于 API v2 的前端，**已完成**（#71、#78；界面升级 U1～U5 #81～#85，计划见 [design/ui-upgrade.md](design/ui-upgrade.md)；包含 T6、T7 和 T8 的文字）：**学生端**（聊天、我的进度、小测、问卷）和**教师端**（班级概览、每个学生的进度（遵守可见性规则）、小测、资料、设置）。没有每条回答后的评分，没有回答风格按钮；不使用 `/api/v1/survey`。用 `data/demo_courses/` 里的八个开放课程包测试 | S7 | Z9、Q1、S6～S10、Z12 的 OpenAPI | `frontend/` | `npm run build && npm test`；两个端在演示课程包上都能用 |
 
 ### 7.4 前端技术栈（T）
 
@@ -482,10 +482,18 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | 学习者数据按课程（course-structure.md 4.1、4.4） | S | `learner_kc_state`、`learner_topic_level`、`evidence_log`、`learner_misconception` 加 `course_id`（已有的行归到演示课程）；每门课一个 `LearnerRepository`；`app/learner/course_data.py` 导出和删除一门课的学习者数据 | #60 | 审查 |
 | S9（API v2 接口和数据库部分） | S | `app/api/v2/learner.py`：检查题、课程诊断、个人档案、可见性选择、删除自己在一门课的数据、班级汇总、个人概览、学习计划；`app/learner/course_views.py` 在数据库上实现 `LearnerViewStore`、可见性变更和计划（`learning_plan`，迁移 0012） | #62 | 审查 |
 | S5 的一部分（11-12 顾问会议） | S | `data/demo_courses/archives/` 里的 8 个公开课程包（讲义、大纲、日历、作业、考试；答案只给教师），带清单、署名和许可；`scripts/fetch_open_courses.py` 用来解压和重建；`tests/test_open_course_packs.py` | #64 | 审查；S5、S11、T4 都用这些课程包 |
-| Q1（新增：小测和学期末问卷；S9 的问卷、S6 的教师端 AI 里的小测起草） | S | `app/learner/quizzes.py`、`app/api/v2/quizzes.py`、`app/api/v2/survey.py`、`app/instructor_ai/quiz_drafts.py`、结束学期的导出和删除、迁移 0013；api-v2.md 3.9、3.10 | 分支 `feature/q1-quizzes-survey` | 审查 |
-| F1（前端 v2：学生端和教师端；包含 T6、T7 和 T8 的文字） | T | `frontend/` | 随 F1 | 审查 |
+| Q1（新增：小测和学期末问卷；S9 的问卷、S6 的教师端 AI 里的小测起草） | S | `app/learner/quizzes.py`、`app/api/v2/quizzes.py`、`app/api/v2/survey.py`、`app/instructor_ai/quiz_drafts.py`、结束学期的导出和删除、迁移 0013；api-v2.md 3.9、3.10 | #66 | 审查 |
+| F1（前端 v2：学生端和教师端；包含 T6、T7 和 T8 的文字） | T | `frontend/` | #71、#78、#81～#85 | 审查 |
+| S4（API v2 部分） | S | 上传资料先扫描再存储、删除、重建索引的后台任务 | #67 | 审查 |
+| S6、S7、S10（API v2 部分） | S | 教师端 AI 草稿作为后台任务、接受进课程内容、班级洞察 | #70 | 审查 |
+| S9（概览里的回答风格） | S | 概览显示学生开始共享之后设置的回答风格 | #77 | 审查 |
+| S11 | S | 在全部 8 个公开课程包上做检索评估（`eval/course-rag-packs/`） | #72 | 审查 |
+| T4 | T | ECE 和计算机科学问题的路由评估（`eval/routing-ece/`）；重新训练的候选模型没有采用 | #75 | 审查 |
+| T5 | T | 问题类型（概念 / 课程事务）；课程事务问题先检索课程级文件 | #80 | 审查 |
+| T9 | T | `scripts/build_demo.py`：通过 API v2 用课程包建演示课程 | #69 | 审查 |
+| T11（无障碍部分）、T12（手册） | T | 无障碍自查和 axe 测试；学生手册和教师手册 | #74、#73 | 审查 |
 
-从 2026-11-11 起，按同样的决定，Z 也用这种方式做 7.2 和 7.3 里 S 和 T 剩下的任务（每个任务一个 PR，开 PR 时加到上表）。还没开始的：S4、S6、S7、S10 的 API v2 接口；T3 到 T13（T6、T7 和 T8 的一部分由 F1 承担，见 7.3a）；CI 扫描报告的 `react-router` 7 和 `vite`/`vitest` 升级。
+从 2026-11-11 起，按同样的决定，Z 也用这种方式做 7.2 和 7.3 里 S 和 T 剩下的任务（每个任务一个 PR，开 PR 时加到上表）。还没开始的（2026-11-15）：把课程级知识模型注册进系统（S8）；网页搜索（T13）；视频（T10）；改名（T11，等项目名）；路由、前端和网页搜索的交接说明（T12）；CI 扫描报告的 `transformers` 5、`react-router` 7 和 `vite`/`vitest` 升级。
 
 ## 8. 开发流程
 

@@ -1,131 +1,132 @@
-# Integrated main + RAG + semantic routing (v3)
-
-Keeps the full instructor dashboard and adds the real medical RAG and the LR/SVM routing trained on 500 questions.
-First run on Windows: [GETTING_STARTED.md](GETTING_STARTED.md) (Chinese version:
-[docs/GETTING_STARTED_zh.md](docs/GETTING_STARTED_zh.md)); version sources and limits:
-[docs/history/INTEGRATION.md](docs/history/INTEGRATION.md).
-Install: run `setup_local.py` with Python 3.12; start: run `start_backend.ps1` and `start_frontend.ps1`.
-
----
-
-The original project description of the main branch follows:
-
 # Privacy-Aware Hybrid AI Tutor
 
-A health-education tutor (ELG 5902, Group 1). Students pick one of five topics (High Blood Pressure, Type 2 Diabetes, Asthma, Migraine, Pneumonia) and ask questions. The system removes private information locally, then routes each question to a local model (Ollama) or a cloud model. Answers are grounded in course material (RAG) and adapted to what the student already knows. The tutor tracks the student's mastery of each knowledge component and adapts the level, the material and the check questions. Learning preferences only change how the answer is presented. The learner profile never leaves the local network.
+A course tutor for any subject (ELG 5902, Group 1). Instructors create courses, import their class list and
+upload their material; students ask questions about the course. The system removes personal information
+locally, then routes each question to a local model the course controls or to a cloud model. Answers cite the
+course material and adapt to what the student already knows. Original questions and learner profiles never
+leave the course's own servers, and question text is never stored.
 
-- **Next version (v4), start here**: [docs/v4-implementation-guide.md](docs/v4-implementation-guide.md) (rules, target architecture, owners, tasks)
-- Design (v3, as built): [docs/System_Design_v3.md](docs/System_Design_v3.md) (diagrams in [docs/diagrams/](docs/diagrams/))
-- Progress log: [docs/IMPLEMENTATION_LOG.md](docs/IMPLEMENTATION_LOG.md)
-- For teammates (routing, RAG): [docs/INTERFACES.md](docs/INTERFACES.md)
-- Demo script: [docs/DEMO.md](docs/DEMO.md)
-- Student manual: [docs/STUDENT_MANUAL.md](docs/STUDENT_MANUAL.md)
-- Instructor manual: [docs/INSTRUCTOR_MANUAL.md](docs/INSTRUCTOR_MANUAL.md)
-- Privacy: [docs/report/privacy_subsystem.md](docs/report/privacy_subsystem.md) (evaluation, design, test results)
-- Routing and RAG as integrated: [docs/ROUTING_PATCH.md](docs/ROUTING_PATCH.md), course-material RAG: [docs/RAG_COURSE_BETA.md](docs/RAG_COURSE_BETA.md); differences from the design: [System_Design_v3.md §16](docs/System_Design_v3.md)
-- Older plans, checklists and one-off integration notes: [docs/history/](docs/history/)
+What it does (v4):
+- **Courses and modules** for any subject; the course type (medical science, life science, ECE, general) picks
+  the privacy rules. Class list import (CSV) and invitation codes.
+- **Ask**: privacy filter, semantic router (local or cloud; concept or logistics question), retrieval over the
+  course's own material, answer checks, a local/cloud label on every answer.
+- **Learner model** per course, a diagnostic, quizzes (AI drafts reviewed by the instructor) and an end-of-term
+  survey.
+- **Instructor dashboard**: class overview and class insights, each student's progress when the course allows
+  it (visibility mode B; students can opt out), learning plans, AI drafts of course content, local versus cloud
+  evaluation, end of term (export, then delete the course's student data).
+- **One Docker Compose stack** (Caddy, FastAPI, worker, PostgreSQL, optional monitoring); the local model
+  (vLLM or Ollama) runs separately and is reached by URL.
+
+## Start here
+
+| For | Read |
+|---|---|
+| Everyone working on the code, and coding agents | [AGENTS.md](AGENTS.md), then [docs/v4-implementation-guide.md](docs/v4-implementation-guide.md) (rules, architecture, owners, tasks) |
+| State of the work, decisions, open tasks | [docs/HANDOVER.md](docs/HANDOVER.md), [TODO.md](TODO.md) |
+| Deploying and running | [docs/OPERATIONS.md](docs/OPERATIONS.md), [deploy/README.md](deploy/README.md) |
+| Courses, accounts, settings, data model; the HTTP API | [docs/design/course-structure.md](docs/design/course-structure.md), [docs/design/api-v2.md](docs/design/api-v2.md) |
+| Privacy rules and their evaluation | [docs/PRIVACY_PROFILES.md](docs/PRIVACY_PROFILES.md), [eval/privacy-filter/](eval/privacy-filter/) |
+| Model connections | [docs/MODEL_CONNECTIONS.md](docs/MODEL_CONNECTIONS.md) |
+| Database and migrations | [docs/DATABASE.md](docs/DATABASE.md) |
+| Using the tutor | [docs/STUDENT_MANUAL.md](docs/STUDENT_MANUAL.md), [docs/INSTRUCTOR_MANUAL.md](docs/INSTRUCTOR_MANUAL.md) |
+| Demo and test courses | [data/demo_courses/README.md](data/demo_courses/README.md), [docs/DEMO.md](docs/DEMO.md) |
+| How the code came about | [docs/IMPLEMENTATION_LOG.md](docs/IMPLEMENTATION_LOG.md); older documents in [docs/history/](docs/history/) |
+
+First run on Windows without Docker: [GETTING_STARTED.md](GETTING_STARTED.md) (Chinese version:
+[docs/GETTING_STARTED_zh.md](docs/GETTING_STARTED_zh.md)).
 
 ## Quick start (Docker)
 
-Requirements: Docker with Compose, and the Ollama GPU server on the network (`OLLAMA_URL`).
+Requirements: Docker with Compose v2, and a local model server (vLLM or Ollama) the course controls.
 
-```powershell
-Copy-Item .env.example .env       # set OLLAMA_URL, INSTRUCTOR_USERNAME, INSTRUCTOR_INITIAL_PASSWORD
-docker compose up --build -d      # http://localhost:8080 (WEB_PORT changes the port)
+```bash
+cp .env.example .env    # set POSTGRES_PASSWORD, OLLAMA_URL, INSTRUCTOR_USERNAME, INSTRUCTOR_INITIAL_PASSWORD
+docker compose up -d --build
 ```
 
-- `api`: FastAPI with the privacy filter and the learner model; SQLite lives in the `tutor-data` volume.
-- `web`: nginx serving the React app and proxying `/api` to `api`. The browser sees one origin.
-- The first build downloads the spaCy model `en_core_web_lg` (about 400 MB) and the routing encoder and two evidence models (about 600 MB); the trained LR/SVM weights come from `data/routing/models`. The build fails if any configured model is missing (`python -m app.routing.prepare --check`), and the container never downloads a model at run time. `SPACY_MODEL=en_core_web_sm` gives a smaller image.
-- Log in as the instructor, choose a new password, then create students (API `/api/v1/admin/students` until the dashboard of Step 13). For a demo with three prepared students, see [docs/DEMO.md](docs/DEMO.md).
-- Any `config.yaml` value can be overridden in `.env` as `SECTION__FIELD`, e.g. `CONTENT__SERVE_UNREVIEWED=true` (needed while the course content is unreviewed) or `ROUTING__THRESHOLD=0.7`.
-- `docker compose down` stops the app; `docker compose down -v` also deletes all accounts and data.
-- Demo students inside the container: `docker compose exec -e DEMO_INSTRUCTOR_PASSWORD=<new password> api python /app/scripts/demo_seed.py --base-url http://127.0.0.1:8000` (see [docs/DEMO.md](docs/DEMO.md)).
+- Services: `proxy` (Caddy: the web app, `/api` forwarded to `api`, HTTPS once `SITE_ADDRESS` is a domain
+  name), `api` (FastAPI; applies the database migrations at startup), `worker` (indexing, AI drafts,
+  evaluations, the live settings switch), `db` (PostgreSQL 16, internal network only). `--profile monitoring`
+  adds Prometheus, Alertmanager and Grafana.
+- The first account (`INSTRUCTOR_USERNAME`) is the admin and must choose a new password at first login; it then
+  creates instructor accounts and model connections. Production settings, upgrades and backups:
+  [docs/OPERATIONS.md](docs/OPERATIONS.md).
+- `docker-compose.override.yml` is for local development (it publishes the database on `127.0.0.1:5432`);
+  production uses `docker compose -f docker-compose.yml`.
+- Demo courses from the open course packs, built through the API: `python scripts/build_demo.py`
+  ([docs/DEMO.md](docs/DEMO.md)).
 
 ## Repository layout
 
 | Path | Contents |
 |---|---|
-| `backend/` | FastAPI app (`app/`) and tests |
-| `frontend/` | React + TypeScript web app (see `frontend/README.md`) |
-| `content/topics/` | KCs, check questions, misconception catalog per topic |
-| `scripts/` | Content review export, demo seeding |
-| `config.yaml` | Pipeline steps, models, thresholds, learner settings |
-| `.env` | Secrets and machine-specific URLs (copy from `.env.example`) |
-| `eval/` | Evaluations; `model-boundary-test/` is done |
-| `data/synthetic/` | Synthetic test data (fictional people only) |
+| `backend/` | FastAPI app (`app/`), Alembic migrations, tests |
+| `frontend/` | React 19 + TypeScript, Tailwind CSS 4, shadcn/ui, on API v2 (see [frontend/README.md](frontend/README.md)) |
+| `deploy/` | Caddy and monitoring configuration |
+| `data/demo_courses/` | the eight open course packs (zips) used by evaluations, integration tests and demos |
+| `data/routing/` | routing training data and weights |
+| `content/` | the fictional v3 course content (YAML import format) |
+| `eval/` | evaluations: privacy filter (E6), routing, retrieval, learner model, model comparison, load test |
+| `scripts/` | demo build, course pack download, v3 migration, content export |
+| `config.yaml` | pipeline steps, models, thresholds, hard limits; any value can be overridden in `.env` as `SECTION__FIELD` |
 
-## Development setup (without Docker)
+## Development
 
-Requirements: Python 3.12, Node 20+. The commands below are for PowerShell; on bash use `.venv/bin/` (Linux/macOS) or `.venv/Scripts/` (Git Bash) instead of `.venv\Scripts\`.
+Requirements: Python 3.12, Node 20+, PostgreSQL for the backend tests. On bash use `.venv/bin/` (Linux, macOS)
+or `.venv/Scripts/` (Git Bash) instead of `.venv\Scripts\`.
 
 ```powershell
 python -m venv .venv
 .venv\Scripts\python -m pip install -e "backend[dev]"
 .venv\Scripts\python -m spacy download en_core_web_sm   # tests; production uses en_core_web_lg
-Copy-Item .env.example .env                              # then fill in what you need
+cd backend; ..\.venv\Scripts\python -m app.routing.prepare; cd ..   # routing and evidence models, about 600 MB
+Copy-Item .env.example .env                              # keys and passwords live only here
 ```
 
-Run the checks from `backend/`:
+- **spaCy model**: the server refuses to start without the model named in `config.yaml`
+  (`privacy.spacy_model`, default `en_core_web_lg`) and never downloads it by itself. For quick local work set
+  `PRIVACY__SPACY_MODEL=en_core_web_sm` in `.env`.
+- **Routing and evidence models** run offline (`routing.local_files_only: true`). Without them the app still
+  works: the router picks the cloud with the reason in its diagnostics, and passages are marked "not checked
+  for relevance".
+- **Cloud model**: any OpenAI-compatible API in `.env` (`CLOUD_BASE_URL`, `CLOUD_API_KEY`, `CLOUD_MODEL`); the
+  provider is chosen by the client. The cloud only receives text that passed the cloud gate; without a key the
+  local model answers. Send only fictional data to hosted APIs while developing.
 
-```powershell
-cd backend
-..\.venv\Scripts\python -m ruff check .
-..\.venv\Scripts\python -m pytest -q
-```
-
-### spaCy model for the privacy filter
-
-The server refuses to start without the spaCy model named in `config.yaml` (`privacy.spacy_model`, default `en_core_web_lg`, about 400 MB). It never downloads it by itself.
-
-```powershell
-.venv\Scripts\python -m spacy download en_core_web_lg
-```
-
-For quick local development you can use the small model instead: set `PRIVACY__SPACY_MODEL=en_core_web_sm` in `.env`. Tests always use the small model.
-
-### Routing and evidence models
-
-The semantic router and the evidence check run locally and offline (`routing.local_files_only: true`). Download their models once (MiniLM sentence encoder and two cross-encoders, about 600 MB in the Hugging Face cache):
-
-```powershell
-cd backend; ..\.venv\Scripts\python -m app.routing.prepare
-```
-
-Without them the app still works: the router selects the cloud with the reason in its diagnostics, and the retrieved course passages are used but marked "not checked for relevance" (one warning in the server log).
-
-### Cloud model
-
-Any OpenAI-compatible API, set in `.env` (never commit keys):
-
-```
-CLOUD_BASE_URL=https://api.deepseek.com      # example: DeepSeek, tested Oct 19, 2026
-CLOUD_API_KEY=...
-CLOUD_MODEL=deepseek-flash
-```
-
-The cloud only receives the sanitized question, the topic, course passages and three coarse labels; a question with a personal health detail reaches the cloud only as a general question rewritten by the local model ("Can a person with asthma play soccer?"), and stays local if the rewrite fails its checks (`privacy.health_detail_policy: generalize`, approved by the professor; `local_only` keeps all such questions local). Without a key, or when the cloud fails, the local model answers and the student is told why. Reasoning models count their hidden reasoning against `llm.cloud.max_tokens` (2000). Check the provider's data location and retention with the client before a pilot (DeepSeek stores data in China): see [docs/history (privacy upgrade notes)](docs/history/%E9%9A%90%E7%A7%81%E5%8D%87%E7%BA%A7.md).
-
-Run the app in development mode (two terminals):
+Run in development mode (two terminals):
 
 ```powershell
 cd backend; ..\.venv\Scripts\python -m uvicorn app.main:app --reload     # http://localhost:8000/docs
 cd frontend; npm install; npm run dev                                   # http://localhost:5173
 ```
 
-### First instructor account
-
-There is no self-registration: the instructor creates student accounts. To create the first instructor, set `INSTRUCTOR_USERNAME` and `INSTRUCTOR_INITIAL_PASSWORD` in `.env` before the first start; that password must be changed at first login. Alternatively, run from `backend/`:
+Checks (tests need `TEST_DATABASE_URL`, see [docs/DATABASE.md](docs/DATABASE.md); they ignore the developer's
+`.env`):
 
 ```powershell
-..\.venv\Scripts\python -m app.auth.cli create-instructor <username>
-..\.venv\Scripts\python -m app.auth.cli set-password <username>      # recovery: also clears a lockout
+cd backend
+..\.venv\Scripts\python -m pytest -q
+$env:TEST_LEARNER_KNOWLEDGE="rule"; ..\.venv\Scripts\python -m pytest -q; Remove-Item Env:TEST_LEARNER_KNOWLEDGE
+..\.venv\Scripts\python -m ruff check . ../scripts
+cd ..\frontend
+npm run build; npm test
 ```
 
-Tests run offline by default. Tests that need the Ollama server or a cloud key are marked; run them with `-m ollama` or `-m cloud`.
+Tests run offline; the few that need the local model server or a cloud key are marked (`-m ollama`,
+`-m cloud`). Before using the course packs: `python scripts/fetch_open_courses.py unpack` (never commit the
+unpacked folders).
+
+Accounts from the command line (from `backend/`): `..\.venv\Scripts\python -m app.auth.cli create-instructor
+<username>`, and `set-password <username>` for recovery (it also clears a lockout).
 
 ## Team
 
-- Zhenyan: privacy filter, learner model, pipeline, API, frontend
-- Tongkai: routing score (plugs in via `routing.impl`)
-- Siyun: RAG retrieval (plugs in via `rag.impl`)
+| Who | Components |
+|---|---|
+| Zhenyan Xing | platform (accounts, courses, settings, API, database), privacy, model gateway and LLM deployment, Docker and operations |
+| Siyun Tan | retrieval and course content, instructor AI tiers 1 to 3, learner model (backend) |
+| Tongkai Liu | routing and web search, frontend and user experience, demo material and manuals |
+
+Owners per component: guide section 5 and `.github/CODEOWNERS`.

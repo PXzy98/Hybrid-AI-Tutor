@@ -501,7 +501,7 @@ data); users build against the fakes without waiting for the real implementation
 
 | ID | Task | Sprint | Depends on | Main files | Done when |
 |---|---|---|---|---|---|
-| F1 | Frontend on API v2, being done now (carries T6 and T7, and the strings of T8): a **student dashboard** (chat, my progress, quizzes, survey) and an **instructor dashboard** (class overview, each student's progress under the visibility rules, quizzes, materials, settings). No rating after an answer, no answer-style buttons; `/api/v1/survey` is not used. Tested with the eight open course packs in `data/demo_courses/` | S7 | Z9, Q1, S6–S10, Z12 OpenAPI | `frontend/` | `npm run build && npm test`; both dashboards work on the demo packs |
+| F1 | Frontend on API v2, **done** (#71, #78; UI upgrade U1 to U5 #81 to #85, plan in [design/ui-upgrade.md](design/ui-upgrade.md); carries T6 and T7, and the strings of T8): a **student dashboard** (chat, my progress, quizzes, survey) and an **instructor dashboard** (class overview, each student's progress under the visibility rules, quizzes, materials, settings). No rating after an answer, no answer-style buttons; `/api/v1/survey` is not used. Tested with the eight open course packs in `data/demo_courses/` | S7 | Z9, Q1, S6–S10, Z12 OpenAPI | `frontend/` | `npm run build && npm test`; both dashboards work on the demo packs |
 
 ### 7.4 Frontend stack (T)
 
@@ -547,13 +547,22 @@ owner reviews and approves the PR, and the area stays the owner's afterwards (ru
 | learner data per course (course-structure.md 4.1, 4.4) | S | `course_id` on `learner_kc_state`, `learner_topic_level`, `evidence_log` and `learner_misconception` (existing rows go to the demo course); one `LearnerRepository` per course; `app/learner/course_data.py` exports and deletes one course's learner data | #60 | review |
 | S9 (API v2 endpoints and database side) | S | `app/api/v2/learner.py`: check, course diagnostic, profile, visibility choices, deleting own course data, class summary, individual overview, learning plan; `app/learner/course_views.py` implements `LearnerViewStore`, visibility changes and plans on the database (`learning_plan`, migration 0012) | #62 | review |
 | part of S5 (advisor meeting 2026-11-12) | S | eight open course packs (lectures, syllabi, calendars, assignments, exams; solutions kept instructor-only) as zips in `data/demo_courses/archives/` with manifests, attribution and license; `scripts/fetch_open_courses.py` to unpack and rebuild them; `tests/test_open_course_packs.py` | #64 | review; S5, S11 and T4 use the packs |
-| Q1 (new: quizzes and the end-of-term survey; the survey of S9, quiz drafts as instructor AI of S6) | S | `app/learner/quizzes.py`, `app/api/v2/quizzes.py`, `app/api/v2/survey.py`, `app/instructor_ai/quiz_drafts.py`, end of term export and deletion, migration 0013; api-v2.md 3.9, 3.10 | branch `feature/q1-quizzes-survey` | review |
-| F1 (frontend v2: student and instructor dashboards; carries T6, T7 and the strings of T8) | T | `frontend/` | with F1 | review |
+| Q1 (new: quizzes and the end-of-term survey; the survey of S9, quiz drafts as instructor AI of S6) | S | `app/learner/quizzes.py`, `app/api/v2/quizzes.py`, `app/api/v2/survey.py`, `app/instructor_ai/quiz_drafts.py`, end of term export and deletion, migration 0013; api-v2.md 3.9, 3.10 | #66 | review |
+| F1 (frontend v2: student and instructor dashboards; carries T6, T7 and the strings of T8) | T | `frontend/` | #71, #78, #81 to #85 | review |
+| S4 (API v2 side) | S | material upload scanned before storing, delete, index rebuild job | #67 | review |
+| S6, S7, S10 (API v2 side) | S | instructor AI drafts as background jobs, accept into content, class insights | #70 | review |
+| S9 (answer style in the overview) | S | the overview shows the answer style set after sharing started | #77 | review |
+| S11 | S | retrieval evaluation on all eight open course packs (`eval/course-rag-packs/`) | #72 | review |
+| T4 | T | routing evaluation on ECE and CS questions (`eval/routing-ece/`); retrained candidates not adopted | #75 | review |
+| T5 | T | question type head (concept / logistics); logistics questions search course-level files first | #80 | review |
+| T9 | T | `scripts/build_demo.py`: the demo courses from the packs through API v2 | #69 | review |
+| T11 (accessibility part), T12 (manuals) | T | accessibility self-check and axe tests; student and instructor manuals | #74, #73 | review |
 
 From 2026-11-11, by the same decision, Z also works on the remaining S and T tasks of sections 7.2 and 7.3 in
-this way (one PR per task, listed in the table above when it is opened). Not started yet: the API v2
-endpoints of S4, S6, S7 and S10; T3 to T13 (T6, T7 and part of T8 are carried by F1, section 7.3a); the `react-router` 7 and `vite`/`vitest` updates reported by
-the CI scans.
+this way (one PR per task, listed in the table above when it is opened). Not started yet (2026-11-15):
+registering the course-level knowledge model (S8); web search (T13); the video (T10); renaming (T11, waits for
+the name); the routing, frontend and web search handover notes (T12); the `transformers` 5, `react-router` 7
+and `vite`/`vitest` updates reported by the CI scans.
 
 ## 8. Workflow
 
