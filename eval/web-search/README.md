@@ -11,8 +11,9 @@ per subject and cost. See [docs/WEB_SEARCH.md](../../docs/WEB_SEARCH.md) for the
 | C | Tavily (`app.websearch`, `provider: api`) + the same model |
 | D | OpenAI `web_search` with the same allow-list, answer by `gpt-6.1-terra` |
 | DL | the same as D with `gpt-6-luna` (low cost) |
+| E | `provider: openai` (`app.websearch`): `gpt-6-luna` searches and reports cited findings, which become passages for `gpt-6.1-terra` |
 
-A, B and C use the app's `render_cloud` prompt; the web passages take the place of the course passages.
+A, B, C and E use the app's `render_cloud` prompt; the web passages take the place of the course passages.
 Every arm searches every question, including the control questions, to see whether search hurts.
 
 ## Files
@@ -46,8 +47,8 @@ fakes (no network).
 ## Judging
 
 Claude Sonnet (`anthropic/claude-sonnet-5.5` through OpenRouter) grades each answer against the reference
-(correct / partial / wrong / refused) and, for B and C, whether the passages support it. It compares B with C
-and C with D on the fresh questions, once in each order; a win counts only when both orders agree. Small
+(correct / partial / wrong / refused) and, for B, C and E, whether the passages support it. It compares B with C,
+C with D, C with E and E with D on the fresh questions, once in each order; a win counts only when both orders agree. Small
 samples: proportions come with Wilson 95% intervals, pairs with a sign test; read directions, not decimals.
 
 ## Limits

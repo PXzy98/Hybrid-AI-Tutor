@@ -35,8 +35,13 @@ rag:
   materials_dir: data/topics          # instructor uploads (admin dashboard), one folder per topic
 
 websearch:                        # task T13; docs/WEB_SEARCH.md
-  provider: "off"                 # off | api (hosted search API, key in WEBSEARCH_API_KEY) | searxng (Compose profile)
+  # off | openai (OpenAI web_search, default since the comparison of 2026-11-16) | api (Tavily-format API)
+  # | searxng (Compose profile); openai and api need WEBSEARCH_API_KEY, without it the search step fails
+  provider: openai
   api_url: https://api.tavily.com/search
+  openai_url: https://api.openai.com/v1/responses
+  openai_model: gpt-6-luna         # searches and summarizes only; the course's cloud model writes the answer
+  openai_timeout_s: 30
   searxng_url: http://searxng:8080
   max_results: 3
   max_chars: 1200                 # per result, after cleaning

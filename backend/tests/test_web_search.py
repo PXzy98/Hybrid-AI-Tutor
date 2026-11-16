@@ -129,6 +129,57 @@ async def test_the_api_must_be_a_public_address(use_config, monkeypatch):
         await web_search("q words here", SITES, settings=cfg)
 
 
+def _openai_reply() -> dict:
+    """A Responses API answer: findings with inline links, cited by url_citation annotations."""
+    cdc = "https://www.cdc.gov/rsv/adults.html?utm_source=openai"
+    parts = [("**Adults 75 and older** should get one dose ", cdc, "RSV vaccine guidance"),
+             ("\n\n- A 2025 study found lower risk ", "https://pmc.ncbi.nlm.nih.gov/articles/PMC1/", "Study"),
+             ("\n- Another claim from an outside site ", "https://example.com/x", "Other")]
+    text, annotations = "", []
+    for words, url, title in parts:
+        text += words
+        link = f"([{title}]({url}))."
+        annotations.append({"type": "url_citation", "url": url, "title": title, "start_index": len(text),
+                            "end_index": len(text) + len(link)})
+        text += link
+    return {"output": [{"type": "web_search_call", "status": "completed"},
+                       {"type": "message", "content": [{"type": "output_text", "text": text,
+                                                        "annotations": annotations}]}]}
+
+
+OPENAI_REPLY = _openai_reply()
+
+
+async def test_openai_sends_only_the_query_and_the_allow_list(settings, monkeypatch):
+    monkeypatch.setenv("WEBSEARCH_API_KEY", "fake-test-key")
+    calls, transport = recorder(OPENAI_REPLY)
+    found = await web_search("RSV vaccine for older adults", SITES + ["cdc.gov"], settings=settings("openai"),
+                             transport=transport)
+    body = json.loads(calls[0].content)
+    assert calls[0].url == "https://api.openai.com/v1/responses"
+    assert body["input"] == "RSV vaccine for older adults" and body["model"] == "gpt-6-luna"
+    assert body["tools"] == [{"type": "web_search", "filters": {"allowed_domains": SITES + ["cdc.gov"]}}]
+    assert set(body) == {"model", "instructions", "input", "max_output_tokens", "reasoning", "tool_choice",
+                         "tools"}  # nothing about the student or the course
+    # one passage per cited page on an allowed site, without links, bold markers or tracking parameters
+    assert [c.source for c in found] == ["https://www.cdc.gov/rsv/adults.html",
+                                         "https://pmc.ncbi.nlm.nih.gov/articles/PMC1/"]
+    assert found[0].text == "Adults 75 and older should get one dose ."
+    assert found[0].metadata["title"] == "RSV vaccine guidance"
+
+
+async def test_openai_without_a_key_or_with_an_error_fails(settings, monkeypatch):
+    calls, transport = recorder(OPENAI_REPLY)
+    with pytest.raises(WebSearchError, match="WEBSEARCH_API_KEY"):
+        await web_search("RSV vaccine for older adults", SITES, settings=settings("openai"),
+                         transport=transport)
+    assert calls == []  # nothing was sent
+    monkeypatch.setenv("WEBSEARCH_API_KEY", "fake-test-key")
+    _, down = recorder(httpx.Response(429))
+    with pytest.raises(WebSearchError, match="429"):
+        await web_search("RSV vaccine for older adults", SITES, settings=settings("openai"), transport=down)
+
+
 async def test_searxng_asks_each_site_and_takes_them_in_turns(settings):
     def answer(request: httpx.Request):
         site = request.url.params["q"].rsplit("site:", 1)[1]

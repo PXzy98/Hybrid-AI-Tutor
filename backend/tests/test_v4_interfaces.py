@@ -20,7 +20,7 @@ from app.platform.settings import effective_settings
 from app.platform.usage import NoLimits, UsageLimitExceeded
 from app.privacy.profiles import privacy_profile, scan_document, search_query
 from app.rag.course import FakeCourseRetriever
-from app.websearch import web_search
+from app.websearch import WebSearchError, web_search
 
 COURSE = CourseRef(id=7, code="ELG 5902", title="Test course", course_type="ece")
 StudentAccess = Depends(require_course_role("student"))
@@ -135,7 +135,12 @@ def test_instructor_view_is_refused_until_s9():
 
 
 def test_other_stand_ins():
-    assert asyncio.run(web_search("query", ["medlineplus.gov"])) == []
+    base = Settings(_env_file=None)
+    off = base.model_copy(update={"websearch": base.websearch.model_copy(update={"provider": "off"})})
+    assert asyncio.run(web_search("query", ["medlineplus.gov"], settings=off)) == []
+    # the default (openai) without WEBSEARCH_API_KEY fails before anything is sent
+    with pytest.raises(WebSearchError, match="WEBSEARCH_API_KEY"):
+        asyncio.run(web_search("query", ["medlineplus.gov"], settings=base))
     retriever = FakeCourseRetriever()
     assert retriever.retrieve(7, None, "q") == [] and retriever.calls == [(7, None, "q", 4)]
     NoLimits().check_usage("sid", 7, "question")

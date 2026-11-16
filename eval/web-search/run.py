@@ -50,9 +50,12 @@ OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 PRICES = {"gpt-6.1-terra": (1.00, 5.00), "gpt-6-luna": (0.10, 0.50)}
 OPENAI_SEARCH_CALL = 0.010
 TAVILY_CALL = 0.008  # pay as you go; the first 1,000 a month are free
-ARMS = ("A", "B", "C", "D", "DL")
+ARMS = ("A", "B", "C", "D", "DL", "E")
 LABELS = {"A": "A no search", "B": "B SearXNG", "C": "C Tavily", "D": f"D OpenAI search ({ANSWER_MODEL})",
-          "DL": f"D OpenAI search ({LOW_COST_MODEL})"}
+          "DL": f"D OpenAI search ({LOW_COST_MODEL})", "E": f"E provider openai ({LOW_COST_MODEL} passages)"}
+# E: the search call's tokens are not reported through app.websearch; estimated from DL's search part
+# (one web_search call plus about 9,000 input and 300 output tokens of the low-cost model)
+OPENAI_PASSAGES_CALL = OPENAI_SEARCH_CALL + 9000 * 0.10 / 1e6 + 300 * 0.50 / 1e6
 SUBJECTS = {"medical": "Medical science", "life": "Life science", "ece": "ECE", "cs": "Computer science"}
 TOPIC = {"medical": "pharmacology_and_pathology", "life": "genetics_and_biology",
          "ece": "circuits_and_signals",
@@ -237,7 +240,8 @@ def settings_for(provider: str, a, env: dict):
     s = Settings()
     ws = s.websearch.model_copy(update={"provider": provider, "cache_hours": 0, "timeout_s": a.search_timeout,
                                         **({"searxng_url": a.searxng_url} if a.searxng_url else {})})
-    key = env.get("WEBSEARCH_API_KEY") or env.get("TAVILY_KEY")
+    key = env.get("OPENAI_API_KEY") if provider == "openai" else \
+        env.get("WEBSEARCH_API_KEY") or env.get("TAVILY_KEY")
     return s.model_copy(update={"websearch": ws, **({"websearch_api_key": SecretStr(key)} if key else {})})
 
 
@@ -291,7 +295,7 @@ async def run_arm(arm: str, q: dict, api: OpenAI, settings: dict, search=None, m
                        search_cost=out["searches"] * OPENAI_SEARCH_CALL)
             return row
         found, search_s, search_error = [], None, None
-        if arm in ("B", "C"):
+        if arm in ("B", "C", "E"):
             s = settings[arm]
             query = make_query(q["question"])
             t0 = time.perf_counter()
@@ -304,7 +308,7 @@ async def run_arm(arm: str, q: dict, api: OpenAI, settings: dict, search=None, m
             search_s = time.perf_counter() - t0
         passages = [c.text for c in found]
         out = await api.respond(ANSWER_MODEL, prompt(q, passages))
-        search_cost = TAVILY_CALL if arm == "C" else 0.0
+        search_cost = {"C": TAVILY_CALL, "E": OPENAI_PASSAGES_CALL}.get(arm, 0.0)
         row.update(answer=out["text"], urls=[c.source for c in found], cited=[], passages=passages,
                    search_s=search_s, search_error=search_error, total_s=(search_s or 0) + out["seconds"],
                    input_tokens=out["input_tokens"], output_tokens=out["output_tokens"],
@@ -458,7 +462,7 @@ def report(questions, runs, judged, privacy, pairs, searxng_repeat=None) -> str:
         failed = sum(1 for r in ok if r.get("search_error"))
         empty = sum(1 for r in ok if arm != "A" and not r.get("search_error") and not r.get("urls"))
         lines.append(f"| {LABELS[arm]} | {len(rs)} | {len(rs) - len(ok)} | "
-                     f"{failed if arm in 'BC' else '-'} | "
+                     f"{failed if arm in ('B', 'C', 'E') else '-'} | "
                      f"{empty if arm != 'A' else '-'} | {f(pct(srch, .5))} / {f(pct(srch, .95))} / "
                      f"{f(max(srch) if srch else None)} | {f(pct(tot, .5))} / {f(pct(tot, .95))} |")
     errors = sorted({r.get("search_error") or r.get("error") for r in runs
@@ -578,7 +582,7 @@ async def main_async(a) -> int:
     if a.smoke:
         questions = questions[:2] + [q for q in questions if not q["needs_fresh"]][:1]
     arms = [x for x in a.arms.split(",") if x]
-    pairs = [("B", "C"), ("C", "D")]
+    pairs = [("B", "C"), ("C", "D"), ("C", "E"), ("E", "D")]
     # smoke answers are canned: their own files, never reused by a real run in the same directory
     tag = ".smoke" if a.smoke else ""
     runs_path, judge_path = out / f"runs{tag}.jsonl", out / f"judge{tag}.jsonl"
@@ -589,7 +593,8 @@ async def main_async(a) -> int:
     async with httpx.AsyncClient(transport=a.transport) as client:
         api = a.openai or (SmokeOpenAI() if a.smoke else OpenAI(env.get("OPENAI_API_KEY", ""), client))
         judge = a.judge or (SmokeJudge() if a.smoke else Judge(env.get("OPENROUTER_API_KEY", ""), client))
-        settings = {"B": settings_for("searxng", a, env), "C": settings_for("api", a, env)}
+        settings = {"B": settings_for("searxng", a, env), "C": settings_for("api", a, env),
+                    "E": settings_for("openai", a, env)}
         search = a.search or (smoke_search if a.smoke else web_search)
         make_query = QueryMaker(settings["C"])
         for arm in arms:

@@ -1,7 +1,8 @@
 # Web search (task T13)
 
 Cloud answers to questions that need recent information can add passages from a few allowed web sites. The
-search is chosen when the stack is deployed and is **off by default**.
+search is chosen when the stack is deployed. **The default is `openai`** (chosen after the comparison of
+2026-11-16, below); without `WEBSEARCH_API_KEY` the search step fails and the answer uses the course material.
 
 ## When it runs
 
@@ -24,20 +25,22 @@ routing panel shows a "Web search" step. A failed search is skipped: the answer 
 
 | `websearch.provider` | What | Needs |
 |---|---|---|
-| `off` (default) | no search | nothing |
+| `off` | no search | nothing |
+| `openai` (default) | OpenAI's web search (Responses API, `web_search` tool with `filters.allowed_domains` = the allow-list, `tool_choice: required`). `openai_model` (`gpt-6-luna`) searches for the query and writes short findings citing their pages; every cited page on an allowed site becomes one passage (its citing paragraphs, links removed). The course's cloud model then writes the answer from these passages, as with `api` | `WEBSEARCH_API_KEY` in `.env`: an OpenAI key (the developer's own) |
 | `api` | a hosted search API with the Tavily request format (`POST {api_url}` with `query`, `include_domains`, `max_results`); the allow-list is sent as `include_domains` | `WEBSEARCH_API_KEY` in `.env` (each developer uses their own key) |
 | `searxng` | the self-hosted [SearXNG](https://docs.searxng.org/) metasearch engine of the `searxng` Compose profile (JSON API); one query to the course type's engines (below) | `SEARXNG_SECRET` in `.env`; `docker compose --profile searxng up -d` |
 
 Set the mode in `.env`, for example `WEBSEARCH__PROVIDER=searxng`, or in `config.yaml`. Other settings in
-`config.yaml` under `websearch`: `api_url`, `searxng_url` (default `http://searxng:8080`), `max_results` (3),
-`max_chars` per result (1200), `timeout_s` (8), `cache_hours` (24).
+`config.yaml` under `websearch`: `api_url`, `openai_url`, `openai_model` (`gpt-6-luna`), `openai_timeout_s`
+(30), `searxng_url` (default `http://searxng:8080`), `max_results` (3), `max_chars` per result (1200),
+`timeout_s` (8, `api` and `searxng`), `cache_hours` (24).
 
 **Cache**: results are kept per process for `cache_hours` (0 turns it off), keyed by provider, query, sites and
 engines, so the same question in a course does not search again. Only the sanitized query and public pages are
 kept; empty answers and failures are not cached.
 
-**What leaves the server**: only the sanitized query and the list of allowed sites. With `api` they go to the
-search provider; with `searxng` to the SearXNG container, which forwards the query to its upstream search
+**What leaves the server**: only the sanitized query and the list of allowed sites (and, with `openai`, the
+fixed instruction and model name). With `api` and `openai` they go to the search provider; with `searxng` to the SearXNG container, which forwards the query to its upstream search
 engines. No student identifier, no conversation and no learner data are sent.
 
 ## Allowed sites
@@ -98,7 +101,24 @@ survives a failing one), the cache, an internal API address is refused, and the 
 `search_query()` only, never for local answers, questions without a need for recent information, or questions
 with nothing general left.
 
-## Not done yet
+## Evaluation (G1-106)
 
-An evaluation of answer quality with and without web search (G1-106) needs a running SearXNG or an API key;
-the harness is the next step once one is available.
+`eval/web-search/` compares the modes on 79 fictional questions of the four demo-course subjects (59 need
+information from 2024 to 2026), answers by `gpt-6.1-terra`, judged by Claude Sonnet against references checked
+on the web. Results of 2026-11-16 (questions needing recent information answered correctly):
+
+| Mode | Correct | Cost per question | Total time p50 |
+|---|---|---|---|
+| no search | 30 / 59 | $0.001 | 2.9 s |
+| `searxng` (API-backed engines) | 31 / 59 | $0.001 | 4.6 s |
+| `api` (Tavily) | 40 / 59 | $0.010 (first 1,000 a month free) | 5.3 s |
+| OpenAI writes the answer itself with `web_search` (`gpt-6-luna`) | 50 / 59 | $0.013 | 4.1 s |
+| **`openai`** (`gpt-6-luna` findings as passages, `gpt-6.1-terra` answers) | 48 / 59 | $0.012 | 7.7 s |
+
+No mode made the 20 control questions (no recent information needed) worse, and no personal data reached a
+search request in 10 fictional questions with personal data. SearXNG helped little: PubMed matches every word
+of a whole question and rate-limits clients without a key. The `openai` mode keeps the answer in the tutor's
+own pipeline (the search model only reports findings, the course's cloud model answers from them as
+passages): nearly as accurate as letting OpenAI answer itself, and better than Tavily in pairwise judging (26
+wins to 11). Its search has a long tail: half of the searches take under 5 s, 10% more than 12 s, and 2 of 79
+reached `openai_timeout_s` (30 s; the answer then uses the course material only).

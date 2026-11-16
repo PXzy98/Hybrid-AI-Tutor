@@ -5,6 +5,10 @@ question. Chosen when the stack is deployed (`websearch.provider`, docs/WEB_SEAR
 - `off`: no search, `web_search` returns no passages;
 - `api`: a hosted search API with the Tavily request format (`WEBSEARCH_API_KEY`); the allow-list is sent as
   `include_domains`;
+- `openai`: OpenAI's own web search (Responses API `web_search` tool, `WEBSEARCH_API_KEY`), restricted to
+  the allow-list. A small model (`openai_model`) searches for the query and writes short findings that cite
+  their pages; each cited page becomes a passage. Only the query leaves, as with `api`; the answer is still
+  written by the course's cloud model from these passages;
 - `searxng`: the self-hosted SearXNG of the `searxng` Compose profile (JSON API). With engines configured
   for the course type (`websearch.searxng_engines`: API-backed engines such as PubMed or arXiv, which are not
   blocked the way scraped web engines are) one query goes to those engines and only their results are kept;
@@ -15,8 +19,7 @@ cut to `max_chars`, at most `max_results`, no duplicate URLs. Outbound requests 
 SSRF checks (`app.llm.ssrf`): the API must be a public address, SearXNG a deployment-internal one.
 
 Results are cached per process for `cache_hours` (key: provider and its URL, limits, query, sites,
-engines). Only the sanitized
-query and public pages are kept, never anything about the student.
+engines). Only the sanitized query and public pages are kept, never anything about the student.
 """
 import asyncio
 import re
@@ -102,6 +105,56 @@ async def _search_api(query: str, allowlist: list[str], settings: Settings, tran
     return list(r.json().get("results") or [])
 
 
+OPENAI_INSTRUCTIONS = (
+    "Search the web for recent, reliable information about the query. Report what you found as short factual "
+    "paragraphs, each citing the page it comes from. Do not give advice and do not ask questions.")
+_MD_LINK = re.compile(r"\(?\[([^\]]*)\]\((https?://[^)\s]+)\)\)?")
+
+
+def _strip_tracking(url: str) -> str:
+    return re.sub(r"[?&]utm_source=openai$", "", url)
+
+
+def _cited_passages(text: str, annotations: list[dict]) -> list[dict]:
+    """One result per cited page: the paragraphs that cite it, without the inline links, in citation order."""
+    found: dict[str, dict] = {}
+    start = 0
+    for para in re.split(r"(\n\s*\n|\n(?=\s*[-*\d]))", text):
+        end = start + len(para)
+        cited = [a for a in annotations if start <= int(a.get("start_index") or 0) < end]
+        start = end
+        content = re.sub(r"\s+", " ", _MD_LINK.sub("", para).replace("**", "")).strip(" -*")
+        if not content:
+            continue
+        for a in cited:
+            url = _strip_tracking(str(a.get("url") or ""))
+            row = found.setdefault(url, {"url": url, "title": a.get("title") or "", "content": ""})
+            if content not in row["content"]:
+                row["content"] = (row["content"] + " " + content).strip()
+    return [r for r in found.values() if r["url"]]
+
+
+async def _search_openai(query: str, allowlist: list[str], settings: Settings, transport) -> list[dict]:
+    cfg = settings.websearch
+    if settings.websearch_api_key is None:
+        raise WebSearchError("websearch.provider is openai but WEBSEARCH_API_KEY is not set")
+    body = {"model": cfg.openai_model, "instructions": OPENAI_INSTRUCTIONS, "input": query,
+            "max_output_tokens": 700, "reasoning": {"effort": "none"}, "tool_choice": "required",
+            "tools": [{"type": "web_search", "filters": {"allowed_domains": allowlist}}]}
+    headers = {"Authorization": f"Bearer {settings.websearch_api_key.get_secret_value()}"}
+    async with _client(cfg.openai_url, "external", cfg.openai_timeout_s, transport) as client:
+        r = await client.post(cfg.openai_url, json=body, headers=headers)
+    if r.status_code != 200:
+        raise WebSearchError(f"OpenAI search answered {r.status_code}")
+    out = []
+    for item in r.json().get("output") or []:
+        for c in item.get("content") or []:
+            if c.get("type") == "output_text":
+                cites = [a for a in c.get("annotations") or [] if a.get("type") == "url_citation"]
+                out += _cited_passages(c.get("text") or "", cites)
+    return out
+
+
 async def _search_searxng(query: str, allowlist: list[str], settings: Settings, transport,
                           engines: list[str]) -> list[dict]:
     cfg = settings.websearch
@@ -156,7 +209,8 @@ async def web_search(query: str, allowlist: list[str], *, engines: list[str] | N
         return []
     engines = list(engines or []) if provider == "searxng" else []
     # everything that changes the passages is part of the key: another endpoint or limit is another entry
-    where = cfg.api_url if provider == "api" else cfg.searxng_url
+    where = {"api": cfg.api_url, "openai": f"{cfg.openai_url} {cfg.openai_model}"}.get(provider,
+                                                                                    cfg.searxng_url)
     key = (provider, where, cfg.max_results, cfg.max_chars, query.strip().lower(), tuple(allowlist),
            tuple(engines))
     now = time.monotonic()
@@ -165,6 +219,8 @@ async def web_search(query: str, allowlist: list[str], *, engines: list[str] | N
         return list(hit[1])
     if provider == "api":
         raw = await _search_api(query, allowlist, settings, transport)
+    elif provider == "openai":
+        raw = await _search_openai(query, allowlist, settings, transport)
     else:
         raw = await _search_searxng(query, allowlist, settings, transport, engines)
     found = _passages(raw, allowlist, cfg)

@@ -77,10 +77,15 @@ class RagConfig(Section):
 class WebSearchConfig(Section):
     """Web search for cloud answers that need recent information (task T13; guide 4.5 step 6a). Chosen when
     the stack is deployed: `off` (never), `api` (a hosted search API, Tavily-compatible, key in
-    `WEBSEARCH_API_KEY`) or `searxng` (the self-hosted SearXNG of the `searxng` Compose profile)."""
+    `WEBSEARCH_API_KEY`), `openai` (OpenAI's web_search tool, key in `WEBSEARCH_API_KEY`) or `searxng`
+    (the self-hosted SearXNG of the `searxng` Compose profile)."""
 
-    provider: Literal["off", "api", "searxng"] = "off"
+    provider: Literal["off", "api", "openai", "searxng"] = "off"
     api_url: str = "https://api.tavily.com/search"
+    # provider openai: the Responses API with its web_search tool; the model only searches and summarizes
+    openai_url: str = "https://api.openai.com/v1/responses"
+    openai_model: str = "gpt-6-luna"
+    openai_timeout_s: float = Field(30, gt=0, le=120)
     searxng_url: str = "http://searxng:8080"
     max_results: int = Field(3, ge=1, le=10)
     max_chars: int = Field(1200, ge=200, le=5000)  # per result, after cleaning
@@ -327,7 +332,7 @@ class Settings(BaseSettings):
     ollama_url: str = "http://192.168.2.25:11434"
     cloud_base_url: str = "https://api.openai.com/v1"
     cloud_api_key: SecretStr | None = None
-    websearch_api_key: SecretStr | None = None  # websearch.provider: api
+    websearch_api_key: SecretStr | None = None  # websearch.provider: api or openai
     settings_encryption_key: SecretStr | None = None  # Fernet key for API keys of model connections (Z6)
     cloud_model: str | None = None
     instructor_username: str | None = None
