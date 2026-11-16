@@ -29,6 +29,10 @@ the connection for the role, checks it, and queues the request.
   longer than `limits.models.queue_timeout_seconds` gets "the model is busy".
 - **Streaming**: `gateway.complete(..., stream=True)` returns the answer token by token (Ollama and
   OpenAI-compatible APIs).
+- **Thinking off**: Qwen3.5 thinks before it answers unless told not to (on the vLLM test host a one-sentence
+  answer took 9.9 s instead of 1.4 s). Ollama connections send `think: false`; trusted local OpenAI-compatible
+  connections (vLLM) send `chat_template_kwargs: {"enable_thinking": false}`. External connections send neither,
+  since hosted APIs reject unknown fields.
 
 ## API
 
@@ -41,7 +45,7 @@ course): list, create, change, delete. Responses never contain the key.
 the first token. Run it against the vLLM server from a machine that can reach it:
 
 ```bash
-python eval/load-test/run.py --kind openai_compat --base-url http://<vllm-host>:8000/v1 --model Qwen/Qwen3.5-9B --concurrency 20 --requests 200 --stream
+python eval/load-test/run.py --kind openai_compat --base-url http://<vllm-host>:8000/v1 --model Qwen3.5-9B --concurrency 20 --requests 200 --stream
 ```
 
-CI runs it with `--smoke` (a fake model).
+`--model` is the served name that the server lists at `/v1/models`. CI runs it with `--smoke` (a fake model).

@@ -58,8 +58,9 @@ def build_client(row: ModelEndpoint, encryption_key: str | None, *, timeout_s: f
         return OllamaClient(row.base_url, row.model, timeout_s=timeout_s, max_tokens=max_tokens,
                             transport=pinned)
     key = secrets.decrypt(row.api_key_encrypted, encryption_key) if row.api_key_encrypted else "none"
+    # a trusted local OpenAI-compatible connection is the course's own server (vLLM): thinking off
     return OpenAICompatClient(row.base_url, key, row.model, timeout_s=timeout_s, max_tokens=max_tokens,
-                              transport=pinned)
+                              transport=pinned, thinking_off=row.trust == "trusted_local")
 
 
 Tester = Callable[[ModelEndpoint, str | None], Awaitable[None]]  # raises when the connection does not work

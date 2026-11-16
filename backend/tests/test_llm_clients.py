@@ -127,6 +127,29 @@ async def test_openai_compat_request_and_result():
     assert (res.text, res.backend, res.prompt_tokens) == ("Cloud answer.", "cloud", 11)
 
 
+async def test_openai_compat_thinking_off_only_when_asked():
+    """vLLM (a trusted local connection) gets thinking switched off; hosted APIs reject the extra field."""
+    hosted = FakeOpenAI()
+    await OpenAICompatClient("https://x", "k", "m", client=hosted).complete(MSGS)
+    assert "extra_body" not in hosted.kwargs
+    own = FakeOpenAI()
+    await OpenAICompatClient("http://10.0.0.5:8000/v1", "k", "m", client=own,
+                             thinking_off=True).complete(MSGS)
+    assert own.kwargs["extra_body"] == {"chat_template_kwargs": {"enable_thinking": False}}
+
+
+def test_trusted_local_connections_switch_thinking_off():
+    from app.llm.endpoints import build_client
+    from app.storage.models import ModelEndpoint
+
+    def row(trust):
+        return ModelEndpoint(name="n", kind="openai_compat", base_url="http://10.0.0.5:8000/v1", model="m",
+                             trust=trust)
+
+    assert build_client(row("trusted_local"), None)._extra
+    assert not build_client(row("external"), None)._extra
+
+
 async def test_openai_compat_maps_errors():
     req = httpx.Request("POST", "https://x")
     down = FakeOpenAI(error=openai.APIConnectionError(request=req))
