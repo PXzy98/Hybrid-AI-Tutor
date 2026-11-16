@@ -10,6 +10,14 @@ the connection for the role, checks it, and queues the request.
 | `local` (original text, learner profile) | `course_settings.local_endpoint_id` | `system_settings.default_local_endpoint_id` | the deployment's model (`OLLAMA_URL` / `llm.local`) |
 | `cloud` (only what passed the cloud gate) | `course_settings.cloud_endpoint_id` | `system_settings.default_cloud_endpoint_id` | `CLOUD_BASE_URL` / `CLOUD_MODEL` / `CLOUD_API_KEY` |
 
+The small local calls on the original text use the `local` connection too (task Z17): the understand step
+(knowledge components, question type), the hypothetical rewrite of a personal health question
+(`health_detail_policy: generalize`) and the second health check (`privacy.llm_check`). With a stored
+connection they share its queue with the answers; a stored `local` connection that is not `trusted_local` is
+never used for them (understand is skipped, the question stays local). Without one they use the deployment's
+clients (`llm.understand`, `llm.local`). Checked on 2026-11-16 against vLLM (Qwen3.5-9B, thinking off):
+understand 1 to 2 s, rewrite 0.8 s, health check 0.3 s.
+
 ## Rules
 
 - **Trust**: a connection is `trusted_local` (may receive original student text; the creator confirms that he
