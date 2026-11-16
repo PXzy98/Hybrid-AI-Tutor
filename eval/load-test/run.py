@@ -7,6 +7,8 @@ throughput, latency (p50/p95/max), time to the first token (with --stream) and e
 Real model (fictional prompts only; never student data):
     python eval/load-test/run.py --kind openai_compat --base-url http://<vllm-host>:8000/v1 \\
         --model Qwen/Qwen3.5-9B --concurrency 20 --requests 200 --out eval-out/load
+The served model name is what the vLLM server reports at /v1/models. Thinking is off, as in the app; a hosted
+API (which rejects the field) needs --keep-thinking.
 Smoke (CI, no model): python eval/load-test/run.py --smoke --out eval-out/load
 """
 import argparse
@@ -53,7 +55,7 @@ def _client(a):
     if a.kind == "ollama":
         return OllamaClient(a.base_url, a.model, timeout_s=a.timeout, max_tokens=a.max_tokens)
     return OpenAICompatClient(a.base_url, os.environ.get("LOAD_TEST_API_KEY", "none"), a.model,
-                              timeout_s=a.timeout, max_tokens=a.max_tokens)
+                              timeout_s=a.timeout, max_tokens=a.max_tokens, thinking_off=not a.keep_thinking)
 
 
 class _SlowFake(FakeLLMClient):
@@ -124,6 +126,8 @@ def main(argv=None) -> int:
     ap.add_argument("--timeout", type=float, default=120)
     ap.add_argument("--max-tokens", type=int, default=200)
     ap.add_argument("--stream", action="store_true", help="measure the time to the first token")
+    ap.add_argument("--keep-thinking", action="store_true",
+                    help="openai_compat: leave the server's thinking default on (the app switches it off)")
     ap.add_argument("--out", type=Path, default=ROOT / "eval-out" / "load")
     a = ap.parse_args(argv)
     if a.smoke:

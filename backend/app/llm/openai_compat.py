@@ -1,4 +1,5 @@
-"""Any OpenAI-compatible chat API (OpenAI, Groq, Kimi, DeepSeek, ...). Only used behind CloudClient."""
+"""Any OpenAI-compatible chat API: hosted ones (OpenAI, Groq, Kimi, DeepSeek, ...) behind CloudClient, and a
+course's own server (vLLM) through a trusted local model connection."""
 import asyncio
 import logging
 from collections.abc import AsyncIterator
@@ -15,8 +16,13 @@ log = logging.getLogger("app.llm")
 class OpenAICompatClient:
     def __init__(self, base_url: str, api_key: str, model: str, *, timeout_s: float = 30,
                  max_tokens: int = 800, temperature: float = 0.2,
-                 client: openai.AsyncOpenAI | None = None, transport=None) -> None:
+                 client: openai.AsyncOpenAI | None = None, transport=None,
+                 thinking_off: bool = False) -> None:
         self.model = model
+        # a self-hosted server (vLLM) runs Qwen3.5 with thinking on by default: hundreds of hidden tokens
+        # before the answer (7x slower on the test host, and cut off at max_tokens). Hosted APIs reject it.
+        off = {"chat_template_kwargs": {"enable_thinking": False}}
+        self._extra = {"extra_body": off} if thinking_off else {}
         self.max_tokens = max_tokens
         self.temperature = temperature
         self._injected = client
@@ -43,7 +49,7 @@ class OpenAICompatClient:
 
     async def complete(self, messages: list[Message], *, json_schema: dict | None = None,
                        max_tokens: int | None = None) -> LLMResult:
-        kwargs: dict = {}
+        kwargs: dict = dict(self._extra)
         if json_schema is not None:
             kwargs["response_format"] = {"type": "json_object"}
         t0 = perf_counter()
@@ -80,7 +86,9 @@ class OpenAICompatClient:
     async def stream(self, messages: list[Message], *, json_schema: dict | None = None,
                      max_tokens: int | None = None) -> AsyncIterator[str]:
         """The answer as it is generated (task Z6: token streaming)."""
-        kwargs: dict = {"response_format": {"type": "json_object"}} if json_schema is not None else {}
+        kwargs: dict = dict(self._extra)
+        if json_schema is not None:
+            kwargs["response_format"] = {"type": "json_object"}
         try:
             chunks = await self._client().chat.completions.create(
                 model=self.model, messages=messages, temperature=self.temperature,
