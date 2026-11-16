@@ -106,24 +106,29 @@ async def _search_searxng(query: str, allowlist: list[str], settings: Settings, 
     cfg = settings.websearch
     url = cfg.searxng_url.rstrip("/") + "/search"
     async with _client(cfg.searxng_url, "trusted_local", cfg.timeout_s, transport) as client:
-        async def one(q: str, extra: dict) -> list[dict]:
+        async def one(q: str, extra: dict) -> dict:
             r = await client.get(url, params={"q": q, "format": "json", "safesearch": 1, **extra})
             if r.status_code != 200:
                 raise WebSearchError(f"SearXNG answered {r.status_code}")
-            return list(r.json().get("results") or [])
+            return r.json()
 
         if engines:
             # an unknown engine name makes SearXNG fall back to its default (scraped) engines: keep only
             # results from the engines asked for
             wanted = {e.lower() for e in engines}
-            found = await one(query, {"engines": ",".join(engines)})
-            kept = [r for r in found if str(r.get("engine") or "").lower() in wanted]
+            data = await one(query, {"engines": ",".join(engines)})
+            kept = [r for r in data.get("results") or [] if str(r.get("engine") or "").lower() in wanted]
+            # SearXNG answers 200 when its engines fail (PubMed suspended after a 429, a parsing error):
+            # every engine down is a failed search, not an empty one
+            down = {str(e[0]).lower() for e in data.get("unresponsive_engines") or [] if e}
+            if not kept and wanted <= down:
+                raise WebSearchError(f"SearXNG: every engine failed ({', '.join(sorted(wanted))})")
             # arXiv still links its abstracts over http (the page is never fetched, only named)
             return [{**r, "url": "https://" + r["url"][len("http://"):]}
                     if str(r.get("url") or "").startswith("http://arxiv.org/") else r for r in kept]
         found = await asyncio.gather(*(one(f"{query} site:{site}", {}) for site in allowlist),
                                      return_exceptions=True)
-    lists = [f for f in found if not isinstance(f, BaseException)]
+    lists = [list(f.get("results") or []) for f in found if not isinstance(f, BaseException)]
     if not lists:
         raise WebSearchError("SearXNG failed for every site")
     # take the sites in turns, so one site cannot fill every slot

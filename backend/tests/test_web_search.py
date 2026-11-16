@@ -178,6 +178,20 @@ async def test_searxng_engines_one_query_and_only_their_results(settings):
     assert [c.source for c in found] == ["https://pubmed.ncbi.nlm.nih.gov/1", "https://arxiv.org/abs/2"]
 
 
+async def test_searxng_engines_all_down_is_a_failed_search(settings):
+    """SearXNG answers 200 with `unresponsive_engines` when PubMed is suspended after a 429."""
+    down = {"results": [], "unresponsive_engines": [["pubmed", "Suspended: too many requests"],
+                                                    ["semantic scholar", "parsing error"]]}
+    _, transport = recorder(down)
+    with pytest.raises(WebSearchError, match="every engine failed"):
+        await web_search("salt and blood pressure", SITES, engines=["pubmed", "semantic scholar"],
+                         settings=settings("searxng"), transport=transport)
+    one_down = {"results": [], "unresponsive_engines": [["pubmed", "Suspended: too many requests"]]}
+    _, transport = recorder(one_down)  # the other engine answered and found nothing: an empty search
+    assert await web_search("salt and pepper", SITES, engines=["pubmed", "semantic scholar"],
+                            settings=settings("searxng"), transport=transport) == []
+
+
 async def test_results_are_cached_per_query(settings):
     calls, transport = recorder({"results": [{**RESULTS[0], "engine": "pubmed"}]})
     cfg = settings("searxng")

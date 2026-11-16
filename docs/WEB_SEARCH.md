@@ -76,7 +76,11 @@ behaviour: one `site:` query per allowed site to the instance's default engines.
 
 `deploy/searxng/settings.yml` keeps only these engines (`use_default_settings.engines.keep_only`) and turns
 on `semantic scholar`, which SearXNG ships disabled. An instance deployed outside the Compose stack needs the
-same file. These sources are mostly paper abstracts, documentation and encyclopedia pages; public health pages
+same file. API-backed engines have limits too: on the test instance PubMed (NCBI allows a few requests a second
+without a key) answered "too many requests" and SearXNG then suspended it for its suspension time (an hour by
+default), and Semantic Scholar's keyless API returned errors. SearXNG still answers 200 then, with the engine
+under `unresponsive_engines`; when every engine asked for is down the search counts as failed (the routing
+panel shows it), not as empty. These sources are mostly paper abstracts, documentation and encyclopedia pages; public health pages
 (MedlinePlus, CDC) are better reached through the `api` mode.
 
 ## Outbound requests
