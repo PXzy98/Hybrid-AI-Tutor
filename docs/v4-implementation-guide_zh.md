@@ -393,6 +393,9 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | Z13 | 整套部署到测试主机；监控（应用 `/metrics`、vLLM 指标、Grafana、告警）；CI 扫描（`pip-audit`、`npm audit`、`bandit`、镜像扫描） | S7 | Z8 | `docker-compose.yml`、`deploy/`、`.github/workflows/ci.yml` | 客户和 Lavin 能试用；能看到指标 |
 | Z14 | 部署和运维手册、交接文档、压测 | S8 | — | `docs/` | 新人照着能部署 |
 | Z15 | Z 代码的规则 14：`privacy/recognizers/zh_person.py` 和 `recognizers/grade.py` 的 docstring 改成英文（中文规则保留）；补测试，证明中文规则不改变英文输入的结果；`eval/model-boundary-test/` 的 `README.md` 和 `TEST_PLAN.md` 改成英文；重跑 E6 | S5 | — | 上述文件 | 注释、docstring 和 `docs/` 以外的 Markdown 里没有中文；英文测试和英文 E6 结果不变 |
+| Z16 | 按学科回答（审查 B1、B2）：隐私配置决定系统提示词和检查器；非医学课程不再用健康教育提示词和医学安全检查 | S8 | Z7 | `prompts/`、`privacy/profiles/`、`pipeline/steps/verify.py` | 非医学课程的端到端测试验证提示词和检查器；E6 不变差 |
+| Z17 | 本地模型调用走网关（审查 B3）：understand、generalize 改写和 `llm_check` 用课程的可信本地连接，不再固定用 Ollama | S8 | Z6 | `llm/`、`pipeline/steps/` | 三处调用在 OpenAI 兼容服务（vLLM）上可用 |
+| Z18 | 仓库清理（审查 B5、第 7 节）：已合并分支、无用文件，过时文档移到 `docs/history/` | S8 | — | 仓库根目录、`docs/` | 审查列出的无用文件都已处理；链接仍然有效 |
 
 **落后时按这个顺序往后推**：Z12 → Z13 里的 Grafana 和告警 → `login_identity`。
 

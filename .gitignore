@@ -33,16 +33,12 @@ frontend/tsconfig.tsbuildinfo
 # E4 raw payload capture (large; the report is kept)
 eval/privacy-audit/results/cloud_requests.jsonl
 
-# Integration backups and SQLite sidecars
-.routing_patch_backups/
-.materials_patch_backups/
-routing_patch_backup_*/
+# SQLite sidecars of v3 databases
 data/*.db-wal
 data/*.db-shm
 
-# ZIP handoff attachments (the branch bundle is not source)
-/handoff/
-/SHA256.json
+# Vite cache when the dev server is started from the repository root
+/.vite/
 
 # course materials, indexes and exports (DATA_DIR, task Z12)
 /var/

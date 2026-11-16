@@ -1,10 +1,10 @@
 # Interfaces for teammates (routing and RAG)
 
-> Status 19 Oct 2026: both components are integrated (semantic router `routing.impl: semantic`, medical RAG `rag.impl: medical_hybrid`). This page describes the plug-in contract, which is unchanged; as-built details are in [ROUTING_PATCH.md](ROUTING_PATCH.md), [history/RAG_INTEGRATION.md](history/RAG_INTEGRATION.md) and [System_Design_v3.md §16](System_Design_v3.md).
+> Status 19 Oct 2026: both components are integrated (semantic router `routing.impl: semantic`, medical RAG `rag.impl: medical_hybrid`). This page describes the plug-in contract, which is unchanged; as-built details are in [ROUTING_PATCH.md](ROUTING_PATCH.md), [history/RAG_INTEGRATION.md](RAG_INTEGRATION.md) and [System_Design_v3.md §16](../System_Design_v3.md).
 
 For **Tongkai** (routing score) and **Siyun** (RAG retrieval). This document covers what your code receives, what it must return, and how it plugs in. You do not need to touch the pipeline or any other code.
 
-Source of truth: [`backend/app/core/schemas.py`](../backend/app/core/schemas.py). Design background: [System_Design_v3.md](System_Design_v3.md) §7.1 and §9.
+Source of truth: [`backend/app/core/schemas.py`](../../backend/app/core/schemas.py). Design background: [System_Design_v3.md](../System_Design_v3.md) §7.1 and §9.
 
 ## How plugging in works
 
@@ -112,7 +112,7 @@ class Chunk(BaseModel):
 
 ## Running the contract tests
 
-Setup is in the [README](../README.md#development-setup). Then, from `backend/`:
+Setup is in the [README](../../README.md#development-setup). Then, from `backend/`:
 
 ```powershell
 ..\.venv\Scripts\python -m pytest tests/contracts -k routing   # Tongkai
@@ -123,4 +123,4 @@ Every registered implementation is tested; your class shows up as `[<your_name>]
 
 ## If you need an interface change
 
-Changes to `schemas.py` affect everyone. Tell Zhenyan which field you need and why. Changes are recorded under "Interface changes" in [IMPLEMENTATION_LOG.md](IMPLEMENTATION_LOG.md).
+Changes to `schemas.py` affect everyone. Tell Zhenyan which field you need and why. Changes are recorded under "Interface changes" in [IMPLEMENTATION_LOG.md](../IMPLEMENTATION_LOG.md).

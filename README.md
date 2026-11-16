@@ -32,11 +32,8 @@ What it does (v4):
 | Model connections | [docs/MODEL_CONNECTIONS.md](docs/MODEL_CONNECTIONS.md) |
 | Database and migrations | [docs/DATABASE.md](docs/DATABASE.md) |
 | Using the tutor | [docs/STUDENT_MANUAL.md](docs/STUDENT_MANUAL.md), [docs/INSTRUCTOR_MANUAL.md](docs/INSTRUCTOR_MANUAL.md) |
-| Demo and test courses | [data/demo_courses/README.md](data/demo_courses/README.md), [docs/DEMO.md](docs/DEMO.md) |
+| Demo and test courses | [data/demo_courses/README.md](data/demo_courses/README.md) |
 | How the code came about | [docs/IMPLEMENTATION_LOG.md](docs/IMPLEMENTATION_LOG.md); older documents in [docs/history/](docs/history/) |
-
-First run on Windows without Docker: [GETTING_STARTED.md](GETTING_STARTED.md) (Chinese version:
-[docs/GETTING_STARTED_zh.md](docs/GETTING_STARTED_zh.md)).
 
 ## Quick start (Docker)
 
@@ -58,7 +55,7 @@ docker compose up -d --build
 - `docker-compose.override.yml` is for local development (it publishes the database on `127.0.0.1:5432`);
   production uses `docker compose -f docker-compose.yml`.
 - Demo courses from the open course packs, built through the API: `python scripts/build_demo.py`
-  ([docs/DEMO.md](docs/DEMO.md)).
+  ([data/demo_courses/README.md](data/demo_courses/README.md)).
 
 ## Repository layout
 

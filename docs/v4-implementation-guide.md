@@ -455,6 +455,9 @@ data); users build against the fakes without waiting for the real implementation
 | Z13 | Deploy the whole stack to the test host; monitoring (app `/metrics`, vLLM metrics, Grafana, alerts); CI scans (`pip-audit`, `npm audit`, `bandit`, image scan) | S7 | Z8 | `docker-compose.yml`, `deploy/`, `.github/workflows/ci.yml` | the client and Lavin can try it; metrics visible |
 | Z14 | Deployment and operations manual, handover documents, load test | S8 | — | `docs/` | a newcomer can deploy from it |
 | Z15 | Rule 14 in Z code: English docstrings in `privacy/recognizers/zh_person.py` and `recognizers/grade.py` (the Chinese patterns stay); tests that the Chinese patterns leave English input unchanged; English `README.md` and `TEST_PLAN.md` in `eval/model-boundary-test/`; re-run E6 | S5 | — | listed files | no Chinese in comments, docstrings or Markdown outside `docs/`; English tests and English E6 results unchanged |
+| Z16 | Answers by subject (audit B1, B2): the privacy profile chooses the system prompt and the checkers; non-medical courses get no health-education prompt or medical safety check | S8 | Z7 | `prompts/`, `privacy/profiles/`, `pipeline/steps/verify.py` | an end-to-end test of a non-medical course asserts its prompt and checkers; E6 not worse |
+| Z17 | Local model calls through the gateway (audit B3): understand, the generalize rewrite and `llm_check` use the course's trusted-local connection, not a fixed Ollama client | S8 | Z6 | `llm/`, `pipeline/steps/` | the three calls work against an OpenAI-compatible server (vLLM) |
+| Z18 | Repository cleanup (audit B5, section 7): merged branches, unused files, out-of-date documents to `docs/history/` | S8 | — | repository root, `docs/` | no unused file left from the audit list; links still resolve |
 
 **If behind, postpone in this order**: Z12 → Grafana and alerts in Z13 → `login_identity`.
 
