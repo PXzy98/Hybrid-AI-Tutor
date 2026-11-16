@@ -56,20 +56,21 @@ def test_a_whole_run_against_fakes(tmp_path):
     api, queries = ws.SmokeOpenAI(), []
     assert ws.main(["--smoke", "--out", str(tmp_path)], openai=api, judge=ws.SmokeJudge(),
                    search=record_queries(queries)) == 0
-    runs = ws.load_jsonl(tmp_path / "runs.jsonl")
+    runs = ws.load_jsonl(tmp_path / "runs.smoke.jsonl")
     assert {r["arm"] for r in runs} == set(ws.ARMS) and not any("error" in r for r in runs)
     assert len(runs) == 3 * len(ws.ARMS)
     # A has no passages, B and C carry the web passage into the prompt, D asks with the allow-list
     prompts = {(m, tool): c for m, tool, c in api.calls}
     assert any("A web passage." in c for c in prompts.values())
     assert (ws.LOW_COST_MODEL, True) in prompts
-    judged = ws.load_jsonl(tmp_path / "judge.jsonl")
+    judged = ws.load_jsonl(tmp_path / "judge.smoke.jsonl")
     assert sum(j["key"].startswith("grade|") for j in judged) == len(runs)
     report = (tmp_path / "report.md").read_text(encoding="utf-8")
     assert "## Performance" in report and "## Pairwise" in report and "B SearXNG vs C Tavily" in report
     # a rerun asks nothing new
     before = len(api.calls)
-    ws.main(["--smoke", "--out", str(tmp_path)], openai=api, judge=ws.SmokeJudge(), search=record_queries([]))
+    ws.main(["--smoke", "--out", str(tmp_path)], openai=api, judge=ws.SmokeJudge(),
+            search=record_queries([]))
     assert len(api.calls) == before
     assert json.loads((tmp_path / "privacy.json").read_text(encoding="utf-8")) == []
     # rule 5: B and C search with search_query() of the question, never the question itself
@@ -97,3 +98,30 @@ def test_standalone_smoke_needs_no_network(tmp_path, monkeypatch):
     monkeypatch.setattr(ws, "OpenAI", no_network)
     monkeypatch.setattr(ws, "Judge", no_network)
     assert ws.main(["--smoke", "--out", str(tmp_path)]) == 0
+
+
+def test_pairs_need_both_answers():
+    questions = [{"id": "q1", "needs_fresh": True, "question": "q", "reference_answer": "r"}]
+    runs = [{"arm": "B", "id": "q1", "answer": "x", "passages": []},
+            {"arm": "C", "id": "q1", "error": "down"}]
+
+    class Judge:
+        calls = 0
+
+        async def ask(self, system, user):
+            Judge.calls += 1
+            return {"text": '{"verdict": "correct", "winner": "A"}', "cost": 0}
+
+    import asyncio
+    import tempfile
+
+    judged: dict = {}
+    with tempfile.TemporaryDirectory() as d:
+        asyncio.run(ws.judge_all(questions, runs, Judge(), judged, Path(d) / "j.jsonl", [("B", "C")],
+                                 asyncio.Semaphore(1)))
+    assert set(judged) == {"grade|B|q1"}  # no pair against the failed answer
+
+
+def test_smoke_runs_never_feed_a_real_run(tmp_path):
+    ws.main(["--smoke", "--out", str(tmp_path)])
+    assert (tmp_path / "runs.smoke.jsonl").exists() and not (tmp_path / "runs.jsonl").exists()

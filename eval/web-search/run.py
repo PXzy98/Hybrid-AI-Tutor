@@ -367,7 +367,8 @@ async def judge_all(questions, runs, judge: Judge, judged: dict, path: Path, pai
                 tasks.append(grade(q, row))
         if q["needs_fresh"]:
             for x, y in pairs:
-                if (x, q["id"]) in by and (y, q["id"]) in by:
+                # both answers must exist: a failed one would be judged as "(no answer)" and cached
+                if all(k in by and "error" not in by[k] for k in ((x, q["id"]), (y, q["id"]))):
                     tasks += [pair(q, x, y, "xy"), pair(q, x, y, "yx")]
     await asyncio.gather(*tasks)
 
@@ -578,7 +579,9 @@ async def main_async(a) -> int:
         questions = questions[:2] + [q for q in questions if not q["needs_fresh"]][:1]
     arms = [x for x in a.arms.split(",") if x]
     pairs = [("B", "C"), ("C", "D")]
-    runs_path, judge_path = out / "runs.jsonl", out / "judge.jsonl"
+    # smoke answers are canned: their own files, never reused by a real run in the same directory
+    tag = ".smoke" if a.smoke else ""
+    runs_path, judge_path = out / f"runs{tag}.jsonl", out / f"judge{tag}.jsonl"
     runs = load_jsonl(runs_path)
     done = {(r["arm"], r["id"]) for r in runs if "error" not in r}
 
