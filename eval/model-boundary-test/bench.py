@@ -9,7 +9,7 @@ Examples
 Answers are appended to results/answers.jsonl. Re-running skips finished
 (model, think, repeat, id) combinations, so an interrupted run can continue.
 """
-import argparse, json, os, sys, time
+import argparse, json, os, time
 from pathlib import Path
 
 import requests

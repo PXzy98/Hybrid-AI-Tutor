@@ -31,7 +31,7 @@ Reflection #2 (ethics, individual) 11/18 · video 11/25 · Design Day 12/3 · fi
 | — | `transformers` 5, `react-router` 7, `vite`/`vitest` (CI advisories) | T, Z | open |
 | Z13, Z6, Z2 | Deploy on the test host with monitoring; vLLM load test; local speed of the 9B model | Z | waits for server access |
 | Z13 | Choose the alert receiver | Z | waits for the client |
-| S12 | Self-review and handover checklist | S | handover notes in `docs/s-tasks/` |
+| S12 | Self-review and handover checklist | S | handover notes in `docs/history/s-tasks/` |
 
 Not this term: targeted material for single students (only the learning plan with notes now). Tests and demos
 use the eight open course packs in `data/demo_courses/`.

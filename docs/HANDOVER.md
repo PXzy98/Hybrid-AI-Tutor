@@ -48,7 +48,7 @@ stand and where to look. Running the system: [OPERATIONS.md](OPERATIONS.md).
 | S11 retrieval evaluation | merged (#72): all eight packs | `eval/course-rag-packs/` |
 | T4 ECE and CS routing evaluation | merged (#75); retrained candidates not adopted | `eval/routing-ece/` |
 | T5 question type (concept / logistics) | merged (#80): own weight file, set by the route step; logistics questions search course-level files first | `app/routing/question_type.py`, `app/rag/course_retriever.py` |
-| T9 demo build | merged (#69): the demo courses from the packs through API v2 | `scripts/build_demo.py`, `docs/DEMO.md` |
+| T9 demo build | merged (#69): the demo courses from the packs through API v2 | `scripts/build_demo.py` |
 | F1 frontend on API v2 (carries T6, T7, T8) | merged (#71, #78; UI upgrade #81 to #85): student and instructor dashboards, admin, model connections, quizzes, survey, materials | `frontend/`, `docs/design/ui-upgrade.md` |
 | T11 accessibility, T12 manuals | merged (#74, #73); renaming waits for the project name; routing, frontend and web search handover notes still open | `docs/ACCESSIBILITY.md`, `docs/STUDENT_MANUAL.md`, `docs/INSTRUCTOR_MANUAL.md` |
 | T13 web search | merged (#88): three deployment modes (`off` default, hosted `api`, self-hosted `searxng` Compose profile); runs for cloud answers that need recent information, query from `search_query()`, allow-listed sites per course type; evaluation (G1-106) not run yet | `app/websearch/`, `app/pipeline/steps/web_search.py`, [WEB_SEARCH.md](WEB_SEARCH.md) |

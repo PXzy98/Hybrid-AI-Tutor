@@ -12,7 +12,6 @@
 /eval/course_rag_benchmark.py       @TSYYY233
 /eval/fixtures/                     @TSYYY233
 /eval/learner-sim/                  @TSYYY233
-/docs/RAG_COURSE_BETA.md            @TSYYY233
 
 # Z again: instructor AI tier 4 (local vs cloud evaluation)
 /backend/app/instructor_ai/eval/    @PXzy98
@@ -23,8 +22,8 @@
 /data/routing/                      @nylxyqs
 /frontend/                          @nylxyqs
 /scripts/demo_seed.py               @nylxyqs
-/docs/ROUTING_PATCH.md              @nylxyqs
-/docs/manuals/                      @nylxyqs
+/docs/STUDENT_MANUAL.md             @nylxyqs
+/docs/INSTRUCTOR_MANUAL.md          @nylxyqs
 
 # Shared contract files: changes need Z's review as well
 /frontend/openapi.json              @nylxyqs @PXzy98
