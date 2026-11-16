@@ -31,3 +31,11 @@ complete the production S8 task.
 
 Still open (needs Z4): course-scoped persistence of the state and evidence, and wiring behind the
 `KnowledgeModel` interface with `course_id`.
+
+## In the app (2026-11-15, by Z for S's review)
+
+`app/learner/knowledge/course.py` registers the model as `course`, the default in `config.yaml`
+(`learner.course_model`: `ability_gain`, `ability_weight`). The ability is replayed from the course's evidence log
+(no new table); the stored KC estimate stays raw BKT and updates start from it; the prerequisite cap is applied
+when a state is shown. Tests: `tests/test_course_knowledge_model.py`; the whole suite passes with `bkt`, `rule`
+and `course`.

@@ -13,8 +13,8 @@ Reflection #2 (ethics, individual) 11/18 · video 11/25 · Design Day 12/3 · fi
 - **Platform (Z1 to Z15)**: courses and modules, accounts and invitations, settings layers, PostgreSQL, model
   gateway, privacy profiles, document scanning, API v2, usage limits, CSRF, end of term and export, instructor
   AI tier 4, CI scans and monitoring configuration, operations manual.
-- **Learner, content and instructor AI (S1 to S7, S9 to S11)**: course retriever and materials on API v2, the
-  eight open course packs, instructor AI tiers 1 to 3, visibility modes, overview and learning plans, retrieval
+- **Learner, content and instructor AI (S1 to S11)**: course retriever and materials on API v2, the
+  eight open course packs, instructor AI tiers 1 to 3, the course-level knowledge model (the default), visibility modes, overview and learning plans, retrieval
   evaluation on all eight packs.
 - **Quizzes and the end-of-term survey (Q1)**, decided at the advisor meeting of 2026-11-12.
 - **Frontend on API v2 (F1, carrying T6 to T8)** with the UI upgrade (U1 to U5), accessibility (T11), manuals
@@ -24,7 +24,6 @@ Reflection #2 (ethics, individual) 11/18 · video 11/25 · Design Day 12/3 · fi
 
 | ID | Task | Owner | Status |
 |---|---|---|---|
-| S8 | Register the course-level knowledge model and make it the default (guide 4.10) | S | core and simulated evaluation merged; the app still runs BKT |
 | T13 | Web search and its evaluation | T | not started |
 | T10 | Video (11/25); French UI screenshots to Lavin | T | not started |
 | T11 | Renaming | T | waits for the project name |

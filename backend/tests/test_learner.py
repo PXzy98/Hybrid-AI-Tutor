@@ -39,7 +39,7 @@ def rows(table):
 
 
 # ------------------------------------------------------------------------- knowledge models
-@pytest.mark.parametrize("knowledge", ["bkt", "rule"])
+@pytest.mark.parametrize("knowledge", ["bkt", "rule", "course"])
 def test_correct_answers_raise_and_wrong_answers_lower(make, knowledge):
     lm = make(knowledge)
     prior = lm.knowledge.state(S, ["HBP.1"])["HBP.1"]
@@ -52,7 +52,7 @@ def test_correct_answers_raise_and_wrong_answers_lower(make, knowledge):
     assert lm.knowledge.state(S, ["HBP.1"])["HBP.1"].n_obs == 7
 
 
-@pytest.mark.parametrize("knowledge", ["bkt", "rule"])
+@pytest.mark.parametrize("knowledge", ["bkt", "rule", "course"])
 def test_weak_evidence_moves_less_than_strong(make, knowledge):
     lm = make(knowledge)
     for _ in range(3):

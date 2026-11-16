@@ -407,7 +407,7 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | S5 | 示例课程资料：`data/demo_courses/` 里的 8 个公开课程包（Z 已做好，见 7.5）；剩下的是确认每个课程包都能通过课程检索器上传和检索 | S5 | 独立 | `data/`（目录按 course-structure.md 第 7 节） | 8 门课都能上传和检索 |
 | S6 | 教师端 AI 第一档后端，通过模型网关 | S6 | S4、Z6 | 新的 `backend/app/instructor_ai/` | 教师接受后学生才看得到 |
 | S7 | 教师端 AI 第二档后端（知识点、检测题、误解；草稿 → 接受）；课程摸底题也用它（D3） | S6–S7 | Z4、S4 | 同上 | 新课程可以由 AI 起草，接受后用于个性化 |
-| S8 | 课程级知识模型（4.10） | S6–S7 | Z4 | `backend/app/learner/knowledge/` | 和现有 BKT 的对比评估（`eval/learner-sim/`） |
+| S8 | 课程级知识模型（4.10）。**已完成**（#87）：`learner.knowledge: course`，设为默认；`app/learner/knowledge/course.py` | S6–S7 | Z4 | `backend/app/learner/knowledge/` | 和现有 BKT 的对比评估（`eval/learner-sim/`） |
 | S9 | 可见性方案 A/B、个人概览、学习计划、不公开、审计；结束学期导出的内容 | S6–S7 | Z4、Z10 | `backend/app/learner/`、`backend/app/api/v2/` | 测试覆盖"不该看到的不返回" |
 | S10 | 教师端 AI 第三档：班级洞察后端 | S7 | S8 | `backend/app/instructor_ai/` | 不返回原文 |
 | S11 | 公开课程包的检索评估，八个课程包都已在 `eval/course-rag-packs/` 完成（题集、`run.py`、`results/report.md`）；`eval/course_rag_benchmark.py`（人工标注段落）是另一个独立的评估程序，不属于这一项 | S7 | S5 | `eval/` | 八个课程包都有结果 |
@@ -491,9 +491,10 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | T4 | T | ECE 和计算机科学问题的路由评估（`eval/routing-ece/`）；重新训练的候选模型没有采用 | #75 | 审查 |
 | T5 | T | 问题类型（概念 / 课程事务）；课程事务问题先检索课程级文件 | #80 | 审查 |
 | T9 | T | `scripts/build_demo.py`：通过 API v2 用课程包建演示课程 | #69 | 审查 |
+| S8（接进系统） | S | 分层模型注册为 `course` 并设为默认；更新从存储的估计值开始，前置知识点的上限只在显示时生效；三种模型都跑了全部测试 | #87 | 审查 |
 | T11（无障碍部分）、T12（手册） | T | 无障碍自查和 axe 测试；学生手册和教师手册 | #74、#73 | 审查 |
 
-从 2026-11-11 起，按同样的决定，Z 也用这种方式做 7.2 和 7.3 里 S 和 T 剩下的任务（每个任务一个 PR，开 PR 时加到上表）。还没开始的（2026-11-15）：把课程级知识模型注册进系统（S8）；网页搜索（T13）；视频（T10）；改名（T11，等项目名）；路由、前端和网页搜索的交接说明（T12）；CI 扫描报告的 `transformers` 5、`react-router` 7 和 `vite`/`vitest` 升级。
+从 2026-11-11 起，按同样的决定，Z 也用这种方式做 7.2 和 7.3 里 S 和 T 剩下的任务（每个任务一个 PR，开 PR 时加到上表）。还没开始的（2026-11-15）：网页搜索（T13）；视频（T10）；改名（T11，等项目名）；路由、前端和网页搜索的交接说明（T12）；CI 扫描报告的 `transformers` 5、`react-router` 7 和 `vite`/`vitest` 升级。
 
 ## 8. 开发流程
 

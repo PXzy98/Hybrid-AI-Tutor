@@ -469,7 +469,7 @@ data); users build against the fakes without waiting for the real implementation
 | S5 | Demo course material: the eight open course packs in `data/demo_courses/` (done by Z, see 7.5); remaining: check that each pack uploads and retrieves through the course retriever | S5 | independent | `data/` (layout from course-structure.md section 7) | all eight courses upload and retrieve |
 | S6 | Instructor AI tier 1 backend, through the model gateway | S6 | S4, Z6 | new `backend/app/instructor_ai/` | drafts visible to students only after acceptance |
 | S7 | Instructor AI tier 2 backend (KCs, check items, misconceptions; drafts → accepted); also used by the course diagnostic (D3) | S6–S7 | Z4, S4 | same | a new course can be drafted by AI and used for personalization after acceptance |
-| S8 | Course-level knowledge model (4.10) | S6–S7 | Z4 | `backend/app/learner/knowledge/` | evaluation against the current BKT (`eval/learner-sim/`) |
+| S8 | Course-level knowledge model (4.10). **Done** (#87): `learner.knowledge: course`, the default; `app/learner/knowledge/course.py` | S6–S7 | Z4 | `backend/app/learner/knowledge/` | evaluation against the current BKT (`eval/learner-sim/`) |
 | S9 | Visibility modes A/B, overview, learning plan, opt-out, audit; end-of-term export content | S6–S7 | Z4, Z10 | `backend/app/learner/`, `backend/app/api/v2/` | tests cover "what must not be seen is not returned" |
 | S10 | Instructor AI tier 3: class insights backend | S7 | S8 | `backend/app/instructor_ai/` | never returns question text |
 | S11 | Retrieval evaluation on the open course packs, all eight packs done in `eval/course-rag-packs/` (question sets, `run.py`, `results/report.md`); `eval/course_rag_benchmark.py` (labelled passages) is a separate harness and not part of this | S7 | S5 | `eval/` | results for all eight packs |
@@ -556,13 +556,14 @@ owner reviews and approves the PR, and the area stays the owner's afterwards (ru
 | T4 | T | routing evaluation on ECE and CS questions (`eval/routing-ece/`); retrained candidates not adopted | #75 | review |
 | T5 | T | question type head (concept / logistics); logistics questions search course-level files first | #80 | review |
 | T9 | T | `scripts/build_demo.py`: the demo courses from the packs through API v2 | #69 | review |
+| S8 (in the app) | S | the layered model registered as `course` and made the default; updates start from the stored estimate, the prerequisite cap applies when shown; tests with all three models | #87 | review |
 | T11 (accessibility part), T12 (manuals) | T | accessibility self-check and axe tests; student and instructor manuals | #74, #73 | review |
 
 From 2026-11-11, by the same decision, Z also works on the remaining S and T tasks of sections 7.2 and 7.3 in
-this way (one PR per task, listed in the table above when it is opened). Not started yet (2026-11-15):
-registering the course-level knowledge model (S8); web search (T13); the video (T10); renaming (T11, waits for
-the name); the routing, frontend and web search handover notes (T12); the `transformers` 5, `react-router` 7
-and `vite`/`vitest` updates reported by the CI scans.
+this way (one PR per task, listed in the table above when it is opened). Not started yet (2026-11-15): web
+search (T13); the video (T10); renaming (T11, waits for the name); the routing, frontend and web search
+handover notes (T12); the `transformers` 5, `react-router` 7 and `vite`/`vitest` updates reported by the CI
+scans.
 
 ## 8. Workflow
 

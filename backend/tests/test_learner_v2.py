@@ -1,11 +1,13 @@
 """API v2 learner endpoints (api-v2.md 3.5, 3.6; course-structure.md 4.4, 4.5; task S9): what a student does
 in a course, and what the instructor may see. Rule 9: what must not be seen is not returned."""
+import os
+
 import pytest
 from sqlmodel import Session
 
 from app.learner.preference import PreferenceSignal
 from app.storage.models import CourseMember
-from tests.test_ask_v2 import V2, World, _login, rows
+from tests.test_ask_v2 import OPTIONS, V2, World, _login, rows
 
 Q1 = {"item_id": "C.1-q1", "choice": "A"}  # the correct choice
 
@@ -231,3 +233,27 @@ def test_members_list_gives_the_student_id_for_the_learner_endpoints(world):
     members = world.prof.get(f"{world.url}/members").json()
     by_role = {m["role"]: m for m in members}
     assert by_role["student"]["student_id"] == world.sid and by_role["instructor"]["student_id"] is None
+
+
+@pytest.mark.skipif(os.environ.get("TEST_LEARNER_KNOWLEDGE", "course") != "course",
+                    reason="the prerequisite cap belongs to the course model")
+def test_the_overview_shows_a_prerequisite_cap_learned_after_the_dependent_kc(world):
+    """Course model (S8): answers on a prerequisite after the dependent KC change what the dependent KC shows,
+    and the overview reads the final states, not each KC's value at its own last answer."""
+    c1 = next(k for k in world.prof.get(f"{world.url}/kcs").json() if k["code"] == "C.1")
+    c2 = world.prof.post(f"{world.url}/kcs", json={
+        "module_id": world.module, "code": "C.2", "name": "Power", "difficulty": "basic",
+        "prerequisite_ids": [c1["id"]]}).json()
+    world.prof.post(f"{world.url}/check-items", json={
+        "kc_id": c2["id"], "code": "C.2-q1", "level": "basic", "stem": "How much?", "options": OPTIONS,
+        "answer": "A", "status": "active"})
+    set_mode(world, "B")
+    alice = _login(world.app, "alice")
+    alice.post(f"{world.url}/me/visibility", json={"action": "acknowledge"})
+    for _ in range(4):
+        alice.post(f"{world.url}/check", json={"item_id": "C.2-q1", "choice": "A"})
+    for _ in range(3):
+        alice.post(f"{world.url}/check", json={"item_id": "C.1-q1", "choice": "B"})  # wrong
+    kcs = {k["kc_code"]: k["p_mastery"] for k in world.prof.get(
+        f"{world.url}/students/{world.sid}/overview").json()["kcs"]}
+    assert kcs["C.2"] == pytest.approx(0.25 + 0.75 * kcs["C.1"], abs=1e-6)  # capped by the weak C.1

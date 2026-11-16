@@ -56,8 +56,9 @@ sessions:
   history_turns: 6
 
 learner:
-  knowledge: bkt                      # bkt | rule. BKT stays the default although E2 favoured rule (G1-100,
-                                      # docs/review/BKT_KC_review.md); fit its parameters on real answers
+  knowledge: course                   # course | bkt | rule. course = the layered model of guide 4.10 (course ability +
+                                      # KC-level BKT + prerequisites; simulated comparison in
+                                      # eval/learner-sim/results/course_model.md); fit its parameters on real answers
   preference: simple                  # simple | ils (later)
   weak_evidence: false                # off in the MVP; Beta turns it on after E1
   levels: { basic_below: 0.40, advanced_above: 0.70, hysteresis: 0.05 }
@@ -66,6 +67,7 @@ learner:
   bkt_by_level: {}                    # e.g. { advanced: { slip: 0.15 } } — tuned in E2 (Step 14)
   weak_likelihood: { given_mastered: 0.30, given_not_mastered: 0.60 }
   rule: { last_n: 5, weak_penalty: 0.05 }
+  course_model: { ability_gain: 0.3, ability_weight: 0.5 }   # the course model only
   class_summary_min_group: 5
   instructor_individual_view: false   # individual learning views stay off unless the client requires them
 
