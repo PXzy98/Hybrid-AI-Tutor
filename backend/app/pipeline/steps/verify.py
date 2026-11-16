@@ -21,9 +21,20 @@ WARNINGS = {
 }
 
 
+def subject_checkers() -> frozenset[str]:
+    """Checkers named by some privacy profile: they belong to that subject."""
+    from app.privacy.profiles import privacy_profile, profile_names
+
+    return frozenset(c for name in profile_names() for c in privacy_profile(name).checkers)
+
+
 @steps.register("verify")
 class VerifyStep(BaseStep):
     """Step 8: run the configured checkers (verify.checkers) and act on the results.
+
+    A checker that a privacy profile names (`checkers` in app/privacy/profiles/, e.g. medical_safety) is a
+    subject's checker: it runs only for courses whose profile names it (task Z16). Without a profile (tests,
+    evaluation harnesses) every configured checker runs.
 
     medical_safety fail -> regenerate once with a fixed safety instruction; still failing -> a safe fallback
     message (the retrieved sources are still returned). medical_safety warn -> append a referral sentence.
@@ -37,11 +48,18 @@ class VerifyStep(BaseStep):
         super().__init__(services)
         import_submodules("app.verify.checkers")
         self.checkers = [checkers.get(n)(services) for n in services.settings.verify.checkers]
+        self.subject_checkers = subject_checkers()
         self.generate = GenerateStep(services)
+
+    def _active(self, ctx: RequestContext) -> list:
+        if ctx.profile is None:
+            return self.checkers
+        return [c for c in self.checkers
+                if c.name not in self.subject_checkers or c.name in ctx.profile.checkers]
 
     def _run_all(self, ctx: RequestContext) -> list[CheckResult]:
         results = []
-        for c in self.checkers:
+        for c in self._active(ctx):
             try:
                 results.append(c.check(ctx))
             except Exception as e:  # noqa: BLE001  a broken checker must not break the answer

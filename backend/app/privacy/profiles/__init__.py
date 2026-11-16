@@ -1,8 +1,9 @@
 """Privacy profiles per course type, document scanning and web search queries (guide 4.7; tasks Z7, Z11).
 
 Task Z7: one YAML file per profile in this folder. `base.yaml` is the layer every course has; a profile
-`extends: base` and adds recognizers, its health-detail policy, checkers and the medical disclaimer. A new
-profile (course type) needs one new file. Files are validated when first loaded: unknown recognizers or
+`extends: base` and adds recognizers, its health-detail policy, checkers, the medical disclaimer and its
+subject prompt (`prompt`, task Z16: app/prompts/subjects/<prompt>.md). A new profile (course type) needs one
+new file. Files are validated when first loaded: unknown recognizers or
 checkers stop the app.
 
 Task Z11:
@@ -35,7 +36,7 @@ def _raw(name: str) -> dict:
         raise ProfileError(f"unknown privacy profile: {name}")
     data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     unknown = set(data) - {"extends", "recognizers", "health_detail_policy", "checkers", "medical_disclaimer",
-                           "consent_note"}
+                           "consent_note", "prompt"}
     if unknown:
         raise ProfileError(f"{path.name}: unknown keys {sorted(unknown)}")
     return data
@@ -66,12 +67,17 @@ def privacy_profile(course_type: str) -> PrivacyProfile:
     import_submodules("app.verify.checkers")
     bad = [r for r in recognizers if r not in pii_recognizers.names()]
     bad += [c for c in merged.get("checkers") or [] if c not in checker_registry.names()]
+    from app.prompts import subject_names
+
+    if merged.get("prompt", "general") not in subject_names():
+        bad.append(f"prompt {merged.get('prompt')}")
     if bad:
-        raise ProfileError(f"{course_type}: unknown recognizer or checker {bad}")
+        raise ProfileError(f"{course_type}: unknown recognizer, checker or prompt {bad}")
     return PrivacyProfile(name=course_type, recognizers=recognizers,
                           health_detail_policy=merged.get("health_detail_policy", "local_only"),
                           checkers=tuple(merged.get("checkers") or ()),
-                          medical_disclaimer=bool(merged.get("medical_disclaimer", False)))
+                          medical_disclaimer=bool(merged.get("medical_disclaimer", False)),
+                          prompt=merged.get("prompt", "general"))
 
 
 # Found in a course document, these are student data and keep it out of the index: identifiers of a person

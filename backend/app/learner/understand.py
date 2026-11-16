@@ -18,7 +18,7 @@ from app.llm.base import Message
 QUESTION_TYPES = ["definition", "how_why", "self_management", "check_my_answer", "other"]
 MAX_KCS = 2
 
-INSTRUCTIONS = """You classify a student's question for a health-education tutor. Reply with JSON only:
+INSTRUCTIONS = """You classify a student's question for a course tutor. Reply with JSON only:
 {"k": [...], "t": "...", "c": true|false, "m": [...]}
 
 - k: the 0-2 knowledge components the question is mainly about, most relevant first; [] when the question
