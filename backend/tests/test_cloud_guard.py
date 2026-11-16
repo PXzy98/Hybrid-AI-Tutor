@@ -63,6 +63,7 @@ def test_cloud_request_contains_only_the_allow_list():
         "passages": ["Reliever inhalers can cause a fast heartbeat or shaking."],
         "labels": {"level": "basic", "sequencing": "concept_first", "detail": "detailed"},
         "language": "en",
+        "subject": "general",  # a fixed prompt name (task Z16); the course's profile sets it
     }
     dumped = req.model_dump_json()
     for secret in SECRETS:
