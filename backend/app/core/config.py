@@ -77,8 +77,8 @@ class RagConfig(Section):
 class WebSearchConfig(Section):
     """Web search for cloud answers that need recent information (task T13; guide 4.5 step 6a). Chosen when
     the stack is deployed: `off` (never), `api` (a hosted search API, Tavily-compatible, key in
-    `WEBSEARCH_API_KEY`), `openai` (OpenAI's web_search tool, key in `WEBSEARCH_API_KEY`) or `searxng`
-    (the self-hosted SearXNG of the `searxng` Compose profile)."""
+    `TAVILY_API_KEY`), `openai` (OpenAI's web_search tool, key in `OPENAI_API_KEY`) or `searxng` (the
+    self-hosted SearXNG of the `searxng` Compose profile, no key)."""
 
     provider: Literal["off", "api", "openai", "searxng"] = "off"
     api_url: str = "https://api.tavily.com/search"
@@ -332,7 +332,10 @@ class Settings(BaseSettings):
     ollama_url: str = "http://192.168.2.25:11434"
     cloud_base_url: str = "https://api.openai.com/v1"
     cloud_api_key: SecretStr | None = None
-    websearch_api_key: SecretStr | None = None  # websearch.provider: api or openai
+    # web search keys, one per provider: TAVILY_API_KEY for `api`, OPENAI_API_KEY for `openai`
+    tavily_api_key: SecretStr | None = None
+    openai_api_key: SecretStr | None = None
+    websearch_api_key: SecretStr | None = None  # old name of TAVILY_API_KEY, still read for `api`
     settings_encryption_key: SecretStr | None = None  # Fernet key for API keys of model connections (Z6)
     cloud_model: str | None = None
     instructor_username: str | None = None
@@ -350,7 +353,7 @@ class Settings(BaseSettings):
 
     @field_validator(
         "cloud_api_key", "cloud_model", "instructor_username", "instructor_initial_password", "pgpassword",
-        "settings_encryption_key", "websearch_api_key",
+        "settings_encryption_key", "tavily_api_key", "openai_api_key", "websearch_api_key",
         mode="before",
     )
     @classmethod
