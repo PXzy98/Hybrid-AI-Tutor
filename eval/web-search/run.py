@@ -17,7 +17,7 @@ The privacy part runs the real privacy filter and `search_query()` on fictional 
 and records what a search request would carry (through a mock transport: nothing is sent).
 
 All questions are fictional (questions.jsonl). Keys come from the environment or the repository's .env:
-OPENAI_API_KEY, TAVILY_KEY (or WEBSEARCH_API_KEY), OPENROUTER_API_KEY; SearXNG from --searxng-url.
+OPENAI_API_KEY, TAVILY_API_KEY (or TAVILY_KEY), OPENROUTER_API_KEY; SearXNG from --searxng-url.
 Answers are cached in <out>/runs.jsonl, judgements in <out>/judge.jsonl: a rerun only asks what is missing.
 
     .venv\\Scripts\\python eval\\web-search\\run.py --searxng-url http://<host>:<port> --out <dir>
@@ -240,9 +240,9 @@ def settings_for(provider: str, a, env: dict):
     s = Settings()
     ws = s.websearch.model_copy(update={"provider": provider, "cache_hours": 0, "timeout_s": a.search_timeout,
                                         **({"searxng_url": a.searxng_url} if a.searxng_url else {})})
-    key = env.get("OPENAI_API_KEY") if provider == "openai" else \
-        env.get("WEBSEARCH_API_KEY") or env.get("TAVILY_KEY")
-    return s.model_copy(update={"websearch": ws, **({"websearch_api_key": SecretStr(key)} if key else {})})
+    field, key = ("openai_api_key", env.get("OPENAI_API_KEY")) if provider == "openai" else \
+        ("tavily_api_key", env.get("TAVILY_API_KEY") or env.get("TAVILY_KEY"))
+    return s.model_copy(update={"websearch": ws, **({field: SecretStr(key)} if key else {})})
 
 
 def prompt(q: dict, passages: list[str]) -> list[dict]:

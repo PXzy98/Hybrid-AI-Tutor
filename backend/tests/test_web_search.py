@@ -97,7 +97,7 @@ async def test_off_makes_no_request(settings):
 
 
 async def test_api_sends_only_the_query_and_the_allow_list(settings, monkeypatch):
-    monkeypatch.setenv("WEBSEARCH_API_KEY", "fake-test-key")
+    monkeypatch.setenv("TAVILY_API_KEY", "fake-test-key")
     calls, transport = recorder({"results": RESULTS})
     found = await web_search("salt and blood pressure", SITES, settings=settings("api"), transport=transport)
     (request,) = calls
@@ -112,18 +112,25 @@ async def test_api_sends_only_the_query_and_the_allow_list(settings, monkeypatch
 
 
 async def test_api_without_a_key_or_with_an_error_fails(settings, monkeypatch):
-    monkeypatch.delenv("WEBSEARCH_API_KEY", raising=False)
+    monkeypatch.setenv("OPENAI_API_KEY", "fake-other-key")  # another provider's key is not used
     _, transport = recorder({"results": RESULTS})
-    with pytest.raises(WebSearchError, match="WEBSEARCH_API_KEY"):
+    with pytest.raises(WebSearchError, match="TAVILY_API_KEY"):
         await web_search("q words here", SITES, settings=settings("api"), transport=transport)
-    monkeypatch.setenv("WEBSEARCH_API_KEY", "fake-test-key")
+    monkeypatch.setenv("TAVILY_API_KEY", "fake-test-key")
     _, broken = recorder(httpx.Response(401, json={"detail": "bad key"}))
     with pytest.raises(WebSearchError, match="401"):
         await web_search("q words here", SITES, settings=settings("api"), transport=broken)
 
 
+async def test_api_still_reads_the_old_key_name(settings, monkeypatch):
+    monkeypatch.setenv("WEBSEARCH_API_KEY", "fake-old-key")
+    calls, transport = recorder({"results": RESULTS})
+    await web_search("salt and blood pressure", SITES, settings=settings("api"), transport=transport)
+    assert calls[0].headers["Authorization"] == "Bearer fake-old-key"
+
+
 async def test_the_api_must_be_a_public_address(use_config, monkeypatch):
-    monkeypatch.setenv("WEBSEARCH_API_KEY", "fake-test-key")
+    monkeypatch.setenv("TAVILY_API_KEY", "fake-test-key")
     cfg = use_config({"websearch": {"provider": "api", "api_url": "http://10.0.0.5/search"}})
     with pytest.raises(UnsafeEndpoint):  # the real SSRF check (an IP address needs no DNS)
         await web_search("q words here", SITES, settings=cfg)
@@ -151,7 +158,7 @@ OPENAI_REPLY = _openai_reply()
 
 
 async def test_openai_sends_only_the_query_and_the_allow_list(settings, monkeypatch):
-    monkeypatch.setenv("WEBSEARCH_API_KEY", "fake-test-key")
+    monkeypatch.setenv("OPENAI_API_KEY", "fake-test-key")
     calls, transport = recorder(OPENAI_REPLY)
     found = await web_search("RSV vaccine for older adults", SITES + ["cdc.gov"], settings=settings("openai"),
                              transport=transport)
@@ -170,11 +177,13 @@ async def test_openai_sends_only_the_query_and_the_allow_list(settings, monkeypa
 
 async def test_openai_without_a_key_or_with_an_error_fails(settings, monkeypatch):
     calls, transport = recorder(OPENAI_REPLY)
-    with pytest.raises(WebSearchError, match="WEBSEARCH_API_KEY"):
+    for other in ("TAVILY_API_KEY", "WEBSEARCH_API_KEY"):  # other providers' keys are not used
+        monkeypatch.setenv(other, "fake-other-key")
+    with pytest.raises(WebSearchError, match="OPENAI_API_KEY"):
         await web_search("RSV vaccine for older adults", SITES, settings=settings("openai"),
                          transport=transport)
     assert calls == []  # nothing was sent
-    monkeypatch.setenv("WEBSEARCH_API_KEY", "fake-test-key")
+    monkeypatch.setenv("OPENAI_API_KEY", "fake-test-key")
     _, down = recorder(httpx.Response(429))
     with pytest.raises(WebSearchError, match="429"):
         await web_search("RSV vaccine for older adults", SITES, settings=settings("openai"), transport=down)
@@ -280,7 +289,7 @@ def test_engines_per_course_type(settings):
 
 
 async def test_the_api_ignores_engines(settings, monkeypatch):
-    monkeypatch.setenv("WEBSEARCH_API_KEY", "fake-test-key")
+    monkeypatch.setenv("TAVILY_API_KEY", "fake-test-key")
     calls, transport = recorder({"results": [RESULTS[0]]})
     await web_search("salt and blood pressure", SITES, engines=["pubmed"], settings=settings("api"),
                      transport=transport)

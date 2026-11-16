@@ -37,7 +37,7 @@ Volumes: `db-data` (database), `tutor-data` (uploaded materials and indexes), `c
 | `OLLAMA_URL`, `LLM__LOCAL__MODEL` | yes | the local model server and model |
 | `CLOUD_BASE_URL`, `CLOUD_API_KEY`, `CLOUD_MODEL` | optional | an external model; leave the key empty for local-only |
 | `SPACY_MODEL` | optional | `en_core_web_lg` (default) for production |
-| `WEBSEARCH__PROVIDER`, `WEBSEARCH_API_KEY`, `SEARXNG_SECRET` | optional | web search for cloud answers: `off` (default), `api` (with the key) or `searxng` (with the secret and `--profile searxng`); [WEB_SEARCH.md](WEB_SEARCH.md) |
+| `WEBSEARCH__PROVIDER`, `OPENAI_API_KEY`, `TAVILY_API_KEY`, `SEARXNG_SECRET` | optional | web search for cloud answers: `openai` (default, with `OPENAI_API_KEY`), `api` (with `TAVILY_API_KEY`), `searxng` (no key; the secret and `--profile searxng`) or `off`; [WEB_SEARCH.md](WEB_SEARCH.md) |
 
 Limits (usage, login failures, roster size, invitation codes, uploads) are in `config.yaml` under `limits`; any
 value can be overridden in `.env` as `SECTION__FIELD`, for example `LIMITS__ACCOUNTS__LOGIN_FAILURES_PER_HOUR=20`.

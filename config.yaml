@@ -36,7 +36,7 @@ rag:
 
 websearch:                        # task T13; docs/WEB_SEARCH.md
   # off | openai (OpenAI web_search, default since the comparison of 2026-11-16) | api (Tavily-format API)
-  # | searxng (Compose profile); openai and api need WEBSEARCH_API_KEY, without it the search step fails
+  # | searxng (Compose profile); openai needs OPENAI_API_KEY, api TAVILY_API_KEY (searxng none); without it the search step fails
   provider: openai
   api_url: https://api.tavily.com/search
   openai_url: https://api.openai.com/v1/responses

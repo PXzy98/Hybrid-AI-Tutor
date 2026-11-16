@@ -30,8 +30,8 @@ Every arm searches every question, including the control questions, to see wheth
 
 ## Running
 
-Keys from the environment or the repository's `.env`: `OPENAI_API_KEY`, `TAVILY_KEY` (or
-`WEBSEARCH_API_KEY`), `OPENROUTER_API_KEY` (judge). Only the fictional questions are sent.
+Keys from the environment or the repository's `.env`: `OPENAI_API_KEY`, `TAVILY_API_KEY` (or
+`TAVILY_KEY`), `OPENROUTER_API_KEY` (judge). Only the fictional questions are sent.
 
 ```bash
 python eval/web-search/run.py --searxng-url http://<searxng-host>:<port> --out <dir>

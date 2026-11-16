@@ -2,7 +2,7 @@
 
 Cloud answers to questions that need recent information can add passages from a few allowed web sites. The
 search is chosen when the stack is deployed. **The default is `openai`** (chosen after the comparison of
-2026-11-16, below); without `WEBSEARCH_API_KEY` the search step fails and the answer uses the course material.
+2026-11-16, below); without `OPENAI_API_KEY` the search step fails and the answer uses the course material.
 
 ## When it runs
 
@@ -26,11 +26,12 @@ routing panel shows a "Web search" step. A failed search is skipped: the answer 
 | `websearch.provider` | What | Needs |
 |---|---|---|
 | `off` | no search | nothing |
-| `openai` (default) | OpenAI's web search (Responses API, `web_search` tool with `filters.allowed_domains` = the allow-list, `tool_choice: required`). `openai_model` (`gpt-6-luna`) searches for the query and writes short findings citing their pages; every cited page on an allowed site becomes one passage (its citing paragraphs, links removed). The course's cloud model then writes the answer from these passages, as with `api` | `WEBSEARCH_API_KEY` in `.env`: an OpenAI key (the developer's own) |
-| `api` | a hosted search API with the Tavily request format (`POST {api_url}` with `query`, `include_domains`, `max_results`); the allow-list is sent as `include_domains` | `WEBSEARCH_API_KEY` in `.env` (each developer uses their own key) |
-| `searxng` | the self-hosted [SearXNG](https://docs.searxng.org/) metasearch engine of the `searxng` Compose profile (JSON API); one query to the course type's engines (below) | `SEARXNG_SECRET` in `.env`; `docker compose --profile searxng up -d` |
+| `openai` (default) | OpenAI's web search (Responses API, `web_search` tool with `filters.allowed_domains` = the allow-list, `tool_choice: required`). `openai_model` (`gpt-6-luna`) searches for the query and writes short findings citing their pages; every cited page on an allowed site becomes one passage (its citing paragraphs, links removed). The course's cloud model then writes the answer from these passages, as with `api` | `OPENAI_API_KEY` in `.env`: an OpenAI key (the developer's own) |
+| `api` | a hosted search API with the Tavily request format (`POST {api_url}` with `query`, `include_domains`, `max_results`); the allow-list is sent as `include_domains` | `TAVILY_API_KEY` in `.env` (each developer uses their own key; the old name `WEBSEARCH_API_KEY` still works) |
+| `searxng` | the self-hosted [SearXNG](https://docs.searxng.org/) metasearch engine of the `searxng` Compose profile (JSON API); one query to the course type's engines (below) | no key; `SEARXNG_SECRET` in `.env` for the SearXNG server itself; `docker compose --profile searxng up -d` |
 
-Set the mode in `.env`, for example `WEBSEARCH__PROVIDER=searxng`, or in `config.yaml`. Other settings in
+Set the mode in `.env`, for example `WEBSEARCH__PROVIDER=searxng`, or in `config.yaml`. Each provider reads
+only its own key, so keys of the other providers can stay in `.env` when switching. Other settings in
 `config.yaml` under `websearch`: `api_url`, `openai_url`, `openai_model` (`gpt-6-luna`), `openai_timeout_s`
 (30), `searxng_url` (default `http://searxng:8080`), `max_results` (3), `max_chars` per result (1200),
 `timeout_s` (8, `api` and `searxng`), `cache_hours` (24).

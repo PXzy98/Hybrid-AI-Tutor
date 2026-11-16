@@ -138,8 +138,8 @@ def test_other_stand_ins():
     base = Settings(_env_file=None)
     off = base.model_copy(update={"websearch": base.websearch.model_copy(update={"provider": "off"})})
     assert asyncio.run(web_search("query", ["medlineplus.gov"], settings=off)) == []
-    # the default (openai) without WEBSEARCH_API_KEY fails before anything is sent
-    with pytest.raises(WebSearchError, match="WEBSEARCH_API_KEY"):
+    # the default (openai) without OPENAI_API_KEY fails before anything is sent
+    with pytest.raises(WebSearchError, match="OPENAI_API_KEY"):
         asyncio.run(web_search("query", ["medlineplus.gov"], settings=base))
     retriever = FakeCourseRetriever()
     assert retriever.retrieve(7, None, "q") == [] and retriever.calls == [(7, None, "q", 4)]

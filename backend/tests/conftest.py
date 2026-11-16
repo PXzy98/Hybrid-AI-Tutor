@@ -83,6 +83,9 @@ def _fresh_settings(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, _test_datab
     # a developer's .env must not change test behaviour: no instructor bootstrap unless a test asks for it
     monkeypatch.setenv("INSTRUCTOR_USERNAME", "")
     monkeypatch.setenv("INSTRUCTOR_INITIAL_PASSWORD", "")
+    # nor a web search key exported in the shell: no test may reach a real search provider (rule 6)
+    for name in ("OPENAI_API_KEY", "TAVILY_API_KEY", "WEBSEARCH_API_KEY"):
+        monkeypatch.setenv(name, "")
     get_settings.cache_clear()
     yield
     get_settings.cache_clear()

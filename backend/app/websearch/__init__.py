@@ -3,9 +3,9 @@
 The query always comes from `app.privacy.profiles.search_query()`; this package never sees the original
 question. Chosen when the stack is deployed (`websearch.provider`, docs/WEB_SEARCH.md):
 - `off`: no search, `web_search` returns no passages;
-- `api`: a hosted search API with the Tavily request format (`WEBSEARCH_API_KEY`); the allow-list is sent as
+- `api`: a hosted search API with the Tavily request format (`TAVILY_API_KEY`); the allow-list is sent as
   `include_domains`;
-- `openai`: OpenAI's own web search (Responses API `web_search` tool, `WEBSEARCH_API_KEY`), restricted to
+- `openai`: OpenAI's own web search (Responses API `web_search` tool, `OPENAI_API_KEY`), restricted to
   the allow-list. A small model (`openai_model`) searches for the query and writes short findings that cite
   their pages; each cited page becomes a passage. Only the query leaves, as with `api`; the answer is still
   written by the course's cloud model from these passages;
@@ -91,13 +91,24 @@ def _client(url: str, trust: str, timeout: float, transport) -> httpx.AsyncClien
     return httpx.AsyncClient(transport=transport or PinnedTransport(trust=trust), timeout=timeout)
 
 
+def _key(settings: Settings, provider: str) -> str:
+    """The key of the chosen provider; each provider has its own (WEBSEARCH_API_KEY is the old name of
+    TAVILY_API_KEY)."""
+    if provider == "api":
+        key, name = settings.tavily_api_key or settings.websearch_api_key, "TAVILY_API_KEY"
+    else:
+        key, name = settings.openai_api_key, "OPENAI_API_KEY"
+    if key is None:
+        raise WebSearchError(f"websearch.provider is {provider} but {name} is not set")
+    return key.get_secret_value()
+
+
 async def _search_api(query: str, allowlist: list[str], settings: Settings, transport) -> list[dict]:
     cfg = settings.websearch
-    if settings.websearch_api_key is None:
-        raise WebSearchError("websearch.provider is api but WEBSEARCH_API_KEY is not set")
+    key = _key(settings, "api")
     body = {"query": query, "max_results": cfg.max_results * 2, "include_domains": allowlist,
             "search_depth": "basic", "include_answer": False}
-    headers = {"Authorization": f"Bearer {settings.websearch_api_key.get_secret_value()}"}
+    headers = {"Authorization": f"Bearer {key}"}
     async with _client(cfg.api_url, "external", cfg.timeout_s, transport) as client:
         r = await client.post(cfg.api_url, json=body, headers=headers)
     if r.status_code != 200:
@@ -136,12 +147,11 @@ def _cited_passages(text: str, annotations: list[dict]) -> list[dict]:
 
 async def _search_openai(query: str, allowlist: list[str], settings: Settings, transport) -> list[dict]:
     cfg = settings.websearch
-    if settings.websearch_api_key is None:
-        raise WebSearchError("websearch.provider is openai but WEBSEARCH_API_KEY is not set")
+    key = _key(settings, "openai")
     body = {"model": cfg.openai_model, "instructions": OPENAI_INSTRUCTIONS, "input": query,
             "max_output_tokens": 700, "reasoning": {"effort": "none"}, "tool_choice": "required",
             "tools": [{"type": "web_search", "filters": {"allowed_domains": allowlist}}]}
-    headers = {"Authorization": f"Bearer {settings.websearch_api_key.get_secret_value()}"}
+    headers = {"Authorization": f"Bearer {key}"}
     async with _client(cfg.openai_url, "external", cfg.openai_timeout_s, transport) as client:
         r = await client.post(cfg.openai_url, json=body, headers=headers)
     if r.status_code != 200:
