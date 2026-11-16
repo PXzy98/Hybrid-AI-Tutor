@@ -6,6 +6,7 @@ from app.llm.base import LLMError
 from app.llm.cloud_guard import build_cloud_request
 from app.pipeline.base import BaseStep
 from app.pipeline.settings_view import health_detail_policy, local_only
+from app.pipeline.steps.understand import local_helper
 from app.privacy.analyzer import PIIAnalyzer
 from app.privacy.generalize import generalize
 from app.privacy.llm_check import reveals_personal_health
@@ -118,8 +119,9 @@ class GenerateStep(BaseStep):
             names, usernames = self.services.accounts.identity_terms(ctx.request.student_id)
             local_only = set(self.services.settings.privacy.local_only_types)
             known = [e.text for e in ctx.pii.entities if e.type not in local_only]
-            rewrite = await generalize(ctx.request.question, self.services.local_llm, self.leaks.analyzer,
-                                       names, usernames, known)
+            llm = local_helper(self.services, ctx, self.services.local_llm)
+            rewrite = await generalize(ctx.request.question, llm, self.leaks.analyzer, names, usernames,
+                                       known)
         if rewrite is None:
             return None
         ctx.generalized_question = rewrite
@@ -148,7 +150,8 @@ async def llm_flags_health(ctx: RequestContext, services) -> bool:
             or not TOPIC_RE.search(ctx.request.question)):
         return False
     ctx.pii = ctx.pii.model_copy(update={"llm_checked": True})
-    flagged = await reveals_personal_health(services.understand_llm, ctx.pii.sanitized_text)
+    flagged = await reveals_personal_health(local_helper(services, ctx, services.understand_llm),
+                                            ctx.pii.sanitized_text)
     if flagged:
         log.info("local model check kept a question off the cloud, request=%s", ctx.request_id)
     return flagged

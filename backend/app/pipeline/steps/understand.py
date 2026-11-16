@@ -4,6 +4,14 @@ from app.learner import understand
 from app.pipeline.base import BaseStep
 
 
+def local_helper(services, ctx: RequestContext, default):
+    """The trusted local client for a small call on the original text: the request's stored connection
+    through the gateway (task Z17), or `default` for contexts without settings (unit tests)."""
+    if services.gateway is None or ctx.settings is None:
+        return default
+    return services.gateway.trusted_local_client(ctx.settings, default)
+
+
 @steps.register("understand")
 class UnderstandStep(BaseStep):
     """Tag the question with KC IDs, question type, confusion and misconception IDs (local model, JSON).
@@ -21,7 +29,7 @@ class UnderstandStep(BaseStep):
         content, topic = self.services.content, ctx.request.topic
         if not content.kcs(topic):
             return ctx
-        result = await self.services.understand_llm.complete(
+        result = await local_helper(self.services, ctx, self.services.understand_llm).complete(
             understand.messages(content, topic, ctx.request.question),
             json_schema=understand.schema(content, topic), max_tokens=200)
         ctx.understanding = understand.parse(result.text, content, topic, ctx.request.question)

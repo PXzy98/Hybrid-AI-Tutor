@@ -150,6 +150,18 @@ class Gateway:
 
         return tokens()
 
+    def trusted_local_client(self, settings: EffectiveSettings | None, default):
+        """The client for the small local calls that read the original text (understand, the generalize
+        rewrite, llm_check; task Z17): the request's trusted local connection when one is stored (course or
+        system default), queued with the answers; otherwise `default`, the deployment's own client for that
+        call. A stored connection that is not trusted local is never used for them."""
+        if self._endpoint_id("local", settings) is None:
+            return default
+        client, trust, key = self.resolve("local", settings)
+        if trust != "trusted_local":
+            return _Refused("the local connection is not a trusted local connection")
+        return _Queued(self, client, key)
+
     def cloud_client(self, settings: EffectiveSettings | None):
         """The CloudClient for this request: only a validated CloudRequest can pass it (privacy rule 3)."""
         from app.llm.cloud_guard import CloudClient
@@ -161,6 +173,18 @@ class Gateway:
             return _QueuedCloud(self, self.services.cloud_llm, "cloud")
         client, _, key = self.resolve("cloud", settings)
         return CloudClient(_Queued(self, client, key))
+
+
+class _Refused:
+    """Stands in for a connection that may not receive the call: every call fails like an unreachable model,
+    so each caller's own failure rule applies (understand is skipped, generalize and llm_check keep the
+    question local)."""
+
+    def __init__(self, reason: str) -> None:
+        self.reason, self.model = reason, None
+
+    async def complete(self, messages, *, json_schema=None, max_tokens=None):
+        raise LLMUnavailable(self.reason)
 
 
 class _Queued:
