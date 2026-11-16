@@ -3,6 +3,7 @@ from time import perf_counter
 from app.core.registry import steps
 from app.core.schemas import RequestContext
 from app.pipeline.base import BaseStep
+from app.pipeline.steps.generate import llm_flags_health
 from app.privacy.profiles import search_query
 from app.websearch import allowlist_for, web_search
 
@@ -24,6 +25,10 @@ class WebSearchStep(BaseStep):
         analysis = ctx.semantic_analysis
         if ctx.target != "cloud" or analysis is None or not analysis.requires_fresh_evidence:
             return ctx
+        # the local model's health check runs before anything leaves (it would otherwise only run when the
+        # generate step builds the cloud request): a flagged question is not cloud-safe, so no query below
+        if ctx.pii is not None and ctx.pii.cloud_safe and await llm_flags_health(ctx, self.services):
+            ctx.pii = ctx.pii.model_copy(update={"cloud_safe": False})
         query = search_query(ctx)
         if query is None:
             await ctx.report("web_search", "skipped",

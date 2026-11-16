@@ -9,8 +9,10 @@ import pytest
 
 from app.core.schemas import AskRequest, Chunk, PIIResult, RequestContext, SemanticAnalysis
 from app.core.services import build_services
+from app.llm.fake import FakeLLMClient
 from app.llm.ssrf import UnsafeEndpoint
 from app.pipeline.steps import web_search as step_module
+from app.pipeline.steps.generate import llm_flags_health
 from app.pipeline.steps.web_search import WebSearchStep
 from app.privacy.profiles import search_query
 from app.rag.sources import source_positions
@@ -211,3 +213,32 @@ async def test_a_failed_search_keeps_the_course_passages(use_config, monkeypatch
     monkeypatch.setattr(step_module, "web_search", failing)
     run = WebSearchStep(build_services(use_config({"websearch": {"provider": "api"}})))
     assert [c.source for c in (await run.run(make_ctx())).passages] == ["notes.pdf"]
+
+
+HEALTH_Q = "I have asthma since last week. What triggers asthma attacks in cold air?"
+
+
+@pytest.mark.parametrize(("reply", "searched"), [
+    ('{"personal_health": true}', False),  # the local model flags it: nothing is sent
+    ('{"personal_health": false}', True),
+    ("not json", False),  # a failed check fails closed
+])
+async def test_the_local_health_check_runs_before_anything_is_sent(use_config, monkeypatch, reply, searched):
+    queries: list[str] = []
+
+    async def fake_search(query, allowlist, *, settings=None, transport=None):
+        queries.append(query)
+        return []
+    monkeypatch.setattr(step_module, "web_search", fake_search)
+    privacy = {"llm_check": True, "health_detail_policy": "local_only"}
+    services = build_services(use_config({"websearch": {"provider": "searxng"}, "privacy": privacy}))
+    services.understand_llm = FakeLLMClient(reply)
+    ctx = RequestContext(request_id="r", request=AskRequest(student_id="s", topic="t", question=HEALTH_Q))
+    ctx.pii = PIIResult(sanitized_text=HEALTH_Q, cloud_safe=True)
+    ctx.target = "cloud"
+    ctx.semantic_analysis = SemanticAnalysis(method="lr", requires_fresh_evidence=True, reliable=True)
+    out = await WebSearchStep(services).run(ctx)
+    assert bool(queries) is searched and out.pii.cloud_safe is searched
+    assert out.pii.llm_checked and len(services.understand_llm.calls) == 1
+    # the generate step reuses this answer instead of asking the local model again
+    assert await llm_flags_health(out, services) is False and len(services.understand_llm.calls) == 1

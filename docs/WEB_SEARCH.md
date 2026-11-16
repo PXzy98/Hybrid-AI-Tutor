@@ -12,7 +12,10 @@ All of these must hold (`app/pipeline/steps/web_search.py`, after `route` in `co
 3. the semantic router found that it needs recent information (`requires_fresh_evidence`);
 4. `search_query()` returns a query (guide rule 5). It is built from the privacy filter's sanitized text only;
    every sentence that held personal data is dropped, and nothing is searched when fewer than three general
-   words are left. The search code never sees the original question.
+   words are left. The search code never sees the original question;
+5. with `privacy.llm_check` on, the local model's personal-health check has passed. It runs here, before
+   anything is sent, instead of only when the cloud request is built; a flagged question (or a failed check)
+   is not cloud-safe, so nothing is searched, and the generate step reuses the result.
 
 The results are added after the course passages, shown in the Sources list under their page title, and the
 routing panel shows a "Web search" step. A failed search is skipped: the answer uses the course material.
