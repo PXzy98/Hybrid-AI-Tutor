@@ -71,3 +71,14 @@ def test_the_understand_step_uses_the_stored_connection(services, monkeypatch):
     stored(services, monkeypatch, vllm)
     asyncio.run(UnderstandStep(services).run(ctx(7)))
     assert len(vllm.calls) == 1 and not services.understand_llm.calls
+
+
+def test_a_connection_that_cannot_be_resolved_keeps_the_question_local(services, monkeypatch):
+    from app.llm.ssrf import UnsafeEndpoint
+
+    def broken(role, settings):
+        raise UnsafeEndpoint("the name does not resolve")
+    monkeypatch.setattr(services.gateway, "resolve", broken)
+    c = ctx(7, "My mother takes metformin for her diabetes, is that common?")
+    assert asyncio.run(llm_flags_health(c, services)) is True  # fails closed, does not raise
+    assert c.pii.llm_checked

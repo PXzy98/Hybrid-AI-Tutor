@@ -157,7 +157,12 @@ class Gateway:
         call. A stored connection that is not trusted local is never used for them."""
         if self._endpoint_id("local", settings) is None:
             return default
-        client, trust, key = self.resolve("local", settings)
+        try:
+            client, trust, key = self.resolve("local", settings)
+        except Exception as e:  # noqa: BLE001  e.g. the name no longer resolves (SSRF check): fail closed
+            return _Refused(f"the local connection cannot be used ({type(e).__name__})")
+        if client is None:
+            return _Refused("no local connection")
         if trust != "trusted_local":
             return _Refused("the local connection is not a trusted local connection")
         return _Queued(self, client, key)
