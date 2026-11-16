@@ -198,11 +198,18 @@ async def test_results_are_cached_per_query(settings):
     for query in ("salt and blood pressure", "Salt and blood pressure ", "another question here"):
         await web_search(query, SITES, engines=["pubmed"], settings=cfg, transport=transport)
     assert len(calls) == 2  # the second query is the first one again
-    off = settings("searxng", cache_hours=0)
-    clear_cache()
+    off = settings("searxng", cache_hours=0)  # no cache read either, though the entry is still there
     for _ in range(2):
         await web_search("salt and blood pressure", SITES, engines=["pubmed"], settings=off,
                          transport=transport)
+    assert len(calls) == 4
+
+
+async def test_the_cache_key_holds_the_settings_that_change_results(settings):
+    calls, transport = recorder({"results": [{**RESULTS[0], "engine": "pubmed"}]})
+    for extra in ({}, {"max_results": 1}, {"max_chars": 300}, {"searxng_url": "http://searxng-2:8080"}):
+        await web_search("salt and blood pressure", SITES, engines=["pubmed"],
+                         settings=settings("searxng", **extra), transport=transport)
     assert len(calls) == 4
 
 
