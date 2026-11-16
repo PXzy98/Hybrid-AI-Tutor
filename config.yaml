@@ -41,11 +41,18 @@ websearch:                        # task T13; docs/WEB_SEARCH.md
   max_results: 3
   max_chars: 1200                 # per result, after cleaning
   timeout_s: 8
+  cache_hours: 24                 # results per query, per process (sanitized query and public pages only)
   allowlist:                      # sites searched per course type (a site includes its subdomains)
-    medical_science: [medlineplus.gov, nih.gov, cdc.gov, who.int]
-    life_science: [nih.gov, ebi.ac.uk, nature.com, khanacademy.org]
-    ece: [ieee.org, nist.gov, python.org, developer.mozilla.org, en.cppreference.com]
+    medical_science: [medlineplus.gov, nih.gov, cdc.gov, who.int, semanticscholar.org, nature.com]
+    life_science: [nih.gov, ebi.ac.uk, nature.com, khanacademy.org, arxiv.org, semanticscholar.org]
+    ece: [ieee.org, nist.gov, python.org, developer.mozilla.org, en.cppreference.com, arxiv.org,
+          semanticscholar.org, stackoverflow.com]
     general: [wikipedia.org]
+  searxng_engines:                # API-backed engines (scraped web engines get blocked; docs/WEB_SEARCH.md)
+    medical_science: [pubmed, semantic scholar]
+    life_science: [pubmed, semantic scholar, arxiv]
+    ece: [arxiv, semantic scholar, mdn, stackoverflow]
+    general: [wikipedia]
 privacy:
   spacy_model: en_core_web_lg         # tests use en_core_web_sm
   score_threshold: 0.5                # phone numbers need a context word ("phone", "call"): 0.4 -> 0.75

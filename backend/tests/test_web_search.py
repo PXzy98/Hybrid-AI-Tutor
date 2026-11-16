@@ -16,7 +16,15 @@ from app.pipeline.steps.generate import llm_flags_health
 from app.pipeline.steps.web_search import WebSearchStep
 from app.privacy.profiles import search_query
 from app.rag.sources import source_positions
-from app.websearch import WebSearchError, allowed_site, allowlist_for, clean, web_search
+from app.websearch import (
+    WebSearchError,
+    allowed_site,
+    allowlist_for,
+    clean,
+    clear_cache,
+    engines_for,
+    web_search,
+)
 
 SITES = ["medlineplus.gov", "nih.gov"]
 RESULTS = [
@@ -29,6 +37,13 @@ RESULTS = [
     {"url": "https://evilnih.gov/e", "title": "Look-alike", "content": "Not a subdomain."},
     {"url": "https://nih.gov/empty", "title": "Empty", "content": "   "},
 ]
+
+
+@pytest.fixture(autouse=True)
+def _no_cached_results():
+    clear_cache()
+    yield
+    clear_cache()
 
 
 @pytest.fixture
@@ -140,7 +155,64 @@ async def test_searxng_keeps_the_sites_that_answered(settings):
     assert [c.source for c in found] == ["https://medlineplus.gov/a"]
     _, down = recorder(httpx.Response(503))
     with pytest.raises(WebSearchError):
-        await web_search("salt and blood pressure", SITES, settings=settings("searxng"), transport=down)
+        await web_search("salt and pepper", SITES, settings=settings("searxng"), transport=down)
+
+
+async def test_searxng_engines_one_query_and_only_their_results(settings):
+    """With engines for the course type: one query to those engines, no site: queries; results of other
+    engines (SearXNG falls back to its default engines for an unknown name) are dropped."""
+    def answer(request: httpx.Request):
+        assert request.url.params["engines"] == "pubmed,semantic scholar"
+        return {"results": [
+            {"url": "https://pubmed.ncbi.nlm.nih.gov/1", "title": "P", "content": "abstract",
+             "engine": "pubmed"},
+            {"url": "https://nih.gov/scraped", "title": "G", "content": "scraped", "engine": "google"},
+            {"url": "http://arxiv.org/abs/2", "title": "A", "content": "preprint",
+             "engine": "semantic scholar"},
+        ]}
+    calls, transport = recorder(answer)
+    found = await web_search("salt and blood pressure", [*SITES, "arxiv.org"],
+                             engines=["pubmed", "semantic scholar"], settings=settings("searxng"),
+                             transport=transport)
+    assert [r.url.params["q"] for r in calls] == ["salt and blood pressure"]
+    assert [c.source for c in found] == ["https://pubmed.ncbi.nlm.nih.gov/1", "https://arxiv.org/abs/2"]
+
+
+async def test_results_are_cached_per_query(settings):
+    calls, transport = recorder({"results": [{**RESULTS[0], "engine": "pubmed"}]})
+    cfg = settings("searxng")
+    for query in ("salt and blood pressure", "Salt and blood pressure ", "another question here"):
+        await web_search(query, SITES, engines=["pubmed"], settings=cfg, transport=transport)
+    assert len(calls) == 2  # the second query is the first one again
+    off = settings("searxng", cache_hours=0)
+    clear_cache()
+    for _ in range(2):
+        await web_search("salt and blood pressure", SITES, engines=["pubmed"], settings=off,
+                         transport=transport)
+    assert len(calls) == 4
+
+
+async def test_failures_and_empty_answers_are_not_cached(settings):
+    calls, transport = recorder({"results": []})
+    cfg = settings("searxng")
+    for _ in range(2):
+        assert await web_search("salt and blood pressure", SITES, engines=["pubmed"], settings=cfg,
+                                transport=transport) == []
+    assert len(calls) == 2
+
+
+def test_engines_per_course_type(settings):
+    cfg = settings("searxng", searxng_engines={"ece": ["arxiv"], "general": ["wikipedia"]})
+    assert engines_for("ece", cfg) == ["arxiv"]
+    assert engines_for("custom_type", cfg) == engines_for(None, cfg) == ["wikipedia"]
+
+
+async def test_the_api_ignores_engines(settings, monkeypatch):
+    monkeypatch.setenv("WEBSEARCH_API_KEY", "fake-test-key")
+    calls, transport = recorder({"results": [RESULTS[0]]})
+    await web_search("salt and blood pressure", SITES, engines=["pubmed"], settings=settings("api"),
+                     transport=transport)
+    assert "engines" not in json.loads(calls[0].content)
 
 
 def test_web_sources_are_named_by_their_page_title():
@@ -172,7 +244,7 @@ def make_ctx(target="cloud", fresh=True, sanitized=MIXED):
 def step(use_config, monkeypatch):
     queries: list[str] = []
 
-    async def fake_search(query, allowlist, *, settings=None, transport=None):
+    async def fake_search(query, allowlist, *, engines=None, settings=None, transport=None):
         queries.append(query)
         return [Chunk(text="web", source="https://nih.gov/a", topic="web", score=0, metadata={"web": True})]
 
@@ -226,7 +298,7 @@ HEALTH_Q = "I have asthma since last week. What triggers asthma attacks in cold 
 async def test_the_local_health_check_runs_before_anything_is_sent(use_config, monkeypatch, reply, searched):
     queries: list[str] = []
 
-    async def fake_search(query, allowlist, *, settings=None, transport=None):
+    async def fake_search(query, allowlist, *, engines=None, settings=None, transport=None):
         queries.append(query)
         return []
     monkeypatch.setattr(step_module, "web_search", fake_search)

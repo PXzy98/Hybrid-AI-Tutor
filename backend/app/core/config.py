@@ -85,8 +85,11 @@ class WebSearchConfig(Section):
     max_results: int = Field(3, ge=1, le=10)
     max_chars: int = Field(1200, ge=200, le=5000)  # per result, after cleaning
     timeout_s: float = Field(8, gt=0, le=30)
+    cache_hours: float = Field(24, ge=0, le=168)  # results per query, per process; 0 = no cache
     # sites searched per course type; a course type without a list uses `general`
     allowlist: dict[str, list[str]] = {}
+    # SearXNG engines per course type (API-backed ones); none = default engines, one site: query per site
+    searxng_engines: dict[str, list[str]] = {}
 
 
 class PrivacyConfig(Section):

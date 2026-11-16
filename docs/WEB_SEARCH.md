@@ -26,11 +26,15 @@ routing panel shows a "Web search" step. A failed search is skipped: the answer 
 |---|---|---|
 | `off` (default) | no search | nothing |
 | `api` | a hosted search API with the Tavily request format (`POST {api_url}` with `query`, `include_domains`, `max_results`); the allow-list is sent as `include_domains` | `WEBSEARCH_API_KEY` in `.env` (each developer uses their own key) |
-| `searxng` | the self-hosted [SearXNG](https://docs.searxng.org/) metasearch engine of the `searxng` Compose profile (JSON API); one `site:` query per allowed site, the sites taken in turns | `SEARXNG_SECRET` in `.env`; `docker compose --profile searxng up -d` |
+| `searxng` | the self-hosted [SearXNG](https://docs.searxng.org/) metasearch engine of the `searxng` Compose profile (JSON API); one query to the course type's engines (below) | `SEARXNG_SECRET` in `.env`; `docker compose --profile searxng up -d` |
 
 Set the mode in `.env`, for example `WEBSEARCH__PROVIDER=searxng`, or in `config.yaml`. Other settings in
 `config.yaml` under `websearch`: `api_url`, `searxng_url` (default `http://searxng:8080`), `max_results` (3),
-`max_chars` per result (1200), `timeout_s` (8).
+`max_chars` per result (1200), `timeout_s` (8), `cache_hours` (24).
+
+**Cache**: results are kept per process for `cache_hours` (0 turns it off), keyed by provider, query, sites and
+engines, so the same question in a course does not search again. Only the sanitized query and public pages are
+kept; empty answers and failures are not cached.
 
 **What leaves the server**: only the sanitized query and the list of allowed sites. With `api` they go to the
 search provider; with `searxng` to the SearXNG container, which forwards the query to its upstream search
@@ -47,10 +51,33 @@ The defaults are a starting point for the deployer to review with the instructor
 
 | Course type | Sites |
 |---|---|
-| `medical_science` | medlineplus.gov, nih.gov, cdc.gov, who.int |
-| `life_science` | nih.gov, ebi.ac.uk, nature.com, khanacademy.org |
-| `ece` | ieee.org, nist.gov, python.org, developer.mozilla.org, en.cppreference.com |
+| `medical_science` | medlineplus.gov, nih.gov, cdc.gov, who.int, semanticscholar.org, nature.com |
+| `life_science` | nih.gov, ebi.ac.uk, nature.com, khanacademy.org, arxiv.org, semanticscholar.org |
+| `ece` | ieee.org, nist.gov, python.org, developer.mozilla.org, en.cppreference.com, arxiv.org, semanticscholar.org, stackoverflow.com |
 | `general` | wikipedia.org |
+
+## SearXNG engines
+
+SearXNG forwards each query to upstream engines. The scraped web engines (Google, DuckDuckGo, Brave,
+Startpage) blocked the test instance after a few requests (CAPTCHA, "too many requests"), while the engines
+that call an official API kept answering. So `websearch.searxng_engines` names API-backed engines per course
+type, and each question is **one query** to those engines (`engines=` parameter):
+
+| Course type | Engines |
+|---|---|
+| `medical_science` | pubmed, semantic scholar |
+| `life_science` | pubmed, semantic scholar, arxiv |
+| `ece` | arxiv, semantic scholar, mdn, stackoverflow |
+| `general` | wikipedia |
+
+SearXNG silently falls back to its default engines when an engine name is unknown or disabled, so only results
+from the engines asked for are kept. A course type without engines (and no `general` list) uses the older
+behaviour: one `site:` query per allowed site to the instance's default engines.
+
+`deploy/searxng/settings.yml` keeps only these engines (`use_default_settings.engines.keep_only`) and turns
+on `semantic scholar`, which SearXNG ships disabled. An instance deployed outside the Compose stack needs the
+same file. These sources are mostly paper abstracts, documentation and encyclopedia pages; public health pages
+(MedlinePlus, CDC) are better reached through the `api` mode.
 
 ## Outbound requests
 
@@ -62,7 +89,8 @@ SearXNG is a deployment-internal one, but never one of the system's own services
 
 `backend/tests/test_web_search.py` (no network: an `httpx.MockTransport`): allowed sites and look-alikes,
 cleaning, `off` makes no request, the API request carries only the query and the allow-list, SearXNG asks
-each site and survives a failing one, an internal API address is refused, and the step searches with
+the course type's engines once and drops other engines' results (or, without engines, asks each site and
+survives a failing one), the cache, an internal API address is refused, and the step searches with
 `search_query()` only, never for local answers, questions without a need for recent information, or questions
 with nothing general left.
 

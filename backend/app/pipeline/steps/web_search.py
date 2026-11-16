@@ -5,7 +5,7 @@ from app.core.schemas import RequestContext
 from app.pipeline.base import BaseStep
 from app.pipeline.steps.generate import llm_flags_health
 from app.privacy.profiles import search_query
-from app.websearch import allowlist_for, web_search
+from app.websearch import allowlist_for, engines_for, web_search
 
 
 @steps.register("web_search")
@@ -38,7 +38,8 @@ class WebSearchStep(BaseStep):
         t0 = perf_counter()
         await ctx.report("web_search", "running", "Searching allowed sites for recent information.")
         try:
-            found = await web_search(query, allowlist_for(course_type, settings), settings=settings)
+            found = await web_search(query, allowlist_for(course_type, settings),
+                                     engines=engines_for(course_type, settings), settings=settings)
         except Exception:
             await ctx.report("web_search", "failed", "Web search failed; course material only.",
                              (perf_counter() - t0) * 1000)
