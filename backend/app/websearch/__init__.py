@@ -14,7 +14,8 @@ Every result is checked again here: an https URL on an allowed site (or its subd
 cut to `max_chars`, at most `max_results`, no duplicate URLs. Outbound requests go through the model gateway's
 SSRF checks (`app.llm.ssrf`): the API must be a public address, SearXNG a deployment-internal one.
 
-Results are cached per process for `cache_hours` (key: provider, query, sites, engines). Only the sanitized
+Results are cached per process for `cache_hours` (key: provider and its URL, limits, query, sites,
+engines). Only the sanitized
 query and public pages are kept, never anything about the student.
 """
 import asyncio
@@ -154,9 +155,12 @@ async def web_search(query: str, allowlist: list[str], *, engines: list[str] | N
     if provider == "off" or not query or not allowlist:
         return []
     engines = list(engines or []) if provider == "searxng" else []
-    key = (provider, query.strip().lower(), tuple(allowlist), tuple(engines))
+    # everything that changes the passages is part of the key: another endpoint or limit is another entry
+    where = cfg.api_url if provider == "api" else cfg.searxng_url
+    key = (provider, where, cfg.max_results, cfg.max_chars, query.strip().lower(), tuple(allowlist),
+           tuple(engines))
     now = time.monotonic()
-    hit = _cache.get(key)
+    hit = _cache.get(key) if cfg.cache_hours > 0 else None
     if hit is not None and hit[0] > now:
         return list(hit[1])
     if provider == "api":
