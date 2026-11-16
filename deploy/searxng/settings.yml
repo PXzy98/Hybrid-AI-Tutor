@@ -1,6 +1,10 @@
 # SearXNG for the tutor's web search (task T13; docs/WEB_SEARCH.md). Only the api service calls it, inside the
 # Compose stack, with the sanitized queries of search_query(); it publishes no port.
-use_default_settings: true
+use_default_settings:
+  engines:
+    # only engines that call an official API: the scraped web engines (google, duckduckgo, brave, startpage)
+    # get blocked after a few requests. Keep in step with websearch.searxng_engines in config.yaml.
+    keep_only: [pubmed, semantic scholar, arxiv, wikipedia, mdn, stackoverflow]
 
 server:
   secret_key: "set-SEARXNG_SECRET-in-.env"  # replaced by the SEARXNG_SECRET environment variable
@@ -17,3 +21,7 @@ general:
 
 outgoing:
   request_timeout: 5.0
+
+engines:
+  - name: semantic scholar
+    disabled: false      # shipped disabled
