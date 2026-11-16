@@ -4,8 +4,6 @@ import importlib.util
 import json
 from pathlib import Path
 
-from app.core.schemas import Chunk
-
 EVAL = Path(__file__).resolve().parents[2] / "eval" / "web-search"
 spec = importlib.util.spec_from_file_location("web_search_eval", EVAL / "run.py")
 ws = importlib.util.module_from_spec(spec)
@@ -47,31 +45,17 @@ def test_the_question_files_are_complete_and_fictional():
     assert privacy and all(p["pii"] for p in privacy)
 
 
-class FakeOpenAI:
-    def __init__(self) -> None:
-        self.calls = []
-
-    async def respond(self, model, messages, *, allowlist=None):
-        self.calls.append((model, allowlist is not None, messages[-1]["content"]))
-        return {"text": "An answer.", "seconds": 0.1, "input_tokens": 100, "output_tokens": 20,
-                "searches": int(allowlist is not None), "cited": ["https://nih.gov/a"] if allowlist else [],
-                "sources": [], "cost": 0.001, "status": "completed"}
-
-
-class FakeJudge:
-    async def ask(self, system, user):
-        text = '{"winner": "A"}' if "two answers" in system else '{"verdict": "correct", "supported": "yes"}'
-        return {"text": text, "cost": 0.0001}
-
-
-async def fake_search(query, allowlist, *, engines=None, settings=None, transport=None):
-    return [Chunk(text="A web passage.", source="https://nih.gov/a", topic="web", score=0)]
+def record_queries(seen):
+    async def search(query, allowlist, *, engines=None, settings=None, transport=None):
+        seen.append(query)
+        return await ws.smoke_search(query, allowlist)
+    return search
 
 
 def test_a_whole_run_against_fakes(tmp_path):
-    api = FakeOpenAI()
-    assert ws.main(["--smoke", "--out", str(tmp_path)], openai=api, judge=FakeJudge(),
-                   search=fake_search) == 0
+    api, queries = ws.SmokeOpenAI(), []
+    assert ws.main(["--smoke", "--out", str(tmp_path)], openai=api, judge=ws.SmokeJudge(),
+                   search=record_queries(queries)) == 0
     runs = ws.load_jsonl(tmp_path / "runs.jsonl")
     assert {r["arm"] for r in runs} == set(ws.ARMS) and not any("error" in r for r in runs)
     assert len(runs) == 3 * len(ws.ARMS)
@@ -85,6 +69,31 @@ def test_a_whole_run_against_fakes(tmp_path):
     assert "## Performance" in report and "## Pairwise" in report and "B SearXNG vs C Tavily" in report
     # a rerun asks nothing new
     before = len(api.calls)
-    ws.main(["--smoke", "--out", str(tmp_path)], openai=api, judge=FakeJudge(), search=fake_search)
+    ws.main(["--smoke", "--out", str(tmp_path)], openai=api, judge=ws.SmokeJudge(), search=record_queries([]))
     assert len(api.calls) == before
     assert json.loads((tmp_path / "privacy.json").read_text(encoding="utf-8")) == []
+    # rule 5: B and C search with search_query() of the question, never the question itself
+    questions = {q["id"]: q["question"] for q in ws.load_jsonl(ws.HERE / "questions.jsonl")}
+    assert queries and set(queries) <= set(questions.values())  # fictional, no personal data: unchanged
+    # a rerun for one question reports only that question
+    one = next(r["id"] for r in runs)
+    ws.main(["--smoke", "--only", one, "--out", str(tmp_path)], openai=api, judge=ws.SmokeJudge(),
+            search=record_queries([]))
+    assert "1 fictional questions" in (tmp_path / "report.md").read_text(encoding="utf-8")
+
+
+def test_the_query_comes_from_search_query():
+    from app.core.config import get_settings
+
+    make = ws.QueryMaker(get_settings())
+    question = "I'm Daniel Okafor, student number 300418277. What changed in the 2025 guideline?"
+    assert make(question) == "What changed in the 2025 guideline?"
+    assert make("What is new in Python 3.14 this year?") == "What is new in Python 3.14 this year?"
+
+
+def test_standalone_smoke_needs_no_network(tmp_path, monkeypatch):
+    def no_network(*args, **kwargs):
+        raise AssertionError("smoke mode must not build a real client")
+    monkeypatch.setattr(ws, "OpenAI", no_network)
+    monkeypatch.setattr(ws, "Judge", no_network)
+    assert ws.main(["--smoke", "--out", str(tmp_path)]) == 0

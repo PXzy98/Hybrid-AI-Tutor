@@ -195,6 +195,31 @@ class Judge:
                 "cost": (d.get("usage") or {}).get("cost")}
 
 
+class SmokeOpenAI:
+    """--smoke without injected clients: no network, canned answers."""
+
+    def __init__(self) -> None:
+        self.calls = []
+
+    async def respond(self, model, messages, *, allowlist=None):
+        self.calls.append((model, allowlist is not None, messages[-1]["content"]))
+        return {"text": "An answer.", "seconds": 0.1, "input_tokens": 100, "output_tokens": 20,
+                "searches": int(allowlist is not None), "cited": ["https://nih.gov/a"] if allowlist else [],
+                "sources": [], "cost": 0.001, "status": "completed"}
+
+
+class SmokeJudge:
+    async def ask(self, system, user):
+        text = '{"winner": "A"}' if "two answers" in system else '{"verdict": "correct", "supported": "yes"}'
+        return {"text": text, "cost": 0.0001}
+
+
+async def smoke_search(query, allowlist, *, engines=None, settings=None, transport=None):
+    from app.core.schemas import Chunk
+
+    return [Chunk(text="A web passage.", source="https://nih.gov/a", topic="web", score=0)]
+
+
 def parse_json(text: str) -> dict:
     m = re.search(r"\{.*\}", text or "", re.S)
     try:
@@ -225,8 +250,32 @@ def prompt(q: dict, passages: list[str]) -> list[dict]:
     return render_cloud(req)
 
 
-async def run_arm(arm: str, q: dict, api: OpenAI, settings: dict, search=None) -> dict:
-    """One question in one arm. `search(query, allowlist, engines, settings)` is app.websearch.web_search."""
+class QueryMaker:
+    """The app's query boundary (rule 5): the real privacy filter, then `search_query()`. None means no
+    search (the question must stay local, or nothing general is left)."""
+
+    def __init__(self, settings) -> None:
+        from app.privacy.analyzer import PIIAnalyzer
+
+        self.analyzer = PIIAnalyzer(settings.privacy)
+        self.local_only = set(settings.privacy.local_only_types)
+
+    def __call__(self, question: str) -> str | None:
+        from app.core.schemas import AskRequest, PIIResult, RequestContext
+        from app.privacy.anonymizer import anonymize
+        from app.privacy.profiles import search_query
+
+        sanitized, entities, _ = anonymize(question, self.analyzer.analyze(question))
+        ctx = RequestContext(request_id="eval", request=AskRequest(student_id="eval", topic="t",
+                                                                   question=question))
+        safe = not any(e.type in self.local_only for e in entities)
+        ctx.pii = PIIResult(entities=entities, cloud_safe=safe, sanitized_text=sanitized)
+        return search_query(ctx)
+
+
+async def run_arm(arm: str, q: dict, api: OpenAI, settings: dict, search=None, make_query=None) -> dict:
+    """One question in one arm. `search(query, allowlist, engines, settings)` is app.websearch.web_search;
+    the query is `make_query(question)` (QueryMaker: search_query(), as in the app)."""
     from app.websearch import allowlist_for, engines_for
 
     allow = allowlist_for(q["course_type"], settings.get("B") or settings.get("C"))
@@ -244,10 +293,12 @@ async def run_arm(arm: str, q: dict, api: OpenAI, settings: dict, search=None) -
         found, search_s, search_error = [], None, None
         if arm in ("B", "C"):
             s = settings[arm]
+            query = make_query(q["question"])
             t0 = time.perf_counter()
             try:
-                found = await search(q["question"], allow, engines=engines_for(q["course_type"], s),
-                                     settings=s)
+                if query is None:  # the app would not search either
+                    raise RuntimeError("no query from search_query()")
+                found = await search(query, allow, engines=engines_for(q["course_type"], s), settings=s)
             except Exception as e:  # the app skips a failed search; so does the evaluation
                 search_error = f"{type(e).__name__}: {e}"[:200]
             search_s = time.perf_counter() - t0
@@ -322,25 +373,13 @@ async def judge_all(questions, runs, judge: Judge, judged: dict, path: Path, pai
 
 
 # ------------------------------------------------------------------ privacy
-async def privacy_check(items: list[dict], settings) -> list[dict]:
+async def privacy_check(items: list[dict], settings, make_query) -> list[dict]:
     """The real privacy filter and search_query(); the would-be request is caught by a mock transport."""
-    from app.core.schemas import AskRequest, PIIResult, RequestContext
-    from app.privacy.analyzer import PIIAnalyzer
-    from app.privacy.anonymizer import anonymize
-    from app.privacy.profiles import search_query
     from app.websearch import allowlist_for, web_search
 
-    analyzer = PIIAnalyzer(settings.privacy)
-    local_only = set(settings.privacy.local_only_types)
     out = []
     for item in items:
-        findings = analyzer.analyze(item["question"])
-        sanitized, entities, _ = anonymize(item["question"], findings)
-        ctx = RequestContext(request_id="eval", request=AskRequest(student_id="eval", topic="t",
-                                                                   question=item["question"]))
-        ctx.pii = PIIResult(entities=entities, cloud_safe=not any(e.type in local_only for e in entities),
-                            sanitized_text=sanitized)
-        query = search_query(ctx)
+        query = make_query(item["question"])
         sent: list[str] = []
 
         def record(request: httpx.Request, sent=sent) -> httpx.Response:
@@ -545,10 +584,11 @@ async def main_async(a) -> int:
 
     from app.websearch import web_search
     async with httpx.AsyncClient(transport=a.transport) as client:
-        api = a.openai or OpenAI(env.get("OPENAI_API_KEY", ""), client)
-        judge = a.judge or Judge(env.get("OPENROUTER_API_KEY", ""), client)
+        api = a.openai or (SmokeOpenAI() if a.smoke else OpenAI(env.get("OPENAI_API_KEY", ""), client))
+        judge = a.judge or (SmokeJudge() if a.smoke else Judge(env.get("OPENROUTER_API_KEY", ""), client))
         settings = {"B": settings_for("searxng", a, env), "C": settings_for("api", a, env)}
-        search = a.search or web_search
+        search = a.search or (smoke_search if a.smoke else web_search)
+        make_query = QueryMaker(settings["C"])
         for arm in arms:
             todo = [q for q in questions if (arm, q["id"]) not in done]
             limit = asyncio.Semaphore(1 if arm == "B" else a.concurrency)  # B: one search at a time, as a
@@ -556,7 +596,7 @@ async def main_async(a) -> int:
 
             async def one(q, arm=arm, limit=limit):
                 async with limit:
-                    row = await run_arm(arm, q, api, settings, search)
+                    row = await run_arm(arm, q, api, settings, search, make_query)
                 append_jsonl(runs_path, row)
                 print(f"{arm:2} {q['id']:8} {'ERROR ' + row['error'][:80] if 'error' in row else 'ok'}",
                       flush=True)
@@ -566,12 +606,14 @@ async def main_async(a) -> int:
         latest = {}
         for r in runs:
             latest[(r["arm"], r["id"])] = r
-        runs = list(latest.values())
+        ids = {q["id"] for q in questions}
+        runs = [r for r in latest.values() if r["id"] in ids and r["arm"] in arms]
         judged = {r["key"]: r for r in load_jsonl(judge_path)}
         if not a.no_judge:
             await judge_all(questions, runs, judge, judged, judge_path, pairs,
                             asyncio.Semaphore(a.concurrency))
-    privacy = await privacy_check(privacy_items, settings["C"]) if privacy_items and not a.smoke else []
+    privacy = await privacy_check(privacy_items, settings["C"], make_query) \
+        if privacy_items and not a.smoke else []
     repeat = None
     rep_path = out / "searxng_repeat.json"
     if rep_path.exists():
@@ -589,13 +631,18 @@ async def searxng_repeat(a) -> int:
 
     env = load_env(Path(a.env_file) if a.env_file else None)
     s = settings_for("searxng", a, env)
+    make_query = QueryMaker(s)
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     times, empty, failed = [], 0, []
     for q in load_jsonl(Path(a.questions)):
         t0 = time.perf_counter()
         try:
-            found = await web_search(q["question"], allowlist_for(q["course_type"], s),
+            query = make_query(q["question"])
+            if query is None:
+                failed.append(f"{q['id']}: no query")
+                continue
+            found = await web_search(query, allowlist_for(q["course_type"], s),
                                      engines=engines_for(q["course_type"], s), settings=s)
             empty += not found
         except Exception as e:
