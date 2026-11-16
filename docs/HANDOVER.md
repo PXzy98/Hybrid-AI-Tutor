@@ -1,6 +1,6 @@
 # Handover (task Z14)
 
-State of the v4 work on 2026-11-12, for whoever continues it. The rules, owners and task list are in
+State of the v4 work on 2026-11-15, for whoever continues it. The rules, owners and task list are in
 [v4-implementation-guide.md](v4-implementation-guide.md) (the source of truth); this page says where things
 stand and where to look. Running the system: [OPERATIONS.md](OPERATIONS.md).
 
@@ -20,7 +20,7 @@ stand and where to look. Running the system: [OPERATIONS.md](OPERATIONS.md).
 | Using the app (instructors, TA note) | [INSTRUCTOR_MANUAL.md](INSTRUCTOR_MANUAL.md) |
 | How the code came about | [IMPLEMENTATION_LOG.md](IMPLEMENTATION_LOG.md) |
 
-## 2. State per area (Z tasks)
+## 2. State per area
 
 | Task | State | Where |
 |---|---|---|
@@ -39,7 +39,19 @@ stand and where to look. Running the system: [OPERATIONS.md](OPERATIONS.md).
 | Z13 CI scans, `/metrics`, Prometheus, alerts, Grafana | merged (#49, #58); not deployed on the test host, no alert receiver chosen yet | `.github/workflows/ci.yml`, `app/platform/metrics.py`, `deploy/monitoring/` |
 | Z14 manual and handover | merged (#50; this page, OPERATIONS.md); load test on the server outstanding | `docs/` |
 | Z15 rule 14 in Z code | merged | `app/privacy/recognizers/` |
-| Q1 quizzes and the end-of-term survey (decided 2026-11-12) | on branch `feature/q1-quizzes-survey`: quizzes (multiple choice and true/false, local-model drafts reviewed by the instructor, auto-grading, results under the visibility rules, `final` = post-test against the diagnostic), the end-of-term survey (window, anonymous ratings, minimum group of 3), both exported as aggregates and deleted at the end of term; migration 0013; the per-answer rating is gone from the new frontend | `app/learner/quizzes.py`, `app/api/v2/quizzes.py`, `app/api/v2/survey.py`, `app/instructor_ai/quiz_drafts.py`, `app/platform/end_of_term.py`, `tests/test_quizzes_v2.py`; api-v2.md 3.9, 3.10; course-structure.md 4.6, 4.7 |
+| Q1 quizzes and the end-of-term survey (decided 2026-11-12) | merged (#66): quizzes (multiple choice and true/false, local-model drafts reviewed by the instructor, auto-grading, results under the visibility rules, `final` = post-test against the diagnostic), the end-of-term survey (window, anonymous ratings, minimum group of 3), both exported as aggregates and deleted at the end of term; migration 0013 | `app/learner/quizzes.py`, `app/api/v2/quizzes.py`, `app/api/v2/survey.py`, `app/instructor_ai/quiz_drafts.py`, `tests/test_quizzes_v2.py`; api-v2.md 3.9, 3.10; course-structure.md 4.6, 4.7 |
+| S (learner data per course, S9) | merged (#60, #62, #77): learner tables per course, export and delete one course, visibility choices, overview, learning plan, answer style in the overview | `app/learner/course_data.py`, `course_views.py`, `visibility_policy.py`, `app/api/v2/learner.py` |
+| S4 materials on API v2 | merged (#67): upload scanned before storing, delete, index rebuild job | `app/api/v2/`, `app/rag/index_jobs.py` |
+| S5 open course packs | merged (#64, #65 for the scan false positives) | `data/demo_courses/`, `scripts/fetch_open_courses.py` |
+| S6, S7, S10 instructor AI tiers 1 to 3 on API v2 | merged (#70): drafts as background jobs, accept into course content, class insights | `app/instructor_ai/draft_jobs.py`, `insights_source.py`, `app/api/v2/` |
+| S8 course-level knowledge model | core and simulated evaluation merged; **not registered as a knowledge model**, so the app still runs BKT | `app/learner/knowledge/course_core.py`, `eval/learner-sim/results/course_model.md` |
+| S11 retrieval evaluation | merged (#72): all eight packs | `eval/course-rag-packs/` |
+| T4 ECE and CS routing evaluation | merged (#75); retrained candidates not adopted | `eval/routing-ece/` |
+| T5 question type (concept / logistics) | merged (#80): own weight file, set by the route step; logistics questions search course-level files first | `app/routing/question_type.py`, `app/rag/course_retriever.py` |
+| T9 demo build | merged (#69): the demo courses from the packs through API v2 | `scripts/build_demo.py`, `docs/DEMO.md` |
+| F1 frontend on API v2 (carries T6, T7, T8) | merged (#71, #78; UI upgrade #81 to #85): student and instructor dashboards, admin, model connections, quizzes, survey, materials | `frontend/`, `docs/design/ui-upgrade.md` |
+| T11 accessibility, T12 manuals | merged (#74, #73); renaming waits for the project name; routing, frontend and web search handover notes still open | `docs/ACCESSIBILITY.md`, `docs/STUDENT_MANUAL.md`, `docs/INSTRUCTOR_MANUAL.md` |
+| T13 web search | **not started**: `app/websearch/` returns no passages | `app/websearch/` |
 
 ## 3. Decisions taken during the work (not obvious from the code)
 
@@ -80,10 +92,12 @@ What Z did in other owners' areas (for their review): guide section 7.5.
 
 | Owner | Task | Why it matters |
 |---|---|---|
-| S | API v2 endpoints for materials (S4), drafts (S6, S7) and class insights (S10) | the modules are merged; nothing calls them yet (learner views, S9: `app/api/v2/learner.py`) |
-| T | `transformers` 5 together with Z | 6 pip-audit advisories ignored with reason |
-| T | `react-router` 7 (moderate advisory), `vite`/`vitest` (dev tools); `README.md`, `frontend/README.md` and `docs/DEMO.md` still describe SQLite | CI reports the advisories |
-| T | frontend for API v2 (T6, T7, now F1): a student dashboard (chat, my progress, quizzes, survey) and an instructor dashboard (class overview, each student's progress under the visibility rules, quizzes, materials, settings); no per-answer rating or style buttons; a v2 client sends `X-CSRF-Token` | course management, quizzes and the survey are API-only until then |
+| S | register the course-level knowledge model (S8) and make it the default, as decided in guide 4.10 | the app still runs plain BKT |
+| T | web search (T13) and its evaluation | the only feature of the plan not started |
+| T | video (T10, Nov 25); French UI screenshots to Lavin | course deliverable |
+| T | renaming (T11), once the project name is chosen | open decision |
+| T | routing, frontend and web search handover notes (T12) | handover |
+| T, Z | `transformers` 5 (6 pip-audit advisories ignored with reason), `react-router` 7 and `vite`/`vitest` (CI advisories) | CI reports them |
 | Z | deploy on the test host with the monitoring profile, the vLLM load test, Z2 local speed | needs access to the test host and the vLLM server |
 | Z | choose the alert receiver (`deploy/monitoring/alertmanager.yml`) | alerts are only visible in Alertmanager until then |
 | Others | Lavin's second review of the 30 revised items | content |

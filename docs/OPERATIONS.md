@@ -3,14 +3,14 @@
 For whoever deploys and runs the tutor. It links to the detailed documents instead of repeating them:
 [deploy/README.md](../deploy/README.md) (containers, proxy, metrics, CI scans), [DATABASE.md](DATABASE.md),
 [MODEL_CONNECTIONS.md](MODEL_CONNECTIONS.md), [PRIVACY_PROFILES.md](PRIVACY_PROFILES.md); the state of the work and the open tasks: [HANDOVER.md](HANDOVER.md). Status:
-2026-11-08; the last section lists what is not built yet.
+2026-11-15; the last section lists what is not built yet.
 
 ## 1. What runs
 
 | Service | What | Reached by |
 |---|---|---|
 | `proxy` | Caddy: serves the frontend, forwards `/api/*` to `api`, HTTPS with a domain name | the browser (ports 80/443) |
-| `api` | FastAPI on port 8000: API v1 (current frontend) and v2; applies the database migrations at startup | the proxy; Prometheus at `/metrics` |
+| `api` | FastAPI on port 8000: API v2 (the frontend) and the frozen API v1; applies the database migrations at startup | the proxy; Prometheus at `/metrics` |
 | `worker` | background jobs and the live settings switch | nothing (health check only) |
 | `db` | PostgreSQL 16 | `api` and `worker` only (internal network) |
 
@@ -125,10 +125,10 @@ Prometheus, alert rules and Grafana are ready to start (`--profile monitoring`, 
   worse (rule 4); E4 (`eval/privacy-audit/run.py --smoke`) runs in CI and fails on any leak.
 - Do not copy database dumps to personal machines; they contain learner profiles (pseudonymous) and account data.
 
-## 9. Not built yet (2026-11-08)
+## 9. Not built yet (2026-11-15)
 
 | Missing | Effect for operations | Task |
 |---|---|---|
-| Frontend for API v2 | the current frontend uses API v1 and the demo course; course management is API-only for now | T6, T7 |
+| Web search | answers use the course material only; `app/websearch/` returns no passages | T13 |
 | Deployment on the test host; an alert receiver; the vLLM address for scraping | the monitoring stack is ready but not started anywhere yet | Z13 part 2 |
 | Measured capacity on the real vLLM server | sizing is not confirmed; `eval/load-test/run.py` is ready | Z6 load test |
