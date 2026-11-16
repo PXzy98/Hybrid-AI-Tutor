@@ -2,14 +2,15 @@
 
 Each course type has a privacy profile: one YAML file in `backend/app/privacy/profiles/`. The course's
 `course_type` (course row, or the course setting of the same name) selects it; the privacy filter then runs the
-profile's recognizers, and the generate step uses its health-detail policy.
+profile's recognizers, the generate step uses its health-detail policy, the prompt uses its subject prompt and
+the verify step runs its checkers (task Z16).
 
 | File | Contents |
 |---|---|
 | `base.yaml` | the layer of every course: student IDs, grades, names in context, Chinese and French names and grades, phone numbers, contacts, addresses, postal codes, dates of birth, ID and health-card numbers, credentials (`secret_token`: API keys, tokens, private keys, assigned passwords; Z11), and the light personal-health detector (`health_detail`); policy `local_only` |
-| `medical_science.yaml` | base + `health_context`, `health_extra`, `fr_health`; policy `generalize`; checker `medical_safety`; "not medical advice" notice (the v3 behaviour) |
-| `ece.yaml` | base + `internal_address` (private IPv4 host addresses with a port, MAC addresses; a network like `10.0.0.0/8` is kept) and `repo_url` (code-host URLs that name an account); test set `eval/privacy-filter/ece_cases.jsonl`, results `eval/privacy-filter/results/ece/` (Z11) |
-| `life_science.yaml`, `general.yaml` | the base layer |
+| `medical_science.yaml` | base + `health_context`, `health_extra`, `fr_health`; policy `generalize`; checker `medical_safety`; "not medical advice" notice; subject prompt `health` (the v3 behaviour) |
+| `ece.yaml` | subject prompt `engineering`; base + `internal_address` (private IPv4 host addresses with a port, MAC addresses; a network like `10.0.0.0/8` is kept) and `repo_url` (code-host URLs that name an account); test set `eval/privacy-filter/ece_cases.jsonl`, results `eval/privacy-filter/results/ece/` (Z11) |
+| `life_science.yaml`, `general.yaml` | the base layer; subject prompt `general` |
 
 Format:
 
@@ -19,9 +20,17 @@ recognizers: [health_context] # added to the base layer's (names from app/privac
 health_detail_policy: generalize   # local_only | generalize
 checkers: [medical_safety]
 medical_disclaimer: true
+prompt: health                # subject prompt: backend/app/prompts/subjects/<prompt>.md (default general)
 consent_note: >-            # added to the onboarding consent text of this course type (Z11)
   ...
 ```
+
+**Subject prompt and checkers (task Z16)**: the system prompt is `prompts/base_system.md` (the rules of every
+course: cite the material, invent nothing, no diagnosis or personal medical advice, emergencies) followed by
+`prompts/subjects/<prompt>.md`. Only `health` makes the tutor a health-education tutor with the rules on
+medicines and doses. A checker that some profile lists (today `medical_safety`) belongs to that subject: the
+verify step runs it only for courses whose profile lists it, so a lab answer in an ECE course ("inject 5 ml of
+the sample") is not replaced by the medical fallback. `medical_disclaimer` is read by nothing yet.
 
 **A new course type needs one file**: it then appears as a course type (settings and course creation). Files are
 validated when loaded; an unknown recognizer, checker or key stops the app.

@@ -12,7 +12,7 @@ from app.core.schemas import (
     RequestContext,
 )
 from app.prompts import base_system, render_cloud, render_local, system_prompt
-from app.prompts.render import PROMPT_DIR, level_partial, style_partial
+from app.prompts.render import PROMPT_DIR, level_partial, style_partial, subject_partial
 
 LEVELS = ["basic", "intermediate", "advanced"]
 STYLES = list(itertools.product(["example_first", "concept_first"], ["concise", "detailed"]))
@@ -23,7 +23,7 @@ def test_every_combination_keeps_the_safety_block(level, style):
     prompt = system_prompt(level, *style)
     assert prompt.startswith(base_system())  # the base safety rules come first, unchanged
     assert level_partial(level) in prompt and style_partial(*style) in prompt
-    assert prompt.count("Safety rules.") == 1
+    assert prompt.count(base_system()) == 1
 
 
 def test_partials_do_not_touch_safety_or_content():
@@ -47,9 +47,11 @@ def test_local_prompt_uses_level_and_preferences():
     assert level_partial("advanced") in system and style_partial("concept_first", "detailed") in system
 
 
-def test_unpersonalized_local_prompt_is_the_base_only():
-    assert render_local(make_ctx(LearnerContext(personalized=False)))[0]["content"] == base_system()
-    assert render_local(make_ctx(None))[0]["content"] == base_system()
+def test_unpersonalized_local_prompt_is_the_base_and_subject_only():
+    base = system_prompt()  # no profile: the base and the general subject
+    assert base == base_system() + "\n\n" + subject_partial("general")
+    assert render_local(make_ctx(LearnerContext(personalized=False)))[0]["content"] == base
+    assert render_local(make_ctx(None))[0]["content"] == base
 
 
 def test_cloud_prompt_uses_labels_only():

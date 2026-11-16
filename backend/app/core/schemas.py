@@ -250,6 +250,8 @@ class CloudRequest(BaseModel):
     passages: list[str] = []  # course material, not student data
     labels: CloudLabels
     language: str = "en"
+    # the course's subject prompt (prompts/subjects/<name>.md, task Z16): a fixed name, never free text
+    subject: str = Field("general", pattern=r"^[a-z_]{1,40}$")
 
 
 # --------------------------------------------------------------------------- answer
@@ -334,6 +336,7 @@ class PrivacyProfile(BaseModel):
     health_detail_policy: Literal["local_only", "generalize"] = "local_only"
     checkers: tuple[str, ...] = ()  # extra checkers this profile turns on, e.g. medical_safety
     medical_disclaimer: bool = False
+    prompt: str = "general"  # the subject prompt, app/prompts/subjects/<prompt>.md (task Z16)
 
 
 class RequestContext(BaseModel):

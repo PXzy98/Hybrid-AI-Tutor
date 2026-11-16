@@ -22,3 +22,4 @@ recognizers:
 health_detail_policy: local_only   # a personal health detail never leaves the local model
 checkers: []
 medical_disclaimer: false
+prompt: general   # subject prompt: app/prompts/subjects/<prompt>.md (task Z16)

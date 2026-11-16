@@ -1,10 +1,13 @@
-"""Prompt rendering (design §6). Safety rules live ONLY in base_system.md and are identical for every
-level and both routes. levels/<level>.md and style/<sequencing>.<detail>.md only change depth and form.
+"""Prompt rendering (design §6). The safety rules of every course live ONLY in base_system.md; the rules of
+one subject live ONLY in subjects/<subject>.md, chosen by the course's privacy profile (`prompt`, task Z16).
+Both are identical for every level and both routes. levels/<level>.md and style/<sequencing>.<detail>.md only
+change depth and form.
 
 `render_local` may use the full RequestContext (raw question, learner context, history): it only ever goes
 to the local model. `render_cloud` takes a CloudRequest and nothing else, so a cloud prompt cannot contain
 anything the allow-list does not contain.
 """
+import re
 from functools import cache
 from pathlib import Path
 
@@ -14,6 +17,7 @@ from app.learner.misconceptions import prompt_block
 from app.llm.base import Message
 
 PROMPT_DIR = Path(__file__).parent
+DEFAULT_SUBJECT = "general"  # a request without a privacy profile (tests, evaluation harnesses)
 
 # Added (as this exact constant, never free text) when the medical-safety check rejected the first answer.
 SAFETY_RETRY_INSTRUCTION = (
@@ -33,6 +37,17 @@ def base_system() -> str:
     return (PROMPT_DIR / "base_system.md").read_text(encoding="utf-8").strip()
 
 
+def subject_names() -> list[str]:
+    return sorted(p.stem for p in (PROMPT_DIR / "subjects").glob("*.md"))
+
+
+@cache
+def subject_partial(subject: str) -> str:
+    if not re.fullmatch(r"[a-z_]+", subject) or subject not in subject_names():
+        raise ValueError(f"unknown subject prompt: {subject}")
+    return (PROMPT_DIR / "subjects" / f"{subject}.md").read_text(encoding="utf-8").strip()
+
+
 @cache
 def level_partial(level: Level) -> str:
     return (PROMPT_DIR / "levels" / f"{level}.md").read_text(encoding="utf-8").strip()
@@ -44,12 +59,13 @@ def style_partial(sequencing: Sequencing, detail: Detail) -> str:
 
 
 def system_prompt(level: Level | None = None, sequencing: Sequencing | None = None,
-                  detail: Detail | None = None) -> str:
-    """base (safety) + level partial + style partial.
+                  detail: Detail | None = None, subject: str = DEFAULT_SUBJECT) -> str:
+    """base (safety) + subject partial + level partial + style partial.
 
-    The partials only change depth and form; they never repeat or override the safety rules.
+    The subject partial adds the subject's own rules; the other partials only change depth and form. None of
+    them repeats or overrides the base safety rules.
     """
-    parts = [base_system()]
+    parts = [base_system(), subject_partial(subject)]
     if level:
         parts.append(level_partial(level))
     if sequencing and detail:
@@ -72,13 +88,14 @@ def _user_message(topic: str, passages: list[str], question: str) -> Message:
 def render_local(ctx: RequestContext, *, safety_retry: bool = False) -> list[Message]:
     """Messages for the LOCAL model. May contain the original question and the learner context."""
     learner = ctx.learner if ctx.learner and ctx.learner.personalized else None
+    subject = ctx.profile.prompt if ctx.profile else DEFAULT_SUBJECT
     if learner:
         prefs = learner.preferences
-        system = system_prompt(learner.focus_level, prefs.sequencing, prefs.detail)
+        system = system_prompt(learner.focus_level, prefs.sequencing, prefs.detail, subject)
         if learner.misconceptions:  # local only: render_cloud has no access to the learner context
             system += "\n\n" + prompt_block(learner.misconceptions)
     else:
-        system = system_prompt()
+        system = system_prompt(subject=subject)
     if safety_retry:
         system += "\n\n" + SAFETY_RETRY_INSTRUCTION
     messages: list[Message] = [{"role": "system", "content": system}]
@@ -91,7 +108,8 @@ def render_local(ctx: RequestContext, *, safety_retry: bool = False) -> list[Mes
 def render_cloud(req: CloudRequest, *, safety_retry: bool = False) -> list[Message]:
     """Messages for the CLOUD model, built from the allow-listed CloudRequest only."""
     labels = req.labels
-    system = system_prompt(labels.level, labels.sequencing, labels.detail) + "\n\n" + CLOUD_PLACEHOLDER_RULE
+    system = (system_prompt(labels.level, labels.sequencing, labels.detail, req.subject) + "\n\n"
+              + CLOUD_PLACEHOLDER_RULE)
     if safety_retry:
         system += "\n\n" + SAFETY_RETRY_INSTRUCTION
     return [{"role": "system", "content": system},

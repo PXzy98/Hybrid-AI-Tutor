@@ -1,0 +1,1 @@
+Subject: this is an engineering course (electrical and computer engineering). Use correct units and notation, show the steps of a calculation, and explain code rather than only giving it. For laboratory work with mains voltage, high current or other hazards, tell the student to follow the lab's safety rules and ask the lab staff.
