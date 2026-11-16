@@ -169,6 +169,7 @@ export const en = {
   "routing.stage.retrieval": "Course material retrieval",
   "routing.stage.evidence": "Evidence validation",
   "routing.stage.decision": "Local / Cloud decision",
+  "routing.stage.web_search": "Web search on allowed sites",
   "routing.stage.generation": "Generate answer",
   "routing.stage.verification": "Check answer",
   "routing.status.pending": "pending",

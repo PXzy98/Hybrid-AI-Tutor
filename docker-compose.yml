@@ -132,6 +132,18 @@ services:
     depends_on: [prometheus]
     restart: unless-stopped
 
+  # ---- web search (task T13): `docker compose --profile searxng up -d` with WEBSEARCH__PROVIDER=searxng --------
+  searxng:
+    # self-hosted metasearch (docs/WEB_SEARCH.md); only the api calls it, with queries from search_query()
+    image: searxng/searxng:2026.10.4-44b98e610
+    profiles: [searxng]
+    environment:
+      SEARXNG_SECRET: ${SEARXNG_SECRET:-}  # required by SearXNG: set it in .env (a long random string)
+    volumes:
+      - ./deploy/searxng/settings.yml:/etc/searxng/settings.yml:ro
+    networks: [public]  # needs the internet for its upstream search engines; publishes no port
+    restart: unless-stopped
+
 networks:
   public: {}
   internal:

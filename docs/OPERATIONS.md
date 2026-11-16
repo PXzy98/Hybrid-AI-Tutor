@@ -37,6 +37,7 @@ Volumes: `db-data` (database), `tutor-data` (uploaded materials and indexes), `c
 | `OLLAMA_URL`, `LLM__LOCAL__MODEL` | yes | the local model server and model |
 | `CLOUD_BASE_URL`, `CLOUD_API_KEY`, `CLOUD_MODEL` | optional | an external model; leave the key empty for local-only |
 | `SPACY_MODEL` | optional | `en_core_web_lg` (default) for production |
+| `WEBSEARCH__PROVIDER`, `WEBSEARCH_API_KEY`, `SEARXNG_SECRET` | optional | web search for cloud answers: `off` (default), `api` (with the key) or `searxng` (with the secret and `--profile searxng`); [WEB_SEARCH.md](WEB_SEARCH.md) |
 
 Limits (usage, login failures, roster size, invitation codes, uploads) are in `config.yaml` under `limits`; any
 value can be overridden in `.env` as `SECTION__FIELD`, for example `LIMITS__ACCOUNTS__LOGIN_FAILURES_PER_HOUR=20`.
@@ -129,6 +130,5 @@ Prometheus, alert rules and Grafana are ready to start (`--profile monitoring`, 
 
 | Missing | Effect for operations | Task |
 |---|---|---|
-| Web search | answers use the course material only; `app/websearch/` returns no passages | T13 |
 | Deployment on the test host; an alert receiver; the vLLM address for scraping | the monitoring stack is ready but not started anywhere yet | Z13 part 2 |
 | Measured capacity on the real vLLM server | sizing is not confirmed; `eval/load-test/run.py` is ready | Z6 load test |

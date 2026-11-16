@@ -44,8 +44,12 @@ def source_positions(passages: list[Chunk]) -> list[SourcePosition]:
         slide = None if page is not None else _positive(chunk.metadata.get("slide"))
         key = (chunk.source, page, slide)
         seen[key] = seen.get(key, 0) + 1
+        # a web passage (task T13) is named by its page title; its source is the URL
+        title = chunk.metadata.get("title") if chunk.metadata.get("web") else None
+        if not (isinstance(title, str) and title):
+            title = PurePosixPath(chunk.source).stem.replace("_", " ")
         out.append(SourcePosition(
-            source=chunk.source, name=PurePosixPath(chunk.source).stem.replace("_", " "),
+            source=chunk.source, name=title,
             page=page, slide=slide, excerpt=seen[key] if seen[key] > 1 else None, kc_ids=tuple(chunk.kc_ids),
         ))
     return out

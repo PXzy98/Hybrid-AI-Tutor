@@ -169,6 +169,7 @@ export const fr: Messages = {
   "routing.stage.retrieval": "Recherche dans le matériel du cours",
   "routing.stage.evidence": "Validation des preuves",
   "routing.stage.decision": "Décision local / infonuagique",
+  "routing.stage.web_search": "Recherche Web sur des sites autorisés",
   "routing.stage.generation": "Générer la réponse",
   "routing.stage.verification": "Vérifier la réponse",
   "routing.status.pending": "en attente",

@@ -74,6 +74,21 @@ class RagConfig(Section):
     materials_dir: str = "data/topics"  # instructor uploads: <materials_dir>/<topic>/ (relative to the repo)
 
 
+class WebSearchConfig(Section):
+    """Web search for cloud answers that need recent information (task T13; guide 4.5 step 6a). Chosen when
+    the stack is deployed: `off` (never), `api` (a hosted search API, Tavily-compatible, key in
+    `WEBSEARCH_API_KEY`) or `searxng` (the self-hosted SearXNG of the `searxng` Compose profile)."""
+
+    provider: Literal["off", "api", "searxng"] = "off"
+    api_url: str = "https://api.tavily.com/search"
+    searxng_url: str = "http://searxng:8080"
+    max_results: int = Field(3, ge=1, le=10)
+    max_chars: int = Field(1200, ge=200, le=5000)  # per result, after cleaning
+    timeout_s: float = Field(8, gt=0, le=30)
+    # sites searched per course type; a course type without a list uses `general`
+    allowlist: dict[str, list[str]] = {}
+
+
 class PrivacyConfig(Section):
     spacy_model: str = "en_core_web_lg"
     score_threshold: float = Field(0.5, ge=0, le=1)
@@ -296,6 +311,7 @@ class Settings(BaseSettings):
     routing: RoutingConfig = RoutingConfig()
     rag: RagConfig = RagConfig()
     privacy: PrivacyConfig = PrivacyConfig()
+    websearch: WebSearchConfig = WebSearchConfig()
     sessions: SessionsConfig = SessionsConfig()
     learner: LearnerConfig = LearnerConfig()
     limits: LimitsConfig = LimitsConfig()
@@ -308,6 +324,7 @@ class Settings(BaseSettings):
     ollama_url: str = "http://192.168.2.25:11434"
     cloud_base_url: str = "https://api.openai.com/v1"
     cloud_api_key: SecretStr | None = None
+    websearch_api_key: SecretStr | None = None  # websearch.provider: api
     settings_encryption_key: SecretStr | None = None  # Fernet key for API keys of model connections (Z6)
     cloud_model: str | None = None
     instructor_username: str | None = None
@@ -325,7 +342,7 @@ class Settings(BaseSettings):
 
     @field_validator(
         "cloud_api_key", "cloud_model", "instructor_username", "instructor_initial_password", "pgpassword",
-        "settings_encryption_key",
+        "settings_encryption_key", "websearch_api_key",
         mode="before",
     )
     @classmethod
