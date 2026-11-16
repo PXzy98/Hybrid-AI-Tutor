@@ -494,7 +494,7 @@ data); users build against the fakes without waiting for the real implementation
 | T10 | Video (Nov 25); send French UI screenshots to Lavin and apply her corrections | S6 | T3 | — | delivered on time |
 | T11 | Renaming (once the name is chosen, **open**); accessibility self-check (keyboard, screen reader, contrast, zoom) (**done**, see [ACCESSIBILITY.md](ACCESSIBILITY.md); axe test in `frontend/src/test/Accessibility.test.tsx`) | S7 | name | `frontend/` | checklist |
 | T12 | **In progress**: student manual ([STUDENT_MANUAL.md](STUDENT_MANUAL.md)) and instructor manual ([INSTRUCTOR_MANUAL.md](INSTRUCTOR_MANUAL.md), including the TA note in course-structure.md 3.4) are done; routing, frontend and web search handover still open | S8 | — | `docs/` | a new instructor can use it |
-| T13 | Web search (G1-92) + evaluation (G1-106): search API, allow-list, cleaning, results as passages for generation; query only from `search_query()`; outbound calls only through the single outbound helper | S7 | Z11, Z6 | new `backend/app/websearch/`, `config.yaml` pipeline | E4 audit: no personal data in search requests; evaluation report |
+| T13 | Web search (G1-92) + evaluation (G1-106). **Search done** (#88; [WEB_SEARCH.md](WEB_SEARCH.md): `off`, hosted `api` or self-hosted `searxng`, chosen at deployment); evaluation open: search API, allow-list, cleaning, results as passages for generation; query only from `search_query()`; outbound calls only through the single outbound helper | S7 | Z11, Z6 | new `backend/app/websearch/`, `config.yaml` pipeline | E4 audit: no personal data in search requests; evaluation report |
 | T14 | Remove Chinese from Markdown outside `docs/` (rule 14): rewrite `TODO.md` in English from section 7; move the Chinese copy of `GETTING_STARTED.md` from the repository root to `docs/GETTING_STARTED_zh.md` and fix its links; remove the Chinese lines of `README.md` and `GETTING_STARTED.md`. The Chinese test text in `frontend/src/test/Routing.test.tsx` stays (it tests Chinese input) | S5 | — | listed files | no Chinese in Markdown outside `docs/` |
 
 ### 7.3a Frontend v2 (task F1)
@@ -557,13 +557,14 @@ owner reviews and approves the PR, and the area stays the owner's afterwards (ru
 | T5 | T | question type head (concept / logistics); logistics questions search course-level files first | #80 | review |
 | T9 | T | `scripts/build_demo.py`: the demo courses from the packs through API v2 | #69 | review |
 | S8 (in the app) | S | the layered model registered as `course` and made the default; updates start from the stored estimate, the prerequisite cap applies when shown; tests with all three models | #87 | review |
+| T13 (search) | T | web search with three deployment modes, the `web_search` step after `route`, allow-lists per course type, SearXNG Compose profile | #88 | review |
 | T11 (accessibility part), T12 (manuals) | T | accessibility self-check and axe tests; student and instructor manuals | #74, #73 | review |
 
 From 2026-11-11, by the same decision, Z also works on the remaining S and T tasks of sections 7.2 and 7.3 in
-this way (one PR per task, listed in the table above when it is opened). Not started yet (2026-11-15): web
-search (T13); the video (T10); renaming (T11, waits for the name); the routing, frontend and web search
-handover notes (T12); the `transformers` 5, `react-router` 7 and `vite`/`vitest` updates reported by the CI
-scans.
+this way (one PR per task, listed in the table above when it is opened). Not started yet (2026-11-15): the web
+search evaluation (T13, G1-106); the video (T10); renaming (T11, waits for the name); the routing, frontend
+and web search handover notes (T12); the `transformers` 5, `react-router` 7 and `vite`/`vitest` updates
+reported by the CI scans.
 
 ## 8. Workflow
 

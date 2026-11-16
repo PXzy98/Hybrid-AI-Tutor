@@ -51,7 +51,7 @@ stand and where to look. Running the system: [OPERATIONS.md](OPERATIONS.md).
 | T9 demo build | merged (#69): the demo courses from the packs through API v2 | `scripts/build_demo.py`, `docs/DEMO.md` |
 | F1 frontend on API v2 (carries T6, T7, T8) | merged (#71, #78; UI upgrade #81 to #85): student and instructor dashboards, admin, model connections, quizzes, survey, materials | `frontend/`, `docs/design/ui-upgrade.md` |
 | T11 accessibility, T12 manuals | merged (#74, #73); renaming waits for the project name; routing, frontend and web search handover notes still open | `docs/ACCESSIBILITY.md`, `docs/STUDENT_MANUAL.md`, `docs/INSTRUCTOR_MANUAL.md` |
-| T13 web search | **not started**: `app/websearch/` returns no passages | `app/websearch/` |
+| T13 web search | merged (#88): three deployment modes (`off` default, hosted `api`, self-hosted `searxng` Compose profile); runs for cloud answers that need recent information, query from `search_query()`, allow-listed sites per course type; evaluation (G1-106) not run yet | `app/websearch/`, `app/pipeline/steps/web_search.py`, [WEB_SEARCH.md](WEB_SEARCH.md) |
 
 ## 3. Decisions taken during the work (not obvious from the code)
 
@@ -92,7 +92,7 @@ What Z did in other owners' areas (for their review): guide section 7.5.
 
 | Owner | Task | Why it matters |
 |---|---|---|
-| T | web search (T13) and its evaluation | the only feature of the plan not started |
+| T | web search evaluation (G1-106), with SearXNG or an API key | the search is built, not measured |
 | T | video (T10, Nov 25); French UI screenshots to Lavin | course deliverable |
 | T | renaming (T11), once the project name is chosen | open decision |
 | T | routing, frontend and web search handover notes (T12) | handover |
