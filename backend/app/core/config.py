@@ -143,6 +143,14 @@ class RuleConfig(Section):
     weak_penalty: float = Field(0.05, ge=0, le=0.5)
 
 
+class CourseModelConfig(Section):
+    """The course-level layered model (guide 4.10): how fast the course ability moves, and how far it shifts
+    the starting estimate of a KC not practised yet (0 = plain BKT)."""
+
+    ability_gain: float = Field(0.3, gt=0, le=1)
+    ability_weight: float = Field(0.5, ge=0, le=1)
+
+
 class LearnerConfig(Section):
     knowledge: str = "bkt"
     preference: str = "simple"
@@ -154,6 +162,7 @@ class LearnerConfig(Section):
     bkt_by_level: dict[Literal["basic", "intermediate", "advanced"], BktOverride] = {}  # item level -> params
     weak_likelihood: WeakLikelihood = WeakLikelihood()
     rule: RuleConfig = RuleConfig()
+    course_model: CourseModelConfig = CourseModelConfig()
     class_summary_min_group: int = Field(5, ge=1)
     instructor_individual_view: bool = False
 

@@ -44,7 +44,7 @@ stand and where to look. Running the system: [OPERATIONS.md](OPERATIONS.md).
 | S4 materials on API v2 | merged (#67): upload scanned before storing, delete, index rebuild job | `app/api/v2/`, `app/rag/index_jobs.py` |
 | S5 open course packs | merged (#64, #65 for the scan false positives) | `data/demo_courses/`, `scripts/fetch_open_courses.py` |
 | S6, S7, S10 instructor AI tiers 1 to 3 on API v2 | merged (#70): drafts as background jobs, accept into course content, class insights | `app/instructor_ai/draft_jobs.py`, `insights_source.py`, `app/api/v2/` |
-| S8 course-level knowledge model | core and simulated evaluation merged; **not registered as a knowledge model**, so the app still runs BKT | `app/learner/knowledge/course_core.py`, `eval/learner-sim/results/course_model.md` |
+| S8 course-level knowledge model | merged (#87): `learner.knowledge: course` is the default; course ability replayed from the evidence log, a starting estimate shifted by it, prerequisites cap what is shown (the stored estimate stays raw BKT); the whole suite passes with `bkt`, `rule` and `course` | `app/learner/knowledge/course.py`, `course_core.py`, `eval/learner-sim/results/course_model.md` |
 | S11 retrieval evaluation | merged (#72): all eight packs | `eval/course-rag-packs/` |
 | T4 ECE and CS routing evaluation | merged (#75); retrained candidates not adopted | `eval/routing-ece/` |
 | T5 question type (concept / logistics) | merged (#80): own weight file, set by the route step; logistics questions search course-level files first | `app/routing/question_type.py`, `app/rag/course_retriever.py` |
@@ -92,7 +92,6 @@ What Z did in other owners' areas (for their review): guide section 7.5.
 
 | Owner | Task | Why it matters |
 |---|---|---|
-| S | register the course-level knowledge model (S8) and make it the default, as decided in guide 4.10 | the app still runs plain BKT |
 | T | web search (T13) and its evaluation | the only feature of the plan not started |
 | T | video (T10, Nov 25); French UI screenshots to Lavin | course deliverable |
 | T | renaming (T11), once the project name is chosen | open decision |

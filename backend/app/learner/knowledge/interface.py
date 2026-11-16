@@ -47,7 +47,7 @@ class BaseKnowledgeModel:
             raise ValueError(f"unknown KC '{evidence.kc_id}'")
         if evidence.kind in ("strong", "diagnostic") and evidence.correct is None:
             raise ValueError("graded evidence needs `correct`")
-        previous = self.state(student_id, [evidence.kc_id])[evidence.kc_id]
+        previous = self._previous(student_id, evidence.kc_id)
         weight = self._weight(evidence)
         seen_at = self.repo.log_evidence(student_id, evidence, weight)
         p, n_obs = self._estimate(student_id, previous, evidence)
@@ -55,6 +55,10 @@ class BaseKnowledgeModel:
                       n_obs=n_obs, last_seen=seen_at)
         self.repo.save_state(student_id, new)
         return new
+
+    def _previous(self, student_id: str, kc_id: str) -> KcState:
+        """The estimate an update starts from: the shown state, unless a model shows an adjusted one."""
+        return self.state(student_id, [kc_id])[kc_id]
 
     def _weight(self, evidence: Evidence) -> float:
         if evidence.kind != "weak":

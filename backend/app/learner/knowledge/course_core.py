@@ -17,6 +17,41 @@ from app.learner.knowledge.bkt_math import learn, posterior, weak_update
 
 EvidenceKind = Literal["strong", "diagnostic", "weak"]
 Difficulty = Literal["basic", "intermediate", "advanced"]
+DIFFICULTY = {"basic": -1.0, "intermediate": 0.0, "advanced": 1.0}
+ABILITY_BOUND = 4.0
+
+
+def ability_step(ability: float, correct: bool, difficulty: str, gain: float) -> float:
+    """The ability after one graded answer (Elo-like): up when the answer beats the expectation, down
+    otherwise; an unknown difficulty counts as intermediate."""
+    expected = 1.0 / (1.0 + exp(-(ability - DIFFICULTY.get(difficulty, 0.0))))
+    return max(-ABILITY_BOUND, min(ABILITY_BOUND, ability + gain * (float(correct) - expected)))
+
+
+def shifted_prior(prior: float, ability: float, weight: float) -> float:
+    """The starting mastery of an unobserved KC: the prior's log-odds shifted by `weight × ability`."""
+    logit = log(prior / (1 - prior)) + weight * ability
+    return round(1 / (1 + exp(-logit)), 6)
+
+
+def propagate(raw: dict[str, float], graph: dict[str, tuple[str, ...]]) -> dict[str, float]:
+    """Effective mastery: a KC is capped by its weakest prerequisite (0.25 + 0.75 × its effective mastery);
+    the raw estimates are not changed. `graph` must hold every prerequisite of every KC in `raw`, without
+    cycles."""
+    done: dict[str, float] = {}
+
+    def score(kc: str) -> float:
+        if kc not in done:
+            value = raw[kc]
+            deps = graph.get(kc, ())
+            if deps:
+                value = min(value, 0.25 + 0.75 * min(score(dep) for dep in deps))
+            done[kc] = round(value, 6)
+        return done[kc]
+
+    for kc in raw:
+        score(kc)
+    return done
 
 
 class CourseKnowledgeError(ValueError):
@@ -94,8 +129,7 @@ class CourseKnowledgeCore:
 
     def prior_for(self, ability: float) -> float:
         """The starting mastery of an unobserved KC: the prior's log-odds shifted by the ability."""
-        logit = log(self.prior / (1 - self.prior)) + self.ability_weight * ability
-        return round(1 / (1 + exp(-logit)), 6)
+        return shifted_prior(self.prior, ability, self.ability_weight)
 
     def predict_correct(self, state: CourseKnowledgeState, kc_id: str) -> float:
         """P(correct answer) on an item of this KC, from the effective mastery (with prerequisites)."""
@@ -114,20 +148,7 @@ class CourseKnowledgeCore:
 
     def effective_mastery(self, state: CourseKnowledgeState) -> dict[str, float]:
         """Lower apparent mastery when prerequisites are weak, preserving raw BKT state."""
-        calculated: dict[str, float] = {}
-
-        def score(kc: str) -> float:
-            if kc not in calculated:
-                raw = self.progress(state, kc).probability
-                deps = self.graph[kc]
-                if deps:
-                    raw = min(raw, 0.25 + 0.75 * min(score(dep) for dep in deps))
-                calculated[kc] = round(raw, 6)
-            return calculated[kc]
-
-        for kc in self.graph:
-            score(kc)
-        return calculated
+        return propagate({kc: self.progress(state, kc).probability for kc in self.graph}, self.graph)
 
     def update(self, state: CourseKnowledgeState, event: CourseEvidence) -> CourseKnowledgeState:
         """Apply one labelled observation to the correct course without persistence."""
@@ -154,10 +175,7 @@ class CourseKnowledgeCore:
             if event.kind == "strong":
                 p = learn(p, self.learn_rate)
             n = old.observations + 1
-            difficulties = {"basic": -1.0, "intermediate": 0.0, "advanced": 1.0}
-            expected = 1.0 / (1.0 + exp(-(state.ability - difficulties[event.difficulty])))
-            ability = max(-4.0, min(4.0, state.ability + self.ability_gain *
-                                    (float(event.correct) - expected)))
+            ability = ability_step(state.ability, event.correct, event.difficulty, self.ability_gain)
         if not isfinite(ability):
             raise CourseKnowledgeError("Invalid ability state.")
         next_kcs = dict(state.kcs)
