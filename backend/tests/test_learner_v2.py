@@ -1,5 +1,7 @@
 """API v2 learner endpoints (api-v2.md 3.5, 3.6; course-structure.md 4.4, 4.5; task S9): what a student does
 in a course, and what the instructor may see. Rule 9: what must not be seen is not returned."""
+import os
+
 import pytest
 from sqlmodel import Session
 
@@ -233,6 +235,8 @@ def test_members_list_gives_the_student_id_for_the_learner_endpoints(world):
     assert by_role["student"]["student_id"] == world.sid and by_role["instructor"]["student_id"] is None
 
 
+@pytest.mark.skipif(os.environ.get("TEST_LEARNER_KNOWLEDGE", "course") != "course",
+                    reason="the prerequisite cap belongs to the course model")
 def test_the_overview_shows_a_prerequisite_cap_learned_after_the_dependent_kc(world):
     """Course model (S8): answers on a prerequisite after the dependent KC change what the dependent KC shows,
     and the overview reads the final states, not each KC's value at its own last answer."""
