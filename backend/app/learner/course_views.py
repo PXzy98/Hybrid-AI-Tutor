@@ -147,16 +147,20 @@ class DbLearnerViewStore:
         rows = sorted(self._rows(EvidenceLog, course_id, student_id, since), key=lambda r: r.id)
         repo = _WindowRepo()
         model = load_knowledge_model(self.settings, repo, self.content)
-        latest: dict[str, LearnerSignal] = {}
+        last_seen: dict[str, datetime] = {}
         for r in rows:
             if self.content.kc(r.kc_id) is None:  # a KC that no longer exists
                 continue
             repo.at = r.created_at
-            new = model.update(student_id, Evidence(kc_id=r.kc_id, kind=r.kind, correct=r.correct,
-                                                    signal=r.signal, misconception_id=r.misconception_id,
-                                                    item_id=r.item_id, source=r.source))
-            latest[r.kc_id] = LearnerSignal(course_id, student_id, r.created_at, r.kc_id, new.p_mastery)
-        return list(latest.values())
+            model.update(student_id, Evidence(kc_id=r.kc_id, kind=r.kind, correct=r.correct, signal=r.signal,
+                                              misconception_id=r.misconception_id, item_id=r.item_id,
+                                              source=r.source))
+            last_seen[r.kc_id] = r.created_at
+        # the final states, read after the whole window: with the course model a later answer on a
+        # prerequisite changes what an earlier-practised KC shows
+        final = model.state(student_id, list(last_seen))
+        return [LearnerSignal(course_id, student_id, at, kc, final[kc].p_mastery)
+                for kc, at in last_seen.items()]
 
     def check_answers(self, course_id: int, student_id: str) -> Sequence[CheckAnswerRecord]:
         return [CheckAnswerRecord(course_id, student_id, r.created_at, r.item_id, bool(r.correct))
