@@ -1,7 +1,7 @@
 # Privacy-Aware Hybrid AI Tutor: runtime configuration (design: docs/System_Design_v3.md §9).
 # Secrets and machine-specific URLs live in .env (see .env.example), not here.
 
-pipeline: [privacy_filter, understand, learner_context, analyze_route, retrieve, route, generate, restore, verify, attach_check, record]
+pipeline: [privacy_filter, understand, learner_context, analyze_route, retrieve, route, web_search, generate, restore, verify, attach_check, record]
 post_response: [update_learner]
 
 verify:
@@ -34,6 +34,18 @@ rag:
   k: 4
   materials_dir: data/topics          # instructor uploads (admin dashboard), one folder per topic
 
+websearch:                        # task T13; docs/WEB_SEARCH.md
+  provider: "off"                 # off | api (hosted search API, key in WEBSEARCH_API_KEY) | searxng (Compose profile)
+  api_url: https://api.tavily.com/search
+  searxng_url: http://searxng:8080
+  max_results: 3
+  max_chars: 1200                 # per result, after cleaning
+  timeout_s: 8
+  allowlist:                      # sites searched per course type (a site includes its subdomains)
+    medical_science: [medlineplus.gov, nih.gov, cdc.gov, who.int]
+    life_science: [nih.gov, ebi.ac.uk, nature.com, khanacademy.org]
+    ece: [ieee.org, nist.gov, python.org, developer.mozilla.org, en.cppreference.com]
+    general: [wikipedia.org]
 privacy:
   spacy_model: en_core_web_lg         # tests use en_core_web_sm
   score_threshold: 0.5                # phone numbers need a context word ("phone", "call"): 0.4 -> 0.75

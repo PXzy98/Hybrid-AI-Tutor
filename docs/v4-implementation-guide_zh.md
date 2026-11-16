@@ -432,7 +432,7 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | T10 | 视频（11/25）；把法语界面截图发给 Lavin 审核并改回 | S6 | T3 | — | 按时交付 |
 | T11 | 改名（定名后，**未完成**）；无障碍自查（键盘、屏幕阅读器、对比度、放大）（**已完成**，见 [ACCESSIBILITY.md](ACCESSIBILITY.md)；axe 测试在 `frontend/src/test/Accessibility.test.tsx`） | S7 | 定名 | `frontend/` | 自查清单 |
 | T12 | **进行中**：学生使用手册（[STUDENT_MANUAL.md](STUDENT_MANUAL.md)）和教师使用手册（[INSTRUCTOR_MANUAL.md](INSTRUCTOR_MANUAL.md)，含 course-structure.md 3.4 关于助教的说明）已完成；路由、前端、网络搜索的交接文档未完成 | S8 | — | `docs/` | 新教师照着能用 |
-| T13 | 网络搜索（G1-92）+ 评估（G1-106）：搜索 API、白名单、清洗结果、作为资料交给生成步骤；查询只用 `search_query()`；出网只走统一的出网函数 | S7 | Z11、Z6 | 新的 `backend/app/websearch/`、`config.yaml` 的 pipeline | E4 审计：搜索请求里没有个人信息；评估报告 |
+| T13 | 网络搜索（G1-92）+ 评估（G1-106）。**搜索已完成**（#88；见 [WEB_SEARCH.md](WEB_SEARCH.md)：部署时选择 `off`、外部 `api` 或自建 `searxng`）；评估还没做：搜索 API、白名单、清洗结果、作为资料交给生成步骤；查询只用 `search_query()`；出网只走统一的出网函数 | S7 | Z11、Z6 | 新的 `backend/app/websearch/`、`config.yaml` 的 pipeline | E4 审计：搜索请求里没有个人信息；评估报告 |
 | T14 | 清除 `docs/` 以外 Markdown 里的中文（规则 14）：按第 7 节用英文重写 `TODO.md`；把仓库根目录的中文版入门文档挪到 `docs/GETTING_STARTED_zh.md` 并修好链接；删掉 `README.md`、`GETTING_STARTED.md` 里的中文行。`frontend/src/test/Routing.test.tsx` 里的中文测试文本保留（它测试的是中文输入） | S5 | — | 上述文件 | `docs/` 以外的 Markdown 里没有中文 |
 
 ### 7.3a 前端 v2（任务 F1）
@@ -492,9 +492,10 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | T5 | T | 问题类型（概念 / 课程事务）；课程事务问题先检索课程级文件 | #80 | 审查 |
 | T9 | T | `scripts/build_demo.py`：通过 API v2 用课程包建演示课程 | #69 | 审查 |
 | S8（接进系统） | S | 分层模型注册为 `course` 并设为默认；更新从存储的估计值开始，前置知识点的上限只在显示时生效；三种模型都跑了全部测试 | #87 | 审查 |
+| T13（搜索） | T | 三种部署模式的网页搜索、`route` 之后的 `web_search` 步骤、按课程类型的白名单、SearXNG 的 Compose profile | #88 | 审查 |
 | T11（无障碍部分）、T12（手册） | T | 无障碍自查和 axe 测试；学生手册和教师手册 | #74、#73 | 审查 |
 
-从 2026-11-11 起，按同样的决定，Z 也用这种方式做 7.2 和 7.3 里 S 和 T 剩下的任务（每个任务一个 PR，开 PR 时加到上表）。还没开始的（2026-11-15）：网页搜索（T13）；视频（T10）；改名（T11，等项目名）；路由、前端和网页搜索的交接说明（T12）；CI 扫描报告的 `transformers` 5、`react-router` 7 和 `vite`/`vitest` 升级。
+从 2026-11-11 起，按同样的决定，Z 也用这种方式做 7.2 和 7.3 里 S 和 T 剩下的任务（每个任务一个 PR，开 PR 时加到上表）。还没开始的（2026-11-15）：网页搜索的评估（T13，G1-106）；视频（T10）；改名（T11，等项目名）；路由、前端和网页搜索的交接说明（T12）；CI 扫描报告的 `transformers` 5、`react-router` 7 和 `vite`/`vitest` 升级。
 
 ## 8. 开发流程
 

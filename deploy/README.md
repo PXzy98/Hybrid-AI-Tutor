@@ -78,3 +78,10 @@ ssh -L 3000:127.0.0.1:3000 <host>    # then open http://localhost:3000 (user adm
 
 Only Grafana publishes a port, on `127.0.0.1` of the host. Prometheus keeps 30 days. CI checks the files with
 `promtool` and `amtool`, and `backend/tests/test_monitoring_config.py` checks that every metric they use exists.
+
+## Web search (task T13)
+
+`docker compose -f docker-compose.yml --profile searxng up -d` adds a self-hosted SearXNG (`searxng`, settings in
+`deploy/searxng/settings.yml`, pinned image). It publishes no port and only the api calls it. Set
+`SEARXNG_SECRET` and `WEBSEARCH__PROVIDER=searxng` in `.env`; the other modes (`off`, `api`) and the allowed
+sites are in [docs/WEB_SEARCH.md](../docs/WEB_SEARCH.md).

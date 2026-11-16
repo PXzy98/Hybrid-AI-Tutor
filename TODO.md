@@ -24,7 +24,7 @@ Reflection #2 (ethics, individual) 11/18 · video 11/25 · Design Day 12/3 · fi
 
 | ID | Task | Owner | Status |
 |---|---|---|---|
-| T13 | Web search and its evaluation | T | not started |
+| T13 | Web search evaluation (G1-106) | T | search built (#88: off / API / SearXNG); evaluation needs SearXNG or a key |
 | T10 | Video (11/25); French UI screenshots to Lavin | T | not started |
 | T11 | Renaming | T | waits for the project name |
 | T12 | Routing, frontend and web search handover notes | T | manuals done |

@@ -126,19 +126,7 @@ class GenerateStep(BaseStep):
         return req.model_copy(update={"sanitized_question": rewrite})
 
     async def _llm_flags_health(self, ctx: RequestContext) -> bool:
-        """privacy.llm_check: the local model double-checks a cloud-bound question about a health topic.
-
-        Here rather than in the privacy filter, so only questions really going to the cloud pay the latency;
-        once per request (a safety retry reuses the answer).
-        """
-        if (not self.services.settings.privacy.llm_check or ctx.pii.llm_checked
-                or not TOPIC_RE.search(ctx.request.question)):
-            return False
-        ctx.pii = ctx.pii.model_copy(update={"llm_checked": True})
-        flagged = await reveals_personal_health(self.services.understand_llm, ctx.pii.sanitized_text)
-        if flagged:
-            log.info("local model check kept a question off the cloud, request=%s", ctx.request_id)
-        return flagged
+        return await llm_flags_health(ctx, self.services)
 
     async def _fallback(self, ctx: RequestContext, safety_retry: bool, reason: str) -> LLMResult:
         log.info("routed to cloud, answered locally (%s), request=%s", reason, ctx.request_id)
@@ -147,3 +135,20 @@ class GenerateStep(BaseStep):
                 ctx.warnings.append(w)
         result = await self._local(ctx, safety_retry)
         return result.model_copy(update={"fell_back": True})
+
+
+async def llm_flags_health(ctx: RequestContext, services) -> bool:
+    """privacy.llm_check: the local model double-checks a cloud-bound question about a health topic.
+
+    Here rather than in the privacy filter, so only questions really going to the cloud pay the latency; once
+    per request (a safety retry and the generate step after web search reuse the answer). Also run by the
+    web_search step before anything is sent to a search service (task T13).
+    """
+    if (not services.settings.privacy.llm_check or ctx.pii.llm_checked
+            or not TOPIC_RE.search(ctx.request.question)):
+        return False
+    ctx.pii = ctx.pii.model_copy(update={"llm_checked": True})
+    flagged = await reveals_personal_health(services.understand_llm, ctx.pii.sanitized_text)
+    if flagged:
+        log.info("local model check kept a question off the cloud, request=%s", ctx.request_id)
+    return flagged

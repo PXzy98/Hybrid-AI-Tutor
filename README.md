@@ -27,6 +27,7 @@ What it does (v4):
 | State of the work, decisions, open tasks | [docs/HANDOVER.md](docs/HANDOVER.md), [TODO.md](TODO.md) |
 | Deploying and running | [docs/OPERATIONS.md](docs/OPERATIONS.md), [deploy/README.md](deploy/README.md) |
 | Courses, accounts, settings, data model; the HTTP API | [docs/design/course-structure.md](docs/design/course-structure.md), [docs/design/api-v2.md](docs/design/api-v2.md) |
+| Web search (off, hosted API or SearXNG) | [docs/WEB_SEARCH.md](docs/WEB_SEARCH.md) |
 | Privacy rules and their evaluation | [docs/PRIVACY_PROFILES.md](docs/PRIVACY_PROFILES.md), [eval/privacy-filter/](eval/privacy-filter/) |
 | Model connections | [docs/MODEL_CONNECTIONS.md](docs/MODEL_CONNECTIONS.md) |
 | Database and migrations | [docs/DATABASE.md](docs/DATABASE.md) |
@@ -49,7 +50,8 @@ docker compose up -d --build
 - Services: `proxy` (Caddy: the web app, `/api` forwarded to `api`, HTTPS once `SITE_ADDRESS` is a domain
   name), `api` (FastAPI; applies the database migrations at startup), `worker` (indexing, AI drafts,
   evaluations, the live settings switch), `db` (PostgreSQL 16, internal network only). `--profile monitoring`
-  adds Prometheus, Alertmanager and Grafana.
+  adds Prometheus, Alertmanager and Grafana; `--profile searxng` adds a self-hosted search engine for web
+  search, which is off by default ([docs/WEB_SEARCH.md](docs/WEB_SEARCH.md)).
 - The first account (`INSTRUCTOR_USERNAME`) is the admin and must choose a new password at first login; it then
   creates instructor accounts and model connections. Production settings, upgrades and backups:
   [docs/OPERATIONS.md](docs/OPERATIONS.md).

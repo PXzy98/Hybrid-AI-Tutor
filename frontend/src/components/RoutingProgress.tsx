@@ -11,8 +11,10 @@ export type RoutingTrace = {
   startedAt: number; finishedAt?: number; details?: Schemas["RouteScore"] | null; error?: string;
 };
 
-const STAGES = ["preparation", "embedding", "classification", "retrieval", "evidence", "decision",
+const STAGES = ["preparation", "embedding", "classification", "retrieval", "evidence", "decision", "web_search",
   "generation", "verification"] as const;
+// shown only when it ran: web search is off in most deployments and runs only for some cloud answers
+const OPTIONAL_STAGES = new Set<string>(["web_search"]);
 const STATUSES = ["pending", "running", "completed", "skipped", "failed"];
 
 export function latestEvents(events: Progress[]): Progress[] {
@@ -43,6 +45,7 @@ export default function RoutingProgress({ trace }: { trace: RoutingTrace }) {
       <ol className="relative space-y-2.5 before:absolute before:top-1.5 before:bottom-1.5 before:left-[5px] before:w-px before:bg-border">
         {STAGES.map((id) => {
           const e = events.find((p) => p.stage === id);
+          if (!e && OPTIONAL_STAGES.has(id)) return null;
           const state = e?.status ?? "pending";
           const duration = e?.duration_ms ?? (state === "running" ? Math.max(0, elapsed - (e?.elapsed_ms ?? 0)) : null);
           return (
