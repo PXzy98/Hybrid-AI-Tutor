@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, ListChecks, XCircle } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
 import { api, type Course, type OwnAttempt, type StudentQuiz } from "@/api/endpoints";
-import { ErrorNote } from "@/components/common";
+import { choiceRow, EmptyState, ErrorNote, Loading, PageHeader } from "@/components/common";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,14 +14,11 @@ export default function Quizzes({ course }: { course: Course }) {
   const { t } = useI18n();
   const quizzes = useQuery({ queryKey: ["quizzes", course.id], queryFn: () => api.studentQuizzes(course.id) });
   return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-lg font-semibold">{t("quiz.title")}</h2>
-        <p className="text-sm text-muted-foreground">{t("quiz.studentIntro")}</p>
-      </div>
+    <div className="mx-auto max-w-3xl space-y-6">
+      <PageHeader title={t("quiz.title")} description={t("quiz.studentIntro")} />
       <ErrorNote error={quizzes.error} />
-      {quizzes.isLoading && <p className="text-muted-foreground">{t("app.loading")}</p>}
-      {quizzes.data?.length === 0 && <p className="text-muted-foreground">{t("quiz.studentNone")}</p>}
+      {quizzes.isLoading && <Loading variant="list" />}
+      {quizzes.data?.length === 0 && <EmptyState icon={ListChecks} title={t("empty.quizzes.title")}>{t("quiz.studentNone")}</EmptyState>}
       <ul className="space-y-4">
         {quizzes.data?.map((q) => <li key={q.id}><QuizCard course={course} quiz={q} /></li>)}
       </ul>
@@ -64,9 +61,9 @@ function QuizCard({ course, quiz }: { course: Course; quiz: StudentQuiz }) {
               {attempt.results.map((r, i) => {
                 const q = questions[i];
                 return (
-                  <li key={i} className="rounded-md border p-3 text-sm">
+                  <li key={i} className={`rounded-lg border p-3 text-sm ${r.correct ? "border-success-border bg-success-soft/50" : "border-destructive/30 bg-destructive-soft/50"}`}>
                     <p className="flex items-center gap-2 font-medium">
-                      {r.correct ? <CheckCircle2 aria-hidden className="size-4 text-emerald-600" /> : <XCircle aria-hidden className="size-4 text-rose-600" />}
+                      {r.correct ? <CheckCircle2 aria-hidden className="size-4 text-success" /> : <XCircle aria-hidden className="size-4 text-destructive" />}
                       {t("quiz.questionN", { n: i + 1 })}: {t(r.correct ? "quiz.correct" : "quiz.incorrect")}
                     </p>
                     {q && <p className="mt-1">{q.stem}</p>}
@@ -82,20 +79,25 @@ function QuizCard({ course, quiz }: { course: Course; quiz: StudentQuiz }) {
         ) : quiz.open ? (
           <form onSubmit={send} className="space-y-4" aria-label={quiz.title}>
             {questions.map((q, i) => (
-              <fieldset key={i} className="space-y-2">
-                <legend className="text-sm"><span className="font-medium">{i + 1}.</span> {q.stem}</legend>
-                {(q.options ?? []).map((o, j) => (
-                  <label key={j} className="flex cursor-pointer items-start gap-2 rounded-md border bg-card px-3 py-2 text-sm">
-                    <input type="radio" name={`quiz-${quiz.id}-${i}`} className="mt-0.5 accent-primary" checked={answers[i] === j}
-                           onChange={() => setAnswers(answers.map((a, k) => (k === i ? j : a)))} />
-                    <span>{o}</span>
-                  </label>
-                ))}
-              </fieldset>
+              <div key={i} className="border-t pt-4 first:border-0 first:pt-0">
+                <fieldset className="space-y-2">
+                  <legend className="text-sm"><span className="font-medium">{i + 1}.</span> {q.stem}</legend>
+                  {(q.options ?? []).map((o, j) => (
+                    <label key={j} className={choiceRow(answers[i] === j)}>
+                      <input type="radio" name={`quiz-${quiz.id}-${i}`} className="mt-0.5 accent-primary" checked={answers[i] === j}
+                             onChange={() => setAnswers(answers.map((a, k) => (k === i ? j : a)))} />
+                      <span>{o}</span>
+                    </label>
+                  ))}
+                </fieldset>
+              </div>
             ))}
-            <p className="text-xs text-muted-foreground">{t("quiz.onceHint")}</p>
+            <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+              <span>{t("quiz.onceHint")}</span>
+              <span className="tabular-nums">{t("quiz.answeredN", { n: answers.filter((a) => a !== null).length, m: answers.length })}</span>
+            </div>
             <ErrorNote error={submit.error} />
-            <Button type="submit" disabled={!complete || submit.isPending}>{submit.isPending ? t("check.busy") : t("quiz.submit")}</Button>
+            <Button loading={submit.isPending} type="submit" disabled={!complete || submit.isPending}>{submit.isPending ? t("check.busy") : t("quiz.submit")}</Button>
           </form>
         ) : <p className="text-sm text-muted-foreground">{t("quiz.notAvailable")}</p>}
       </CardContent>

@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -140,6 +140,128 @@ describe("chat", () => {
     await user.type(await screen.findByLabelText("Your question"), "Explain resonance");
     await user.click(screen.getByRole("button", { name: "Send" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("The model is busy.");
+  });
+});
+
+/** Lets one request path wait for `release()` or stream until the request is aborted; everything else goes to mockApi. */
+function interceptFetch(match: string, respond: (init: RequestInit | undefined) => Promise<Response>) {
+  const base = globalThis.fetch;
+  vi.stubGlobal("fetch", (input: RequestInfo | URL, init?: RequestInit) =>
+    (String(input).includes(match) ? respond(init) : base(input, init)));
+}
+
+describe("chat composer and scrolling", () => {
+  it("sends a failed question again with Try again", async () => {
+    let attempts = 0;
+    const calls = mockApi(studentRoutes({
+      "POST /courses/1/ask/stream": () => (++attempts === 1
+        ? sse(["error", { detail: "The model is busy." }], ["done", {}])
+        : sse(["result", answer], ["done", {}])),
+    }));
+    renderApp("/courses/1/chat");
+    const user = userEvent.setup();
+    await user.type(await screen.findByLabelText("Your question"), "Explain resonance");
+    await user.click(screen.getByRole("button", { name: "Send" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("The model is busy.");
+    await user.click(screen.getByRole("button", { name: "Try again" }));
+    expect(await screen.findByText("Local model")).toBeInTheDocument();
+    const bodies = calls.filter((c) => c.path === "/courses/1/ask/stream").map((c) => c.body as Record<string, unknown>);
+    expect(bodies.map((b) => b.question)).toEqual(["Explain resonance", "Explain resonance"]);
+    expect(screen.queryByRole("button", { name: "Try again" })).not.toBeInTheDocument();
+  });
+
+  it("scrolls past the composer to the latest error, so nothing is left under it", async () => {
+    mockApi(studentRoutes({ "POST /courses/1/ask/stream": () => sse(["error", { detail: "The model is busy." }], ["done", {}]) }));
+    const targets: Element[] = [];
+    Element.prototype.scrollIntoView = function (this: Element) { targets.push(this); };
+    try {
+      renderApp("/courses/1/chat");
+      const user = userEvent.setup();
+      const field = await screen.findByLabelText("Your question");
+      await user.type(field, "Explain resonance");
+      await user.click(screen.getByRole("button", { name: "Send" }));
+      await user.click(await screen.findByRole("button", { name: "Try again" }));
+      await waitFor(() => expect(screen.getAllByRole("alert")).toHaveLength(2));
+      const anchor = targets[targets.length - 1];
+      expect(field.compareDocumentPosition(anchor) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      expect(screen.getAllByRole("alert")[1].compareDocumentPosition(anchor) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    } finally {
+      delete (Element.prototype as Partial<Element>).scrollIntoView;
+    }
+  });
+
+  it("stops a running answer quietly with the Stop button", async () => {
+    mockApi(studentRoutes());
+    interceptFetch("/ask/stream", async (init) => {
+      const body = new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(new TextEncoder().encode('event: token\ndata: {"text":"Partial words"}\n\n'));
+          init?.signal?.addEventListener("abort", () => controller.error(new DOMException("Aborted", "AbortError")));
+        },
+      });
+      return new Response(body, { headers: { "Content-Type": "text/event-stream" } });
+    });
+    renderApp("/courses/1/chat");
+    const user = userEvent.setup();
+    await user.type(await screen.findByLabelText("Your question"), "Explain resonance");
+    await user.click(screen.getByRole("button", { name: "Send" }));
+    expect(await screen.findByText("Partial words")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Stop the answer" }));
+    expect(await screen.findByRole("button", { name: "Send" })).toBeInTheDocument();
+    expect(screen.queryByText("Partial words")).not.toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("copies the answer as Markdown and confirms with a toast", async () => {
+    mockApi(studentRoutes({ "POST /courses/1/ask/stream": () => sse(["result", answer], ["done", {}]) }));
+    renderApp("/courses/1/chat");
+    const user = userEvent.setup();
+    await user.type(await screen.findByLabelText("Your question"), "What is Ohm's law?");
+    await user.click(screen.getByRole("button", { name: "Send" }));
+    await user.click(await screen.findByRole("button", { name: "Copy the answer" }));
+    expect(await navigator.clipboard.readText()).toBe(answer.answer);
+    expect(await screen.findByText("Copied")).toBeInTheDocument();
+  });
+
+  it("does not send on Enter while an input method is composing", async () => {
+    const calls = mockApi(studentRoutes({ "POST /courses/1/ask/stream": () => sse(["result", answer], ["done", {}]) }));
+    renderApp("/courses/1/chat");
+    const field = await screen.findByLabelText("Your question");
+    fireEvent.change(field, { target: { value: "What is resistance" } });
+    fireEvent.keyDown(field, { key: "Enter", isComposing: true });
+    await new Promise((r) => setTimeout(r, 50));
+    expect(calls.some((c) => c.path === "/courses/1/ask/stream")).toBe(false);
+    fireEvent.keyDown(field, { key: "Enter" });
+    await waitFor(() => expect(calls.some((c) => c.path === "/courses/1/ask/stream")).toBe(true));
+  });
+
+  it("does not pull a reader who scrolled up down to new messages, and offers a jump button", async () => {
+    let release!: () => void;
+    const gate = new Promise<void>((r) => { release = r; });
+    mockApi(studentRoutes());
+    interceptFetch("/conversations/c-9", async () => {
+      await gate;
+      return reply({ conversation_id: "c-9", turns: [{ role: "student", text: "Earlier question" }, { role: "tutor", text: "Earlier answer" }] });
+    });
+    const scrollIntoView = vi.fn();
+    Element.prototype.scrollIntoView = scrollIntoView;
+    try {
+      renderApp("/courses/1/chat?c=c-9");
+      await screen.findByLabelText("Your question");
+      const main = screen.getByRole("main");
+      Object.defineProperty(main, "scrollHeight", { value: 2000, configurable: true });
+      Object.defineProperty(main, "clientHeight", { value: 500, configurable: true });
+      main.scrollTop = 0;
+      fireEvent.scroll(main);
+      scrollIntoView.mockClear();
+      release();
+      expect(await screen.findByText("Earlier answer")).toBeInTheDocument();
+      expect(scrollIntoView).not.toHaveBeenCalled();
+      await userEvent.setup().click(screen.getByRole("button", { name: "Jump to the latest message" }));
+      expect(scrollIntoView).toHaveBeenCalled();
+    } finally {
+      delete (Element.prototype as Partial<Element>).scrollIntoView;
+    }
   });
 });
 

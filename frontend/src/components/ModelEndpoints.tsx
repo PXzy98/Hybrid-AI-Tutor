@@ -146,7 +146,7 @@ function EndpointDialog({ courseId, endpoint }: { courseId: number | null; endpo
             <Input id={`${p}-key`} type="password" autoComplete="off" value={form.api_key} onChange={set("api_key")} maxLength={500} />
             <p className="text-xs text-muted-foreground">{t(endpoint ? "models.keyKeep" : "models.keyOptional")}</p></div>
           <ErrorNote error={save.error} />
-          <DialogFooter><Button type="submit" disabled={save.isPending}>{save.isPending ? t("settings.saving") : t("settings.save")}</Button></DialogFooter>
+          <DialogFooter><Button loading={save.isPending} type="submit" disabled={save.isPending}>{save.isPending ? t("settings.saving") : t("settings.save")}</Button></DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

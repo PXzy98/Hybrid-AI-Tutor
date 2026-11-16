@@ -42,7 +42,7 @@ export default function EndOfTerm({ course }: { course: Course }) {
   const early = useMutation({ mutationFn: () => api.createExport(course.id) });
   const done = end.data;
   return (
-    <div className="space-y-4">
+    <div className="mx-auto max-w-3xl space-y-6">
       {!done && (
         <Card>
           <CardHeader>
@@ -50,7 +50,7 @@ export default function EndOfTerm({ course }: { course: Course }) {
             <CardDescription>{t("end.previewIntro")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button type="button" variant="outline" onClick={() => early.mutate()} disabled={early.isPending}>
+            <Button loading={early.isPending} type="button" variant="outline" onClick={() => early.mutate()} disabled={early.isPending}>
               {early.isPending ? t("end.working") : t("end.previewCreate")}
             </Button>
             <ErrorNote error={early.error} />
@@ -67,9 +67,9 @@ export default function EndOfTerm({ course }: { course: Course }) {
           </CardContent>
         </Card>
       )}
-      <Card>
+      <Card className="border-destructive/30">
         <CardHeader>
-          <CardTitle>{t("end.title")}</CardTitle>
+          <CardTitle className="flex items-center gap-2"><TriangleAlert aria-hidden className="size-4 text-destructive" />{t("end.title")}</CardTitle>
           <CardDescription>{t("end.intro")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -92,7 +92,7 @@ export default function EndOfTerm({ course }: { course: Course }) {
                   <ErrorNote error={end.error} />
                   <DialogFooter>
                     <DialogClose asChild><Button type="button" variant="outline">{t("end.cancel")}</Button></DialogClose>
-                    <Button type="submit" variant="destructive" disabled={typed.trim() !== course.code || end.isPending}>
+                    <Button loading={end.isPending} type="submit" variant="destructive" disabled={typed.trim() !== course.code || end.isPending}>
                       {end.isPending ? t("end.working") : t("end.confirm")}
                     </Button>
                   </DialogFooter>

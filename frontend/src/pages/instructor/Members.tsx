@@ -131,7 +131,7 @@ function ImportCard({ course, onDone }: { course: Course; onDone: () => void }) 
             <Input id="import-file" ref={input} type="file" accept=".csv,text/csv" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
           </div>
           <ErrorNote error={run.error} />
-          <Button type="submit" disabled={!file || run.isPending}>{run.isPending ? t("import.busy") : t("import.submit")}</Button>
+          <Button loading={run.isPending} type="submit" disabled={!file || run.isPending}>{run.isPending ? t("import.busy") : t("import.submit")}</Button>
         </form>
         {report && (
           <div role="status" className="mt-4 space-y-1 text-sm">

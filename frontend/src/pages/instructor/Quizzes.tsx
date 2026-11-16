@@ -1,12 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Sparkles, Trash2 } from "lucide-react";
+import { ListChecks, Plus, Sparkles, Trash2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
 import { api, type Course, type DraftBody, type Quiz, type QuizQuestion, type QuizResults } from "@/api/endpoints";
-import { ErrorNote } from "@/components/common";
+import { EmptyState, ErrorNote, Loading, PageHeader, StatusText } from "@/components/common";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,19 +46,18 @@ function QuizList({ course, onOpen }: { course: Course; onOpen: (v: View) => voi
     mutationFn: (v: { id: number; status: "published" | "closed" }) => api.updateQuiz(course.id, v.id, { status: v.status }),
     onSuccess: refresh,
   });
-  const remove = useMutation({ mutationFn: (id: number) => api.deleteQuiz(course.id, id), onSuccess: refresh });
+  const [pendingDelete, setPendingDelete] = useState<Quiz | null>(null);
+  const remove = useMutation({
+    mutationFn: (id: number) => api.deleteQuiz(course.id, id),
+    onSuccess: () => { setPendingDelete(null); refresh(); },
+  });
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold">{t("quiz.title")}</h2>
-          <p className="text-sm text-muted-foreground">{t("quiz.intro")}</p>
-        </div>
-        <Button type="button" onClick={() => onOpen({ kind: "edit", id: null })}><Plus aria-hidden />{t("quiz.new")}</Button>
-      </div>
-      <ErrorNote error={quizzes.error ?? change.error ?? remove.error} />
-      {quizzes.isLoading && <p className="text-muted-foreground">{t("app.loading")}</p>}
-      {quizzes.data?.length === 0 && <p className="text-muted-foreground">{t("quiz.none")}</p>}
+      <PageHeader title={t("quiz.title")} description={t("quiz.intro")}
+                  actions={<Button type="button" onClick={() => onOpen({ kind: "edit", id: null })}><Plus aria-hidden />{t("quiz.new")}</Button>} />
+      <ErrorNote error={quizzes.error ?? change.error} />
+      {quizzes.isLoading && <Loading variant="list" />}
+      {quizzes.data?.length === 0 && <EmptyState icon={ListChecks} title={t("empty.quizzes.title")}>{t("quiz.none")}</EmptyState>}
       <ul className="space-y-3">
         {quizzes.data?.map((q) => {
           const pending = unreviewed(q);
@@ -87,7 +87,7 @@ function QuizList({ course, onOpen }: { course: Course; onOpen: (v: View) => voi
                     <Button type="button" size="sm" variant="outline" aria-label={t("quiz.closeFor", { name: q.title })} onClick={() => change.mutate({ id: q.id, status: "closed" })}>{t("quiz.close")}</Button>
                   )}
                   {q.attempts === 0 && (
-                    <Button type="button" size="sm" variant="ghost" aria-label={t("quiz.deleteFor", { name: q.title })} onClick={() => remove.mutate(q.id)}><Trash2 aria-hidden /></Button>
+                    <Button type="button" size="sm" variant="ghost" aria-label={t("quiz.deleteFor", { name: q.title })} onClick={() => setPendingDelete(q)}><Trash2 aria-hidden /></Button>
                   )}
                 </CardContent>
               </Card>
@@ -95,6 +95,20 @@ function QuizList({ course, onOpen }: { course: Course; onOpen: (v: View) => voi
           );
         })}
       </ul>
+      <Dialog open={!!pendingDelete} onOpenChange={(o) => { if (!o) setPendingDelete(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("quiz.deleteTitle")}</DialogTitle>
+            <DialogDescription>{t("quiz.deleteBody", { name: pendingDelete?.title ?? "" })}</DialogDescription>
+          </DialogHeader>
+          <ErrorNote error={remove.error} />
+          <DialogFooter>
+            <DialogClose asChild><Button type="button" variant="outline">{t("end.cancel")}</Button></DialogClose>
+            <Button type="button" variant="destructive" loading={remove.isPending}
+                    onClick={() => pendingDelete && remove.mutate(pendingDelete.id)}>{t("quiz.deleteConfirm")}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -102,9 +116,8 @@ function QuizList({ course, onOpen }: { course: Course; onOpen: (v: View) => voi
 const blankQuestion = (): QuizQuestion => ({ kind: "mcq", kc: null, stem: "", options: ["", "", "", ""], answer: 0, explanation: "", sources: [], reviewed: true });
 
 function QuizEditor({ course, id, onClose, onCreated }: { course: Course; id: number | null; onClose: () => void; onCreated: (id: number) => void }) {
-  const { t } = useI18n();
   const quizzes = useQuery({ queryKey: ["quizzes", course.id], queryFn: () => api.quizzes(course.id) });
-  if (quizzes.isLoading) return <p className="text-muted-foreground">{t("app.loading")}</p>;
+  if (quizzes.isLoading) return <Loading variant="list" />;
   const quiz = id === null ? undefined : quizzes.data?.find((q) => q.id === id);
   // a new form every time the server copy changes (after a save or after the AI draft arrives)
   return <EditorForm key={quiz ? `${quiz.id}:${quiz.updated_at}` : "new"} course={course} quiz={quiz} onClose={onClose} onCreated={onCreated} />;
@@ -151,7 +164,7 @@ function EditorForm({ course, quiz, onClose, onCreated }: { course: Course; quiz
         <h2 className="text-lg font-semibold">{quiz ? t("quiz.editTitle") : t("quiz.new")}</h2>
         <Button type="button" variant="outline" onClick={onClose}>{t("quiz.back")}</Button>
       </div>
-      {locked && <Alert variant="info">{t("quiz.locked")}</Alert>}
+      {locked && <Alert variant="info" icon>{t("quiz.locked")}</Alert>}
       <Card>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="grid gap-1.5 sm:col-span-2"><Label htmlFor="q-title">{t("course.title")}</Label>
@@ -247,9 +260,9 @@ function EditorForm({ course, quiz, onClose, onCreated }: { course: Course; quiz
       </section>
 
       <ErrorNote error={save.error} />
-      {save.isSuccess && <p role="status" className="text-sm text-emerald-700 dark:text-emerald-300">{t("settings.saved")}</p>}
+      {save.isSuccess && <StatusText>{t("settings.saved")}</StatusText>}
       <div className="flex flex-wrap gap-3">
-        <Button type="submit" disabled={save.isPending}>{save.isPending ? t("settings.saving") : t("quiz.save")}</Button>
+        <Button loading={save.isPending} type="submit" disabled={save.isPending}>{save.isPending ? t("settings.saving") : t("quiz.save")}</Button>
       </div>
       {quiz && quiz.status === "draft" && !locked && <AiDraft course={course} quiz={quiz} />}
     </form>
@@ -292,7 +305,7 @@ function AiDraft({ course, quiz }: { course: Course; quiz: Quiz }) {
         </div>
         <ErrorNote error={start.error ?? job.error} />
         {running && <p role="status" className="text-sm text-muted-foreground">{t("quiz.aiRunning")}</p>}
-        {job.data?.status === "done" && <p role="status" className="text-sm text-emerald-700 dark:text-emerald-300">{t("quiz.aiDone")}</p>}
+        {job.data?.status === "done" && <StatusText>{t("quiz.aiDone")}</StatusText>}
         {job.data?.status === "failed" && <Alert variant="destructive" role="alert">{t("quiz.aiFailed")}</Alert>}
       </CardContent>
     </Card>
@@ -314,7 +327,7 @@ function ResultsView({ course, id, onClose }: { course: Course; id: number; onCl
         <Button type="button" variant="outline" onClick={onClose}>{t("quiz.back")}</Button>
       </div>
       <ErrorNote error={results.error} />
-      {results.isLoading && <p className="text-muted-foreground">{t("app.loading")}</p>}
+      {results.isLoading && <Loading variant="list" />}
       {r && (
         <>
           <p className="text-sm text-muted-foreground">{t("quiz.attemptsN", { n: r.attempts })}</p>

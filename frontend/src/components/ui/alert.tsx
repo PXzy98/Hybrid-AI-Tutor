@@ -1,4 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
+import { CircleAlert, Info, TriangleAlert } from "lucide-react";
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
@@ -7,16 +8,32 @@ const alertVariants = cva("relative w-full rounded-lg border px-4 py-3 text-sm",
   variants: {
     variant: {
       default: "bg-card text-card-foreground",
-      info: "border-sky-200 bg-sky-50 text-sky-900 dark:border-sky-800 dark:bg-sky-950 dark:text-sky-100",
-      warning: "border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-100",
-      destructive: "border-red-200 bg-red-50 text-red-900 dark:border-red-800 dark:bg-red-950 dark:text-red-100",
+      info: "border-info-border bg-info-soft text-foreground",
+      warning: "border-warning-border bg-warning-soft text-foreground",
+      destructive: "border-destructive/40 bg-destructive-soft text-destructive-soft-foreground",
     },
   },
   defaultVariants: { variant: "default" },
 });
 
-function Alert({ className, variant, ...props }: React.ComponentProps<"div"> & VariantProps<typeof alertVariants>) {
-  return <div data-slot="alert" className={cn(alertVariants({ variant }), className)} {...props} />;
+const ICONS = {
+  default: [Info, "text-muted-foreground"],
+  info: [Info, "text-info"],
+  warning: [TriangleAlert, "text-warning"],
+  destructive: [CircleAlert, ""],
+} as const;
+
+/** `icon` puts the variant's icon before the text (decorative: the text carries the meaning). */
+function Alert({ className, variant, icon = false, children, ...props }:
+  React.ComponentProps<"div"> & VariantProps<typeof alertVariants> & { icon?: boolean }) {
+  const [Icon, tone] = ICONS[variant ?? "default"];
+  if (!icon) return <div data-slot="alert" className={cn(alertVariants({ variant }), className)} {...props}>{children}</div>;
+  return (
+    <div data-slot="alert" className={cn(alertVariants({ variant }), "flex items-start gap-2.5", className)} {...props}>
+      <Icon aria-hidden className={cn("mt-0.5 size-4 shrink-0", tone)} />
+      <div className="min-w-0 flex-1">{children}</div>
+    </div>
+  );
 }
 
 export { Alert };

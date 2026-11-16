@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { ApiError } from "@/api/client";
 import { api, type Staff, type SystemSettings, type SystemValues } from "@/api/endpoints";
 import { useMe } from "@/auth";
-import { ErrorNote } from "@/components/common";
+import { ErrorNote, Loading, PageHeader, StatusText } from "@/components/common";
 import ModelEndpoints, { endpointsKey } from "@/components/ModelEndpoints";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -23,8 +23,8 @@ export default function Admin() {
   const { data: me } = useMe();
   if (me && me.system_role !== "admin") return <p role="alert" className="text-destructive">{t("admin.forbidden")}</p>;
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">{t("admin.title")}</h1>
+    <div className="space-y-6">
+      <PageHeader level={1} title={t("admin.title")} />
       <StaffCard selfId={me?.account_id} />
       <SystemSettingsCard />
       <ModelEndpoints courseId={null} />
@@ -76,7 +76,7 @@ function StaffCard({ selfId }: { selfId?: number }) {
                   <TableCell className="font-medium">{a.display_name}</TableCell>
                   <TableCell>{a.email ?? "—"}</TableCell>
                   <TableCell>
-                    <Select aria-label={t("admin.roleOf", { name: a.display_name })} value={a.role} disabled={a.account_id === selfId}
+                    <Select aria-label={t("admin.roleOf", { name: a.display_name })} className="min-w-36" value={a.role} disabled={a.account_id === selfId}
                             onChange={(e) => update.mutate({ id: a.account_id, changes: { role: e.target.value as Staff["role"] } })}>
                       <option value="instructor">{t("role.instructor")}</option>
                       <option value="admin">{t("role.admin")}</option>
@@ -133,7 +133,7 @@ function SystemSettingsCard() {
     <>
       <ErrorNote error={settings.error} />
       {conflict && <Alert variant="warning" role="alert">{t("settings.conflict")}</Alert>}
-      {settings.isLoading && <p className="text-muted-foreground">{t("app.loading")}</p>}
+      {settings.isLoading && <Loading variant="form" />}
       {state === "applying" && <Alert variant="info" role="status">{t("admin.applying")}</Alert>}
       {state === "failed" && <Alert variant="destructive" role="alert">{t("admin.rolledBack", { reason: status.data?.error ?? "" })}</Alert>}
       {settings.data && <SystemSettingsForm key={`${settings.data.version}-${state}`} initial={settings.data} onConflict={setConflict} />}
@@ -205,8 +205,8 @@ function SystemSettingsForm({ initial, onConflict }: { initial: SystemSettings; 
           <div className="grid gap-1.5"><Label htmlFor="sys-dcloud">{t("admin.defaultCloud")}</Label>{endpointSelect("sys-dcloud", "default_cloud_endpoint_id", "external")}</div>
           <div className="space-y-2 sm:col-span-2">
             <ErrorNote error={save.error instanceof ApiError && save.error.status === 409 ? null : save.error} />
-            {save.isSuccess && <p role="status" className="text-sm text-emerald-700 dark:text-emerald-300">{t("settings.saved")}</p>}
-            <Button type="submit" disabled={save.isPending || initial.apply_state === "applying"}>{save.isPending ? t("settings.saving") : t("settings.save")}</Button>
+            {save.isSuccess && <StatusText>{t("settings.saved")}</StatusText>}
+            <Button loading={save.isPending} type="submit" disabled={save.isPending || initial.apply_state === "applying"}>{save.isPending ? t("settings.saving") : t("settings.save")}</Button>
           </div>
         </form>
       </CardContent>

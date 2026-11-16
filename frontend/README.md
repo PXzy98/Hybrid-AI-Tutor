@@ -31,10 +31,26 @@ After a backend API change: from `backend/`, run `..\.venv\Scripts\python -m app
 | `/login` | everyone | Log in with username or e-mail |
 | `/join` | everyone | Join a course with an invitation code (new students also create their account) |
 | `/change-password` | everyone | Forced after a temporary password |
-| `/courses` | logged in | Course picker; the left sidebar lists courses, modules and the student's conversations |
+| `/courses` | logged in | Course picker |
 | `/admin` | administrators | Instructor accounts, system settings (versioned save), model connections (the link is only shown to administrators; the API enforces the role) |
-| `/courses/:id/:tab` | students | Tabs: chat, my progress (bands, visibility choices, read-only plan), personalize, quizzes, end-of-term survey; delete my learning data in this course |
-| `/courses/:id/:tab` | instructors | Tabs: class overview (with class insights), students (progress, plan editor), course content (modules, KCs, check items, misconceptions, YAML import and export), AI assistant (drafts, cloud evaluation), members (invitation code, CSV import), materials (upload, delete, index rebuild), settings (with the course's model connections and archiving), end of term, quizzes, end-of-term survey |
+| `/courses/:id/:tab` | students | Sections: chat, my progress (bands, visibility choices, read-only plan), personalize, quizzes, end-of-term survey; delete my learning data in this course |
+| `/courses/:id/:tab` | instructors | Sections: class overview (with class insights), students (progress, plan editor), course content (modules, KCs, check items, misconceptions, YAML import and export), AI assistant (drafts, cloud evaluation), members (invitation code, CSV import), materials (upload, delete, index rebuild), settings (with the course's model connections and archiving), end of term, quizzes, end-of-term survey |
+
+## Layout
+
+`src/components/AppShell.tsx` is a full-height shell; only the content area scrolls.
+
+- **Sidebar** (`src/components/shell/`, 264 px): brand, course switcher (a native select inside a course, links on
+  `/courses`), join / new course / administration, then for the open course its sections
+  (`src/pages/sections.ts`; instructors in the groups Class, Teaching, Course), the modules (the chat scope) and,
+  for students, New chat and the conversations grouped by day. The account menu at the bottom holds language,
+  theme (light, dark, system), change password and log out. The sidebar can be hidden on desktop
+  (`localStorage` key `tutor.sidebar`) and is a sheet on screens narrower than `md`.
+- **Top bar**: the sidebar button, the page `h1` (course code and title), the role and archived badges.
+- **Disclaimer**: a muted `role="note"` line under the content.
+
+`CourseDashboard.tsx` renders only the active section; a student's chat stays mounted (hidden) on other sections
+so a running answer survives.
 
 Everything uses `/api/v2`; every non-GET request sends `X-CSRF-Token` (`src/api/client.ts`). UI components are
 shadcn/ui, copied into `src/components/ui/`. Answers are rendered as Markdown with KaTeX.

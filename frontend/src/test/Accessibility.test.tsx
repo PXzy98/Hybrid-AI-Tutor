@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -150,13 +150,29 @@ describe("axe: no serious or critical violations", () => {
     expect(trigger).toHaveFocus();
   });
 
-  it("tabs move with the arrow keys", async () => {
+  it("the course sections are a named navigation with the current page marked, reachable with Tab", async () => {
     mockApi(instructorRoutes());
     renderApp("/courses/1/overview");
     const user = userEvent.setup();
-    const first = await screen.findByRole("tab", { name: "Class overview" });
+    const sections = await screen.findByRole("navigation", { name: "Instructor dashboard" });
+    const first = within(sections).getByRole("link", { name: "Class overview" });
+    expect(first).toHaveAttribute("aria-current", "page");
+    expect(within(sections).getByRole("link", { name: "Students" })).not.toHaveAttribute("aria-current");
     first.focus();
-    await user.keyboard("{ArrowRight}");
-    expect(screen.getByRole("tab", { name: "Students" })).toHaveFocus();
+    await user.tab();
+    expect(within(sections).getByRole("link", { name: "Students" })).toHaveFocus();
+  });
+
+  it("a section link opens the section and keeps a running chat mounted", async () => {
+    mockApi(studentRoutes());
+    renderApp("/courses/1/chat");
+    const user = userEvent.setup();
+    await user.type(await screen.findByLabelText("Your question"), "Draft that must survive");
+    const sections = screen.getByRole("navigation", { name: "Student dashboard" });
+    await user.click(within(sections).getByRole("link", { name: "My progress" }));
+    expect(within(sections).getByRole("link", { name: "My progress" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByLabelText("Your question")).not.toBeVisible();  // hidden, not unmounted
+    await user.click(within(sections).getByRole("link", { name: "Chat" }));
+    expect(screen.getByLabelText("Your question")).toHaveValue("Draft that must survive");
   });
 });
