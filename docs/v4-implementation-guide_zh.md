@@ -153,7 +153,7 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
   - 内部网络：`internal: true`，db 只在这里，api 和 worker 两边都接。
 - **端口**：只映射 443（80 只用来跳转）；db 和监控不映射到主机。
 - **vLLM**：设 API key；vLLM 主机的防火墙只允许应用主机访问；经过公网时用 HTTPS。
-- **本地开发**：把模型地址指向 Ollama 或任何 OpenAI 兼容地址即可。
+- **本地开发**：把 `VLLM_BASE_URL` 指向实验室的 vLLM，或你自己的任何 OpenAI 兼容服务即可。
 - **应用主机**：不需要 GPU。
 
 ### 4.3 组件
@@ -398,6 +398,7 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | Z18 | 仓库清理（审查 B5、第 7 节）：已合并分支、无用文件，过时文档移到 `docs/history/` | S8 | — | 仓库根目录、`docs/` | 审查列出的无用文件都已处理；链接仍然有效 |
 | Z19 | 答案里的课程来源（11/16 截界面图时发现）：证据步骤丢掉了课程检索的全部段落（主题是 `course:<id>`，问题的主题是模块代码或 `general`），答案没有来源 | S8 | — | `routing/evidence.py` | 本次请求所在课程的段落能进答案；别的课程的段落永远不能 |
 | Z20 | vLLM 上的结构草稿（11/16 截界面图时发现）：可信本地的 OpenAI 兼容连接收到 JSON schema，而不只是 `json_object`；第 2 层草稿可用 4,096 个输出 token；schema 只允许引用已接受的知识点；无效的前置知识点链接去掉，不再整份草稿作废 | S8 | Z6 | `llm/`、`instructor_ai/structure_drafts.py` | 知识点、检查题、迷思草稿在测试主机的 vLLM 上都能成功 |
+| Z22 | 部署默认的本地模型就是它的 vLLM（审查 A4、I9）：用 `VLLM_BASE_URL` 和 `VLLM_KEY` 取代 `OLLAMA_URL`（以及它指向团队内网的默认地址）；回答和 understand 两个本地客户端都走 OpenAI 兼容接口，并且是可信本地（关闭思考、按 JSON schema 输出）；可信本地 OpenAI 兼容服务的回答记为本地，不再记成云端；健康检查、v1 服务器测试、`setup_local.py` 和 E1/E3/E6 评估脚本都用同一台服务器 | S8 | Z17 | `core/config.py`、`llm/`、`admin/llm_server.py`、`eval/` | 只有 vLLM 的部署不用登记模型连接就能本地回答；除了 `ollama` 类型的模型连接，不再有 `OLLAMA_URL` |
 
 **落后时按这个顺序往后推**：Z12 → Z13 里的 Grafana 和告警 → `login_identity`。
 
