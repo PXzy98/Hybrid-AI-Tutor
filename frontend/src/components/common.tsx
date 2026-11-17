@@ -1,13 +1,11 @@
-import { Check, Moon, Sun, type LucideIcon } from "lucide-react";
+import { Check, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { ApiError } from "@/api/client";
 import { Alert } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/i18n";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
-import { useTheme } from "./theme";
 
 /** A failed request, shown with the server's English sentence (the codes below get a translated one). */
 export function ErrorNote({ error, id }: { error: unknown; id?: string }) {
@@ -118,18 +116,5 @@ export function StatusText({ children }: { children: ReactNode }) {
       <Check aria-hidden className="size-4 shrink-0" />
       <span>{children}</span>
     </p>
-  );
-}
-
-/** Switches between light and dark (the user menu also offers "system"). */
-export function ThemeToggle() {
-  const { t } = useI18n();
-  const [pref, setPref] = useTheme();
-  const dark = pref === "dark" || (pref === "system" && document.documentElement.classList.contains("dark"));
-  return (
-    <Button type="button" variant="ghost" size="icon" onClick={() => setPref(dark ? "light" : "dark")}
-            aria-label={t(dark ? "theme.light" : "theme.dark")}>
-      {dark ? <Sun aria-hidden /> : <Moon aria-hidden />}
-    </Button>
   );
 }

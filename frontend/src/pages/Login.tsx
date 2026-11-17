@@ -43,7 +43,7 @@ export default function Login() {
       <form onSubmit={submit} className="space-y-4" aria-labelledby="login-title">
         <div className="grid gap-1.5">
           <Label htmlFor="username">{t("login.username")}</Label>
-          <Input id="username" className="h-10" aria-describedby={error ? "login-error" : undefined} autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} required />
+          <Input id="username" className="h-10" aria-describedby={error ? "login-error" : undefined} autoComplete="username" autoCapitalize="off" autoCorrect="off" spellCheck={false} value={username} onChange={(e) => setUsername(e.target.value)} required />
         </div>
         <div className="grid gap-1.5">
           <Label htmlFor="password">{t("login.password")}</Label>

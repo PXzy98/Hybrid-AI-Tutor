@@ -4,6 +4,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 import { api, type Course } from "@/api/endpoints";
 import { useI18n } from "@/i18n";
+import { useFormat } from "@/lib/format";
 import type { MessageKey } from "@/i18n/en";
 import { cn } from "@/lib/utils";
 import { activeSection, sectionGroups } from "@/pages/sections";
@@ -19,6 +20,7 @@ export function GroupLabel({ children }: { children: string }) {
 /** The open course: New chat (students), its sections, its modules (the chat scope) and the student's conversations. */
 export default function CourseNav({ course, student, tab }: { course: Course; student: boolean; tab?: string }) {
   const { t } = useI18n();
+  const fmt = useFormat();
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
   const courseId = course.id;
@@ -86,7 +88,7 @@ export default function CourseNav({ course, student, tab }: { course: Course; st
                   <button key={c.conversation_id} type="button" className={itemClass(activeConversation === c.conversation_id)}
                           aria-current={activeConversation === c.conversation_id ? "true" : undefined}
                           onClick={() => open({ c: c.conversation_id })}>
-                    <span className="truncate">{new Date(c.last_at).toLocaleDateString()} · {t("nav.turns", { n: c.turns })}</span>
+                    <span className="truncate">{fmt.date(c.last_at)} · {t("nav.turns", { n: c.turns })}</span>
                   </button>
                 ))}
               </div>

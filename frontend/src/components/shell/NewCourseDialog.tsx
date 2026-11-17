@@ -48,7 +48,7 @@ export default function NewCourseDialog() {
             <DialogDescription>{t("course.newHint")}</DialogDescription>
           </DialogHeader>
           <div className="grid gap-1.5"><Label htmlFor="nc-code">{t("course.code")}</Label>
-            <Input id="nc-code" value={form.code} onChange={set("code")} required /></div>
+            <Input id="nc-code" autoCapitalize="off" autoCorrect="off" spellCheck={false} value={form.code} onChange={set("code")} required /></div>
           <div className="grid gap-1.5"><Label htmlFor="nc-title">{t("course.title")}</Label>
             <Input id="nc-title" value={form.title} onChange={set("title")} required /></div>
           <div className="grid gap-1.5"><Label htmlFor="nc-type">{t("course.type")}</Label>

@@ -69,7 +69,7 @@ function ModulesCard({ course }: { course: Course }) {
         </ul>
         <form className="grid gap-3 border-t pt-4 sm:grid-cols-[1fr_2fr]" onSubmit={(e: FormEvent) => { e.preventDefault(); create.mutate(); }} aria-label={t("content.addModule")}>
           <div className="grid gap-1.5"><Label htmlFor="mod-code">{t("content.moduleCode")}</Label>
-            <Input id="mod-code" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} required /></div>
+            <Input id="mod-code" autoCapitalize="off" autoCorrect="off" spellCheck={false} value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} required /></div>
           <div className="grid gap-1.5"><Label htmlFor="mod-title">{t("course.title")}</Label>
             <Input id="mod-title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required /></div>
           <div className="grid gap-1.5 sm:col-span-2"><Label htmlFor="mod-guideline">{t("content.guideline")}</Label>
@@ -139,7 +139,7 @@ function KcsCard({ course }: { course: Course }) {
               {LEVELS.map((l) => <option key={l} value={l}>{t(`band.${l}`)}</option>)}
             </Select></div>
           <div className="grid gap-1.5"><Label htmlFor="kc-code">{t("content.kcCode")}</Label>
-            <Input id="kc-code" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} required /></div>
+            <Input id="kc-code" autoCapitalize="off" autoCorrect="off" spellCheck={false} value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} required /></div>
           <div className="grid gap-1.5"><Label htmlFor="kc-name">{t("content.kcName")}</Label>
             <Input id="kc-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></div>
           <div className="grid gap-1.5 sm:col-span-2"><Label htmlFor="kc-def">{t("content.definition")}</Label>
@@ -189,7 +189,7 @@ function ItemsCard({ course }: { course: Course }) {
               {kcs.data?.map((k) => <option key={k.id} value={k.id}>{k.code} {k.name}</option>)}
             </Select></div>
           <div className="grid gap-1.5"><Label htmlFor="it-code">{t("content.itemCode")}</Label>
-            <Input id="it-code" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} required /></div>
+            <Input id="it-code" autoCapitalize="off" autoCorrect="off" spellCheck={false} value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} required /></div>
           <div className="grid gap-1.5 sm:col-span-2"><Label htmlFor="it-stem">{t("content.stem")}</Label>
             <Textarea id="it-stem" value={form.stem} onChange={(e) => setForm({ ...form, stem: e.target.value })} required /></div>
           {CHOICES.map((c) => (

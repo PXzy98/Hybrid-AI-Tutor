@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useI18n } from "@/i18n";
+import { useFormat } from "@/lib/format";
 
 /** Student quizzes: open quizzes are answered once; the result and the explanations show right after. */
 export default function Quizzes({ course }: { course: Course }) {
@@ -28,6 +29,7 @@ export default function Quizzes({ course }: { course: Course }) {
 
 function QuizCard({ course, quiz }: { course: Course; quiz: StudentQuiz }) {
   const { t } = useI18n();
+  const fmt = useFormat();
   const qc = useQueryClient();
   const questions = quiz.questions ?? [];
   const [answers, setAnswers] = useState<(number | null)[]>(() => questions.map(() => null));
@@ -49,8 +51,8 @@ function QuizCard({ course, quiz }: { course: Course; quiz: StudentQuiz }) {
           <Badge variant={quiz.open ? "success" : "secondary"}>{t(quiz.open ? "quiz.open" : "quiz.notOpen")}</Badge>
         </CardTitle>
         <CardDescription>
-          {quiz.opens_at && `${t("quiz.opens")} ${new Date(quiz.opens_at).toLocaleString()}`}
-          {quiz.closes_at && ` · ${t("quiz.closes")} ${new Date(quiz.closes_at).toLocaleString()}`}
+          {quiz.opens_at && `${t("quiz.opens")} ${fmt.dateTime(quiz.opens_at)}`}
+          {quiz.closes_at && ` · ${t("quiz.closes")} ${fmt.dateTime(quiz.closes_at)}`}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
