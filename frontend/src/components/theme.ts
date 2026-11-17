@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 
 export type ThemePref = "light" | "dark" | "system";
 const THEME_KEY = "tutor.theme";  // interface preference only
@@ -41,6 +41,14 @@ export function useTheme(): [ThemePref, (next: ThemePref) => void] {
     query.addEventListener?.("change", follow);
     return () => query.removeEventListener?.("change", follow);
   }, [pref]);
+  // a choice made in another tab
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === THEME_KEY || e.key === null) listeners.forEach((listener) => listener());
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
   const setPref = useCallback((next: ThemePref) => {
     try {
       if (next === "system") window.localStorage.removeItem(THEME_KEY);
@@ -52,4 +60,18 @@ export function useTheme(): [ThemePref, (next: ThemePref) => void] {
     listeners.forEach((listener) => listener());
   }, []);
   return [pref, setPref];
+}
+
+/** Whether the page is dark now (the choice, or the system setting when the choice is "system"). */
+export function useIsDark(): boolean {
+  const [pref] = useTheme();
+  const [systemIsDark, setSystemIsDark] = useState(systemDark);
+  useEffect(() => {
+    if (!window.matchMedia) return;
+    const query = window.matchMedia("(prefers-color-scheme: dark)");
+    const follow = () => setSystemIsDark(!!query.matches);
+    query.addEventListener?.("change", follow);
+    return () => query.removeEventListener?.("change", follow);
+  }, []);
+  return pref === "dark" || (pref === "system" && systemIsDark);
 }

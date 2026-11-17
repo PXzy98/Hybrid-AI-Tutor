@@ -67,14 +67,28 @@ export default function MessageList({ courseId, messages, partial, pending, load
   function jump() {
     atEnd.current = true;
     setAway(false);
-    endRef.current?.scrollIntoView?.({ behavior: "smooth", block: "end" });
+    const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    endRef.current?.scrollIntoView?.({ behavior: reduced ? "auto" : "smooth", block: "end" });
   }
+
+  // one polite announcement when an answer is complete; the conversation itself is not a live region
+  const [announcement, setAnnouncement] = useState("");
+  const announced = useRef<unknown>(null);
+  const last = messages[messages.length - 1];
+  useEffect(() => {
+    if (pending) setAnnouncement("");
+    else if (last?.role === "tutor" && last.reply !== announced.current) {
+      announced.current = last.reply;  // an error is announced by its own role=alert note
+      setAnnouncement(t("chat.answerReady"));
+    }
+  }, [pending, last, t]);
 
   const empty = messages.length === 0 && !loadingHistory;
 
   return (
     <div className="flex flex-col">
-      <section aria-label={t("chat.conversation")} aria-live="polite" className="flex flex-col gap-6 pb-6">
+      <section aria-label={t("chat.conversation")} className="flex flex-col gap-6 pb-6">
+        <div role="status" aria-live="polite" className="sr-only">{announcement}</div>
         {loadingHistory && <Loading variant="chat" />}
         <ErrorNote error={historyError} />
         {empty && <EmptyChat onSuggest={onSuggest} />}

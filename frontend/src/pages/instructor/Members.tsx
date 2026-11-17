@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useI18n } from "@/i18n";
+import { useFormat } from "@/lib/format";
 
 /** Members: invitation code, CSV import, co-instructors and the member list. */
 export default function Members({ course }: { course: Course }) {
@@ -74,6 +75,7 @@ export default function Members({ course }: { course: Course }) {
 
 function InviteCard({ course }: { course: Course }) {
   const { t } = useI18n();
+  const fmt = useFormat();
   const qc = useQueryClient();
   const invite = useQuery({ queryKey: ["invite", course.id], queryFn: () => api.invite(course.id) });
   const rotate = useMutation({
@@ -97,7 +99,7 @@ function InviteCard({ course }: { course: Course }) {
         {data && (
           <p className="text-muted-foreground">
             {t("invite.uses", { n: data.uses, max: data.max_uses ?? "∞" })}
-            {data.expires_at && ` · ${t(data.expired ? "invite.expired" : "invite.expires", { date: new Date(data.expires_at).toLocaleDateString() })}`}
+            {data.expires_at && ` · ${t(data.expired ? "invite.expired" : "invite.expires", { date: fmt.date(data.expires_at) })}`}
           </p>
         )}
         <Button type="button" variant="outline" onClick={() => rotate.mutate()} disabled={rotate.isPending}>

@@ -100,7 +100,7 @@ function StudentSurvey({ course, survey }: { course: Course; survey: SurveyData 
         <form className="space-y-5" onSubmit={(e: FormEvent) => { e.preventDefault(); if (complete) send.mutate(); }} aria-label={t("survey.title")}>
           {ITEMS.map((k) => (
             <div key={k} className="border-t pt-5 first:border-0 first:pt-0">
-              <fieldset role="radiogroup" aria-label={t(`survey.q.${k}` as MessageKey)} className="space-y-2">
+              <fieldset className="space-y-2">
                 <legend className="text-sm font-medium">{t(`survey.q.${k}` as MessageKey)}</legend>
                 <div className="max-w-md space-y-1.5">
                   <div className="grid grid-cols-5 gap-2 text-sm">

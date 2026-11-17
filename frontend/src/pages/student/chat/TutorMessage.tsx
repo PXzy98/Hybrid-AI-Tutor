@@ -35,7 +35,7 @@ function RouteLabel({ target }: { target: string }) {
   const local = target === "local";
   return (
     <Tooltip content={t(local ? "chat.localHint" : "chat.cloudHint")}>
-      <button type="button" className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      <button type="button" className="rounded-full outline-hidden focus-visible:ring-2 focus-visible:ring-ring">
         <Badge variant={local ? "success" : "info"} data-route={target}>
           {local ? <ShieldCheck aria-hidden /> : <Cloud aria-hidden />}
           {t(local ? "chat.local" : "chat.cloud")}

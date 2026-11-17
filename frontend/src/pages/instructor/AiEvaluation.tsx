@@ -81,7 +81,7 @@ function EvaluationDetail({ course, id }: { course: Course; id: number }) {
       <CardHeader><CardTitle className="flex items-center gap-2">#{e.id} <Badge variant="secondary">{t(`eval.status.${e.status}` as MessageKey)}</Badge></CardTitle></CardHeader>
       <CardContent className="space-y-4">
         {(e.status === "generating" || e.status === "running") && (
-          <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 aria-hidden className="size-4 animate-spin" />{t(e.status === "generating" ? "eval.generating" : "eval.running")}</p>
+          <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 aria-hidden className="size-4 animate-spin motion-reduce:animate-none" />{t(e.status === "generating" ? "eval.generating" : "eval.running")}</p>
         )}
         {e.status === "failed" && <Alert variant="destructive" role="alert">{t("eval.failed")}{e.error ? ` ${e.error}` : ""}</Alert>}
         {e.status === "review" && <ReviewForm course={course} evaluation={e} onChange={update} />}

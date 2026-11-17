@@ -56,7 +56,7 @@ export function LanguageSwitch() {
   return (
     <label className="flex items-center gap-1.5 text-sm text-muted-foreground">
       <span className="sr-only">{t("lang.label")}</span>
-      <select className="select-chevron h-8 appearance-none rounded-md border border-input bg-background py-1 pr-7 pl-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/30"
+      <select className="select-chevron h-8 appearance-none rounded-md border border-input bg-background py-1 pr-7 pl-2 text-sm text-foreground outline-hidden focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/30"
               value={lang} aria-label={t("lang.label")} onChange={(e) => setLang(e.target.value as Lang)}>
         {LANGS.map((l) => <option key={l.id} value={l.id} lang={l.id}>{l.label}</option>)}
       </select>

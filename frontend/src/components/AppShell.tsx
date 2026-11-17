@@ -105,7 +105,7 @@ export default function AppShell({ me }: { me: Me }) {
           )}
           {!showSidebar && <div className="ml-auto"><UserMenu me={me} compact /></div>}
         </header>
-        <main id="main" tabIndex={-1} className="min-h-0 flex-1 overflow-y-auto outline-none">
+        <main id="main" tabIndex={-1} className="min-h-0 flex-1 overflow-y-auto outline-hidden">
           <div className="mx-auto w-full max-w-6xl min-w-0 px-4 py-6 [overflow-wrap:anywhere] sm:px-6">
             <ErrorBoundary><Outlet /></ErrorBoundary>
           </div>

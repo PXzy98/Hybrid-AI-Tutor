@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useI18n } from "@/i18n";
+import { useFormat } from "@/lib/format";
 import type { MessageKey } from "@/i18n/en";
 
 /** "My progress": what the tutor knows about the student in this course (bands only), what the instructor
@@ -103,6 +104,7 @@ function PlanCard({ plan }: { plan: CourseProfile["plan"] }) {
 
 function VisibilityCard({ course, profile }: { course: Course; profile: CourseProfile }) {
   const { t } = useI18n();
+  const fmt = useFormat();
   const qc = useQueryClient();
   const v = profile.visibility;
   const change = useMutation({
@@ -126,7 +128,7 @@ function VisibilityCard({ course, profile }: { course: Course; profile: CoursePr
         </div>
         {v.mode === "B" && (
           <>
-            {v.visible_since && <p className="text-muted-foreground">{t("vis.since", { date: new Date(v.visible_since).toLocaleDateString() })}</p>}
+            {v.visible_since && <p className="text-muted-foreground">{t("vis.since", { date: fmt.date(v.visible_since) })}</p>}
             {!v.acknowledged && !v.opted_out && (
               <>
                 <Alert variant="warning" icon>{t("vis.ackText")}</Alert>

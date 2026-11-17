@@ -1,27 +1,26 @@
-import { lazy, Suspense, useId, type ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 import { useParams } from "react-router-dom";
 
 import type { Course } from "@/api/endpoints";
 import { roleIn, useCourses, useMe } from "@/auth";
 import { ErrorNote, Loading } from "@/components/common";
 import { useI18n } from "@/i18n";
+import AiAssistant from "./instructor/AiAssistant";
+import Content from "./instructor/Content";
+import EndOfTerm from "./instructor/EndOfTerm";
+import Materials from "./instructor/Materials";
+import Members from "./instructor/Members";
+import InstructorQuizzes from "./instructor/Quizzes";
+import Overview from "./instructor/Overview";
+import Settings from "./instructor/Settings";
+import Students from "./instructor/Students";
 import { activeSection } from "./sections";
-
-// Each page is its own chunk: a student never downloads the instructor pages.
-const AiAssistant = lazy(() => import("./instructor/AiAssistant"));
-const Content = lazy(() => import("./instructor/Content"));
-const EndOfTerm = lazy(() => import("./instructor/EndOfTerm"));
-const Materials = lazy(() => import("./instructor/Materials"));
-const Members = lazy(() => import("./instructor/Members"));
-const InstructorQuizzes = lazy(() => import("./instructor/Quizzes"));
-const Overview = lazy(() => import("./instructor/Overview"));
-const Settings = lazy(() => import("./instructor/Settings"));
-const Students = lazy(() => import("./instructor/Students"));
-const Survey = lazy(() => import("./Survey"));
-const Chat = lazy(() => import("./student/chat/Chat"));
-const StudentQuizzes = lazy(() => import("./student/Quizzes"));
-const Progress = lazy(() => import("./student/Progress"));
-const Start = lazy(() => import("./student/Start"));
+import Survey from "./Survey";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
+import Chat from "./student/chat/Chat";
+import StudentQuizzes from "./student/Quizzes";
+import Progress from "./student/Progress";
+import Start from "./student/Start";
 
 /** The course page: the student dashboard or the instructor dashboard, by the role the server reports. The sidebar
  *  links to the sections (pages/sections.ts); the h1 is in the top bar. */
@@ -67,6 +66,7 @@ function Dashboard({ course, student, tab }: { course: Course; student: boolean;
   const { t } = useI18n();
   const active = activeSection(student, tab);
   const headingId = useId();
+  useDocumentTitle(t(active.label), course.code);
   const chatActive = student && active.id === "chat";
   return (
     <>
@@ -74,13 +74,13 @@ function Dashboard({ course, student, tab }: { course: Course; student: boolean;
       {student && (
         <section aria-labelledby={chatActive ? headingId : undefined} hidden={!chatActive}>
           {chatActive && <h2 id={headingId} className="sr-only">{t("tab.chat")}</h2>}
-          <Suspense fallback={<Loading variant="list" />}><Chat course={course} /></Suspense>
+          <Chat course={course} />
         </section>
       )}
       {!chatActive && (
         <section key={active.id} aria-labelledby={headingId}>
           <h2 id={headingId} className="sr-only">{t(active.label)}</h2>
-          <Suspense fallback={<Loading variant="list" />}>{sectionNode(course, student, active.id)}</Suspense>
+          {sectionNode(course, student, active.id)}
         </section>
       )}
     </>

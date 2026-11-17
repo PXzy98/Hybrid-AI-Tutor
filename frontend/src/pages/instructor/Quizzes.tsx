@@ -15,6 +15,7 @@ import { Select } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/i18n";
+import { useFormat } from "@/lib/format";
 
 type View = { kind: "list" } | { kind: "edit"; id: number | null } | { kind: "results"; id: number };
 
@@ -39,6 +40,7 @@ export default function Quizzes({ course }: { course: Course }) {
 
 function QuizList({ course, onOpen }: { course: Course; onOpen: (v: View) => void }) {
   const { t } = useI18n();
+  const fmt = useFormat();
   const qc = useQueryClient();
   const quizzes = useQuery({ queryKey: ["quizzes", course.id], queryFn: () => api.quizzes(course.id) });
   const refresh = () => qc.invalidateQueries({ queryKey: ["quizzes", course.id] });
@@ -72,8 +74,8 @@ function QuizList({ course, onOpen }: { course: Course; onOpen: (v: View) => voi
                   </CardTitle>
                   <CardDescription>
                     {t("quiz.questionsN", { n: q.questions.length })} · {t("quiz.attemptsN", { n: q.attempts })}
-                    {q.opens_at && ` · ${t("quiz.opens")} ${new Date(q.opens_at).toLocaleString()}`}
-                    {q.closes_at && ` · ${t("quiz.closes")} ${new Date(q.closes_at).toLocaleString()}`}
+                    {q.opens_at && ` · ${t("quiz.opens")} ${fmt.dateTime(q.opens_at)}`}
+                    {q.closes_at && ` · ${t("quiz.closes")} ${fmt.dateTime(q.closes_at)}`}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-wrap gap-2">

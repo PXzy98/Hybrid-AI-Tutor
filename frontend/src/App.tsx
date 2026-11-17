@@ -26,7 +26,7 @@ function Guard() {
     return (
       <div aria-busy="true" className="flex h-dvh flex-col items-center justify-center gap-4">
         <BrandMark className="size-10" />
-        <Loader2 aria-hidden className="size-5 animate-spin text-muted-foreground" />
+        <Loader2 aria-hidden className="size-5 animate-spin motion-reduce:animate-none text-muted-foreground" />
         <span className="sr-only">{t("app.loading")}</span>
       </div>
     );

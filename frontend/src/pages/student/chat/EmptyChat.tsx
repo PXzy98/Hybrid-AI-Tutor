@@ -14,7 +14,7 @@ export default function EmptyChat({ onSuggest }: { onSuggest: (text: string) => 
       <div role="group" aria-label={t("chat.suggested")} className="mt-4 grid w-full gap-2 sm:grid-cols-3">
         {suggestions.map((s) => (
           <button key={s} type="button" onClick={() => onSuggest(s)}
-                  className="rounded-xl border bg-card p-3 text-left text-sm transition-colors outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring">
+                  className="rounded-xl border bg-card p-3 text-left text-sm transition-colors outline-hidden hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring">
             {s}
           </button>
         ))}

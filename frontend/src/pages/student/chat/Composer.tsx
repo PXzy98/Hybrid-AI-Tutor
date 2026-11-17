@@ -7,6 +7,8 @@ import { Tooltip } from "@/components/ui/tooltip";
 import { useI18n } from "@/i18n";
 
 const MAX_HEIGHT = 240;  // about 8 lines, then the field scrolls
+// browsers with `field-sizing: content` grow the field in CSS; the others are measured in JS
+const NATIVE_GROW = typeof CSS !== "undefined" && typeof CSS.supports === "function" && CSS.supports("field-sizing", "content");
 
 type Props = {
   ref?: Ref<HTMLTextAreaElement>;
@@ -19,7 +21,7 @@ type Props = {
   localOnly: boolean;
 };
 
-/** The floating question box. Enter sends, Shift+Enter makes a new line; nothing is sent during an IME composition.
+/** The floating question box. Enter sends, Shift+Enter makes a new line; nothing is sent during an IME composition (keyCode 229 covers Safari).
  *  While an answer runs the send button becomes Stop. */
 export default function Composer({ ref, value, onChange, onSubmit, onStop, pending, scopeLabel, localOnly }: Props) {
   const { t } = useI18n();
@@ -28,7 +30,7 @@ export default function Composer({ ref, value, onChange, onSubmit, onStop, pendi
   // grow with the text (no dependency): measure the content height after each change
   useLayoutEffect(() => {
     const el = field.current;
-    if (!el) return;
+    if (!el || NATIVE_GROW) return;
     el.style.height = "auto";
     if (el.scrollHeight) el.style.height = `${Math.min(el.scrollHeight, MAX_HEIGHT)}px`;
   }, [value]);
@@ -46,9 +48,10 @@ export default function Composer({ ref, value, onChange, onSubmit, onStop, pendi
         <label htmlFor="question" className="sr-only">{t("chat.question")}</label>
         <textarea id="question" ref={setRefs} rows={1} placeholder={t("chat.placeholder")} value={value}
                   onChange={(e) => onChange(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) onSubmit(e); }}
+                  onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing
+                      && e.nativeEvent.keyCode !== 229) onSubmit(e); }}  // Safari ends the composition before the Enter that confirms it
                   style={{ maxHeight: MAX_HEIGHT }}
-                  className="block w-full resize-none overflow-y-auto bg-transparent px-4 pt-3.5 pb-1 text-[0.9375rem] leading-7 outline-none placeholder:text-muted-foreground" />
+                  className="block w-full resize-none overflow-y-auto [field-sizing:content] bg-transparent px-4 pt-3.5 pb-1 text-[0.9375rem] leading-7 outline-hidden placeholder:text-muted-foreground" />
         <div className="flex items-center gap-2 px-3 pt-1 pb-2.5">
           <Badge variant="secondary" className="max-w-[60%] truncate font-normal">{scopeLabel}</Badge>
           <div className="ml-auto">

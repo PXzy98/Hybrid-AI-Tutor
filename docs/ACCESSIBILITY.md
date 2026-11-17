@@ -22,7 +22,7 @@ Not done: a test with a real screen reader (NVDA, VoiceOver) and an automated co
   Enter and Space work. No click-only handlers on non-interactive elements.
 - Focus is visible: shadcn components use `focus-visible:ring-2` with the `--ring` token (3.8:1 light, 7.0:1 dark
   against the page; form fields also turn their border to `--ring` with a 3 px ring); sidebar buttons and links have the same ring; native checkboxes, radios, file inputs and
-  selects keep the browser outline.
+  selects keep the browser outline. Components hide the default outline with `outline-hidden`, which keeps a transparent outline in forced-colors mode (Windows high contrast), so the ring stays visible there. A table that scrolls sideways is a focusable region (arrow keys scroll it).
 - Dialogs (new course, end of term, material delete, data delete, cloud confirmation) are Radix `Dialog`: focus is
   trapped, Escape closes, focus returns to the button that opened it (tested for the end-of-term dialog). A student's detail on the
   instructor's Students page opens in a sheet (a Radix dialog from the right, named after the student) with the same
@@ -43,14 +43,12 @@ Not done: a test with a real screen reader (NVDA, VoiceOver) and an automated co
   "Student dashboard" or "Instructor dashboard", modules, conversations, each named), `header` (top bar), `main`,
   and the disclaimer note.
 - Headings: one `h1` per page (the page, or the course code and title in the top bar on a course page). Each
-  course section is a `section` labelled by a visually hidden `h2` with the section name. Card titles are announced as level 3 headings (`role="heading" aria-level=3`).
+  course section is a `section` labelled by a visually hidden `h2` with the section name. Card titles are `h3` elements. Every page sets `document.title` as page, course code, PACT.
   The sidebar group labels are no longer headings.
 - Forms: every field has a visible `label` (or an `aria-label` where the label is the context, for example module
   titles in the course editor). Login, join and password errors are `role="alert"` and referenced from the fields
   with `aria-describedby` (and `aria-invalid`).
-- Live regions: the conversation is `aria-live="polite"`; the routing steps panel is `aria-live="off"` so the
-  progress updates are not announced one by one; status messages (saved, imported, plan saved, answers
-  submitted) are `role="status"`; errors are `role="alert"`.
+- Live regions: the conversation is not a live region (its timers would be read out); one visually hidden polite status says "Answer ready" once when an answer is complete. The elapsed time of a running answer is hidden from assistive technology. The routing steps panel is `aria-live="off"`; status messages (saved, imported, plan saved, answers submitted) are `role="status"`; errors are `role="alert"`.
 - Icons are `aria-hidden` when next to text; icon-only buttons have an `aria-label`.
 - The local/cloud label on an answer is text plus an icon (not colour alone); it is a button whose hint opens as a
   tooltip on hover and on keyboard focus. The chat's icon-only buttons (send, stop, copy, jump to the latest
