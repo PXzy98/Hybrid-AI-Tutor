@@ -396,6 +396,7 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | Z16 | 按学科回答（审查 B1、B2）：隐私配置决定系统提示词和检查器；非医学课程不再用健康教育提示词和医学安全检查 | S8 | Z7 | `prompts/`、`privacy/profiles/`、`pipeline/steps/verify.py` | 非医学课程的端到端测试验证提示词和检查器；E6 不变差 |
 | Z17 | 本地模型调用走网关（审查 B3）：understand、generalize 改写和 `llm_check` 用课程的可信本地连接，不再固定用 Ollama | S8 | Z6 | `llm/`、`pipeline/steps/` | 三处调用在 OpenAI 兼容服务（vLLM）上可用 |
 | Z18 | 仓库清理（审查 B5、第 7 节）：已合并分支、无用文件，过时文档移到 `docs/history/` | S8 | — | 仓库根目录、`docs/` | 审查列出的无用文件都已处理；链接仍然有效 |
+| Z20 | vLLM 上的结构草稿（11/16 截界面图时发现）：可信本地的 OpenAI 兼容连接收到 JSON schema，而不只是 `json_object`；第 2 层草稿可用 4,096 个输出 token；schema 只允许引用已接受的知识点；无效的前置知识点链接去掉，不再整份草稿作废 | S8 | Z6 | `llm/`、`instructor_ai/structure_drafts.py` | 知识点、检查题、迷思草稿在测试主机的 vLLM 上都能成功 |
 
 **落后时按这个顺序往后推**：Z12 → Z13 里的 Grafana 和告警 → `login_identity`。
 
@@ -496,6 +497,7 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | T9 | T | `scripts/build_demo.py`：通过 API v2 用课程包建演示课程 | #69 | 审查 |
 | S8（接进系统） | S | 分层模型注册为 `course` 并设为默认；更新从存储的估计值开始，前置知识点的上限只在显示时生效；三种模型都跑了全部测试 | #87 | 审查 |
 | T13（搜索） | T | 三种部署模式的网页搜索、`route` 之后的 `web_search` 步骤、按课程类型的白名单、SearXNG 的 Compose profile | #88 | 审查 |
+| Z20（结构草稿） | S | 4,096 个输出 token，schema 里知识点名字是枚举，无效的前置知识点链接去掉（以前整份草稿作废） | 见 PR | 审查 |
 | T11（无障碍部分）、T12（手册） | T | 无障碍自查和 axe 测试；学生手册和教师手册 | #74、#73 | 审查 |
 
 从 2026-11-11 起，按同样的决定，Z 也用这种方式做 7.2 和 7.3 里 S 和 T 剩下的任务（每个任务一个 PR，开 PR 时加到上表）。还没开始的（2026-11-15）：网页搜索的评估（T13，G1-106）；视频（T10）；改名（T11，等项目名）；路由、前端和网页搜索的交接说明（T12）；CI 扫描报告的 `transformers` 5、`react-router` 7 和 `vite`/`vitest` 升级。
