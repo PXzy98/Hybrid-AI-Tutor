@@ -100,7 +100,7 @@ function MisconceptionDialog({ course, misconception }: { course: Course; miscon
             </Select></div>
           <div className="grid gap-1.5"><Label htmlFor={`${p}-code`}>{t("misc.code")}</Label>
             <Input id={`${p}-code`} value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })}
-                   required readOnly={!!misconception} pattern="[A-Za-z0-9._\-]{1,64}" /></div>
+                   autoCapitalize="off" autoCorrect="off" spellCheck={false} required readOnly={!!misconception} pattern="[A-Za-z0-9._\-]{1,64}" /></div>
           <div className="grid gap-1.5"><Label htmlFor={`${p}-statement`}>{t("misc.statement")}</Label>
             <Textarea id={`${p}-statement`} value={form.statement} onChange={(e) => setForm({ ...form, statement: e.target.value })} required maxLength={2000} /></div>
           <div className="grid gap-1.5"><Label htmlFor={`${p}-correction`}>{t("misc.correction")}</Label>

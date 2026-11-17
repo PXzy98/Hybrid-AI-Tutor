@@ -46,7 +46,7 @@ export default function Join() {
       <form onSubmit={submit} className="space-y-4" aria-labelledby="join-title">
         <div className="grid gap-1.5">
           <Label htmlFor="join-code">{t("join.code")}</Label>
-          <Input id="join-code" className="h-10" aria-describedby={error ? "join-error" : undefined} aria-invalid={error ? true : undefined} value={code} onChange={(e) => setCode(e.target.value)} autoComplete="off" required />
+          <Input id="join-code" className="h-10" aria-describedby={error ? "join-error" : undefined} aria-invalid={error ? true : undefined} value={code} onChange={(e) => setCode(e.target.value)} autoComplete="off" autoCapitalize="off" autoCorrect="off" spellCheck={false} required />
         </div>
         {!me && (
           <>
@@ -60,7 +60,7 @@ export default function Join() {
             </div>
             <div className="grid gap-1.5">
               <Label htmlFor="join-password">{t("join.password")}</Label>
-              <Input id="join-password" className="h-10" type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <Input id="join-password" className="h-10" type="password" autoComplete="new-password" minLength={10} value={password} onChange={(e) => setPassword(e.target.value)} required />
               <p className="text-xs text-muted-foreground">{t("pw.hint", { n: 10 })}</p>
             </div>
           </>

@@ -69,7 +69,7 @@ function CourseInfo({ course }: { course: Course }) {
       <CardHeader><CardTitle>{t("course.info")}</CardTitle></CardHeader>
       <CardContent>
         <form className="grid gap-4 sm:grid-cols-3" onSubmit={(e) => { e.preventDefault(); save.mutate(); }}>
-          <div className="grid gap-1.5"><Label htmlFor="ci-code">{t("course.code")}</Label><Input id="ci-code" value={form.code} onChange={set("code")} required /></div>
+          <div className="grid gap-1.5"><Label htmlFor="ci-code">{t("course.code")}</Label><Input id="ci-code" autoCapitalize="off" autoCorrect="off" spellCheck={false} value={form.code} onChange={set("code")} required /></div>
           <div className="grid gap-1.5"><Label htmlFor="ci-title">{t("course.title")}</Label><Input id="ci-title" value={form.title} onChange={set("title")} required /></div>
           <div className="grid gap-1.5"><Label htmlFor="ci-term">{t("course.term")}</Label><Input id="ci-term" value={form.term_label} onChange={set("term_label")} /></div>
           <div className="sm:col-span-3 space-y-2">
