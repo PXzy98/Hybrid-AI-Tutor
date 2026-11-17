@@ -399,6 +399,7 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | Z19 | 答案里的课程来源（11/16 截界面图时发现）：证据步骤丢掉了课程检索的全部段落（主题是 `course:<id>`，问题的主题是模块代码或 `general`），答案没有来源 | S8 | — | `routing/evidence.py` | 本次请求所在课程的段落能进答案；别的课程的段落永远不能 |
 | Z20 | vLLM 上的结构草稿（11/16 截界面图时发现）：可信本地的 OpenAI 兼容连接收到 JSON schema，而不只是 `json_object`；第 2 层草稿可用 4,096 个输出 token；schema 只允许引用已接受的知识点；无效的前置知识点链接去掉，不再整份草稿作废 | S8 | Z6 | `llm/`、`instructor_ai/structure_drafts.py` | 知识点、检查题、迷思草稿在测试主机的 vLLM 上都能成功 |
 | Z21 | 文档更新到当前状态（2026-11-17）：v3 的实施日志移到 `docs/history/`；v3 设计和隐私报告加状态说明；HANDOVER、OPERATIONS、MODEL_CONNECTIONS、ACCESSIBILITY 更新到 2026-11-17 | S8 | — | `docs/`、`AGENTS.md`、`README.md` | `docs/` 里 `history/` 以外的文档不把过去的状态写成现状 |
+| Z22 | v4 还缺的隐私过滤测试（2026-11-17 发现）：ECE 规则冻结之后再写、再标注的 ECE 留出集（现有 47 题是对着规则写的）；`life_science` 和 `general` 配置的测试集；E6 给 v4 新类型（`SECRET`、`INTERNAL_ADDRESS`、`REPO_URL`，现在只有 ECE 集测）打分；新的医学留出集，测现在规则的泄漏率（v4 只证明了 E6 没有变差） | S8 | Z11 | `eval/privacy-filter/` | 每个新集在 `eval/privacy-filter/results/` 有报告；由此改的规则重跑 E6 |
 
 **落后时按这个顺序往后推**：Z12 → Z13 里的 Grafana 和告警 → `login_identity`。
 
@@ -440,6 +441,7 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | T12 | **进行中**：学生使用手册（[STUDENT_MANUAL.md](STUDENT_MANUAL.md)）和教师使用手册（[INSTRUCTOR_MANUAL.md](INSTRUCTOR_MANUAL.md)，含 course-structure.md 3.4 关于助教的说明）已完成；路由、前端、网络搜索的交接文档未完成 | S8 | — | `docs/` | 新教师照着能用 |
 | T13 | 网络搜索（G1-92）+ 评估（G1-106）。**搜索已完成**（#88；见 [WEB_SEARCH.md](WEB_SEARCH.md)：部署时选择 `off`、外部 `api` 或自建 `searxng`）；评估还没做：搜索 API、白名单、清洗结果、作为资料交给生成步骤；查询只用 `search_query()`；出网只走统一的出网函数 | S7 | Z11、Z6 | 新的 `backend/app/websearch/`、`config.yaml` 的 pipeline | E4 审计：搜索请求里没有个人信息；评估报告 |
 | T14 | 清除 `docs/` 以外 Markdown 里的中文（规则 14）：按第 7 节用英文重写 `TODO.md`；把仓库根目录的中文版入门文档挪到 `docs/GETTING_STARTED_zh.md` 并修好链接；删掉 `README.md`、`GETTING_STARTED.md` 里的中文行。`frontend/src/test/Routing.test.tsx` 里的中文测试文本保留（它测试的是中文输入） | S5 | — | 上述文件 | `docs/` 以外的 Markdown 里没有中文 |
+| T15 | 分学科的路由（2026-11-17 发现）：路由分类头只用 `data/routing/seed.jsonl` 的 500 道医学题训练，所有课程共用一个阈值；ECE 课上较难的问题没有来源（证据被判为不需要，或能力判断在检索之前就送云端）。把其他学科的问题加进训练数据（像 T5 一样按课程划分），或按课程类型定阈值；同时决定 T4 的候选权重（`eval/routing-ece/results/candidate/`）是否采用 | S8 | T4 | `backend/app/routing/`、`data/routing/`、`eval/routing-ece/` | T4 的 ECE/CS 和医学路由评估不变差；较难的 ECE 问题有课程来源 |
 
 ### 7.3a 前端 v2（任务 F1）
 

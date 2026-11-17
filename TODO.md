@@ -32,6 +32,8 @@ Reflection #2 (ethics, individual) 11/18 · video 11/25 · Design Day 12/3 · fi
 | Z13, Z6, Z2 | Deploy on the test host with monitoring; vLLM load test; local speed of the 9B model | Z | waits for server access |
 | Z13 | Choose the alert receiver | Z | waits for the client |
 | S12 | Self-review and handover checklist | S | handover notes in `docs/history/s-tasks/` |
+| T15 | Routing by subject: the routing heads are trained on medical questions only; harder ECE questions get no sources | T | not started |
+| Z22 | Privacy filter tests: held-out ECE set, `life_science` and `general` sets, E6 scores for the v4 types, a fresh held-out medical set | Z | not started |
 
 Not this term: targeted material for single students (only the learning plan with notes now). Tests and demos
 use the eight open course packs in `data/demo_courses/`.
