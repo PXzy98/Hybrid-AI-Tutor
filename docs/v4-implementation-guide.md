@@ -458,6 +458,7 @@ data); users build against the fakes without waiting for the real implementation
 | Z16 | Answers by subject (audit B1, B2): the privacy profile chooses the system prompt and the checkers; non-medical courses get no health-education prompt or medical safety check | S8 | Z7 | `prompts/`, `privacy/profiles/`, `pipeline/steps/verify.py` | an end-to-end test of a non-medical course asserts its prompt and checkers; E6 not worse |
 | Z17 | Local model calls through the gateway (audit B3): understand, the generalize rewrite and `llm_check` use the course's trusted-local connection, not a fixed Ollama client | S8 | Z6 | `llm/`, `pipeline/steps/` | the three calls work against an OpenAI-compatible server (vLLM) |
 | Z18 | Repository cleanup (audit B5, section 7): merged branches, unused files, out-of-date documents to `docs/history/` | S8 | — | repository root, `docs/` | no unused file left from the audit list; links still resolve |
+| Z19 | Course sources in answers (found while taking the UI screenshots of 2026-11-16): the evidence step dropped every passage of the course retriever (topic `course:<id>`, the question's topic is a module code or `general`), so answers had no sources | S8 | — | `routing/evidence.py` | passages of the request's course reach the answer; another course's never do |
 | Z20 | Structured drafts on vLLM (found while taking the UI screenshots of 2026-11-16): a trusted local OpenAI-compatible connection gets the JSON schema, not only `json_object`; tier-2 drafts may use 4,096 output tokens; KC references limited to the accepted KCs in the schema; an invalid prerequisite link is dropped, not the whole draft | S8 | Z6 | `llm/`, `instructor_ai/structure_drafts.py` | KC, check item and misconception drafts succeed against the test host's vLLM |
 
 **If behind, postpone in this order**: Z12 → Grafana and alerts in Z13 → `login_identity`.
@@ -562,6 +563,7 @@ owner reviews and approves the PR, and the area stays the owner's afterwards (ru
 | T9 | T | `scripts/build_demo.py`: the demo courses from the packs through API v2 | #69 | review |
 | S8 (in the app) | S | the layered model registered as `course` and made the default; updates start from the stored estimate, the prerequisite cap applies when shown; tests with all three models | #87 | review |
 | T13 (search) | T | web search with three deployment modes, the `web_search` step after `route`, allow-lists per course type, SearXNG Compose profile | #88 | review |
+| Z19 (evidence) | T | passages of the request's course count as on topic in `assess_evidence` and `select_passages` | see PR | review |
 | Z20 (structure drafts) | S | 4,096 output tokens, KC names as an enum in the schema, invalid prerequisite links dropped (was: the draft was rejected) | see PR | review |
 | T11 (accessibility part), T12 (manuals) | T | accessibility self-check and axe tests; student and instructor manuals | #74, #73 | review |
 
