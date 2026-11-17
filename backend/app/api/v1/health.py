@@ -9,7 +9,7 @@ from app.api.deps import ServicesDep
 router = APIRouter()
 
 
-# the local model server (vLLM since Z22); the v1 names `ollama` and `OllamaStatus` stay (v1 is frozen)
+# the local model server (vLLM since Z24); the v1 names `ollama` and `OllamaStatus` stay (v1 is frozen)
 class OllamaStatus(BaseModel):
     reachable: bool
     model: str
