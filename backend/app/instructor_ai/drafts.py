@@ -58,7 +58,7 @@ class DraftGateway(Protocol):
 
     async def complete(self, role: str, messages: list[dict[str, str]], *,
                        settings: object, trust_required: str, json_schema: dict | None = None,
-                       stream: bool = False) -> ModelResult: ...
+                       stream: bool = False, max_tokens: int | None = None) -> ModelResult: ...
 
 
 _THINK = re.compile(r"<think>.*?</think>", re.S | re.I)

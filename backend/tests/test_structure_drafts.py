@@ -14,8 +14,9 @@ class FakeGateway:
         self.calls = []
 
     async def complete(self, role, messages, *, settings, trust_required, json_schema=None,
-                       stream=False):
+                       stream=False, max_tokens=None):
         self.calls.append((role, trust_required, stream, messages))
+        self.max_tokens = max_tokens
         return type("Response", (), {"text": json.dumps({"items": self.items})})()
 
 
@@ -50,6 +51,7 @@ async def test_generate_draft_only_with_trusted_local_gateway(kind):
     assert result.cited_sources == ["course/101/_course/guide.md"]
     assert gateway.calls[0][:3] == ("local", "trusted_local", False)
     assert "Quartzzyme" in gateway.calls[0][3][1]["content"]
+    assert gateway.max_tokens == 4096  # up to 12 items do not fit in the connection's default limit
 
 
 @pytest.mark.asyncio
@@ -101,11 +103,14 @@ async def test_invalid_draft_kind_rejected():
 
 
 @pytest.mark.asyncio
-async def test_unknown_prerequisite_and_unknown_kc_are_rejected():
-    kc = dict(_item("kcs"), prerequisite_names=["Nonexistent KC"])
-    with pytest.raises(DraftError, match="unknown"):
-        await generate_structure_draft(course_id=101, kind="kcs", passages=[_chunk()],
-                                       gateway=FakeGateway([kc]), settings=None)
+async def test_unknown_or_own_prerequisites_are_dropped_and_unknown_kc_is_rejected():
+    """A prerequisite link is a suggestion: an invalid one is dropped (a real model writes some on a course
+    without KCs), the draft survives. A check item for an unknown KC is still rejected."""
+    second = dict(_item("kcs"), name="Quartzzyme Detail", prerequisite_names=["Quartzzyme Overview"])
+    kc = dict(_item("kcs"), prerequisite_names=["Nonexistent KC", "Quartzzyme Overview"])
+    draft = await generate_structure_draft(course_id=101, kind="kcs", passages=[_chunk()],
+                                           gateway=FakeGateway([kc, second]), settings=None)
+    assert [i.prerequisite_names for i in draft.items] == [[], ["Quartzzyme Overview"]]
     with pytest.raises(DraftError, match="unknown"):
         await generate_structure_draft(course_id=101, kind="check_items", passages=[_chunk()],
                                        gateway=FakeGateway([_item("check_items")]), settings=None,
@@ -158,3 +163,16 @@ async def test_accepted_kc_names_are_given_to_the_model():
     request = json.loads(gateway.calls[0][3][1]["content"])
     assert request["accepted_kc_names"] == ["Quartzzyme Overview", "Zephyrlens Basics"]
     assert "accepted_kc_names" in request["kc_rule"]
+
+
+def test_output_schema_limits_kc_references_to_the_accepted_kcs():
+    """A server that follows the schema (vLLM) then cannot make up a KC name; KC drafts stay free."""
+    from app.instructor_ai.structure_drafts import response_schema
+
+    known = ["Quartzzyme Overview", "Quartzzyme Detail"]
+    check = response_schema("check_items", known)["$defs"]["CheckItemDraft"]["properties"]["kc_names"]
+    assert check["items"]["enum"] == known
+    wrong = response_schema("misconceptions", known)["$defs"]["MisconceptionDraft"]["properties"]["kc_name"]
+    assert wrong["enum"] == known
+    assert "enum" not in json.dumps(response_schema("kcs", known))
+    assert "enum" not in json.dumps(response_schema("misconceptions"))  # nothing accepted yet: free

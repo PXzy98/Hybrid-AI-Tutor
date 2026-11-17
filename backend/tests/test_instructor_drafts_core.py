@@ -14,7 +14,7 @@ class StubGateway:
         self.calls = []
 
     async def complete(self, role, messages, *, settings, trust_required, json_schema=None,
-                       stream=False):
+                       stream=False, max_tokens=None):
         self.calls.append((role, messages, settings, trust_required, stream))
         return type("Response", (), {"text": json.dumps(self.reply)})()
 

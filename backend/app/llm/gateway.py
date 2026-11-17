@@ -30,7 +30,8 @@ class TrustViolation(Exception):
 class ModelGateway(Protocol):
     async def complete(self, role: EndpointRole, messages: list[Message], *, settings: EffectiveSettings,
                        trust_required: TrustRequired, json_schema: dict | None = None,
-                       stream: bool = False) -> LLMResult | AsyncIterator[str]: ...
+                       stream: bool = False, max_tokens: int | None = None) -> LLMResult | AsyncIterator[str]:
+        """`max_tokens` overrides the connection's output limit for this call (long structured drafts)."""
 
 
 class FakeGateway:
@@ -41,7 +42,7 @@ class FakeGateway:
 
     async def complete(self, role: EndpointRole, messages: list[Message], *, settings: EffectiveSettings,
                        trust_required: TrustRequired, json_schema: dict | None = None,
-                       stream: bool = False) -> LLMResult | AsyncIterator[str]:
+                       stream: bool = False, max_tokens: int | None = None) -> LLMResult | AsyncIterator[str]:
         external = role not in self.trusted  # decided by the connection's trust level, never by the role name
         if trust_required == "trusted_local" and external:
             raise TrustViolation(f"'{role}' is not a trusted local connection")
@@ -50,7 +51,7 @@ class FakeGateway:
         client = self.clients.get(role)
         if client is None:
             raise LLMUnavailable(f"no model connection for '{role}'")
-        result = await client.complete(messages, json_schema=json_schema)
+        result = await client.complete(messages, json_schema=json_schema, max_tokens=max_tokens)
         if not stream:
             return result
 
@@ -124,8 +125,8 @@ class Gateway:
     # ------------------------------------------------------------------------------------- calling
     async def complete(self, role: EndpointRole, messages: list[Message], *,
                        settings: EffectiveSettings | None, trust_required: TrustRequired,
-                       json_schema: dict | None = None,
-                       stream: bool = False) -> LLMResult | AsyncIterator[str]:
+                       json_schema: dict | None = None, stream: bool = False,
+                       max_tokens: int | None = None) -> LLMResult | AsyncIterator[str]:
         client, trust, key = self.resolve(role, settings)
         external = trust != "trusted_local"
         if trust_required == "trusted_local" and external:
@@ -137,16 +138,17 @@ class Gateway:
         backend = "local" if trust == "trusted_local" else "cloud"  # by trust, not by wire protocol
         if not stream:
             async with self._slot(key):
-                result = await client.complete(messages, json_schema=json_schema)
+                result = await client.complete(messages, json_schema=json_schema, max_tokens=max_tokens)
             return result.model_copy(update={"backend": backend})
 
         async def tokens() -> AsyncIterator[str]:
+            options = {"json_schema": json_schema, "max_tokens": max_tokens}
             async with self._slot(key):
                 if hasattr(client, "stream"):
-                    async for piece in client.stream(messages, json_schema=json_schema):
+                    async for piece in client.stream(messages, **options):
                         yield piece
                 else:
-                    yield (await client.complete(messages, json_schema=json_schema)).text
+                    yield (await client.complete(messages, **options)).text
 
         return tokens()
 
