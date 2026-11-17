@@ -12,6 +12,7 @@ import numpy as np
 
 from app.core.config import RoutingConfig
 from app.core.schemas import Chunk, EvidenceAssessment, RouteInput, SemanticAnalysis
+from app.platform import course_scope
 from app.routing.models import pair_scores
 
 log = logging.getLogger("app.routing")
@@ -63,6 +64,16 @@ def source_usable(chunk, fresh: bool, cfg: RoutingConfig) -> bool:
     return True
 
 
+def same_topic(c: Chunk, x: RouteInput) -> bool:
+    """The passage belongs to the question's topic. The course retriever tags its passages
+    `course:<id>` and has already limited them to the request's course and module, so a passage of the
+    current course counts as on topic."""
+    if c.topic == x.topic:
+        return True
+    scope = course_scope.current()
+    return scope is not None and c.topic == f"course:{scope.course_id}"
+
+
 def assess_evidence(x: RouteInput, analysis: SemanticAnalysis, cfg: RoutingConfig) -> EvidenceAssessment:
     count = len(x.passages)
     required = analysis.requires_evidence
@@ -77,7 +88,7 @@ def assess_evidence(x: RouteInput, analysis: SemanticAnalysis, cfg: RoutingConfi
     candidates = [
         (i, w)
         for i, c in enumerate(x.passages)
-        if c.topic == x.topic and source_usable(c, analysis.requires_fresh_evidence, cfg)
+        if same_topic(c, x) and source_usable(c, analysis.requires_fresh_evidence, cfg)
         for w in windows(c.text)
     ]
     if not candidates:
@@ -157,4 +168,4 @@ def select_passages(x: RouteInput, evidence: EvidenceAssessment | None, cfg: Rou
     if evidence is not None and evidence.checked:
         return [x.passages[i] for i in evidence.relevant_indices]
     return [c.model_copy(update={"metadata": {**c.metadata, "evidence_check": "unverified"}})
-            for c in x.passages if c.topic == x.topic and source_usable(c, False, cfg)]
+            for c in x.passages if same_topic(c, x) and source_usable(c, False, cfg)]
