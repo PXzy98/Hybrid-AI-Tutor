@@ -16,6 +16,7 @@ import Settings from "./instructor/Settings";
 import Students from "./instructor/Students";
 import { activeSection } from "./sections";
 import Survey from "./Survey";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import Chat from "./student/chat/Chat";
 import StudentQuizzes from "./student/Quizzes";
 import Progress from "./student/Progress";
@@ -65,6 +66,7 @@ function Dashboard({ course, student, tab }: { course: Course; student: boolean;
   const { t } = useI18n();
   const active = activeSection(student, tab);
   const headingId = useId();
+  useDocumentTitle(t(active.label), course.code);
   const chatActive = student && active.id === "chat";
   return (
     <>

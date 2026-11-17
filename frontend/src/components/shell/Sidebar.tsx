@@ -30,7 +30,7 @@ export default function Sidebar({ me, current, student, tab, onCollapse }: Props
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex h-12 shrink-0 items-center gap-2 px-3">
-        <Link to="/courses" className="flex min-w-0 items-center gap-2 rounded-md font-semibold outline-none focus-visible:ring-2 focus-visible:ring-ring">
+        <Link to="/courses" className="flex min-w-0 items-center gap-2 rounded-md font-semibold outline-hidden focus-visible:ring-2 focus-visible:ring-ring">
           <BrandMark className="size-6" /><span className="truncate">{t("app.name")}</span>
         </Link>
         {onCollapse && (
@@ -49,7 +49,7 @@ export default function Sidebar({ me, current, student, tab, onCollapse }: Props
             <>
               <label htmlFor="course-switch" className="sr-only">{t("nav.courses")}</label>
               <select id="course-switch" value={current.id} onChange={(e) => navigate(`/courses/${e.target.value}`)}
-                      className="select-chevron h-9 w-full appearance-none truncate rounded-md border border-input bg-background py-1 pr-8 pl-2.5 text-sm font-medium outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/30">
+                      className="select-chevron h-9 w-full appearance-none truncate rounded-md border border-input bg-background py-1 pr-8 pl-2.5 text-sm font-medium outline-hidden focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/30">
                 {courses.data?.map((c) => <option key={c.id} value={c.id}>{c.code} · {c.title}</option>)}
               </select>
             </>

@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { activeSection, sectionGroups } from "@/pages/sections";
 
 export const itemClass = (active: boolean) =>
-  cn("flex h-9 w-full min-w-0 items-center gap-2.5 rounded-md px-2.5 text-left text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring [&_svg]:size-4 [&_svg]:shrink-0",
+  cn("flex h-9 w-full min-w-0 items-center gap-2.5 rounded-md px-2.5 text-left text-sm outline-hidden transition-colors focus-visible:ring-2 focus-visible:ring-ring [&_svg]:size-4 [&_svg]:shrink-0",
     active ? "bg-primary-soft font-medium text-primary-soft-foreground" : "text-foreground/80 hover:bg-accent hover:text-foreground");
 
 export function GroupLabel({ children }: { children: string }) {
@@ -40,7 +40,7 @@ export default function CourseNav({ course, student, tab }: { course: Course; st
     <>
       {student && (
         <button type="button" onClick={() => open({ c: null })}
-                className="mb-1 flex h-9 w-full items-center gap-2.5 rounded-md border bg-background px-2.5 text-sm font-medium shadow-xs outline-none transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring">
+                className="mb-1 flex h-9 w-full items-center gap-2.5 rounded-md border bg-background px-2.5 text-sm font-medium shadow-xs outline-hidden transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring">
           <SquarePen aria-hidden className="size-4" />{t("nav.newChat")}
         </button>
       )}

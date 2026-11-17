@@ -26,7 +26,7 @@ function SheetContent({ className, children, side = "left", onOpenAutoFocus, onC
         {...props}>
         {children}
         <DialogPrimitive.Close aria-label={t("dialog.close")}
-          className="absolute top-2.5 right-2.5 inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring">
+          className="absolute top-2.5 right-2.5 inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors outline-hidden hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring">
           <X aria-hidden className="size-4" />
         </DialogPrimitive.Close>
       </DialogPrimitive.Content>

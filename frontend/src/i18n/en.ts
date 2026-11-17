@@ -134,6 +134,7 @@ export const en = {
   "chat.empty": "Ask anything about this course.",
   "chat.englishOnly": "Course content and answers are in English for now. Please ask in English: the privacy filter only recognizes English.",
   "chat.thinking": "The tutor is thinking…",
+  "chat.answerReady": "Answer ready",
   "chat.suggested": "Suggested questions",
   "chat.suggest1": "Summarize the key ideas of this module",
   "chat.suggest2": "What should I study first?",

@@ -36,7 +36,7 @@ export default function UserMenu({ me, compact = false }: { me: Me; compact?: bo
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className={cn("flex min-w-0 items-center gap-2.5 rounded-md text-left text-sm outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring data-[state=open]:bg-accent",
+        className={cn("flex min-w-0 items-center gap-2.5 rounded-md text-left text-sm outline-hidden hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring data-[state=open]:bg-accent",
           compact ? "h-9 px-1.5" : "h-11 w-full px-2")}>
         <span aria-hidden className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary-soft text-xs font-semibold text-primary-soft-foreground">
           {initials(me.display_name)}

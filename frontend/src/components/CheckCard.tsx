@@ -39,10 +39,10 @@ export default function CheckCard({ courseId, item, onAnswered }: Props) {
       }}
       aria-describedby={`${id}-hint`}
     >
-      <fieldset disabled={!!result || answer.isPending}>
+      <fieldset aria-describedby={`${id}-stem`} disabled={!!result || answer.isPending}>
         <legend className="mb-2 text-xs font-medium text-muted-foreground">{t("check.legend")}</legend>
         <p id={`${id}-stem`} className="mb-3 text-[0.9375rem]">{item.stem}</p>
-        <div role="radiogroup" aria-labelledby={`${id}-stem`} className="space-y-2">
+        <div className="space-y-2">
           {options.map(([key, text]) => {
             const isKey = result?.correct_choice === key;
             const isWrongChoice = result && choice === key && !result.correct;

@@ -161,7 +161,7 @@ describe("end-of-term survey", () => {
     const user = userEvent.setup();
     const submit = await screen.findByRole("button", { name: "Submit survey" });
     expect(submit).toBeDisabled();
-    for (const group of screen.getAllByRole("radiogroup")) await user.click(within(group).getByLabelText("4"));
+    for (const group of screen.getAllByRole("group")) await user.click(within(group).getByLabelText("4"));
     expect(submit).toBeEnabled();
     await user.click(submit);
     expect(await screen.findByText(/anonymous answers were saved/)).toBeInTheDocument();

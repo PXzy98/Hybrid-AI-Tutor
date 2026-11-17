@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useI18n } from "@/i18n";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 const MIN_LENGTH = 10;
 
@@ -18,6 +19,7 @@ export default function ChangePassword() {
   const navigate = useNavigate();
   const resetSession = useResetSession();
   const { t } = useI18n();
+  useDocumentTitle(t("pw.title"));
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [repeat, setRepeat] = useState("");

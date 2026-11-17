@@ -2,9 +2,15 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-function Table({ className, ...props }: React.ComponentProps<"table">) {
+// The wide table scrolls sideways inside its container, so the container takes focus (a keyboard user can scroll it
+// with the arrow keys); with a `label` it is also a named region.
+function Table({ className, label, ...props }: React.ComponentProps<"table"> & { label?: string }) {
   return (
-    <div className="relative w-full overflow-x-auto rounded-lg border">
+    <div
+      tabIndex={0}
+      {...(label ? { role: "region", "aria-label": label } : {})}
+      className="relative w-full overflow-x-auto rounded-lg border focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
+    >
       <table data-slot="table" className={cn("w-full caption-bottom text-sm [overflow-wrap:normal] [word-break:normal]", className)} {...props} />
     </div>
   );

@@ -6,6 +6,7 @@ import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/i18n";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { useTheme } from "./theme";
 
 /** A failed request, shown with the server's English sentence (the codes below get a translated one). */
@@ -26,6 +27,8 @@ export function ErrorNote({ error, id }: { error: unknown; id?: string }) {
 export function PageHeader({ title, description, actions, level = 2 }:
   { title: ReactNode; description?: ReactNode; actions?: ReactNode; level?: 1 | 2 }) {
   const Heading = level === 1 ? "h1" : "h2";
+  // a course section sets its own title, with the course code, in the course page
+  useDocumentTitle(level === 1 && typeof title === "string" ? title : undefined);
   return (
     <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
       <div className="min-w-0 space-y-1">

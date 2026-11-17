@@ -48,7 +48,7 @@ export default function Composer({ ref, value, onChange, onSubmit, onStop, pendi
                   onChange={(e) => onChange(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) onSubmit(e); }}
                   style={{ maxHeight: MAX_HEIGHT }}
-                  className="block w-full resize-none overflow-y-auto bg-transparent px-4 pt-3.5 pb-1 text-[0.9375rem] leading-7 outline-none placeholder:text-muted-foreground" />
+                  className="block w-full resize-none overflow-y-auto bg-transparent px-4 pt-3.5 pb-1 text-[0.9375rem] leading-7 outline-hidden placeholder:text-muted-foreground" />
         <div className="flex items-center gap-2 px-3 pt-1 pb-2.5">
           <Badge variant="secondary" className="max-w-[60%] truncate font-normal">{scopeLabel}</Badge>
           <div className="ml-auto">

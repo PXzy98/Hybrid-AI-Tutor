@@ -134,6 +134,7 @@ export const fr: Messages = {
   "chat.empty": "Posez n’importe quelle question sur ce cours.",
   "chat.englishOnly": "Posez vos questions en anglais : le contenu du cours et les réponses sont en anglais pour l’instant, et le filtre de confidentialité ne reconnaît que l’anglais.",
   "chat.thinking": "Le tuteur réfléchit…",
+  "chat.answerReady": "Réponse prête",
   "chat.suggested": "Questions suggérées",
   "chat.suggest1": "Résume les idées clés de ce module",
   "chat.suggest2": "Que devrais-je étudier en premier ?",
