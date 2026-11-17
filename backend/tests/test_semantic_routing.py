@@ -372,6 +372,28 @@ def test_missing_evidence_models_keep_the_retrieved_passages_unverified(monkeypa
     assert kept[0].metadata["evidence_check"] == "unverified"
 
 
+def test_course_passages_of_the_current_course_are_on_topic(monkeypatch):
+    """The course retriever tags passages `course:<id>`; the question's topic is a module code or "general".
+    Passages of the request's course are evidence; another course's passages never are."""
+    from app.platform import course_scope
+
+    monkeypatch.setattr(
+        "app.routing.evidence.pair_scores", lambda name, pairs, cfg: np.array([0.9 for _ in pairs])
+    )
+    own = chunk().model_copy(update={"topic": "course:7"})
+    other = chunk(text="Another course's text about blood pressure.").model_copy(update={"topic": "course:8"})
+    x = input_for(passages=[own, other])
+    scope = course_scope.CourseScope(course_id=7, content=None, learner=None, retriever=None, sessions=None,
+                                     modules={})
+    assert assess_evidence(x, analysis(), RoutingConfig()).status == "insufficient"  # no scope: none on topic
+    with course_scope.use(scope):
+        r = assess_evidence(x, analysis(), RoutingConfig())
+        assert r.status == "sufficient" and r.accepted_indices == [0]
+        assert [c.text for c in select_passages(x, r, RoutingConfig())] == [own.text]
+        unverified = select_passages(x, None, RoutingConfig())  # evidence models skipped
+        assert [c.text for c in unverified] == [own.text]
+
+
 def test_sources_rejected_by_the_freshness_check_are_not_used_as_unverified():
     a = analysis(requires_fresh_evidence=True)
     x = input_for(passages=[chunk()])  # no verified_current metadata: fails the freshness check
