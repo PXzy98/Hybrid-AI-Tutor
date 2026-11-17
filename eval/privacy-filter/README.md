@@ -17,7 +17,7 @@ which upgrade is worth it? All data is fictional.
 | `ece_cases.jsonl`, `ece.py` | engineering courses (task Z11): 47 fictional ECE questions (22 positive: fake keys and tokens, also inside JSON and Python dictionaries, lab addresses, repository URLs, names and numbers; 25 negative: course terms) → `results/ece/report.md`, `general` vs `ece` profile |
 
 ```
-.venv\Scripts\python eval\privacy-filter\run.py                       # main set, all configurations (~10 min with Ollama)
+.venv\Scripts\python eval\privacy-filter\run.py                       # main set, all configurations (~10 min with the local model, VLLM_BASE_URL)
 .venv\Scripts\python eval\privacy-filter\run.py --fast                # rules only, ~1 min
 .venv\Scripts\python eval\privacy-filter\run.py --beta --cases eval\privacy-filter\holdout4.jsonl --out eval\privacy-filter\results\beta_holdout4   # Beta configurations (results/beta.md)
 .venv\Scripts\python eval\privacy-filter\run.py --cases eval\privacy-filter\holdout2.jsonl --out eval\privacy-filter\results\holdout_test

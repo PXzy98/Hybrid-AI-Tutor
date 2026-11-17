@@ -670,7 +670,7 @@ export const fr: Messages = {
   "models.key": "Clé API",
   "models.kindLabel": "Type",
   "models.kind.ollama": "Ollama",
-  "models.kind.openai_compat": "API compatible OpenAI",
+  "models.kind.openai_compat": "API compatible OpenAI (vLLM)",
   "models.trust.trusted_local": "Local de confiance",
   "models.trust.external": "Externe",
   "models.trustLocalHint": "Peut recevoir le texte original des étudiants et les profils d’apprenants. Uniquement pour un service que vous contrôlez.",

@@ -10,7 +10,7 @@ each push, and a **full mode** against the real servers, run on request.
 | `understand-tagging/` | **E1** Can the local model tag questions? | `run.py [--model M] [--repeat N]` | — | `results/report.md` |
 | `learner-sim/` | **E2** Does BKT beat the rule method? | `run.py` (~3 min, no LLM) | `run.py --smoke` | `results/report.md` + SVG charts |
 | `personalization/` | **E3** Does personalization fit better without losing accuracy? | `run.py` (~40 min with local models) | `run.py --smoke` | `results/report.md`, `abbas_sample.csv` |
-| `privacy-filter/` | **E6** Does the privacy filter find the PII in student questions? Benchmark vs Presidio, upgrades (trf, GLiNER, local LLM), ablation, held-out sets, answer quality after redaction | `run.py` (~10 min with Ollama; `--fast` ~1 min), `exposure.py`, `utility.py`; see its README | `run.py --smoke` | `results/report.md`, `results/holdout_test/report.md`, `results/exposure.md`, `results/utility.md` |
+| `privacy-filter/` | **E6** Does the privacy filter find the PII in student questions? Benchmark vs Presidio, upgrades (trf, GLiNER, local LLM), ablation, held-out sets, answer quality after redaction | `run.py` (~10 min with the local model; `--fast` ~1 min), `exposure.py`, `utility.py`; see its README | `run.py --smoke` | `results/report.md`, `results/holdout_test/report.md`, `results/exposure.md`, `results/utility.md` |
 | `privacy-audit/` | **E4** Does any profile or identity data reach the cloud? `--e6`: the E6 questions end to end, incl. "no personal health question reaches the cloud" | `run.py`, `run.py --e6` | `run.py --smoke` (exit 1 on any leak) | `results/report.md`, `results/e6/report.md` |
 | `routing-ece/` | **T4** How do the shipped routers (lr, svm) route questions of the ECE and computer science packs? Labelled questions in `data/routing/ece_cs_questions.jsonl`; accuracy, confusion, cloud share per pack and type; in-memory retraining experiment | `run.py` (~1 min, no model, no network; local encoder) | - | `results/report.md`, `results/metrics.json`, `results/candidate/` |
 | `course-rag-packs/` | **S11** Does the course index find the right file for student questions on the open course packs (medical science, life science, ECE, computer science)? | `run.py` (~5 min for eight packs, no model, no network; needs the unpacked packs) | `run.py --smoke` (~6 min, not in CI: needs the packs) | `results/report.md`, `results/metrics.json` |
@@ -22,8 +22,8 @@ each push, and a **full mode** against the real servers, run on request.
 .venv\Scripts\python eval\personalization\run.py
 ```
 
-Every harness takes `--out <folder>` (default: its own `results/`). The full runs of E1, E3 and E4 need the Ollama
-server (`OLLAMA_URL` in `.env`); E2 needs nothing.
+Every harness takes `--out <folder>` (default: its own `results/`). The full runs of E1, E3 and E4 need the local
+model server (vLLM: `VLLM_BASE_URL`, `VLLM_KEY` in `.env`); E2 needs nothing.
 
 ## E2 — `learner-sim/`
 
@@ -43,8 +43,8 @@ check answers. Each asks the 20 questions in `questions.jsonl` twice: personaliz
 (`learner.personalize: false`). A blind pairwise judge compares the two answers in random A/B order.
 
 - Judge: any OpenAI-compatible API. Set `JUDGE_BASE_URL`, `JUDGE_MODEL`, `JUDGE_API_KEY`; the default is the
-  Ollama server's OpenAI endpoint (`<OLLAMA_URL>/v1`) with `gemma4:e4b`, a different model from the one that
-  writes the answers. The judge only sees fictional personas.
+  local vLLM (`VLLM_BASE_URL`, `VLLM_KEY`) with `JUDGE_MODEL` (default `gemma4:e4b`, which that server must
+  serve), a different model from the one that writes the answers. The judge only sees fictional personas.
 - `abbas_sample.csv`: 30 blind pairs for Dr. Abbas, with empty rating columns. `abbas_key.csv` says which side
   was personalized; keep it away from the rater.
 - Options: `--questions N`, `--personas novice,advanced`, `--judge-model`, `--seed`.

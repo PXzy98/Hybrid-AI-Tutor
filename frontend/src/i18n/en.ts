@@ -670,7 +670,7 @@ export const en = {
   "models.key": "API key",
   "models.kindLabel": "Type",
   "models.kind.ollama": "Ollama",
-  "models.kind.openai_compat": "OpenAI-compatible API",
+  "models.kind.openai_compat": "OpenAI-compatible API (vLLM)",
   "models.trust.trusted_local": "Trusted local",
   "models.trust.external": "External",
   "models.trustLocalHint": "May receive original student text and learner profiles. Only for a service you control.",

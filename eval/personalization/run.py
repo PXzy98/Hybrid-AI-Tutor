@@ -192,8 +192,12 @@ def main(argv: list[str] | None = None) -> int:
         if a.smoke:
             judge = FakeJudge()
         else:
-            base_url = a.judge_base_url or f"{services.settings.ollama_url.rstrip('/')}/v1"
-            judge = LLMJudge(base_url, a.judge_model, os.environ.get("JUDGE_API_KEY", "ollama"))
+            s = services.settings
+            base_url = a.judge_base_url or s.vllm_base_url
+            if not base_url:
+                raise SystemExit("set JUDGE_BASE_URL or VLLM_BASE_URL for the judge")
+            vllm_key = s.vllm_key.get_secret_value() if s.vllm_key else "none"
+            judge = LLMJudge(base_url.rstrip("/"), a.judge_model, os.environ.get("JUDGE_API_KEY", vllm_key))
         by_key = {p.key: p for p in personas}
         prompts = []
         for pr in pairs:

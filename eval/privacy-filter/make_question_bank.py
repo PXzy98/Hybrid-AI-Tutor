@@ -15,6 +15,7 @@ import httpx
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parents[1] / "backend"))
+sys.path.insert(0, str(HERE.parents[1] / "eval" / "common"))
 from app.core.config import get_settings  # noqa: E402
 
 TOPICS = ["high blood pressure", "type 2 diabetes", "asthma", "migraine", "pneumonia"]
@@ -26,14 +27,14 @@ BAD = re.compile(r"\d|@|\b(?:I|my|me|mine)\b|\b(?:Dr|Mr|Mrs|Ms)\.?\s", re.I)
 
 
 def main() -> None:
-    s = get_settings()
+    from local_model import chat
+
+    s, http = get_settings(), httpx.Client(timeout=300)
     bank = {}
     for topic in TOPICS:
-        r = httpx.post(f"{s.ollama_url}/api/chat", timeout=300, json={
-            "model": s.llm.local.model, "stream": False, "think": False,
-            "options": {"temperature": 0.9, "seed": 6},
-            "messages": [{"role": "user", "content": PROMPT.format(topic=topic)}]})
-        lines = [re.sub(r"^[-*•\s]+", "", ln).strip() for ln in r.json()["message"]["content"].splitlines()]
+        text = chat(http, s, [{"role": "user", "content": PROMPT.format(topic=topic)}], temperature=0.9,
+                    seed=6) or ""
+        lines = [re.sub(r"^[-*•\s]+", "", ln).strip() for ln in text.splitlines()]
         keep = [ln for ln in lines if 8 <= len(ln) <= 160 and ln.endswith("?") and not BAD.search(ln)]
         bank[topic] = list(dict.fromkeys(keep))
         print(f"{topic}: {len(bank[topic])} kept of {len(lines)}")

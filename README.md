@@ -17,7 +17,7 @@ What it does (v4):
   it (visibility mode B; students can opt out), learning plans, AI drafts of course content, local versus cloud
   evaluation, end of term (export, then delete the course's student data).
 - **One Docker Compose stack** (Caddy, FastAPI, worker, PostgreSQL, optional monitoring); the local model
-  (vLLM or Ollama) runs separately and is reached by URL.
+  (vLLM) runs separately and is reached by URL.
 
 ## Start here
 
@@ -37,10 +37,10 @@ What it does (v4):
 
 ## Quick start (Docker)
 
-Requirements: Docker with Compose v2, and a local model server (vLLM or Ollama) the course controls.
+Requirements: Docker with Compose v2, and a local model server (vLLM) the course controls.
 
 ```bash
-cp .env.example .env    # set POSTGRES_PASSWORD, OLLAMA_URL, INSTRUCTOR_USERNAME, INSTRUCTOR_INITIAL_PASSWORD
+cp .env.example .env    # set POSTGRES_PASSWORD, VLLM_BASE_URL, VLLM_KEY, INSTRUCTOR_USERNAME, INSTRUCTOR_INITIAL_PASSWORD
 docker compose up -d --build
 ```
 
@@ -113,7 +113,7 @@ cd ..\frontend
 npm run build; npm test
 ```
 
-Tests run offline; the few that need the local model server or a cloud key are marked (`-m ollama`,
+Tests run offline; the few that need the local model server or a cloud key are marked (`-m local_model`,
 `-m cloud`). Before using the course packs: `python scripts/fetch_open_courses.py unpack` (never commit the
 unpacked folders).
 

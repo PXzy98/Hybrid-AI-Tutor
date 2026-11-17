@@ -38,15 +38,16 @@ def valid_password(password, username, minimum=10):
     )
 
 
-def env_text(username, password, ollama_model, db_password=None):
+def env_text(username, password, model, db_password=None, vllm_url="http://127.0.0.1:8001/v1", vllm_key=""):
     """Quote values as data; passwords are never interpolated into shell commands."""
     if not re.fullmatch(r"[a-z0-9._-]{3,32}", username) or not valid_password(password, username):
         raise ValueError("Use a username and a different password of at least 10 characters.")
     db_password = db_password or secrets.token_urlsafe(24)  # PostgreSQL of `docker compose up -d db`
     values = {
-        "OLLAMA_URL": "http://127.0.0.1:11434",
-        "LLM__LOCAL__MODEL": ollama_model,
-        "LLM__UNDERSTAND__MODEL": ollama_model,
+        # the local model: an OpenAI-compatible server (vLLM) on this machine or the lab's GPU host
+        "VLLM_BASE_URL": vllm_url, "VLLM_KEY": vllm_key,
+        "LLM__LOCAL__MODEL": model,
+        "LLM__UNDERSTAND__MODEL": model,
         "CLOUD_BASE_URL": "https://api.openai.com/v1",
         "CLOUD_API_KEY": "", "CLOUD_MODEL": "",
         "INSTRUCTOR_USERNAME": username,
@@ -81,10 +82,12 @@ def initialize_env():
             print("Passwords do not match.")
             continue
         break
-    model = input("Ollama model [qwen3.5:9b-q4_K_M]: ").strip() or "qwen3.5:9b-q4_K_M"
+    vllm_url = input("vLLM API root [http://127.0.0.1:8001/v1]: ").strip() or "http://127.0.0.1:8001/v1"
+    vllm_key = getpass.getpass("vLLM API key (empty if the server has none): ").strip()
+    model = input("Model name the server lists [Qwen3.5-9B]: ").strip() or "Qwen3.5-9B"
     # Exclusive creation also prevents overwriting a concurrently created config.
     with path.open("x", encoding="utf-8", newline="\n") as file:
-        file.write(env_text(username, password, model))
+        file.write(env_text(username, password, model, vllm_url=vllm_url, vllm_key=vllm_key))
     print("Created local .env. The first login requires a password change.", flush=True)
 
 

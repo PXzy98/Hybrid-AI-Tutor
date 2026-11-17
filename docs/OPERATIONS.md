@@ -14,8 +14,8 @@ For whoever deploys and runs the tutor. It links to the detailed documents inste
 | `worker` | background jobs and the live settings switch | nothing (health check only) |
 | `db` | PostgreSQL 16 | `api` and `worker` only (internal network) |
 
-**Not in the stack**: the local model server (Ollama or vLLM). It runs on a machine that the course controls and
-is reached by URL (`OLLAMA_URL`, or a model connection marked trusted local). Original student text and learner
+**Not in the stack**: the local model server (vLLM). It runs on a machine that the course controls and is
+reached by URL (`VLLM_BASE_URL` with `VLLM_KEY`, or a model connection marked trusted local). Original student text and learner
 profiles go only to such a connection (guide rule 2).
 
 Volumes: `db-data` (database), `tutor-data` (uploaded materials and indexes), `caddy-data` (certificates).
@@ -24,7 +24,8 @@ Volumes: `db-data` (database), `tutor-data` (uploaded materials and indexes), `c
 
 - **Host**: Docker with Compose v2; ports 80 and 443 reachable from the internet, and a DNS name pointing to the
   host (Caddy obtains the certificate itself).
-- **Local model**: an Ollama or vLLM server the course controls, reachable from the host.
+- **Local model**: a vLLM server the course controls, reachable from the host, serving the model under the
+  name of `llm.local.model` (`--served-model-name Qwen3.5-9B`) and protected by `--api-key`.
 - **`.env`**: copy `.env.example`. The file is git-ignored; keys and passwords live only there (rule 6).
 
 | Variable | Needed | Notes |
@@ -34,7 +35,8 @@ Volumes: `db-data` (database), `tutor-data` (uploaded materials and indexes), `c
 | `AUTH__COOKIE_SECURE=true` | production | session cookie only over HTTPS |
 | `INSTRUCTOR_USERNAME`, `INSTRUCTOR_INITIAL_PASSWORD` | first start | creates the first account (an **admin**), which must change its password at first login; remove both afterwards |
 | `SETTINGS_ENCRYPTION_KEY` | before anyone saves a model connection with an API key | Fernet key; **keep a copy**: without it stored API keys cannot be read and the api refuses to start |
-| `OLLAMA_URL`, `LLM__LOCAL__MODEL` | yes | the local model server and model |
+| `VLLM_BASE_URL`, `VLLM_KEY` | yes | the local model server: its OpenAI-compatible API root ending in `/v1`, and its `--api-key`; without the URL no local answers |
+| `LLM__LOCAL__MODEL`, `LLM__UNDERSTAND__MODEL` | optional | the model name the server lists under `/models` (default `Qwen3.5-9B`) |
 | `CLOUD_BASE_URL`, `CLOUD_API_KEY`, `CLOUD_MODEL` | optional | an external model; leave the key empty for local-only |
 | `SPACY_MODEL` | optional | `en_core_web_lg` (default) for production |
 | `WEBSEARCH__PROVIDER`, `OPENAI_API_KEY`, `TAVILY_API_KEY`, `SEARXNG_SECRET` | optional | web search for cloud answers: `openai` (default, with `OPENAI_API_KEY`), `api` (with `TAVILY_API_KEY`), `searxng` (no key; the secret and `--profile searxng`) or `off`; [WEB_SEARCH.md](WEB_SEARCH.md) |

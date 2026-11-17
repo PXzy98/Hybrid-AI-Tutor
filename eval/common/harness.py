@@ -4,7 +4,7 @@ The app runs in-process (FastAPI TestClient) against its own temporary PostgreSQ
 the server of TEST_DATABASE_URL and dropped afterwards), so the harnesses never touch the application
 database. Configuration goes through SECTION__FIELD environment variables, exactly as an operator
 would set them. `fake=True` (smoke mode, CI) replaces the local models by scripted fakes; otherwise the real
-Ollama server from OLLAMA_URL / .env is used.
+local model server from VLLM_BASE_URL / .env (vLLM) is used.
 """
 import json
 import logging
@@ -88,7 +88,7 @@ class Harness:
             "CONTENT__SEED_STATUS": "active",
             "PRIVACY__SPACY_MODEL": os.environ.get("EVAL_SPACY_MODEL", "en_core_web_sm"),
             "INSTRUCTOR_USERNAME": "", "INSTRUCTOR_INITIAL_PASSWORD": "",
-            **({"OLLAMA_URL": "http://127.0.0.1:9"} if fake else {}),
+            **({"VLLM_BASE_URL": "http://127.0.0.1:9/v1"} if fake else {}),
             **(env or {}),
         }
         self.fake = fake

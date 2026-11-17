@@ -129,7 +129,7 @@ def make_client(use_config, monkeypatch: pytest.MonkeyPatch):
     from app.main import create_app
 
     def _make(overrides: dict | None = None):
-        monkeypatch.setenv("OLLAMA_URL", "http://127.0.0.1:9")  # closed port: health check fails fast
+        monkeypatch.setenv("VLLM_BASE_URL", "http://127.0.0.1:9/v1")  # closed port: health check fails fast
         use_config(overrides)
         return csrf_client(create_app())
 

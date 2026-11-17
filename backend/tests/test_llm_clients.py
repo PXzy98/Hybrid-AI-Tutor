@@ -150,6 +150,40 @@ def test_trusted_local_connections_switch_thinking_off():
     assert not build_client(row("external"), None)._extra
     assert build_client(row("trusted_local"), None).schema_output
     assert not build_client(row("external"), None).schema_output
+    assert build_client(row("trusted_local"), None).backend == "local"
+    assert build_client(row("external"), None).backend == "cloud"
+
+
+async def test_the_deployment_local_model_is_its_vllm(use_config, monkeypatch):
+    """VLLM_BASE_URL / VLLM_KEY: both local clients (answers and understand) are OpenAI-compatible, trusted
+    local (thinking off, the JSON schema, answers reported as local) and send the key."""
+    from app.llm.factory import build_llm_clients
+
+    monkeypatch.setenv("VLLM_BASE_URL", "http://10.0.0.5:8000/v1/")
+    monkeypatch.setenv("VLLM_KEY", "fictional-key")
+    local, _, understand = build_llm_clients(use_config())
+    for client in (local, understand):
+        assert isinstance(client, OpenAICompatClient)
+        assert client._args["base_url"] == "http://10.0.0.5:8000/v1"
+        assert client._args["api_key"] == "fictional-key"
+        assert client._extra and client.schema_output and client.backend == "local"
+    assert local.model == "Qwen3.5-9B" and understand.temperature == 0.0
+    fake = FakeOpenAI(reply="Local answer.")
+    local._injected = fake
+    assert (await local.complete(MSGS)).backend == "local"
+
+
+async def test_without_vllm_url_the_local_model_is_unavailable(use_config, monkeypatch):
+    from app.llm.factory import NoLocalServer, build_llm_clients
+
+    monkeypatch.setenv("VLLM_BASE_URL", "")
+    local, _, understand = build_llm_clients(use_config())
+    assert isinstance(local, NoLocalServer) and isinstance(understand, NoLocalServer)
+    with pytest.raises(LLMUnavailable, match="VLLM_BASE_URL"):
+        await local.complete(MSGS)
+    with pytest.raises(LLMUnavailable):
+        async for _ in local.stream(MSGS):
+            pass
 
 
 async def test_self_hosted_server_gets_the_json_schema():
@@ -186,10 +220,12 @@ async def test_openai_compat_reasoning_used_the_whole_budget(caplog):
     assert res.text == "Half an ans" and "cut off" in caplog.text
 
 
-@pytest.mark.ollama
-async def test_real_ollama_smoke():
-    """Run with: python -m pytest -m ollama  (needs the GPU server)."""
+@pytest.mark.local_model
+async def test_real_local_model_smoke():
+    """Run with: python -m pytest -m local_model  (needs the vLLM server of VLLM_BASE_URL)."""
+    from app.llm.factory import build_local_client
+
     s = get_settings()
-    client = OllamaClient(s.ollama_url, s.llm.local.model, max_tokens=64)
+    client = build_local_client(s, s.llm.local.model, temperature=0.0, timeout_s=60, max_tokens=64)
     res = await client.complete([{"role": "user", "content": "Reply with exactly one word: hello"}])
     assert res.text and res.backend == "local" and res.completion_tokens

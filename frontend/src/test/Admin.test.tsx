@@ -12,7 +12,7 @@ const staff = [
   { account_id: 2, username: "ida@example.test", email: "ida@example.test", display_name: "Ida Instructor", role: "instructor", active: true, must_change_password: false, last_login_at: null },
 ];
 const settings = { values: { weak_evidence: true, level_basic_below: 0.4, level_advanced_above: 0.8, level_hysteresis: 0.05, default_routing_method: "lr",
-  local_llm_url: "http://localhost:11434", local_llm_model: "fictional-model", enabled_course_types: ["ece"], default_local_endpoint_id: null, default_cloud_endpoint_id: null },
+  local_llm_url: "http://localhost:8001/v1", local_llm_model: "fictional-model", enabled_course_types: ["ece"], default_local_endpoint_id: null, default_cloud_endpoint_id: null },
   version: 3, apply_state: "applied" };
 const endpoint = { id: 4, course_id: null, name: "Lab server", kind: "openai_compat", base_url: "https://models.example.test/v1", model: "fictional-large",
   trust: "external", api_key_last4: "4321", last_test_ok_at: null };
@@ -149,13 +149,13 @@ describe("system administration", () => {
     const dialog = await screen.findByRole("dialog");
     expect(within(dialog).queryByLabelText(/I control this service/)).not.toBeInTheDocument();
     await user.type(within(dialog).getByLabelText("Name"), "Local box");
-    await user.type(within(dialog).getByLabelText("Address (URL)"), "http://10.0.0.5:11434");
+    await user.type(within(dialog).getByLabelText("Address (URL)"), "http://10.0.0.5:8000/v1");
     await user.type(within(dialog).getByLabelText("Model"), "fictional-small");
     await user.selectOptions(within(dialog).getByLabelText("Trust level"), "trusted_local");
     await user.click(within(dialog).getByLabelText(/I control this service/));
     await user.click(within(dialog).getByRole("button", { name: "Save" }));
     expect(await within(dialog).findByRole("alert")).toHaveTextContent("connection test failed");
-    expect(calls.find((c) => c.method === "POST")!.body).toMatchObject({ trust: "trusted_local", confirm_controlled: true, kind: "ollama" });
+    expect(calls.find((c) => c.method === "POST")!.body).toMatchObject({ trust: "trusted_local", confirm_controlled: true, kind: "openai_compat" });
   });
 });
 

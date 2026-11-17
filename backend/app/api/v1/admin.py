@@ -81,9 +81,10 @@ def put_config(body: RuntimeConfig, user: Instructor, request: Request):
 
 
 @router.post("/llm-server/test", response_model=ServerStatus)
-async def test_llm_server(body: ServerTest, _: Instructor):
+async def test_llm_server(body: ServerTest, _: Instructor, services: ServicesDep):
     """Is a local model server reachable, and does it have the model? Reads only its model list (G1-94)."""
-    return await check_server(body.url, body.model)
+    key = services.settings.vllm_key
+    return await check_server(body.url, body.model, key.get_secret_value() if key else None)
 
 
 @router.get("/class-summary", response_model=ClassSummary)

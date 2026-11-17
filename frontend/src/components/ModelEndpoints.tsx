@@ -83,7 +83,7 @@ export default function ModelEndpoints({ courseId }: { courseId: number | null }
 function EndpointDialog({ courseId, endpoint }: { courseId: number | null; endpoint?: ModelEndpoint }) {
   const { t } = useI18n();
   const qc = useQueryClient();
-  const blank = { name: "", kind: "ollama" as ModelEndpoint["kind"], base_url: "", model: "", trust: "external" as ModelEndpoint["trust"], api_key: "", confirm_controlled: false };
+  const blank = { name: "", kind: "openai_compat" as ModelEndpoint["kind"], base_url: "", model: "", trust: "external" as ModelEndpoint["trust"], api_key: "", confirm_controlled: false };
   const initial = endpoint ? { ...blank, name: endpoint.name, kind: endpoint.kind, base_url: endpoint.base_url, model: endpoint.model, trust: endpoint.trust } : blank;
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(initial);
@@ -122,8 +122,8 @@ function EndpointDialog({ courseId, endpoint }: { courseId: number | null; endpo
             <Input id={`${p}-name`} value={form.name} onChange={set("name")} required maxLength={100} /></div>
           <div className="grid gap-1.5"><Label htmlFor={`${p}-kind`}>{t("models.kindLabel")}</Label>
             <Select id={`${p}-kind`} value={form.kind} onChange={set("kind")}>
-              <option value="ollama">{t("models.kind.ollama")}</option>
               <option value="openai_compat">{t("models.kind.openai_compat")}</option>
+              <option value="ollama">{t("models.kind.ollama")}</option>
             </Select></div>
           <div className="grid gap-1.5"><Label htmlFor={`${p}-url`}>{t("models.url")}</Label>
             <Input id={`${p}-url`} type="url" value={form.base_url} onChange={set("base_url")} required maxLength={300} /></div>

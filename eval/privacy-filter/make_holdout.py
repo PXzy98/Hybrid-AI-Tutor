@@ -19,7 +19,6 @@ import httpx
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parents[1] / "backend"))
-from app.core.config import get_settings  # noqa: E402
 
 COMMON = ("You write test data for a privacy filter in a university health-course tutor (topics: blood pressure, "
           "diabetes, asthma, migraine, pneumonia). Students type short, informal messages, sometimes with typos. "
@@ -74,9 +73,11 @@ def main(argv=None) -> int:
     ap.add_argument("--model", default="gemma4:e4b")
     ap.add_argument("--seed", type=int, default=61)
     ap.add_argument("--native", action="store_true", help="v3: Ollama API with thinking off")
+    ap.add_argument("--ollama-url", default="http://127.0.0.1:11434",
+                    help="the Ollama server the holdout sets were generated with (not the app's local model)")
     ap.add_argument("--out", default="holdout_raw.jsonl", help="v1 (dev): holdout_raw.jsonl, v2 (test): holdout2_raw.jsonl")
     a = ap.parse_args(argv)
-    url = get_settings().ollama_url.rstrip("/")
+    url = a.ollama_url.rstrip("/")
     http = httpx.Client(timeout=600)
     out, seen = [], set()
     for group, variant, n, spec in SCENARIOS:

@@ -30,6 +30,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
+sys.path.insert(0, str(ROOT / "eval" / "common"))
 
 from app.core.config import PrivacyConfig  # noqa: E402
 from app.privacy import analyzer as an  # noqa: E402
@@ -118,17 +119,10 @@ LLM_TYPE = {"name": "PERSON", "id": "ID_NUMBER", "contact": "EMAIL_ADDRESS", "gr
             "health": "HEALTH_DETAIL", "other": "OTHER"}
 
 
-def post_chat(http, url, body, tries=3):
-    """POST to Ollama with retries; None if the server keeps failing (callers decide how to fail)."""
-    import httpx
-    for _ in range(tries):
-        try:
-            r = http.post(url, json=body)
-            r.raise_for_status()
-            return r
-        except httpx.HTTPError:
-            time.sleep(5)
-    return None
+def post_chat(http, settings, prompt, schema):
+    """The local model (vLLM) with retries; None if the server keeps failing (callers decide how to fail)."""
+    from local_model import chat
+    return chat(http, settings, [{"role": "user", "content": prompt}], schema=schema, temperature=0.0)
 
 
 class LocalLLM:
@@ -144,13 +138,10 @@ class LocalLLM:
         schema = {"type": "object", "properties": {"items": {"type": "array", "items": {
             "type": "object", "properties": {"text": {"type": "string"}, "type": {"type": "string"}},
             "required": ["text", "type"]}}}, "required": ["items"]}
-        r = post_chat(self.http, f"{self.s.ollama_url}/api/chat", {
-            "model": self.s.llm.local.model, "stream": False, "think": False, "format": schema,
-            "options": {"temperature": 0, "num_ctx": self.s.llm.local.num_ctx},
-            "messages": [{"role": "user", "content": LLM_PROMPT + sanitized}]})
+        answer = post_chat(self.http, self.s, LLM_PROMPT + sanitized, schema)
         try:
-            items = json.loads(r.json()["message"]["content"]).get("items", [])
-        except (ValueError, KeyError, AttributeError):  # AttributeError: no response (post_chat gave up)
+            items = json.loads(answer).get("items", [])
+        except (ValueError, TypeError, AttributeError):  # TypeError: no response (post_chat gave up)
             SCRATCH["llm_failures"] = SCRATCH.get("llm_failures", 0) + 1
             items = []
         out = []
@@ -183,13 +174,10 @@ class LocalLLMClassifier:
         sanitized, _, _ = anonymize(text, findings)
         schema = {"type": "object", "properties": {"personal_health": {"type": "boolean"}},
                   "required": ["personal_health"]}
-        r = post_chat(self.http, f"{self.s.ollama_url}/api/chat", {
-            "model": self.s.llm.local.model, "stream": False, "think": False, "format": schema,
-            "options": {"temperature": 0, "num_ctx": 2048},
-            "messages": [{"role": "user", "content": CLASSIFY_PROMPT + sanitized}]})
+        answer = post_chat(self.http, self.s, CLASSIFY_PROMPT + sanitized, schema)
         try:
-            return bool(json.loads(r.json()["message"]["content"]).get("personal_health"))
-        except (ValueError, KeyError, AttributeError):  # AttributeError: no response (post_chat gave up)
+            return bool(json.loads(answer).get("personal_health"))
+        except (ValueError, TypeError, AttributeError):  # TypeError: no response (post_chat gave up)
             SCRATCH["llm_failures"] = SCRATCH.get("llm_failures", 0) + 1
             return True  # an unreadable answer keeps the question local (fail closed)
 

@@ -1,8 +1,8 @@
 # Deployment (task Z8)
 
 One Docker Compose stack (guide 4.2): `proxy` (Caddy), `api`, `worker` (the same image as `api`, started as
-`python -m app.worker`) and `db` (PostgreSQL). The local model (vLLM or Ollama) runs elsewhere and is reached by
-URL.
+`python -m app.worker`) and `db` (PostgreSQL). The local model (vLLM) runs elsewhere and is reached by URL
+(`VLLM_BASE_URL`, `VLLM_KEY`).
 
 ```
 browser ──80/443──► proxy (Caddy: serves the frontend, forwards /api to api, HTTPS with a domain)

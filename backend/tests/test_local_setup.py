@@ -21,7 +21,7 @@ def test_env_values_round_trip_without_shell_interpolation():
     password = 'Strong"pass\\word$123汉字'
     values = dotenv_values(stream=io.StringIO(setup.env_text("teacher", password, "qwen3.5:9b-q4_K_M")))
     assert values["INSTRUCTOR_INITIAL_PASSWORD"] == password
-    assert values["OLLAMA_URL"] == "http://127.0.0.1:11434"
+    assert values["VLLM_BASE_URL"] == "http://127.0.0.1:8001/v1" and values["VLLM_KEY"] == ""
     assert values["LLM__LOCAL__MODEL"] == values["LLM__UNDERSTAND__MODEL"] == "qwen3.5:9b-q4_K_M"
     assert values["ROUTING__IMPL"] == "semantic" and values["RAG__IMPL"] == "medical_hybrid"
     assert values["DATABASE_URL"] == "postgresql+psycopg://tutor@127.0.0.1:5432/tutor"  # no password inside
@@ -51,11 +51,14 @@ def test_existing_env_is_preserved_without_password_prompt(tmp_path, monkeypatch
 def test_first_run_retries_short_and_mismatched_passwords(tmp_path, monkeypatch):
     setup = setup_module_object()
     monkeypatch.setattr(setup, "ROOT", tmp_path)
-    inputs = iter(["Teacher", "qwen3.5:9b-q4_K_M"])
-    passwords = iter(["short", "TestPassword123", "DoesNotMatch123", "TestPassword123", "TestPassword123"])
+    inputs = iter(["Teacher", "http://10.0.0.5:8000/v1", "Qwen3.5-9B"])
+    passwords = iter(["short", "TestPassword123", "DoesNotMatch123", "TestPassword123", "TestPassword123",
+                      "fictional-vllm-key"])
     monkeypatch.setattr("builtins.input", lambda *args: next(inputs))
     monkeypatch.setattr(setup.getpass, "getpass", lambda *args: next(passwords))
     setup.initialize_env()
     values = dotenv_values(tmp_path / ".env")
     assert values["INSTRUCTOR_USERNAME"] == "teacher"
     assert values["INSTRUCTOR_INITIAL_PASSWORD"] == "TestPassword123"
+    assert values["VLLM_BASE_URL"] == "http://10.0.0.5:8000/v1" and values["VLLM_KEY"] == "fictional-vllm-key"
+    assert values["LLM__LOCAL__MODEL"] == "Qwen3.5-9B"

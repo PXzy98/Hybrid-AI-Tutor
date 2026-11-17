@@ -66,9 +66,9 @@ known-third-party = ["alembic"]  # backend/alembic/ holds the migrations, not th
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
-addopts = '-m "not ollama and not cloud"'
+addopts = '-m "not local_model and not cloud"'
 markers = [
-    "ollama: needs the Ollama server (run with -m ollama)",
+    "local_model: needs the local model server of VLLM_BASE_URL (run with -m local_model)",
     "cloud: needs a cloud LLM API key (run with -m cloud)",
     "presidio: needs a spaCy model for Presidio (en_core_web_sm in tests)",
 ]
