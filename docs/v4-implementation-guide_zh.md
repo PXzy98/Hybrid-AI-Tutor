@@ -443,6 +443,7 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | T13 | 网络搜索（G1-92）+ 评估（G1-106）。**搜索已完成**（#88；见 [WEB_SEARCH.md](WEB_SEARCH.md)：部署时选择 `off`、外部 `api` 或自建 `searxng`）；评估还没做：搜索 API、白名单、清洗结果、作为资料交给生成步骤；查询只用 `search_query()`；出网只走统一的出网函数 | S7 | Z11、Z6 | 新的 `backend/app/websearch/`、`config.yaml` 的 pipeline | E4 审计：搜索请求里没有个人信息；评估报告 |
 | T14 | 清除 `docs/` 以外 Markdown 里的中文（规则 14）：按第 7 节用英文重写 `TODO.md`；把仓库根目录的中文版入门文档挪到 `docs/GETTING_STARTED_zh.md` 并修好链接；删掉 `README.md`、`GETTING_STARTED.md` 里的中文行。`frontend/src/test/Routing.test.tsx` 里的中文测试文本保留（它测试的是中文输入） | S5 | — | 上述文件 | `docs/` 以外的 Markdown 里没有中文 |
 | T15 | 分学科的路由（2026-11-17 发现）：路由分类头只用 `data/routing/seed.jsonl` 的 500 道医学题训练，所有课程共用一个阈值；ECE 课上较难的问题没有来源（证据被判为不需要，或能力判断在检索之前就送云端）。把其他学科的问题加进训练数据（像 T5 一样按课程划分），或按课程类型定阈值；同时决定 T4 的候选权重（`eval/routing-ece/results/candidate/`）是否采用 | S8 | T4 | `backend/app/routing/`、`data/routing/`、`eval/routing-ece/` | T4 的 ECE/CS 和医学路由评估不变差；较难的 ECE 问题有课程来源 |
+| T16 | 看过历史对话之后开新对话（2026-11-17 报告）：学生点开历史记录里的一个对话后，回不到一个全新的空白对话。侧栏有 **New chat**（`components/shell/CourseNav.tsx` 从 URL 去掉 `c`，`pages/student/chat/Chat.tsx` 应该重建对话区），所以先复现在哪种情况下失败（桌面或手机布局、选了模块、发过问题以后） | S8 | F1 | `frontend/src/components/shell/`、`frontend/src/pages/student/chat/` | 有界面测试：打开一个历史对话，再开新对话，对话区为空，下一个问题开始新的对话 |
 
 ### 7.3a 前端 v2（任务 F1）
 
