@@ -1,6 +1,6 @@
 # Student manual
 
-For students of a course that uses the Course Tutor. Interface labels are quoted as they appear in the
+For students of a course that uses PACT (Privacy-Aware Course Tutor). Interface labels are quoted as they appear in the
 English interface (French is available through the language switch). The instructor manual is
 [INSTRUCTOR_MANUAL.md](INSTRUCTOR_MANUAL.md).
 

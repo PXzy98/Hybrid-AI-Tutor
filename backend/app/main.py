@@ -52,7 +52,7 @@ async def _csrf(request: Request, call_next):
 
 def create_app() -> FastAPI:
     app = FastAPI(
-        title="Privacy-Aware Hybrid AI Tutor",
+        title="PACT: Privacy-Aware Course Tutor",
         version="0.1.0",
         description="Health-education tutor with a local learner model. Design: docs/System_Design_v3.md",
         lifespan=lifespan,

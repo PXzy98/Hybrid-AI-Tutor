@@ -237,7 +237,7 @@ sidebar into `src/components/shell/Sidebar.tsx`, `UserMenu.tsx`, `CourseNav.tsx`
 
 ```
 ┌──────────────┬──────────────────────────────────────────────────────┐
-│ ◈ Course Tutor  «│  ELG 5902  Privacy-aware tutors   [Student]      │  top bar, 48 px, h1 lives here
+│ ◈ PACT         «│  ELG 5902  Privacy-aware tutors   [Student]      │  top bar, 48 px, h1 lives here
 │              │──────────────────────────────────────────────────────│
 │ ELG 5902   ▾ │                                                      │
 │              │                                                      │

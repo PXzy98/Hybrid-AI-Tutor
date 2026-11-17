@@ -1,4 +1,4 @@
-# Privacy-Aware Hybrid AI Tutor: runtime configuration (design: docs/System_Design_v3.md §9).
+# PACT (Privacy-Aware Course Tutor): runtime configuration (design: docs/System_Design_v3.md §9).
 # Secrets and machine-specific URLs live in .env (see .env.example), not here.
 
 pipeline: [privacy_filter, understand, learner_context, analyze_route, retrieve, route, web_search, generate, restore, verify, attach_check, record]

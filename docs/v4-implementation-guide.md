@@ -47,7 +47,7 @@ Design documents that are part of this guide:
 - **Per-student overview**: the instructor can see each student and set a learning plan.
 - **Deployment** in the client's own environment.
 
-**v4 goal**: **evolve** the current code (no rewrite) into a multi-course, multi-instructor course tutor:
+**v4 goal**: **evolve** the current code (no rewrite) into a multi-course, multi-instructor course tutor, **PACT** (Privacy-Aware Course Tutor; name chosen 2026-11-17):
 - privacy rules per course type;
 - instructor AI;
 - one Docker Compose deployment.
@@ -497,7 +497,7 @@ data); users build against the fakes without waiting for the real implementation
 | T8 | "Data may be sent to the cloud" notices (text from Z); en/fr strings of all new pages, including quizzes and the survey; no strings for the removed per-answer rating and style buttons | S6–S7 | Z11 | `frontend/src/i18n/` | notices in all three places |
 | T9 | Demo accounts and sample data scripts (through the API only); demo flow for both courses | S6 | Z9, S5 | `scripts/` | one command builds the demo |
 | T10 | Video (Nov 25); send French UI screenshots to Lavin and apply her corrections | S6 | T3 | — | delivered on time |
-| T11 | Renaming (once the name is chosen, **open**); accessibility self-check (keyboard, screen reader, contrast, zoom) (**done**, see [ACCESSIBILITY.md](ACCESSIBILITY.md); axe test in `frontend/src/test/Accessibility.test.tsx`) | S7 | name | `frontend/` | checklist |
+| T11 | Renaming to **PACT** (Privacy-Aware Course Tutor; name chosen 2026-11-17; done by Z, see 7.5); accessibility self-check (keyboard, screen reader, contrast, zoom) (**done**, see [ACCESSIBILITY.md](ACCESSIBILITY.md); axe test in `frontend/src/test/Accessibility.test.tsx`) | S7 | name | `frontend/` | checklist |
 | T12 | **In progress**: student manual ([STUDENT_MANUAL.md](STUDENT_MANUAL.md)) and instructor manual ([INSTRUCTOR_MANUAL.md](INSTRUCTOR_MANUAL.md), including the TA note in course-structure.md 3.4) are done; routing, frontend and web search handover still open | S8 | — | `docs/` | a new instructor can use it |
 | T13 | Web search (G1-92) + evaluation (G1-106). **Search done** (#88; [WEB_SEARCH.md](WEB_SEARCH.md): `off`, hosted `api` or self-hosted `searxng`, chosen at deployment); evaluation open: search API, allow-list, cleaning, results as passages for generation; query only from `search_query()`; outbound calls only through the single outbound helper | S7 | Z11, Z6 | new `backend/app/websearch/`, `config.yaml` pipeline | E4 audit: no personal data in search requests; evaluation report |
 | T14 | Remove Chinese from Markdown outside `docs/` (rule 14): rewrite `TODO.md` in English from section 7; move the Chinese copy of `GETTING_STARTED.md` from the repository root to `docs/GETTING_STARTED_zh.md` and fix its links; remove the Chinese lines of `README.md` and `GETTING_STARTED.md`. The Chinese test text in `frontend/src/test/Routing.test.tsx` stays (it tests Chinese input) | S5 | — | listed files | no Chinese in Markdown outside `docs/` |
@@ -565,11 +565,12 @@ owner reviews and approves the PR, and the area stays the owner's afterwards (ru
 | T13 (search) | T | web search with three deployment modes, the `web_search` step after `route`, allow-lists per course type, SearXNG Compose profile | #88 | review |
 | Z19 (evidence) | T | passages of the request's course count as on topic in `assess_evidence` and `select_passages` | see PR | review |
 | Z20 (structure drafts) | S | 4,096 output tokens, KC names as an enum in the schema, invalid prerequisite links dropped (was: the draft was rejected) | see PR | review |
+| T11 (renaming) | T | the product name PACT in the interface (English and French), the page title, the API title, README, AGENTS.md, the manuals, the UI design sketch, file header comments and the Grafana dashboard; internal names (`tutor` database user, `tutor_*` metrics, package names, repository name) and history unchanged | see PR | review |
 | T11 (accessibility part), T12 (manuals) | T | accessibility self-check and axe tests; student and instructor manuals | #74, #73 | review |
 
 From 2026-11-11, by the same decision, Z also works on the remaining S and T tasks of sections 7.2 and 7.3 in
 this way (one PR per task, listed in the table above when it is opened). Not started yet (2026-11-15): the web
-search evaluation (T13, G1-106); the video (T10); renaming (T11, waits for the name); the routing, frontend
+search evaluation (T13, G1-106); the video (T10); renaming (T11) started 2026-11-17 with the name PACT; the routing, frontend
 and web search handover notes (T12); the `transformers` 5, `react-router` 7 and `vite`/`vitest` updates
 reported by the CI scans.
 
