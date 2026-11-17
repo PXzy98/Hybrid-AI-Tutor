@@ -32,6 +32,7 @@ Reflection #2 (ethics, individual) 11/18 · video 11/25 · Design Day 12/3 · fi
 | Z13, Z6, Z2 | Deploy on the test host with monitoring; vLLM load test; local speed of the 9B model | Z | waits for server access |
 | Z13 | Choose the alert receiver | Z | waits for the client |
 | S12 | Self-review and handover checklist | S | handover notes in `docs/history/s-tasks/` |
+| S13 | Learning profile for the whole course: one onboarding and diagnostic per course (not per module), a course summary on My progress and in the instructor's view | S (frontend with T) | not started |
 | T15 | Routing by subject: the routing heads are trained on medical questions only; harder ECE questions get no sources | T | not started |
 | T16 | Student chat: after opening a past conversation there is no way back to a new, empty conversation | T | to reproduce |
 | Z22 | Privacy filter tests: held-out ECE set, `life_science` and `general` sets, E6 scores for the v4 types, a fresh held-out medical set | Z | not started |
