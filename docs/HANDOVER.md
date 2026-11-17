@@ -29,7 +29,7 @@ stand and where to look. Running the system: [OPERATIONS.md](OPERATIONS.md).
 | Z3 PostgreSQL + Alembic | merged | `backend/alembic/`, `app/storage/` |
 | Z4 course catalog | merged | `app/catalog/` |
 | Z5 settings layers, live component switch | merged | `app/platform/settings.py`, `components.py` |
-| Z6 model gateway | merged; vLLM itself measured (concurrency 8 ≈ 200 tokens/s, 32 ≈ 315, one request ≈ 30); the app under load not measured | `app/llm/`, `eval/load-test/` |
+| Z6 model gateway | merged; a load test through the gateway on 2026-11-16 (Qwen3.5-9B, short answers): 0.40 answers/s alone, 0.71 at 8 at a time, no gain at 20; the tokens/s figures quoted earlier have no saved report; the app under load not measured (Z23) | `app/llm/`, `eval/load-test/` |
 | Z7 privacy profiles | merged | `app/privacy/profiles/` |
 | Z8 Docker Compose | merged | `docker-compose.yml`, `deploy/` |
 | Z9 API v2 (accounts, courses, members, invitations, content, settings, admin) | merged (#42–#45); main fix #47; viewable invitation code #52; v2 ask #61; end of term and export #63 (`app/platform/end_of_term.py`) | `app/api/v2/`, `app/platform/courses.py`, `app/catalog/editor.py` |

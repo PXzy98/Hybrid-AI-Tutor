@@ -131,6 +131,6 @@ Prometheus, alert rules and Grafana are ready to start (`--profile monitoring`, 
 | Missing | Effect for operations | Task |
 |---|---|---|
 | Deployment on the test host; an alert receiver; the vLLM address for scraping | the monitoring stack is ready but not started anywhere yet | Z13 part 2 |
-| Measured capacity of the app on the real servers | vLLM itself was measured (concurrency 8 ≈ 200 tokens/s); the app under load was not; `eval/load-test/run.py` is ready | Z6 load test |
+| Measured capacity of the app on the real servers | the model connection was measured through the gateway (0.40 answers/s alone, 0.71 at 8 at a time, no gain at 20); tokens per second and the app under load were not; `eval/load-test/run.py` is ready | Z23 |
 | A health check for vLLM | `/api/v1/health` asks Ollama's `/api/tags`; a vLLM-only deployment shows the local model as unreachable although answers work | audit I6 |
 | A vLLM connection in the deployment's configuration | a vLLM-only deployment needs an administrator to add a trusted local connection after the first start (`MODEL_CONNECTIONS.md`) | audit A4 |

@@ -400,6 +400,7 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | Z20 | vLLM 上的结构草稿（11/16 截界面图时发现）：可信本地的 OpenAI 兼容连接收到 JSON schema，而不只是 `json_object`；第 2 层草稿可用 4,096 个输出 token；schema 只允许引用已接受的知识点；无效的前置知识点链接去掉，不再整份草稿作废 | S8 | Z6 | `llm/`、`instructor_ai/structure_drafts.py` | 知识点、检查题、迷思草稿在测试主机的 vLLM 上都能成功 |
 | Z21 | 文档更新到当前状态（2026-11-17）：v3 的实施日志移到 `docs/history/`；v3 设计和隐私报告加状态说明；HANDOVER、OPERATIONS、MODEL_CONNECTIONS、ACCESSIBILITY 更新到 2026-11-17 | S8 | — | `docs/`、`AGENTS.md`、`README.md` | `docs/` 里 `history/` 以外的文档不把过去的状态写成现状 |
 | Z22 | v4 还缺的隐私过滤测试（2026-11-17 发现）：ECE 规则冻结之后再写、再标注的 ECE 留出集（现有 47 题是对着规则写的）；`life_science` 和 `general` 配置的测试集；E6 给 v4 新类型（`SECRET`、`INTERNAL_ADDRESS`、`REPO_URL`，现在只有 ECE 集测）打分；新的医学留出集，测现在规则的泄漏率（v4 只证明了 E6 没有变差） | S8 | Z11 | `eval/privacy-filter/` | 每个新集在 `eval/privacy-filter/results/` 有报告；由此改的规则重跑 E6 |
+| Z23 | vLLM 容量（2026-11-17 发现）：`eval/load-test/run.py` 记录每个回答的输出 token 数，报告每个请求和合计的 token/秒；在测试主机上用 `--stream` 和较长的回答（`--max-tokens 400`）跑 1、4、8、16、32 并发；按结果定 `limits.models.max_concurrent`（现在 4）和 `queue_timeout_seconds`（现在 60）的默认值（检查题草稿要 45–50 秒）；在 vLLM 上给一次提问的每一步计时（Z2）；写明超过 5 个学生同时提问需要什么显卡 | S8 | Z6 | `eval/load-test/`、`backend/app/core/config.py`、`docs/OPERATIONS.md` | 有每档并发的 token/秒报告；OPERATIONS.md 的限制和显卡建议以它为准 |
 
 **落后时按这个顺序往后推**：Z12 → Z13 里的 Grafana 和告警 → `login_identity`。
 

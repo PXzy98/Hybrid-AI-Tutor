@@ -34,6 +34,7 @@ Reflection #2 (ethics, individual) 11/18 · video 11/25 · Design Day 12/3 · fi
 | S12 | Self-review and handover checklist | S | handover notes in `docs/history/s-tasks/` |
 | T15 | Routing by subject: the routing heads are trained on medical questions only; harder ECE questions get no sources | T | not started |
 | Z22 | Privacy filter tests: held-out ECE set, `life_science` and `general` sets, E6 scores for the v4 types, a fresh held-out medical set | Z | not started |
+| Z23 | vLLM capacity: tokens per second in the load test, runs at 1 to 32 at a time, model limits set from them, step timing of one ask, GPU for more than 5 students at once | Z | needs the test host |
 
 Not this term: targeted material for single students (only the learning plan with notes now). Tests and demos
 use the eight open course packs in `data/demo_courses/`.
