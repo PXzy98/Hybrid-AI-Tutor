@@ -148,6 +148,20 @@ def test_trusted_local_connections_switch_thinking_off():
 
     assert build_client(row("trusted_local"), None)._extra
     assert not build_client(row("external"), None)._extra
+    assert build_client(row("trusted_local"), None).schema_output
+    assert not build_client(row("external"), None).schema_output
+
+
+async def test_self_hosted_server_gets_the_json_schema():
+    """vLLM with only "json_object" makes up its own field names and every structured draft fails
+    validation; the course's own server is given the schema to constrain the answer."""
+    schema = {"type": "object", "properties": {"items": {"type": "array"}}}
+    own = FakeOpenAI(reply="{}")
+    await OpenAICompatClient("http://10.0.0.5:8000/v1", "k", "m", client=own,
+                             schema_output=True).complete(MSGS, json_schema=schema, max_tokens=4096)
+    assert own.kwargs["response_format"] == {"type": "json_schema",
+                                             "json_schema": {"name": "answer", "schema": schema}}
+    assert own.kwargs["max_tokens"] == 4096
 
 
 async def test_openai_compat_maps_errors():

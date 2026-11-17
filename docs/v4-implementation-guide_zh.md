@@ -397,6 +397,7 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | Z17 | 本地模型调用走网关（审查 B3）：understand、generalize 改写和 `llm_check` 用课程的可信本地连接，不再固定用 Ollama | S8 | Z6 | `llm/`、`pipeline/steps/` | 三处调用在 OpenAI 兼容服务（vLLM）上可用 |
 | Z18 | 仓库清理（审查 B5、第 7 节）：已合并分支、无用文件，过时文档移到 `docs/history/` | S8 | — | 仓库根目录、`docs/` | 审查列出的无用文件都已处理；链接仍然有效 |
 | Z19 | 答案里的课程来源（11/16 截界面图时发现）：证据步骤丢掉了课程检索的全部段落（主题是 `course:<id>`，问题的主题是模块代码或 `general`），答案没有来源 | S8 | — | `routing/evidence.py` | 本次请求所在课程的段落能进答案；别的课程的段落永远不能 |
+| Z20 | vLLM 上的结构草稿（11/16 截界面图时发现）：可信本地的 OpenAI 兼容连接收到 JSON schema，而不只是 `json_object`；第 2 层草稿可用 4,096 个输出 token；schema 只允许引用已接受的知识点；无效的前置知识点链接去掉，不再整份草稿作废 | S8 | Z6 | `llm/`、`instructor_ai/structure_drafts.py` | 知识点、检查题、迷思草稿在测试主机的 vLLM 上都能成功 |
 
 **落后时按这个顺序往后推**：Z12 → Z13 里的 Grafana 和告警 → `login_identity`。
 
@@ -498,6 +499,7 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | S8（接进系统） | S | 分层模型注册为 `course` 并设为默认；更新从存储的估计值开始，前置知识点的上限只在显示时生效；三种模型都跑了全部测试 | #87 | 审查 |
 | T13（搜索） | T | 三种部署模式的网页搜索、`route` 之后的 `web_search` 步骤、按课程类型的白名单、SearXNG 的 Compose profile | #88 | 审查 |
 | Z19（证据） | T | 在 `assess_evidence` 和 `select_passages` 里，本次请求所在课程的段落算作同一主题 | 见 PR | 审查 |
+| Z20（结构草稿） | S | 4,096 个输出 token，schema 里知识点名字是枚举，无效的前置知识点链接去掉（以前整份草稿作废） | 见 PR | 审查 |
 | T11（改名） | T | 界面（英文和法文）、网页标题、API 标题、README、AGENTS.md、手册、界面设计示意图、文件开头的注释和 Grafana 看板里的产品名改为 PACT；内部名字（数据库用户 `tutor`、`tutor_*` 指标、包名、仓库名）和历史文档不变 | 见 PR | 审查 |
 | T11（无障碍部分）、T12（手册） | T | 无障碍自查和 axe 测试；学生手册和教师手册 | #74、#73 | 审查 |
 
