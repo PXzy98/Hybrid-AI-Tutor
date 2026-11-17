@@ -1,6 +1,10 @@
 # Implementation Log
 
-One entry per step of [history/IMPLEMENTATION_PROMPTS.md](history/IMPLEMENTATION_PROMPTS.md). Each new agent session reads this file first.
+> **History.** The build log of v3, from 12 Oct to 4 Nov 2026. v4 work is recorded in its pull requests and in
+> [../v4-implementation-guide.md](../v4-implementation-guide.md) (section 7); the state of the work is in
+> [../HANDOVER.md](../HANDOVER.md).
+
+One entry per step of [IMPLEMENTATION_PROMPTS.md](IMPLEMENTATION_PROMPTS.md).
 
 ## Step 0 — Repository bootstrap (2026-10-12)
 

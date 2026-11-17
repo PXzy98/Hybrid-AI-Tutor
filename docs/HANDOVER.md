@@ -1,6 +1,6 @@
 # Handover (task Z14)
 
-State of the v4 work on 2026-11-15, for whoever continues it. The rules, owners and task list are in
+State of the v4 work on 2026-11-17, for whoever continues it. The rules, owners and task list are in
 [v4-implementation-guide.md](v4-implementation-guide.md) (the source of truth); this page says where things
 stand and where to look. Running the system: [OPERATIONS.md](OPERATIONS.md).
 
@@ -18,18 +18,18 @@ stand and where to look. Running the system: [OPERATIONS.md](OPERATIONS.md).
 | Deploying and running | [OPERATIONS.md](OPERATIONS.md) |
 | Using the app (students) | [STUDENT_MANUAL.md](STUDENT_MANUAL.md) |
 | Using the app (instructors, TA note) | [INSTRUCTOR_MANUAL.md](INSTRUCTOR_MANUAL.md) |
-| How the code came about | [IMPLEMENTATION_LOG.md](IMPLEMENTATION_LOG.md) |
+| How the code came about | pull requests; the v3 build log [history/IMPLEMENTATION_LOG.md](history/IMPLEMENTATION_LOG.md) |
 
 ## 2. State per area
 
 | Task | State | Where |
 |---|---|---|
 | Z1 interface contract | merged | `backend/app/platform/`, `core/schemas.py` |
-| Z2 9B vs 27B | merged (#51); local speed on the vLLM server not measured | `eval/model-compare/` (judged in both orders: 27B 6, 9B 2, 12 ties; 9B stays the default; both fit one 24 GB GPU in 4-bit) |
+| Z2 9B vs 27B | merged (#51); the speed of the whole ask pipeline on the vLLM server not measured | `eval/model-compare/` (judged in both orders: 27B 6, 9B 2, 12 ties; 9B stays the default; both fit one 24 GB GPU in 4-bit) |
 | Z3 PostgreSQL + Alembic | merged | `backend/alembic/`, `app/storage/` |
 | Z4 course catalog | merged | `app/catalog/` |
 | Z5 settings layers, live component switch | merged | `app/platform/settings.py`, `components.py` |
-| Z6 model gateway | merged; real vLLM load test not run (server unreachable) | `app/llm/`, `eval/load-test/` |
+| Z6 model gateway | merged; vLLM itself measured (concurrency 8 ≈ 200 tokens/s, 32 ≈ 315, one request ≈ 30); the app under load not measured | `app/llm/`, `eval/load-test/` |
 | Z7 privacy profiles | merged | `app/privacy/profiles/` |
 | Z8 Docker Compose | merged | `docker-compose.yml`, `deploy/` |
 | Z9 API v2 (accounts, courses, members, invitations, content, settings, admin) | merged (#42–#45); main fix #47; viewable invitation code #52; v2 ask #61; end of term and export #63 (`app/platform/end_of_term.py`) | `app/api/v2/`, `app/platform/courses.py`, `app/catalog/editor.py` |
@@ -37,8 +37,13 @@ stand and where to look. Running the system: [OPERATIONS.md](OPERATIONS.md).
 | Z11 ECE profile, `scan_document`, `search_query`, consent text | merged (#48) | `app/privacy/recognizers/engineering.py`, `eval/privacy-filter/ece*.py` |
 | Z12 instructor AI tier 4 | merged (#53); background jobs in the `job` table, run by the worker | `app/instructor_ai/eval/`, `app/platform/jobs.py` |
 | Z13 CI scans, `/metrics`, Prometheus, alerts, Grafana | merged (#49, #58); not deployed on the test host, no alert receiver chosen yet | `.github/workflows/ci.yml`, `app/platform/metrics.py`, `deploy/monitoring/` |
-| Z14 manual and handover | merged (#50; this page, OPERATIONS.md); load test on the server outstanding | `docs/` |
+| Z14 manual and handover | merged (#50; this page, OPERATIONS.md); load test of the app on the server outstanding | `docs/` |
 | Z15 rule 14 in Z code | merged | `app/privacy/recognizers/` |
+| Z16 answers by subject | merged (#97): the course's privacy profile chooses the system prompt and the checkers (no medical safety check outside medical courses) | `app/prompts/`, `app/privacy/profiles/` |
+| Z17 local model calls through the gateway | merged (#96): understand, the generalize rewrite and `llm_check` use the stored trusted local connection | `app/llm/gateway.py` |
+| Z18 repository cleanup | merged (#95) | `docs/history/` |
+| Z19 course sources in answers | merged (#100): the evidence step kept no passage of the course retriever, so answers had no sources | `app/routing/evidence.py` |
+| Z20 structured drafts on vLLM | merged (#99): the JSON schema is sent to trusted local OpenAI-compatible connections; tier 2 drafts may use 4,096 output tokens | `app/llm/openai_compat.py`, `app/instructor_ai/structure_drafts.py` |
 | Q1 quizzes and the end-of-term survey (decided 2026-11-12) | merged (#66): quizzes (multiple choice and true/false, local-model drafts reviewed by the instructor, auto-grading, results under the visibility rules, `final` = post-test against the diagnostic), the end-of-term survey (window, anonymous ratings, minimum group of 3), both exported as aggregates and deleted at the end of term; migration 0013 | `app/learner/quizzes.py`, `app/api/v2/quizzes.py`, `app/api/v2/survey.py`, `app/instructor_ai/quiz_drafts.py`, `tests/test_quizzes_v2.py`; api-v2.md 3.9, 3.10; course-structure.md 4.6, 4.7 |
 | S (learner data per course, S9) | merged (#60, #62, #77): learner tables per course, export and delete one course, visibility choices, overview, learning plan, answer style in the overview | `app/learner/course_data.py`, `course_views.py`, `visibility_policy.py`, `app/api/v2/learner.py` |
 | S4 materials on API v2 | merged (#67): upload scanned before storing, delete, index rebuild job | `app/api/v2/`, `app/rag/index_jobs.py` |
@@ -50,8 +55,8 @@ stand and where to look. Running the system: [OPERATIONS.md](OPERATIONS.md).
 | T5 question type (concept / logistics) | merged (#80): own weight file, set by the route step; logistics questions search course-level files first | `app/routing/question_type.py`, `app/rag/course_retriever.py` |
 | T9 demo build | merged (#69): the demo courses from the packs through API v2 | `scripts/build_demo.py` |
 | F1 frontend on API v2 (carries T6, T7, T8) | merged (#71, #78; UI upgrade #81 to #85): student and instructor dashboards, admin, model connections, quizzes, survey, materials | `frontend/`, `docs/design/ui-upgrade.md` |
-| T11 accessibility, T12 manuals | merged (#74, #73); renaming waits for the project name; routing, frontend and web search handover notes still open | `docs/ACCESSIBILITY.md`, `docs/STUDENT_MANUAL.md`, `docs/INSTRUCTOR_MANUAL.md` |
-| T13 web search | merged (#88): three deployment modes (`off` default, hosted `api`, self-hosted `searxng` Compose profile); runs for cloud answers that need recent information, query from `search_query()`, allow-listed sites per course type; evaluation (G1-106) not run yet | `app/websearch/`, `app/pipeline/steps/web_search.py`, [WEB_SEARCH.md](WEB_SEARCH.md) |
+| T11 accessibility and renaming, T12 manuals | merged (#74, #101, #73); the product is named PACT (Privacy-Aware Course Tutor); routing, frontend and web search handover notes still open | `docs/ACCESSIBILITY.md`, `docs/STUDENT_MANUAL.md`, `docs/INSTRUCTOR_MANUAL.md` |
+| T13 web search | merged (#88, #90, #92 to #94): modes `off`, `openai` (the default), hosted `api` (Tavily) and self-hosted `searxng`; runs for cloud answers that need recent information, query from `search_query()`, allow-listed sites per course type; evaluated on 79 questions (G1-106: OpenAI 48 of 59, Tavily 40, no search 30) | `app/websearch/`, `app/pipeline/steps/web_search.py`, [WEB_SEARCH.md](WEB_SEARCH.md) |
 
 ## 3. Decisions taken during the work (not obvious from the code)
 
@@ -92,12 +97,11 @@ What Z did in other owners' areas (for their review): guide section 7.5.
 
 | Owner | Task | Why it matters |
 |---|---|---|
-| T | web search evaluation (G1-106), with SearXNG or an API key | the search is built, not measured |
 | T | video (T10, Nov 25); French UI screenshots to Lavin | course deliverable |
-| T | renaming (T11), once the project name is chosen | open decision |
 | T | routing, frontend and web search handover notes (T12) | handover |
 | T, Z | `transformers` 5 (6 pip-audit advisories ignored with reason), `react-router` 7 and `vite`/`vitest` (CI advisories) | CI reports them |
-| Z | deploy on the test host with the monitoring profile, the vLLM load test, Z2 local speed | needs access to the test host and the vLLM server |
+| Z | deploy on the test host with the monitoring profile; the app under load and the speed of the whole ask pipeline on vLLM | needs access to the test host |
+| Z | E4 privacy audit on API v2 and the current `main` (audit P4); the health check also for vLLM (audit I6, A4) | the last full E4 predates v4 |
 | Z | choose the alert receiver (`deploy/monitoring/alertmanager.yml`) | alerts are only visible in Alertmanager until then |
 | Others | Lavin's second review of the 30 revised items | content |
 

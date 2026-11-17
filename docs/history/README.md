@@ -6,8 +6,9 @@ Documents kept for the record. They describe earlier stages of the project (step
 
 | File | What it was | Replaced by |
 |---|---|---|
+| `IMPLEMENTATION_LOG.md` | Build log of v3, one entry per step (12 Oct to 4 Nov) | pull requests; `../HANDOVER.md` |
 | `IMPLEMENTATION_PROMPTS.md` | Step-by-step prompts used to build v3 (12 Oct) | `../v4-implementation-guide.md` |
-| `INTEGRATION.md` | Source commits of the 17 Oct integration of main, RAG and semantic routing | `../IMPLEMENTATION_LOG.md` |
+| `INTEGRATION.md` | Source commits of the 17 Oct integration of main, RAG and semantic routing | `IMPLEMENTATION_LOG.md` |
 | `VALIDATION_V3.md` | Test results of that integration (442 tests) | CI on main |
 | `MATERIALS_SYNC.md` | Patch note: built-in and uploaded materials in the Content page | `RAG_COURSE_BETA.md` |
 | `RAG_INTEGRATION.md` | First TF-IDF medical RAG baseline (12 Oct) | `ROUTING_PATCH.md`, `RAG_COURSE_BETA.md` |

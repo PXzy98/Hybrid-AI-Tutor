@@ -1,7 +1,7 @@
 """Shared data models: the contract between pipeline steps, the API and teammates' components.
 
 Design: docs/System_Design_v3.md §9. Teammates code against these models, so any change here
-must be listed under "Interface changes" in docs/IMPLEMENTATION_LOG.md. Never rename or remove a field
+must be stated in the PR that makes it (guide section 6). Never rename or remove a field
 without agreement.
 """
 

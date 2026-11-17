@@ -398,6 +398,7 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | Z18 | 仓库清理（审查 B5、第 7 节）：已合并分支、无用文件，过时文档移到 `docs/history/` | S8 | — | 仓库根目录、`docs/` | 审查列出的无用文件都已处理；链接仍然有效 |
 | Z19 | 答案里的课程来源（11/16 截界面图时发现）：证据步骤丢掉了课程检索的全部段落（主题是 `course:<id>`，问题的主题是模块代码或 `general`），答案没有来源 | S8 | — | `routing/evidence.py` | 本次请求所在课程的段落能进答案；别的课程的段落永远不能 |
 | Z20 | vLLM 上的结构草稿（11/16 截界面图时发现）：可信本地的 OpenAI 兼容连接收到 JSON schema，而不只是 `json_object`；第 2 层草稿可用 4,096 个输出 token；schema 只允许引用已接受的知识点；无效的前置知识点链接去掉，不再整份草稿作废 | S8 | Z6 | `llm/`、`instructor_ai/structure_drafts.py` | 知识点、检查题、迷思草稿在测试主机的 vLLM 上都能成功 |
+| Z21 | 文档更新到当前状态（2026-11-17）：v3 的实施日志移到 `docs/history/`；v3 设计和隐私报告加状态说明；HANDOVER、OPERATIONS、MODEL_CONNECTIONS、ACCESSIBILITY 更新到 2026-11-17 | S8 | — | `docs/`、`AGENTS.md`、`README.md` | `docs/` 里 `history/` 以外的文档不把过去的状态写成现状 |
 
 **落后时按这个顺序往后推**：Z12 → Z13 里的 Grafana 和告警 → `login_identity`。
 

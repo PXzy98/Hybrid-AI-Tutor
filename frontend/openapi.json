@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "PACT: Privacy-Aware Course Tutor",
-    "description": "Health-education tutor with a local learner model. Design: docs/System_Design_v3.md",
+    "description": "Course tutor that keeps student data private: a local model the course controls, a cloud model only for de-identified text, and a local learner model. Design: docs/v4-implementation-guide.md",
     "version": "0.1.0"
   },
   "paths": {

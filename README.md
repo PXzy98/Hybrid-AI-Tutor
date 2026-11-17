@@ -33,7 +33,7 @@ What it does (v4):
 | Database and migrations | [docs/DATABASE.md](docs/DATABASE.md) |
 | Using the tutor | [docs/STUDENT_MANUAL.md](docs/STUDENT_MANUAL.md), [docs/INSTRUCTOR_MANUAL.md](docs/INSTRUCTOR_MANUAL.md) |
 | Demo and test courses | [data/demo_courses/README.md](data/demo_courses/README.md) |
-| How the code came about | [docs/IMPLEMENTATION_LOG.md](docs/IMPLEMENTATION_LOG.md); older documents in [docs/history/](docs/history/) |
+| How the code came about | pull requests; the v3 build log [docs/history/IMPLEMENTATION_LOG.md](docs/history/IMPLEMENTATION_LOG.md) and other older documents in [docs/history/](docs/history/) |
 
 ## Quick start (Docker)
 

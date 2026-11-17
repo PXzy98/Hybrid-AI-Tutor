@@ -3,7 +3,7 @@
 For whoever deploys and runs the tutor. It links to the detailed documents instead of repeating them:
 [deploy/README.md](../deploy/README.md) (containers, proxy, metrics, CI scans), [DATABASE.md](DATABASE.md),
 [MODEL_CONNECTIONS.md](MODEL_CONNECTIONS.md), [PRIVACY_PROFILES.md](PRIVACY_PROFILES.md); the state of the work and the open tasks: [HANDOVER.md](HANDOVER.md). Status:
-2026-11-15; the last section lists what is not built yet.
+2026-11-17; the last section lists what is not built yet.
 
 ## 1. What runs
 
@@ -126,9 +126,11 @@ Prometheus, alert rules and Grafana are ready to start (`--profile monitoring`, 
   worse (rule 4); E4 (`eval/privacy-audit/run.py --smoke`) runs in CI and fails on any leak.
 - Do not copy database dumps to personal machines; they contain learner profiles (pseudonymous) and account data.
 
-## 9. Not built yet (2026-11-15)
+## 9. Not built yet (2026-11-17)
 
 | Missing | Effect for operations | Task |
 |---|---|---|
 | Deployment on the test host; an alert receiver; the vLLM address for scraping | the monitoring stack is ready but not started anywhere yet | Z13 part 2 |
-| Measured capacity on the real vLLM server | sizing is not confirmed; `eval/load-test/run.py` is ready | Z6 load test |
+| Measured capacity of the app on the real servers | vLLM itself was measured (concurrency 8 ≈ 200 tokens/s); the app under load was not; `eval/load-test/run.py` is ready | Z6 load test |
+| A health check for vLLM | `/api/v1/health` asks Ollama's `/api/tags`; a vLLM-only deployment shows the local model as unreachable although answers work | audit I6 |
+| A vLLM connection in the deployment's configuration | a vLLM-only deployment needs an administrator to add a trusted local connection after the first start (`MODEL_CONNECTIONS.md`) | audit A4 |
