@@ -1,6 +1,6 @@
 # Instructions for coding agents
 
-This repository is the Privacy-Aware Hybrid AI Tutor (ELG 5902, Group 1). It is being turned into a
+This repository is PACT, the Privacy-Aware Course Tutor (ELG 5902, Group 1). It is being turned into a
 multi-course product ("v4").
 
 ## Read first

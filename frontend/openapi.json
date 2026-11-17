@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Privacy-Aware Hybrid AI Tutor",
+    "title": "PACT: Privacy-Aware Course Tutor",
     "description": "Health-education tutor with a local learner model. Design: docs/System_Design_v3.md",
     "version": "0.1.0"
   },

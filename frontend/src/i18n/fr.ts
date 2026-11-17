@@ -2,7 +2,7 @@ import type { Messages } from "./en";
 
 /** Interface en français (Canada). Machine-assisted draft; to be proofread by a French speaker. */
 export const fr: Messages = {
-  "app.name": "Tuteur de cours",
+  "app.name": "PACT",
   "app.loading": "Chargement…",
   "app.unreachable": "Le serveur est inaccessible. Veuillez réessayer plus tard.",
   "app.retry": "Réessayer",

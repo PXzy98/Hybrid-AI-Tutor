@@ -1,6 +1,6 @@
-# Privacy-Aware Hybrid AI Tutor
+# PACT: Privacy-Aware Course Tutor
 
-A course tutor for any subject (ELG 5902, Group 1). Instructors create courses, import their class list and
+PACT is a course tutor for any subject (ELG 5902, Group 1). Instructors create courses, import their class list and
 upload their material; students ask questions about the course. The system removes personal information
 locally, then routes each question to a local model the course controls or to a cloud model. Answers cite the
 course material and adapt to what the student already knows. Original questions and learner profiles never

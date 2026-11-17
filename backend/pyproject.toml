@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "app"
 version = "0.1.0"
-description = "Privacy-Aware Hybrid AI Tutor: backend (FastAPI step pipeline + local learner model)"
+description = "PACT (Privacy-Aware Course Tutor): backend (FastAPI step pipeline + local learner model)"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115",
