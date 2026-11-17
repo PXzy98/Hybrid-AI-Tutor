@@ -41,10 +41,10 @@ Reflection #2 (ethics, individual) 11/18 · video 11/25 · Design Day 12/3 · fi
 | T17 | Course-rule questions routed to the cloud skip retrieval ("Can I use ChatGPT for the problem sets?" gets no syllabus) | T | not started |
 | Z22 | Privacy filter tests: held-out ECE set, `life_science` and `general` sets, E6 scores for the v4 types, a fresh held-out medical set | Z | not started |
 | Z23 | vLLM capacity: tokens per second in the load test, runs at 1 to 32 at a time, model limits set from them, step timing of one ask, GPU for more than 5 students at once | Z | needs the test host |
-| Z24 | The module guideline (Modules page) is stored but never reaches the answering model; use it for questions scoped to that module | Z | not started |
-| Z25 | Security review of the whole system (auth, CSRF, access, SSRF, uploads, prompt injection, proxy and networks, keys, logs, scans), report in `docs/SECURITY_REVIEW.md` | Z | not started |
 | Z24 | The deployment's local model is its vLLM (`VLLM_BASE_URL`, `VLLM_KEY` replace `OLLAMA_URL`) | Z | PR #107 |
 | Z25 | Document scan refuses public course text (CS50x `pset_5.md` as `GRADE`); check all eight packs | Z | not started |
+| Z26 | The module guideline (Modules page) is stored but never reaches the answering model; use it for questions scoped to that module | Z | not started |
+| Z27 | Security review of the whole system (auth, CSRF, access, SSRF, uploads, prompt injection, proxy and networks, keys, logs, scans), report in `docs/SECURITY_REVIEW.md` | Z | not started |
 
 Not this term: targeted material for single students (only the learning plan with notes now). Tests and demos
 use the eight open course packs in `data/demo_courses/`.
