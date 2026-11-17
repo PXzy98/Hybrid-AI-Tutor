@@ -145,6 +145,27 @@ async def test_missing_referral_is_appended(services):
     assert ctx.answer.endswith(REFERRAL)
 
 
+@pytest.mark.parametrize(("answer", "plain"), [
+    ("See ![a lung](https://tracker.example/p.png) here.", "See a lung here."),
+    ("See ![a lung](https://tracker.example/p(1).png \"t\") here.", "See a lung here."),
+    ("See ![a lung][img] here.\n\n[img]: https://tracker.example/p.png",
+     "See a lung here.\n\n[img]: https://tracker.example/p.png"),
+    ("See <img src='https://tracker.example/p.png' alt='a lung'> here.", "See a lung here."),
+    ("See <IMG src=https://tracker.example/p.png> here.", "See  here."),
+    ("A [link](https://example.org) stays.", "A [link](https://example.org) stays."),
+])
+def test_strip_images_keeps_the_alt_text(answer, plain):
+    from app.core.markdown import strip_images
+
+    assert strip_images(answer) == plain
+
+
+async def test_the_final_answer_has_no_images(services):
+    ctx = await VerifyStep(services).run(make_ctx("Airways: ![diagram](https://tracker.example/a.png)",
+                                                  target="local"))
+    assert "tracker.example" not in ctx.answer and ctx.answer.startswith("Airways: diagram")
+
+
 async def test_grounding_and_checker_errors_become_warnings(services):
     step = VerifyStep(services)
 

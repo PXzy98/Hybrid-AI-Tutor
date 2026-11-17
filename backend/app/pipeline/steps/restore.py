@@ -1,3 +1,4 @@
+from app.core.markdown import strip_images
 from app.core.registry import steps
 from app.core.schemas import RequestContext
 from app.learner.misconceptions import append_corrections
@@ -15,6 +16,8 @@ class RestoreStep(BaseStep):
 
     Cloud route: the reviewed correction of a relevant open misconception is appended here, locally, when
     the answer does not already address it (design §6). The cloud request itself never carries it.
+
+    Markdown images are replaced by their alt text (web audit S2; `verify` does it again for the final text).
     """
 
     name = "restore"
@@ -22,6 +25,6 @@ class RestoreStep(BaseStep):
 
     async def run(self, ctx: RequestContext) -> RequestContext:
         if ctx.answer:
-            ctx.answer = restore(ctx.answer, ctx.pii_mapping)
+            ctx.answer = strip_images(restore(ctx.answer, ctx.pii_mapping))
             append_corrections(ctx)
         return ctx
