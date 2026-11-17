@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 import type { AskResponse } from "@/api/endpoints";
 import CheckCard from "@/components/CheckCard";
-import Markdown from "@/components/Markdown";
+import Markdown from "@/components/LazyMarkdown";
 import { BrandMark } from "@/components/shell/Sidebar";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";

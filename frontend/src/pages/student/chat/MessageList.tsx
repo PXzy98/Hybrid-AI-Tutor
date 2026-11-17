@@ -3,7 +3,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "re
 
 import type { AskResponse } from "@/api/endpoints";
 import { ErrorNote, Loading } from "@/components/common";
-import Markdown from "@/components/Markdown";
+import Markdown from "@/components/LazyMarkdown";
 import type { RoutingTrace } from "@/components/RoutingProgress";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n";
