@@ -17,8 +17,11 @@ class OpenAICompatClient:
     def __init__(self, base_url: str, api_key: str, model: str, *, timeout_s: float = 30,
                  max_tokens: int = 800, temperature: float = 0.2,
                  client: openai.AsyncOpenAI | None = None, transport=None,
-                 thinking_off: bool = False) -> None:
+                 thinking_off: bool = False, schema_output: bool = False) -> None:
         self.model = model
+        # a self-hosted server (vLLM) constrains the answer to the JSON schema; with only "json_object" the
+        # model makes up its own field names and every structured answer fails validation
+        self.schema_output = schema_output
         # a self-hosted server (vLLM) runs Qwen3.5 with thinking on by default: hundreds of hidden tokens
         # before the answer (7x slower on the test host, and cut off at max_tokens). Hosted APIs reject it.
         off = {"chat_template_kwargs": {"enable_thinking": False}}
@@ -29,6 +32,11 @@ class OpenAICompatClient:
         self._args = {"base_url": base_url, "api_key": api_key, "timeout": timeout_s, "max_retries": 1}
         self._transport = transport  # e.g. ssrf.PinnedTransport for instructor-added connections
         self._clients: dict[int, openai.AsyncOpenAI] = {}
+
+    def _response_format(self, json_schema: dict) -> dict:
+        if self.schema_output:
+            return {"type": "json_schema", "json_schema": {"name": "answer", "schema": json_schema}}
+        return {"type": "json_object"}
 
     def _client(self) -> openai.AsyncOpenAI:
         """One SDK client per event loop: its connection pool belongs to the loop that opened it, and a
@@ -51,7 +59,7 @@ class OpenAICompatClient:
                        max_tokens: int | None = None) -> LLMResult:
         kwargs: dict = dict(self._extra)
         if json_schema is not None:
-            kwargs["response_format"] = {"type": "json_object"}
+            kwargs["response_format"] = self._response_format(json_schema)
         t0 = perf_counter()
         try:
             resp = await self._client().chat.completions.create(
@@ -88,7 +96,7 @@ class OpenAICompatClient:
         """The answer as it is generated (task Z6: token streaming)."""
         kwargs: dict = dict(self._extra)
         if json_schema is not None:
-            kwargs["response_format"] = {"type": "json_object"}
+            kwargs["response_format"] = self._response_format(json_schema)
         try:
             chunks = await self._client().chat.completions.create(
                 model=self.model, messages=messages, temperature=self.temperature,

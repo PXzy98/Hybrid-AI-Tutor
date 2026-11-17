@@ -30,6 +30,9 @@ from app.instructor_ai.drafts import (
 )
 
 StructureKind = Literal["kcs", "check_items", "misconceptions"]
+# Up to 12 items with explanations: about 2,000 tokens on the test host's Qwen3.5 (check items were cut off
+# at the connection's default of 1,024).
+STRUCTURE_MAX_TOKENS = 4096
 
 
 class _BaseItem(BaseModel):
@@ -139,7 +142,7 @@ async def generate_structure_draft(
     schema = TypeAdapter(list[_ITEM_TYPES[kind]])
     response = await gateway.complete(
         "local", messages, settings=settings, trust_required="trusted_local",
-        json_schema=response_schema(kind), stream=False,
+        json_schema=response_schema(kind, known_kc_names), stream=False, max_tokens=STRUCTURE_MAX_TOKENS,
     )
     try:
         payload = parse_model_json(response.text)
@@ -157,7 +160,7 @@ async def generate_structure_draft(
                 raise DraftError("Draft citation is not present in course evidence.")
             cited.add(number)
 
-    _check_kc_references(kind, items, known_kc_names)
+    items = _check_kc_references(kind, items, known_kc_names)
     if kind == "check_items":
         items = [_shuffled(item) for item in items]
     return StructureDraft(
@@ -166,31 +169,42 @@ async def generate_structure_draft(
     )
 
 
-def response_schema(kind: StructureKind) -> dict:
-    """JSON schema of the whole answer {"items": [...]}, with its definitions at the document root."""
+def response_schema(kind: StructureKind, known_kc_names: Sequence[str] = ()) -> dict:
+    """JSON schema of the whole answer {"items": [...]}, with its definitions at the document root.
+
+    With accepted KCs, the KC references of check items and misconceptions may only be their names (a server
+    that constrains the answer to the schema, like vLLM, then cannot make up a KC)."""
     envelope = create_model(f"{kind}_draft_response", __config__=ConfigDict(extra="forbid"),
                             items=(list[_ITEM_TYPES[kind]], Field(min_length=1, max_length=12)))
-    return envelope.model_json_schema()
+    schema = envelope.model_json_schema()
+    if known_kc_names and kind != "kcs":
+        fields = schema["$defs"][_ITEM_TYPES[kind].__name__]["properties"]
+        names = list(dict.fromkeys(known_kc_names))
+        if kind == "check_items":
+            fields["kc_names"]["items"] = {"type": "string", "enum": names}
+        else:
+            fields["kc_name"] = {"type": "string", "enum": names, "title": fields["kc_name"].get("title")}
+    return schema
 
 
-def _check_kc_references(kind: str, items: list, known: Sequence[str]) -> None:
+def _check_kc_references(kind: str, items: list, known: Sequence[str]) -> list:
     known_names = {name.casefold() for name in known}
     if kind == "kcs":
         drafted = {item.name.casefold() for item in items}
         if len(drafted) != len(items):
             raise DraftError("The draft repeats a knowledge component.")
-        for item in items:
-            for name in item.prerequisite_names:
-                if name.casefold() == item.name.casefold():
-                    raise DraftError("A knowledge component cannot be its own prerequisite.")
-                if name.casefold() not in drafted | known_names:
-                    raise DraftError("A prerequisite refers to an unknown knowledge component.")
-        return
+        # A prerequisite link is a suggestion the instructor reviews: one to the item itself or to a KC that
+        # is neither drafted nor accepted is dropped, not a reason to lose the whole draft.
+        return [item.model_copy(update={"prerequisite_names": [
+            name for name in item.prerequisite_names
+            if name.casefold() != item.name.casefold() and name.casefold() in drafted | known_names]})
+            for item in items]
     if not known_names:
-        return  # nothing accepted yet: the instructor links the KCs when accepting the draft
+        return items  # nothing accepted yet: the instructor links the KCs when accepting the draft
     names = [n for item in items for n in (item.kc_names if kind == "check_items" else [item.kc_name])]
     if any(name.casefold() not in known_names for name in names):
         raise DraftError("A draft item refers to an unknown knowledge component.")
+    return items
 
 
 def _shuffled(item: CheckItemDraft) -> CheckItemDraft:

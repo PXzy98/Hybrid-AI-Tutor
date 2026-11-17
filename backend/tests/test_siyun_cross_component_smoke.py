@@ -27,7 +27,7 @@ class _FakeLocalGateway:
         self.messages = []
 
     async def complete(self, role, messages, *, settings, trust_required, json_schema=None,
-                       stream=False):
+                       stream=False, max_tokens=None):
         assert (role, trust_required, stream) == ("local", "trusted_local", False)
         self.messages.append(messages)
         task = json.loads(messages[1]["content"])["task"]
