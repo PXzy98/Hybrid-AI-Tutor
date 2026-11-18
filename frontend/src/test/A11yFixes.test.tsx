@@ -5,6 +5,7 @@ import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { AskResponse } from "../api/endpoints";
+import { PageHeader } from "../components/common";
 import { Table } from "../components/ui/table";
 import { I18nProvider } from "../i18n";
 import { documentTitle } from "../lib/useDocumentTitle";
@@ -36,6 +37,15 @@ describe("document title", () => {
 
     renderApp("/courses/1/quizzes");
     await vi.waitFor(() => expect(document.title).toBe("Quizzes · ECE 1000 · PACT"));
+  });
+
+  it("a section header mounted later keeps the course page's title", () => {
+    document.title = "Start · ECE 1000 · PACT";
+    const section = render(<PageHeader title="Modules" />);
+    expect(document.title).toBe("Start · ECE 1000 · PACT");
+    section.unmount();
+    render(<PageHeader title="My courses" level={1} />);
+    expect(document.title).toBe("My courses · PACT");
   });
 });
 

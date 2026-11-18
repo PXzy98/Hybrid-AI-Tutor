@@ -8,9 +8,12 @@ export function documentTitle(page?: string | null, courseCode?: string | null):
   return [page, courseCode, PRODUCT].filter((p, i, all): p is string => !!p && all.indexOf(p) === i).join(" · ");
 }
 
-/** Sets document.title while the page is shown, so a screen reader announces the new page after navigating. */
+/** Sets document.title while the page is shown, so a screen reader announces the new page after navigating.
+ *  `undefined` leaves the title alone (a section header mounted later must not overwrite the page's title);
+ *  `null` sets just the product name. */
 export function useDocumentTitle(page?: string | null, courseCode?: string | null) {
   useEffect(() => {
+    if (page === undefined) return;
     document.title = documentTitle(page, courseCode);
   }, [page, courseCode]);
 }
