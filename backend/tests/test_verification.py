@@ -153,6 +153,21 @@ async def test_missing_referral_is_appended(services):
     ("See <img src='https://tracker.example/p.png' alt='a lung'> here.", "See a lung here."),
     ("See <IMG src=https://tracker.example/p.png> here.", "See  here."),
     ("A [link](https://example.org) stays.", "A [link](https://example.org) stays."),
+    # code is shown as literal text, so image examples there stay
+    ("Write `![plot](plot.png)` to show ![a plot](https://tracker.example/p.png).",
+     "Write `![plot](plot.png)` to show a plot."),
+    ("Use ``a ` and ![x](y.png)`` here.", "Use ``a ` and ![x](y.png)`` here."),
+    ("```html\n<img src=\"logo.png\" alt=\"Course logo\">\n```\nAfter ![x](https://t.example/x.png)",
+     "```html\n<img src=\"logo.png\" alt=\"Course logo\">\n```\nAfter x"),
+    ("~~~~\n![a](a.png)\n~~~\n![b](b.png)\n~~~~\n![c](https://t.example/c.png)",
+     "~~~~\n![a](a.png)\n~~~\n![b](b.png)\n~~~~\nc"),
+    ("```\n![open](o.png) without a closing fence", "```\n![open](o.png) without a closing fence"),
+    ("Example:\n\n    <img src=\"a.png\" alt=\"A\">\n\nDone ![b](https://t.example/b.png)",
+     "Example:\n\n    <img src=\"a.png\" alt=\"A\">\n\nDone b"),
+    # not code: an indented line right after a paragraph, inside a list item, or a lone backtick
+    ("Text\n    ![a](https://t.example/a.png)", "Text\n    a"),
+    ("- item\n\n    ![a](https://t.example/a.png)", "- item\n\n    a"),
+    ("A ` then ![a](https://t.example/a.png)", "A ` then a"),
 ])
 def test_strip_images_keeps_the_alt_text(answer, plain):
     from app.core.markdown import strip_images
