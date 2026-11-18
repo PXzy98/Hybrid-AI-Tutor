@@ -15,6 +15,7 @@ import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/i18n";
+import { useFormat } from "@/lib/format";
 import type { MessageKey } from "@/i18n/en";
 
 const GOALS = ["basic", "intermediate", "advanced"] as const;
@@ -80,6 +81,7 @@ export default function Students({ course }: { course: Course }) {
 
 function StudentDetail({ course, studentId, name }: { course: Course; studentId: string; name: string }) {
   const { t } = useI18n();
+  const fmt = useFormat();
   const overview = useQuery({
     queryKey: ["overview", course.id, studentId],
     queryFn: () => api.studentOverview(course.id, studentId),
@@ -96,7 +98,7 @@ function StudentDetail({ course, studentId, name }: { course: Course; studentId:
     <section aria-label={t("students.detail", { name })} className="space-y-5 p-6">
       <div className="space-y-1 pr-8">
         <SheetTitle className="text-base font-semibold">{name || t("students.detailFallback")}</SheetTitle>
-        {shown && <p className="text-sm text-muted-foreground">{t("students.since", { date: new Date(shown.visible_since).toLocaleDateString() })}</p>}
+        {shown && <p className="text-sm text-muted-foreground">{t("students.since", { date: fmt.date(shown.visible_since) })}</p>}
       </div>
         {overview.isLoading && <Loading variant="table" />}
         {notVisible && (
@@ -114,7 +116,7 @@ function StudentDetail({ course, studentId, name }: { course: Course; studentId:
             <div className="grid gap-3 text-sm sm:grid-cols-3">
               <p className="rounded-lg border p-3"><span className="block text-xs text-muted-foreground">{t("students.checks")}</span> <strong className="text-lg tabular-nums">{shown.checks_answered ?? 0}</strong></p>
               <p className="rounded-lg border p-3"><span className="block text-xs text-muted-foreground">{t("students.misconceptions")}</span> <strong className="text-lg tabular-nums">{shown.open_misconceptions ?? 0}</strong></p>
-              <p className="rounded-lg border p-3"><span className="block text-xs text-muted-foreground">{t("students.lastActive")}</span> <strong className="text-lg">{shown.last_active ? new Date(shown.last_active).toLocaleDateString() : "—"}</strong></p>
+              <p className="rounded-lg border p-3"><span className="block text-xs text-muted-foreground">{t("students.lastActive")}</span> <strong className="text-lg">{shown.last_active ? fmt.date(shown.last_active) : "—"}</strong></p>
             </div>
             <p className="text-sm">
               <span className="text-muted-foreground">{t("students.preferences")}</span>{" "}

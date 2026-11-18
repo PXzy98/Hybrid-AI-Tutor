@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useI18n } from "@/i18n";
+import { useFormat } from "@/lib/format";
 
 export const endpointsKey = (courseId: number | null) => ["model-endpoints", courseId] as const;
 
@@ -20,6 +21,7 @@ export const endpointsKey = (courseId: number | null) => ["model-endpoints", cou
  * key is never sent to the browser: only whether one is set and its last four characters. */
 export default function ModelEndpoints({ courseId }: { courseId: number | null }) {
   const { t } = useI18n();
+  const fmt = useFormat();
   const qc = useQueryClient();
   const list = useQuery({ queryKey: endpointsKey(courseId), queryFn: () => api.modelEndpoints(courseId) });
   const remove = useMutation({
@@ -58,7 +60,7 @@ export default function ModelEndpoints({ courseId }: { courseId: number | null }
                   <TableCell>
                     {e.api_key_last4 ? t("models.keySet", { last4: e.api_key_last4 }) : t("models.keyNone")}
                     <br /><span className="text-xs text-muted-foreground">{e.last_test_ok_at
-                      ? t("models.lastTest", { date: new Date(e.last_test_ok_at).toLocaleString() })
+                      ? t("models.lastTest", { date: fmt.dateTime(e.last_test_ok_at) })
                       : t("models.neverTested")}</span>
                   </TableCell>
                   <TableCell className="space-x-1 text-right">
@@ -143,7 +145,7 @@ function EndpointDialog({ courseId, endpoint }: { courseId: number | null; endpo
             </label>
           )}
           <div className="grid gap-1.5"><Label htmlFor={`${p}-key`}>{t("models.apiKey")}</Label>
-            <Input id={`${p}-key`} type="password" autoComplete="off" value={form.api_key} onChange={set("api_key")} maxLength={500} />
+            <Input id={`${p}-key`} type="password" autoComplete="new-password" data-1p-ignore data-lpignore="true" value={form.api_key} onChange={set("api_key")} maxLength={500} />
             <p className="text-xs text-muted-foreground">{t(endpoint ? "models.keyKeep" : "models.keyOptional")}</p></div>
           <ErrorNote error={save.error} />
           <DialogFooter><Button loading={save.isPending} type="submit" disabled={save.isPending}>{save.isPending ? t("settings.saving") : t("settings.save")}</Button></DialogFooter>

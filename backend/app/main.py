@@ -54,7 +54,9 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="PACT: Privacy-Aware Course Tutor",
         version="0.1.0",
-        description="Health-education tutor with a local learner model. Design: docs/System_Design_v3.md",
+        description=("Course tutor that keeps student data private: a local model the course controls, "
+                     "a cloud model only for de-identified text, and a local learner model. "
+                     "Design: docs/v4-implementation-guide.md"),
         lifespan=lifespan,
     )
     # innermost first: CSRF (API v2 only, app.auth.csrf), then the metrics (Z13; requests refused by CSRF are

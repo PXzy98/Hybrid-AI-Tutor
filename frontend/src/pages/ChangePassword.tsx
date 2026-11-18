@@ -57,12 +57,12 @@ export default function ChangePassword() {
         </div>
         <div className="grid gap-1.5">
           <Label htmlFor="pw-new">{t("pw.new")}</Label>
-          <Input id="pw-new" className="h-10" aria-describedby={local ? "pw-local" : "pw-hint"} aria-invalid={local ? true : undefined} type="password" autoComplete="new-password" value={next} onChange={(e) => setNext(e.target.value)} required />
+          <Input id="pw-new" className="h-10" aria-describedby={local ? "pw-local" : "pw-hint"} aria-invalid={local ? true : undefined} type="password" autoComplete="new-password" minLength={MIN_LENGTH} value={next} onChange={(e) => setNext(e.target.value)} required />
           <p id="pw-hint" className="text-xs text-muted-foreground">{t("pw.hint", { n: MIN_LENGTH })}</p>
         </div>
         <div className="grid gap-1.5">
           <Label htmlFor="pw-repeat">{t("pw.repeat")}</Label>
-          <Input id="pw-repeat" className="h-10" type="password" autoComplete="new-password" value={repeat} onChange={(e) => setRepeat(e.target.value)} required />
+          <Input id="pw-repeat" className="h-10" type="password" autoComplete="new-password" minLength={MIN_LENGTH} value={repeat} onChange={(e) => setRepeat(e.target.value)} required />
         </div>
         {local && <Alert variant="destructive" role="alert" id="pw-local" icon>{local}</Alert>}
         <ErrorNote error={error} id="pw-error" />
