@@ -195,6 +195,35 @@ def test_server_check_endpoint(dash, monkeypatch):
     assert r.status_code == 200 and r.json()["model_available"] is True
 
 
+def test_the_vllm_key_only_goes_to_the_deployments_vllm(dash, monkeypatch):
+    monkeypatch.setenv("VLLM_KEY", "fictional-key")
+    api = dash()  # the test app's VLLM_BASE_URL is http://127.0.0.1:9/v1
+    seen = []
+
+    async def fake(url, model, api_key=None):
+        seen.append((url, api_key))
+        return await check_server(url, model, api_key, _vllm(["Qwen3.5-9B"]))
+    monkeypatch.setattr("app.api.v1.admin.check_server", fake)
+    for url in ("http://127.0.0.1:9/v1/", "http://attacker.example/v1", "http://127.0.0.1:10/v1"):
+        r = api.client.post(f"{ADMIN}/llm-server/test", json={"url": url, "model": "Qwen3.5-9B"})
+        assert r.status_code == 200, r.text
+    assert [key for _, key in seen] == ["fictional-key", None, None]
+
+
+def test_a_changed_local_model_address_does_not_get_the_vllm_key():
+    from pydantic import SecretStr
+
+    from app.core.config import get_settings
+    from app.platform.components import component_settings
+
+    base = get_settings().model_copy(update={"vllm_base_url": "http://127.0.0.1:9/v1",
+                                             "vllm_key": SecretStr("fictional-key")})
+    same = component_settings(base, {"local_llm_url": "http://127.0.0.1:9/v1/"})
+    assert same.vllm_key and same.vllm_key.get_secret_value() == "fictional-key"
+    other = component_settings(base, {"local_llm_url": "http://attacker.example/v1"})
+    assert other.vllm_base_url == "http://attacker.example/v1" and other.vllm_key is None
+
+
 # ------------------------------------------------------------------------------ class summary
 def test_suppression_rules():
     assert suppress({"basic": 7, "intermediate": 0, "advanced": 6}, 5) == {"basic": 7, "intermediate": 0,

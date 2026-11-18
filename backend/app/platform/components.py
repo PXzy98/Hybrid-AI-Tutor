@@ -96,6 +96,9 @@ def component_settings(base: Settings, values: dict) -> Settings:
     update = {}
     if values.get("local_llm_url"):
         update["vllm_base_url"] = values["local_llm_url"]
+        if (values["local_llm_url"].strip().rstrip("/").lower()
+                != (base.vllm_base_url or "").strip().rstrip("/").lower()):
+            update["vllm_key"] = None  # the deployment's key only goes to the deployment's own vLLM
     if values.get("local_llm_model") and values["local_llm_model"] != llm["local"]["model"]:
         if llm["understand"]["model"] == llm["local"]["model"]:  # understand follows the answer model
             llm["understand"]["model"] = values["local_llm_model"]
