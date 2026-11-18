@@ -11,12 +11,14 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, Di
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useI18n } from "@/i18n";
+import { useFormat } from "@/lib/format";
 
 /** End of term: the instructor can first take an export and check it (nothing is deleted); ending the term
  * writes a final export and then deletes the course's student data. The instructor confirms by typing the
  * course code; exports can be downloaded until they expire. */
 export default function EndOfTerm({ course }: { course: Course }) {
   const { t } = useI18n();
+  const fmt = useFormat();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [typed, setTyped] = useState("");
@@ -57,7 +59,7 @@ export default function EndOfTerm({ course }: { course: Course }) {
             {early.data && (
               <div role="status" className="space-y-2 text-sm">
                 <p>{t("end.previewReady", { exported: early.data.students_exported })}</p>
-                <p>{t("end.expires", { date: new Date(early.data.expires_at).toLocaleString() })}</p>
+                <p>{t("end.expires", { date: fmt.dateTime(early.data.expires_at) })}</p>
                 <Button type="button" onClick={() => save.mutate(early.data.export_id)} disabled={save.isPending}>
                   <Download aria-hidden />{t("end.download")}
                 </Button>
@@ -87,7 +89,7 @@ export default function EndOfTerm({ course }: { course: Course }) {
                   </DialogHeader>
                   <div className="grid gap-1.5">
                     <Label htmlFor="end-code">{t("end.typeCode", { code: course.code })}</Label>
-                    <Input id="end-code" value={typed} onChange={(e) => setTyped(e.target.value)} autoComplete="off" />
+                    <Input id="end-code" value={typed} onChange={(e) => setTyped(e.target.value)} autoComplete="off" autoCapitalize="off" autoCorrect="off" spellCheck={false} />
                   </div>
                   <ErrorNote error={end.error} />
                   <DialogFooter>
@@ -106,7 +108,7 @@ export default function EndOfTerm({ course }: { course: Course }) {
         <Alert variant="info" role="status" className="space-y-3">
           <p className="font-medium">{t("end.done")}</p>
           <p>{t("end.result", { exported: done.students_exported, removed: done.students_removed })}</p>
-          <p>{t("end.expires", { date: new Date(done.expires_at).toLocaleString() })}</p>
+          <p>{t("end.expires", { date: fmt.dateTime(done.expires_at) })}</p>
           <Button type="button" onClick={() => save.mutate(done.export_id)} disabled={save.isPending}><Download aria-hidden />{t("end.download")}</Button>
           <ErrorNote error={save.error} />
         </Alert>
