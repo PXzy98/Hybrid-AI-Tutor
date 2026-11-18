@@ -41,6 +41,11 @@ understand 1 to 2 s, rewrite 0.8 s, health check 0.3 s.
   answer took 9.9 s instead of 1.4 s). Ollama connections send `think: false`; trusted local OpenAI-compatible
   connections (vLLM) send `chat_template_kwargs: {"enable_thinking": false}`. External connections send neither,
   since hosted APIs reject unknown fields.
+- **Structured answers** (understand, instructor AI drafts): Ollama gets the JSON schema as `format`; trusted local
+  OpenAI-compatible connections (vLLM) get it as `response_format: json_schema`, so the server constrains the
+  answer to it (with only `json_object` the model made up its own field names; #99). External connections get
+  `json_object`. A caller may ask for more output tokens than the connection's limit for one call
+  (`gateway.complete(..., max_tokens=...)`); structure drafts ask for 4,096.
 
 ## API
 
