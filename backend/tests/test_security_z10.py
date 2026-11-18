@@ -197,3 +197,16 @@ def test_reservations_are_atomic_and_can_be_given_back(meter):
         day = db.exec(select(UsageCounter).where(UsageCounter.student_id == "sid-r",
                                                  UsageCounter.period == "day")).one()
     assert (day.count, day.tokens) == (2, 7)
+
+
+def test_api_responses_are_not_cached_and_logout_clears_the_cache(make_client):
+    with make_client() as client:
+        client.app.state.services.accounts.create_instructor("prof", PASSWORD, must_change=False)
+        assert client.post(f"{V2}/auth/login", json=LOGIN).status_code == 200
+        me = client.get(f"{V2}/auth/me")
+        assert me.status_code == 200 and me.headers["cache-control"] == "no-store"
+        assert client.get(f"{V2}/courses").headers["cache-control"] == "no-store"
+        assert client.get("/api/v1/health").headers["cache-control"] == "no-store"
+        out = client.post(f"{V2}/auth/logout")
+        assert out.status_code == 204 and out.headers["clear-site-data"] == '"cache"'  # not "storage"
+        assert client.get("/metrics").headers.get("cache-control") != "no-store"  # not under /api

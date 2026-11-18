@@ -134,6 +134,8 @@ def logout(request: Request, response: Response, services: ServicesDep):
     services.accounts.logout(request.cookies.get(cfg.cookie_name))
     response.delete_cookie(cfg.cookie_name, path="/")
     response.delete_cookie(csrf.ANON_COOKIE, path="/")
+    # "cache" only: "storage" would also wipe the theme and language preferences kept in localStorage
+    response.headers["Clear-Site-Data"] = '"cache"'
 
 
 @router.post("/logout-all", status_code=status.HTTP_204_NO_CONTENT, operation_id="auth_logout_all")
