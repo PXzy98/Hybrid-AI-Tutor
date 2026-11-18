@@ -1,6 +1,11 @@
 # Privacy-Aware Hybrid AI Tutor: System Design v3 (Adaptive Learner Modelling)
 
 Oct 11, 2026 · Zhenyan Xing · ELG 5902, Group 1
+
+> **Status (2026-11-17).** This is the design of v3 (one health-education course). Still in force: the content
+> format (§4), the request and response models (§9) and the pre-registered evaluation targets (§11). Replaced by
+> v4: courses, roles, settings, the model gateway, deployment and the product name (PACT) — see
+> [v4-implementation-guide.md](v4-implementation-guide.md) and [design/](design/).
 Replaces System Plan v2 (Oct 6, 2026). Diagrams: [`docs/diagrams/`](diagrams/) (`.drawio` files are editable in draw.io; `.png` files are exports).
 **Revision Oct 12, 2026:** student and instructor accounts. The instructor manages student accounts, and identity is kept apart from the learner profile (§2, §7.5, §8.1, §8.3, §9).
 

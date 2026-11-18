@@ -10,7 +10,8 @@ multi-course product ("v4").
 2. [docs/design/course-structure.md](docs/design/course-structure.md) and
    [docs/design/api-v2.md](docs/design/api-v2.md) when your task touches courses, accounts, learner data,
    settings, the database or the HTTP API.
-3. [docs/IMPLEMENTATION_LOG.md](docs/IMPLEMENTATION_LOG.md) for how the current code came about.
+3. [docs/HANDOVER.md](docs/HANDOVER.md) for where the work stands; how the v3 code came about is in
+   [docs/history/IMPLEMENTATION_LOG.md](docs/history/IMPLEMENTATION_LOG.md).
 
 **Test and demo courses**: evaluations, test question sets, integration tests that need real course
 material, and demos use the eight open courses of [data/demo_courses/README.md](data/demo_courses/README.md);
