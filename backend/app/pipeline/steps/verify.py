@@ -1,5 +1,6 @@
 import logging
 
+from app.core.markdown import strip_images
 from app.core.registry import checkers, import_submodules, steps
 from app.core.schemas import CheckResult, RequestContext
 from app.learner.misconceptions import append_corrections
@@ -88,6 +89,8 @@ class VerifyStep(BaseStep):
                                                        detail="safe fallback message")]
         if self._status(ctx.checks, "medical_safety") == "warn":
             ctx.answer = (ctx.answer or "").rstrip() + "\n\n" + REFERRAL
+        if ctx.answer:
+            ctx.answer = strip_images(ctx.answer)  # the last word on the text; also covers a regenerated one
         for r in ctx.checks:
             if r.status == "fail" and r.name in ("pii_leak", "profile_leak"):
                 log.error("%s check failed (%s), request=%s", r.name, r.detail, ctx.request_id)

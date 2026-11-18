@@ -1,7 +1,7 @@
 # Accessibility self-check (task T11)
 
-Scope: the v2 frontend (`frontend/`), checked against WCAG 2.1 level AA. Date: 2026-11-13. Renaming is a separate,
-open part of T11.
+Scope: the v2 frontend (`frontend/`), checked against WCAG 2.1 level AA. Date: 2026-11-13. Renaming (to PACT) was
+the other part of T11 (#101).
 
 ## How it was checked
 

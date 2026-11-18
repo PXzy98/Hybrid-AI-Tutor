@@ -1,5 +1,10 @@
 # Privacy subsystem: problem definition, concepts, detailed design and MVP test
 
+> **Status (2026-11-17).** A report of 4 Nov 2026; numbers and design are as of that date. The product is now
+> named PACT (Privacy-Aware Course Tutor). Later changes: the subject prompt and checkers per course type
+> ([../PRIVACY_PROFILES.md](../PRIVACY_PROFILES.md), Z16) and the local calls through the model gateway
+> ([../MODEL_CONNECTIONS.md](../MODEL_CONNECTIONS.md), Z17).
+
 Report section for Deliverable B (GNG/ELG 5902, Group 1). Covers B1–B4 for the privacy subsystem of the
 Privacy-Aware Hybrid AI Tutor. All test data is fictional. Numbers come from `eval/privacy-filter/` (E6) and
 `eval/privacy-audit/` (E4), run on 2026-10-19; see `eval/privacy-filter/README.md` to re-run them. The design

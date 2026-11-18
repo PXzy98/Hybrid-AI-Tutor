@@ -50,16 +50,28 @@ async def _csrf(request: Request, call_next):
     return await call_next(request)
 
 
+async def _no_store(request: Request, call_next):
+    """API responses carry personal data: shared computers must not keep them in the HTTP cache (audit S3).
+    A response that sets its own Cache-Control (the answer streams, the export) keeps it."""
+    response = await call_next(request)
+    if request.url.path.startswith("/api/") and "cache-control" not in response.headers:
+        response.headers["Cache-Control"] = "no-store"
+    return response
+
+
 def create_app() -> FastAPI:
     app = FastAPI(
         title="PACT: Privacy-Aware Course Tutor",
         version="0.1.0",
-        description="Health-education tutor with a local learner model. Design: docs/System_Design_v3.md",
+        description=("Course tutor that keeps student data private: a local model the course controls, "
+                     "a cloud model only for de-identified text, and a local learner model. "
+                     "Design: docs/v4-implementation-guide.md"),
         lifespan=lifespan,
     )
-    # innermost first: CSRF (API v2 only, app.auth.csrf), then the metrics (Z13; requests refused by CSRF are
-    # counted too, streamed answers until their last byte), then CORS around everything
+    # innermost first: CSRF (API v2 only, app.auth.csrf), then Cache-Control (S3), then the metrics (Z13;
+    # requests refused by CSRF are counted too, streamed answers until their last byte), then CORS around all
     app.middleware("http")(_csrf)
+    app.middleware("http")(_no_store)
     app.add_middleware(metrics.MetricsMiddleware)
     app.add_middleware(CORSMiddleware, allow_origins=DEV_ORIGINS, allow_credentials=True,  # session cookie
                        allow_methods=["*"], allow_headers=["*"])
