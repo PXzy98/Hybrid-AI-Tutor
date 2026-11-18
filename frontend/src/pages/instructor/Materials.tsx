@@ -48,7 +48,7 @@ export default function Materials({ course }: { course: Course }) {
       <ErrorNote error={materials.error} />
       {rebuilding && (
         <Alert variant="info" role="status" className="flex items-center gap-2">
-          <Loader2 aria-hidden className="size-4 animate-spin text-info" />{t("materials.rebuilding")}
+          <Loader2 aria-hidden className="size-4 animate-spin motion-reduce:animate-none text-info" />{t("materials.rebuilding")}
         </Alert>
       )}
       {jobStatus === "failed" && <Alert variant="destructive" role="alert" icon>{t("materials.rebuildFailed")}</Alert>}

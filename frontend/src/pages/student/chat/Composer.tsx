@@ -51,7 +51,7 @@ export default function Composer({ ref, value, onChange, onSubmit, onStop, pendi
                   onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing
                       && e.nativeEvent.keyCode !== 229) onSubmit(e); }}  // Safari ends the composition before the Enter that confirms it
                   style={{ maxHeight: MAX_HEIGHT }}
-                  className="block w-full resize-none overflow-y-auto [field-sizing:content] bg-transparent px-4 pt-3.5 pb-1 text-[0.9375rem] leading-7 outline-none placeholder:text-muted-foreground" />
+                  className="block w-full resize-none overflow-y-auto [field-sizing:content] bg-transparent px-4 pt-3.5 pb-1 text-[0.9375rem] leading-7 outline-hidden placeholder:text-muted-foreground" />
         <div className="flex items-center gap-2 px-3 pt-1 pb-2.5">
           <Badge variant="secondary" className="max-w-[60%] truncate font-normal">{scopeLabel}</Badge>
           <div className="ml-auto">

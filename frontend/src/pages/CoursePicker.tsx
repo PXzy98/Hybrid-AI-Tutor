@@ -27,7 +27,7 @@ export default function CoursePicker() {
         {courses.data?.map((c) => (
           <li key={c.id}>
             <Link to={`/courses/${c.id}`}
-                  className="group flex h-full flex-col gap-3 rounded-xl border bg-card p-4 transition-colors outline-none hover:border-foreground/20 hover:bg-accent/40 focus-visible:ring-2 focus-visible:ring-ring">
+                  className="group flex h-full flex-col gap-3 rounded-xl border bg-card p-4 transition-colors outline-hidden hover:border-foreground/20 hover:bg-accent/40 focus-visible:ring-2 focus-visible:ring-ring">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <h3 className="text-sm font-semibold">{c.code}</h3>

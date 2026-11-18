@@ -144,7 +144,7 @@ function DraftDetail({ course, id, onGone }: { course: Course; id: number; onGon
         <CardDescription>{d.status === "draft" ? t("ai.notVisible") : d.status === "accepted" ? t("ai.acceptedNote") : ""}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {d.status === "generating" && <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 aria-hidden className="size-4 animate-spin" />{t("ai.generating")}</p>}
+        {d.status === "generating" && <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 aria-hidden className="size-4 animate-spin motion-reduce:animate-none" />{t("ai.generating")}</p>}
         {d.status === "failed" && <Alert variant="destructive" role="alert" icon>{t("ai.failed")}{d.error ? ` ${d.error}` : ""}</Alert>}
         {!!d.cited_sources.length && (
           <div className="text-sm">
@@ -249,7 +249,7 @@ function DraftStatus({ status }: { status: AiDraftStatus }) {
   const { t } = useI18n();
   return (
     <Badge variant={DRAFT_VARIANT[status]}>
-      {status === "generating" && <Loader2 aria-hidden className="animate-spin" />}
+      {status === "generating" && <Loader2 aria-hidden className="animate-spin motion-reduce:animate-none" />}
       {t(`ai.status.${status}` as MessageKey)}
     </Badge>
   );

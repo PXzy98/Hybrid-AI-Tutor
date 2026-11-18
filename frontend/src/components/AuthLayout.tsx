@@ -2,12 +2,14 @@ import type { ReactNode } from "react";
 
 import { BrandMark } from "@/components/shell/Sidebar";
 import { LanguageSwitch } from "@/i18n";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 /** The pages outside the app shell (log in, join): a narrow centred column on the sidebar surface, the brand and
  *  the page h1 above the card, the language switch in the corner. */
 export default function AuthLayout({ title, titleId, description, language = true, below, children }: {
   title: string; titleId: string; description?: ReactNode; language?: boolean; below?: ReactNode; children: ReactNode;
 }) {
+  useDocumentTitle(title);
   return (
     <main className="relative flex min-h-dvh flex-col items-center justify-center bg-sidebar px-4 py-16">
       {language && <div className="absolute top-4 right-4"><LanguageSwitch /></div>}

@@ -29,7 +29,7 @@ export default function RoutingProgress({ trace }: { trace: RoutingTrace }) {
   const { t } = useI18n();
   useEffect(() => {
     if (!trace.running) return;
-    const timer = window.setInterval(() => setNow(Date.now()), 100);
+    const timer = window.setInterval(() => setNow(Date.now()), 200);
     return () => window.clearInterval(timer);
   }, [trace.running]);
   const events = latestEvents(trace.events);
@@ -40,7 +40,7 @@ export default function RoutingProgress({ trace }: { trace: RoutingTrace }) {
     <section aria-label={t("routing.region")} aria-live="off" className="w-full rounded-xl border bg-card px-4 py-3">
       <div className="mb-3 flex items-center justify-between gap-3 text-sm">
         <strong>{t("routing.title", { method: trace.method.toUpperCase() })}</strong>
-        <span className="tabular-nums text-muted-foreground">{t(trace.running ? "routing.running" : trace.error ? "routing.failed" : "routing.finished")} · {(elapsed / 1000).toFixed(2)} s</span>
+        <span aria-hidden={trace.running || undefined} className="tabular-nums text-muted-foreground">{t(trace.running ? "routing.running" : trace.error ? "routing.failed" : "routing.finished")} · {(elapsed / 1000).toFixed(2)} s</span>
       </div>
       <ol className="relative space-y-2.5 before:absolute before:top-1.5 before:bottom-1.5 before:left-[5px] before:w-px before:bg-border">
         {STAGES.map((id) => {
@@ -79,7 +79,7 @@ export default function RoutingProgress({ trace }: { trace: RoutingTrace }) {
 /** The timeline dot of a stage. The status word next to it carries the meaning; the dot only repeats it. */
 function StageDot({ state }: { state: string }) {
   const base = "absolute top-0.5 left-0 flex size-[11px] items-center justify-center rounded-full";
-  if (state === "running") return <Loader2 aria-hidden className={`${base} animate-spin bg-card text-primary`} />;
+  if (state === "running") return <Loader2 aria-hidden className={`${base} animate-spin motion-reduce:animate-none bg-card text-primary`} />;
   if (state === "completed") return <span aria-hidden className={`${base} bg-primary`} />;
   if (state === "failed") return <span aria-hidden className={`${base} bg-destructive`} />;
   if (state === "skipped") return <span aria-hidden className={`${base} bg-card`}><span className="h-px w-1.5 bg-muted-foreground" /></span>;
