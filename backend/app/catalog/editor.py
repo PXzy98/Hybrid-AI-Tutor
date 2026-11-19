@@ -28,6 +28,7 @@ from app.storage.models import CatalogMisconception, CheckItem, Course, Kc, KcPr
 
 STATUSES = ("draft", "active", "retired")
 _FILES = ("kcs.yaml", "items.yaml", "misconceptions.yaml")
+COURSE_FILE = "course.yaml"  # top level of the content ZIP: the course guideline (Z26)
 
 
 class CatalogNotFound(CatalogError):
@@ -364,7 +365,8 @@ class CatalogEditor:
 
     # ----------------------------------------------------------------------------- YAML import/export
     def export_zip(self, course_id: int) -> bytes:
-        """Every module with its KCs (retired ones too, with their status), items and misconceptions."""
+        """Every module with its KCs (retired ones too, with their status), items and misconceptions, and the
+        course's guideline for the tutor in `course.yaml` (Z26)."""
         with self._db() as db:
             course = db.get(Course, course_id)
             if course is None:
@@ -383,6 +385,8 @@ class CatalogEditor:
             prereqs.setdefault(e.kc_id, []).append(codes[e.prerequisite_id])
         buffer = io.BytesIO()
         with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+            if course.guideline:
+                zf.writestr(COURSE_FILE, yaml.safe_dump({"guideline": course.guideline}, allow_unicode=True))
             for m in modules:
                 own = [k for k in kcs if k.module_id == m.id]
                 ids = {k.id for k in own}
@@ -403,6 +407,7 @@ class CatalogEditor:
         """The seed layout into a course without content; one module per folder, ordered by the exported
         `position` (folder name otherwise). A module without KCs (exported before its first KC) is kept."""
         folders = _read_zip(data, max_bytes)
+        course_doc = _read_course_doc(data, max_bytes)
         topics: list[TopicContent] = []
         retired: set[str] = set()
         docs = {}
@@ -451,6 +456,11 @@ class CatalogEditor:
             for position, tp in enumerate(topics):  # the file's order, empty modules included
                 modules[tp.topic].position = position
                 db.add(modules[tp.topic])
+            guideline = course_doc.get("guideline")
+            if isinstance(guideline, str) and guideline.strip():
+                course = db.get(Course, course_id)
+                course.guideline = guideline.strip()[:4000]
+                db.add(course)
             for kc in db.exec(select(Kc).where(Kc.course_id == course_id, col(Kc.code).in_(retired))).all():
                 kc.status = "retired"
                 db.add(kc)
@@ -472,6 +482,24 @@ def _with_status(row) -> dict:
     if row["status"] not in STATUSES:
         raise CatalogError(f"unknown status {row['status']!r}")
     return row
+
+
+def _read_course_doc(data: bytes, max_bytes: int) -> dict:
+    """The top-level `course.yaml` of a content ZIP (the course's guideline), or {} without one."""
+    with zipfile.ZipFile(io.BytesIO(data)) as zf:
+        if COURSE_FILE not in zf.namelist():
+            return {}
+        with zf.open(COURSE_FILE) as f:
+            raw = f.read(max_bytes + 1)
+    if len(raw) > max_bytes:
+        raise CatalogError("the unpacked files are too large")
+    try:
+        doc = yaml.safe_load(raw.decode("utf-8"))
+    except (UnicodeDecodeError, yaml.YAMLError) as e:
+        raise CatalogError(f"{COURSE_FILE}: not valid UTF-8 YAML ({type(e).__name__})") from None
+    if doc is not None and not isinstance(doc, dict):
+        raise CatalogError(f"{COURSE_FILE} must be a mapping")
+    return doc or {}
 
 
 def _read_zip(data: bytes, max_bytes: int) -> dict[str, dict]:

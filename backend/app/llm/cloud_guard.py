@@ -9,8 +9,8 @@ from app.prompts import render_cloud
 
 
 def build_cloud_request(ctx: RequestContext) -> CloudRequest:
-    """Allow-list: sanitized question, topic, course passages, coarse labels, the subject prompt's name.
-    Nothing else."""
+    """Allow-list: sanitized question, topic, course passages, coarse labels, the subject prompt's name, the
+    instructor's guidelines. Nothing else."""
     if ctx.pii is None:
         raise ValueError("no privacy filter result: refusing to build a cloud request")
     learner = ctx.learner if ctx.learner and ctx.learner.personalized else LearnerContext()
@@ -21,6 +21,7 @@ def build_cloud_request(ctx: RequestContext) -> CloudRequest:
         labels=learner.to_cloud_labels(),
         language=ctx.request.language,
         subject=ctx.profile.prompt if ctx.profile else "general",
+        guidelines=list(ctx.guidelines),
     )
 
 

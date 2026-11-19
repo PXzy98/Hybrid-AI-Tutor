@@ -12,7 +12,8 @@ ARCHIVES = Path(__file__).resolve().parents[2] / "data" / "demo_courses" / "arch
 EXPECTED = {
     "medical_science": {"mit_hst151_pharmacology", "mit_hst035_pathology"},
     "life_science": {"mit_7_03_genetics", "mit_7_016_intro_biology"},
-    "ece": {"mit_6_002_circuits", "mit_res_6_007_signals", "mit_6_006_algorithms", "harvard_cs50x"},
+    "ece": {"mit_6_002_circuits", "mit_res_6_007_signals"},
+    "computer_science": {"mit_6_006_algorithms", "harvard_cs50x"},
 }
 NAMES = sorted(set().union(*EXPECTED.values()))
 
@@ -30,6 +31,16 @@ def unpacked(tmp_path_factory) -> Path:
 
 def _manifest(pack: Path) -> dict:
     return json.loads((pack / "manifest.json").read_text(encoding="utf-8"))
+
+
+def test_computer_science_courses_get_the_computing_prompt():
+    """S16: CS50x answered a recursion question with "electrical and computer engineering" knowledge."""
+    from app.prompts import system_prompt
+
+    cs, ece = privacy_profile("computer_science"), privacy_profile("ece")
+    assert cs.prompt == "computing" and "computer science course" in system_prompt(subject=cs.prompt)
+    assert "electrical" not in system_prompt(subject=cs.prompt)
+    assert sorted(cs.recognizers) == sorted(ece.recognizers)  # the same privacy rules as ece (E6 ece set)
 
 
 def test_two_courses_per_area_and_nothing_else(unpacked):

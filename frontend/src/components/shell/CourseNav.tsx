@@ -28,7 +28,7 @@ export default function CourseNav({ course, student, tab }: { course: Course; st
   const conversations = useQuery({ queryKey: ["conversations", courseId], queryFn: () => api.conversations(courseId), enabled: student });
   const activeModule = params.get("module");
   const activeConversation = params.get("c");
-  const current = activeSection(student, tab);
+  const current = activeSection(student, tab, course.individual_view);
   const chatPath = `/courses/${courseId}/chat`;
 
   function open(next: Record<string, string | null>) {
@@ -47,7 +47,7 @@ export default function CourseNav({ course, student, tab }: { course: Course; st
         </button>
       )}
       <nav aria-label={t(student ? "dash.student" : "dash.instructor")}>
-        {sectionGroups(student).map((group, i) => (
+        {sectionGroups(student, course.individual_view).map((group, i) => (
           <div key={group.label ?? i}>
             {group.label && <GroupLabel>{t(group.label)}</GroupLabel>}
             <ul className="space-y-0.5">
