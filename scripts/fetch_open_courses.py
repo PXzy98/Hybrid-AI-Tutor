@@ -86,7 +86,7 @@ OCW_COURSES = [
          author="Alan V. Oppenheim, MIT OpenCourseWare", extra=("assignments",)),
     dict(pack="mit_6_006_algorithms", slug="6-006-introduction-to-algorithms-spring-2020",
          page="lecture-notes",
-         course_type="ece", code="MIT 6.006", title="Introduction to Algorithms (Spring 2020)",
+         course_type="computer_science", code="MIT 6.006", title="Introduction to Algorithms (Spring 2020)",
          author="Erik Demaine, Jason Ku, and Justin Solomon, MIT OpenCourseWare",
          extra=("calendar", "assignments", "quizzes"),
          skip=r"Recitation|Lecture 16:"),  # lecture 16 has no extractable text
@@ -274,7 +274,7 @@ def ocw_extra_page(c: dict, pack: Path, name: str) -> tuple[list[str], list[str]
 
 
 def build_cs50() -> dict:
-    c = dict(pack="harvard_cs50x", course_type="ece", code="Harvard CS50x",
+    c = dict(pack="harvard_cs50x", course_type="computer_science", code="Harvard CS50x",
              title="CS50's Introduction to Computer Science (2026)",
              author="David J. Malan, Harvard University",
              home=f"{CS50}/")
