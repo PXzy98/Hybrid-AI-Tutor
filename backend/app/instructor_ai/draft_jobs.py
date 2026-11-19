@@ -5,21 +5,26 @@
 material never leaves the course's server), and the result is stored on the `ai_draft` row as an editable
 draft. Nothing is visible to students until the instructor accepts it. No student data is used.
 """
+import shutil
+from pathlib import Path
+
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, TypeAdapter, ValidationError, field_validator
-from sqlmodel import Session, select
+from sqlmodel import Session, col, select
 
 from app.core.schemas import Chunk
 from app.instructor_ai import structure_drafts as tier2
 from app.instructor_ai.drafts import DraftError, generate_tier1_draft
 from app.instructor_ai.eval import passages as fallback_passages
 from app.platform import jobs
-from app.storage.models import AiDraft, Course, Kc, Module, utcnow
+from app.rag.documents import extract_text
+from app.storage.models import AiDraft, Course, Kc, Material, Module, utcnow
 
 GENERATE = "ai_draft.generate"
-TIER1 = ("project_ideas", "sample_proposal", "faq")
+TIER1 = ("project_ideas", "sample_proposal", "faq", "custom")
 TIER2 = ("kcs", "check_items", "misconceptions")
 KINDS = (*TIER1, *TIER2)
 PASSAGES, PASSAGE_CHARS = 8, 1200
+CHOSEN_POOL = 40  # chosen files or modules (V5): ranked over the whole course, then filtered
 
 _QUERY = {
     "project_ideas": "project topic deliverable assignment proposal",
@@ -76,16 +81,63 @@ def parse_content(kind: str, content: dict) -> dict:
 
 
 # ------------------------------------------------------------------------------------------ the job
-def _passages(services, course_id: int, module: Module | None, query: str) -> list[Chunk]:
-    """Material of the module (and the course-level files), or of the whole course; scanned at upload."""
+def upload_path(data_root: Path, course_id: int, draft_id: int, name: str) -> Path:
+    """A file uploaded for one draft only (V6): kept until the draft job has read it."""
+    return data_root / "courses" / str(course_id) / "draft_uploads" / str(draft_id) / name
+
+
+def _upload_passages(path: Path, course_id: int, query: str) -> list[Chunk]:
+    """Passages of a file uploaded for this draft (scanned at upload): its paragraphs, the ones sharing the
+    most words with the query first, then in the file's order."""
+    text = extract_text(path)
+    pieces, current = [], ""
+    for paragraph in (p.strip() for p in text.split("\n\n")):
+        if not paragraph:
+            continue
+        if current and len(current) + len(paragraph) > PASSAGE_CHARS:
+            pieces.append(current)
+            current = ""
+        current = f"{current}\n\n{paragraph}".strip()
+    if current:
+        pieces.append(current)
+    words = {w for w in query.lower().split() if len(w) > 3}
+    ranked = sorted(enumerate(pieces), key=lambda ip: (-len(words & set(ip[1].lower().split())), ip[0]))
+    return [Chunk(text=piece[:PASSAGE_CHARS], source=path.name, topic=f"course:{course_id}", score=0.0,
+                  metadata={"course_id": course_id, "origin": "draft_upload"})
+            for _, piece in ranked[:PASSAGES]]
+
+
+def _chosen(engine, course_id: int, sources: dict):
+    """A filter for the chosen modules or files (V5), or None for the default scope."""
+    if sources.get("material_ids"):
+        with Session(engine) as db:
+            rows = db.exec(select(Material).where(Material.course_id == course_id,
+                                                  col(Material.id).in_(sources["material_ids"]))).all()
+        files = {(r.module_id, r.filename) for r in rows}
+        return lambda c: (c.metadata.get("module_id"), c.source.rsplit("/", 1)[-1]) in files
+    if sources.get("module_ids"):
+        modules = set(sources["module_ids"])
+        return lambda c: c.metadata.get("module_id") in modules
+    return None
+
+
+def _passages(services, course_id: int, module: Module | None, query: str,
+              sources: dict | None = None) -> list[Chunk]:
+    """Material of the module (and the course-level files), or of the whole course, or only of the chosen
+    modules or files (V5); scanned at upload."""
     retriever = getattr(services, "course_retriever", None)
     found: list[Chunk] = []
+    where = _chosen(services.engine, course_id, sources or {})
     if retriever is not None:
         try:
-            found = list(retriever.retrieve(course_id, module.id if module else None, query, PASSAGES))
+            if where is None:
+                found = list(retriever.retrieve(course_id, module.id if module else None, query, PASSAGES))
+            else:  # the whole course, then only the chosen files or modules
+                ranked = retriever.retrieve(course_id, None, query, PASSAGES * CHOSEN_POOL)
+                found = [c for c in ranked if where(c)][:PASSAGES]
         except Exception:  # noqa: BLE001 - no index yet: fall back below
             found = []
-    if not found and module is not None:  # the demo course without a course index
+    if not found and module is not None and where is None:  # the demo course without a course index
         texts = fallback_passages(services, course_id, module, query, k=PASSAGES)
         found = [Chunk(text=t, source="course material", topic=module.code, score=0.0) for t in texts]
     # the retriever is scoped to the course: stamp the scope the core checks, and cap the size
@@ -114,17 +166,23 @@ async def generate(services, job) -> None:
         kcs = db.exec(select(Kc).where(Kc.course_id == draft.course_id, Kc.status == "active")
                       .order_by(Kc.id)).all()
         kind, course_id, focus, title = draft.kind, draft.course_id, draft.focus, course.title
+        request, sources = draft.request, dict(draft.sources or {})
     scope_kcs = [k for k in kcs if module is None or k.module_id == module.id]
-    query = " ".join([focus or (module.title if module else title), _QUERY.get(kind, ""),
+    query = " ".join([focus or request or (module.title if module else title), _QUERY.get(kind, ""),
                       *(f"{k.name} {k.definition}" for k in scope_kcs[:6])]).strip()
     settings = services.effective(course_id)
+    upload = (upload_path(services.settings.data_path(), course_id, job.ref_id, sources["upload"])
+              if sources.get("upload") else None)
     try:
-        chunks = _passages(services, course_id, module, query)
+        if upload is not None:
+            chunks = _upload_passages(upload, course_id, query) if upload.is_file() else []
+        else:
+            chunks = _passages(services, course_id, module, query, sources)
         if not chunks:
             raise DraftError("no indexed course material to draft from")
         if kind in TIER1:
             result = await generate_tier1_draft(course_id=course_id, kind=kind, passages=chunks,
-                                                gateway=services.gateway, settings=settings)
+                                                gateway=services.gateway, settings=settings, request=request)
             content = {"title": result.title, "body": result.body}
         else:
             if kind != "kcs" and not kcs:
@@ -136,5 +194,8 @@ async def generate(services, job) -> None:
     except Exception as e:
         _save(services.engine, job.ref_id, status="failed", error=jobs._message(e))
         raise
+    finally:
+        if upload is not None:  # read once: a file for this draft only is not kept (V6)
+            shutil.rmtree(upload.parent, ignore_errors=True)
     _save(services.engine, job.ref_id, status="draft", content=content,
           cited_sources=list(dict.fromkeys(result.cited_sources)))

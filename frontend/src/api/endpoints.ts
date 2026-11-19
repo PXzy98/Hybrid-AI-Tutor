@@ -186,6 +186,18 @@ export const api = {
     request<AiDraftSummary[]>("GET", `${c(id)}/ai/drafts${status ? `?status=${status}` : ""}`),
   aiDraft: (id: number, draftId: number) => request<AiDraft>("GET", `${c(id)}/ai/drafts/${draftId}`),
   createAiDraft: (id: number, input: Schemas["AiDraftIn"]) => request<AiDraft>("POST", `${c(id)}/ai/drafts`, input),
+  // V6: a file uploaded for this draft only, or also added to the course material
+  createAiDraftFromUpload: (id: number, input: { file: File; kind: AiDraftKind; request: string; focus: string;
+                                                 addToCourse: boolean; moduleId: number | null }) => {
+    const form = new FormData();
+    form.append("file", input.file);
+    form.append("kind", input.kind);
+    form.append("request", input.request);
+    form.append("focus", input.focus);
+    form.append("add_to_course", String(input.addToCourse));
+    if (input.moduleId !== null) form.append("module_id", String(input.moduleId));
+    return upload<AiDraft>(`${c(id)}/ai/drafts/upload`, form);
+  },
   updateAiDraft: (id: number, draftId: number, content: Record<string, unknown>) =>
     request<AiDraft>("PATCH", `${c(id)}/ai/drafts/${draftId}`, { content }),
   acceptAiDraft: (id: number, draftId: number, moduleId: number | null) =>

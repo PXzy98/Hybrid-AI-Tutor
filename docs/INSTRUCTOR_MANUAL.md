@@ -165,6 +165,18 @@ Quizzes are course content: they stay after the term, but published ones are clo
 Drafts are visible to students only after you accept them. No tier receives student data. Uploads are scanned
 first (section 4).
 
+**AI assistant** > **New draft** (tiers 1 and 2):
+- **What to draft**: **Custom request** (the default) or one of the fixed kinds. A custom request is your own
+  description of the draft, up to 1000 characters, for example "expand the material on one topic", "thesis or
+  research topics", "a summary of this new paper and what it means for patients", "examples for a lecture" or
+  "what to add to the course next". It is drafted as Markdown, like an FAQ.
+- **Material to use**: **Whole course**, **One module** (with the course-level files), **Some modules** (only
+  their files), **Some files** (only the files you tick), or **Upload a file**. An uploaded file (for example a
+  new paper) is scanned like any upload and used for this draft only; it is deleted once the model has read
+  it, unless you tick **Also add this file to the course material** (then it appears under **Materials** and
+  students' answers can use it after the index is rebuilt).
+- A draft is never shown to students until you accept it; a custom draft becomes a Markdown course material.
+
 ## 11. End-of-term survey
 
 **End-of-term survey**: set **Survey window** (opening and closing time, usually the last week of term) and
