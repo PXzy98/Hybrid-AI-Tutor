@@ -110,7 +110,7 @@ class StructureDraft(BaseModel):
 async def generate_structure_draft(
     *, course_id: int, kind: StructureKind, passages: Sequence[Chunk],
     gateway: DraftGateway, settings: object, known_kc_names: Sequence[str] = (),
-    max_passages: int = DEFAULT_PASSAGES, max_chars: int = DEFAULT_CHARS,
+    max_passages: int = DEFAULT_PASSAGES, max_chars: int = DEFAULT_CHARS, model: str = "local",
 ) -> StructureDraft:
     """Generate only unpublished drafts; the caller must provide scanned course evidence.
 
@@ -140,8 +140,10 @@ async def generate_structure_draft(
         {"role": "user", "content": json.dumps(request, ensure_ascii=False)},
     ]
     schema = TypeAdapter(list[_ITEM_TYPES[kind]])
+    from app.instructor_ai.drafts import trust_for
+
     response = await gateway.complete(
-        "local", messages, settings=settings, trust_required="trusted_local",
+        model, messages, settings=settings, trust_required=trust_for(model),
         json_schema=response_schema(kind, known_kc_names), stream=False, max_tokens=STRUCTURE_MAX_TOKENS,
     )
     try:

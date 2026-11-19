@@ -38,6 +38,13 @@ _SYSTEM = (
 # for whole-course drafts such as a project list when the model's context allows.
 DEFAULT_PASSAGES, DEFAULT_CHARS = 8, 20_000
 REQUEST_CHARS = 1000  # the instructor's free request of a custom draft (V4)
+
+
+def trust_for(model: str) -> str:
+    """V16: the local model must be trusted local; the cloud model is external (chosen and confirmed)."""
+    if model not in ("local", "cloud"):
+        raise DraftError("Unsupported draft model.")
+    return "trusted_local" if model == "local" else "external_ok"
 MAX_PASSAGES, MAX_CHARS = 24, 60_000
 
 
@@ -115,6 +122,7 @@ async def generate_tier1_draft(
     *, course_id: int, kind: Tier1Kind, passages: Sequence[Chunk],
     gateway: DraftGateway, settings: object,
     max_passages: int = DEFAULT_PASSAGES, max_chars: int = DEFAULT_CHARS, request: str = "",
+    model: str = "local",
 ) -> Tier1Draft:
     """Build an unpublishable-in-isolation draft through Z's trusted-local gateway.
 
@@ -144,8 +152,8 @@ async def generate_tier1_draft(
             **({"instructor_request": request.strip()[:REQUEST_CHARS]} if kind == "custom" else {}),
         }, ensure_ascii=False)},
     ]
-    # Never send unreviewed full-course documents to an external provider here.
-    result = await gateway.complete("local", messages, settings=settings, trust_required="trusted_local",
+    # the cloud model only when the instructor chose and confirmed it for this draft (V16; the API checks)
+    result = await gateway.complete(model, messages, settings=settings, trust_required=trust_for(model),
                                     json_schema=_Generated.model_json_schema(), stream=False)
     try:
         generated = _Generated.model_validate(parse_model_json(result.text))

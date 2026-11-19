@@ -47,6 +47,10 @@ class AiDraftIn(BaseModel):
     # V5: only these modules' material, or only these files (materials); instead of module_id
     module_ids: list[int] | None = Field(None, min_length=1, max_length=50)
     material_ids: list[int] | None = Field(None, min_length=1, max_length=50)
+    # V16: the cloud model for public material, only with `confirm_cloud` (the material goes to the cloud
+    # model) and never in a local-only course; default the local model
+    model: Literal["local", "cloud"] = "local"
+    confirm_cloud: bool = False
 
 
 class AiDraftPatch(BaseModel):
@@ -137,8 +141,11 @@ def create(request: Request, body: AiDraftIn, access: CourseInstructor):
     The material is the module's (and the course-level files), the whole course's, or only the chosen
     modules or files (V5)."""
     engine = _engine(request)
+    _check_cloud(request, access.course.id, body.model, body.confirm_cloud)
     with Session(engine, expire_on_commit=False) as db:
         sources = _sources(db, access.course.id, body)
+        if body.model == "cloud":
+            sources["model"] = "cloud"
         row = AiDraft(course_id=access.course.id, module_id=body.module_id, kind=body.kind,
                       focus=body.focus.strip(), request=_request(body.kind, body.request), sources=sources,
                       created_by=access.account_id)
@@ -147,6 +154,18 @@ def create(request: Request, body: AiDraftIn, access: CourseInstructor):
     job = jobs.enqueue(engine, draft_jobs.GENERATE, course_id=access.course.id, ref_id=row.id,
                        created_by=access.account_id)
     return _out(row, job.id)
+
+
+def _check_cloud(request: Request, course_id: int, model: str, confirmed: bool) -> None:
+    """V16: drafting with the cloud model sends course material to it: confirmed, and not in a local-only
+    course (the same rule as the tier 4 evaluation)."""
+    if model != "cloud":
+        return
+    if request.app.state.services.effective(course_id).local_only:
+        raise ApiError(409, ErrorCode.conflict, "this course uses the local model only: no cloud drafts")
+    if not confirmed:
+        raise ApiError(422, ErrorCode.invalid, "confirm that the course material may go to the cloud model "
+                                               "(confirm_cloud)")
 
 
 def _request(kind: str, text: str) -> str:
@@ -186,7 +205,9 @@ async def create_from_upload(
         kind: Annotated[DraftKind, Form()],
         draft_request: Annotated[str, Form(alias="request", max_length=1000)] = "",
         focus: Annotated[str, Form(max_length=300)] = "", add_to_course: Annotated[bool, Form()] = False,
-        module_id: Annotated[int | None, Form()] = None):
+        module_id: Annotated[int | None, Form()] = None,
+        model: Annotated[Literal["local", "cloud"], Form()] = "local",
+        confirm_cloud: Annotated[bool, Form()] = False):
     """V6: draft from a file uploaded for this draft (for example a new paper). The file is scanned like
     every upload; it is used for this draft only and deleted after it was read, unless `add_to_course` also
     adds it to the course material (in `module_id`, or course-level), where students see it like any other
@@ -195,6 +216,7 @@ async def create_from_upload(
     with Session(services.engine) as db:
         _module(db, access.course.id, module_id)
     text = _request(kind, draft_request)
+    _check_cloud(request, access.course.id, model, confirm_cloud)
     data = await file.read(MAX_BYTES + 1)
     try:
         name = await asyncio.to_thread(index_jobs.check_upload, file.filename or "", data,
@@ -202,7 +224,8 @@ async def create_from_upload(
     except index_jobs.MaterialRefused as e:
         raise ApiError(422, ErrorCode.invalid, str(e)) from None
     return _draft_from_file(services, access, name, data, kind=kind, text=text, focus=focus,
-                            add_to_course=add_to_course, module_id=module_id, action="ai_draft.upload")
+                            add_to_course=add_to_course, module_id=module_id, action="ai_draft.upload",
+                            model=model)
 
 
 class AiDraftUrlIn(BaseModel):
@@ -212,6 +235,8 @@ class AiDraftUrlIn(BaseModel):
     focus: str = Field("", max_length=300)
     add_to_course: bool = False
     module_id: int | None = None  # of the added page
+    model: Literal["local", "cloud"] = "local"  # V16, as in AiDraftIn
+    confirm_cloud: bool = False
 
 
 @router.post("/courses/{course_id}/ai/drafts/url", response_model=AiDraftOut, status_code=202,
@@ -227,13 +252,16 @@ async def create_from_url(request: Request, body: AiDraftUrlIn, access: CourseIn
     with Session(services.engine) as db:
         _module(db, access.course.id, body.module_id)
     text = _request(body.kind, body.request)
+    _check_cloud(request, access.course.id, body.model, body.confirm_cloud)
     name, data = await fetch_as_material(services, body.url, access.course.course_type)
     return _draft_from_file(services, access, name, data, kind=body.kind, text=text, focus=body.focus,
-                            add_to_course=body.add_to_course, module_id=body.module_id, action="ai_draft.url")
+                            add_to_course=body.add_to_course, module_id=body.module_id, action="ai_draft.url",
+                            model=body.model)
 
 
 def _draft_from_file(services, access, name: str, data: bytes, *, kind: str, text: str, focus: str,
-                     add_to_course: bool, module_id: int | None, action: str) -> AiDraftOut:
+                     add_to_course: bool, module_id: int | None, action: str,
+                     model: str = "local") -> AiDraftOut:
     """A scanned file for one draft (V6, V7): kept until the job read it, and stored as a material too
     when `add_to_course`."""
     added = None
@@ -246,7 +274,8 @@ def _draft_from_file(services, access, name: str, data: bytes, *, kind: str, tex
                            "rename it or delete that one") from None
         index_jobs.request_rebuild(services.engine, access.course.id, access.account_id)
     with Session(services.engine, expire_on_commit=False) as db:
-        sources = {"upload": name, **({"material_ids": [added.id]} if added else {})}
+        sources = {"upload": name, **({"material_ids": [added.id]} if added else {}),
+                   **({"model": "cloud"} if model == "cloud" else {})}
         row = AiDraft(course_id=access.course.id, module_id=module_id, kind=kind, focus=focus.strip(),
                       request=text, sources=sources, created_by=access.account_id)
         db.add(row)

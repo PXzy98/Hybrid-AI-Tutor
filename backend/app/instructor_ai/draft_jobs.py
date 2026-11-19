@@ -167,6 +167,9 @@ async def generate(services, job) -> None:
                       .order_by(Kc.id)).all()
         kind, course_id, focus, title = draft.kind, draft.course_id, draft.focus, course.title
         request, sources = draft.request, dict(draft.sources or {})
+    model = sources.get("model", "local")  # V16: "cloud" only after the instructor's confirmation
+    if model == "cloud" and services.effective(course_id).local_only:
+        model = "local"  # the course became local only since: never the cloud
     scope_kcs = [k for k in kcs if module is None or k.module_id == module.id]
     query = " ".join([focus or request or (module.title if module else title), _QUERY.get(kind, ""),
                       *(f"{k.name} {k.definition}" for k in scope_kcs[:6])]).strip()
@@ -182,14 +185,15 @@ async def generate(services, job) -> None:
             raise DraftError("no indexed course material to draft from")
         if kind in TIER1:
             result = await generate_tier1_draft(course_id=course_id, kind=kind, passages=chunks,
-                                                gateway=services.gateway, settings=settings, request=request)
+                                                gateway=services.gateway, settings=settings, request=request,
+                                                model=model)
             content = {"title": result.title, "body": result.body}
         else:
             if kind != "kcs" and not kcs:
                 raise DraftError("the course has no KCs yet: draft and accept the KCs first")
             result = await tier2.generate_structure_draft(
                 course_id=course_id, kind=kind, passages=chunks, gateway=services.gateway, settings=settings,
-                known_kc_names=[k.name for k in kcs])
+                known_kc_names=[k.name for k in kcs], model=model)
             content = {"items": [i.model_dump(exclude={"citations"}) for i in result.items]}
     except Exception as e:
         _save(services.engine, job.ref_id, status="failed", error=jobs._message(e))

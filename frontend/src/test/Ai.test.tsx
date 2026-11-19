@@ -73,6 +73,24 @@ describe("AI drafts", () => {
       .toMatchObject({ kind: "custom", request: "Extra material on Resistance", module_id: 10 }));
   });
 
+  it("drafts with the cloud model only after the confirmation (V16)", async () => {
+    const calls = mockApi(instructorRoutes({
+      "GET /courses/1/ai/drafts": [], "GET /courses/1/materials": { index_version: 0, rebuild_job_id: null, materials: [] },
+      "POST /courses/1/ai/drafts": () => reply(draft({ kind: "custom", status: "generating", content: {}, cited_sources: [] }), 202),
+      "GET /courses/1/ai/drafts/7": () => draft({ kind: "custom", status: "generating", content: {}, cited_sources: [] }),
+    }));
+    renderApp("/courses/1/ai");
+    const user = userEvent.setup();
+    await user.type(await screen.findByLabelText("What should be drafted?"), "Summary of the open course page");
+    await user.click(screen.getByLabelText("Cloud model, for public material only"));
+    const button = screen.getByRole("button", { name: "Draft with AI" });
+    expect(button).toBeDisabled();
+    await user.click(screen.getByLabelText(/I confirm that this material is public/));
+    await user.click(button);
+    await waitFor(() => expect(calls.find((c) => c.path === "/courses/1/ai/drafts" && c.method === "POST")?.body)
+      .toMatchObject({ kind: "custom", model: "cloud", confirm_cloud: true }));
+  });
+
   it("uploads a file for this draft only (V6)", async () => {
     const calls = mockApi(instructorRoutes({
       "GET /courses/1/ai/drafts": [],

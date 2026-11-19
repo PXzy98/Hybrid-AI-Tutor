@@ -2192,6 +2192,17 @@ export interface components {
             module_ids?: number[] | null;
             /** Material Ids */
             material_ids?: number[] | null;
+            /**
+             * Model
+             * @default local
+             * @enum {string}
+             */
+            model?: "local" | "cloud";
+            /**
+             * Confirm Cloud
+             * @default false
+             */
+            confirm_cloud?: boolean;
         };
         /** AiDraftOut */
         AiDraftOut: {
@@ -2304,6 +2315,17 @@ export interface components {
             add_to_course?: boolean;
             /** Module Id */
             module_id?: number | null;
+            /**
+             * Model
+             * @default local
+             * @enum {string}
+             */
+            model?: "local" | "cloud";
+            /**
+             * Confirm Cloud
+             * @default false
+             */
+            confirm_cloud?: boolean;
         };
         /** ApplyStatusOut */
         ApplyStatusOut: {
@@ -2525,6 +2547,17 @@ export interface components {
             add_to_course?: boolean;
             /** Module Id */
             module_id?: number | null;
+            /**
+             * Model
+             * @default local
+             * @enum {string}
+             */
+            model?: "local" | "cloud";
+            /**
+             * Confirm Cloud
+             * @default false
+             */
+            confirm_cloud?: boolean;
         };
         /** Body_content_import */
         Body_content_import: {

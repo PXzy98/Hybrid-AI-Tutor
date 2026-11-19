@@ -6788,6 +6788,20 @@
               }
             ],
             "title": "Material Ids"
+          },
+          "model": {
+            "type": "string",
+            "enum": [
+              "local",
+              "cloud"
+            ],
+            "title": "Model",
+            "default": "local"
+          },
+          "confirm_cloud": {
+            "type": "boolean",
+            "title": "Confirm Cloud",
+            "default": false
           }
         },
         "type": "object",
@@ -7044,6 +7058,20 @@
               }
             ],
             "title": "Module Id"
+          },
+          "model": {
+            "type": "string",
+            "enum": [
+              "local",
+              "cloud"
+            ],
+            "title": "Model",
+            "default": "local"
+          },
+          "confirm_cloud": {
+            "type": "boolean",
+            "title": "Confirm Cloud",
+            "default": false
           }
         },
         "type": "object",
@@ -7628,6 +7656,20 @@
               }
             ],
             "title": "Module Id"
+          },
+          "model": {
+            "type": "string",
+            "enum": [
+              "local",
+              "cloud"
+            ],
+            "title": "Model",
+            "default": "local"
+          },
+          "confirm_cloud": {
+            "type": "boolean",
+            "title": "Confirm Cloud",
+            "default": false
           }
         },
         "type": "object",
