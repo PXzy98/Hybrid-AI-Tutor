@@ -28,7 +28,7 @@ from app.platform import course_scope, usage
 from app.platform.access import CourseAccess, require_course_role
 from app.platform.course_scope import GENERAL_TOPIC, CourseScope
 from app.privacy.profiles import privacy_profile
-from app.storage.models import SessionTurn
+from app.storage.models import Course, Module, SessionTurn
 
 router = APIRouter(tags=["ask"])
 CourseStudent = Annotated[CourseAccess, Depends(require_course_role("student"))]
@@ -115,10 +115,23 @@ def _prepare(body: AskIn, access: CourseAccess, services) -> tuple[RequestContex
     ctx = RequestContext(
         request_id=str(uuid.uuid4()), request=request, course=access.course, module_id=body.module_id,
         settings=eff, profile=privacy_profile(eff.course_type), warnings=warnings,
+        guidelines=_guidelines(services, course_id, body.module_id),
         show_routing_progress=eff.show_routing_progress,
         history=scope.sessions.history(conversation_id, last=turns) if known else [])
     ctx.set_cloud_meter(_CloudMeter(access.student_id, course_id))
     return ctx, scope
+
+
+def _guidelines(services, course_id: int, module_id: int | None) -> list[str]:
+    """The instructor's rules for the tutor (Z26): the course's, then the asked module's; never another
+    module's, and only the course's for a question about the whole course."""
+    with Session(services.engine) as db:
+        course = db.get(Course, course_id)
+        module = db.get(Module, module_id) if module_id is not None else None
+        out = [course.guideline if course else ""]
+        if module is not None and module.course_id == course_id:
+            out.append(module.guideline)
+    return [g for g in out if g and g.strip()]
 
 
 class _CloudMeter:
