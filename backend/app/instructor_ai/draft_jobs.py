@@ -25,7 +25,9 @@ TIER1 = ("project_ideas", "sample_proposal", "faq", "custom")
 TIER2 = ("kcs", "check_items", "misconceptions")
 KINDS = (*TIER1, *TIER2)
 PASSAGES, PASSAGE_CHARS = 8, 1200
-CHOSEN_POOL = 40  # chosen files or modules (V5): ranked over the whole course, then filtered
+# chosen files or modules (V5): every matching passage of the course is ranked, then filtered, so passages of
+# other files cannot crowd the chosen ones out (the retriever scores the whole index either way)
+CHOSEN_POOL = 1_000_000
 
 _QUERY = {
     "project_ideas": "project topic deliverable assignment proposal",
@@ -87,12 +89,38 @@ def upload_path(data_root: Path, course_id: int, draft_id: int, name: str) -> Pa
     return data_root / "courses" / str(course_id) / "draft_uploads" / str(draft_id) / name
 
 
+def _bounded(paragraphs):
+    """Paragraphs no longer than a passage: a longer one (a file without blank lines, or text extracted from
+    a PDF, DOCX or PPTX joined by single newlines) is split at line ends, and a longer line at spaces."""
+    for paragraph in paragraphs:
+        if len(paragraph) <= PASSAGE_CHARS:
+            yield paragraph
+            continue
+        current = ""
+        for line in paragraph.split("\n"):
+            parts = line.split(" ") if len(line) > PASSAGE_CHARS else [line]
+            for i, part in enumerate(parts):
+                while len(part) > PASSAGE_CHARS:  # one unbroken token longer than a passage
+                    if current:
+                        yield current
+                        current = ""
+                    yield part[:PASSAGE_CHARS]
+                    part = part[PASSAGE_CHARS:]
+                sep = " " if i else "\n"
+                if current and len(current) + len(sep) + len(part) > PASSAGE_CHARS:
+                    yield current
+                    current = ""
+                current = f"{current}{sep}{part}" if current else part
+        if current:
+            yield current
+
+
 def _upload_passages(path: Path, course_id: int, query: str) -> list[Chunk]:
     """Passages of a file uploaded for this draft (scanned at upload): its paragraphs, the ones sharing the
     most words with the query first, then in the file's order."""
     text = extract_text(path)
     pieces, current = [], ""
-    for paragraph in (p.strip() for p in text.split("\n\n")):
+    for paragraph in _bounded(p.strip() for p in text.split("\n\n")):
         if not paragraph:
             continue
         if current and len(current) + len(paragraph) > PASSAGE_CHARS:
@@ -134,7 +162,7 @@ def _passages(services, course_id: int, module: Module | None, query: str,
             if where is None:
                 found = list(retriever.retrieve(course_id, module.id if module else None, query, PASSAGES))
             else:  # the whole course, then only the chosen files or modules
-                ranked = retriever.retrieve(course_id, None, query, PASSAGES * CHOSEN_POOL)
+                ranked = retriever.retrieve(course_id, None, query, CHOSEN_POOL)
                 found = [c for c in ranked if where(c)][:PASSAGES]
         except Exception:  # noqa: BLE001 - no index yet: fall back below
             found = []

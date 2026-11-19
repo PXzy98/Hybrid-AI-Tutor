@@ -19,6 +19,9 @@ PAGE = ("<html><head><title>Pull-up resistors explained</title><script>alert(1)<
         "line high.</p></body></html>")
 
 
+PULLUPS = web_pages.material_name("https://example.org/pullups")
+
+
 def _resolver(table: dict[str, str] | None = None):
     """Like the real resolver: an address literal is itself, a name is looked up in `table` (else public)."""
     def resolve(host):
@@ -49,7 +52,15 @@ def test_a_public_page_becomes_markdown_with_its_address():
     assert "alert(1)" not in page.text and "Home | About" not in page.text
     text = web_pages.material_text(page)
     assert web_pages.source_url(text.splitlines()[0]) == "https://example.org/pullups"
-    assert web_pages.material_name(page.url) == "web-example-org-pullups.md"
+    assert web_pages.material_name(page.url) == PULLUPS
+
+
+def test_pages_that_differ_only_in_the_query_get_different_names():
+    urls = ("https://example.org/lesson?id=1", "https://example.org/lesson?id=2", "https://example.org/Lesson",
+            "https://example.org/lesson")
+    names = {web_pages.material_name(u) for u in urls}
+    assert len(names) == 4
+    assert all(n.startswith("web-example-org-lesson-") and n.endswith(".md") for n in names)
 
 
 @pytest.mark.parametrize("url", [
@@ -109,6 +120,28 @@ def test_size_type_and_status_limits():
         fetch("https://example.org/missing", {})
 
 
+def test_a_page_that_never_finishes_is_cut_off(monkeypatch):
+    """The time limit covers the whole fetch: small pieces sent just often enough do not keep it open."""
+    monkeypatch.setattr(web_pages, "TIMEOUT_S", 0.5)
+
+    async def drip():
+        while True:
+            await asyncio.sleep(0.05)
+            yield b"<p>x</p>"
+
+    slow = httpx.Response(200, headers={"content-type": "text/html"}, content=drip())
+    with pytest.raises(web_pages.PageRefused, match="in time"):
+        fetch("https://example.org/slow", {"example.org/slow": slow})
+
+
+def test_the_same_page_twice_with_another_query_can_be_added(world, site):
+    prof, url = world["prof"], world["url"]
+    for query in ("?id=1", "?id=2"):
+        r = prof.post(f"{url}/materials/url", json={"url": f"https://example.org/pullups{query}"})
+        assert r.status_code == 201, r.text
+    assert len(prof.get(f"{url}/materials").json()["materials"]) == 2
+
+
 # --------------------------------------------------------------------------------------------- the API
 @pytest.fixture
 def site(world):
@@ -123,7 +156,7 @@ def test_an_instructor_adds_a_page_and_fetches_it_again(world, site):
     r = prof.post(f"{url}/materials/url", json={"url": "https://example.org/pullups"})
     assert r.status_code == 201, r.text
     material = r.json()["material"]
-    assert material["filename"] == "web-example-org-pullups.md"
+    assert material["filename"] == PULLUPS
     assert material["source_url"] == "https://example.org/pullups"
     listed = prof.get(f"{url}/materials").json()["materials"]
     assert [m["source_url"] for m in listed] == ["https://example.org/pullups"]
@@ -151,7 +184,7 @@ def test_a_draft_from_a_web_page(world, site):
     assert r.status_code == 202, r.text
     assert jobs.run_pending(world["services"]) >= 1
     draft = _draft(world, r.json()["id"])
-    assert draft["status"] == "draft" and draft["sources"] == {"upload": "web-example-org-pullups.md"}
+    assert draft["status"] == "draft" and draft["sources"] == {"upload": PULLUPS}
     assert "WEB-PASSAGE" in local.sent_text() and world["cloud"].calls == []
 
 
@@ -164,3 +197,11 @@ def test_who_may_add_pages(world, site):
         assert client.post(f"{url}/materials/url", json=page).status_code == code
         assert client.post(f"{url}/materials/{added}/refetch").status_code == code
         assert client.post(f"{url}/ai/drafts/url", json=draft).status_code == code
+
+
+def test_a_draft_from_a_web_page_with_student_data_in_the_request_is_refused(world, site):
+    leak = "Write feedback for student 300123456 (jane.doe@uottawa.ca), who got 45% on the final."
+    r = world["prof"].post(f"{world['url']}/ai/drafts/url", json={
+        "url": "https://example.org/pullups", "kind": "custom", "request": leak})
+    assert r.status_code == 422 and "300123456" not in r.text
+    assert world["prof"].get(f"{world['url']}/ai/drafts").json() == []

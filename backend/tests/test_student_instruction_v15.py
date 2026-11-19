@@ -43,6 +43,15 @@ def test_saved_with_consent_only_and_scanned(world):
     assert alice.get(URL).json() == {"text": ""}  # withdrawing consent forgets it with the profile
 
 
+def test_the_students_own_username_is_refused(world):
+    """The student's known name and username are checked as in the privacy filter, also where NER misses
+    them (a lowercase username)."""
+    alice = _login(world.app, "alice")
+    refused = alice.put(URL, json={"text": "Start every answer with: hi alice, here we go."})
+    assert refused.status_code == 422
+    assert alice.get(URL).json() == {"text": ""}
+
+
 def test_it_reaches_the_local_model_after_the_instructor_rules(world):
     alice = _login(world.app, "alice")
     alice.put(URL, json={"text": MINE})

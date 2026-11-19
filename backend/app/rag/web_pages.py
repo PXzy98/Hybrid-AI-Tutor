@@ -6,11 +6,14 @@
   link-local, cloud metadata or the system's own services), so a name cannot be checked as public and then
   connected as private;
 - redirects are followed by hand, at most MAX_REDIRECTS, and every target is checked the same way;
-- at most MAX_BYTES of body and TIMEOUT_S seconds; only HTML, plain text or Markdown.
+- at most MAX_BYTES of body and TIMEOUT_S seconds for the whole fetch, redirects included (a server that
+  keeps sending small pieces is cut off); only HTML, plain text or Markdown.
 
-The page becomes a Markdown material (`web-<host>-<path>.md`) whose first line records the address, so it can
-be fetched again. Like every upload it is scanned (`index_jobs.check_upload`) before it is stored.
+The page becomes a Markdown material (`web-<host>-<path>-<digest>.md`) whose first line records the address,
+so it can be fetched again. Like every upload it is scanned (`index_jobs.check_upload`) before it is stored.
 """
+import asyncio
+import hashlib
 import re
 from dataclasses import dataclass
 from html.parser import HTMLParser
@@ -108,6 +111,14 @@ async def fetch_page(url: str, *, resolve=None, inner: httpx.AsyncBaseTransport 
     """Fetch one page under the rules of the module docstring; PageRefused otherwise. `resolve` and `inner`
     (the connection under the pinned transport) are for tests only."""
     current = check_url(url, resolve)
+    try:
+        async with asyncio.timeout(TIMEOUT_S):  # httpx's timeout is per network operation, this one is total
+            return await _fetch(current, resolve, inner)
+    except TimeoutError:
+        raise PageRefused("the page did not answer in time") from None
+
+
+async def _fetch(current: str, resolve, inner) -> Page:
     transport = PinnedTransport(trust="external", resolve=resolve, inner=inner)
     client = httpx.AsyncClient(transport=transport, timeout=TIMEOUT_S,
                                follow_redirects=False, headers={"User-Agent": USER_AGENT,
@@ -145,10 +156,12 @@ async def fetch_page(url: str, *, resolve=None, inner: httpx.AsyncBaseTransport 
 
 
 def material_name(url: str) -> str:
-    """`web-<host>-<path>.md`, safe as a material file name."""
+    """`web-<host>-<path>-<digest>.md`, safe as a material file name. The digest of the whole address keeps
+    pages apart that differ only in the query, in case or in punctuation, or after the cut."""
     parsed = urlparse(url)
     slug = re.sub(r"[^A-Za-z0-9]+", "-", f"{parsed.hostname}{parsed.path}").strip("-").lower()
-    return f"web-{slug[:80] or 'page'}.md"
+    digest = hashlib.sha256(url.encode("utf-8")).hexdigest()[:10]
+    return f"web-{slug[:80] or 'page'}-{digest}.md"
 
 
 def material_text(page: Page) -> str:
