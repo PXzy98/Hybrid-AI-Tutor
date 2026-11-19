@@ -103,7 +103,7 @@ logged in. Owner = component owner who implements it.
 | `POST /courses/{course_id}/content/import`, `GET /courses/{course_id}/content/export` | I | Z | YAML import/export |
 | `GET /courses/{course_id}/materials` | I | S | materials, scan and index status |
 | `POST /courses/{course_id}/materials` | I | S | upload (field `module_id` optional = course-level) |
-| `POST /courses/{course_id}/materials/url` | I | S | V7: `{url, module_id?}`; the server fetches the page (`app.rag.web_pages.fetch_page`: https only, no credentials, public addresses only and pinned per request, every redirect checked, at most 3, 2 MB, 15 s, HTML/text/Markdown only), stores it as `web-<host>-<path>.md` with the address on its first line, scans and indexes it; 422 when refused, 409 when that page is there already; `MaterialOut.source_url` |
+| `POST /courses/{course_id}/materials/url` | I | S | V7: `{url, module_id?}`; the server fetches the page (`app.rag.web_pages.fetch_page`: https only, no credentials, public addresses only and pinned per request, every redirect checked, at most 3, 2 MB, 15 s for the whole fetch, HTML/text/Markdown only), stores it as `web-<host>-<path>-<digest>.md` (the digest of the full address) with the address on its first line, scans and indexes it; 422 when refused, 409 when that page is there already; `MaterialOut.source_url` |
 | `POST /courses/{course_id}/materials/{material_id}/refetch` | I | S | V7: fetch a web material again from its address and replace its text (scanned again) |
 | `DELETE /courses/{course_id}/materials/{material_id}` | I | S | delete and re-index |
 | `GET /courses/{course_id}/jobs/{job_id}` | I | Z | background job status (also for quiz drafts, 3.9) |
