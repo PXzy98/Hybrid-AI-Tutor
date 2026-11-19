@@ -7849,6 +7849,11 @@
             "type": "boolean",
             "title": "Local Only",
             "default": false
+          },
+          "individual_view": {
+            "type": "boolean",
+            "title": "Individual View",
+            "default": false
           }
         },
         "type": "object",

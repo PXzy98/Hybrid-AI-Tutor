@@ -35,6 +35,9 @@ class CourseOut(BaseModel):
     status: Literal["active", "archived"]
     my_role: Literal["instructor", "student"] | None
     local_only: bool = False  # the course's effective setting: no question goes to a cloud model
+    # whether visibility mode B can be chosen in this deployment (learner.instructor_individual_view, V1);
+    # false: instructors see class statistics only and the UI hides every individual view
+    individual_view: bool = False
 
 
 class CourseIn(BaseModel):
@@ -108,7 +111,8 @@ def _course_out(view, request: Request) -> CourseOut:
     eff = request.app.state.services.settings_service.effective(view.id)
     # the effective settings, not the course row's initial values: the course settings may change them
     values = {**view.__dict__, "visibility_mode": eff.visibility_mode}
-    return CourseOut(**values, local_only=bool(eff.local_only))
+    return CourseOut(**values, local_only=bool(eff.local_only),
+                     individual_view=request.app.state.services.settings.learner.instructor_individual_view)
 
 
 # -------------------------------------------------------------------------------------------- courses
