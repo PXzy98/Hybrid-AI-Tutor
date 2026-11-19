@@ -125,6 +125,13 @@ B applies to a student only after that student agrees, and then only data after 
 
 ## 8. Class overview and individual progress
 
+**Use of the tutor** (top of **Class overview**): **Students enrolled**, **Active students (7 days)**,
+**Questions (7 days)**, the share **Answered by the local model**, **Questions per week** (the last 8 weeks, with
+the number of students who asked), **Questions per module** (and **Whole course**) and **Quiz averages** (answers
+and average score per published quiz). Counts only: no question, no name, and every number that fewer than 5
+students contributed shows "hidden". The administrator sees the same counts for every course on
+**Administration** (**Use of the tutor in every course**).
+
 **Class overview**: totals per **Module**: **Students with a profile**, **Topics**, **Open misconceptions**,
 **Students per level**, and shared misconceptions. Groups smaller than 5 are hidden ("hidden"), in both modes.
 

@@ -63,6 +63,7 @@ logged in. Owner = component owner who implements it.
 |---|---|---|
 | `GET /admin/instructors`, `POST /admin/instructors` | A | list, create instructor accounts |
 | `PATCH /admin/instructors/{account_id}`, `POST /admin/instructors/{account_id}/reset-password` | A | deactivate, change role, reset |
+| `GET /admin/statistics` | A | v5 V2: per course and in total, students enrolled, active students (7 days), questions (7 days, term); question counts that fewer than `learner.class_summary_min_group` students contributed are null |
 | `GET /admin/settings`, `PUT /admin/settings` | A | system settings; `PUT` sends the `version` it read, 409 if it changed (course-structure 6.2) |
 | `GET /admin/settings/history`, `POST /admin/settings/restore/{history_id}` | A | change history and undo |
 | `GET /admin/settings/apply-status` | A | `apply_state`, target version, per-process progress and errors (course-structure 6.5); the page polls it while `applying` |
@@ -138,6 +139,7 @@ Notes on ask (implemented in `backend/app/api/v2/ask.py`):
 | Method and path | Who | Purpose |
 |---|---|---|
 | `GET /courses/{course_id}/class-summary` | I | aggregates (all modes) |
+| `GET /courses/{course_id}/statistics` | I | v5 V2: students enrolled, active students (term, 7 days), questions (term, 7 days), share answered locally, questions per week (8 weeks, with the number of students) and per module, quiz attempts and average score. From `request_log` and quiz attempts, counts only; a count that fewer than `learner.class_summary_min_group` students contributed is null |
 | `GET /courses/{course_id}/students/{student_id}/overview` | I | individual overview (mode B, not opted out, since `visible_since`; audited) |
 | `GET/PUT /courses/{course_id}/students/{student_id}/plan` | I | learning plan (same conditions) |
 | `GET /courses/{course_id}/insights` | I | class insights, tier 3: `{min_group, suppressed, kc_question_counts[], misconception_counts[]}`, each entry `{label (KC or misconception code), name, count}`. Built from the consenting students' `evidence_log` (understand-step KC signals, misconception codes), never question text; a label needs `learner.class_summary_min_group` (at least 5) different students, and `suppressed` is true below that many students overall |

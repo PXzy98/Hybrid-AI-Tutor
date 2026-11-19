@@ -300,3 +300,25 @@ def test_ai_drafts_are_not_added_once_the_quiz_is_published(world):
     assert world.prof.get(f"{world.url}/jobs/{job}").json()["status"] == "failed"
     after = world.prof.get(f"{world.url}/quizzes/{quiz['id']}").json()["questions"]
     assert len(after) == 2 and all(q["reviewed"] for q in after)
+
+
+def test_a_quiz_attempt_moves_the_mastery_estimate_only_with_consent(world):
+    """S15: a correct answer raises the estimate of the question's KC on My progress; without consent nothing
+    is stored and nothing moves."""
+    quiz = _quiz(world, questions=[MCQ])
+    _publish(world, quiz["id"])
+    world.services.learner.set_consent(world.sid["bob"], False)
+
+    def mastery(student: str) -> list[float]:
+        return [r["p_mastery"] for r in rows("learner_kc_state") if r["student_id"] == world.sid[student]
+                and r["kc_id"] == "C.1" and r["course_id"] == world.course]
+
+    assert mastery("alice") == [] and mastery("bob") == []
+    alice, bob = _login(world.app, "alice"), _login(world.app, "bob")
+    assert alice.post(f"{world.url}/quizzes/{quiz['id']}/attempt", json={"answers": [0]}).status_code == 201
+    assert bob.post(f"{world.url}/quizzes/{quiz['id']}/attempt", json={"answers": [0]}).status_code == 201
+    (after,) = mastery("alice")
+    assert after > world.services.settings.learner.bkt_defaults.p_init  # the prior moved up
+    assert mastery("bob") == []  # no consent: no learner state at all
+    profile = alice.get(f"{world.url}/me/profile").json()  # My progress shows the KC now
+    assert any(k["kc_id"] == "C.1" for m in profile["modules"] for k in m["kcs"])
