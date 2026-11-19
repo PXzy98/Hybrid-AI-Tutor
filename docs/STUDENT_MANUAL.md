@@ -80,6 +80,11 @@ on", "A common mix-up:" with "What is true:" for misconceptions the tutor notice
 answers" or "may have come up in a question"), and your explanation preferences. You are never graded: the
 bands are only there to adapt answers.
 
+A topic in the **basic** band (for example after a quiz) has **Explain it another way**: it opens the chat in
+that module with a request for a different explanation, a new example and where to read more, ready for you to
+send or change. Where the course allows web search, the answer can also point to outside sources. This stays
+between you and the tutor: your instructor only sees class totals.
+
 **Personalize** (optional, every part can be skipped, you can change everything later):
 1. **Your learning profile**: consent that the tutor keeps a learning profile for you. Without consent your
    answers are not saved and the tutor answers without a profile.

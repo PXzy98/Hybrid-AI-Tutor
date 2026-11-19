@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import { api, type AskResponse, type Course, type CourseProfile } from "@/api/endpoints";
@@ -29,15 +29,26 @@ export default function Chat({ course }: { course: Course }) {
     shown.current = conversationId;
     setEpoch((e) => e + 1);
   }
+  // V8: "Explain it another way" on My progress hands over a prepared request (router state, never the URL);
+  // it fills the input of a new conversation, the student still decides to send it
+  const location = useLocation();
+  const navigate = useNavigate();
+  const ask = (location.state as { ask?: string } | null)?.ask;
+  const [prefill, setPrefill] = useState<{ text: string; n: number } | null>(null);
+  useEffect(() => {
+    if (!ask) return;
+    setPrefill((p) => ({ text: ask, n: (p?.n ?? 0) + 1 }));
+    navigate({ pathname: location.pathname, search: location.search }, { replace: true, state: null });
+  }, [ask, location.pathname, location.search, navigate]);
   const started = (id: string) => {
     shown.current = id;
     setParams((prev) => { const next = new URLSearchParams(prev); next.set("c", id); return next; }, { replace: true });
   };
   return <ChatPane key={`${course.id}:${epoch}`} course={course} initialConversation={shown.current}
-                   moduleId={moduleParam ? Number(moduleParam) : null} onStarted={started} />;
+                   moduleId={moduleParam ? Number(moduleParam) : null} onStarted={started} prefill={prefill} />;
 }
 
-function ChatPane({ course, initialConversation: initial, moduleId, onStarted }: { course: Course; initialConversation: string | null; moduleId: number | null; onStarted: (id: string) => void }) {
+function ChatPane({ course, initialConversation: initial, moduleId, onStarted, prefill }: { course: Course; initialConversation: string | null; moduleId: number | null; onStarted: (id: string) => void; prefill?: { text: string; n: number } | null }) {
   const [initialConversation] = useState(initial); // fixed for the life of the pane
   const { t } = useI18n();
   const qc = useQueryClient();
@@ -45,6 +56,9 @@ function ChatPane({ course, initialConversation: initial, moduleId, onStarted }:
   const [conversation, setConversation] = useState<string | null>(initialConversation);
   const [partial, setPartial] = useState("");
   const [question, setQuestion] = useState("");
+  useEffect(() => {
+    if (prefill) setQuestion(prefill.text);
+  }, [prefill]);
   const controller = useRef<AbortController | null>(null);
   const traceSequence = useRef(0);
   const inputRef = useRef<HTMLTextAreaElement>(null);

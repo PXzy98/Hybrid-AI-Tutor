@@ -1,11 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { BookOpen, Cpu, Lightbulb, MessageSquare, UserCheck, Users } from "lucide-react";
 import { useState, type ReactNode } from "react";
+import { Link } from "react-router-dom";
 
 import { api, type Course } from "@/api/endpoints";
 import BandBar from "@/components/BandBar";
 import { ErrorNote, Loading, PageHeader, StatCard } from "@/components/common";
 import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
@@ -41,6 +43,7 @@ export default function Overview({ course }: { course: Course }) {
       } />
       <ErrorNote error={summary.error} />
       <UsageCard course={course} />
+      <WeakTopicsCard course={course} />
       <InsightsCard course={course} />
       {summary.isLoading && <Loading variant="cards" />}
       {data?.suppressed && <Alert variant="info" role="status" icon>{t("overview.suppressed", { n: data.min_group })}</Alert>}
@@ -156,6 +159,35 @@ function UsageCard({ course }: { course: Course }) {
             </div>
           </>
         )}
+      </CardContent>
+    </Card>
+  );
+}
+
+/** V8: topics the class finds hard in quizzes (each with at least the minimum group of students), with a way
+ *  to draft extra material on one. Counts and shares only. */
+function WeakTopicsCard({ course }: { course: Course }) {
+  const { t } = useI18n();
+  const weak = useQuery({ queryKey: ["weak-topics", course.id], queryFn: () => api.weakTopics(course.id) });
+  const data = weak.data;
+  return (
+    <Card aria-label={t("loop.title")}>
+      <CardHeader><CardTitle>{t("loop.title")}</CardTitle><CardDescription>{t("loop.hint", { n: data?.min_group ?? 5 })}</CardDescription></CardHeader>
+      <CardContent>
+        <ErrorNote error={weak.error} />
+        {data && data.topics.length === 0 && <p className="text-sm text-muted-foreground">{t("loop.none")}</p>}
+        <ul className="divide-y">
+          {data?.topics.map((w) => (
+            <li key={w.kc_code} className="flex flex-wrap items-center justify-between gap-2 py-2 text-sm">
+              <span className="min-w-0"><span className="font-medium">{w.name}</span>{" "}
+                <span className="text-muted-foreground">{t("loop.rate", { pct: Math.round(w.correct_rate * 100), n: w.students })}</span></span>
+              <Button asChild size="sm" variant="outline">
+                <Link to={`/courses/${course.id}/ai`} state={{ draft: { request: t("loop.draftRequest", { kc: w.name }), moduleId: w.module_id } }}
+                      aria-label={t("loop.draftFor", { kc: w.name })}>{t("loop.draft")}</Link>
+              </Button>
+            </li>
+          ))}
+        </ul>
       </CardContent>
     </Card>
   );
