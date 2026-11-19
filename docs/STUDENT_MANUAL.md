@@ -30,6 +30,13 @@ syllabus and project requirements. **Conversations** lists your earlier chats; *
 A conversation belongs to one course. The dashboard has five tabs: **Chat**, **My progress**,
 **Personalize**, **Quizzes**, **End-of-term survey**.
 
+At the top of every course page a green line says what is private: "Private: only you see your questions,
+answers and progress. Your instructor sees class statistics only." **What is private?** opens the full notice
+(it is open on your first visit to a course; **Got it** closes it): no one, not even the instructor, sees your
+questions, answers or progress; the instructor sees class statistics only; questions are not stored in readable
+form and personal details are removed before a question can go to a cloud model; on **My progress** you can see
+and delete what the tutor learned about you.
+
 ## 3. Asking questions (Chat)
 
 - Type under **Your question** and press **Send**. Or start from **Suggested questions**.
