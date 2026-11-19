@@ -8,6 +8,7 @@ from app.privacy.analyzer import PIIAnalyzer
 from app.privacy.profiles import (
     CONSENT_BASE,
     SEARCH_QUERY_MAX_CHARS,
+    STATISTICS_ONLY_NOTE,
     consent_text,
     privacy_profile,
     scan_document,
@@ -111,6 +112,7 @@ def test_consent_text_per_course_type():
     assert consent_text(privacy_profile("general")) == CONSENT_BASE
     assert "medical advice" in consent_text(privacy_profile("medical_science"))
     assert "API keys" in consent_text(privacy_profile("ece"))
+    assert consent_text(privacy_profile("general"), statistics_only=True).endswith(STATISTICS_ONLY_NOTE)
     from app.api.v1.onboarding import CONSENT_TEXT
 
     assert CONSENT_TEXT == CONSENT_BASE  # API v1 keeps the same reviewed text
