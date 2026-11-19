@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
 import { api, type AskResponse, type Course, type CourseProfile } from "@/api/endpoints";
 import Band from "@/components/Band";
@@ -35,6 +35,7 @@ export default function Chat({ course }: { course: Course }) {
   const navigate = useNavigate();
   const ask = (location.state as { ask?: string } | null)?.ask;
   const [prefill, setPrefill] = useState<{ text: string; n: number } | null>(null);
+  const prefillUsed = useCallback(() => setPrefill(null), []);  // once in the composer, not again in a new pane
   useEffect(() => {
     if (!ask) return;
     setPrefill((p) => ({ text: ask, n: (p?.n ?? 0) + 1 }));
@@ -45,10 +46,11 @@ export default function Chat({ course }: { course: Course }) {
     setParams((prev) => { const next = new URLSearchParams(prev); next.set("c", id); return next; }, { replace: true });
   };
   return <ChatPane key={`${course.id}:${epoch}`} course={course} initialConversation={shown.current}
-                   moduleId={moduleParam ? Number(moduleParam) : null} onStarted={started} prefill={prefill} />;
+                   moduleId={moduleParam ? Number(moduleParam) : null} onStarted={started} prefill={prefill}
+                   onPrefillUsed={prefillUsed} />;
 }
 
-function ChatPane({ course, initialConversation: initial, moduleId, onStarted, prefill }: { course: Course; initialConversation: string | null; moduleId: number | null; onStarted: (id: string) => void; prefill?: { text: string; n: number } | null }) {
+function ChatPane({ course, initialConversation: initial, moduleId, onStarted, prefill, onPrefillUsed }: { course: Course; initialConversation: string | null; moduleId: number | null; onStarted: (id: string) => void; prefill?: { text: string; n: number } | null; onPrefillUsed?: () => void }) {
   const [initialConversation] = useState(initial); // fixed for the life of the pane
   const { t } = useI18n();
   const qc = useQueryClient();
@@ -57,8 +59,10 @@ function ChatPane({ course, initialConversation: initial, moduleId, onStarted, p
   const [partial, setPartial] = useState("");
   const [question, setQuestion] = useState("");
   useEffect(() => {
-    if (prefill) setQuestion(prefill.text);
-  }, [prefill]);
+    if (!prefill) return;
+    setQuestion(prefill.text);
+    onPrefillUsed?.();
+  }, [prefill, onPrefillUsed]);
   const controller = useRef<AbortController | null>(null);
   const traceSequence = useRef(0);
   const inputRef = useRef<HTMLTextAreaElement>(null);

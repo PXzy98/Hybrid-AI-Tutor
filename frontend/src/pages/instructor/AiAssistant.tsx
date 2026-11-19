@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Sparkles } from "lucide-react";
 import { useState, type FormEvent } from "react";
+import { useLocation } from "react-router-dom";
 
 import { api, type AiDraft, type AiDraftAccept, type AiDraftKind, type AiDraftStatus, type Course } from "@/api/endpoints";
 import { ErrorNote, Loading, PageHeader, StatusText } from "@/components/common";
@@ -83,9 +84,11 @@ function Drafts({ course }: { course: Course }) {
 function StartForm({ course, onStarted }: { course: Course; onStarted: (d: AiDraft) => void }) {
   const { t } = useI18n();
   const modules = useQuery({ queryKey: ["modules", course.id], queryFn: () => api.modules(course.id) });
+  // V8: "Draft extra material" on Class overview hands over a request and its module (router state)
+  const handed = (useLocation().state as { draft?: { request: string; moduleId: number | null } } | null)?.draft;
   const [kind, setKind] = useState<AiDraftKind>("faq");
-  const [moduleId, setModuleId] = useState<number | null>(null);
-  const [focus, setFocus] = useState("");
+  const [moduleId, setModuleId] = useState<number | null>(handed?.moduleId ?? null);
+  const [focus, setFocus] = useState(handed?.request ?? "");
   const start = useMutation({
     mutationFn: () => api.createAiDraft(course.id, { kind, module_id: moduleId, focus }),
     onSuccess: onStarted,
