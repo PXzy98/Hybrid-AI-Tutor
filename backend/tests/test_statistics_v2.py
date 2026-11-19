@@ -6,7 +6,8 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
-from app.storage.models import CourseMember
+from app.pipeline.steps.generate import LOCAL_CAPABILITY_NOTE
+from app.storage.models import CourseMember, RequestLog
 from tests.test_ask_v2 import PASSWORD, V2, World, _login
 
 MIN = 3
@@ -89,6 +90,38 @@ def test_the_admin_sees_the_counts_of_every_course(world):
     assert stats["students_enrolled"] >= 4 and stats["questions_total"] == 3
     demo = next(c for c in stats["courses"] if c["course_id"] == world.demo)
     assert demo["questions_total"] is None  # nobody asked there
+
+
+def _log(world, name: str, course_id: int, target: str, warnings: list[str] | None = None) -> None:
+    with Session(world.services.engine) as db:
+        db.add(RequestLog(request_id="r", session_id="s", student_id=world.students[name].student_id,
+                          course_id=course_id, topic="M1", sanitized_question="[question]", target=target,
+                          warnings=warnings or []))
+        db.commit()
+
+
+def test_a_cloud_question_answered_locally_counts_as_local(world):
+    """A question routed to the cloud that fell back to the local model was answered locally."""
+    _log(world, "alice", world.course, "cloud", ["no cloud connection", LOCAL_CAPABILITY_NOTE])
+    _log(world, "cara", world.course, "cloud", [LOCAL_CAPABILITY_NOTE])
+    _log(world, "dan", world.course, "cloud")
+    _log(world, "eve", world.course, "local")
+    stats = world.prof.get(f"{world.url}/statistics").json()
+    assert stats["local_share"] == 0.75
+
+
+def test_system_totals_need_the_minimum_group_of_different_students(world):
+    """One student asking in several courses is one contributor: the system totals stay hidden."""
+    world.services.accounts.create_admin("root", PASSWORD, must_change=False)
+    root = _login(world.app, "root")
+    for i in range(MIN):
+        course = root.post(f"{V2}/courses", json={"code": f"ELG {5000 + i}", "title": "Fictional",
+                                                   "course_type": "ece"})
+        assert course.status_code == 201, course.text
+        _log(world, "alice", course.json()["id"], "local")
+    stats = root.get(f"{V2}/admin/statistics").json()
+    assert stats["active_students_7d"] == MIN  # per course
+    assert stats["questions_total"] is None and stats["questions_7d"] is None
 
 
 def test_who_may_read_the_statistics(world):

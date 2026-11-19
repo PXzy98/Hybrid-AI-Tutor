@@ -10,6 +10,7 @@ from statistics import mean
 from sqlalchemy import Engine, func
 from sqlmodel import Session, col, select
 
+from app.pipeline.steps.generate import LOCAL_CAPABILITY_NOTE
 from app.platform.course_scope import GENERAL_TOPIC
 from app.storage.models import Course, CourseMember, Module, Quiz, QuizAttempt, RequestLog
 
@@ -90,6 +91,13 @@ def _enrolled(db: Session, course_id: int) -> int:
         CourseMember.status == "active")).one()
 
 
+def _answered_locally(row) -> bool:
+    """`request_log.target` is the routing decision; a question routed to the cloud that fell back to the
+    local model (privacy check, no cloud connection, cloud failure) carries the fallback's note in its
+    warnings."""
+    return row.target == "local" or (row.target == "cloud" and LOCAL_CAPABILITY_NOTE in (row.warnings or []))
+
+
 def _monday(day: date) -> date:
     return day - timedelta(days=day.weekday())
 
@@ -101,7 +109,8 @@ def course_statistics(engine: Engine, course_id: int, min_group: int, *, now: da
     first_week = _monday(now.date()) - timedelta(weeks=WEEKS - 1)
     with Session(engine) as db:
         rows = db.exec(select(RequestLog.student_id, RequestLog.topic, RequestLog.created_at,
-                              RequestLog.target).where(RequestLog.course_id == course_id)).all()
+                              RequestLog.target, RequestLog.warnings)
+                       .where(RequestLog.course_id == course_id)).all()
         modules = db.exec(select(Module).where(Module.course_id == course_id)
                           .order_by(Module.position, Module.id)).all()
         quizzes = db.exec(select(Quiz).where(Quiz.course_id == course_id, Quiz.status != "draft")
@@ -121,7 +130,7 @@ def course_statistics(engine: Engine, course_id: int, min_group: int, *, now: da
         active_students=students, active_students_7d=students_7d,
         questions_total=_shown(len(rows), students, min_group),
         questions_7d=_shown(len(recent), students_7d, min_group),
-        local_share=(round(sum(r.target == "local" for r in answered) / len(answered), 3)
+        local_share=(round(sum(_answered_locally(r) for r in answered) / len(answered), 3)
                      if answered and students >= min_group else None))
     for i in range(WEEKS):
         start = first_week + timedelta(weeks=i)
@@ -162,8 +171,9 @@ def system_statistics(engine: Engine, min_group: int, *, now: datetime | None = 
                              _shown(len(own), n, min_group), _shown(len(last), n7, min_group)))
     scoped = [r for r in rows if r.course_id is not None]
     last = [r for r in scoped if recent(r)]
-    # a student of two courses is two students here: the course is the unit
-    total = sum(_students(r.student_id for r in scoped if r.course_id == c.id) for c in courses)
+    # the active count is per course (a student of two courses is two students: the course is the unit), but
+    # whether a total may be shown depends on how many different students asked
     total7 = sum(row.active_students_7d for row in out)
+    distinct, distinct7 = _students(r.student_id for r in scoped), _students(r.student_id for r in last)
     return SystemStatistics(min_group, out, sum(enrolled.values()), total7,
-                            _shown(len(scoped), total, min_group), _shown(len(last), total7, min_group))
+                            _shown(len(scoped), distinct, min_group), _shown(len(last), distinct7, min_group))
