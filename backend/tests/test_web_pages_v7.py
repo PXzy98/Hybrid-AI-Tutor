@@ -197,3 +197,11 @@ def test_who_may_add_pages(world, site):
         assert client.post(f"{url}/materials/url", json=page).status_code == code
         assert client.post(f"{url}/materials/{added}/refetch").status_code == code
         assert client.post(f"{url}/ai/drafts/url", json=draft).status_code == code
+
+
+def test_a_draft_from_a_web_page_with_student_data_in_the_request_is_refused(world, site):
+    leak = "Write feedback for student 300123456 (jane.doe@uottawa.ca), who got 45% on the final."
+    r = world["prof"].post(f"{world['url']}/ai/drafts/url", json={
+        "url": "https://example.org/pullups", "kind": "custom", "request": leak})
+    assert r.status_code == 422 and "300123456" not in r.text
+    assert world["prof"].get(f"{world['url']}/ai/drafts").json() == []

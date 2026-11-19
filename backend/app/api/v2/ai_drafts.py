@@ -233,7 +233,7 @@ async def create_from_url(request: Request, body: AiDraftUrlIn, access: CourseIn
     services = request.app.state.services
     with Session(services.engine) as db:
         _module(db, access.course.id, body.module_id)
-    text = _request(body.kind, body.request)
+    text = _request(body.kind, body.request, body.focus, access.course.course_type)
     name, data = await fetch_as_material(services, body.url, access.course.course_type)
     return _draft_from_file(services, access, name, data, kind=body.kind, text=text, focus=body.focus,
                             add_to_course=body.add_to_course, module_id=body.module_id, action="ai_draft.url")
