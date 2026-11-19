@@ -240,6 +240,11 @@ export const en = {
   "plan.save": "Save plan",
   "plan.saved": "Plan saved.",
 
+  "own.title": "How answers should look",
+  "own.hint": "Optional: tell the tutor in your own words how to present answers, for example \"always end with a short summary\" or \"use bullet points\". Your instructor's rules for the course come first.",
+  "own.placeholder": "For example: always end with a one-line summary.",
+  "own.privacy": "Only the course's own model reads this, never your instructor or a cloud model. Do not write personal details: text with names, numbers or health details is refused.",
+  "own.saved": "Saved.",
   "vis.title": "What your instructor can see",
   "vis.modeA": "In this course your instructor only sees anonymous class totals, never your own progress.",
   "vis.modeB": "In this course your instructor can see your individual progress and write a learning plan for you, once you agree.",

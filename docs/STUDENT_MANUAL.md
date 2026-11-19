@@ -80,6 +80,13 @@ on", "A common mix-up:" with "What is true:" for misconceptions the tutor notice
 answers" or "may have come up in a question"), and your explanation preferences. You are never graded: the
 bands are only there to adapt answers.
 
+**How answers should look** (on **My progress**, once you gave consent): tell the tutor in your own words how
+to present answers, up to 300 characters, for example "always end with a one-line summary" or "use bullet
+points", then **Save**. Your instructor's rules for the course come first: where your request conflicts with
+them, the tutor follows the instructor. Only the course's own model reads it; your instructor and cloud models
+never see it. Do not write personal details: a text with names, numbers or health details is refused. It is
+deleted with your profile when you withdraw consent.
+
 **Personalize** (optional, every part can be skipped, you can change everything later):
 1. **Your learning profile**: consent that the tutor keeps a learning profile for you. Without consent your
    answers are not saved and the tutor answers without a profile.

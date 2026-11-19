@@ -61,7 +61,12 @@ class LearnerModel:
             preferences=self.preferences.get(student_id),
             next_kc=self.recommender.next_kc(student_id, topic),
             personalized=True,
+            answer_instruction=self._instruction(student_id),
         )
+
+    def _instruction(self, student_id: str) -> str:
+        read = getattr(self.repo, "instruction", None)  # repositories without it (offline simulations)
+        return read(student_id) if read else ""
 
     def _focus_level(self, student_id: str, topic: str, topic_kcs: list[str], asked: list[str],
                      states: dict[str, KcState]) -> Level:

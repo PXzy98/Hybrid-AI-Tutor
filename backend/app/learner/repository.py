@@ -120,6 +120,19 @@ class LearnerRepository:
             db.add(row)
             db.commit()
 
+    def instruction(self, student_id: str) -> str:
+        """The student's own answer instruction (V15), or ""."""
+        row = self.preference_row(student_id)
+        return (row.instruction or "") if row is not None else ""
+
+    def save_instruction(self, student_id: str, text: str) -> None:
+        with self._db() as db:
+            row = db.exec(select(LearnerPreference).where(LearnerPreference.student_id == student_id)).first()
+            row = row or LearnerPreference(student_id=student_id)
+            row.instruction = text  # not a preference change of the visibility window: updated_at stays
+            db.add(row)
+            db.commit()
+
     # ------------------------------------------------------------- misconceptions
     def misconceptions(self, student_id: str, statuses: tuple[str, ...] | None = None
                        ) -> list[LearnerMisconception]:
