@@ -127,3 +127,44 @@ def test_who_may_upload_a_file_for_a_draft(world):
     app, url = world["app"], world["url"]
     for client, code in ((_login(app, "other"), 404), (_login(app, "alice"), 404), (csrf_client(app), 401)):
         assert _upload(client, url, "paper.md", PAPER, kind="faq").status_code == code
+
+
+def test_a_request_with_student_data_is_refused_and_not_stored(world):
+    """The custom request and the focus are scanned before they are stored, in both endpoints."""
+    leak = "Write feedback for student 300123456 (jane.doe@uottawa.ca), who got 45% on the final."
+    for body in ({"kind": "custom", "request": leak}, {"kind": "faq", "focus": leak}):
+        r = world["prof"].post(f"{world['url']}/ai/drafts", json=body)
+        assert r.status_code == 422 and "300123456" not in r.text, body
+    r = _upload(world["prof"], world["url"], "paper.md", PAPER, kind="custom", request=leak)
+    assert r.status_code == 422 and "300123456" not in r.text
+    assert world["prof"].get(f"{world['url']}/ai/drafts").json() == []
+
+
+def test_a_long_paragraph_of_an_uploaded_file_is_not_cut(world):
+    """A file without blank lines (or text extracted with single newlines) is split into passages; the end
+    of the file still reaches the model."""
+    local = world["use"](TIER1)
+    lines = [f"Line {i}: open drain outputs share the bus through one pull-up resistor." for i in range(40)]
+    text = "\n".join([*lines, "LATE-PASSAGE rise times were measured with three resistor values."])
+    assert len(text) > 2500
+    r = _upload(world["prof"], world["url"], "paper.md", text, kind="custom",
+                request="Summarize the rise time measurements with three resistor values.")
+    assert r.status_code == 202, r.text
+    assert jobs.run_pending(world["services"]) >= 1
+    assert "LATE-PASSAGE" in local.sent_text()
+
+
+def test_chosen_files_are_not_crowded_out_by_other_material(world):
+    """Many better-ranked passages of other files do not hide the chosen file's passages."""
+    services, cid, module = world["services"], world["course_id"], world["module"]["id"]
+    with Session(services.engine) as db:
+        db.add(Material(course_id=cid, module_id=module, filename="chosen.md", size_bytes=1, sha256="0" * 64,
+                        scan_status="accepted"))
+        db.commit()
+        chosen = db.exec(select(Material).where(Material.filename == "chosen.md")).one().id
+    crowd = [_passage(f"pull-up resistors, passage {i}", module, "other.md", cid) for i in range(400)]
+    services.course_retriever = FakeCourseRetriever(
+        [*crowd, _passage("CHOSEN-PASSAGE pull-up resistors", module, "chosen.md", cid)])
+    r, local = _start(world, {"kind": "faq", "material_ids": [chosen]})
+    assert r.status_code == 202 and _draft(world, r.json()["id"])["status"] == "draft"
+    assert "CHOSEN-PASSAGE" in local.sent_text()
