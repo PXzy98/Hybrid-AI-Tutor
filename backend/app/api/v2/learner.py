@@ -151,10 +151,13 @@ def check(body: CheckIn, access: CourseStudent, request: Request):
 @router.get("/courses/{course_id}/onboarding", response_model=OnboardingOut,
             operation_id="learner_onboarding_get")
 def get_onboarding(module_id: int, access: CourseStudent, request: Request):
-    scope = _scope(_services(request), access.course.id)
+    services = _services(request)
+    scope = _scope(services, access.course.id)
     code = _module_code(scope, module_id)
+    statistics_only = not services.settings.learner.instructor_individual_view
     return OnboardingOut(module_id=module_id,
-                         consent_text=consent_text(privacy_profile(access.course.course_type)),
+                         consent_text=consent_text(privacy_profile(access.course.course_type),
+                                                   statistics_only=statistics_only),
                          consent_given=scope.learner.repo.consent(access.student_id),
                          preference_questions=PREFERENCE_QUESTIONS,
                          diagnostic=[i.public() for i in diagnostic_items(scope.content, code)])

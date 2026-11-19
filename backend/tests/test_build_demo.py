@@ -87,6 +87,22 @@ def test_build_demo_twice_and_sample_activity(world, packs_dir, tmp_path):
     assert kept == accounts
 
 
+def test_build_demo_keeps_statistics_only_courses_in_mode_a(make_client, packs_dir, tmp_path):
+    """v5 V1: where individual views are off, the demo build leaves mode A and the sample activity still
+    runs without problems."""
+    off = {"data_dir": str(tmp_path / "data"), "learner": {"instructor_individual_view": False}}
+    with make_client(off) as client:
+        services = client.app.state.services
+        services.local_llm = FakeLLMClient("Fake local answer.", model="fake-local")
+        services.understand_llm = FakeLLMClient(UNDERSTOOD_NOTHING, model="fake-understand")
+        services.accounts.create_instructor("prof", PASSWORD, must_change=False)
+        report = run((client.app, services), packs_dir, tmp_path, students=1, sample=True)[0]
+        assert report.failed == []
+        prof = csrf_client(client.app)
+        prof.post("/api/v2/auth/login", json={"username": "prof", "password": PASSWORD})
+        assert prof.get(f"/api/v2/courses/{report.course_id}").json()["visibility_mode"] == "A"
+
+
 def test_instructor_only_files_are_never_uploaded(tmp_path):
     pack = tmp_path / "p"
     (pack / "instructor_only").mkdir(parents=True)
