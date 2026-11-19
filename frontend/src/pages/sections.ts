@@ -5,8 +5,9 @@ import {
 
 import type { MessageKey } from "@/i18n/en";
 
-/** A section of the course page: its URL segment (/courses/:id/:section), its name and its icon. */
-export type Section = { id: string; label: MessageKey; icon: LucideIcon };
+/** A section of the course page: its URL segment (/courses/:id/:section), its name and its icon. `individual`:
+ *  shows one student's data, so it exists only where the deployment allows individual views (v5 V1). */
+export type Section = { id: string; label: MessageKey; icon: LucideIcon; individual?: boolean };
 export type SectionGroup = { label?: MessageKey; sections: Section[] };
 
 export const STUDENT_SECTIONS: SectionGroup[] = [{
@@ -22,7 +23,7 @@ export const STUDENT_SECTIONS: SectionGroup[] = [{
 export const INSTRUCTOR_SECTIONS: SectionGroup[] = [
   { label: "nav.group.class", sections: [
     { id: "overview", label: "tab.overview", icon: LayoutDashboard },
-    { id: "students", label: "tab.students", icon: Users },
+    { id: "students", label: "tab.students", icon: Users, individual: true },
   ] },
   { label: "nav.group.teaching", sections: [
     { id: "content", label: "tab.content", icon: BookOpen },
@@ -38,10 +39,12 @@ export const INSTRUCTOR_SECTIONS: SectionGroup[] = [
   ] },
 ];
 
-export const sectionGroups = (student: boolean) => (student ? STUDENT_SECTIONS : INSTRUCTOR_SECTIONS);
+export const sectionGroups = (student: boolean, individualView = false): SectionGroup[] =>
+  (student ? STUDENT_SECTIONS : INSTRUCTOR_SECTIONS)
+    .map((g) => ({ ...g, sections: g.sections.filter((s) => individualView || !s.individual) }));
 
 /** The section a URL segment names; an unknown or missing one falls back to the first section. */
-export function activeSection(student: boolean, tab: string | undefined): Section {
-  const all = sectionGroups(student).flatMap((g) => g.sections);
+export function activeSection(student: boolean, tab: string | undefined, individualView = false): Section {
+  const all = sectionGroups(student, individualView).flatMap((g) => g.sections);
   return all.find((s) => s.id === tab) ?? all[0];
 }

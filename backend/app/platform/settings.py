@@ -239,6 +239,8 @@ class SettingsService:
         if course is not None:
             base["local_endpoint_id"] = course.local_endpoint_id or base["local_endpoint_id"]
             base["cloud_endpoint_id"] = course.cloud_endpoint_id or base["cloud_endpoint_id"]
+        if not self.base.learner.instructor_individual_view:
+            base["visibility_mode"] = "A"  # V1: individual views are off here, whatever is stored
         base["course_version"] = course.version if course else 0
         base["system_version"] = system.version if system else 0
         return EffectiveSettings(**base)
@@ -252,7 +254,12 @@ class SettingsService:
     def course_values(self, course_id: int) -> tuple[dict, int]:
         with Session(self.engine) as db:
             row = db.get(CourseSettings, course_id)
-            return _values(row, COURSE_FIELDS), (row.version if row else 0)
+            values = _values(row, COURSE_FIELDS)
+        if values["visibility_mode"] == "B" and not self.base.learner.instructor_individual_view:
+            # V1: a mode B stored before the switch went off is not offered back, so saving the other
+            # settings does not send it again (and fail); the course reads as mode A anyway
+            values["visibility_mode"] = None
+        return values, (row.version if row else 0)
 
     # --------------------------------------------------------------------------------------- write
     def check_levels(self, values: dict) -> None:
@@ -330,6 +337,8 @@ class SettingsService:
     def save_course(self, course_id: int, values: dict, *, expected_version: int, account_id: int | None,
                     action: str = "settings.course.update") -> int:
         values = validate_course({**dict.fromkeys(COURSE_FIELDS), **values})
+        if values.get("visibility_mode") == "B" and not self.base.learner.instructor_individual_view:
+            raise SettingsError("individual views are switched off here: visibility_mode must be A")
         self.check_endpoints(values, course_id=course_id)
         with Session(self.engine) as db:
             # a per-course lock: FOR UPDATE cannot lock the row before it exists (first save)

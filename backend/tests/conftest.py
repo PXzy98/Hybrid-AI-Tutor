@@ -23,7 +23,10 @@ def _deep_merge(base: dict, overrides: dict) -> dict:
 # The suite runs with the default knowledge model (course, guide 4.10); TEST_LEARNER_KNOWLEDGE=rule runs it
 # with the fallback model and =bkt with plain BKT.
 TEST_BASE = {"privacy": {"spacy_model": "en_core_web_sm"},
-             "learner": {"knowledge": os.environ.get("TEST_LEARNER_KNOWLEDGE", "course")},
+             # the kept visibility mode B code is tested with the individual view switched on; the deployment
+             # default (off, v5 V1) is tested in test_statistics_only.py
+             "learner": {"knowledge": os.environ.get("TEST_LEARNER_KNOWLEDGE", "course"),
+                         "instructor_individual_view": True},
              "routing": {"impl": "stub"}, "rag": {"impl": "stub"},
              "llm": {"cloud": {"fallback_to_local": True}},
              "pipeline": ["privacy_filter", "understand", "learner_context", "retrieve", "route",
