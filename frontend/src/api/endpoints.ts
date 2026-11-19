@@ -192,6 +192,7 @@ export const api = {
     request<Schemas["AiDraftAcceptOut"]>("POST", `${c(id)}/ai/drafts/${draftId}/accept`, moduleId === null ? {} : { module_id: moduleId }),
   discardAiDraft: (id: number, draftId: number) => request<void>("DELETE", `${c(id)}/ai/drafts/${draftId}`),
   insights: (id: number) => request<Insights>("GET", `${c(id)}/insights`),
+  courseStatistics: (id: number) => request<Schemas["CourseStatisticsOut"]>("GET", `${c(id)}/statistics`),
   evaluations: (id: number) => request<EvaluationSummary[]>("GET", `${c(id)}/ai/evaluations`),
   evaluation: (id: number, evalId: number) => request<Evaluation>("GET", `${c(id)}/ai/evaluations/${evalId}`),
   createEvaluation: (id: number, input: Schemas["EvaluationIn"]) => request<Evaluation>("POST", `${c(id)}/ai/evaluations`, input),
@@ -209,6 +210,7 @@ export const api = {
   resetStaffPassword: (accountId: number) =>
     request<Schemas["TemporaryPasswordOut"]>("POST", `/admin/instructors/${accountId}/reset-password`),
   systemSettings: () => request<SystemSettings>("GET", "/admin/settings"),
+  systemStatistics: () => request<Schemas["SystemStatisticsOut"]>("GET", "/admin/statistics"),
   applyStatus: () => request<Schemas["ApplyStatusOut"]>("GET", "/admin/settings/apply-status"),
   saveSystemSettings: (values: SystemValues, version: number) => request<SystemSettings>("PUT", "/admin/settings", { values, version }),
   // model connections: system scope (courseId null, admin) or one course (instructors)

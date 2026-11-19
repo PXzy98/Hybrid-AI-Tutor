@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { ApiError } from "@/api/client";
 import { api, type Staff, type SystemSettings, type SystemValues } from "@/api/endpoints";
 import { useMe } from "@/auth";
-import { ErrorNote, Loading, PageHeader, StatusText } from "@/components/common";
+import { ErrorNote, Loading, PageHeader, StatCard, StatusText } from "@/components/common";
 import ModelEndpoints, { endpointsKey } from "@/components/ModelEndpoints";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -25,10 +25,53 @@ export default function Admin() {
   return (
     <div className="space-y-6">
       <PageHeader level={1} title={t("admin.title")} />
+      <UsageCard />
       <StaffCard selfId={me?.account_id} />
       <SystemSettingsCard />
       <ModelEndpoints courseId={null} />
     </div>
+  );
+}
+
+/** v5 V2: students and questions of every course, and the totals (counts only; small groups hidden). */
+function UsageCard() {
+  const { t } = useI18n();
+  const stats = useQuery({ queryKey: ["system-statistics"], queryFn: api.systemStatistics });
+  const data = stats.data;
+  const show = (n: number | null | undefined) => (n == null ? t("overview.hidden") : n);
+  return (
+    <Card aria-label={t("usage.adminTitle")}>
+      <CardHeader><CardTitle>{t("usage.adminTitle")}</CardTitle><CardDescription>{t("usage.hint", { n: data?.min_group ?? 5 })}</CardDescription></CardHeader>
+      <CardContent className="space-y-4">
+        <ErrorNote error={stats.error} />
+        {stats.isLoading && <Loading variant="table" />}
+        {data && (
+          <>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <StatCard label={t("usage.enrolled")} value={data.students_enrolled} />
+              <StatCard label={t("usage.active7d")} value={data.active_students_7d} />
+              <StatCard label={t("usage.questions7d")} value={show(data.questions_7d)} />
+            </div>
+            <Table aria-label={t("usage.perCourse")}>
+              <TableHeader><TableRow>
+                <TableHead>{t("usage.course")}</TableHead><TableHead>{t("usage.enrolled")}</TableHead>
+                <TableHead>{t("usage.active7d")}</TableHead><TableHead>{t("usage.questions7d")}</TableHead><TableHead>{t("usage.questionsTotal")}</TableHead>
+              </TableRow></TableHeader>
+              <TableBody>{data.courses.map((c) => (
+                <TableRow key={c.course_id}>
+                  <TableCell><span className="font-medium">{c.code}</span> <span className="text-muted-foreground">{c.title}</span>
+                    {c.status === "archived" && <Badge variant="secondary" className="ml-2">{t("usage.archived")}</Badge>}</TableCell>
+                  <TableCell className="tabular-nums">{c.students_enrolled}</TableCell>
+                  <TableCell className="tabular-nums">{c.active_students_7d}</TableCell>
+                  <TableCell className="tabular-nums">{show(c.questions_7d)}</TableCell>
+                  <TableCell className="tabular-nums">{show(c.questions_total)}</TableCell>
+                </TableRow>
+              ))}</TableBody>
+            </Table>
+          </>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 

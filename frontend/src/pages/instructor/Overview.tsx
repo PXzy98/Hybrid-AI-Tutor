@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { BookOpen, Lightbulb, Users } from "lucide-react";
+import { BookOpen, Cpu, Lightbulb, MessageSquare, UserCheck, Users } from "lucide-react";
 import { useState, type ReactNode } from "react";
 
 import { api, type Course } from "@/api/endpoints";
@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useI18n } from "@/i18n";
+import { useFormat } from "@/lib/format";
 import type { MessageKey } from "@/i18n/en";
 
 const BANDS = ["basic", "intermediate", "advanced", "mastered"];
@@ -39,6 +40,7 @@ export default function Overview({ course }: { course: Course }) {
         </div>
       } />
       <ErrorNote error={summary.error} />
+      <UsageCard course={course} />
       <InsightsCard course={course} />
       {summary.isLoading && <Loading variant="cards" />}
       {data?.suppressed && <Alert variant="info" role="status" icon>{t("overview.suppressed", { n: data.min_group })}</Alert>}
@@ -87,6 +89,75 @@ export default function Overview({ course }: { course: Course }) {
         </>
       )}
     </div>
+  );
+}
+
+const pct = (x: number | null | undefined) => (x == null ? null : `${Math.round(x * 100)}%`);
+
+/** v5 V2: how many students use the tutor, questions per week and per module, quiz averages. Counts that fewer
+ *  than the minimum group contributed come back as null and are shown as hidden. */
+function UsageCard({ course }: { course: Course }) {
+  const { t } = useI18n();
+  const fmt = useFormat();
+  const stats = useQuery({ queryKey: ["statistics", course.id], queryFn: () => api.courseStatistics(course.id) });
+  const data = stats.data;
+  const hidden = t("overview.hidden");
+  const show = (n: number | null | undefined) => (n == null ? hidden : n);
+  const modules = (data?.modules ?? []).filter((m) => m.module_id !== null || m.questions !== 0);
+  const most = Math.max(1, ...modules.map((m) => m.questions ?? 0));
+  const weekMax = Math.max(1, ...(data?.weeks ?? []).map((w) => w.questions ?? 0));
+  return (
+    <Card aria-label={t("usage.title")}>
+      <CardHeader><CardTitle>{t("usage.title")}</CardTitle><CardDescription>{t("usage.hint", { n: data?.min_group ?? 5 })}</CardDescription></CardHeader>
+      <CardContent className="space-y-6">
+        <ErrorNote error={stats.error} />
+        {stats.isLoading && <Loading variant="cards" />}
+        {data && (
+          <>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <StatCard label={t("usage.enrolled")} value={data.students_enrolled} icon={Users} />
+              <StatCard label={t("usage.active7d")} value={data.active_students_7d} icon={UserCheck} />
+              <StatCard label={t("usage.questions7d")} value={show(data.questions_7d)} icon={MessageSquare} />
+              <StatCard label={t("usage.local")} value={pct(data.local_share) ?? hidden} icon={Cpu} />
+            </div>
+            <div className="grid gap-6 md:grid-cols-2">
+              <div>
+                <h3 className="mb-2 text-sm font-medium">{t("usage.perWeek")}</h3>
+                <ul className="space-y-1.5 text-sm">
+                  {data.weeks.map((w) => (
+                    <RankedRow key={w.week_start} label={t("usage.weekOf", { date: fmt.date(w.week_start) })}
+                               count={w.questions == null ? hidden : t("usage.questionsStudents", { q: w.questions, s: w.students ?? 0 })}
+                               share={(w.questions ?? 0) / weekMax} />
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="mb-2 text-sm font-medium">{t("usage.perModule")}</h3>
+                <ul className="space-y-1.5 text-sm">
+                  {modules.map((m) => (
+                    <RankedRow key={m.module_id ?? "course"} label={m.module_id === null ? t("usage.wholeCourse") : m.title}
+                               count={show(m.questions)} share={(m.questions ?? 0) / most} />
+                  ))}
+                </ul>
+              </div>
+            </div>
+            <div>
+              <h3 className="mb-2 text-sm font-medium">{t("usage.quizzes")}</h3>
+              {data.quizzes.length === 0 ? <p className="text-sm text-muted-foreground">{t("usage.noQuizzes")}</p> : (
+                <Table>
+                  <TableHeader><TableRow><TableHead>{t("usage.quiz")}</TableHead><TableHead>{t("usage.attempts")}</TableHead><TableHead>{t("usage.average")}</TableHead></TableRow></TableHeader>
+                  <TableBody>{data.quizzes.map((q) => (
+                    <TableRow key={q.quiz_id}><TableCell className="font-medium">{q.title}</TableCell>
+                      <TableCell className="tabular-nums">{q.attempts}</TableCell>
+                      <TableCell className="tabular-nums">{pct(q.mean_score) ?? hidden}</TableCell></TableRow>
+                  ))}</TableBody>
+                </Table>
+              )}
+            </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
