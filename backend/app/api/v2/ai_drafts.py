@@ -139,8 +139,9 @@ def create(request: Request, body: AiDraftIn, access: CourseInstructor):
     engine = _engine(request)
     with Session(engine, expire_on_commit=False) as db:
         sources = _sources(db, access.course.id, body)
+        text = _request(body.kind, body.request, body.focus, access.course.course_type)
         row = AiDraft(course_id=access.course.id, module_id=body.module_id, kind=body.kind,
-                      focus=body.focus.strip(), request=_request(body.kind, body.request), sources=sources,
+                      focus=body.focus.strip(), request=text, sources=sources,
                       created_by=access.account_id)
         db.add(row)
         db.commit()
@@ -149,10 +150,16 @@ def create(request: Request, body: AiDraftIn, access: CourseInstructor):
     return _out(row, job.id)
 
 
-def _request(kind: str, text: str) -> str:
+def _request(kind: str, text: str, focus: str, course_type: str) -> str:
+    """The custom request to store. It and the focus are the instructor's free text: scanned like an edited
+    draft before anything is stored, so student data never reaches the table or a model."""
     if kind == "custom" and not text.strip():
         raise ApiError(422, ErrorCode.invalid, "a custom draft needs a request: what should be drafted")
-    return text.strip() if kind == "custom" else ""
+    text = text.strip() if kind == "custom" else ""
+    found = scan_document(f"{text}\n\n{focus.strip()}", privacy_profile(course_type)).blocking
+    if found:
+        raise ApiError(422, ErrorCode.invalid, "the privacy scan found student data: " + ", ".join(found))
+    return text
 
 
 def _sources(db: Session, course_id: int, body: "AiDraftIn") -> dict:
@@ -194,7 +201,7 @@ async def create_from_upload(
     services = request.app.state.services
     with Session(services.engine) as db:
         _module(db, access.course.id, module_id)
-    text = _request(kind, draft_request)
+    text = _request(kind, draft_request, focus, access.course.course_type)
     data = await file.read(MAX_BYTES + 1)
     try:
         name = await asyncio.to_thread(index_jobs.check_upload, file.filename or "", data,
