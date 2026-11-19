@@ -73,7 +73,9 @@ def put_instruction(request: Request, body: InstructionIO, user: Student):
         raise HTTPException(status.HTTP_409_CONFLICT, "consent required: give consent first")
     text = " ".join(body.text.split())
     if text:
-        found = sorted({e.type for e in _analyzer(request).analyze(text)})
+        # the student's own name and username too, as in the privacy filter: NER misses some of them
+        names, usernames = request.app.state.services.accounts.identity_terms(user.student_id)
+        found = sorted({e.type for e in _analyzer(request).analyze(text, names, usernames)})
         if found:
             raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY,
                                 "remove personal details from the instruction: " + ", ".join(found))
