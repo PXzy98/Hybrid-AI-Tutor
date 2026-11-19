@@ -68,7 +68,14 @@ def get_config(_: Instructor, services: ServicesDep):
 
 @router.put("/config", response_model=AdminConfig)
 def put_config(body: RuntimeConfig, user: Instructor, request: Request):
-    """Applied at once (the next /ask uses it) and stored in config_history."""
+    """Applied at once (the next /ask uses it) and stored in config_history. The system-wide fields (checkers,
+    knowledge model, levels, the local model server) are an administrator's (Z27): an instructor may only
+    change the demo course's routing fields here."""
+    if user.role != "admin":
+        before = runtime_config.current(request.app.state.services).model_dump(exclude=set(COURSE_LEVEL))
+        if body.model_dump(exclude=set(COURSE_LEVEL)) != before:
+            raise HTTPException(status.HTTP_403_FORBIDDEN,
+                                "only an administrator changes system settings (API v2: /admin/settings)")
     try:
         runtime_config.change(request.app, body, user.account_id)
     except InvalidConfig as e:
@@ -81,13 +88,20 @@ def put_config(body: RuntimeConfig, user: Instructor, request: Request):
 
 
 @router.post("/llm-server/test", response_model=ServerStatus)
-async def test_llm_server(body: ServerTest, _: Instructor, services: ServicesDep):
-    """Is a local model server reachable, and does it have the model? Reads only its model list (G1-94)."""
+async def test_llm_server(body: ServerTest, user: Instructor, services: ServicesDep):
+    """Is a local model server reachable, and does it have the model? Reads only its model list (G1-94).
+    Administrators only (Z27): the address may be a private one, so it must not let an instructor probe the
+    internal network."""
+    if user.role != "admin":
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "only an administrator tests model servers")
     s = services.settings
     # the deployment's key only goes to the deployment's own vLLM, never to an address typed into the form
     own = bool(s.vllm_base_url) and _api_root(body.url) == _api_root(s.vllm_base_url)
     key = s.vllm_key.get_secret_value() if s.vllm_key and own else None
     return await check_server(body.url, body.model, key)
+
+
+COURSE_LEVEL = ("routing_threshold", "show_routing_progress")  # the demo course's own settings
 
 
 def _api_root(url: str) -> str:

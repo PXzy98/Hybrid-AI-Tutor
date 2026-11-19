@@ -4,6 +4,7 @@ An admin creates instructor (or admin) accounts by e-mail with a one-time tempor
 them, changes between instructor and admin, and resets passwords. Nobody deactivates themselves or changes
 their own role, so an admin always remains. System settings and model connections have their own modules.
 """
+from dataclasses import asdict
 from datetime import datetime
 from typing import Annotated, Literal
 
@@ -13,6 +14,7 @@ from pydantic import BaseModel, Field
 from app.api.v2.errors import ApiError, ErrorCode
 from app.auth.deps import CurrentUser
 from app.auth.service import AccountError, AccountNotFound, UsernameTaken
+from app.learner.statistics import system_statistics
 from app.platform.access import require_system_role
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -101,3 +103,32 @@ def reset_password(request: Request, account_id: int, _: Admin):
         return TemporaryPasswordOut(temporary_password=_accounts(request).reset_staff_password(account_id))
     except AccountError as e:
         raise _account_error(e) from None
+
+
+class CourseUsageOut(BaseModel):
+    course_id: int
+    code: str
+    title: str
+    status: Literal["active", "archived"]
+    students_enrolled: int
+    active_students_7d: int
+    questions_total: int | None  # null: fewer than the minimum group asked
+    questions_7d: int | None
+
+
+class SystemStatisticsOut(BaseModel):
+    """Counts per course and in total (v5 V2); no individual data."""
+    min_group: int
+    courses: list[CourseUsageOut]
+    students_enrolled: int
+    active_students_7d: int
+    questions_total: int | None
+    questions_7d: int | None
+
+
+@router.get("/statistics", response_model=SystemStatisticsOut, operation_id="admin_statistics")
+def get_statistics(user: Admin, request: Request):
+    """Students and questions of every course, and the totals."""
+    services = request.app.state.services
+    return SystemStatisticsOut(**asdict(system_statistics(services.engine,
+                                                          services.settings.learner.class_summary_min_group)))

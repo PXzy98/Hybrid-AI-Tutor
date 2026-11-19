@@ -100,3 +100,27 @@ def test_a_real_credential_still_blocks_in_every_course():
     for profile in ("general", "ece", "medical_science", "life_science"):
         assert "SECRET" in _blocking(profile, 'password = "Lab4Pass!2026"')
         assert "SECRET" in _blocking(profile, "token=FAKEtoken0000abc")
+
+
+def test_an_allele_received_from_a_grandparent_is_not_a_grade():
+    """Z25: the CS50x pset 5 text (paraphrased) was refused as GRADE: the allele exceptions never matched,
+    because three of their patterns ended in a control character instead of a word boundary."""
+    text = ("For example, the child in Generation 0 received an O allele from both Generation 1 parents. The "
+            "first parent received an A from the first grandparent and a O from the second grandparent. "
+            "Similarly, the second parent received an O and a B from their grandparents.\n\n"
+            "Child (Generation 0): blood type OO\n    Parent (Generation 1): blood type AO\n")
+    assert "GRADE" not in _types("ece", text)
+    assert not _blocking("ece", text)
+    assert "GRADE" not in _types("ece", "She has an A allele and he has a B allele.")
+
+
+def test_no_recognizer_pattern_contains_a_control_character():
+    """A non-raw "\\b" in a pattern is a backspace, and the pattern silently never matches."""
+    from pathlib import Path
+
+    import app.privacy.recognizers as recognizers
+
+    for source in Path(recognizers.__file__).parent.glob("*.py"):
+        text = source.read_text(encoding="utf-8")
+        bad = [c for c in text if ord(c) < 32 and c not in "\n\r\t"]
+        assert not bad, f"{source.name} contains control characters {sorted(set(map(ord, bad)))}"

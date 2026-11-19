@@ -6,7 +6,8 @@ Instructors: the class summary (aggregates, every mode), and in visibility mode 
 and the learning plan of a student who acknowledged it and did not opt out. Every individual view is
 audited; a student who is not visible is answered exactly like one who does not exist (404).
 """
-from datetime import datetime
+from dataclasses import asdict
+from datetime import date, datetime
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Request, Response, status
@@ -30,6 +31,7 @@ from app.learner import course_views
 from app.learner.checks import diagnostic_items, evidence_for, grade
 from app.learner.instructor_view import InstructorProfileView, NotVisible, profile_for_instructor
 from app.learner.preference import PreferenceSignal
+from app.learner.statistics import course_statistics
 from app.learner.visibility_policy import VisibilityDenied
 from app.platform.access import CourseAccess, require_course_role
 from app.platform.course_scope import CourseScope
@@ -252,6 +254,49 @@ def get_class_summary(module_id: int, access: CourseInstructor, request: Request
     return class_summary(services.engine, scope.learner, scope.content, code,
                          services.settings.learner.class_summary_min_group,
                          members=course_views.course_student_ids(services.engine, access.course.id))
+
+
+class WeekCountOut(BaseModel):
+    week_start: date
+    questions: int | None  # null: fewer than the minimum group asked that week
+    students: int | None
+
+
+class ModuleCountOut(BaseModel):
+    module_id: int | None  # null: questions about the whole course
+    title: str
+    questions: int | None
+
+
+class QuizStatOut(BaseModel):
+    quiz_id: int
+    title: str
+    attempts: int
+    mean_score: float | None
+
+
+class CourseStatisticsOut(BaseModel):
+    """Counts only (v5 V2); a count contributed by fewer than `min_group` students is null."""
+    min_group: int
+    students_enrolled: int
+    active_students: int
+    active_students_7d: int
+    questions_total: int | None
+    questions_7d: int | None
+    local_share: float | None
+    weeks: list[WeekCountOut]
+    modules: list[ModuleCountOut]
+    quizzes: list[QuizStatOut]
+
+
+@router.get("/courses/{course_id}/statistics", response_model=CourseStatisticsOut,
+            operation_id="learner_course_statistics")
+def get_course_statistics(access: CourseInstructor, request: Request):
+    """How many students use the tutor, questions per week and per module, quiz averages (v5 V2)."""
+    services = _services(request)
+    min_group = services.settings.learner.class_summary_min_group
+    stats = course_statistics(services.engine, access.course.id, min_group)
+    return CourseStatisticsOut(**{k: v for k, v in asdict(stats).items() if k != "course_id"})
 
 
 @router.get("/courses/{course_id}/students/{student_id}/overview", response_model=InstructorProfileView,
