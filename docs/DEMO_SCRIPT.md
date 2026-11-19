@@ -5,7 +5,8 @@ teaching, research groups and industry training; a bridge between academia, rese
 fictional accounts and the open course packs (`data/demo_courses/`) are shown.
 
 Setup: the production site (or the dev server for the video) built with
-`python scripts/build_demo.py --students 6 --sample-activity --learner-content`; the demo vLLM running
+`python scripts/build_demo.py --students 6 --sample-activity --learner-content` (the
+`--learner-content` option comes with S15, PR #113; merge it before the demo build); the demo vLLM running
 (DEMO_VLLM.md); a second browser profile for the student.
 
 | Min | Who | What to show | Point to make |
