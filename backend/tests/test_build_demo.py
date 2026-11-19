@@ -139,6 +139,48 @@ def test_learner_content_gives_the_course_kcs_items_and_a_published_quiz(world, 
     assert again.accepted == {} and again.quiz_id == report.quiz_id and len(local.calls) == calls
 
 
+class FailingFake(SchemaFake):
+    """Misconceptions and quiz questions fail (a temporary model failure)."""
+
+    async def complete(self, messages, *, json_schema=None, max_tokens=None):
+        schema = json.dumps(json_schema or {})
+        if '"incorrect_belief"' in schema or json_schema is None:
+            self.replies = ["not json"]
+            return await FakeLLMClient.complete(self, messages, json_schema=json_schema,
+                                                max_tokens=max_tokens)
+        return await super().complete(messages, json_schema=json_schema, max_tokens=max_tokens)
+
+
+def test_learner_content_run_again_finishes_what_failed(world, packs_dir, tmp_path):
+    """S15: a kind that failed is drafted on the next run without drafting the accepted KCs again, and a
+    practice quiz left as a draft is filled and published."""
+    from app.core.schemas import Chunk
+    from app.llm.gateway import FakeGateway
+    from app.rag.course import FakeCourseRetriever
+
+    app, services = world
+    passage = Chunk(text="Arrays store values of one type back to back.", source="week_2.md", topic="week_2",
+                    score=1.0)
+    services.course_retriever = FakeCourseRetriever([passage])
+    cloud = FakeLLMClient("never", backend="cloud")
+    services.gateway = FakeGateway({"local": FailingFake(model="local-9b"), "cloud": cloud})
+    first = run(world, packs_dir, tmp_path, students=0, learner_content=True, learner_modules=1)[0]
+    assert first.accepted == {"kcs": 1, "check_items": 1}
+    assert any("misconceptions" in f for f in first.failed)
+    assert any("practice quiz" in f for f in first.failed)
+    assert first.quiz_id is None
+
+    services.gateway = FakeGateway({"local": SchemaFake(model="local-9b"), "cloud": cloud})
+    again = run(world, packs_dir, tmp_path, students=0, learner_content=True, learner_modules=1)[0]
+    assert again.failed == [], again.failed
+    assert again.accepted == {"misconceptions": 1} and again.quiz_id
+    prof = csrf_client(app)
+    prof.post("/api/v2/auth/login", json={"username": "prof", "password": PASSWORD})
+    course = f"/api/v2/courses/{again.course_id}"
+    quizzes = prof.get(f"{course}/quizzes").json()
+    assert len(quizzes) == 1 and quizzes[0]["status"] == "published"
+
+
 def test_instructor_only_files_are_never_uploaded(tmp_path):
     pack = tmp_path / "p"
     (pack / "instructor_only").mkdir(parents=True)

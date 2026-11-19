@@ -283,14 +283,20 @@ def run_job(api: Api, course_id: int, job_id: int, sleep: Callable[[float], None
 def draft_learner_content(api: Api, report: CourseReport, modules: int = 2,
                           sleep: Callable[[float], None] = time.sleep) -> None:
     """Task S15: KCs, check items and misconceptions for the first modules, drafted by the local model from
-    the material and accepted; then one published practice quiz. Kept when it exists (run again: nothing new
-    for a module that has KCs, no second quiz)."""
+    the material and accepted; then one published practice quiz. Run again, it drafts only what is still
+    missing: a kind a module already has is kept, and a practice quiz left as a draft is finished."""
     url = f"/courses/{report.course_id}"
-    have_kcs = {k["module_id"] for k in ok(api.get(f"{url}/kcs"), "listing KCs")}
+    kcs = ok(api.get(f"{url}/kcs"), "listing KCs")
+    items = ok(api.get(f"{url}/check-items"), "listing check items")
+    misconceptions = ok(api.get(f"{url}/misconceptions"), "listing misconceptions")
     for module in ok(api.get(f"{url}/modules"), "listing modules")[:modules]:
-        if module["id"] in have_kcs:
-            continue
+        module_kcs = {k["id"] for k in kcs if k["module_id"] == module["id"]}
+        done = {"kcs": bool(module_kcs),
+                "check_items": any(i["kc_id"] in module_kcs for i in items),
+                "misconceptions": any(m["kc_id"] in module_kcs for m in misconceptions)}
         for kind in LEARNER_KINDS:
+            if done[kind]:
+                continue
             draft = ok(api.post(f"{url}/ai/drafts", json={"kind": kind, "module_id": module["id"]}),
                        f"drafting {kind}", (202,))
             state = run_job(api, report.course_id, draft["job_id"], sleep)
@@ -303,24 +309,36 @@ def draft_learner_content(api: Api, report: CourseReport, modules: int = 2,
             r = api.post(f"{url}/ai/drafts/{draft['id']}/accept", json={"module_id": module["id"]})
             if r.status_code != 200:
                 report.failed.append(f"{module['code']} {kind}: accept HTTP {r.status_code}")
+                if kind == "kcs":
+                    break
                 continue
             for name, ids in r.json()["created"].items():
                 report.accepted[name] = report.accepted.get(name, 0) + len(ids)
+    practice_quiz(api, report, sleep)
+
+
+def practice_quiz(api: Api, report: CourseReport, sleep: Callable[[float], None]) -> None:
+    """One published practice quiz; a draft one left by an earlier run that stopped is drafted and published
+    now (students do not see draft quizzes)."""
+    url = f"/courses/{report.course_id}"
     quizzes = ok(api.get(f"{url}/quizzes"), "listing quizzes")
-    existing = next((q for q in quizzes if q["title"] == QUIZ_TITLE), None)
-    if existing is not None:
-        report.quiz_id = existing["id"]
+    quiz = next((q for q in quizzes if q["title"] == QUIZ_TITLE), None)
+    if quiz is not None and quiz["status"] != "draft":
+        report.quiz_id = quiz["id"]
         return
-    first = next(iter(ok(api.get(f"{url}/modules"), "listing modules")), None)
-    body = {"title": QUIZ_TITLE, "module_id": first["id"] if first else None}
-    quiz = ok(api.post(f"{url}/quizzes", json=body), "creating the practice quiz")
-    job = ok(api.post(f"{url}/quizzes/{quiz['id']}/drafts", json={"count": 5}), "drafting quiz questions",
-             (202,))
-    state = run_job(api, report.course_id, job["job_id"], sleep)
+    if quiz is None:
+        first = next(iter(ok(api.get(f"{url}/modules"), "listing modules")), None)
+        body = {"title": QUIZ_TITLE, "module_id": first["id"] if first else None}
+        quiz = ok(api.post(f"{url}/quizzes", json=body), "creating the practice quiz")
     questions = ok(api.get(f"{url}/quizzes/{quiz['id']}"), "reading the quiz")["questions"]
-    if state != "done" or not questions:
-        report.failed.append(f"practice quiz: {state}, {len(questions)} questions")
-        return
+    if not questions:
+        job = ok(api.post(f"{url}/quizzes/{quiz['id']}/drafts", json={"count": 5}), "drafting quiz questions",
+                 (202,))
+        state = run_job(api, report.course_id, job["job_id"], sleep)
+        questions = ok(api.get(f"{url}/quizzes/{quiz['id']}"), "reading the quiz")["questions"]
+        if state != "done" or not questions:
+            report.failed.append(f"practice quiz: {state}, {len(questions)} questions")
+            return
     # saving the questions marks them reviewed (the review gate), then the quiz can be published
     ok(api.request("PATCH", f"{url}/quizzes/{quiz['id']}", json={"questions": questions}), "saving the quiz")
     ok(api.request("PATCH", f"{url}/quizzes/{quiz['id']}", json={"status": "published"}),
