@@ -44,7 +44,7 @@ Reflection #2 (ethics, individual) 11/18 · video 11/25 · Design Day 12/3 · fi
 | Z24 | The deployment's local model is its vLLM (`VLLM_BASE_URL`, `VLLM_KEY` replace `OLLAMA_URL`) | Z | PR #107 |
 | Z25 | Document scan refuses public course text (CS50x `pset_5.md` as `GRADE`); check all eight packs | Z | done: three allele exceptions never matched (a backspace instead of `\b`); 0 of 304 pack files refused |
 | Z26 | The module guideline (Modules page) is stored but never reaches the answering model; use it for questions scoped to that module | Z | done: course and module guidelines reach the answering model (local and cloud) |
-| Z27 | Security review of the whole system (auth, CSRF, access, SSRF, uploads, prompt injection, proxy and networks, keys, logs, scans), report in `docs/SECURITY_REVIEW.md` | Z | not started |
+| Z27 | Security review of the whole system (auth, CSRF, access, SSRF, uploads, prompt injection, proxy and networks, keys, logs, scans), report in `docs/SECURITY_REVIEW.md` | Z | report done (`docs/SECURITY_REVIEW.md`); H1, M1, L4 fixed; M2, M3, M4 before the public deploy |
 
 Not this term: targeted material for single students (only the learning plan with notes now). Tests and demos
 use the eight open course packs in `data/demo_courses/`.

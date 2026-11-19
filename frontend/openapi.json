@@ -764,7 +764,7 @@
           "admin: dashboard"
         ],
         "summary": "Put Config",
-        "description": "Applied at once (the next /ask uses it) and stored in config_history.",
+        "description": "Applied at once (the next /ask uses it) and stored in config_history. The system-wide fields (checkers,\nknowledge model, levels, the local model server) are an administrator's (Z27): an instructor may only\nchange the demo course's routing fields here.",
         "operationId": "put_config_api_v1_admin_config_put",
         "requestBody": {
           "content": {
@@ -806,7 +806,7 @@
           "admin: dashboard"
         ],
         "summary": "Test Llm Server",
-        "description": "Is a local model server reachable, and does it have the model? Reads only its model list (G1-94).",
+        "description": "Is a local model server reachable, and does it have the model? Reads only its model list (G1-94).\nAdministrators only (Z27): the address may be a private one, so it must not let an instructor probe the\ninternal network.",
         "operationId": "test_llm_server_api_v1_admin_llm_server_test_post",
         "requestBody": {
           "content": {
