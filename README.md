@@ -13,8 +13,8 @@ What it does (v4):
   course's own material, answer checks, a local/cloud label on every answer.
 - **Learner model** per course, a diagnostic, quizzes (AI drafts reviewed by the instructor) and an end-of-term
   survey.
-- **Instructor dashboard**: class overview and class insights, each student's progress when the course allows
-  it (visibility mode B; students can opt out), learning plans, AI drafts of course content, local versus cloud
+- **Instructor dashboard**: class statistics only (no individual student data in this version; the code for an
+  opt-in individual view is kept and switched off), AI drafts of course content, local versus cloud
   evaluation, end of term (export, then delete the course's student data).
 - **One Docker Compose stack** (Caddy, FastAPI, worker, PostgreSQL, optional monitoring); the local model
   (vLLM) runs separately and is reached by URL.

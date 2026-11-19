@@ -12,14 +12,15 @@ What it does, in order (every step can be run again; what exists is kept):
      refuses (422) are reported and skipped. `instructor_only/` is never uploaded;
   4. creates fictional demo students (credentials go to var/demo_accounts.json, never to the screen),
      lists them in each course, and lets them join with the course's invitation code;
-  5. sets visibility mode B in every demo course;
+  5. sets visibility mode B in every demo course, only where the deployment allows individual views
+     (`learner.instructor_individual_view`, off by default since v5 V1);
   5a. with --learner-content (task S15): for the first modules (--learner-modules, default 2) the local
      model drafts knowledge components, check items and misconceptions from the uploaded material, and the
      drafts are accepted; then one practice quiz per course is drafted, saved (reviewed) and published, so
      quiz answers move the students' levels on My progress. Needs the local model (vLLM) and takes minutes;
      the demo instructor should still read what was accepted;
-  6. with --sample-activity: each student acknowledges mode B, answers the check questions the modules
-     have, and asks two questions (fictional, written from the pack material).
+  6. with --sample-activity: each student acknowledges mode B (only where it is set), answers the check
+     questions the modules have, and asks two questions (fictional, written from the pack material).
 """
 import argparse
 import csv
@@ -346,6 +347,12 @@ def practice_quiz(api: Api, report: CourseReport, sleep: Callable[[float], None]
     report.quiz_id = quiz["id"]
 
 
+def individual_view(api: Api, course_id: int) -> bool:
+    """Whether the deployment allows visibility mode B (v5 V1: off by default, statistics only)."""
+    course = next((c for c in ok(api.get("/courses"), "listing courses") if c["id"] == course_id), {})
+    return bool(course.get("individual_view"))
+
+
 def set_visibility_mode_b(api: Api, course_id: int) -> None:
     current = ok(api.get(f"/courses/{course_id}/settings"), "reading course settings")
     if current["values"].get("visibility_mode") == "B":
@@ -440,7 +447,7 @@ def sample_activity(api: Api, course_id: int, pack: str, student_index: int) -> 
     done = {"checks": 0, "asked": 0, "problems": []}
     url = f"/courses/{course_id}"
     r = api.post(f"{url}/me/visibility", json={"action": "acknowledge"})
-    if r.status_code != 200:
+    if r.status_code not in (200, 409):  # 409: the course is in mode A (statistics only)
         done["problems"].append(f"acknowledge: HTTP {r.status_code}")
     modules = ok(api.get(f"{url}/modules"), "listing modules")
     for module in modules:
@@ -489,7 +496,8 @@ def build_demo(client_factory: Callable[[], httpx.Client], packs: list[str], ins
                 log(f"drafting learner content for {r.code} ...")
                 draft_learner_content(admin, r, learner_modules, sleep)
         for r in usable:
-            set_visibility_mode_b(admin, r.course_id)
+            if individual_view(admin, r.course_id):
+                set_visibility_mode_b(admin, r.course_id)
         if students:
             people = ensure_students(accounts_path, students)
             codes = {}

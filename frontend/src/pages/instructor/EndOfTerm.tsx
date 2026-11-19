@@ -58,7 +58,7 @@ export default function EndOfTerm({ course }: { course: Course }) {
             <ErrorNote error={early.error} />
             {early.data && (
               <div role="status" className="space-y-2 text-sm">
-                <p>{t("end.previewReady", { exported: early.data.students_exported })}</p>
+                <p>{course.individual_view ? t("end.previewReady", { exported: early.data.students_exported }) : t("end.previewReadyStatistics")}</p>
                 <p>{t("end.expires", { date: fmt.dateTime(early.data.expires_at) })}</p>
                 <Button type="button" onClick={() => save.mutate(early.data.export_id)} disabled={save.isPending}>
                   <Download aria-hidden />{t("end.download")}
