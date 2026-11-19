@@ -59,6 +59,7 @@ class CourseView:
     visibility_mode: str
     status: str
     my_role: str | None  # the caller's role in the course; "instructor" for an admin
+    guideline: str = ""  # the instructor's rules for the tutor (Z26); the API shows it to instructors only
 
 
 @dataclass(frozen=True)
@@ -108,7 +109,7 @@ def invite_hash(code: str) -> str:
 
 def _course_view(course: Course, my_role: str | None) -> CourseView:
     return CourseView(course.id, course.code, course.title, course.term_label, course.course_type,
-                      course.visibility_mode, course.status, my_role)
+                      course.visibility_mode, course.status, my_role, course.guideline or "")
 
 
 def _invite_view(invite: CourseInvite, key: str | None) -> InviteView:
@@ -185,7 +186,7 @@ class CourseService:
             return _course_view(course, "instructor")
 
     def update(self, course_id: int, *, code: str | None = None, title: str | None = None,
-               term_label: str | None = None) -> CourseView:
+               term_label: str | None = None, guideline: str | None = None) -> CourseView:
         with self._db() as db:
             course = self._course(db, course_id)
             if code is not None and code.strip() != course.code:
@@ -200,6 +201,8 @@ class CourseService:
                 course.title = title.strip()
             if term_label is not None:
                 course.term_label = term_label.strip()
+            if guideline is not None:
+                course.guideline = guideline.strip()
             db.add(course)
             try:
                 db.commit()

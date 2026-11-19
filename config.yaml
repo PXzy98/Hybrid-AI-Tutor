@@ -52,11 +52,14 @@ websearch:                        # task T13; docs/WEB_SEARCH.md
     life_science: [nih.gov, ebi.ac.uk, nature.com, khanacademy.org, arxiv.org, semanticscholar.org]
     ece: [ieee.org, nist.gov, python.org, developer.mozilla.org, en.cppreference.com, arxiv.org,
           semanticscholar.org, stackoverflow.com]
+    computer_science: [python.org, developer.mozilla.org, en.cppreference.com, cs50.harvard.edu, arxiv.org,
+                       semanticscholar.org, stackoverflow.com]
     general: [wikipedia.org]
   searxng_engines:                # API-backed engines (scraped web engines get blocked; docs/WEB_SEARCH.md)
     medical_science: [pubmed, semantic scholar]
     life_science: [pubmed, semantic scholar, arxiv]
     ece: [arxiv, semantic scholar, mdn, stackoverflow]
+    computer_science: [arxiv, semantic scholar, mdn, stackoverflow]
     general: [wikipedia]
 privacy:
   spacy_model: en_core_web_lg         # tests use en_core_web_sm
