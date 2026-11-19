@@ -254,7 +254,12 @@ class SettingsService:
     def course_values(self, course_id: int) -> tuple[dict, int]:
         with Session(self.engine) as db:
             row = db.get(CourseSettings, course_id)
-            return _values(row, COURSE_FIELDS), (row.version if row else 0)
+            values = _values(row, COURSE_FIELDS)
+        if values["visibility_mode"] == "B" and not self.base.learner.instructor_individual_view:
+            # V1: a mode B stored before the switch went off is not offered back, so saving the other
+            # settings does not send it again (and fail); the course reads as mode A anyway
+            values["visibility_mode"] = None
+        return values, (row.version if row else 0)
 
     # --------------------------------------------------------------------------------------- write
     def check_levels(self, values: dict) -> None:

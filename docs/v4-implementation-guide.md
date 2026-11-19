@@ -444,6 +444,9 @@ data); users build against the fakes without waiting for the real implementation
 
 "Independent" = does not depend on Z1 code and can start now.
 
+The v5 tasks (`V1`... and the v4 tasks still open) are in [v5-plan.md](v5-plan.md); they follow the rules of
+this guide.
+
 ### 7.1 Zhenyan Xing (Z)
 
 | ID | Task | Sprint | Depends on | Main files | Done when |
