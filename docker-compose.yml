@@ -4,7 +4,7 @@
 #   docker compose -f docker-compose.yml up -d --build
 # (only this file: docker-compose.override.yml is the local-development extra that exposes the database).
 #
-# The local model (vLLM or Ollama) is deployed separately and reached by URL (OLLAMA_URL / model connections).
+# The local model (vLLM) is deployed separately and reached by URL (VLLM_BASE_URL / model connections).
 # Settings come from .env (see .env.example); SECTION__FIELD variables override config.yaml values,
 # e.g. CONTENT__SEED_STATUS=active for a demo (docs/DATABASE.md).
 #

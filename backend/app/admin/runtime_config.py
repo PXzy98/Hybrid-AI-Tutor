@@ -54,7 +54,7 @@ def current(services) -> RuntimeConfig:
         weak_evidence=eff.weak_evidence,
         levels=LevelsConfig(basic_below=eff.level_basic_below, advanced_above=eff.level_advanced_above,
                             hysteresis=eff.level_hysteresis),
-        local_llm_url=s.ollama_url,
+        local_llm_url=s.vllm_base_url,
         local_llm_model=s.llm.local.model,
     )
 

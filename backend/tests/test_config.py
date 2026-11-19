@@ -10,7 +10,7 @@ def test_loads_repo_config_yaml():
     assert s.pipeline[0] == "privacy_filter"
     assert "update_learner" in s.post_response
     assert s.topics() == ["high_blood_pressure", "type2_diabetes", "asthma", "migraine", "pneumonia"]
-    assert s.llm.local.think is False
+    assert s.llm.local.model == s.llm.understand.model == "Qwen3.5-9B"  # the name vLLM serves
 
 
 def test_settings_are_cached():
@@ -24,10 +24,11 @@ def test_use_config_overrides_one_value(use_config):
 
 
 def test_env_overrides_yaml(use_config, monkeypatch):
-    monkeypatch.setenv("OLLAMA_URL", "http://localhost:11434")
+    monkeypatch.setenv("VLLM_BASE_URL", "http://localhost:8001/v1")
+    monkeypatch.setenv("VLLM_KEY", "")
     monkeypatch.setenv("CLOUD_API_KEY", "")
     s = use_config()
-    assert s.ollama_url == "http://localhost:11434"
+    assert s.vllm_base_url == "http://localhost:8001/v1" and s.vllm_key is None
     assert s.cloud_api_key is None
     assert s.cloud_enabled is False
 
@@ -51,7 +52,7 @@ def test_nested_env_cannot_break_invariants(use_config, monkeypatch):
 @pytest.mark.parametrize(
     "overrides",
     [
-        {"llm": {"local": {"think": True}}},  # thinking must stay off
+        {"llm": {"local": {"think": True}}},  # no Ollama option: thinking is always off on vLLM
         {"privacy": {"log_raw_text": True}},  # privacy invariant 1
         {"routing": {"threshold": 1.5}},
         {"learner": {"levels": {"basic_below": 0.8}}},  # basic_below > advanced_above

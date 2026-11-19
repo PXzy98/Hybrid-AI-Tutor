@@ -95,7 +95,10 @@ def component_settings(base: Settings, values: dict) -> Settings:
             learner["levels"][key] = values[name]
     update = {}
     if values.get("local_llm_url"):
-        update["ollama_url"] = values["local_llm_url"]
+        update["vllm_base_url"] = values["local_llm_url"]
+        if (values["local_llm_url"].strip().rstrip("/").lower()
+                != (base.vllm_base_url or "").strip().rstrip("/").lower()):
+            update["vllm_key"] = None  # the deployment's key only goes to the deployment's own vLLM
     if values.get("local_llm_model") and values["local_llm_model"] != llm["local"]["model"]:
         if llm["understand"]["model"] == llm["local"]["model"]:  # understand follows the answer model
             llm["understand"]["model"] = values["local_llm_model"]
@@ -128,9 +131,9 @@ class ComponentManager:
 
         settings = component_settings(self.base, values)
         current = getattr(self.services, "components", None)
-        if current is not None and (current.settings.ollama_url, current.settings.llm.local,
+        if current is not None and (current.settings.vllm_base_url, current.settings.llm.local,
                                     current.settings.llm.understand) == (
-                settings.ollama_url, settings.llm.local, settings.llm.understand):
+                settings.vllm_base_url, settings.llm.local, settings.llm.understand):
             local, understand = current.local_llm, current.understand_llm  # same server: keep the clients
         else:
             local, _, understand = build_llm_clients(settings)

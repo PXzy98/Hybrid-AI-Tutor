@@ -26,6 +26,7 @@ import httpx
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parents[1] / "backend"))
+sys.path.insert(0, str(HERE.parents[1] / "eval" / "common"))
 
 from app.core.config import PrivacyConfig, get_settings  # noqa: E402
 from app.privacy.analyzer import PIIAnalyzer, custom_recognizer_names  # noqa: E402
@@ -51,11 +52,11 @@ shows signs of the modification (placeholders like <PERSON_1>, a different name,
 Reply with JSON only: {{"score": 1-5, "artifacts": true|false}}"""
 
 
-def chat(http, url, model, prompt, system=None, max_tokens=500):
+def chat(http, settings, prompt, system=None, max_tokens=500):
+    """The local model (vLLM), as the app calls it."""
+    from local_model import chat as local_chat
     msgs = ([{"role": "system", "content": system}] if system else []) + [{"role": "user", "content": prompt}]
-    r = http.post(f"{url}/api/chat", json={"model": model, "stream": False, "think": False, "messages": msgs,
-                                          "options": {"temperature": 0.2, "num_predict": max_tokens, "seed": 6}})
-    return r.json()["message"]["content"].strip()
+    return (local_chat(http, settings, msgs, temperature=0.2, max_tokens=max_tokens, seed=6) or "").strip()
 
 
 def judge(http, base, model, q, ref, cand):
@@ -89,10 +90,13 @@ def main(argv=None) -> int:
     ap.add_argument("--n-plain", type=int, default=30)
     ap.add_argument("--n-health", type=int, default=15)
     ap.add_argument("--judge-model", default="gemma4:e4b")
+    ap.add_argument("--judge-url", default="http://127.0.0.1:11434",
+                    help="OpenAI-compatible server of the judge (a different model from the one that answers)")
     ap.add_argument("--out", type=Path, default=HERE / "results")
     a = ap.parse_args(argv)
     s = get_settings()
-    url, model = s.ollama_url.rstrip("/"), s.llm.local.model
+    model = s.llm.local.model
+
     http = httpx.Client(timeout=600)
     an = PIIAnalyzer(PrivacyConfig(spacy_model="en_core_web_lg", allow_list=["Abbas"], recognizers=custom_recognizer_names(),
                                    entities=["PERSON", "EMAIL_ADDRESS", "PHONE_NUMBER", "STUDENT_ID", "GRADE", "HEALTH_DETAIL",
@@ -116,23 +120,23 @@ def main(argv=None) -> int:
         versions["surrogate"] = sur
         rewrite_rejected = None
         if c["personal_health"]:
-            rw = chat(http, url, model, REWRITE + q, max_tokens=120).splitlines()[0].strip('" ')
+            rw = chat(http, s, REWRITE + q, max_tokens=120).splitlines()[0].strip('" ')
             left = an.analyze(rw, names, [])
             rewrite_rejected = bool(left)
             if not left:
                 versions["hypothetical"] = rw
-        ref = chat(http, url, model, q, system)
+        ref = chat(http, s, q, system)
         row = {"id": c["id"], "health": c["personal_health"], "question": q, "versions": versions,
                "rewrite_rejected": rewrite_rejected, "scores": {}, "artifacts": {}, "restore_left": {}}
         for v, text in versions.items():
-            ans = chat(http, url, model, text, system)
+            ans = chat(http, s, text, system)
             if v == "placeholder":
                 ans = restore(ans, mapping)
             elif v == "surrogate":
                 for fake, orig in sur_map.items():
                     ans = ans.replace(fake, orig)
             row["restore_left"][v] = len(PLACEHOLDER_RE.findall(ans))
-            row["scores"][v], row["artifacts"][v] = judge(http, url, a.judge_model, q, ref, ans)
+            row["scores"][v], row["artifacts"][v] = judge(http, a.judge_url.rstrip("/"), a.judge_model, q, ref, ans)
         rows.append(row)
         print(f"{i}/{len(sample)} {c['id']} {row['scores']}", file=sys.stderr)
 

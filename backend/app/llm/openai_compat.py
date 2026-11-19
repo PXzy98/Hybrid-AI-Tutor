@@ -17,8 +17,9 @@ class OpenAICompatClient:
     def __init__(self, base_url: str, api_key: str, model: str, *, timeout_s: float = 30,
                  max_tokens: int = 800, temperature: float = 0.2,
                  client: openai.AsyncOpenAI | None = None, transport=None,
-                 thinking_off: bool = False, schema_output: bool = False) -> None:
+                 thinking_off: bool = False, schema_output: bool = False, backend: str = "cloud") -> None:
         self.model = model
+        self.backend = backend  # "local" for the deployment's or a course's trusted local server (vLLM)
         # a self-hosted server (vLLM) constrains the answer to the JSON schema; with only "json_object" the
         # model makes up its own field names and every structured answer fails validation
         self.schema_output = schema_output
@@ -85,7 +86,7 @@ class OpenAICompatClient:
         return LLMResult(
             text=text,
             model=self.model,
-            backend="cloud",
+            backend=self.backend,
             prompt_tokens=usage.prompt_tokens if usage else None,
             completion_tokens=usage.completion_tokens if usage else None,
             latency_ms=round((perf_counter() - t0) * 1000, 1),

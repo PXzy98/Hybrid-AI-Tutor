@@ -153,7 +153,7 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
   - 内部网络：`internal: true`，db 只在这里，api 和 worker 两边都接。
 - **端口**：只映射 443（80 只用来跳转）；db 和监控不映射到主机。
 - **vLLM**：设 API key；vLLM 主机的防火墙只允许应用主机访问；经过公网时用 HTTPS。
-- **本地开发**：把模型地址指向 Ollama 或任何 OpenAI 兼容地址即可。
+- **本地开发**：把 `VLLM_BASE_URL` 指向实验室的 vLLM，或你自己的任何 OpenAI 兼容服务即可。
 - **应用主机**：不需要 GPU。
 
 ### 4.3 组件
@@ -401,7 +401,7 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 | Z21 | 文档更新到当前状态（2026-11-17）：v3 的实施日志移到 `docs/history/`；v3 设计和隐私报告加状态说明；HANDOVER、OPERATIONS、MODEL_CONNECTIONS、ACCESSIBILITY 更新到 2026-11-17 | S8 | — | `docs/`、`AGENTS.md`、`README.md` | `docs/` 里 `history/` 以外的文档不把过去的状态写成现状 |
 | Z22 | v4 还缺的隐私过滤测试（2026-11-17 发现）：ECE 规则冻结之后再写、再标注的 ECE 留出集（现有 47 题是对着规则写的）；`life_science` 和 `general` 配置的测试集；E6 给 v4 新类型（`SECRET`、`INTERNAL_ADDRESS`、`REPO_URL`，现在只有 ECE 集测）打分；新的医学留出集，测现在规则的泄漏率（v4 只证明了 E6 没有变差） | S8 | Z11 | `eval/privacy-filter/` | 每个新集在 `eval/privacy-filter/results/` 有报告；由此改的规则重跑 E6 |
 | Z23 | vLLM 容量（2026-11-17 发现）：`eval/load-test/run.py` 记录每个回答的输出 token 数，报告每个请求和合计的 token/秒；在测试主机上用 `--stream` 和较长的回答（`--max-tokens 400`）跑 1、4、8、16、32 并发；按结果定 `limits.models.max_concurrent`（现在 4）和 `queue_timeout_seconds`（现在 60）的默认值（检查题草稿要 45–50 秒）；在 vLLM 上给一次提问的每一步计时（Z2）；写明超过 5 个学生同时提问需要什么显卡 | S8 | Z6 | `eval/load-test/`、`backend/app/core/config.py`、`docs/OPERATIONS.md` | 有每档并发的 token/秒报告；OPERATIONS.md 的限制和显卡建议以它为准 |
-| Z24 | 部署默认的本地模型就是它的 vLLM（审查 A4、I9；PR #107）：用 `VLLM_BASE_URL` 和 `VLLM_KEY` 取代 `OLLAMA_URL`；两个本地客户端都走 OpenAI 兼容接口、可信本地；可信本地 OpenAI 兼容服务的回答记为本地，不再记成云端 | S8 | Z17 | `core/config.py`、`llm/`、`admin/llm_server.py`、`eval/` | 只有 vLLM 的部署不登记模型连接也能本地回答 |
+| Z24 | 部署默认的本地模型就是它的 vLLM（审查 A4、I9；PR #107）：用 `VLLM_BASE_URL` 和 `VLLM_KEY` 取代 `OLLAMA_URL`（以及它指向团队内网的默认地址）；回答和 understand 两个本地客户端都走 OpenAI 兼容接口，并且是可信本地（关闭思考、按 JSON schema 输出）；可信本地 OpenAI 兼容服务的回答记为本地，不再记成云端；健康检查、v1 服务器测试、`setup_local.py` 和 E1/E3/E6 评估脚本都用同一台服务器 | S8 | Z17 | `core/config.py`、`llm/`、`admin/llm_server.py`、`eval/` | 只有 vLLM 的部署不用登记模型连接就能本地回答；除了 `ollama` 类型的模型连接，不再有 `OLLAMA_URL` |
 | Z25 | 课程资料的文档扫描（2026-11-17 发现）：CS50x 课程包的 `assignments/pset_5.md` 是公开的课程内容，上传时却被当成学生数据（`GRADE`）拒绝。找出是哪段文字触发的，统计八个公开课程包所有文件被拒的情况，只拒绝真正的学生数据 | S8 | Z7 | `backend/app/privacy/`、`backend/app/rag/index_jobs.py` | 八个课程包没有文件被拒；E6 分数不变差 |
 | Z26 | 让模块的 guideline 起作用（2026-11-17 发现）：Modules 页上的 **Guideline for the tutor** 会保存、导出、导入，但提问流程的每一步都不读它，所以对回答没有影响（v3 也一样）；教师手册第 3 节却说它会用在回答里。问题限定在某个模块时，把这个模块的 guideline 交给生成回答的模型（本地和云端都可以；这是教师写的文字，不是学生数据），限制长度，放在基础规则之后，不能覆盖基础规则 | S8 | Z16 | `backend/app/pipeline/steps/generate.py`、`backend/app/prompts/` | 有测试：模块的 guideline 进了关于这个模块的问题的提示词，不进其他模块或整门课的问题；手册那句话属实 |
 | Z27 | 整个系统的网络安全审查（2026-11-17 提出）：登录和会话（cookie、密码存储、频率限制、退出登录）、CSRF、每个接口的角色检查（规则 3 和 9）、模型连接和网页搜索的 SSRF、上传（压缩包、XML、大小限制、文档扫描）、通过课程资料和搜索结果的提示词注入、存储的 API key、代理的安全头和 TLS（CSP、HSTS）、Compose 的两个网络和外部能访问到什么、数据库和 worker 是否暴露、日志（不含问题原文）、依赖和镜像扫描、仓库历史里有没有密钥 | S8 | Z10, Z13 | 新的 `docs/SECURITY_REVIEW.md`；修复在各负责人的组件里 | 有报告，每个发现写明风险和负责人；高风险的已修或已开任务 |

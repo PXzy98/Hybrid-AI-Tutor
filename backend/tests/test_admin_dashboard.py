@@ -128,14 +128,17 @@ def test_history_is_recorded_and_survives_a_restart(dash, make_client):
 def test_local_model_server_is_switched_live(dash):
     api = dash()
     old_local = api.services.local_llm
-    c = put_config(api, local_llm_url="http://10.0.0.5:11434/", local_llm_model="llama3.1:8b")
-    assert c["values"]["local_llm_url"] == "http://10.0.0.5:11434"
-    assert c["values"]["local_llm_model"] == "llama3.1:8b"
+    c = put_config(api, local_llm_url="http://10.0.0.5:8000/v1/", local_llm_model="Qwen3.5-27B")
+    assert c["values"]["local_llm_url"] == "http://10.0.0.5:8000/v1"
+    assert c["values"]["local_llm_model"] == "Qwen3.5-27B"
     s = api.services
-    assert s.settings.ollama_url == "http://10.0.0.5:11434" and s.settings.llm.local.model == "llama3.1:8b"
+    assert s.settings.vllm_base_url == "http://10.0.0.5:8000/v1"
+    assert s.settings.llm.local.model == "Qwen3.5-27B"
     assert s.local_llm is not old_local
-    assert s.local_llm.url == "http://10.0.0.5:11434/api/chat" and s.local_llm.model == "llama3.1:8b"
-    assert s.understand_llm.model == "llama3.1:8b"  # the understand step follows the answer model
+    # the deployment's vLLM: OpenAI-compatible, trusted local (thinking off, answers reported as local)
+    assert s.local_llm._args["base_url"] == "http://10.0.0.5:8000/v1" and s.local_llm.model == "Qwen3.5-27B"
+    assert s.local_llm.backend == "local" and s.local_llm.schema_output
+    assert s.understand_llm.model == "Qwen3.5-27B"  # the understand step follows the answer model
     assert set(config(api)["history"][0]["changed"]) == {"local_llm_model", "local_llm_url"}
 
 
@@ -154,37 +157,71 @@ def test_invalid_local_model_server_is_rejected(dash):
     assert config(api)["history"] == []
 
 
-def _ollama(models: list[str], status: int = 200) -> httpx.MockTransport:
+def _vllm(models: list[str], status: int = 200, seen: list | None = None) -> httpx.MockTransport:
     def handler(request: httpx.Request) -> httpx.Response:
-        assert request.url.path == "/api/tags"
-        return httpx.Response(status, json={"models": [{"name": m} for m in models]})
+        assert request.url.path.endswith("/models")
+        if seen is not None:
+            seen.append(request.headers.get("authorization"))
+        return httpx.Response(status, json={"object": "list", "data": [{"id": m} for m in models]})
     return httpx.MockTransport(handler)
 
 
 async def test_server_check_reports_reachability_and_the_model():
-    ok = await check_server("http://h:11434/", "qwen3.5:9b", _ollama(["qwen3.5:9b", "llama3.1:8b"]))
-    assert ok.reachable and ok.model_available and ok.models == ["qwen3.5:9b", "llama3.1:8b"] and not ok.error
-    latest = await check_server("http://h:11434", "mistral", _ollama(["mistral:latest"]))
-    assert latest.model_available
-    missing = await check_server("http://h:11434", "gemma4:e4b", _ollama(["qwen3.5:9b"]))
+    seen = []
+    ok = await check_server("http://h:8000/v1/", "Qwen3.5-9B", "fictional-key",
+                            _vllm(["Qwen3.5-9B", "Qwen3.5-27B"], seen=seen))
+    assert ok.reachable and ok.model_available and ok.models == ["Qwen3.5-9B", "Qwen3.5-27B"] and not ok.error
+    assert seen == ["Bearer fictional-key"]
+    missing = await check_server("http://h:8000/v1", "gemma4:e4b", transport=_vllm(["Qwen3.5-9B"]))
     assert missing.reachable and not missing.model_available and "gemma4:e4b" in missing.error
-    broken = await check_server("http://h:11434", "qwen3.5:9b", _ollama([], status=404))
+    broken = await check_server("http://h:8000", "Qwen3.5-9B", transport=_vllm([], status=404))
     assert not broken.reachable and "HTTP 404" in broken.error
+    refused = await check_server("http://h:8000/v1", "Qwen3.5-9B", transport=_vllm([], status=401))
+    assert not refused.reachable and "VLLM_KEY" in refused.error
 
     def refuse(request):
         raise httpx.ConnectError("refused")
-    down = await check_server("http://h:11434", "qwen3.5:9b", httpx.MockTransport(refuse))
+    down = await check_server("http://h:8000/v1", "Qwen3.5-9B", transport=httpx.MockTransport(refuse))
     assert not down.reachable and "ConnectError" in down.error
 
 
 def test_server_check_endpoint(dash, monkeypatch):
     api = dash()
 
-    async def fake(url, model):
-        return await check_server(url, model, _ollama(["qwen3.5:9b"]))
+    async def fake(url, model, api_key=None):
+        return await check_server(url, model, api_key, _vllm(["Qwen3.5-9B"]))
     monkeypatch.setattr("app.api.v1.admin.check_server", fake)
-    r = api.client.post(f"{ADMIN}/llm-server/test", json={"url": "http://h:11434", "model": "qwen3.5:9b"})
+    r = api.client.post(f"{ADMIN}/llm-server/test", json={"url": "http://h:8000/v1", "model": "Qwen3.5-9B"})
     assert r.status_code == 200 and r.json()["model_available"] is True
+
+
+def test_the_vllm_key_only_goes_to_the_deployments_vllm(dash, monkeypatch):
+    monkeypatch.setenv("VLLM_KEY", "fictional-key")
+    api = dash()  # the test app's VLLM_BASE_URL is http://127.0.0.1:9/v1
+    seen = []
+
+    async def fake(url, model, api_key=None):
+        seen.append((url, api_key))
+        return await check_server(url, model, api_key, _vllm(["Qwen3.5-9B"]))
+    monkeypatch.setattr("app.api.v1.admin.check_server", fake)
+    for url in ("http://127.0.0.1:9/v1/", "http://attacker.example/v1", "http://127.0.0.1:10/v1"):
+        r = api.client.post(f"{ADMIN}/llm-server/test", json={"url": url, "model": "Qwen3.5-9B"})
+        assert r.status_code == 200, r.text
+    assert [key for _, key in seen] == ["fictional-key", None, None]
+
+
+def test_a_changed_local_model_address_does_not_get_the_vllm_key():
+    from pydantic import SecretStr
+
+    from app.core.config import get_settings
+    from app.platform.components import component_settings
+
+    base = get_settings().model_copy(update={"vllm_base_url": "http://127.0.0.1:9/v1",
+                                             "vllm_key": SecretStr("fictional-key")})
+    same = component_settings(base, {"local_llm_url": "http://127.0.0.1:9/v1/"})
+    assert same.vllm_key and same.vllm_key.get_secret_value() == "fictional-key"
+    other = component_settings(base, {"local_llm_url": "http://attacker.example/v1"})
+    assert other.vllm_base_url == "http://attacker.example/v1" and other.vllm_key is None
 
 
 # ------------------------------------------------------------------------------ class summary

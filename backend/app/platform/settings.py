@@ -132,12 +132,12 @@ def validate_system(values: dict) -> dict:
 
         url = urlparse(str(out["local_llm_url"]).strip())
         if url.scheme not in ("http", "https") or not url.hostname:
-            raise SettingsError("the local model server must be an http(s) address, e.g. http://10.0.0.5:11434")
+            raise SettingsError("the local model server must be an http(s) address, e.g. http://10.0.0.5:8000/v1")
         out["local_llm_url"] = str(out["local_llm_url"]).strip().rstrip("/")
     if out.get("local_llm_model") is not None:
         model = str(out["local_llm_model"]).strip()
         if not model or " " in model:
-            raise SettingsError("the local model name must be one word, e.g. qwen3.5:9b")
+            raise SettingsError("the local model name must be one word, e.g. Qwen3.5-9B")
         out["local_llm_model"] = model
     for name in ("default_local_endpoint_id", "default_cloud_endpoint_id"):
         if out.get(name) is not None and not isinstance(out[name], int):

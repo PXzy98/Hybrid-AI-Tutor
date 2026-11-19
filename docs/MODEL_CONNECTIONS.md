@@ -7,7 +7,7 @@ the connection for the role, checks it, and queues the request.
 
 | Role | Course connection | System default | Otherwise |
 |---|---|---|---|
-| `local` (original text, learner profile) | `course_settings.local_endpoint_id` | `system_settings.default_local_endpoint_id` | the deployment's model (`OLLAMA_URL` / `llm.local`) |
+| `local` (original text, learner profile) | `course_settings.local_endpoint_id` | `system_settings.default_local_endpoint_id` | the deployment's vLLM (`VLLM_BASE_URL`, `VLLM_KEY` / `llm.local`), trusted local |
 | `cloud` (only what passed the cloud gate) | `course_settings.cloud_endpoint_id` | `system_settings.default_cloud_endpoint_id` | `CLOUD_BASE_URL` / `CLOUD_MODEL` / `CLOUD_API_KEY` |
 
 The small local calls on the original text use the `local` connection too (task Z17): the understand step

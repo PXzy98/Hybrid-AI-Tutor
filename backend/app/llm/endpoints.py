@@ -62,7 +62,8 @@ def build_client(row: ModelEndpoint, encryption_key: str | None, *, timeout_s: f
     # structured answers constrained to their JSON schema
     own = row.trust == "trusted_local"
     return OpenAICompatClient(row.base_url, key, row.model, timeout_s=timeout_s, max_tokens=max_tokens,
-                              transport=pinned, thinking_off=own, schema_output=own)
+                              transport=pinned, thinking_off=own, schema_output=own,
+                              backend="local" if own else "cloud")
 
 
 Tester = Callable[[ModelEndpoint, str | None], Awaitable[None]]  # raises when the connection does not work

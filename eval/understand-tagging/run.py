@@ -4,7 +4,7 @@
     .venv\\Scripts\\python eval\\understand-tagging\\run.py --model gemma4:e4b --repeat 2
 
 Runs the real understand step (same prompt, schema and client settings as the app) on cases.jsonl and
-writes results/report.md and results/predictions.jsonl. Needs the Ollama server (OLLAMA_URL).
+writes results/report.md and results/predictions.jsonl. Needs the local model server (VLLM_BASE_URL).
 
 Metrics
 - KC top-1 accuracy: on questions with a gold KC, the first predicted KC is one of the gold KCs.
@@ -28,7 +28,7 @@ sys.path.insert(0, str(ROOT / "backend"))
 from app.core.config import get_settings  # noqa: E402
 from app.learner import understand  # noqa: E402
 from app.learner.content import ContentStore  # noqa: E402
-from app.llm.ollama_client import OllamaClient  # noqa: E402
+from app.llm.factory import build_local_client  # noqa: E402
 
 TOPIC = "high_blood_pressure"
 TARGETS = {  # design §11 E1: (ideal, marginal)
@@ -59,8 +59,7 @@ async def classify(client, content, question):
 async def main_async(args) -> None:
     s = get_settings()
     model = args.model or s.llm.understand.model
-    client = OllamaClient(s.ollama_url, model, temperature=0.0, num_ctx=s.llm.local.num_ctx,
-                          timeout_s=args.timeout, max_tokens=200)
+    client = build_local_client(s, model, temperature=0.0, timeout_s=args.timeout, max_tokens=200)
     content = ContentStore.from_yaml(s.content_dir(), "active")
     cases = [json.loads(line) for line in (HERE / "cases.jsonl").read_text("utf-8").splitlines() if line.strip()]
     await classify(client, content, "warm-up: what is blood pressure?")  # load the model, not counted
@@ -107,7 +106,7 @@ async def main_async(args) -> None:
                  != set(r["gold"]["misconception_ids"])]
     lines = [
         "# E1: understand-step tagging (design §11)\n",
-        f"Model `{model}` on `{s.ollama_url}` · {len(cases)} cases × {args.repeat} · thinking off, temperature 0, "
+        f"Model `{model}` on the local vLLM · {len(cases)} cases × {args.repeat} · thinking off, temperature 0, "
         f"JSON schema with the topic's IDs. Cases are a DRAFT set (to be extended to 120–150 by the team).\n",
         "| Metric | Value | Target (ideal / marginal) | Verdict |",
         "|---|---|---|---|",

@@ -81,9 +81,17 @@ def put_config(body: RuntimeConfig, user: Instructor, request: Request):
 
 
 @router.post("/llm-server/test", response_model=ServerStatus)
-async def test_llm_server(body: ServerTest, _: Instructor):
+async def test_llm_server(body: ServerTest, _: Instructor, services: ServicesDep):
     """Is a local model server reachable, and does it have the model? Reads only its model list (G1-94)."""
-    return await check_server(body.url, body.model)
+    s = services.settings
+    # the deployment's key only goes to the deployment's own vLLM, never to an address typed into the form
+    own = bool(s.vllm_base_url) and _api_root(body.url) == _api_root(s.vllm_base_url)
+    key = s.vllm_key.get_secret_value() if s.vllm_key and own else None
+    return await check_server(body.url, body.model, key)
+
+
+def _api_root(url: str) -> str:
+    return url.strip().rstrip("/").lower()
 
 
 @router.get("/class-summary", response_model=ClassSummary)

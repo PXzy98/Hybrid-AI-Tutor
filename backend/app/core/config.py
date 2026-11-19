@@ -200,18 +200,16 @@ class AuthConfig(Section):
 
 
 class LocalLLMConfig(Section):
-    model: str = "qwen3.5:9b"
-    think: Literal[False] = False  # thinking stays off (boundary test: loops, 5-7x latency)
+    """The deployment's own model on its OpenAI-compatible server (vLLM, VLLM_BASE_URL); thinking is always
+    off (boundary test: loops, 5-7x latency) and structured answers follow their JSON schema."""
+    model: str = "Qwen3.5-9B"  # the name the server lists under /models (vLLM --served-model-name)
     temperature: float = 0.2
-    num_ctx: int = 8192
     timeout_s: float = 60
     max_tokens: int = Field(1024, ge=64)
 
 
 class UnderstandLLMConfig(Section):
-    model: str = "qwen3.5:9b"
-    think: Literal[False] = False
-    format: Literal["json"] = "json"
+    model: str = "Qwen3.5-9B"
     timeout_s: float = 5
 
 
@@ -329,7 +327,10 @@ class Settings(BaseSettings):
     courses: dict[str, CourseConfig] = {}
 
     # --- from the environment / .env
-    ollama_url: str = "http://192.168.2.25:11434"
+    # the deployment's trusted local model server (vLLM): OpenAI-compatible API root ending in /v1, and the
+    # key its --api-key expects; without a URL the local model is unavailable (a model connection can add one)
+    vllm_base_url: str | None = None
+    vllm_key: SecretStr | None = None
     cloud_base_url: str = "https://api.openai.com/v1"
     cloud_api_key: SecretStr | None = None
     # web search keys, one per provider: TAVILY_API_KEY for `api`, OPENAI_API_KEY for `openai`
@@ -353,8 +354,8 @@ class Settings(BaseSettings):
 
     @field_validator(
         "cloud_api_key", "cloud_model", "instructor_username", "instructor_initial_password", "pgpassword",
-        "settings_encryption_key", "tavily_api_key", "openai_api_key", "websearch_api_key",
-        mode="before",
+        "settings_encryption_key", "tavily_api_key", "openai_api_key", "websearch_api_key", "vllm_key",
+        "vllm_base_url", mode="before",
     )
     @classmethod
     def _empty_is_none(cls, v):
