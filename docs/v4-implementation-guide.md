@@ -96,7 +96,7 @@ Read before changing code. A PR that breaks any of these is not merged.
    not returned.
 9. **An instructor sees one student** only if the course uses visibility mode B and the student did not opt
    out, and only data since `visible_since`; every view is written to the audit log
-   (course-structure.md 4.5).
+   (course-structure.md 4.5). In v5 individual views are switched off altogether (4.8).
 
 ### 2.3 Engineering
 10. **No secrets in git**: API keys and passwords only in `.env` (git-ignored) or Docker secrets; never in
@@ -308,6 +308,13 @@ Highlights:
   over-redaction.
 
 ### 4.8 Visibility modes (chosen per course by the instructor)
+
+**v5 (V1, decision of 2026-11-17): instructors see class statistics only.** `learner.instructor_individual_view`
+is `false` (the default): every course runs in mode A, mode B cannot be chosen (HTTP 422), a course stored in
+mode B reads as mode A, and the UI shows no Students page, learning plan, per-student quiz results or sharing
+choice (`CourseOut.individual_view` tells it). The consent text adds that nobody, not even the instructor, sees a
+student's own profile, questions or answers. The rest of this section describes the kept code; it applies only
+if the client asks for individual views and the flag is switched on.
 
 - **Mode A**: the instructor sees class-level data only (as in v3).
 - **Mode B**: the instructor can see an individual overview:

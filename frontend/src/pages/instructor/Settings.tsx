@@ -115,14 +115,16 @@ function SettingsForm({ course, initial, justSaved, onSaved }:
         <p className="text-sm text-muted-foreground">{t("settings.hint")}</p>
       </div>
       <SettingsGroup title={t("settings.group.visibility")}>
-        <div className={field}>
-          <Label htmlFor="set-visibility">{t("settings.visibility")}</Label>
-          <Select id="set-visibility" value={values.visibility_mode ?? course.visibility_mode}
-                  onChange={(e) => setValues({ ...values, visibility_mode: e.target.value as "A" | "B" })}>
-            <option value="A">{t("settings.visibilityA")}</option>
-            <option value="B">{t("settings.visibilityB")}</option>
-          </Select>
-        </div>
+        {course.individual_view ? (
+          <div className={field}>
+            <Label htmlFor="set-visibility">{t("settings.visibility")}</Label>
+            <Select id="set-visibility" value={values.visibility_mode ?? course.visibility_mode}
+                    onChange={(e) => setValues({ ...values, visibility_mode: e.target.value as "A" | "B" })}>
+              <option value="A">{t("settings.visibilityA")}</option>
+              <option value="B">{t("settings.visibilityB")}</option>
+            </Select>
+          </div>
+        ) : <p className="text-sm text-muted-foreground">{t("settings.statisticsOnly")}</p>}
         <label className="flex items-start gap-2 text-sm">
           <input type="checkbox" className="mt-0.5 accent-primary" checked={!!values.local_only}
                  onChange={(e) => setValues({ ...values, local_only: e.target.checked })} />

@@ -17,7 +17,7 @@ page has nine tabs: **Class overview**, **Students**, **Course content**, **Memb
 
 **Teaching assistants.** There is no TA role. A TA uses the instructor's account for that course. So: the audit
 log cannot tell the instructor and the TA apart; the password is shared, so it must be strong and changed after
-the term; a TA sees everything the instructor sees, including individual progress in mode B.
+the term; a TA sees everything the instructor sees.
 
 ## 2. Creating a course
 
@@ -92,8 +92,10 @@ joins).
 ## 7. Settings
 
 **Settings** ("Privacy and routing"; changes apply to new questions after you save):
-- **What instructors see of students**: **Mode A: class totals only**, or **Mode B: individual progress after
-  the student agrees**.
+- **What instructors see of students**: in this version always class statistics only ("Instructors see class
+  statistics only"); nobody sees one student's questions, answers or progress. (If the deployment switches
+  individual views on, this becomes a choice: **Mode A: class totals only** or **Mode B: individual progress
+  after the student agrees**.)
 - **Local only**: every answer is written on the course's own server; no question goes to a cloud model. This
   is the only setting that guarantees it: with other settings the **Local model** label on an answer only says
   which model answered, and a question may have been sent to the cloud before a failed call fell back to local
@@ -103,13 +105,17 @@ joins).
 If someone else saved at the same time you see "Someone else changed the settings"; review and save again.
 While a change is being applied you may see "The settings are being applied"; try again in a moment.
 
-Switching B to A takes effect at once for everyone. Switching A to B applies to a student only after that student
-agrees, and then only data after that moment is shown. Tell your students when you switch.
+Only where individual views are switched on: switching B to A takes effect at once for everyone; switching A to
+B applies to a student only after that student agrees, and then only data after that moment is shown.
 
 ## 8. Class overview and individual progress
 
 **Class overview**: totals per **Module**: **Students with a profile**, **Topics**, **Open misconceptions**,
 **Students per level**, and shared misconceptions. Groups smaller than 5 are hidden ("hidden"), in both modes.
+
+**Individual progress is not available in this version**: there is no **Students** page, no learning plan and no
+per-student quiz result. The rest of this section applies only where the deployment switches individual views
+on.
 
 **Students** lists students with **Progress sharing**: **Visible**, **Not visible** or **Not shared**.
 **View progress** opens one student: levels per topic, check questions answered, open misconceptions, last
@@ -136,8 +142,8 @@ the plan with notes is the tool.
 4. **Publish**, then students answer **once** inside the window. **Close** ends it. After the first answer the
    questions cannot change, and the quiz cannot be deleted (close it).
 5. **Results**: **Average score** and **Correct answers per question** appear once at least 5 students answered
-   ("Not enough answers yet"). The **Students** list shows only students who share their progress (mode B,
-   agreed, not opted out, answered after agreeing); each such view is audited.
+   ("Not enough answers yet"). There are no per-student results in this version (where individual views are
+   switched on, a **Students** list shows students who share their progress; each such view is audited).
 6. **Final quiz vs diagnostic**: a quiz of type **final** is the post-test. **Before and after** compares the
    course diagnostic (the students' onboarding answers, the pre-test) with the final quiz for students who
    have both (hidden below 5 students).
@@ -171,7 +177,7 @@ First, under **Check the export first**, choose **Create an export** and **Downl
 the end of term will export, and nothing is deleted. Then **End of term** > **End the term…** Type the course
 code to confirm, then **Export and delete**:
 1. The server first writes the **export** (a ZIP): class summary, quiz results (`quizzes.json`), survey averages
-   (`survey.json`) and, only in mode B, the individual overviews you may see under exactly the same rules as the
+   (`survey.json`) and, only where individual views are switched on and in mode B, the individual overviews you may see under exactly the same rules as the
    Students tab (agreed, not opted out, data after agreeing).
 2. Then it deletes the course's student data: memberships, learner state, evidence, misconceptions, plans,
    conversations, request logs, usage counters, quiz attempts and the survey. Published quizzes are closed. The

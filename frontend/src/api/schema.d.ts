@@ -2599,6 +2599,11 @@ export interface components {
              * @default false
              */
             local_only?: boolean;
+            /**
+             * Individual View
+             * @default false
+             */
+            individual_view?: boolean;
         };
         /** CoursePatch */
         CoursePatch: {

@@ -239,6 +239,8 @@ class SettingsService:
         if course is not None:
             base["local_endpoint_id"] = course.local_endpoint_id or base["local_endpoint_id"]
             base["cloud_endpoint_id"] = course.cloud_endpoint_id or base["cloud_endpoint_id"]
+        if not self.base.learner.instructor_individual_view:
+            base["visibility_mode"] = "A"  # V1: individual views are off here, whatever is stored
         base["course_version"] = course.version if course else 0
         base["system_version"] = system.version if system else 0
         return EffectiveSettings(**base)
@@ -330,6 +332,8 @@ class SettingsService:
     def save_course(self, course_id: int, values: dict, *, expected_version: int, account_id: int | None,
                     action: str = "settings.course.update") -> int:
         values = validate_course({**dict.fromkeys(COURSE_FIELDS), **values})
+        if values.get("visibility_mode") == "B" and not self.base.learner.instructor_individual_view:
+            raise SettingsError("individual views are switched off here: visibility_mode must be A")
         self.check_endpoints(values, course_id=course_id)
         with Session(self.engine) as db:
             # a per-course lock: FOR UPDATE cannot lock the row before it exists (first save)

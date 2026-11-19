@@ -366,6 +366,8 @@ export const en = {
   "settings.visibility": "What instructors see of students",
   "settings.visibilityA": "Mode A: class totals only",
   "settings.visibilityB": "Mode B: individual progress after the student agrees",
+  "settings.statisticsOnly": "Instructors see class statistics only: how many students use the tutor, how many questions, the most frequent topics and quiz averages. Nobody sees one student's questions, answers or progress.",
+  "end.previewReadyStatistics": "Export ready: course content and class statistics, no individual student data.",
   "settings.localOnly": "Local only",
   "settings.localOnlyHint": "Every answer is written on the course's own server. No question is sent to a cloud model.",
   "settings.routing": "Routing preference",
