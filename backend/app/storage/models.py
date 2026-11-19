@@ -238,6 +238,8 @@ class Course(SQLModel, table=True):
     created_at: datetime = _ts(default_factory=utcnow)
     # incremented by every content edit; processes reload the content when it changes (task Z9)
     content_version: int = Field(default=0, sa_column_kwargs={"server_default": "0"})
+    # the instructor's rules for the tutor in the whole course (Z26); module guidelines add to it
+    guideline: str = Field(default="", sa_column_kwargs={"server_default": ""})
 
 
 class Module(SQLModel, table=True):

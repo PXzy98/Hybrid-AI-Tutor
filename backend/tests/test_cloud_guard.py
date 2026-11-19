@@ -64,6 +64,7 @@ def test_cloud_request_contains_only_the_allow_list():
         "labels": {"level": "basic", "sequencing": "concept_first", "detail": "detailed"},
         "language": "en",
         "subject": "general",  # a fixed prompt name (task Z16); the course's profile sets it
+        "guidelines": [],  # the instructor's rules (Z26); instructor text, never student data
     }
     dumped = req.model_dump_json()
     for secret in SECRETS:
