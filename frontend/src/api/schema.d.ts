@@ -1271,6 +1271,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/admin/statistics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Statistics
+         * @description Students and questions of every course, and the totals.
+         */
+        get: operations["admin_statistics"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/admin/settings": {
         parameters: {
             query?: never;
@@ -1832,6 +1852,26 @@ export interface paths {
          * @description Aggregates of one module over the course's consenting students; small groups are suppressed.
          */
         get: operations["learner_class_summary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/statistics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Course Statistics
+         * @description How many students use the tutor, questions per week and per module, quiz averages (v5 V2).
+         */
+        get: operations["learner_course_statistics"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2642,6 +2682,54 @@ export interface components {
             values: components["schemas"]["CourseValues"];
             /** Version */
             version: number;
+        };
+        /**
+         * CourseStatisticsOut
+         * @description Counts only (v5 V2); a count contributed by fewer than `min_group` students is null.
+         */
+        CourseStatisticsOut: {
+            /** Min Group */
+            min_group: number;
+            /** Students Enrolled */
+            students_enrolled: number;
+            /** Active Students */
+            active_students: number;
+            /** Active Students 7D */
+            active_students_7d: number;
+            /** Questions Total */
+            questions_total: number | null;
+            /** Questions 7D */
+            questions_7d: number | null;
+            /** Local Share */
+            local_share: number | null;
+            /** Weeks */
+            weeks: components["schemas"]["WeekCountOut"][];
+            /** Modules */
+            modules: components["schemas"]["ModuleCountOut"][];
+            /** Quizzes */
+            quizzes: components["schemas"]["QuizStatOut"][];
+        };
+        /** CourseUsageOut */
+        CourseUsageOut: {
+            /** Course Id */
+            course_id: number;
+            /** Code */
+            code: string;
+            /** Title */
+            title: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "archived";
+            /** Students Enrolled */
+            students_enrolled: number;
+            /** Active Students 7D */
+            active_students_7d: number;
+            /** Questions Total */
+            questions_total: number | null;
+            /** Questions 7D */
+            questions_7d: number | null;
         };
         /** CourseValues */
         CourseValues: {
@@ -3594,6 +3682,15 @@ export interface components {
             /** Students */
             students: number;
         };
+        /** ModuleCountOut */
+        ModuleCountOut: {
+            /** Module Id */
+            module_id: number | null;
+            /** Title */
+            title: string;
+            /** Questions */
+            questions: number | null;
+        };
         /** ModuleIn */
         ModuleIn: {
             /** Code */
@@ -4103,6 +4200,17 @@ export interface components {
              */
             students?: components["schemas"]["StudentResult"][];
         };
+        /** QuizStatOut */
+        QuizStatOut: {
+            /** Quiz Id */
+            quiz_id: number;
+            /** Title */
+            title: string;
+            /** Attempts */
+            attempts: number;
+            /** Mean Score */
+            mean_score: number | null;
+        };
         /** RagMaterial */
         RagMaterial: {
             /** Name */
@@ -4540,6 +4648,24 @@ export interface components {
              */
             apply_state: "applied" | "applying" | "failed";
         };
+        /**
+         * SystemStatisticsOut
+         * @description Counts per course and in total (v5 V2); no individual data.
+         */
+        SystemStatisticsOut: {
+            /** Min Group */
+            min_group: number;
+            /** Courses */
+            courses: components["schemas"]["CourseUsageOut"][];
+            /** Students Enrolled */
+            students_enrolled: number;
+            /** Active Students 7D */
+            active_students_7d: number;
+            /** Questions Total */
+            questions_total: number | null;
+            /** Questions 7D */
+            questions_7d: number | null;
+        };
         /** SystemValues */
         SystemValues: {
             /** Checkers */
@@ -4707,6 +4833,18 @@ export interface components {
             visible_to_instructor: boolean;
             /** Visible Since */
             visible_since?: string | null;
+        };
+        /** WeekCountOut */
+        WeekCountOut: {
+            /**
+             * Week Start
+             * Format: date
+             */
+            week_start: string;
+            /** Questions */
+            questions: number | null;
+            /** Students */
+            students: number | null;
         };
         /** WindowIn */
         WindowIn: {
@@ -7490,6 +7628,26 @@ export interface operations {
             };
         };
     };
+    admin_statistics: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SystemStatisticsOut"];
+                };
+            };
+        };
+    };
     admin_settings_get: {
         parameters: {
             query?: never;
@@ -8752,6 +8910,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ClassSummary"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    learner_course_statistics: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseStatisticsOut"];
                 };
             };
             /** @description Validation Error */

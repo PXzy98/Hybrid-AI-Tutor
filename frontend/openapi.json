@@ -3770,6 +3770,28 @@
         }
       }
     },
+    "/api/v2/admin/statistics": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Get Statistics",
+        "description": "Students and questions of every course, and the totals.",
+        "operationId": "admin_statistics",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemStatisticsOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/admin/settings": {
       "get": {
         "tags": [
@@ -5620,6 +5642,49 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ClassSummary"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/courses/{course_id}/statistics": {
+      "get": {
+        "tags": [
+          "learner"
+        ],
+        "summary": "Get Course Statistics",
+        "description": "How many students use the tutor, questions per week and per module, quiz averages (v5 V2).",
+        "operationId": "learner_course_statistics",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CourseStatisticsOut"
                 }
               }
             }
@@ -8014,6 +8079,161 @@
           "version"
         ],
         "title": "CourseSettingsOut"
+      },
+      "CourseStatisticsOut": {
+        "properties": {
+          "min_group": {
+            "type": "integer",
+            "title": "Min Group"
+          },
+          "students_enrolled": {
+            "type": "integer",
+            "title": "Students Enrolled"
+          },
+          "active_students": {
+            "type": "integer",
+            "title": "Active Students"
+          },
+          "active_students_7d": {
+            "type": "integer",
+            "title": "Active Students 7D"
+          },
+          "questions_total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Questions Total"
+          },
+          "questions_7d": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Questions 7D"
+          },
+          "local_share": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Local Share"
+          },
+          "weeks": {
+            "items": {
+              "$ref": "#/components/schemas/WeekCountOut"
+            },
+            "type": "array",
+            "title": "Weeks"
+          },
+          "modules": {
+            "items": {
+              "$ref": "#/components/schemas/ModuleCountOut"
+            },
+            "type": "array",
+            "title": "Modules"
+          },
+          "quizzes": {
+            "items": {
+              "$ref": "#/components/schemas/QuizStatOut"
+            },
+            "type": "array",
+            "title": "Quizzes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "min_group",
+          "students_enrolled",
+          "active_students",
+          "active_students_7d",
+          "questions_total",
+          "questions_7d",
+          "local_share",
+          "weeks",
+          "modules",
+          "quizzes"
+        ],
+        "title": "CourseStatisticsOut",
+        "description": "Counts only (v5 V2); a count contributed by fewer than `min_group` students is null."
+      },
+      "CourseUsageOut": {
+        "properties": {
+          "course_id": {
+            "type": "integer",
+            "title": "Course Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "archived"
+            ],
+            "title": "Status"
+          },
+          "students_enrolled": {
+            "type": "integer",
+            "title": "Students Enrolled"
+          },
+          "active_students_7d": {
+            "type": "integer",
+            "title": "Active Students 7D"
+          },
+          "questions_total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Questions Total"
+          },
+          "questions_7d": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Questions 7D"
+          }
+        },
+        "type": "object",
+        "required": [
+          "course_id",
+          "code",
+          "title",
+          "status",
+          "students_enrolled",
+          "active_students_7d",
+          "questions_total",
+          "questions_7d"
+        ],
+        "title": "CourseUsageOut"
       },
       "CourseValues": {
         "properties": {
@@ -10714,6 +10934,43 @@
         ],
         "title": "MisconceptionSummary"
       },
+      "ModuleCountOut": {
+        "properties": {
+          "module_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Module Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "questions": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Questions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "module_id",
+          "title",
+          "questions"
+        ],
+        "title": "ModuleCountOut"
+      },
       "ModuleIn": {
         "properties": {
           "code": {
@@ -12156,6 +12413,41 @@
         ],
         "title": "QuizResults"
       },
+      "QuizStatOut": {
+        "properties": {
+          "quiz_id": {
+            "type": "integer",
+            "title": "Quiz Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "attempts": {
+            "type": "integer",
+            "title": "Attempts"
+          },
+          "mean_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mean Score"
+          }
+        },
+        "type": "object",
+        "required": [
+          "quiz_id",
+          "title",
+          "attempts",
+          "mean_score"
+        ],
+        "title": "QuizStatOut"
+      },
       "RagMaterial": {
         "properties": {
           "name": {
@@ -13353,6 +13645,62 @@
         ],
         "title": "SystemSettingsOut"
       },
+      "SystemStatisticsOut": {
+        "properties": {
+          "min_group": {
+            "type": "integer",
+            "title": "Min Group"
+          },
+          "courses": {
+            "items": {
+              "$ref": "#/components/schemas/CourseUsageOut"
+            },
+            "type": "array",
+            "title": "Courses"
+          },
+          "students_enrolled": {
+            "type": "integer",
+            "title": "Students Enrolled"
+          },
+          "active_students_7d": {
+            "type": "integer",
+            "title": "Active Students 7D"
+          },
+          "questions_total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Questions Total"
+          },
+          "questions_7d": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Questions 7D"
+          }
+        },
+        "type": "object",
+        "required": [
+          "min_group",
+          "courses",
+          "students_enrolled",
+          "active_students_7d",
+          "questions_total",
+          "questions_7d"
+        ],
+        "title": "SystemStatisticsOut",
+        "description": "Counts per course and in total (v5 V2); no individual data."
+      },
       "SystemValues": {
         "properties": {
           "checkers": {
@@ -13865,6 +14213,44 @@
         ],
         "title": "VisibilityOut",
         "description": "What the instructor can see of this student (course-structure.md 4.5)."
+      },
+      "WeekCountOut": {
+        "properties": {
+          "week_start": {
+            "type": "string",
+            "format": "date",
+            "title": "Week Start"
+          },
+          "questions": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Questions"
+          },
+          "students": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Students"
+          }
+        },
+        "type": "object",
+        "required": [
+          "week_start",
+          "questions",
+          "students"
+        ],
+        "title": "WeekCountOut"
       },
       "WindowIn": {
         "properties": {
