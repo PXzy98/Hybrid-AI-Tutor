@@ -114,7 +114,7 @@ logged in. Owner = component owner who implements it.
 | `POST /courses/{course_id}/ask/stream` | S | Z | same, SSE |
 | `POST /courses/{course_id}/check` | S | S | answer a check item |
 | `GET /courses/{course_id}/conversations`, `GET .../conversations/{conversation_id}` | S | Z | own conversations in this course |
-| `GET /courses/{course_id}/onboarding`, `POST /courses/{course_id}/onboarding` | S | S | course diagnostic |
+| `GET /courses/{course_id}/onboarding`, `POST /courses/{course_id}/onboarding` | S | S | course diagnostic; `GET ?language=en|fr` gives the consent text and the preference questions in that language. `POST /ask` with `language: "fr"` returns the fixed notes (warnings, the safe replacement answer, error details) in French; model output is never translated (`app/api/v2/fr.yaml`) |
 | `GET /courses/{course_id}/me/profile` | S | S | "What I know" in this course, the visibility mode, what the instructor can see, the instructor's plan |
 | `POST /courses/{course_id}/me/visibility` | S | S | acknowledge mode B, or opt out / opt back in |
 | `DELETE /courses/{course_id}/me/learning-data` | S | S | delete own data in this course |

@@ -5354,6 +5354,7 @@
           "learner"
         ],
         "summary": "Get Onboarding",
+        "description": "The consent text and the preference questions come in `language` (the UI's language).",
         "operationId": "learner_onboarding_get",
         "parameters": [
           {
@@ -5372,6 +5373,20 @@
             "schema": {
               "type": "integer",
               "title": "Module Id"
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "en",
+                "fr"
+              ],
+              "type": "string",
+              "default": "en",
+              "title": "Language"
             }
           }
         ],

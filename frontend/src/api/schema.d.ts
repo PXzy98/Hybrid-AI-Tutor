@@ -1743,7 +1743,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get Onboarding */
+        /**
+         * Get Onboarding
+         * @description The consent text and the preference questions come in `language` (the UI's language).
+         */
         get: operations["learner_onboarding_get"];
         put?: never;
         /**
@@ -8562,6 +8565,7 @@ export interface operations {
         parameters: {
             query: {
                 module_id: number;
+                language?: "en" | "fr";
             };
             header?: never;
             path: {

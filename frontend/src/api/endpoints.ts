@@ -137,7 +137,9 @@ export const api = {
   conversations: (id: number) => request<Conversation[]>("GET", `${c(id)}/conversations`),
   conversation: (id: number, conversationId: string) =>
     request<ConversationDetail>("GET", `${c(id)}/conversations/${encodeURIComponent(conversationId)}`),
-  onboarding: (id: number, moduleId: number) => request<Onboarding>("GET", `${c(id)}/onboarding?module_id=${moduleId}`),
+  // the consent text and the preference questions come in the interface language
+  onboarding: (id: number, moduleId: number, language: "en" | "fr" = "en") =>
+    request<Onboarding>("GET", `${c(id)}/onboarding?module_id=${moduleId}&language=${language}`),
   submitOnboarding: (id: number, input: OnboardingBody) => request<OnboardingResult>("POST", `${c(id)}/onboarding`, input),
   profile: (id: number) => request<CourseProfile>("GET", `${c(id)}/me/profile`),
   setVisibility: (id: number, action: VisibilityAction) => request<Visibility>("POST", `${c(id)}/me/visibility`, { action }),

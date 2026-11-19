@@ -40,9 +40,9 @@ export default function Start({ course }: { course: Course }) {
 }
 
 function OnboardingForm({ course, moduleId }: { course: Course; moduleId: number }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const qc = useQueryClient();
-  const info = useQuery({ queryKey: ["onboarding", course.id, moduleId], queryFn: () => api.onboarding(course.id, moduleId) });
+  const info = useQuery({ queryKey: ["onboarding", course.id, moduleId, lang], queryFn: () => api.onboarding(course.id, moduleId, lang) });
   const [consent, setConsent] = useState<boolean | null>(null);
   const [prefs, setPrefs] = useState<Prefs>({});
   const [skipPrefs, setSkipPrefs] = useState(false);
