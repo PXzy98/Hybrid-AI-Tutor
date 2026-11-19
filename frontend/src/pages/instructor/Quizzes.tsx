@@ -360,20 +360,22 @@ function ResultsView({ course, id, onClose }: { course: Course; id: number; onCl
               )}
             </>
           )}
-          <Card>
-            <CardHeader><CardTitle>{t("quiz.students")}</CardTitle><CardDescription>{t("quiz.studentsHint")}</CardDescription></CardHeader>
-            <CardContent>
-              {(r.students ?? []).length === 0 ? <p className="text-sm text-muted-foreground">{t("quiz.noStudents")}</p> : (
-                <Table>
-                  <TableHeader><TableRow><TableHead>{t("members.name")}</TableHead><TableHead>{t("quiz.score")}</TableHead>{(r.students ?? []).some((s) => s.pre_test != null) && <TableHead>{t("quiz.pre")}</TableHead>}</TableRow></TableHeader>
-                  <TableBody>{(r.students ?? []).map((s) => (
-                    <TableRow key={s.student_id}><TableCell>{name(s.student_id)}</TableCell><TableCell className="tabular-nums">{s.score}/{s.total}</TableCell>
-                      {(r.students ?? []).some((x) => x.pre_test != null) && <TableCell className="tabular-nums">{pct(s.pre_test)}</TableCell>}</TableRow>
-                  ))}</TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
+          {course.individual_view && (
+            <Card>
+              <CardHeader><CardTitle>{t("quiz.students")}</CardTitle><CardDescription>{t("quiz.studentsHint")}</CardDescription></CardHeader>
+              <CardContent>
+                {(r.students ?? []).length === 0 ? <p className="text-sm text-muted-foreground">{t("quiz.noStudents")}</p> : (
+                  <Table>
+                    <TableHeader><TableRow><TableHead>{t("members.name")}</TableHead><TableHead>{t("quiz.score")}</TableHead>{(r.students ?? []).some((s) => s.pre_test != null) && <TableHead>{t("quiz.pre")}</TableHead>}</TableRow></TableHeader>
+                    <TableBody>{(r.students ?? []).map((s) => (
+                      <TableRow key={s.student_id}><TableCell>{name(s.student_id)}</TableCell><TableCell className="tabular-nums">{s.score}/{s.total}</TableCell>
+                        {(r.students ?? []).some((x) => x.pre_test != null) && <TableCell className="tabular-nums">{pct(s.pre_test)}</TableCell>}</TableRow>
+                    ))}</TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </>
       )}
     </div>

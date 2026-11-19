@@ -2686,6 +2686,13 @@ export interface components {
              * @default false
              */
             local_only?: boolean;
+            /** Guideline */
+            guideline?: string | null;
+            /**
+             * Individual View
+             * @default false
+             */
+            individual_view?: boolean;
         };
         /** CoursePatch */
         CoursePatch: {
@@ -2695,6 +2702,8 @@ export interface components {
             title?: string | null;
             /** Term Label */
             term_label?: string | null;
+            /** Guideline */
+            guideline?: string | null;
         };
         /** CourseProfileOut */
         CourseProfileOut: {

@@ -252,6 +252,8 @@ class CloudRequest(BaseModel):
     language: str = "en"
     # the course's subject prompt (prompts/subjects/<name>.md, task Z16): a fixed name, never free text
     subject: str = Field("general", pattern=r"^[a-z_]{1,40}$")
+    # the instructor's rules for the tutor (course, then module; Z26): instructor text, not student data
+    guidelines: list[str] = Field([], max_length=2)
 
 
 # --------------------------------------------------------------------------- answer
@@ -368,6 +370,8 @@ class RequestContext(BaseModel):
     module_id: int | None = None
     settings: EffectiveSettings | None = None
     profile: PrivacyProfile | None = None
+    # the instructor's rules for the tutor: the course's, then the module's (Z26); set by the API layer
+    guidelines: list[str] = []
     _progress_sink: Any = PrivateAttr(default=None)
     _request_started: float = PrivateAttr(default_factory=perf_counter)
 

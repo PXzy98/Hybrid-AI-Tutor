@@ -1,0 +1,11 @@
+# Computer science (task S16): what students paste from programming assignments. The same recognizers as
+# ece (lab and server addresses, repository URLs; keys and tokens are in the base layer), with the
+# computing subject prompt instead of the engineering one. Test set: eval/privacy-filter/ece_cases.jsonl.
+extends: base
+recognizers:
+  - internal_address   # private IPv4 host addresses (with a port) and MAC addresses; "10.0.0.0/8" is kept
+  - repo_url           # github.com/<account>/<repo> and other code hosts: the account names the student
+prompt: computing      # task Z16
+consent_note: >-
+  Please remove passwords, API keys and server addresses from code you paste; the tutor also removes
+  the ones it recognises before anything leaves the course's servers.
