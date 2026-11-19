@@ -26,8 +26,8 @@ license, file list) and a `manifest.json`.
 | Life science | `mit_7_016_intro_biology` | MIT 7.016 Introductory Biology (2018) | `life_science` | 22 | syllabus, calendar, assignments, exams |
 | ECE | `mit_6_002_circuits` | MIT 6.002 Circuits and Electronics (2007) | `ece` | 25 | syllabus, calendar, homework, quizzes and finals |
 | ECE | `mit_res_6_007_signals` | MIT RES.6-007 Signals and Systems (2011) | `ece` | 26 | introduction, problem sets |
-| Computer science | `mit_6_006_algorithms` | MIT 6.006 Introduction to Algorithms (2020) | `ece` | 19 | syllabus, calendar, problem sets, quizzes and final |
-| Computer science | `harvard_cs50x` | Harvard CS50x Introduction to Computer Science (2026) | `ece` | 11 | syllabus, problem sets, final project |
+| Computer science | `mit_6_006_algorithms` | MIT 6.006 Introduction to Algorithms (2020) | `computer_science` | 19 | syllabus, calendar, problem sets, quizzes and final |
+| Computer science | `harvard_cs50x` | Harvard CS50x Introduction to Computer Science (2026) | `computer_science` | 11 | syllabus, problem sets, final project |
 
 - **Modules**: one lecture (or recitation) per module; PDFs, except CS50x (Markdown notes).
 - **Course-level material** (`documents` in the manifest): uploaded to the course, not to a module. Used
@@ -37,8 +37,8 @@ license, file list) and a `manifest.json`.
 - **`instructor_only/`** (`instructor_only` in the manifest): solutions and answer keys. **Never upload
   them as course material**: the tutor would give students the answers. They are kept to check generated
   quizzes and answers.
-- Computer science courses use the `ece` privacy profile (keys, tokens and repository URLs in code) until a
-  separate profile is needed.
+- Computer science courses use the `computer_science` profile: the recognizers of `ece` (keys, tokens,
+  addresses and repository URLs in code) with the computing subject prompt (task S16).
 
 `general_medical_knowledge/` is the fictional v3 course (the five MedlinePlus topics). It stays for the v3
 migration and its tests; new work uses the packs above. `elg5902/` holds no material.

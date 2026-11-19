@@ -70,7 +70,7 @@ export default function Progress({ course }: { course: Course }) {
                 </Card>
               </section>
             ))}
-            <PlanCard plan={data.plan} />
+            {course.individual_view && <PlanCard plan={data.plan} />}
           </>
         )}
       </div>

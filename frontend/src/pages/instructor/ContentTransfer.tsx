@@ -34,6 +34,7 @@ export default function ContentTransfer({ course }: { course: Course }) {
       if (input.current) input.current.value = "";
       setFile(null);
       for (const key of ["modules", "kcs", "check-items", "misconceptions"]) qc.invalidateQueries({ queryKey: [key, course.id] });
+      qc.invalidateQueries({ queryKey: ["courses"] });  // an imported course.yaml replaces the course guideline
     },
   });
   function submit(e: FormEvent) {

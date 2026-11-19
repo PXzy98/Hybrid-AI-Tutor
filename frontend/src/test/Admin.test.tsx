@@ -172,6 +172,21 @@ describe("course content", () => {
     await waitFor(() => expect(calls.find((c) => c.method === "PATCH")?.body).toEqual({ guideline: "Use SI units." }));
   });
 
+  it("shows the imported course guideline after an import", async () => {
+    let guideline = "Old rule.";
+    mockApi(instructorRoutes({
+      "GET /courses": () => [{ ...COURSE, my_role: "instructor", guideline }],
+      "GET /courses/1/kcs": [], "GET /courses/1/check-items": [], "GET /courses/1/misconceptions": [],
+      "POST /courses/1/content/import": () => { guideline = "Imported rule."; return { modules: 1, kcs: 0, items: 0, misconceptions: 0 }; },
+    }));
+    renderApp("/courses/1/content");
+    const user = userEvent.setup();
+    expect(await screen.findByLabelText("Guideline for the tutor (whole course)")).toHaveValue("Old rule.");
+    await user.upload(screen.getByLabelText("ZIP file"), new File(["zip"], "content.zip", { type: "application/zip" }));
+    await user.click(screen.getByRole("button", { name: "Import content" }));
+    await waitFor(() => expect(screen.getByLabelText("Guideline for the tutor (whole course)")).toHaveValue("Imported rule."));
+  });
+
   it("shows the server's message when a YAML import is refused", async () => {
     const calls = mockApi(instructorRoutes({
       "GET /courses/1/kcs": [], "GET /courses/1/check-items": [], "GET /courses/1/misconceptions": [],

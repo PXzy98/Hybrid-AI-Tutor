@@ -42,7 +42,9 @@ export const ME_STUDENT: Me = { account_id: 1, username: "sam", email: null, dis
   must_change_password: false, memberships: [] };
 export const ME_INSTRUCTOR: Me = { ...ME_STUDENT, account_id: 2, username: "ida", display_name: "Ida Instructor", system_role: "instructor" };
 export const COURSE: Course = { id: 1, code: "ECE 1000", title: "Fictional Circuits", term_label: "Fall", course_type: "ece",
-  visibility_mode: "B", status: "active", my_role: "student" };
+  // the kept individual views (visibility mode B) are tested with them switched on; StatisticsOnly.test.tsx
+  // covers the deployment default (v5 V1)
+  visibility_mode: "B", status: "active", my_role: "student", individual_view: true };
 export const MODULES = [{ id: 10, code: "M1", title: "Ohm's law", position: 1, guideline: null }];
 
 /** `path` may carry router state: `{ pathname, state }` (pages that receive a hand-over, e.g. V8). */
