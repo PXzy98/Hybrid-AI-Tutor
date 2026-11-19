@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import type { Course } from "@/api/endpoints";
 import { roleIn, useCourses, useMe } from "@/auth";
 import { ErrorNote, Loading } from "@/components/common";
+import PrivacyNotice from "@/components/PrivacyNotice";
 import { useI18n } from "@/i18n";
 import AiAssistant from "./instructor/AiAssistant";
 import Content from "./instructor/Content";
@@ -70,6 +71,7 @@ function Dashboard({ course, student, tab }: { course: Course; student: boolean;
   const chatActive = student && active.id === "chat";
   return (
     <>
+      {student && <PrivacyNotice key={course.id} course={course} />}
       {/* a running answer and the live messages live in Chat's state: keep it mounted, hidden, on other sections */}
       {student && (
         <section aria-labelledby={chatActive ? headingId : undefined} hidden={!chatActive}>

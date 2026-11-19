@@ -87,6 +87,100 @@ def test_build_demo_twice_and_sample_activity(world, packs_dir, tmp_path):
     assert kept == accounts
 
 
+class SchemaFake(FakeLLMClient):
+    """The local model of the drafts: answers by the JSON schema it is asked for (S15)."""
+
+    REPLIES = {
+        "incorrect_belief": {"items": [{"name": "Arrays grow by themselves", "incorrect_belief":
+                                        "A C array grows when you write past its end.", "correction":
+                                        "Its size is fixed; writing past the end is undefined behaviour.",
+                                        "kc_name": "Arrays", "citations": [1]}]},
+        "correct_index": {"items": [{"question": "What does an array index start at in C?",
+                                     "options": ["0", "1", "-1", "Any number"], "correct_index": 0,
+                                     "explanation": "C arrays are zero-indexed.", "kc_names": ["Arrays"],
+                                     "citations": [1]}]},
+        "definition": {"items": [{"name": "Arrays", "definition": "Values of one type stored back to back.",
+                                  "prerequisite_names": [], "citations": [1]}]},
+        "questions": {"questions": [{"kind": "true_false", "kc": None, "stem": "C arrays start at index 0.",
+                                     "answer": 0, "explanation": "They are zero-indexed.", "passage": 1}]},
+    }
+
+    async def complete(self, messages, *, json_schema=None, max_tokens=None):
+        schema = json.dumps(json_schema or {})  # quiz questions are asked for without a schema
+        key = next((k for k in self.REPLIES if f'"{k}"' in schema), "questions")
+        self.replies = [json.dumps(self.REPLIES[key])]
+        return await super().complete(messages, json_schema=json_schema, max_tokens=max_tokens)
+
+
+def test_learner_content_gives_the_course_kcs_items_and_a_published_quiz(world, packs_dir, tmp_path):
+    """S15: --learner-content drafts and accepts the learner content and publishes one practice quiz; run
+    again, nothing is drafted twice."""
+    from app.core.schemas import Chunk
+    from app.llm.gateway import FakeGateway
+    from app.rag.course import FakeCourseRetriever
+
+    app, services = world
+    local = SchemaFake(model="local-9b")
+    services.gateway = FakeGateway({"local": local, "cloud": FakeLLMClient("never", backend="cloud")})
+    passage = Chunk(text="Arrays store values of one type back to back.", source="week_2.md", topic="week_2",
+                    score=1.0)
+    services.course_retriever = FakeCourseRetriever([passage])
+    report = run(world, packs_dir, tmp_path, students=0, learner_content=True, learner_modules=1)[0]
+    assert report.failed == [], report.failed
+    assert report.accepted == {"kcs": 1, "check_items": 1, "misconceptions": 1} and report.quiz_id
+    prof = csrf_client(app)
+    prof.post("/api/v2/auth/login", json={"username": "prof", "password": PASSWORD})
+    course = f"/api/v2/courses/{report.course_id}"
+    assert [k["name"] for k in prof.get(f"{course}/kcs").json()] == ["Arrays"]
+    quiz = prof.get(f"{course}/quizzes/{report.quiz_id}").json()
+    assert quiz["status"] == "published" and all(q["reviewed"] for q in quiz["questions"])
+    calls = len(local.calls)
+    again = run(world, packs_dir, tmp_path, students=0, learner_content=True, learner_modules=1)[0]
+    assert again.accepted == {} and again.quiz_id == report.quiz_id and len(local.calls) == calls
+
+
+class FailingFake(SchemaFake):
+    """Misconceptions and quiz questions fail (a temporary model failure)."""
+
+    async def complete(self, messages, *, json_schema=None, max_tokens=None):
+        schema = json.dumps(json_schema or {})
+        if '"incorrect_belief"' in schema or json_schema is None:
+            self.replies = ["not json"]
+            return await FakeLLMClient.complete(self, messages, json_schema=json_schema,
+                                                max_tokens=max_tokens)
+        return await super().complete(messages, json_schema=json_schema, max_tokens=max_tokens)
+
+
+def test_learner_content_run_again_finishes_what_failed(world, packs_dir, tmp_path):
+    """S15: a kind that failed is drafted on the next run without drafting the accepted KCs again, and a
+    practice quiz left as a draft is filled and published."""
+    from app.core.schemas import Chunk
+    from app.llm.gateway import FakeGateway
+    from app.rag.course import FakeCourseRetriever
+
+    app, services = world
+    passage = Chunk(text="Arrays store values of one type back to back.", source="week_2.md", topic="week_2",
+                    score=1.0)
+    services.course_retriever = FakeCourseRetriever([passage])
+    cloud = FakeLLMClient("never", backend="cloud")
+    services.gateway = FakeGateway({"local": FailingFake(model="local-9b"), "cloud": cloud})
+    first = run(world, packs_dir, tmp_path, students=0, learner_content=True, learner_modules=1)[0]
+    assert first.accepted == {"kcs": 1, "check_items": 1}
+    assert any("misconceptions" in f for f in first.failed)
+    assert any("practice quiz" in f for f in first.failed)
+    assert first.quiz_id is None
+
+    services.gateway = FakeGateway({"local": SchemaFake(model="local-9b"), "cloud": cloud})
+    again = run(world, packs_dir, tmp_path, students=0, learner_content=True, learner_modules=1)[0]
+    assert again.failed == [], again.failed
+    assert again.accepted == {"misconceptions": 1} and again.quiz_id
+    prof = csrf_client(app)
+    prof.post("/api/v2/auth/login", json={"username": "prof", "password": PASSWORD})
+    course = f"/api/v2/courses/{again.course_id}"
+    quizzes = prof.get(f"{course}/quizzes").json()
+    assert len(quizzes) == 1 and quizzes[0]["status"] == "published"
+
+
 def test_build_demo_keeps_statistics_only_courses_in_mode_a(make_client, packs_dir, tmp_path):
     """v5 V1: where individual views are off, the demo build leaves mode A and the sample activity still
     runs without problems."""

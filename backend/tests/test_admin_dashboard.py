@@ -11,7 +11,7 @@ from app.core.schemas import Evidence
 from app.learner.knowledge.rule import RuleKnowledgeModel
 from app.llm.cloud_guard import CloudClient
 from app.llm.fake import FakeLLMClient
-from tests.conftest import Api
+from tests.conftest import PASSWORD, Api
 
 HBP = "high_blood_pressure"
 ADMIN = "/api/v1/admin"
@@ -19,14 +19,16 @@ ADMIN = "/api/v1/admin"
 
 @pytest.fixture
 def dash(make_client, tmp_path):
-    """`dash(overrides)`: the app with an instructor (logged in) and a student account."""
+    """`dash(overrides)`: the app with an administrator `prof` (logged in; the system-wide settings are an
+    administrator's, Z27), an instructor `teach` and a student account."""
     with ExitStack() as stack:
         def _make(overrides: dict | None = None) -> Api:
             cfg = {"content": {"seed_status": "active"},
                    "rag": {"materials_dir": str(tmp_path / "materials")}, **(overrides or {})}
             api = Api(stack.enter_context(make_client(cfg)))
             api.make_student("alice")
-            api.make_instructor("prof")
+            api.accounts.create_admin("prof", PASSWORD, must_change=False)
+            api.make_instructor("teach")
             api.login("prof")
             return api
 
@@ -346,3 +348,19 @@ def test_upload_calls_ingest_when_the_retriever_has_it(dash):
     api.services.retriever = Indexing()
     assert upload(api).json()["ingested"] is True
     assert calls and calls[0][0] == HBP and calls[0][1].endswith("notes.md")
+
+
+def test_an_instructor_cannot_change_system_settings_or_probe_servers(dash):
+    """Z27: the v1 dashboard let any instructor point the trusted local model (which receives every course's
+    original student text) at another server, and test arbitrary internal addresses."""
+    api = dash()
+    api.login("teach")
+    values = config(api)["values"]
+    outside = {**values, "local_llm_url": "http://203.0.113.5:8000/v1"}
+    assert api.client.put(f"{ADMIN}/config", json=outside).status_code == 403
+    fewer = {**values, "checkers": ["medical_safety", "pii_leak", "profile_leak"]}
+    assert api.client.put(f"{ADMIN}/config", json=fewer).status_code == 403
+    r = api.client.put(f"{ADMIN}/config", json={**values, "routing_threshold": 0.4})  # the demo course's
+    assert r.status_code == 200, r.text
+    probe = api.client.post(f"{ADMIN}/llm-server/test", json={"url": "http://10.0.0.5:8000/v1", "model": "x"})
+    assert probe.status_code == 403
