@@ -48,7 +48,8 @@ def test_it_reaches_the_local_model_after_the_instructor_rules(world):
     alice.put(URL, json={"text": MINE})
     world.prof.patch(f"{world.url}/modules/{world.module}", json={"guideline": RULE})
     question = "What is Ohm's law?"
-    assert alice.post(f"{world.url}/ask", json={"question": question, "module_id": world.module}).status_code == 200
+    body = {"question": question, "module_id": world.module}
+    assert alice.post(f"{world.url}/ask", json=body).status_code == 200
     system = _system(world, question)
     assert system.index(GUIDELINE_INTRO) < system.index(RULE) < system.index(STUDENT_INSTRUCTION_INTRO) \
         < system.index(MINE)
@@ -77,7 +78,8 @@ def test_it_never_goes_to_the_cloud(world):
     assert ctx.answer_instruction == MINE
     from app.core.schemas import AskRequest, PIIResult, RequestContext
 
-    request = RequestContext(request_id="r", request=AskRequest(student_id="s", topic="circuits", question="q"),
+    asked = AskRequest(student_id="s", topic="circuits", question="q")
+    request = RequestContext(request_id="r", request=asked,
                              learner=ctx, pii=PIIResult(sanitized_text="q"))
     assert MINE not in build_cloud_request(request).model_dump_json()
 
