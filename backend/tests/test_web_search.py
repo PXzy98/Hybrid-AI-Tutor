@@ -395,3 +395,17 @@ async def test_the_local_health_check_runs_before_anything_is_sent(use_config, m
     assert out.pii.llm_checked and len(services.understand_llm.calls) == 1
     # the generate step reuses this answer instead of asking the local model again
     assert await llm_flags_health(out, services) is False and len(services.understand_llm.calls) == 1
+
+
+def test_every_course_type_has_its_own_web_sources_in_the_shipped_config():
+    """S16 review: a new privacy profile (course type) without its own list would fall back to Wikipedia."""
+    from pathlib import Path
+
+    import yaml
+
+    from app.privacy.profiles import profile_names
+
+    shipped = yaml.safe_load((Path(__file__).resolve().parents[2] / "config.yaml").read_text(encoding="utf-8"))
+    search = shipped["websearch"]
+    for name in profile_names():
+        assert name in search["allowlist"] and name in search["searxng_engines"], name
