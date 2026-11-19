@@ -405,7 +405,8 @@ def test_every_course_type_has_its_own_web_sources_in_the_shipped_config():
 
     from app.privacy.profiles import profile_names
 
-    shipped = yaml.safe_load((Path(__file__).resolve().parents[2] / "config.yaml").read_text(encoding="utf-8"))
+    config = Path(__file__).resolve().parents[2] / "config.yaml"
+    shipped = yaml.safe_load(config.read_text(encoding="utf-8"))
     search = shipped["websearch"]
     for name in profile_names():
         assert name in search["allowlist"] and name in search["searxng_engines"], name
