@@ -160,6 +160,18 @@ describe("system administration", () => {
 });
 
 describe("course content", () => {
+  it("saves the course guideline for the tutor", async () => {
+    const calls = mockApi(instructorRoutes({
+      "GET /courses/1/kcs": [], "GET /courses/1/check-items": [], "GET /courses/1/misconceptions": [],
+      "PATCH /courses/1": () => ({ ...COURSE, my_role: "instructor", guideline: "Use SI units." }),
+    }));
+    renderApp("/courses/1/content");
+    const user = userEvent.setup();
+    await user.type(await screen.findByLabelText("Guideline for the tutor (whole course)"), "Use SI units.");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+    await waitFor(() => expect(calls.find((c) => c.method === "PATCH")?.body).toEqual({ guideline: "Use SI units." }));
+  });
+
   it("shows the server's message when a YAML import is refused", async () => {
     const calls = mockApi(instructorRoutes({
       "GET /courses/1/kcs": [], "GET /courses/1/check-items": [], "GET /courses/1/misconceptions": [],

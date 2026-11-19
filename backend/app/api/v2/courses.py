@@ -35,6 +35,8 @@ class CourseOut(BaseModel):
     status: Literal["active", "archived"]
     my_role: Literal["instructor", "student"] | None
     local_only: bool = False  # the course's effective setting: no question goes to a cloud model
+    # the instructor's rules for the tutor in the whole course (Z26); null for students
+    guideline: str | None = None
 
 
 class CourseIn(BaseModel):
@@ -48,6 +50,7 @@ class CoursePatch(BaseModel):
     code: str | None = Field(None, min_length=1, max_length=32)
     title: str | None = Field(None, min_length=1, max_length=200)
     term_label: str | None = Field(None, max_length=64)
+    guideline: str | None = Field(None, max_length=4000)
 
 
 class MemberOut(BaseModel):
@@ -107,7 +110,8 @@ def _courses(request: Request):
 def _course_out(view, request: Request) -> CourseOut:
     eff = request.app.state.services.settings_service.effective(view.id)
     # the effective settings, not the course row's initial values: the course settings may change them
-    values = {**view.__dict__, "visibility_mode": eff.visibility_mode}
+    values = {**view.__dict__, "visibility_mode": eff.visibility_mode,
+              "guideline": view.guideline if view.my_role == "instructor" else None}
     return CourseOut(**values, local_only=bool(eff.local_only))
 
 

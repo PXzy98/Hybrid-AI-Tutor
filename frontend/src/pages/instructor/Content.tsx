@@ -22,12 +22,42 @@ const CHOICES = ["A", "B", "C", "D"] as const;
 export default function Content({ course }: { course: Course }) {
   return (
     <div className="space-y-4">
+      <CourseGuidelineCard course={course} />
       <ModulesCard course={course} />
       <KcsCard course={course} />
       <ItemsCard course={course} />
       <Misconceptions course={course} />
       <ContentTransfer course={course} />
     </div>
+  );
+}
+
+/** The instructor's rules for the tutor in the whole course (Z26); each module can add its own. */
+function CourseGuidelineCard({ course }: { course: Course }) {
+  const { t } = useI18n();
+  const qc = useQueryClient();
+  const [guideline, setGuideline] = useState(course.guideline ?? "");
+  const save = useMutation({
+    mutationFn: () => api.updateCourse(course.id, { guideline }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["courses"] }),
+  });
+  function submit(e: FormEvent) {
+    e.preventDefault();
+    save.mutate();
+  }
+  return (
+    <Card>
+      <CardHeader><CardTitle>{t("content.courseGuideline")}</CardTitle><CardDescription>{t("content.courseGuidelineHint")}</CardDescription></CardHeader>
+      <CardContent>
+        <form onSubmit={submit} className="space-y-3">
+          <Label htmlFor="course-guideline" className="sr-only">{t("content.courseGuideline")}</Label>
+          <Textarea id="course-guideline" value={guideline} maxLength={4000} onChange={(e) => setGuideline(e.target.value)} />
+          <ErrorNote error={save.error} />
+          {save.isSuccess && guideline === (course.guideline ?? "") && <p role="status" className="text-sm text-muted-foreground">{t("content.courseGuidelineSaved")}</p>}
+          <Button type="submit" size="sm" loading={save.isPending} disabled={save.isPending || guideline === (course.guideline ?? "")}>{t("settings.save")}</Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }
 

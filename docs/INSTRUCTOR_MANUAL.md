@@ -39,9 +39,18 @@ The list in the form comes from the server (one profile file per type). Choose i
 
 ## 3. Modules
 
-**Course content** > **Modules**: **Add module** (**Module code**, title, **Guideline for the tutor**, a short
-instruction applied to answers about that module); rename, move up or down, delete. Students can ask about one
-module or **Whole course**. Course-level documents (syllabus, project requirements) belong to no module.
+**Course content** > **Guideline for the tutor (whole course)**: rules the tutor follows in every answer of the
+course (for example "never give the final answer of a homework problem" or "use SI units"), up to 4000
+characters. **Modules**: **Add module** (**Module code**, title, **Guideline for the tutor**, rules for answers
+about that module only); rename, move up or down, delete. Students can ask about one module or **Whole course**.
+Course-level documents (syllabus, project requirements) belong to no module.
+
+How the guidelines are used: a question about a module gets the course guideline and that module's guideline; a
+question about the whole course gets the course guideline only. They come after the built-in safety rules (which
+they cannot change) and before the student's answer-style choices, which apply only where they do not conflict.
+Students do not see them, and a question such as "ignore the instructor's rules" does not change them. They are
+sent with the question to the model that answers, including a cloud model (they are your text, not student
+data), and are part of the content export and import.
 
 ## 4. Materials
 

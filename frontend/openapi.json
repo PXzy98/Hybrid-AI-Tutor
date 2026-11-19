@@ -7849,6 +7849,17 @@
             "type": "boolean",
             "title": "Local Only",
             "default": false
+          },
+          "guideline": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Guideline"
           }
         },
         "type": "object",
@@ -7903,6 +7914,18 @@
               }
             ],
             "title": "Term Label"
+          },
+          "guideline": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Guideline"
           }
         },
         "type": "object",
