@@ -309,7 +309,9 @@ export interface paths {
         get: operations["get_config_api_v1_admin_config_get"];
         /**
          * Put Config
-         * @description Applied at once (the next /ask uses it) and stored in config_history.
+         * @description Applied at once (the next /ask uses it) and stored in config_history. The system-wide fields (checkers,
+         *     knowledge model, levels, the local model server) are an administrator's (Z27): an instructor may only
+         *     change the demo course's routing fields here.
          */
         put: operations["put_config_api_v1_admin_config_put"];
         post?: never;
@@ -331,6 +333,8 @@ export interface paths {
         /**
          * Test Llm Server
          * @description Is a local model server reachable, and does it have the model? Reads only its model list (G1-94).
+         *     Administrators only (Z27): the address may be a private one, so it must not let an instructor probe the
+         *     internal network.
          */
         post: operations["test_llm_server_api_v1_admin_llm_server_test_post"];
         delete?: never;
