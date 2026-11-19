@@ -103,6 +103,8 @@ logged in. Owner = component owner who implements it.
 | `POST /courses/{course_id}/content/import`, `GET /courses/{course_id}/content/export` | I | Z | YAML import/export |
 | `GET /courses/{course_id}/materials` | I | S | materials, scan and index status |
 | `POST /courses/{course_id}/materials` | I | S | upload (field `module_id` optional = course-level) |
+| `POST /courses/{course_id}/materials/url` | I | S | V7: `{url, module_id?}`; the server fetches the page (`app.rag.web_pages.fetch_page`: https only, no credentials, public addresses only and pinned per request, every redirect checked, at most 3, 2 MB, 15 s, HTML/text/Markdown only), stores it as `web-<host>-<path>.md` with the address on its first line, scans and indexes it; 422 when refused, 409 when that page is there already; `MaterialOut.source_url` |
+| `POST /courses/{course_id}/materials/{material_id}/refetch` | I | S | V7: fetch a web material again from its address and replace its text (scanned again) |
 | `DELETE /courses/{course_id}/materials/{material_id}` | I | S | delete and re-index |
 | `GET /courses/{course_id}/jobs/{job_id}` | I | Z | background job status (also for quiz drafts, 3.9) |
 
@@ -149,6 +151,7 @@ Draft statuses: `generating`, `draft`, `accepted`, `discarded`, `failed` (with `
 |---|---|---|---|
 | `POST /courses/{course_id}/ai/drafts` | I | S | start a generation job (`kind`: `project_ideas`, `sample_proposal`, `faq`, `custom`, `kcs`, `check_items`, `misconceptions`; optional `module_id`, `focus`; `custom` needs `request`, the instructor's own description, up to 1000 characters (V4); `module_ids` or `material_ids` limit the material to those modules or files, instead of `module_id` (V5)); 202 with the draft (`status: generating`) and its `job_id` (`GET .../jobs/{id}`); the local model only |
 | `POST /courses/{course_id}/ai/drafts/upload` | I | S | V6: multipart `file`, `kind`, optional `request`, `focus`, `add_to_course`, `module_id`; the file is scanned like a material upload (422 when refused, nothing stored), used for this draft only and deleted after the job read it; with `add_to_course` it is also stored as a material (409 when the name exists there); 202 with the draft (`sources: {upload, material_ids?}`) |
+| `POST /courses/{course_id}/ai/drafts/url` | I | S | V7: `{url, kind, request?, focus?, add_to_course?, module_id?}`; the page is fetched like `POST .../materials/url` and used like a file uploaded for this draft (V6) |
 | `GET /courses/{course_id}/ai/drafts`, `GET .../ai/drafts/{draft_id}` | I | S | drafts |
 | `PATCH /courses/{course_id}/ai/drafts/{draft_id}` | I | S | replace the `content` of a draft (tier 1 `{title, body}`, tier 2 `{items: [...]}`); 409 unless `draft` |
 | `POST /courses/{course_id}/ai/drafts/{draft_id}/accept` | I | S | tier 2: create the KCs (need `module_id` in the draft or the body), check items and misconceptions as `active` rows, all or none, with the content checks; tier 1: store a Markdown material (scanned, indexed by a rebuild job). Returns `{draft, created, rebuild_job_id}`; 409 unless `draft` |

@@ -3121,6 +3121,100 @@
         }
       }
     },
+    "/api/v2/courses/{course_id}/materials/url": {
+      "post": {
+        "tags": [
+          "materials"
+        ],
+        "summary": "Add Url",
+        "description": "V7: a web page as course material. The page is fetched once (https, public addresses only, at most\n2 MB, redirects checked), converted to Markdown with its address, scanned like an upload and indexed.",
+        "operationId": "materials_add_url",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UrlIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadOut"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "this page was added here already (fetch it again instead)"
+          },
+          "422": {
+            "description": "the address or the page is refused, or the scan found student data"
+          }
+        }
+      }
+    },
+    "/api/v2/courses/{course_id}/materials/{material_id}/refetch": {
+      "post": {
+        "tags": [
+          "materials"
+        ],
+        "summary": "Refetch",
+        "description": "V7: fetch a web material again from its address and replace its text (scanned again).",
+        "operationId": "materials_refetch",
+        "parameters": [
+          {
+            "name": "material_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Material Id"
+            }
+          },
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "not a web page, or the page is refused now"
+          }
+        }
+      }
+    },
     "/api/v2/courses/{course_id}/materials/{material_id}": {
       "delete": {
         "tags": [
@@ -4860,6 +4954,55 @@
           },
           "422": {
             "description": "the file is refused (type, size, unreadable, privacy scan)"
+          }
+        }
+      }
+    },
+    "/api/v2/courses/{course_id}/ai/drafts/url": {
+      "post": {
+        "tags": [
+          "instructor-ai"
+        ],
+        "summary": "Create From Url",
+        "description": "V7: draft from a web page. The page is fetched with the rules of `POST .../materials/url` and then\nused like a file uploaded for this draft (V6): for this draft only, or also added to the material.",
+        "operationId": "ai_drafts_create_from_url",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiDraftUrlIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiDraftOut"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "add_to_course: this page is in the material already"
+          },
+          "422": {
+            "description": "the address or the page is refused (V7 rules, privacy scan)"
           }
         }
       }
@@ -6794,6 +6937,63 @@
           "updated_at"
         ],
         "title": "AiDraftSummary"
+      },
+      "AiDraftUrlIn": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 8,
+            "title": "Url"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "project_ideas",
+              "sample_proposal",
+              "faq",
+              "custom",
+              "kcs",
+              "check_items",
+              "misconceptions"
+            ],
+            "title": "Kind"
+          },
+          "request": {
+            "type": "string",
+            "maxLength": 1000,
+            "title": "Request",
+            "default": ""
+          },
+          "focus": {
+            "type": "string",
+            "maxLength": 300,
+            "title": "Focus",
+            "default": ""
+          },
+          "add_to_course": {
+            "type": "boolean",
+            "title": "Add To Course",
+            "default": false
+          },
+          "module_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Module Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "url",
+          "kind"
+        ],
+        "title": "AiDraftUrlIn"
       },
       "ApplyStatusOut": {
         "properties": {
@@ -10421,6 +10621,17 @@
             "type": "string",
             "format": "date-time",
             "title": "Uploaded At"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
           }
         },
         "type": "object",
@@ -13916,6 +14127,32 @@
           "ingested"
         ],
         "title": "UploadResult"
+      },
+      "UrlIn": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 8,
+            "title": "Url"
+          },
+          "module_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Module Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "title": "UrlIn"
       },
       "ValidationError": {
         "properties": {

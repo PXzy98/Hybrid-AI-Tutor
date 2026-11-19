@@ -1,18 +1,19 @@
 """Course material (api-v2.md 3.4; course-structure.md 7): upload, list, delete. Each upload is scanned
 before it is stored (`app.rag.index_jobs`); a change starts an index rebuild job (`GET .../jobs/{id}`)."""
 import asyncio
+import hashlib
 from datetime import datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, File, Form, Request, Response, UploadFile, status
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlmodel import Session, col, select
 
 from app.admin.materials import MAX_BYTES
 from app.api.v2.errors import ApiError, ErrorCode
 from app.platform.access import CourseAccess, require_course_role
-from app.rag import index_jobs
-from app.storage.models import AuditLog, Material, Module
+from app.rag import index_jobs, web_pages
+from app.storage.models import AuditLog, Material, Module, utcnow
 
 router = APIRouter(tags=["materials"])
 CourseInstructor = Annotated[CourseAccess, Depends(require_course_role("instructor"))]
@@ -25,6 +26,7 @@ class MaterialOut(BaseModel):
     size_bytes: int
     scan_status: str
     uploaded_at: datetime
+    source_url: str | None = None  # a web page added by its address (V7); it can be fetched again
 
 
 class MaterialsOut(BaseModel):
@@ -42,9 +44,49 @@ def _services(request: Request):
     return request.app.state.services
 
 
-def _out(row: Material) -> MaterialOut:
+def _out(row: Material, data_root=None) -> MaterialOut:
     return MaterialOut(id=row.id, module_id=row.module_id, filename=row.filename, size_bytes=row.size_bytes,
-                       scan_status=row.scan_status, uploaded_at=row.uploaded_at)
+                       scan_status=row.scan_status, uploaded_at=row.uploaded_at,
+                       source_url=_source_url(row, data_root) if data_root is not None else None)
+
+
+def _source_url(row: Material, data_root) -> str | None:
+    if not row.filename.startswith("web-"):
+        return None
+    try:
+        with index_jobs.material_path(data_root, row).open(encoding="utf-8") as f:
+            return web_pages.source_url(f.readline())
+    except OSError:
+        return None
+
+
+class UrlIn(BaseModel):
+    url: str = Field(min_length=8, max_length=2000)
+    module_id: int | None = None  # None: course-level material
+
+
+def _module_of(services, course_id: int, module_id: int | None) -> None:
+    if module_id is None:
+        return
+    with Session(services.engine) as db:
+        module = db.get(Module, module_id)
+    if module is None or module.course_id != course_id:
+        raise ApiError(404, ErrorCode.not_found, "module not found")
+
+
+async def fetch_as_material(services, url: str, course_type: str) -> tuple[str, bytes]:
+    """The page at `url` as a scanned Markdown material: (file name, bytes); ApiError 422 when refused."""
+    try:
+        page = await web_pages.fetch_page(url, **getattr(services, "web_fetch_options", {}))
+    except web_pages.PageRefused as e:
+        raise ApiError(422, ErrorCode.invalid, str(e)) from None
+    data = web_pages.material_text(page).encode("utf-8")
+    try:
+        name = await asyncio.to_thread(index_jobs.check_upload, web_pages.material_name(page.url), data,
+                                       course_type)
+    except index_jobs.MaterialRefused as e:
+        raise ApiError(422, ErrorCode.invalid, str(e)) from None
+    return name, data
 
 
 @router.get("/courses/{course_id}/materials", response_model=MaterialsOut, operation_id="materials_list")
@@ -59,7 +101,8 @@ def list_materials(access: CourseInstructor, request: Request):
                                         col(Job.status).in_(["queued", "running"]))
                      .order_by(col(Job.id).desc())).first()  # the newest: it sees every file
     return MaterialsOut(index_version=index_jobs.index_version(services.engine, access.course.id),
-                        rebuild_job_id=job.id if job else None, materials=[_out(r) for r in rows])
+                        rebuild_job_id=job.id if job else None,
+                        materials=[_out(r, services.settings.data_path()) for r in rows])
 
 
 @router.post("/courses/{course_id}/materials", response_model=UploadOut, status_code=201,
@@ -93,7 +136,66 @@ async def upload(access: CourseInstructor, request: Request,
         db.add(AuditLog(account_id=access.account_id, action="material.upload",
                         target=f"course:{access.course.id}", details={"material_id": row.id}))
         db.commit()
-    return UploadOut(material=_out(row), job_id=job.id)
+    return UploadOut(material=_out(row, services.settings.data_path()), job_id=job.id)
+
+
+@router.post("/courses/{course_id}/materials/url", response_model=UploadOut, status_code=201,
+             operation_id="materials_add_url",
+             responses={409: {"description": "this page was added here already (fetch it again instead)"},
+                        422: {"description": "the address or the page is refused, or the scan found "
+                                             "student data"}})
+async def add_url(body: UrlIn, access: CourseInstructor, request: Request):
+    """V7: a web page as course material. The page is fetched once (https, public addresses only, at most
+    2 MB, redirects checked), converted to Markdown with its address, scanned like an upload and indexed."""
+    services = _services(request)
+    _module_of(services, access.course.id, body.module_id)
+    name, data = await fetch_as_material(services, body.url, access.course.course_type)
+    try:
+        row = index_jobs.store(services.engine, services.settings.data_path(), access.course.id,
+                               body.module_id, name, data)
+    except FileExistsError:
+        raise ApiError(409, ErrorCode.conflict,
+                       "this page is in the material already; fetch it again") from None
+    job = index_jobs.request_rebuild(services.engine, access.course.id, access.account_id)
+    with Session(services.engine) as db:
+        db.add(AuditLog(account_id=access.account_id, action="material.add_url",
+                        target=f"course:{access.course.id}", details={"material_id": row.id}))
+        db.commit()
+    return UploadOut(material=_out(row, services.settings.data_path()), job_id=job.id)
+
+
+@router.post("/courses/{course_id}/materials/{material_id}/refetch", response_model=UploadOut,
+             operation_id="materials_refetch",
+             responses={422: {"description": "not a web page, or the page is refused now"}})
+async def refetch(material_id: int, access: CourseInstructor, request: Request):
+    """V7: fetch a web material again from its address and replace its text (scanned again)."""
+    services = _services(request)
+    root = services.settings.data_path()
+    with Session(services.engine) as db:
+        row = db.get(Material, material_id)
+        if row is None or row.course_id != access.course.id:
+            raise ApiError(404, ErrorCode.not_found, "material not found")
+        db.expunge(row)
+    url = _source_url(row, root)
+    if url is None:
+        raise ApiError(422, ErrorCode.invalid, "only a web page added by its address can be fetched again")
+    _, data = await fetch_as_material(services, url, access.course.course_type)
+    path = index_jobs.material_path(root, row)
+    staging = path.with_name(f".{path.name}.new")
+    staging.write_bytes(data)
+    staging.replace(path)  # atomic: the index never sees half a file
+    with Session(services.engine) as db:
+        stored = db.get(Material, material_id)
+        stored.size_bytes, stored.sha256 = len(data), hashlib.sha256(data).hexdigest()
+        stored.uploaded_at = utcnow()
+        db.add(stored)
+        db.add(AuditLog(account_id=access.account_id, action="material.refetch",
+                        target=f"course:{access.course.id}", details={"material_id": material_id}))
+        db.commit()
+        db.refresh(stored)
+        db.expunge(stored)
+    job = index_jobs.request_rebuild(services.engine, access.course.id, access.account_id)
+    return UploadOut(material=_out(stored, root), job_id=job.id)
 
 
 @router.delete("/courses/{course_id}/materials/{material_id}", status_code=204,

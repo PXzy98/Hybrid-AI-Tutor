@@ -201,6 +201,41 @@ async def create_from_upload(
                                        access.course.course_type)
     except index_jobs.MaterialRefused as e:
         raise ApiError(422, ErrorCode.invalid, str(e)) from None
+    return _draft_from_file(services, access, name, data, kind=kind, text=text, focus=focus,
+                            add_to_course=add_to_course, module_id=module_id, action="ai_draft.upload")
+
+
+class AiDraftUrlIn(BaseModel):
+    url: str = Field(min_length=8, max_length=2000)
+    kind: DraftKind
+    request: str = Field("", max_length=1000)
+    focus: str = Field("", max_length=300)
+    add_to_course: bool = False
+    module_id: int | None = None  # of the added page
+
+
+@router.post("/courses/{course_id}/ai/drafts/url", response_model=AiDraftOut, status_code=202,
+             operation_id="ai_drafts_create_from_url",
+             responses={409: {"description": "add_to_course: this page is in the material already"},
+                        422: {"description": "the address or the page is refused (V7 rules, privacy scan)"}})
+async def create_from_url(request: Request, body: AiDraftUrlIn, access: CourseInstructor):
+    """V7: draft from a web page. The page is fetched with the rules of `POST .../materials/url` and then
+    used like a file uploaded for this draft (V6): for this draft only, or also added to the material."""
+    from app.api.v2.materials import fetch_as_material
+
+    services = request.app.state.services
+    with Session(services.engine) as db:
+        _module(db, access.course.id, body.module_id)
+    text = _request(body.kind, body.request)
+    name, data = await fetch_as_material(services, body.url, access.course.course_type)
+    return _draft_from_file(services, access, name, data, kind=body.kind, text=text, focus=body.focus,
+                            add_to_course=body.add_to_course, module_id=body.module_id, action="ai_draft.url")
+
+
+def _draft_from_file(services, access, name: str, data: bytes, *, kind: str, text: str, focus: str,
+                     add_to_course: bool, module_id: int | None, action: str) -> AiDraftOut:
+    """A scanned file for one draft (V6, V7): kept until the job read it, and stored as a material too
+    when `add_to_course`."""
     added = None
     if add_to_course:
         try:
@@ -215,8 +250,7 @@ async def create_from_upload(
         row = AiDraft(course_id=access.course.id, module_id=module_id, kind=kind, focus=focus.strip(),
                       request=text, sources=sources, created_by=access.account_id)
         db.add(row)
-        db.add(AuditLog(account_id=access.account_id, action="ai_draft.upload",
-                        target=f"course:{access.course.id}",
+        db.add(AuditLog(account_id=access.account_id, action=action, target=f"course:{access.course.id}",
                         details={"added_material_id": added.id if added else None}))
         db.commit()
     path = draft_jobs.upload_path(services.settings.data_path(), access.course.id, row.id, name)
