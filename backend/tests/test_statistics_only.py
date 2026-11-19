@@ -63,6 +63,21 @@ def test_a_course_stored_in_mode_b_shows_nothing_individual(world):
     assert alice.post(f"{world.url}/me/visibility", json={"action": "acknowledge"}).status_code == 409
 
 
+def test_a_stored_mode_b_does_not_block_saving_other_settings(world):
+    """Codex review of V1: the settings page sends back the values it read; a stored B must not come back."""
+    from app.storage.models import CourseSettings
+
+    current = world.prof.get(f"{world.url}/settings").json()
+    with Session(_engine(world)) as db:
+        db.add(CourseSettings(course_id=world.course, visibility_mode="B", version=current["version"] + 1))
+        db.commit()
+    current = world.prof.get(f"{world.url}/settings").json()
+    assert current["values"]["visibility_mode"] is None
+    r = world.prof.put(f"{world.url}/settings", json={"values": {**current["values"], "local_only": True},
+                                                     "version": current["version"]})
+    assert r.status_code == 200, r.text
+
+
 def test_quiz_results_are_class_statistics_only(world):
     _stored_mode_b_with_alice_visible(world)
     body = {"title": "Week 1 check", "module_id": world.module,
