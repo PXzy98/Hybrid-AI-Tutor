@@ -60,6 +60,19 @@ describe("AI drafts", () => {
       { kind: "custom", focus: "", request: "Thesis topics from the lectures", module_id: null, material_ids: [4] }));
   });
 
+  it("starts from a request handed over by Class overview (V8)", async () => {
+    const calls = mockApi(instructorRoutes({
+      "GET /courses/1/ai/drafts": [], "GET /courses/1/materials": { index_version: 0, rebuild_job_id: null, materials: [] },
+      "POST /courses/1/ai/drafts": () => reply(draft({ kind: "custom", status: "generating", content: {}, cited_sources: [] }), 202),
+      "GET /courses/1/ai/drafts/7": () => draft({ kind: "custom", status: "generating", content: {}, cited_sources: [] }),
+    }));
+    renderApp({ pathname: "/courses/1/ai", state: { draft: { request: "Extra material on Resistance", moduleId: 10 } } });
+    expect(await screen.findByLabelText("What should be drafted?")).toHaveValue("Extra material on Resistance");
+    await userEvent.setup().click(screen.getByRole("button", { name: "Draft with AI" }));
+    await waitFor(() => expect(calls.find((c) => c.path === "/courses/1/ai/drafts" && c.method === "POST")?.body)
+      .toMatchObject({ kind: "custom", request: "Extra material on Resistance", module_id: 10 }));
+  });
+
   it("uploads a file for this draft only (V6)", async () => {
     const calls = mockApi(instructorRoutes({
       "GET /courses/1/ai/drafts": [],

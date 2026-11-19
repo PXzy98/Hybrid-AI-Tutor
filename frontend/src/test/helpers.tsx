@@ -45,7 +45,8 @@ export const COURSE: Course = { id: 1, code: "ECE 1000", title: "Fictional Circu
   visibility_mode: "B", status: "active", my_role: "student" };
 export const MODULES = [{ id: 10, code: "M1", title: "Ohm's law", position: 1, guideline: null }];
 
-export function renderApp(path: string, lang: Lang = "en") {
+/** `path` may carry router state: `{ pathname, state }` (pages that receive a hand-over, e.g. V8). */
+export function renderApp(path: string | { pathname: string; state: unknown }, lang: Lang = "en") {
   resetCsrf();
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   return render(
