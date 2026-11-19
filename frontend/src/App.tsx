@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Loader2, RotateCw, WifiOff } from "lucide-react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 
@@ -6,13 +7,15 @@ import AppShell from "./components/AppShell";
 import { BrandMark } from "./components/shell/Sidebar";
 import { Button } from "./components/ui/button";
 import { Toaster } from "./components/ui/sonner";
+import { Loading } from "./components/common";
 import { useI18n } from "./i18n";
-import Admin from "./pages/Admin";
 import ChangePassword from "./pages/ChangePassword";
-import CourseDashboard from "./pages/CourseDashboard";
 import CoursePicker from "./pages/CoursePicker";
 import Join from "./pages/Join";
 import Login from "./pages/Login";
+
+const Admin = lazy(() => import("./pages/Admin"));
+const CourseDashboard = lazy(() => import("./pages/CourseDashboard"));
 
 /** Route guard driven by GET /auth/me: login first, then a pending password change. Wraps the pages in the shell. */
 function Guard() {
@@ -55,9 +58,9 @@ export default function App() {
       <Route path="/join" element={<Join />} />
       <Route element={<Guard />}>
         <Route path="/change-password" element={<ChangePassword />} />
-        <Route path="/admin" element={<Admin />} />
+        <Route path="/admin" element={<Suspense fallback={<Loading variant="list" />}><Admin /></Suspense>} />
         <Route path="/courses" element={<CoursePicker />} />
-        <Route path="/courses/:courseId/:tab?" element={<CourseDashboard />} />
+        <Route path="/courses/:courseId/:tab?" element={<Suspense fallback={<Loading variant="list" />}><CourseDashboard /></Suspense>} />
       </Route>
       <Route path="*" element={<Navigate to="/courses" replace />} />
     </Routes>

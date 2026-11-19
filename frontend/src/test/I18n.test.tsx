@@ -44,8 +44,8 @@ describe("language switch", () => {
     expect(await screen.findByRole("link", { name: "Ma progression" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Quiz" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Sondage de fin de session" })).toBeInTheDocument();
-    expect(screen.getByText(/peut être envoyée à un modèle infonuagique/)).toBeInTheDocument();
-    expect(screen.getByText(/Posez vos questions en anglais/)).toBeInTheDocument();
+    expect(await screen.findByText(/peut être envoyée à un modèle infonuagique/)).toBeInTheDocument();
+    expect(await screen.findByText(/Posez vos questions en anglais/)).toBeInTheDocument();
   });
 
   it("shows the instructor dashboard sections in French", async () => {

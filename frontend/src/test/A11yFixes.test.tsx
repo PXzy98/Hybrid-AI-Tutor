@@ -36,7 +36,8 @@ describe("document title", () => {
     picker.unmount();
 
     renderApp("/courses/1/quizzes");
-    await vi.waitFor(() => expect(document.title).toBe("Quizzes · ECE 1000 · PACT"));
+    // the course page is loaded on demand (T16); under a full parallel run that can take over a second
+    await vi.waitFor(() => expect(document.title).toBe("Quizzes · ECE 1000 · PACT"), { timeout: 5000 });
   });
 
   it("a section header mounted later keeps the course page's title", () => {
