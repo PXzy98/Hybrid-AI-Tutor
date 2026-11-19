@@ -22,7 +22,8 @@ const CHOICES = ["A", "B", "C", "D"] as const;
 export default function Content({ course }: { course: Course }) {
   return (
     <div className="space-y-4">
-      <CourseGuidelineCard course={course} />
+      {/* keyed by the stored text: an import or another save replaces it, and the editor starts from it again */}
+      <CourseGuidelineCard key={course.guideline ?? ""} course={course} />
       <ModulesCard course={course} />
       <KcsCard course={course} />
       <ItemsCard course={course} />

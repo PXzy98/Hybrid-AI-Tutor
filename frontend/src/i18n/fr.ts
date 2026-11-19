@@ -369,6 +369,8 @@ export const fr: Messages = {
   "settings.visibility": "Ce que les enseignants voient des étudiants",
   "settings.visibilityA": "Mode A : totaux de la classe seulement",
   "settings.visibilityB": "Mode B : progression individuelle après l’accord de l’étudiant",
+  "settings.statisticsOnly": "Les enseignants ne voient que des statistiques de la classe : combien d’étudiants utilisent le tuteur, combien de questions, les sujets les plus fréquents et les moyennes des quiz. Personne ne voit les questions, les réponses ou la progression d’un étudiant.",
+  "end.previewReadyStatistics": "Exportation prête : contenu du cours et statistiques de la classe, aucune donnée individuelle d’étudiant.",
   "settings.localOnly": "Local seulement",
   "settings.localOnlyHint": "Chaque réponse est rédigée sur le serveur du cours. Aucune question n’est envoyée à un modèle infonuagique.",
   "settings.routing": "Préférence d’acheminement",
