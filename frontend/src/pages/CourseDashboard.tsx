@@ -71,7 +71,7 @@ function Dashboard({ course, student, tab }: { course: Course; student: boolean;
   const chatActive = student && active.id === "chat";
   return (
     <>
-      {student && <PrivacyNotice course={course} />}
+      {student && <PrivacyNotice key={course.id} course={course} />}
       {/* a running answer and the live messages live in Chat's state: keep it mounted, hidden, on other sections */}
       {student && (
         <section aria-labelledby={chatActive ? headingId : undefined} hidden={!chatActive}>

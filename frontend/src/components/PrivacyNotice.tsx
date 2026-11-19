@@ -29,9 +29,16 @@ function markSeen(courseId: number) {
 
 const POINTS: MessageKey[] = ["privacy.point.private", "privacy.point.instructor", "privacy.point.cloud", "privacy.point.control"];
 
+// with individual views on, the points that depend on the student's agreement on My progress
+const INDIVIDUAL: Partial<Record<MessageKey, MessageKey>> = {
+  "privacy.point.private": "privacy.point.privateIndividual",
+  "privacy.point.instructor": "privacy.point.instructorIndividual",
+};
+
 /** v5 V3: the student's privacy in the course. A short line is always shown at the top of the student pages; the
  *  full notice is open on the first visit of a course and can be opened again from the line. The text matches what
- *  the backend allows: with individual views off (V1) nobody, not even the instructor, sees one student's data. */
+ *  the backend allows: with individual views off (V1) nobody, not even the instructor, sees one student's data.
+ *  Keyed by course where it is used, so switching course starts from that course's first-visit state. */
 export default function PrivacyNotice({ course }: { course: Course }) {
   const { t } = useI18n();
   const [open, setOpen] = useState(() => !seenCourses().includes(course.id));
@@ -59,7 +66,7 @@ export default function PrivacyNotice({ course }: { course: Course }) {
           <h3 className="font-medium">{t("privacy.title")}</h3>
           <ul className="list-disc space-y-1 pl-5">
             {POINTS.map((key) => (
-              <li key={key}>{t(key === "privacy.point.instructor" && !statisticsOnly ? "privacy.point.instructorIndividual" : key)}</li>
+              <li key={key}>{t(statisticsOnly ? key : INDIVIDUAL[key] ?? key)}</li>
             ))}
           </ul>
           <Button type="button" size="sm" onClick={() => toggle(false)}>{t("privacy.gotIt")}</Button>

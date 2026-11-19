@@ -47,6 +47,27 @@ describe("privacy notice", () => {
     expect(notice).toHaveTextContent("Personne, pas même votre enseignant, ne peut les voir.");
   });
 
+  it("says progress may be shared when individual views are on", async () => {
+    mockApi(studentRoutes({ "GET /courses": [{ ...COURSE, individual_view: true }] }));
+    renderApp("/courses/1/progress");
+    const notice = await screen.findByRole("region", { name: "Your privacy in this course" });
+    expect(notice).toHaveTextContent("Your progress stays private unless you agree to share it on My progress.");
+    expect(notice).not.toHaveTextContent("your progress are private");
+  });
+
+  it("opens in full for a course not visited yet after switching course", async () => {
+    const other = { ...STATS_ONLY, id: 2, code: "ECE 2000", title: "Second fictional course" };
+    mockApi({ ...routes(), "GET /courses": [STATS_ONLY, other],
+      "GET /courses/2/me/profile": routes()["GET /courses/1/me/profile"] });
+    renderApp("/courses/1/progress");
+    const user = userEvent.setup();
+    await screen.findByRole("region", { name: "Your privacy in this course" });
+    await user.click(screen.getByRole("button", { name: "Got it" }));
+    await waitFor(() => expect(screen.queryByRole("button", { name: "Got it" })).not.toBeInTheDocument());
+    await user.selectOptions(screen.getByRole("combobox", { name: "Courses" }), "2");
+    expect(await screen.findByRole("button", { name: "Got it" })).toBeInTheDocument();
+  });
+
   it("is not shown to instructors", async () => {
     mockApi({ ...routes(), "GET /auth/me": { ...(await import("./helpers")).ME_INSTRUCTOR },
       "GET /courses": [{ ...STATS_ONLY, my_role: "instructor" }], "GET /courses/1/overview": { students: 0 } });

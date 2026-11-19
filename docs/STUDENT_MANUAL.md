@@ -34,8 +34,10 @@ At the top of every course page a green line says what is private: "Private: onl
 answers and progress. Your instructor sees class statistics only." **What is private?** opens the full notice
 (it is open on your first visit to a course; **Got it** closes it): no one, not even the instructor, sees your
 questions, answers or progress; the instructor sees class statistics only; questions are not stored in readable
-form and personal details are removed before a question can go to a cloud model; on **My progress** you can see
-and delete what the tutor learned about you.
+form and personal details are removed before a question can go to a cloud model (a question about your own health
+stays on the course's model, or in some courses only a general version without personal details is sent); on
+**My progress** you can see and delete what the tutor learned about you. Where your instructor has switched on
+individual views, the notice says instead that your progress stays private unless you agree to share it.
 
 ## 3. Asking questions (Chat)
 
