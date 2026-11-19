@@ -8277,6 +8277,11 @@
               }
             ],
             "title": "Guideline"
+          },
+          "individual_view": {
+            "type": "boolean",
+            "title": "Individual View",
+            "default": false
           }
         },
         "type": "object",

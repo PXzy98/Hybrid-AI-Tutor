@@ -2792,6 +2792,11 @@ export interface components {
             local_only?: boolean;
             /** Guideline */
             guideline?: string | null;
+            /**
+             * Individual View
+             * @default false
+             */
+            individual_view?: boolean;
         };
         /** CoursePatch */
         CoursePatch: {

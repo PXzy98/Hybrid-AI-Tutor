@@ -64,7 +64,7 @@ function sectionNode(course: Course, student: boolean, id: string): ReactNode {
 
 function Dashboard({ course, student, tab }: { course: Course; student: boolean; tab?: string }) {
   const { t } = useI18n();
-  const active = activeSection(student, tab);
+  const active = activeSection(student, tab, course.individual_view);
   const headingId = useId();
   useDocumentTitle(t(active.label), course.code);
   const chatActive = student && active.id === "chat";

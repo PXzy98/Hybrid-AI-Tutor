@@ -103,6 +103,9 @@ chat banner and during **Personalize**.
 | **A** | Only anonymous class totals, never your own progress. Totals are hidden when fewer than 5 students share them. |
 | **B** | Your individual progress and a learning plan, but only after you agree. |
 
+**In this version every course is in mode A**: your instructor only sees class statistics, never your own
+progress, questions or answers. Mode B below exists only if the university switches individual views on.
+
 In mode B:
 - **I understand and agree** starts the sharing. The instructor then sees your progress bands, open
   misconceptions, check-question counts, quiz results, your answer style (example or idea first, short or
@@ -122,7 +125,8 @@ opted out or the mode is A.
 
 ## 6. Learning plan
 
-In mode B, after you agreed, the instructor may write a plan: a **Goal level**, **Focus topics** and **Notes**.
+Not available in this version (no instructor sees your progress). In mode B, after you agreed, the instructor
+may write a plan: a **Goal level**, **Focus topics** and **Notes**.
 You see it under **Learning plan** on **My progress**; it is read-only for you.
 
 ## 7. Quizzes
