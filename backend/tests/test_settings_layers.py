@@ -166,7 +166,7 @@ def test_v1_dashboard_put_is_refused_while_a_change_applies(make_client):
 
     with make_client() as client:
         services = client.app.state.services
-        services.accounts.create_instructor("prof", PASSWORD, must_change=False)
+        services.accounts.create_admin("prof", PASSWORD, must_change=False)  # system fields: admins (Z27)
         login = client.post("/api/v1/auth/login", json={"username": "prof", "password": PASSWORD})
         assert login.status_code == 200
         _other_process(services, version=0)
