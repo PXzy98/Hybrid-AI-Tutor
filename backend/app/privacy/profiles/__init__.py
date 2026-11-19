@@ -211,7 +211,16 @@ CONSENT_BASE = (
 )
 
 
-def consent_text(profile: PrivacyProfile) -> str:
-    """The consent text shown at onboarding for this course type: the base text plus the profile's note."""
+# v5 V1: added to the consent text while individual views are off (learner.instructor_individual_view)
+STATISTICS_ONLY_NOTE = (
+    "Your instructor only sees class statistics, such as how many students use the tutor, the most frequent "
+    "topics and quiz averages. No one, not even the instructor, sees your own profile, questions or answers."
+)
+
+
+def consent_text(profile: PrivacyProfile, *, statistics_only: bool = False) -> str:
+    """The consent text shown at onboarding for this course type: the base text plus the profile's note, and
+    the statistics-only note when instructors cannot see individual students."""
     note = _raw(profile.name).get("consent_note") if profile.name in profile_names() else None
-    return f"{CONSENT_BASE} {note.strip()}" if note else CONSENT_BASE
+    text = f"{CONSENT_BASE} {note.strip()}" if note else CONSENT_BASE
+    return f"{text} {STATISTICS_ONLY_NOTE}" if statistics_only else text
