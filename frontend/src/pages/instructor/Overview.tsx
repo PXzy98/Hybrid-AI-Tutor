@@ -125,7 +125,7 @@ function UsageCard({ course }: { course: Course }) {
                 <h3 className="mb-2 text-sm font-medium">{t("usage.perWeek")}</h3>
                 <ul className="space-y-1.5 text-sm">
                   {data.weeks.map((w) => (
-                    <RankedRow key={w.week_start} label={t("usage.weekOf", { date: fmt.date(w.week_start) })}
+                    <RankedRow key={w.week_start} label={t("usage.weekOf", { date: fmt.day(w.week_start) })}
                                count={w.questions == null ? hidden : t("usage.questionsStudents", { q: w.questions, s: w.students ?? 0 })}
                                share={(w.questions ?? 0) / weekMax} />
                   ))}
