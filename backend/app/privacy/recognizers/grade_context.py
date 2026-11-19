@@ -110,11 +110,11 @@ class GradeContextRecognizer(EntityRecognizer):
 # first grandparent"; a grade word right after it ("a B on the midterm") wins
 BLOOD_BEFORE_RE = re.compile(r"(?:blood\s+(?:types?|groups?)|types?|groups?|alleles?|genotypes?)\s+"
                              r"(?:[ABO]{1,2}\s*(?:,|or|and)\s*)*$", re.I)
-BLOOD_AFTER_RE = re.compile(r"\s*(?:alleles?|blood|antigens?|genotypes?)", re.I)
-FROM_PARENT_RE = re.compile(r"\s+from\s+(?:\w+\s+){0,3}?(?:grand)?(?:parents?|mother|father|mom|dad)",
+BLOOD_AFTER_RE = re.compile(r"\s*(?:alleles?|blood|antigens?|genotypes?)\b", re.I)
+FROM_PARENT_RE = re.compile(r"\s+from\s+(?:\w+\s+){0,3}?(?:grand)?(?:parents?|mother|father|mom|dad)\b",
                             re.I)
 GRADE_AFTER_RE = re.compile(r"(?:\W+\w+){0,4}?\W+(?:midterm|exam|quiz|test|final|course|assignment|grade|"
-                            r"mark|score|paper|lab|project)s?", re.I)
+                            r"mark|score|paper|lab|project)s?\b", re.I)
 
 
 def _blood_type(text: str, start: int, end: int) -> bool:

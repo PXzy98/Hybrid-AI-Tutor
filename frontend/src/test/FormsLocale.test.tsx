@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { I18nProvider } from "../i18n";
-import { formatDate, formatDateTime } from "../lib/format";
+import { formatDate, formatDateTime, formatDay } from "../lib/format";
 import Composer from "../pages/student/chat/Composer";
 
 function setup() {
@@ -45,6 +45,12 @@ describe("date formatting", () => {
     expect(formatDate(when, "fr")).toBe(new Date(when).toLocaleDateString("fr-CA"));
     expect(formatDateTime(when, "en")).toBe(new Date(when).toLocaleString("en-CA"));
     expect(formatDateTime(when, "fr")).toBe(new Date(when).toLocaleString("fr-CA"));
+  });
+
+  it("shows a date-only day as that day in every time zone", () => {
+    // a weekly bucket starts on Monday 2026-11-16; west of UTC, local formatting would show Sunday the 15th
+    expect(formatDay("2026-11-16", "en")).toBe("2026-11-16");
+    expect(formatDay("2026-11-16", "fr")).toBe(new Date(Date.UTC(2026, 10, 16)).toLocaleDateString("fr-CA", { timeZone: "UTC" }));
   });
 
   it("writes the time of day differently in the two languages", () => {
