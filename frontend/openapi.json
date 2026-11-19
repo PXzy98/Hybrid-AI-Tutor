@@ -3770,6 +3770,162 @@
         }
       }
     },
+    "/api/v2/admin/students": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "List Students",
+        "description": "Every student account with its number of courses (V9: the accounts kept from term to term).",
+        "operationId": "admin_students_list",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AdminStudentOut"
+                  },
+                  "type": "array",
+                  "title": "Response Admin Students List"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/admin/students/{account_id}": {
+      "patch": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Update Student",
+        "description": "Deactivate (every session ends, the student cannot log in) or reactivate a student account.",
+        "operationId": "admin_students_update",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Account Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudentPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminStudentOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Delete Student",
+        "description": "Delete the account and all of its learning data in every course (request logs are anonymized). It\ncannot be undone.",
+        "operationId": "admin_students_delete",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Account Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/admin/students/{account_id}/reset-password": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Reset Student Password",
+        "description": "A temporary password, shown once; the student chooses a new one at the next login.",
+        "operationId": "admin_students_reset_password",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Account Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TemporaryPasswordOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/admin/settings": {
       "get": {
         "tags": [
@@ -6416,6 +6572,70 @@
           "history"
         ],
         "title": "AdminConfig"
+      },
+      "AdminStudentOut": {
+        "properties": {
+          "account_id": {
+            "type": "integer",
+            "title": "Account Id"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "active": {
+            "type": "boolean",
+            "title": "Active"
+          },
+          "must_change_password": {
+            "type": "boolean",
+            "title": "Must Change Password"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "last_login_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Login At"
+          },
+          "courses": {
+            "type": "integer",
+            "title": "Courses"
+          }
+        },
+        "type": "object",
+        "required": [
+          "account_id",
+          "display_name",
+          "email",
+          "active",
+          "must_change_password",
+          "created_at",
+          "last_login_at",
+          "courses"
+        ],
+        "title": "AdminStudentOut"
       },
       "AiDraftAcceptIn": {
         "properties": {
@@ -12864,6 +13084,19 @@
           "last_login_at"
         ],
         "title": "StudentAccountOut"
+      },
+      "StudentPatch": {
+        "properties": {
+          "active": {
+            "type": "boolean",
+            "title": "Active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "active"
+        ],
+        "title": "StudentPatch"
       },
       "StudentQuizOut": {
         "properties": {

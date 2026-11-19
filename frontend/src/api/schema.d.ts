@@ -1271,6 +1271,71 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/admin/students": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Students
+         * @description Every student account with its number of courses (V9: the accounts kept from term to term).
+         */
+        get: operations["admin_students_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/admin/students/{account_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete Student
+         * @description Delete the account and all of its learning data in every course (request logs are anonymized). It
+         *     cannot be undone.
+         */
+        delete: operations["admin_students_delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Update Student
+         * @description Deactivate (every session ends, the student cannot log in) or reactivate a student account.
+         */
+        patch: operations["admin_students_update"];
+        trace?: never;
+    };
+    "/api/v2/admin/students/{account_id}/reset-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reset Student Password
+         * @description A temporary password, shown once; the student chooses a new one at the next login.
+         */
+        post: operations["admin_students_reset_password"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/admin/settings": {
         parameters: {
             query?: never;
@@ -2040,6 +2105,28 @@ export interface components {
             options: components["schemas"]["ConfigOptions"];
             /** History */
             history: components["schemas"]["ConfigChange"][];
+        };
+        /** AdminStudentOut */
+        AdminStudentOut: {
+            /** Account Id */
+            account_id: number;
+            /** Display Name */
+            display_name: string;
+            /** Email */
+            email: string | null;
+            /** Active */
+            active: boolean;
+            /** Must Change Password */
+            must_change_password: boolean;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Last Login At */
+            last_login_at: string | null;
+            /** Courses */
+            courses: number;
         };
         /** AiDraftAcceptIn */
         AiDraftAcceptIn: {
@@ -4385,6 +4472,11 @@ export interface components {
             created_at: string;
             /** Last Login At */
             last_login_at: string | null;
+        };
+        /** StudentPatch */
+        StudentPatch: {
+            /** Active */
+            active: boolean;
         };
         /**
          * StudentQuizOut
@@ -7451,6 +7543,121 @@ export interface operations {
         };
     };
     admin_instructors_reset_password: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                account_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TemporaryPasswordOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_students_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminStudentOut"][];
+                };
+            };
+        };
+    };
+    admin_students_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                account_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_students_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                account_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StudentPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminStudentOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_students_reset_password: {
         parameters: {
             query?: never;
             header?: never;
