@@ -1,7 +1,7 @@
 """Build the demo through API v2 only (docs/DEMO.md; task T9); the database is never written directly.
 
     python scripts/build_demo.py --base-url http://localhost:8000 [--packs harvard_cs50x ...]
-                                 [--students N] [--sample-activity]
+                                 [--students N] [--sample-activity] [--learner-content [--learner-modules N]]
 
 What it does, in order (every step can be run again; what exists is kept):
   1. unpacks the course packs (scripts/fetch_open_courses.py unpack) when they are not unpacked yet;
@@ -13,6 +13,11 @@ What it does, in order (every step can be run again; what exists is kept):
   4. creates fictional demo students (credentials go to var/demo_accounts.json, never to the screen),
      lists them in each course, and lets them join with the course's invitation code;
   5. sets visibility mode B in every demo course;
+  5a. with --learner-content (task S15): for the first modules (--learner-modules, default 2) the local
+     model drafts knowledge components, check items and misconceptions from the uploaded material, and the
+     drafts are accepted; then one practice quiz per course is drafted, saved (reviewed) and published, so
+     quiz answers move the students' levels on My progress. Needs the local model (vLLM) and takes minutes;
+     the demo instructor should still read what was accepted;
   6. with --sample-activity: each student acknowledges mode B, answers the check questions the modules
      have, and asks two questions (fictional, written from the pack material).
 """
@@ -85,6 +90,8 @@ class CourseReport:
     existing: int = 0
     failed: list[str] = field(default_factory=list)
     index_version: int | None = None
+    accepted: dict[str, int] = field(default_factory=dict)  # --learner-content: rows created per kind
+    quiz_id: int | None = None  # --learner-content: the published practice quiz
 
 
 class DemoError(Exception):
@@ -265,6 +272,62 @@ def build_course(api: Api, pack: str, packs_dir: Path = PACKS_DIR,
     return report
 
 
+LEARNER_KINDS = ("kcs", "check_items", "misconceptions")  # in this order: items and misconceptions need KCs
+QUIZ_TITLE = "Practice quiz (demo)"
+
+
+def run_job(api: Api, course_id: int, job_id: int, sleep: Callable[[float], None]) -> str:
+    return wait_for_job(api, course_id, job_id, sleep)
+
+
+def draft_learner_content(api: Api, report: CourseReport, modules: int = 2,
+                          sleep: Callable[[float], None] = time.sleep) -> None:
+    """Task S15: KCs, check items and misconceptions for the first modules, drafted by the local model from
+    the material and accepted; then one published practice quiz. Kept when it exists (run again: nothing new
+    for a module that has KCs, no second quiz)."""
+    url = f"/courses/{report.course_id}"
+    have_kcs = {k["module_id"] for k in ok(api.get(f"{url}/kcs"), "listing KCs")}
+    for module in ok(api.get(f"{url}/modules"), "listing modules")[:modules]:
+        if module["id"] in have_kcs:
+            continue
+        for kind in LEARNER_KINDS:
+            draft = ok(api.post(f"{url}/ai/drafts", json={"kind": kind, "module_id": module["id"]}),
+                       f"drafting {kind}", (202,))
+            state = run_job(api, report.course_id, draft["job_id"], sleep)
+            draft = ok(api.get(f"{url}/ai/drafts/{draft['id']}"), "reading the draft")
+            if state != "done" or draft["status"] != "draft" or not draft["content"].get("items"):
+                report.failed.append(f"{module['code']} {kind}: {draft.get('error') or state}")
+                if kind == "kcs":
+                    break  # nothing to attach items and misconceptions to
+                continue
+            r = api.post(f"{url}/ai/drafts/{draft['id']}/accept", json={"module_id": module["id"]})
+            if r.status_code != 200:
+                report.failed.append(f"{module['code']} {kind}: accept HTTP {r.status_code}")
+                continue
+            for name, ids in r.json()["created"].items():
+                report.accepted[name] = report.accepted.get(name, 0) + len(ids)
+    quizzes = ok(api.get(f"{url}/quizzes"), "listing quizzes")
+    existing = next((q for q in quizzes if q["title"] == QUIZ_TITLE), None)
+    if existing is not None:
+        report.quiz_id = existing["id"]
+        return
+    first = next(iter(ok(api.get(f"{url}/modules"), "listing modules")), None)
+    body = {"title": QUIZ_TITLE, "module_id": first["id"] if first else None}
+    quiz = ok(api.post(f"{url}/quizzes", json=body), "creating the practice quiz")
+    job = ok(api.post(f"{url}/quizzes/{quiz['id']}/drafts", json={"count": 5}), "drafting quiz questions",
+             (202,))
+    state = run_job(api, report.course_id, job["job_id"], sleep)
+    questions = ok(api.get(f"{url}/quizzes/{quiz['id']}"), "reading the quiz")["questions"]
+    if state != "done" or not questions:
+        report.failed.append(f"practice quiz: {state}, {len(questions)} questions")
+        return
+    # saving the questions marks them reviewed (the review gate), then the quiz can be published
+    ok(api.request("PATCH", f"{url}/quizzes/{quiz['id']}", json={"questions": questions}), "saving the quiz")
+    ok(api.request("PATCH", f"{url}/quizzes/{quiz['id']}", json={"status": "published"}),
+       "publishing the quiz")
+    report.quiz_id = quiz["id"]
+
+
 def set_visibility_mode_b(api: Api, course_id: int) -> None:
     current = ok(api.get(f"/courses/{course_id}/settings"), "reading course settings")
     if current["values"].get("visibility_mode") == "B":
@@ -388,6 +451,7 @@ def sample_activity(api: Api, course_id: int, pack: str, student_index: int) -> 
 # ------------------------------------------------------------------------------------------------- driver
 def build_demo(client_factory: Callable[[], httpx.Client], packs: list[str], instructor: tuple[str, str],
                students: int = 3, sample: bool = False, packs_dir: Path = PACKS_DIR,
+               learner_content: bool = False, learner_modules: int = 2,
                accounts_path: Path = ACCOUNTS_FILE, sleep: Callable[[float], None] = time.sleep,
                log: Callable[[str], None] = print) -> list[CourseReport]:
     admin = Api(client_factory())
@@ -402,6 +466,10 @@ def build_demo(client_factory: Callable[[], httpx.Client], packs: list[str], ins
             log(f"building {pack} ...")
             reports.append(build_course(admin, pack, packs_dir, sleep))
         usable = [r for r in reports if r.course_id is not None]
+        if learner_content:
+            for r in usable:
+                log(f"drafting learner content for {r.code} ...")
+                draft_learner_content(admin, r, learner_modules, sleep)
         for r in usable:
             set_visibility_mode_b(admin, r.course_id)
         if students:
@@ -437,6 +505,9 @@ def summary(reports: list[CourseReport]) -> str:
         lines += [f"{r.code} problem: {item}" for item in r.failed]
         if r.existing:
             lines.append(f"{r.code}: {r.existing} files were already there")
+        if r.accepted or r.quiz_id:
+            made = ", ".join(f"{n} {k}" for k, n in sorted(r.accepted.items())) or "nothing new"
+            lines.append(f"{r.code} learner content: {made}; practice quiz {r.quiz_id or '-'}")
     return "\n".join(lines)
 
 
@@ -447,6 +518,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--students", type=int, default=3, help="number of demo students (0: none)")
     ap.add_argument("--sample-activity", action="store_true",
                     help="students acknowledge mode B, answer check questions and ask two questions")
+    ap.add_argument("--learner-content", action="store_true",
+                    help="draft KCs, check items, misconceptions and a practice quiz (local model, S15)")
+    ap.add_argument("--learner-modules", type=int, default=2, help="modules that get KCs (default 2)")
     args = ap.parse_args(argv)
     username = os.environ.get("DEMO_INSTRUCTOR_USERNAME", "")
     password = os.environ.get("DEMO_INSTRUCTOR_PASSWORD", "")
@@ -456,7 +530,8 @@ def main(argv: list[str] | None = None) -> int:
     try:
         ensure_unpacked(args.packs)
         reports = build_demo(lambda: httpx.Client(base_url=args.base_url, timeout=120), args.packs,
-                             (username, password), args.students, args.sample_activity)
+                             (username, password), args.students, args.sample_activity,
+                             learner_content=args.learner_content, learner_modules=args.learner_modules)
     except httpx.ConnectError:
         print(f"build_demo: cannot reach {args.base_url} (is the app running?)", file=sys.stderr)
         return 1
