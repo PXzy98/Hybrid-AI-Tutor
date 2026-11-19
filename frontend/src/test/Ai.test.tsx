@@ -24,7 +24,7 @@ describe("AI drafts", () => {
     }));
     renderApp("/courses/1/ai");
     const user = userEvent.setup();
-    expect(await screen.findByText(/Only the local model sees your course material/)).toBeInTheDocument();
+    expect(await screen.findByText(/only the local model sees your course material/)).toBeInTheDocument();
     await user.selectOptions(screen.getByLabelText("What to draft"), "kcs");
     await user.click(screen.getByRole("button", { name: "Draft with AI" }));
     expect(calls.find((c) => c.path === "/courses/1/ai/drafts" && c.method === "POST")!.body).toEqual({ kind: "kcs", module_id: null, focus: "", request: "" });
