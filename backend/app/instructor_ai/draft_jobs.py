@@ -16,6 +16,7 @@ from app.instructor_ai import structure_drafts as tier2
 from app.instructor_ai.drafts import DraftError, generate_tier1_draft
 from app.instructor_ai.eval import passages as fallback_passages
 from app.platform import jobs
+from app.privacy.profiles import privacy_profile, scan_document
 from app.rag.documents import extract_text
 from app.storage.models import AiDraft, Course, Kc, Material, Module, utcnow
 
@@ -157,6 +158,16 @@ def _save(engine, draft_id: int, **changes) -> None:
         db.commit()
 
 
+def _check_cloud_text(request: str, focus: str, course_type: str) -> None:
+    """V16: the instructor's own text goes to the cloud model with the material: it passes the course's
+    privacy scan first (the material was scanned at upload). Also checked when the draft is created; here
+    again because this is the last step before the text leaves."""
+    found = scan_document(f"{request}\n\n{focus}", privacy_profile(course_type)).blocking
+    if found:
+        raise DraftError("the request contains student data (" + ", ".join(found)
+                         + "): not sent to the cloud model")
+
+
 @jobs.handler(GENERATE)
 async def generate(services, job) -> None:
     with Session(services.engine) as db:
@@ -166,6 +177,7 @@ async def generate(services, job) -> None:
         kcs = db.exec(select(Kc).where(Kc.course_id == draft.course_id, Kc.status == "active")
                       .order_by(Kc.id)).all()
         kind, course_id, focus, title = draft.kind, draft.course_id, draft.focus, course.title
+        course_type = course.course_type
         request, sources = draft.request, dict(draft.sources or {})
     model = sources.get("model", "local")  # V16: "cloud" only after the instructor's confirmation
     if model == "cloud" and services.effective(course_id).local_only:
@@ -183,6 +195,8 @@ async def generate(services, job) -> None:
             chunks = _passages(services, course_id, module, query, sources)
         if not chunks:
             raise DraftError("no indexed course material to draft from")
+        if model == "cloud":
+            _check_cloud_text(request, focus, course_type)
         if kind in TIER1:
             result = await generate_tier1_draft(course_id=course_id, kind=kind, passages=chunks,
                                                 gateway=services.gateway, settings=settings, request=request,
