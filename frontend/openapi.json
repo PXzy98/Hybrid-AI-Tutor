@@ -8091,11 +8091,25 @@
             "title": "Students Enrolled"
           },
           "active_students": {
-            "type": "integer",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Active Students"
           },
           "active_students_7d": {
-            "type": "integer",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Active Students 7D"
           },
           "questions_total": {
@@ -8167,7 +8181,7 @@
           "quizzes"
         ],
         "title": "CourseStatisticsOut",
-        "description": "Counts only (v5 V2); a count contributed by fewer than `min_group` students is null."
+        "description": "Counts only (v5 V2); a count that some but fewer than `min_group` students contributed is null (0 is\nshown), `min_group` is at least 5, and a row that would give a hidden one by subtraction is hidden too."
       },
       "CourseUsageOut": {
         "properties": {
@@ -8196,7 +8210,14 @@
             "title": "Students Enrolled"
           },
           "active_students_7d": {
-            "type": "integer",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Active Students 7D"
           },
           "questions_total": {
@@ -12424,7 +12445,14 @@
             "title": "Title"
           },
           "attempts": {
-            "type": "integer",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Attempts"
           },
           "mean_score": {
@@ -13663,7 +13691,14 @@
             "title": "Students Enrolled"
           },
           "active_students_7d": {
-            "type": "integer",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Active Students 7D"
           },
           "questions_total": {
@@ -13699,7 +13734,7 @@
           "questions_7d"
         ],
         "title": "SystemStatisticsOut",
-        "description": "Counts per course and in total (v5 V2); no individual data."
+        "description": "Counts per course and in total (v5 V2); no individual data. Same suppression as the course statistics:\nthe minimum group is at least 5 and a row that would give a hidden one by subtraction is hidden too."
       },
       "SystemValues": {
         "properties": {
