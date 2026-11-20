@@ -173,16 +173,20 @@ describe("system administration", () => {
 });
 
 describe("course content", () => {
-  it("saves the course guideline for the tutor", async () => {
+  it("saves the course guideline for the tutor and says so after the course is reloaded", async () => {
+    let guideline: string | null = null;
     const calls = mockApi(instructorRoutes({
+      "GET /courses": () => [{ ...COURSE, my_role: "instructor", guideline }],
       "GET /courses/1/kcs": [], "GET /courses/1/check-items": [], "GET /courses/1/misconceptions": [],
-      "PATCH /courses/1": () => ({ ...COURSE, my_role: "instructor", guideline: "Use SI units." }),
+      "PATCH /courses/1": () => { guideline = "Use SI units."; return { ...COURSE, my_role: "instructor", guideline }; },
     }));
     renderApp("/courses/1/content");
     const user = userEvent.setup();
     await user.type(await screen.findByLabelText("Guideline for the tutor (whole course)"), "Use SI units.");
     await user.click(screen.getByRole("button", { name: "Save" }));
     await waitFor(() => expect(calls.find((c) => c.method === "PATCH")?.body).toEqual({ guideline: "Use SI units." }));
+    // V17 W8: the editor starts again from the stored text, and the confirmation stays
+    expect(await screen.findByText("Guideline saved.")).toBeInTheDocument();
   });
 
   it("shows the imported course guideline after an import", async () => {
@@ -369,6 +373,25 @@ describe("follow-up fixes", () => {
     await user.click(screen.getByRole("button", { name: "Save" }));
     await waitFor(() => expect(calls.some((c) => c.method === "PUT")).toBe(true));
     expect((calls.find((c) => c.method === "PUT")!.body as { values: { enabled_course_types: unknown } }).values.enabled_course_types).toBeNull();
+  });
+
+  it("shows the value in effect next to an empty field and says saved after the new version loads (V17 W8, W9)", async () => {
+    const empty = { values: { weak_evidence: null, level_basic_below: null, level_advanced_above: null, level_hysteresis: null, default_routing_method: null,
+      local_llm_url: null, local_llm_model: null, enabled_course_types: null, default_local_endpoint_id: null, default_cloud_endpoint_id: null },
+      version: 3, apply_state: "applied",
+      defaults: { weak_evidence: false, level_basic_below: 0.4, level_advanced_above: 0.8, level_hysteresis: 0.05, default_routing_method: "lr",
+        local_llm_url: "http://localhost:8001/v1", local_llm_model: "fictional-model", enabled_course_types: ["ece", "general"],
+        default_local_endpoint_id: null, default_cloud_endpoint_id: null } };
+    let current: typeof empty = empty;
+    mockApi(adminRoutes({ "GET /admin/settings": () => current,
+                          "PUT /admin/settings": (c: { body: { values: typeof empty.values } }) => { current = { ...empty, values: c.body.values, version: 4 }; return current; } }));
+    renderApp("/admin");
+    const user = userEvent.setup();
+    expect(await screen.findByLabelText("Enabled course types")).toHaveAttribute("placeholder", "Default: ece, general");
+    expect(screen.getByLabelText("Local model name")).toHaveAttribute("placeholder", "Default: fictional-model");
+    await user.click(screen.getByLabelText(/Use weak evidence/));
+    await user.click(screen.getByRole("button", { name: "Save" }));
+    expect(await screen.findByText("Saved.")).toBeInTheDocument();
   });
 
   it("keeps course creation off when no type is enabled and another setting is saved", async () => {

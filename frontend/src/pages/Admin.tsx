@@ -267,6 +267,8 @@ function SystemSettingsCard() {
     refetchInterval: state === "applying" ? APPLY_POLL_MS : false,
   });
   const [conflict, setConflict] = useState(false);
+  // kept here: the form starts again from each new version (its key), and must still say "saved"
+  const [saved, setSaved] = useState(false);
   return (
     <>
       <ErrorNote error={settings.error} />
@@ -274,7 +276,8 @@ function SystemSettingsCard() {
       {settings.isLoading && <Loading variant="form" />}
       {state === "applying" && <Alert variant="info" role="status">{t("admin.applying")}</Alert>}
       {state === "failed" && <Alert variant="destructive" role="alert">{t("admin.rolledBack", { reason: status.data?.error ?? "" })}</Alert>}
-      {settings.data && <SystemSettingsForm key={`${settings.data.version}-${state}`} initial={settings.data} onConflict={setConflict} />}
+      {settings.data && <SystemSettingsForm key={`${settings.data.version}-${state}`} initial={settings.data} onConflict={setConflict}
+                                                saved={saved} onSaved={setSaved} />}
     </>
   );
 }
@@ -284,7 +287,8 @@ const splitTypes = (v: string) => v.split(",").map((s) => s.trim()).filter(Boole
 const num = (v: string) => (v === "" ? null : Number(v));
 
 /** Saves with the version that was read; a 409 means someone else saved first and the latest values are loaded. */
-function SystemSettingsForm({ initial, onConflict }: { initial: SystemSettings; onConflict: (on: boolean) => void }) {
+function SystemSettingsForm({ initial, onConflict, saved, onSaved }:
+  { initial: SystemSettings; onConflict: (on: boolean) => void; saved: boolean; onSaved: (saved: boolean) => void }) {
   const { t } = useI18n();
   const qc = useQueryClient();
   const [values, setValues] = useState<SystemValues>(initial.values);
@@ -296,14 +300,17 @@ function SystemSettingsForm({ initial, onConflict }: { initial: SystemSettings; 
   const endpoints = useQuery({ queryKey: endpointsKey(null), queryFn: () => api.modelEndpoints(null) });
   const save = useMutation({
     mutationFn: () => api.saveSystemSettings({ ...values, enabled_course_types: typesToSave() }, initial.version),
-    onSuccess: (fresh) => { onConflict(false); qc.setQueryData(["admin-settings"], fresh); },
+    onSuccess: (fresh) => { onConflict(false); onSaved(true); qc.setQueryData(["admin-settings"], fresh); },
     onError: (e) => {
       const stale = e instanceof ApiError && e.status === 409;
       onConflict(stale);
       if (stale) qc.invalidateQueries({ queryKey: ["admin-settings"] });
     },
   });
-  const set = (patch: Partial<SystemValues>) => setValues({ ...values, ...patch });
+  const set = (patch: Partial<SystemValues>) => { setValues({ ...values, ...patch }); onSaved(false); };
+  // V17 W9: an empty field uses the deployment's config value; show it instead of an empty box
+  const shown = (v: unknown) => (v === null || v === undefined ? undefined : t("admin.defaultValue", { value: String(v) }));
+  const d = initial.defaults;
   const pick = (kind: "trusted_local" | "external") => (endpoints.data ?? []).filter((e) => e.trust === kind);
   const endpointSelect = (id: string, key: "default_local_endpoint_id" | "default_cloud_endpoint_id", kind: "trusted_local" | "external") => (
     <Select id={id} value={values[key] ?? ""} onChange={(e) => set({ [key]: num(e.target.value) })}>
@@ -322,33 +329,33 @@ function SystemSettingsForm({ initial, onConflict }: { initial: SystemSettings; 
         <form onSubmit={submit} className="grid gap-4 sm:grid-cols-2" aria-label={t("admin.settings")}>
           <p className="text-sm text-muted-foreground sm:col-span-2">{t("admin.applyState", { state: t(`admin.apply.${initial.apply_state}`) })}</p>
           <label className="flex items-start gap-2 text-sm sm:col-span-2">
-            <input type="checkbox" className="mt-0.5 accent-primary" checked={!!values.weak_evidence} onChange={(e) => set({ weak_evidence: e.target.checked })} />
+            <input type="checkbox" className="mt-0.5 accent-primary" checked={!!(values.weak_evidence ?? d?.weak_evidence)} onChange={(e) => set({ weak_evidence: e.target.checked })} />
             <span className="font-medium">{t("admin.weakEvidence")}</span>
           </label>
           <div className="grid gap-1.5"><Label htmlFor="sys-basic">{t("admin.basicBelow")}</Label>
-            <Input id="sys-basic" type="number" min={0} max={1} step={0.01} value={values.level_basic_below ?? ""} onChange={(e) => set({ level_basic_below: num(e.target.value) })} /></div>
+            <Input id="sys-basic" type="number" min={0} max={1} step={0.01} value={values.level_basic_below ?? ""} placeholder={shown(d?.level_basic_below)} onChange={(e) => set({ level_basic_below: num(e.target.value) })} /></div>
           <div className="grid gap-1.5"><Label htmlFor="sys-adv">{t("admin.advancedAbove")}</Label>
-            <Input id="sys-adv" type="number" min={0} max={1} step={0.01} value={values.level_advanced_above ?? ""} onChange={(e) => set({ level_advanced_above: num(e.target.value) })} /></div>
+            <Input id="sys-adv" type="number" min={0} max={1} step={0.01} value={values.level_advanced_above ?? ""} placeholder={shown(d?.level_advanced_above)} onChange={(e) => set({ level_advanced_above: num(e.target.value) })} /></div>
           <div className="grid gap-1.5"><Label htmlFor="sys-hyst">{t("admin.hysteresis")}</Label>
-            <Input id="sys-hyst" type="number" min={0} max={0.2} step={0.01} value={values.level_hysteresis ?? ""} onChange={(e) => set({ level_hysteresis: num(e.target.value) })} /></div>
+            <Input id="sys-hyst" type="number" min={0} max={0.2} step={0.01} value={values.level_hysteresis ?? ""} placeholder={shown(d?.level_hysteresis)} onChange={(e) => set({ level_hysteresis: num(e.target.value) })} /></div>
           <div className="grid gap-1.5"><Label htmlFor="sys-method">{t("admin.routingMethod")}</Label>
-            <Select id="sys-method" value={values.default_routing_method ?? "lr"} onChange={(e) => set({ default_routing_method: e.target.value as "lr" | "svm" })}>
+            <Select id="sys-method" value={values.default_routing_method ?? d?.default_routing_method ?? "lr"} onChange={(e) => set({ default_routing_method: e.target.value as "lr" | "svm" })}>
               <option value="lr">{t("admin.methodLr")}</option>
               <option value="svm">{t("admin.methodSvm")}</option>
             </Select></div>
           <div className="grid gap-1.5"><Label htmlFor="sys-url">{t("admin.localUrl")}</Label>
-            <Input id="sys-url" type="url" value={values.local_llm_url ?? ""} onChange={(e) => set({ local_llm_url: e.target.value })} /></div>
+            <Input id="sys-url" type="url" value={values.local_llm_url ?? ""} placeholder={shown(d?.local_llm_url)} onChange={(e) => set({ local_llm_url: e.target.value })} /></div>
           <div className="grid gap-1.5"><Label htmlFor="sys-llm">{t("admin.localModel")}</Label>
-            <Input id="sys-llm" value={values.local_llm_model ?? ""} onChange={(e) => set({ local_llm_model: e.target.value })} /></div>
+            <Input id="sys-llm" value={values.local_llm_model ?? ""} placeholder={shown(d?.local_llm_model)} onChange={(e) => set({ local_llm_model: e.target.value })} /></div>
           <div className="grid gap-1.5 sm:col-span-2"><Label htmlFor="sys-types">{t("admin.courseTypes")}</Label>
-            <Input id="sys-types" value={types} onChange={(e) => setTypes(e.target.value)} />
+            <Input id="sys-types" value={types} placeholder={shown(d?.enabled_course_types?.join(", "))} onChange={(e) => { setTypes(e.target.value); onSaved(false); }} />
             <p className="text-xs text-muted-foreground">{t("admin.courseTypesHint")}</p>
             {initial.values.enabled_course_types?.length === 0 && types === "" && <p className="text-xs text-destructive">{t("admin.courseTypesNone")}</p>}</div>
           <div className="grid gap-1.5"><Label htmlFor="sys-dlocal">{t("admin.defaultLocal")}</Label>{endpointSelect("sys-dlocal", "default_local_endpoint_id", "trusted_local")}</div>
           <div className="grid gap-1.5"><Label htmlFor="sys-dcloud">{t("admin.defaultCloud")}</Label>{endpointSelect("sys-dcloud", "default_cloud_endpoint_id", "external")}</div>
           <div className="space-y-2 sm:col-span-2">
             <ErrorNote error={save.error instanceof ApiError && save.error.status === 409 ? null : save.error} />
-            {save.isSuccess && <StatusText>{t("settings.saved")}</StatusText>}
+            {saved && <StatusText>{t("settings.saved")}</StatusText>}
             <Button loading={save.isPending} type="submit" disabled={save.isPending || initial.apply_state === "applying"}>{save.isPending ? t("settings.saving") : t("settings.save")}</Button>
           </div>
         </form>

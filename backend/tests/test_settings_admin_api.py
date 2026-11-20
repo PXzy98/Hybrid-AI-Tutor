@@ -63,6 +63,23 @@ def test_system_settings_are_admin_only_versioned_and_restorable(world):
     assert all(p["kind"] in ("api", "worker") for p in status["processes"])
 
 
+def test_system_settings_say_what_an_unset_value_means(world):
+    """V17 W9: empty fields on the admin page show the config file's value instead of nothing."""
+    from app.core.config import get_settings
+
+    config = get_settings()
+    out = world["root"].get(f"{V2}/admin/settings").json()
+    assert out["values"]["level_basic_below"] is None  # nothing stored ...
+    defaults = out["defaults"]  # ... so the config value applies
+    assert defaults["level_basic_below"] == config.learner.levels.basic_below
+    assert defaults["level_hysteresis"] == config.learner.levels.hysteresis
+    assert defaults["local_llm_model"] == config.llm.local.model
+    assert "ece" in defaults["enabled_course_types"] and defaults["default_local_endpoint_id"] is None
+    stored = world["root"].put(f"{V2}/admin/settings", json={"values": {"level_hysteresis": 0.1},
+                                                             "version": out["version"]}).json()
+    assert stored["values"]["level_hysteresis"] == 0.1 and stored["defaults"] == defaults
+
+
 def test_a_system_change_being_applied_locks_the_settings(world):
     root = world["root"]
     version = root.get(f"{V2}/admin/settings").json()["version"]

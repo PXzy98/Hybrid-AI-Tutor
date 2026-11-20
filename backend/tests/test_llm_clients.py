@@ -216,7 +216,8 @@ async def test_a_failed_model_call_names_the_model_without_class_names():
     with pytest.raises(LLMUnavailable) as caught:
         await local.complete(MSGS)
     assert str(caught.value) == "the local model cannot be reached; check the model connection"
-    cloud = OpenAICompatClient("https://x", "k", "m", client=FakeOpenAI(error=openai.APITimeoutError(request=req)))
+    slow = FakeOpenAI(error=openai.APITimeoutError(request=req))
+    cloud = OpenAICompatClient("https://x", "k", "m", client=slow)
     with pytest.raises(LLMUnavailable, match="^the cloud model did not answer in time"):
         await cloud.complete(MSGS)
     with pytest.raises(LLMUnavailable) as caught:

@@ -756,6 +756,7 @@ export const en = {
   "admin.methodSvm": "Support vector machine",
   "admin.localUrl": "Local model URL",
   "admin.localModel": "Local model name",
+  "admin.defaultValue": "Default: {value}",
   "admin.courseTypes": "Enabled course types",
   "admin.courseTypesHint": "Separate the names with commas. Empty: every course type.",
   "admin.courseTypesNone": "Course creation is off: no course type is enabled. Type the types to enable.",

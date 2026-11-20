@@ -14445,6 +14445,16 @@
               "failed"
             ],
             "title": "Apply State"
+          },
+          "defaults": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SystemValues"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",

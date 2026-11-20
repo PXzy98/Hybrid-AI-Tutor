@@ -756,6 +756,7 @@ export const fr: Messages = {
   "admin.methodSvm": "Machine à vecteurs de support",
   "admin.localUrl": "URL du modèle local",
   "admin.localModel": "Nom du modèle local",
+  "admin.defaultValue": "Par défaut : {value}",
   "admin.courseTypes": "Types de cours activés",
   "admin.courseTypesHint": "Séparez les noms par des virgules. Vide : tous les types de cours.",
   "admin.courseTypesNone": "La création de cours est désactivée : aucun type de cours n’est activé. Saisissez les types à activer.",
