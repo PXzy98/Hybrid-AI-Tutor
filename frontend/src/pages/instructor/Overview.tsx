@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useI18n } from "@/i18n";
+import { tEnglish, useI18n } from "@/i18n";
 import { useFormat } from "@/lib/format";
 import type { MessageKey } from "@/i18n/en";
 
@@ -183,7 +183,7 @@ function WeakTopicsCard({ course }: { course: Course }) {
               <span className="min-w-0"><span className="font-medium">{w.name}</span>{" "}
                 <span className="text-muted-foreground">{t("loop.rate", { pct: Math.round(w.correct_rate * 100), n: w.students })}</span></span>
               <Button asChild size="sm" variant="outline">
-                <Link to={`/courses/${course.id}/ai`} state={{ draft: { request: t("loop.draftRequest", { kc: w.name }), moduleId: w.module_id } }}
+                <Link to={`/courses/${course.id}/ai`} state={{ draft: { request: tEnglish("loop.draftRequest", { kc: w.name }), moduleId: w.module_id } }}
                       aria-label={t("loop.draftFor", { kc: w.name })}>{t("loop.draft")}</Link>
               </Button>
             </li>
