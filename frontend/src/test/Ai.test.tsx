@@ -2,7 +2,7 @@ import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { instructorRoutes, mockApi, reply, renderApp } from "./helpers";
+import { COURSE, instructorRoutes, mockApi, reply, renderApp } from "./helpers";
 
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
@@ -89,6 +89,34 @@ describe("AI drafts", () => {
     await user.click(button);
     await waitFor(() => expect(calls.find((c) => c.path === "/courses/1/ai/drafts" && c.method === "POST")?.body)
       .toMatchObject({ kind: "custom", model: "cloud", confirm_cloud: true }));
+  });
+
+  it("does not wait for a cloud confirmation when the cloud option is hidden (V16)", async () => {
+    const calls = mockApi(instructorRoutes({
+      "GET /courses": [{ ...COURSE, my_role: "instructor", local_only: true }],
+      "GET /courses/1/ai/drafts": [], "GET /courses/1/materials": { index_version: 0, rebuild_job_id: null, materials: [] },
+      "POST /courses/1/ai/drafts": () => reply(draft({ kind: "custom", status: "generating", content: {}, cited_sources: [] }), 202),
+      "GET /courses/1/ai/drafts/7": () => draft({ kind: "custom", status: "generating", content: {}, cited_sources: [] }),
+    }));
+    renderApp("/courses/1/ai");
+    const user = userEvent.setup();
+    await user.type(await screen.findByLabelText("What should be drafted?"), "Summary of the course");
+    expect(screen.queryByLabelText("Cloud model, for public material only")).not.toBeInTheDocument();
+    const button = screen.getByRole("button", { name: "Draft with AI" });
+    expect(button).toBeEnabled();
+    await user.click(button);
+    await waitFor(() => expect(calls.find((c) => c.path === "/courses/1/ai/drafts" && c.method === "POST")?.body)
+      .not.toHaveProperty("model"));
+  });
+
+  it("hides the cloud option when no cloud model is configured (V16)", async () => {
+    mockApi(instructorRoutes({
+      "GET /courses": [{ ...COURSE, my_role: "instructor", cloud_available: false }],
+      "GET /courses/1/ai/drafts": [], "GET /courses/1/materials": { index_version: 0, rebuild_job_id: null, materials: [] },
+    }));
+    renderApp("/courses/1/ai");
+    await screen.findByLabelText("What should be drafted?");
+    expect(screen.queryByLabelText("Cloud model, for public material only")).not.toBeInTheDocument();
   });
 
   it("uploads a file for this draft only (V6)", async () => {

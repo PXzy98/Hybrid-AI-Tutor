@@ -1652,9 +1652,9 @@ export interface paths {
         put?: never;
         /**
          * Create
-         * @description Start drafting from the course material with the local model (a job; the draft is `generating`).
-         *     The material is the module's (and the course-level files), the whole course's, or only the chosen
-         *     modules or files (V5).
+         * @description Start drafting from the course material (a job; the draft is `generating`), with the local model, or
+         *     with the cloud model when the instructor confirmed it (V16). The material is the module's (and the
+         *     course-level files), the whole course's, or only the chosen modules or files (V5).
          */
         post: operations["ai_drafts_create"];
         delete?: never;
@@ -2867,6 +2867,11 @@ export interface components {
              * @default false
              */
             local_only?: boolean;
+            /**
+             * Cloud Available
+             * @default false
+             */
+            cloud_available?: boolean;
             /** Guideline */
             guideline?: string | null;
             /**
@@ -8725,14 +8730,19 @@ export interface operations {
                     "application/json": components["schemas"]["AiDraftOut"];
                 };
             };
-            /** @description Validation Error */
+            /** @description model cloud: the course is local-only or no cloud model is configured */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description model cloud without confirm_cloud, a custom draft without a request, or the privacy scan found student data */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
+                content?: never;
             };
         };
     };
@@ -8760,14 +8770,14 @@ export interface operations {
                     "application/json": components["schemas"]["AiDraftOut"];
                 };
             };
-            /** @description add_to_course: a material with this name exists there */
+            /** @description add_to_course: a material with this name exists there; model cloud: the course is local-only or no cloud model */
             409: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description the file is refused (type, size, unreadable, privacy scan) */
+            /** @description the file is refused (type, size, unreadable, privacy scan), or model cloud without confirm_cloud */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -8800,14 +8810,14 @@ export interface operations {
                     "application/json": components["schemas"]["AiDraftOut"];
                 };
             };
-            /** @description add_to_course: this page is in the material already */
+            /** @description add_to_course: this page is in the material already; model cloud: the course is local-only or no cloud model */
             409: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description the address or the page is refused (V7 rules, privacy scan) */
+            /** @description the address or the page is refused (V7 rules, privacy scan), or model cloud without confirm_cloud */
             422: {
                 headers: {
                     [name: string]: unknown;

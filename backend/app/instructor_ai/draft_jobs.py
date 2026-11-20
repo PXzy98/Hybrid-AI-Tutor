@@ -2,8 +2,9 @@
 
 `ai_draft.generate`: the course material passages come from the course retriever, the core generators
 (`drafts.py`, `structure_drafts.py`) call the **local** model through the gateway (trusted local only: the
-material never leaves the course's server), and the result is stored on the `ai_draft` row as an editable
-draft. Nothing is visible to students until the instructor accepts it. No student data is used.
+material never leaves the course's server), or, when the instructor confirmed it (V16), the cloud model
+through the cloud gate with scanned public material only. The result is stored on the `ai_draft` row as an
+editable draft. Nothing is visible to students until the instructor accepts it. No student data is used.
 """
 import shutil
 from pathlib import Path
@@ -186,13 +187,16 @@ def _save(engine, draft_id: int, **changes) -> None:
         db.commit()
 
 
-def _check_cloud_text(request: str, focus: str, course_type: str) -> None:
-    """V16: the instructor's own text goes to the cloud model with the material: it passes the course's
-    privacy scan first (the material was scanned at upload). Also checked when the draft is created; here
-    again because this is the last step before the text leaves."""
-    found = scan_document(f"{request}\n\n{focus}", privacy_profile(course_type)).blocking
+def _check_cloud_text(request: str, focus: str, course_type: str, chunks: list[Chunk], kcs: list[Kc]) -> None:
+    """V16: everything that goes to the cloud model passes the course's privacy scan first: the passages
+    (also the ones of a course without an index or of an older upload), the KC names and definitions, the
+    instructor's request and focus. Also checked when the draft is created (request, focus); here again
+    because this is the last step before the text leaves."""
+    parts = [*(f"{c.source}\n{c.text}" for c in chunks), *(f"{k.name}\n{k.definition}" for k in kcs),
+             request, focus]
+    found = scan_document("\n\n".join(parts), privacy_profile(course_type)).blocking
     if found:
-        raise DraftError("the request contains student data (" + ", ".join(found)
+        raise DraftError("the material or the request contains personal data (" + ", ".join(found)
                          + "): not sent to the cloud model")
 
 
@@ -208,8 +212,6 @@ async def generate(services, job) -> None:
         course_type = course.course_type
         request, sources = draft.request, dict(draft.sources or {})
     model = sources.get("model", "local")  # V16: "cloud" only after the instructor's confirmation
-    if model == "cloud" and services.effective(course_id).local_only:
-        model = "local"  # the course became local only since: never the cloud
     scope_kcs = [k for k in kcs if module is None or k.module_id == module.id]
     query = " ".join([focus or request or (module.title if module else title), _QUERY.get(kind, ""),
                       *(f"{k.name} {k.definition}" for k in scope_kcs[:6])]).strip()
@@ -217,6 +219,9 @@ async def generate(services, job) -> None:
     upload = (upload_path(services.settings.data_path(), course_id, job.ref_id, sources["upload"])
               if sources.get("upload") else None)
     try:
+        if model == "cloud" and settings.local_only:  # the course became local only since: never the cloud
+            raise DraftError("this course uses the local model only now: start the draft again with the "
+                             "local model")
         if upload is not None:
             chunks = _upload_passages(upload, course_id, query) if upload.is_file() else []
         else:
@@ -224,7 +229,7 @@ async def generate(services, job) -> None:
         if not chunks:
             raise DraftError("no indexed course material to draft from")
         if model == "cloud":
-            _check_cloud_text(request, focus, course_type)
+            _check_cloud_text(request, focus, course_type, chunks, kcs if kind in TIER2 else [])
         if kind in TIER1:
             result = await generate_tier1_draft(course_id=course_id, kind=kind, passages=chunks,
                                                 gateway=services.gateway, settings=settings, request=request,

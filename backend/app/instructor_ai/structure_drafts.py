@@ -27,7 +27,9 @@ from app.instructor_ai.drafts import (
     DraftGateway,
     check_budget,
     parse_model_json,
+    trust_for,
 )
+from app.llm.cloud_guard import build_draft_cloud_request
 
 StructureKind = Literal["kcs", "check_items", "misconceptions"]
 # Up to 12 items with explanations: about 2,000 tokens on the test host's Qwen3.5 (check items were cut off
@@ -107,6 +109,22 @@ class StructureDraft(BaseModel):
     status: Literal["draft"] = "draft"
 
 
+def structure_messages(kind: str, materials: list[dict],
+                       known_kc_names: Sequence[str]) -> list[dict[str, str]]:
+    """The messages of a tier 2 draft: fixed instructions, the numbered evidence and the accepted KC names.
+    The same for the local and the cloud model."""
+    request = {"task": _GUIDANCE[kind], "evidence": materials}
+    if known_kc_names:
+        # The model must pick its KC references from the course's accepted KCs (checked afterwards).
+        request["accepted_kc_names"] = list(known_kc_names)
+        request["kc_rule"] = ("Refer to knowledge components only by names from accepted_kc_names"
+                              + (" or by KCs drafted in this answer." if kind == "kcs" else "."))
+    return [
+        {"role": "system", "content": _SYSTEM},
+        {"role": "user", "content": json.dumps(request, ensure_ascii=False)},
+    ]
+
+
 async def generate_structure_draft(
     *, course_id: int, kind: StructureKind, passages: Sequence[Chunk],
     gateway: DraftGateway, settings: object, known_kc_names: Sequence[str] = (),
@@ -129,23 +147,21 @@ async def generate_structure_draft(
             raise DraftError("Evidence source is missing.")
         materials.append({"number": i, "source": chunk.source, "text": chunk.text})
 
-    request = {"task": _GUIDANCE[kind], "evidence": materials}
-    if known_kc_names:
-        # The model must pick its KC references from the course's accepted KCs (checked afterwards).
-        request["accepted_kc_names"] = list(known_kc_names)
-        request["kc_rule"] = ("Refer to knowledge components only by names from accepted_kc_names"
-                              + (" or by KCs drafted in this answer." if kind == "kcs" else "."))
-    messages = [
-        {"role": "system", "content": _SYSTEM},
-        {"role": "user", "content": json.dumps(request, ensure_ascii=False)},
-    ]
+    if model == "cloud":
+        # V16: through the cloud gate, which accepts only a DraftCloudRequest (and so no learner data)
+        try:
+            cloud_request = build_draft_cloud_request(
+                kind=kind, passages=[(m["number"], m["source"], m["text"]) for m in materials],
+                kc_names=known_kc_names)
+        except ValidationError:
+            raise DraftError("The draft input is not accepted by the cloud gate.") from None
+        response = await gateway.cloud_client(settings).complete_draft(cloud_request)
+    else:
+        response = await gateway.complete(
+            model, structure_messages(kind, materials, known_kc_names), settings=settings,
+            trust_required=trust_for(model), json_schema=response_schema(kind, known_kc_names), stream=False,
+            max_tokens=STRUCTURE_MAX_TOKENS)
     schema = TypeAdapter(list[_ITEM_TYPES[kind]])
-    from app.instructor_ai.drafts import trust_for
-
-    response = await gateway.complete(
-        model, messages, settings=settings, trust_required=trust_for(model),
-        json_schema=response_schema(kind, known_kc_names), stream=False, max_tokens=STRUCTURE_MAX_TOKENS,
-    )
     try:
         payload = parse_model_json(response.text)
         if not isinstance(payload, dict) or set(payload) != {"items"}:

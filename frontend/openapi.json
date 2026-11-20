@@ -4850,7 +4850,7 @@
           "instructor-ai"
         ],
         "summary": "Create",
-        "description": "Start drafting from the course material with the local model (a job; the draft is `generating`).\nThe material is the module's (and the course-level files), the whole course's, or only the chosen\nmodules or files (V5).",
+        "description": "Start drafting from the course material (a job; the draft is `generating`), with the local model, or\nwith the cloud model when the instructor confirmed it (V16). The material is the module's (and the\ncourse-level files), the whole course's, or only the chosen modules or files (V5).",
         "operationId": "ai_drafts_create",
         "parameters": [
           {
@@ -4884,15 +4884,11 @@
               }
             }
           },
+          "409": {
+            "description": "model cloud: the course is local-only or no cloud model is configured"
+          },
           "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
+            "description": "model cloud without confirm_cloud, a custom draft without a request, or the privacy scan found student data"
           }
         }
       },
@@ -5030,10 +5026,10 @@
             }
           },
           "409": {
-            "description": "add_to_course: a material with this name exists there"
+            "description": "add_to_course: a material with this name exists there; model cloud: the course is local-only or no cloud model"
           },
           "422": {
-            "description": "the file is refused (type, size, unreadable, privacy scan)"
+            "description": "the file is refused (type, size, unreadable, privacy scan), or model cloud without confirm_cloud"
           }
         }
       }
@@ -5079,10 +5075,10 @@
             }
           },
           "409": {
-            "description": "add_to_course: this page is in the material already"
+            "description": "add_to_course: this page is in the material already; model cloud: the course is local-only or no cloud model"
           },
           "422": {
-            "description": "the address or the page is refused (V7 rules, privacy scan)"
+            "description": "the address or the page is refused (V7 rules, privacy scan), or model cloud without confirm_cloud"
           }
         }
       }
@@ -8372,6 +8368,11 @@
           "local_only": {
             "type": "boolean",
             "title": "Local Only",
+            "default": false
+          },
+          "cloud_available": {
+            "type": "boolean",
+            "title": "Cloud Available",
             "default": false
           },
           "guideline": {

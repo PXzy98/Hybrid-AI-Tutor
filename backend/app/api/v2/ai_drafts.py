@@ -135,11 +135,15 @@ def _module(db: Session, course_id: int, module_id: int | None) -> None:
 
 # ------------------------------------------------------------------------------------------ drafts
 @router.post("/courses/{course_id}/ai/drafts", response_model=AiDraftOut, status_code=202,
-             operation_id="ai_drafts_create")
+             operation_id="ai_drafts_create",
+             responses={409: {"description": "model cloud: the course is local-only or no cloud model is "
+                                             "configured"},
+                        422: {"description": "model cloud without confirm_cloud, a custom draft without a "
+                                             "request, or the privacy scan found student data"}})
 def create(request: Request, body: AiDraftIn, access: CourseInstructor):
-    """Start drafting from the course material with the local model (a job; the draft is `generating`).
-    The material is the module's (and the course-level files), the whole course's, or only the chosen
-    modules or files (V5)."""
+    """Start drafting from the course material (a job; the draft is `generating`), with the local model, or
+    with the cloud model when the instructor confirmed it (V16). The material is the module's (and the
+    course-level files), the whole course's, or only the chosen modules or files (V5)."""
     engine = _engine(request)
     _check_cloud(request, access.course.id, body.model, body.confirm_cloud)
     with Session(engine, expire_on_commit=False) as db:
@@ -162,8 +166,16 @@ def _check_cloud(request: Request, course_id: int, model: str, confirmed: bool) 
     course (the same rule as the tier 4 evaluation)."""
     if model != "cloud":
         return
-    if request.app.state.services.effective(course_id).local_only:
+    services = request.app.state.services
+    settings = services.effective(course_id)
+    if settings.local_only:
         raise ApiError(409, ErrorCode.conflict, "this course uses the local model only: no cloud drafts")
+    try:
+        available = services.gateway.cloud_client(settings).available
+    except Exception:  # noqa: BLE001  a stored connection that cannot be resolved is not available
+        available = False
+    if not available:
+        raise ApiError(409, ErrorCode.conflict, "no cloud model is configured")
     if not confirmed:
         raise ApiError(422, ErrorCode.invalid, "confirm that the course material may go to the cloud model "
                                                "(confirm_cloud)")
@@ -204,8 +216,10 @@ def _sources(db: Session, course_id: int, body: "AiDraftIn") -> dict:
 
 @router.post("/courses/{course_id}/ai/drafts/upload", response_model=AiDraftOut, status_code=202,
              operation_id="ai_drafts_create_from_upload",
-             responses={409: {"description": "add_to_course: a material with this name exists there"},
-                        422: {"description": "the file is refused (type, size, unreadable, privacy scan)"}})
+             responses={409: {"description": "add_to_course: a material with this name exists there; "
+                                             "model cloud: the course is local-only or no cloud model"},
+                        422: {"description": "the file is refused (type, size, unreadable, privacy scan), "
+                                             "or model cloud without confirm_cloud"}})
 async def create_from_upload(
         request: Request, access: CourseInstructor,
         file: Annotated[UploadFile, File(description="PDF, PPTX, DOCX, Markdown, text or HTML")],
@@ -248,8 +262,10 @@ class AiDraftUrlIn(BaseModel):
 
 @router.post("/courses/{course_id}/ai/drafts/url", response_model=AiDraftOut, status_code=202,
              operation_id="ai_drafts_create_from_url",
-             responses={409: {"description": "add_to_course: this page is in the material already"},
-                        422: {"description": "the address or the page is refused (V7 rules, privacy scan)"}})
+             responses={409: {"description": "add_to_course: this page is in the material already; "
+                                             "model cloud: the course is local-only or no cloud model"},
+                        422: {"description": "the address or the page is refused (V7 rules, privacy scan), "
+                                             "or model cloud without confirm_cloud"}})
 async def create_from_url(request: Request, body: AiDraftUrlIn, access: CourseInstructor):
     """V7: draft from a web page. The page is fetched with the rules of `POST .../materials/url` and then
     used like a file uploaded for this draft (V6): for this draft only, or also added to the material."""

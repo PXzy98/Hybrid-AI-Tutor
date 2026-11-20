@@ -103,7 +103,8 @@ function StartForm({ course, onStarted }: { course: Course; onStarted: (d: AiDra
   // V16: the cloud model for public material, only with the explicit confirmation below
   const [cloud, setCloud] = useState(false);
   const [confirmCloud, setConfirmCloud] = useState(false);
-  const useCloud = cloud && confirmCloud && !course.local_only;
+  const cloudOffered = !course.local_only && !!course.cloud_available;  // else the model choice is hidden
+  const useCloud = cloud && confirmCloud && cloudOffered;
   const model = useCloud ? { model: "cloud" as const, confirm_cloud: true } : {};
   const start = useMutation({
     mutationFn: () => {
@@ -130,7 +131,7 @@ function StartForm({ course, onStarted }: { course: Course; onStarted: (d: AiDra
   const moduleName = new Map((modules.data ?? []).map((m) => [m.id, m.title]));
   const missing = (kind === "custom" && !request.trim())
     || (source === "modules" && moduleIds.length === 0) || (source === "files" && materialIds.length === 0)
-    || (cloud && !confirmCloud) || (source === "upload" && !file) || (source === "url" && !pageUrl.trim()) || (source === "module" && moduleId === null);
+    || (cloud && cloudOffered && !confirmCloud) || (source === "upload" && !file) || (source === "url" && !pageUrl.trim()) || (source === "module" && moduleId === null);
   function submit(e: FormEvent) {
     e.preventDefault();
     if (!missing) start.mutate();
@@ -216,7 +217,7 @@ function StartForm({ course, onStarted }: { course: Course; onStarted: (d: AiDra
               </div>
             )}
           </fieldset>
-          {!course.local_only && (
+          {cloudOffered && (
             <fieldset className="grid gap-2 sm:col-span-2">
               <legend className="mb-1 text-sm font-medium">{t("ai.model")}</legend>
               <div className="flex flex-wrap gap-x-4 gap-y-1.5">
