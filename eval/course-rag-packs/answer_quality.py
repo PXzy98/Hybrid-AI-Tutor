@@ -3,8 +3,11 @@
 For each question of `questions/<pack>.jsonl` (public text written from the pack material): retrieve k
 passages with the course index (scoped to the question's module, as the product does), build the messages
 with the app's own prompt code (`system_prompt` of the pack's privacy profile + `material_block`), let the
-trusted local vLLM answer (thinking off, streaming not needed here), and let a hosted model judge the answer
-against the passages. Only public course text and public questions leave this machine, and only to the judge.
+trusted local vLLM answer (thinking off, streaming not needed here), and let a judge score the answer against
+the passages. The judge is the same trusted local model by default (it judges its own answers: read the scores as
+a check, not a neutral grade). Course pack text is real (public) course material, not fictional, so rule 6 keeps
+it away from hosted models: `--hosted-judge` sends it to the cloud model only when the project has explicitly
+allowed that.
 
 Judge scores: correct 0 wrong / 1 partly / 2 correct; grounded 0 not supported by the passages / 1 partly /
 2 supported. A question with `gold: []` is not in the material: the right answer says so (abstain).
@@ -78,7 +81,7 @@ def pick(rows: list[dict], n: int) -> list[dict]:
     return out
 
 
-async def run_pack(pack, rows, env, k, tmp):
+async def run_pack(pack, rows, env, k, tmp, hosted_judge=False):
     pack_dir = rag.PACKS_DIR / pack
     manifest = json.loads((pack_dir / "manifest.json").read_text(encoding="utf-8"))
     course_type = manifest["course_type"]
@@ -105,8 +108,12 @@ async def run_pack(pack, rows, env, k, tmp):
                      f"course material: {covered}\n\nPassages:\n{material_block(passages)}\n\n"
                      f"Tutor answer:\n{answer}"}]
             try:
-                text, _ = await chat(client, env["CLOUD_BASE_URL"], env["CLOUD_API_KEY"], env["CLOUD_MODEL"],
-                                     jmsg, 4000)
+                if hosted_judge:
+                    text, _ = await chat(client, env["CLOUD_BASE_URL"], env["CLOUD_API_KEY"], env["CLOUD_MODEL"],
+                                         jmsg, 4000)
+                else:
+                    text, _ = await chat(client, vbase, env.get("VLLM_KEY"), model, jmsg, 800,
+                                         {"chat_template_kwargs": {"enable_thinking": False}})
                 verdict = json.loads(re.search(r"\{.*\}", text, re.S).group(0))
             except Exception as e:  # noqa: BLE001 - the row stays, without a verdict
                 verdict = {"error": type(e).__name__}
@@ -142,13 +149,16 @@ def main():
     ap.add_argument("--per-pack", type=int, default=10)
     ap.add_argument("--k", type=int, default=4)
     ap.add_argument("--out", type=Path, default=HERE / "results")
+    ap.add_argument("--hosted-judge", action="store_true",
+                    help="judge with the cloud model: sends real course text to a hosted API (rule 6: only with "
+                         "the project's explicit permission)")
     a = ap.parse_args()
     env = read_env(a.env)
     results = []
     for pack in a.packs.split(","):
         rows = pick(rag.load_questions(pack), a.per_pack)
         with tempfile.TemporaryDirectory(prefix="pack-quality-") as tmp:
-            results.append(asyncio.run(run_pack(pack, rows, env, a.k, tmp)))
+            results.append(asyncio.run(run_pack(pack, rows, env, a.k, tmp, a.hosted_judge)))
     a.out.mkdir(parents=True, exist_ok=True)
     (a.out / "answer_quality.json").write_text(json.dumps(results, indent=1, ensure_ascii=False), encoding="utf-8")
     lines = ["| Pack | Course type / subject prompt | Answerable n | Gold file retrieved | Correct / partly / wrong | "

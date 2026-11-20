@@ -2,9 +2,10 @@
 
 For a few public questions of the open course packs (never student data) it runs the semantic router with the
 settings of `config.yaml` (capability gate, then the evidence step on passages retrieved from the unpacked
-pack), and sends the question to the model the router chose: the trusted local vLLM for "local", the cloud
-model for "cloud". It is the routing decision and the two model paths, not the whole app pipeline (no
-accounts, no privacy filter, no cloud gate: the questions are public).
+pack), and sends the question to the model the router chose: the trusted local vLLM for "local". A question
+routed to the cloud is only recorded: the passages are real (public) course material, not fictional, so rule 6
+keeps them from hosted models; `--call-cloud` sends it to the cloud model only when the project has explicitly
+allowed that. This is the routing decision and the local model path, not the whole app pipeline.
 
     python eval/routing-ece/manual_check.py --env <path to .env> [--out DIR]
 """
@@ -85,10 +86,12 @@ async def main_async(a):
                         text_out, usage = await aq.chat(client, vbase, env.get("VLLM_KEY"), lmodel, msgs, 400,
                                                         {"chat_template_kwargs": {"enable_thinking": False}})
                         used = lmodel
-                    else:
+                    elif a.call_cloud:
                         text_out, usage = await aq.chat(client, env["CLOUD_BASE_URL"], env["CLOUD_API_KEY"],
                                                         env["CLOUD_MODEL"], msgs, 4000)
                         used = "cloud model"
+                    else:
+                        text_out, used = "", "not sent (rule 6)"
                     rows.append({"pack": pack, "question": row["question"], "target": score.target,
                                  "cloud_probability": round(score.analysis.cloud_probability, 2),
                                  "reliable": score.analysis.reliable, "evidence": score.evidence.status,
@@ -103,6 +106,9 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--env", type=Path, required=True)
     ap.add_argument("--out", type=Path, default=HERE / "results")
+    ap.add_argument("--call-cloud", action="store_true",
+                    help="answer cloud-routed questions with the cloud model: sends real course text to a hosted "
+                         "API (rule 6: only with the project's explicit permission)")
     a = ap.parse_args()
     cfg, rows = asyncio.run(main_async(a))
     lines = [f"Router settings: threshold {cfg.routing.threshold}, uncertainty margin "

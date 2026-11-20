@@ -6,10 +6,10 @@
   "cloud_probability": 0.01,
   "reliable": true,
   "evidence": "sufficient",
-  "route_ms": 4163,
+  "route_ms": 4095,
   "answered_by": "Qwen3.5-9B",
   "answer_s": 9.3,
-  "answer_start": "Based on the course material provided, here is an explanation of pseudocode and its importance.  ### What is Pseudocode? Pseudocode is a way"
+  "answer_start": "Based on the course material provided, here is an explanation of pseudocode and the reasons for using it before writing real code.  ### What"
  },
  {
   "pack": "harvard_cs50x",
@@ -18,10 +18,10 @@
   "cloud_probability": 0.0,
   "reliable": true,
   "evidence": "not_required",
-  "route_ms": 1218,
+  "route_ms": 1229,
   "answered_by": "Qwen3.5-9B",
-  "answer_s": 3.9,
-  "answer_start": "Based on the course material provided, here are the specific CS50 helper functions you can use to read input:  *   **To read an integer:** U"
+  "answer_s": 6.4,
+  "answer_start": "In the CS50 course, you use specific helper functions from the `<cs50.h>` library to read input from the user. These functions are designed "
  },
  {
   "pack": "harvard_cs50x",
@@ -30,10 +30,10 @@
   "cloud_probability": 0.09,
   "reliable": false,
   "evidence": "unavailable",
-  "route_ms": 21,
-  "answered_by": "cloud model",
-  "answer_s": 20.5,
-  "answer_start": "## First, a note on the course material  Lecture 3 [1] covers linear search, binary search, running time, selection sort, bubble sort, recur"
+  "route_ms": 23,
+  "answered_by": "not sent (rule 6)",
+  "answer_s": 0.0,
+  "answer_start": ""
  },
  {
   "pack": "mit_6_002_circuits",
@@ -42,10 +42,10 @@
   "cloud_probability": 0.89,
   "reliable": false,
   "evidence": "unavailable",
-  "route_ms": 21,
-  "answered_by": "cloud model",
-  "answer_s": 10.2,
-  "answer_start": "## Short answer  You can use the lumped circuit abstraction (LCA) when the circuit obeys the **lumped matter discipline (LMD)**. The course "
+  "route_ms": 22,
+  "answered_by": "not sent (rule 6)",
+  "answer_s": 0.0,
+  "answer_start": ""
  },
  {
   "pack": "mit_6_002_circuits",
@@ -54,9 +54,9 @@
   "cloud_probability": 0.02,
   "reliable": true,
   "evidence": "not_required",
-  "route_ms": 762,
+  "route_ms": 760,
   "answered_by": "Qwen3.5-9B",
-  "answer_s": 4.9,
+  "answer_s": 3.7,
   "answer_start": "Based on the course material provided, the sum of the voltages around a loop must equal **0**.  This is known as **Kirchhoff's Voltage Law ("
  },
  {
@@ -67,8 +67,8 @@
   "reliable": true,
   "evidence": "insufficient",
   "route_ms": 17,
-  "answered_by": "cloud model",
-  "answer_s": 4.8,
-  "answer_start": "The course material here doesn't cover USB Power Delivery, so I can't answer that from [1]–[4]. Those materials are about 6.002 topics: ener"
+  "answered_by": "not sent (rule 6)",
+  "answer_s": 0.0,
+  "answer_start": ""
  }
 ]
