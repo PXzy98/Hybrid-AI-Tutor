@@ -147,6 +147,20 @@ describe("instructor quiz editor (V17)", () => {
       { questions: { options: string[]; answer: number }[] }).questions[0]).toMatchObject({ options: ["Ampere", "Volt", "Ohm"], answer: 0 }));
   });
 
+  it("says saved after the saved quiz is loaded again (V17 W25)", async () => {
+    let quiz = { id: 4, title: "Draft quiz", module_id: null, kind: "practice", status: "draft", opens_at: null, closes_at: null, assigned_to: null,
+      questions: [question("Typed by hand", true)], attempts: 0, created_at: "2026-11-01T00:00:00Z", updated_at: "2026-11-01T00:00:00Z" };
+    mockApi(instructorRoutes({
+      "GET /courses/1/quizzes": () => [quiz], "GET /courses/1/members": [], "GET /courses/1/kcs": [],
+      "PATCH /courses/1/quizzes/4": () => { quiz = { ...quiz, updated_at: "2026-11-02T00:00:00Z" }; return quiz; },
+    }));
+    renderApp("/courses/1/quizzes");
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: "Edit Draft quiz" }));
+    await user.click(await screen.findByRole("button", { name: "Save quiz" }));
+    expect(await screen.findByText("Saved.")).toBeInTheDocument();
+  });
+
   it("counts one question in the singular and says why an AI draft failed", async () => {
     const quiz = { id: 4, title: "Draft quiz", module_id: null, kind: "practice", status: "draft", opens_at: null, closes_at: null, assigned_to: null,
       questions: [question("Typed by hand", true)], attempts: 0, created_at: "2026-11-01T00:00:00Z", updated_at: "2026-11-01T00:00:00Z" };

@@ -126,13 +126,17 @@ const blankQuestion = (): QuizQuestion => ({ kind: "mcq", kc: null, stem: "", op
 
 function QuizEditor({ course, id, onClose, onCreated }: { course: Course; id: number | null; onClose: () => void; onCreated: (id: number) => void }) {
   const quizzes = useQuery({ queryKey: ["quizzes", course.id], queryFn: () => api.quizzes(course.id) });
+  // the version this editor saved: the form below starts again from it and must still say "saved" (V17 W25)
+  const [savedAt, setSavedAt] = useState<string | null>(null);
   if (quizzes.isLoading) return <Loading variant="list" />;
   const quiz = id === null ? undefined : quizzes.data?.find((q) => q.id === id);
   // a new form every time the server copy changes (after a save or after the AI draft arrives)
-  return <EditorForm key={quiz ? `${quiz.id}:${quiz.updated_at}` : "new"} course={course} quiz={quiz} onClose={onClose} onCreated={onCreated} />;
+  return <EditorForm key={quiz ? `${quiz.id}:${quiz.updated_at}` : "new"} course={course} quiz={quiz} onClose={onClose} onCreated={onCreated}
+                     saved={!!quiz && savedAt === quiz.updated_at} onSaved={setSavedAt} />;
 }
 
-function EditorForm({ course, quiz, onClose, onCreated }: { course: Course; quiz?: Quiz; onClose: () => void; onCreated: (id: number) => void }) {
+function EditorForm({ course, quiz, onClose, onCreated, saved, onSaved }: { course: Course; quiz?: Quiz; onClose: () => void;
+  onCreated: (id: number) => void; saved: boolean; onSaved: (updatedAt: string) => void }) {
   const { t } = useI18n();
   const qc = useQueryClient();
   const modules = useQuery({ queryKey: ["modules", course.id], queryFn: () => api.modules(course.id) });
@@ -156,9 +160,10 @@ function EditorForm({ course, quiz, onClose, onCreated }: { course: Course; quiz
         ? api.updateQuiz(course.id, quiz.id, locked ? { ...body } : { ...body, questions: questions.map(dropEmptyOptions) })
         : api.createQuiz(course.id, { ...body, questions: questions.map(dropEmptyOptions) });
     },
-    onSuccess: (saved) => {
+    onSuccess: (stored) => {
+      onSaved(stored.updated_at);
       qc.invalidateQueries({ queryKey: ["quizzes", course.id] });
-      if (!quiz) onCreated(saved.id);
+      if (!quiz) onCreated(stored.id);
     },
   });
   const setQuestion = (i: number, patch: Partial<QuizQuestion>) => setQuestions(questions.map((q, j) => (j === i ? { ...q, ...patch } : q)));
@@ -269,7 +274,7 @@ function EditorForm({ course, quiz, onClose, onCreated }: { course: Course; quiz
       </section>
 
       <ErrorNote error={save.error} />
-      {save.isSuccess && <StatusText>{t("settings.saved")}</StatusText>}
+      {saved && <StatusText>{t("settings.saved")}</StatusText>}
       <div className="flex flex-wrap gap-3">
         <Button loading={save.isPending} type="submit" disabled={save.isPending}>{save.isPending ? t("settings.saving") : t("quiz.save")}</Button>
       </div>
