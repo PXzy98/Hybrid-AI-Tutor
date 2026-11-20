@@ -27,6 +27,7 @@ from app.api.v1.onboarding import (
 from app.api.v2.ask import _scope
 from app.api.v2.errors import ApiError, ErrorCode
 from app.core.schemas import CheckItemPublic, Preferences
+from app.instructor_ai.insights_source import MIN_GROUP as INSIGHTS_MIN_GROUP
 from app.learner import course_views
 from app.learner.checks import diagnostic_items, evidence_for, grade
 from app.learner.instructor_view import InstructorProfileView, NotVisible, profile_for_instructor
@@ -316,7 +317,8 @@ class WeakTopicsOut(BaseModel):
 def get_weak_topics(access: CourseInstructor, request: Request):
     """Topics the class finds hard, from quiz answers; counts and shares only, never a student."""
     services = _services(request)
-    min_group = services.settings.learner.class_summary_min_group
+    # the core's lower bound of 5, as for insights: the setting may raise it, never lower it
+    min_group = max(INSIGHTS_MIN_GROUP, services.settings.learner.class_summary_min_group)
     found = weak_topics(services.engine, access.course.id, min_group)
     return WeakTopicsOut(min_group=min_group, weak_below=WEAK_BELOW, topics=[asdict(w) for w in found])
 

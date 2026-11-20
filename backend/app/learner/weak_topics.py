@@ -2,7 +2,8 @@
 
 From the published quizzes' answers: per knowledge component, how many different students answered one of its
 questions and the share of correct answers. A KC is listed only when at least the minimum group answered it
-and the share is below WEAK_BELOW, so nothing points at one student. The instructor can then draft extra
+and the share is below WEAK_BELOW, so nothing points at one student; the share is rounded to tens of percent,
+so one more answer does not show how that student did. The instructor can then draft extra
 material on it (AI assistant, custom request); no student is named, no individual result is used.
 """
 from dataclasses import dataclass
@@ -21,7 +22,7 @@ class WeakTopic:
     name: str
     module_id: int | None
     students: int  # different students who answered a question of this KC (at least the minimum group)
-    correct_rate: float
+    correct_rate: float  # rounded to 0.1
 
 
 def weak_topics(engine: Engine, course_id: int, min_group: int) -> list[WeakTopic]:
@@ -44,5 +45,5 @@ def weak_topics(engine: Engine, course_id: int, min_group: int) -> list[WeakTopi
         rate = sum(given) / len(given)
         if len(students[code]) >= min_group and rate < WEAK_BELOW:
             kc = kcs[code]
-            out.append(WeakTopic(code, kc.name, kc.module_id, len(students[code]), round(rate, 3)))
+            out.append(WeakTopic(code, kc.name, kc.module_id, len(students[code]), round(rate, 1)))
     return sorted(out, key=lambda w: (w.correct_rate, w.kc_code))

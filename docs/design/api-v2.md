@@ -136,7 +136,7 @@ Notes on ask (implemented in `backend/app/api/v2/ask.py`):
 | Method and path | Who | Purpose |
 |---|---|---|
 | `GET /courses/{course_id}/class-summary` | I | aggregates (all modes) |
-| `GET /courses/{course_id}/weak-topics` | I | v5 V8: `{min_group, weak_below, topics[{kc_code, name, module_id, students, correct_rate}]}`: KCs whose quiz questions at least `min_group` different students answered with a share correct below `weak_below` (0.6); counts and shares only |
+| `GET /courses/{course_id}/weak-topics` | I | v5 V8: `{min_group, weak_below, topics[{kc_code, name, module_id, students, correct_rate}]}`: KCs whose quiz questions at least `min_group` different students answered with a share correct below `weak_below` (0.6); `min_group` is `learner.class_summary_min_group` but at least 5, `correct_rate` is rounded to 0.1; counts and shares only |
 | `GET /courses/{course_id}/statistics` | I | v5 V2: students enrolled, active students (term, 7 days), questions (term, 7 days), share answered locally, questions per week (8 weeks, with the number of students) and per module, quiz attempts and average score. From `request_log` and quiz attempts, counts only; a count that fewer than `learner.class_summary_min_group` students contributed is null |
 | `GET /courses/{course_id}/students/{student_id}/overview` | I | individual overview (mode B, not opted out, since `visible_since`; audited) |
 | `GET/PUT /courses/{course_id}/students/{student_id}/plan` | I | learning plan (same conditions) |
