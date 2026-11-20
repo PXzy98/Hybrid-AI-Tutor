@@ -45,4 +45,38 @@ describe("student accounts (V9)", () => {
     await user.click(screen.getByRole("button", { name: "Delete the account" }));
     await waitFor(() => expect(calls.some((c) => c.method === "DELETE" && c.path === "/admin/students/12")).toBe(true));
   });
+
+  it("clears the temporary password when another action starts or that account is deleted", async () => {
+    const calls = mockApi(admin({
+      "POST /admin/students/12/reset-password": { temporary_password: "temp-fictional-123" },
+      "PATCH /admin/students/11": { ...ana, active: false },
+      "DELETE /admin/students/12": () => new Response(null, { status: 204 }),
+      "GET /admin/system-statistics": { students_enrolled: 0, active_students_7d: 0, questions_7d: null, min_group: 5, courses: [] },
+    }));
+    renderApp("/admin");
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: "Reset the password of Ben Example" }));
+    expect(await screen.findByText("temp-fictional-123")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Disable Ana Example" }));
+    expect(screen.queryByText("temp-fictional-123")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Reset the password of Ben Example" }));
+    expect(await screen.findByText("temp-fictional-123")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Delete the account of Ben Example" }));
+    await user.click(screen.getByRole("button", { name: "Delete the account" }));
+    await waitFor(() => expect(screen.queryByText("temp-fictional-123")).not.toBeInTheDocument());
+    const statistics = () => calls.filter((c) => c.path.endsWith("statistics")).length;
+    await waitFor(() => expect(statistics()).toBeGreaterThan(1)); // refetched after the delete
+  });
+
+  it("does not carry a failed delete over to the next dialog", async () => {
+    mockApi(admin({ "DELETE /admin/students/12": () => new Response(JSON.stringify({ detail: "boom", code: "invalid" }), { status: 500 }) }));
+    renderApp("/admin");
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: "Delete the account of Ben Example" }));
+    await user.click(screen.getByRole("button", { name: "Delete the account" }));
+    await within(screen.getByRole("dialog")).findByRole("alert");
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    await user.click(screen.getByRole("button", { name: "Delete the account of Ana Example" }));
+    expect(within(screen.getByRole("dialog")).queryByRole("alert")).not.toBeInTheDocument();
+  });
 });
