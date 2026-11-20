@@ -217,7 +217,9 @@ def delete_material(material_id: int, access: CourseInstructor, request: Request
     """Delete the file and rebuild the index without it (old index versions with its text are removed)."""
     services = _services(request)
     with Session(services.engine) as db:
-        row = db.get(Material, material_id)
+        # the same row lock as a refetch: the file is removed only after a running refetch replaced it, so a
+        # refetch can never write the file of a deleted material back
+        row = db.exec(select(Material).where(Material.id == material_id).with_for_update()).first()
         if row is None or row.course_id != access.course.id:
             raise ApiError(404, ErrorCode.not_found, "material not found")
         index_jobs.material_path(services.settings.data_path(), row).unlink(missing_ok=True)

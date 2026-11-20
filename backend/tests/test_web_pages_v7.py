@@ -313,6 +313,34 @@ def test_two_refetches_of_one_page_keep_the_file_and_its_hash_together(world, si
     assert list(_material_folder(world).glob(".*.new")) == []
 
 
+def test_a_delete_waits_for_the_row_lock_of_a_refetch_before_removing_the_file(world, site):
+    """While a refetch holds the material's row lock (it is replacing the file), a delete waits and removes
+    the file only afterwards, so the refetch cannot write a deleted page back."""
+    import threading
+    import time
+
+    from sqlmodel import Session, select
+
+    from app.storage.models import Material
+
+    prof, url = world["prof"], world["url"]
+    material = prof.post(f"{url}/materials/url", json={"url": "https://example.org/pullups"}).json()["material"]
+    path = _material_folder(world) / PULLUPS
+    result = {}
+    with Session(world["services"].engine) as db:  # what a refetch holds while it replaces the file
+        db.exec(select(Material).where(Material.id == material["id"]).with_for_update()).one()
+        def delete():
+            result["status"] = prof.delete(f"{url}/materials/{material['id']}").status_code
+
+        deleting = threading.Thread(target=delete)
+        deleting.start()
+        time.sleep(1.0)
+        assert path.exists() and "status" not in result  # the delete is waiting for the lock
+        db.commit()
+    deleting.join(timeout=30)
+    assert result["status"] == 204 and not path.exists()
+
+
 def test_the_name_conflict_of_a_draft_from_a_page_talks_about_the_page(world, site):
     prof, url = world["prof"], world["url"]
     assert prof.post(f"{url}/materials/url", json={"url": "https://example.org/pullups"}).status_code == 201
