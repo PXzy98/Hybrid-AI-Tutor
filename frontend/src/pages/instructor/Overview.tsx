@@ -119,7 +119,7 @@ function UsageCard({ course }: { course: Course }) {
           <>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <StatCard label={t("usage.enrolled")} value={data.students_enrolled} icon={Users} />
-              <StatCard label={t("usage.active7d")} value={data.active_students_7d} icon={UserCheck} />
+              <StatCard label={t("usage.active7d")} value={show(data.active_students_7d)} icon={UserCheck} />
               <StatCard label={t("usage.questions7d")} value={show(data.questions_7d)} icon={MessageSquare} />
               <StatCard label={t("usage.local")} value={pct(data.local_share) ?? hidden} icon={Cpu} />
             </div>
@@ -151,7 +151,7 @@ function UsageCard({ course }: { course: Course }) {
                   <TableHeader><TableRow><TableHead>{t("usage.quiz")}</TableHead><TableHead>{t("usage.attempts")}</TableHead><TableHead>{t("usage.average")}</TableHead></TableRow></TableHeader>
                   <TableBody>{data.quizzes.map((q) => (
                     <TableRow key={q.quiz_id}><TableCell className="font-medium">{q.title}</TableCell>
-                      <TableCell className="tabular-nums">{q.attempts}</TableCell>
+                      <TableCell className="tabular-nums">{show(q.attempts)}</TableCell>
                       <TableCell className="tabular-nums">{pct(q.mean_score) ?? hidden}</TableCell></TableRow>
                   ))}</TableBody>
                 </Table>

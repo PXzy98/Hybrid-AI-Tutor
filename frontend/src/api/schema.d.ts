@@ -3029,7 +3029,8 @@ export interface components {
         };
         /**
          * CourseStatisticsOut
-         * @description Counts only (v5 V2); a count contributed by fewer than `min_group` students is null.
+         * @description Counts only (v5 V2); a count that some but fewer than `min_group` students contributed is null (0 is
+         *     shown), `min_group` is at least 5, and a row that would give a hidden one by subtraction is hidden too.
          */
         CourseStatisticsOut: {
             /** Min Group */
@@ -3037,9 +3038,9 @@ export interface components {
             /** Students Enrolled */
             students_enrolled: number;
             /** Active Students */
-            active_students: number;
+            active_students: number | null;
             /** Active Students 7D */
-            active_students_7d: number;
+            active_students_7d: number | null;
             /** Questions Total */
             questions_total: number | null;
             /** Questions 7D */
@@ -3069,7 +3070,7 @@ export interface components {
             /** Students Enrolled */
             students_enrolled: number;
             /** Active Students 7D */
-            active_students_7d: number;
+            active_students_7d: number | null;
             /** Questions Total */
             questions_total: number | null;
             /** Questions 7D */
@@ -4561,7 +4562,7 @@ export interface components {
             /** Title */
             title: string;
             /** Attempts */
-            attempts: number;
+            attempts: number | null;
             /** Mean Score */
             mean_score: number | null;
         };
@@ -5009,7 +5010,8 @@ export interface components {
         };
         /**
          * SystemStatisticsOut
-         * @description Counts per course and in total (v5 V2); no individual data.
+         * @description Counts per course and in total (v5 V2); no individual data. Same suppression as the course statistics:
+         *     the minimum group is at least 5 and a row that would give a hidden one by subtraction is hidden too.
          */
         SystemStatisticsOut: {
             /** Min Group */
@@ -5019,7 +5021,7 @@ export interface components {
             /** Students Enrolled */
             students_enrolled: number;
             /** Active Students 7D */
-            active_students_7d: number;
+            active_students_7d: number | null;
             /** Questions Total */
             questions_total: number | null;
             /** Questions 7D */

@@ -52,7 +52,7 @@ function UsageCard() {
           <>
             <div className="grid gap-4 sm:grid-cols-3">
               <StatCard label={t("usage.enrolled")} value={data.students_enrolled} />
-              <StatCard label={t("usage.active7d")} value={data.active_students_7d} />
+              <StatCard label={t("usage.active7d")} value={show(data.active_students_7d)} />
               <StatCard label={t("usage.questions7d")} value={show(data.questions_7d)} />
             </div>
             <Table aria-label={t("usage.perCourse")}>
@@ -65,7 +65,7 @@ function UsageCard() {
                   <TableCell><span className="font-medium">{c.code}</span> <span className="text-muted-foreground">{c.title}</span>
                     {c.status === "archived" && <Badge variant="secondary" className="ml-2">{t("usage.archived")}</Badge>}</TableCell>
                   <TableCell className="tabular-nums">{c.students_enrolled}</TableCell>
-                  <TableCell className="tabular-nums">{c.active_students_7d}</TableCell>
+                  <TableCell className="tabular-nums">{show(c.active_students_7d)}</TableCell>
                   <TableCell className="tabular-nums">{show(c.questions_7d)}</TableCell>
                   <TableCell className="tabular-nums">{show(c.questions_total)}</TableCell>
                 </TableRow>

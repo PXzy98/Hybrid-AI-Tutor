@@ -129,7 +129,10 @@ B applies to a student only after that student agrees, and then only data after 
 **Questions (7 days)**, the share **Answered by the local model**, **Questions per week** (the last 8 weeks, with
 the number of students who asked), **Questions per module** (and **Whole course**) and **Quiz averages** (answers
 and average score per published quiz). Counts only: no question, no name, and every number that fewer than 5
-students contributed shows "hidden". The administrator sees the same counts for every course on
+students contributed shows "hidden" (a count of 0 is shown as 0; the minimum is 5 even if the setting is lower).
+Questions and quiz answers of students who left the course still count, so the active students can exceed the students enrolled now. When one row would give a hidden one by subtraction from the
+total, one more row (or the total) is hidden too, so "hidden" rows can be more than the small groups. Quiz
+attempts show "hidden" below 5 and the average score is rounded to tenths (60%, 70%). The administrator sees the same counts for every course on
 **Administration** (**Use of the tutor in every course**).
 
 **Topics the class finds hard** (on **Class overview**): from quiz answers, the knowledge components that at

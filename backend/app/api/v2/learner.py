@@ -273,16 +273,17 @@ class ModuleCountOut(BaseModel):
 class QuizStatOut(BaseModel):
     quiz_id: int
     title: str
-    attempts: int
-    mean_score: float | None
+    attempts: int | None  # null below the minimum group
+    mean_score: float | None  # steps of 0.1; null below the minimum group
 
 
 class CourseStatisticsOut(BaseModel):
-    """Counts only (v5 V2); a count contributed by fewer than `min_group` students is null."""
+    """Counts only (v5 V2); a count that some but fewer than `min_group` students contributed is null (0 is
+    shown), `min_group` is at least 5, and a row that would give a hidden one by subtraction is hidden too."""
     min_group: int
     students_enrolled: int
-    active_students: int
-    active_students_7d: int
+    active_students: int | None
+    active_students_7d: int | None
     questions_total: int | None
     questions_7d: int | None
     local_share: float | None

@@ -114,17 +114,18 @@ class CourseUsageOut(BaseModel):
     title: str
     status: Literal["active", "archived"]
     students_enrolled: int
-    active_students_7d: int
+    active_students_7d: int | None  # null: some, but fewer than the minimum group
     questions_total: int | None  # null: fewer than the minimum group asked
     questions_7d: int | None
 
 
 class SystemStatisticsOut(BaseModel):
-    """Counts per course and in total (v5 V2); no individual data."""
+    """Counts per course and in total (v5 V2); no individual data. Same suppression as the course statistics:
+    the minimum group is at least 5 and a row that would give a hidden one by subtraction is hidden too."""
     min_group: int
     courses: list[CourseUsageOut]
     students_enrolled: int
-    active_students_7d: int
+    active_students_7d: int | None
     questions_total: int | None
     questions_7d: int | None
 
