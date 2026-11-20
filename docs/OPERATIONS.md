@@ -174,8 +174,9 @@ No request failed or timed out at any level. Findings:
   drains about 32 asks a minute: in a burst, the first 8 start at once and about 32 more get a slot within the
   60 s limit, so roughly the first 40 asks of a burst are answered and the rest get "the model is busy" and
   must ask again (a longer limit only makes them wait longer). A check-item draft of 45 to 50 s holds a slot
-  for that long. Not changed
-  in `config.yaml` by this task; set it per connection in the admin page or change the default.
+  for that long. Not changed by this task. The limit is one deployment setting that applies to each model
+  connection on its own (the admin page cannot change it per connection): set `limits.models.max_concurrent`
+  (and `queue_timeout_seconds`) in the deployment's `config.yaml` and restart the app and the worker.
 - One GPU (this server) serves about 8 answers at the same time with p95 under 25 s. If a student asks about
   once every 2 minutes while working, that is roughly 60 students actively working at the same time (assumption,
   not measured); if a class of 100 asks all at once, about 40 are answered within a minute and the others
