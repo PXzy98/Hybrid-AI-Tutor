@@ -1,8 +1,8 @@
 # PACT (Privacy-Aware Course Tutor): one command to run the whole system (task Z8; guide 4.2).
 #   docker compose up --build            -> http://localhost:8080  (local: plain HTTP)
 # Production: SITE_ADDRESS=<domain>, HTTP_PORT=80, HTTPS_PORT=443 in .env, then
-#   docker compose -f docker-compose.yml up -d --build
-# (only this file: docker-compose.override.yml is the local-development extra that exposes the database).
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+# (docker-compose.prod.yml sets the production values; docker-compose.override.yml is the local-development extra).
 #
 # The local model (vLLM) is deployed separately and reached by URL (VLLM_BASE_URL / model connections).
 # Settings come from .env (see .env.example); SECTION__FIELD variables override config.yaml values,

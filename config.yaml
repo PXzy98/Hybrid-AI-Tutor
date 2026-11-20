@@ -108,6 +108,9 @@ auth:
   max_failed_logins: 5
   lockout_minutes: 15
 
+api:
+  v1_enabled: true                  # false in production (docker-compose.prod.yml): API v1 is frozen
+
 llm:
   # the deployment's vLLM (VLLM_BASE_URL, VLLM_KEY in .env); model = the name the server lists under /models
   local: { model: "Qwen3.5-9B", temperature: 0.2, max_tokens: 1024, timeout_s: 60 }
