@@ -64,8 +64,8 @@ export default function Materials({ course }: { course: Course }) {
         {!!materials.data?.materials.length && (
           <Table>
             <TableHeader><TableRow>
-              <TableHead>{t("materials.file")}</TableHead><TableHead>{t("content.module")}</TableHead>
-              <TableHead>{t("materials.size")}</TableHead><TableHead>{t("members.status")}</TableHead>
+              <TableHead>{t("materials.file")}</TableHead><TableHead className="hidden sm:table-cell">{t("content.module")}</TableHead>
+              <TableHead className="hidden sm:table-cell">{t("materials.size")}</TableHead><TableHead>{t("members.status")}</TableHead>
               <TableHead><span className="sr-only">{t("students.actions")}</span></TableHead>
             </TableRow></TableHeader>
             <TableBody>
@@ -76,14 +76,16 @@ export default function Materials({ course }: { course: Course }) {
                       <span aria-hidden className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground"><FileText className="size-4" /></span>
                       <span className="max-w-64 min-w-0 break-words">{m.filename}</span>
                     </span>
+                    {/* V17 W14: on a phone the module is shown under the file name instead of in a column off screen */}
+                    <span className="mt-1 block text-xs text-muted-foreground sm:hidden">{moduleName(m.module_id)}</span>
                     {m.source_url && (isHttps(m.source_url) ? (
                       <a href={m.source_url} target="_blank" rel="noopener noreferrer nofollow" className="mt-1 block max-w-64 break-words text-xs text-muted-foreground underline underline-offset-2">{m.source_url}</a>
                     ) : (
                       <span className="mt-1 block max-w-64 break-words text-xs text-muted-foreground">{m.source_url}</span>
                     ))}
                   </TableCell>
-                  <TableCell>{moduleName(m.module_id)}</TableCell>
-                  <TableCell className="tabular-nums text-muted-foreground">{Math.max(1, Math.round(m.size_bytes / 1024))} KB</TableCell>
+                  <TableCell className="hidden sm:table-cell">{moduleName(m.module_id)}</TableCell>
+                  <TableCell className="hidden tabular-nums text-muted-foreground sm:table-cell">{Math.max(1, Math.round(m.size_bytes / 1024))} KB</TableCell>
                   <TableCell><Badge variant={scanVariant(m.scan_status)}>{SCAN_STATES.includes(m.scan_status) ? t(`materials.scan.${m.scan_status}` as MessageKey) : m.scan_status}</Badge></TableCell>
                   <TableCell className="text-right">
                     {m.source_url && (
