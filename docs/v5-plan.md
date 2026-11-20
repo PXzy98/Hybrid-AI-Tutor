@@ -47,12 +47,12 @@ Until this plan is merged into [v4-implementation-guide.md](v4-implementation-gu
 | V2 | **Class statistics**: active students, questions per week, most asked topics and misconceptions, quiz averages per question, all above the minimum group; the admin page shows the same counts across courses | S (UI T) | overview and admin show them with 5+ demo students |
 | V3 | **Privacy notice** at the top of the student side (first visit and a permanent short line), en and fr | T | text approved by Z; screenshot in both languages |
 | Z26 | Module and course guidelines reach the answering model, after the base rules; student preferences only apply where they do not conflict; a student cannot override them ("ignore the instructor") | Z | tests: right module only; override attempt fails |
-| — | **Routing test** asked for by Prof. Ismaeel: run the routing evaluation and a manual ask on the local and cloud paths with the new vLLM setting | T | short result table in the PR or HANDOVER |
+| — | **Routing test** asked for by Prof. Ismaeel: run the routing evaluation and a manual ask on the local and cloud paths with the new vLLM setting | T | done 2026-11-20: `eval/routing-ece/results/routing_test_2026-11-20.md` |
 | — | **Class overview test** with at least 5 demo students (`build_demo.py --students 6`), quizzes and the end-of-term survey answered (the survey showed "not available" in the meeting) | S | screenshots of the overview with data |
 | — | **Settings bug** shown in the meeting (routing / model connection settings) | Z | Z describes it; fixed with a test |
 | — | **End of term to next term**: export a course, import it as a new course with new dates, without student data, then invite a new class | Z | done once on the dev server; manual steps checked |
 | S15 | Demo courses get KCs, check items and a quiz; test that a quiz attempt moves the mastery estimate | S | test asserts `p_mastery` changes after an attempt |
-| S16 | Course type of the CS50x pack | S | CS questions get the CS prompt |
+| S16 | Course type of the CS50x pack | S | done (manifest `computer_science`, computing prompt; test `test_computer_science_courses_get_the_computing_prompt`; checked 2026-11-20 with a real answer) |
 | Z25 | Document scan refuses public course text; check all eight packs | Z | all packs upload |
 | — | Backend French texts: consent text, preference questions, chat error messages (still English in the French UI; consent text still says "What I know") | Z | French UI shows no English from the backend |
 | — | Send French UI screenshots to Lavin (she can check basic French; find a second reviewer for details) | Z | e-mail sent |
@@ -81,13 +81,13 @@ Until this plan is merged into [v4-implementation-guide.md](v4-implementation-gu
 | V13 | **Local model hosting cost**: options and costs (RunPod or another GPU in class hours only, 24/7, AWS GPU instance, own server), with the Z23 numbers; recommendation to Prof. Abbas | Z | report sent by 12/1 |
 | V14 | **Extension points for course-platform features** (assignments, grading, announcements, LTI, university login): a short design note in `docs/design/` on where they plug in (data model, API v2 routes, frontend nav, permissions), no implementation | Z | note reviewed |
 | Z27 | Security review of the whole system before going public (auth, CSRF, access, SSRF incl. V7, uploads, prompt injection incl. Z26, proxy, keys, logs, the public vLLM of V12) in `docs/SECURITY_REVIEW.md` | Z | report; high findings fixed before the deploy |
-| Z23 | vLLM capacity (tokens per second, 1 to 32 at a time), model limits set from it | Z | numbers in OPERATIONS.md |
+| Z23 | vLLM capacity (tokens per second, 1 to 32 at a time), model limits set from it | Z | measured 2026-11-20: numbers and recommendation (`max_concurrent` 8, timeout 60) in OPERATIONS.md section 10; limits not yet changed in `config.yaml`; full-ask timing open |
 | — | Alert receiver for monitoring (ask Prof. Abbas) | Z | set in `alertmanager.yml` |
 | T10 | Video on the v5 UI; Design Day live demo script on the production site; "Brightspace plus" story (teaching, research, industry training; learners include trainees and research groups, a bridge between academia, research and industry); one demo step uploads an open-access paper and drafts research topics from it | T, all | video submitted 11/25 |
 | — | Final report and Design Day material carry the same story and the value for future research | all | report 12/13 |
 | T13 | Web search evaluation (G1-106); Tongkai shows web search at the next meeting | T | report |
 | E4 | End-to-end privacy audit on v5 (after V1, V7, Z26) | Z | report |
-| — | Answer quality on non-medical courses (ECE, CS packs) with the vLLM model | S, T | short result table |
+| — | Answer quality on non-medical courses (ECE, CS packs) with the vLLM model | S, T | done 2026-11-20 for 6.002 and CS50x (10 questions each): `eval/course-rag-packs/results/answer_quality.md` |
 
 ## 6. Remaining v4 items (in order, when time allows)
 

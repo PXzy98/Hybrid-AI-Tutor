@@ -29,7 +29,7 @@ stand and where to look. Running the system: [OPERATIONS.md](OPERATIONS.md).
 | Z3 PostgreSQL + Alembic | merged | `backend/alembic/`, `app/storage/` |
 | Z4 course catalog | merged | `app/catalog/` |
 | Z5 settings layers, live component switch | merged | `app/platform/settings.py`, `components.py` |
-| Z6 model gateway | merged; a load test through the gateway on 2026-11-16 (Qwen3.5-9B, short answers): 0.40 answers/s alone, 0.71 at 8 at a time, no gain at 20; the tokens/s figures quoted earlier have no saved report; the app under load not measured (Z23) | `app/llm/`, `eval/load-test/` |
+| Z6 model gateway | merged; vLLM capacity measured on 2026-11-20 (Z23, Qwen3.5-9B): 43 tokens/s for one answer, 476 tokens/s in total at 32 at a time with short prompts, 120 to 160 tokens/s with course passages, no errors; recommended `max_concurrent` 8 (now 4), `queue_timeout_seconds` 60 (OPERATIONS.md section 10); one full ask through the app not timed (needs accounts) | `app/llm/`, `eval/load-test/` (`capacity.py`, `results/`) |
 | Z7 privacy profiles | merged | `app/privacy/profiles/` |
 | Z8 Docker Compose | merged | `docker-compose.yml`, `deploy/` |
 | Z9 API v2 (accounts, courses, members, invitations, content, settings, admin) | merged (#42–#45); main fix #47; viewable invitation code #52; v2 ask #61; end of term and export #63 (`app/platform/end_of_term.py`) | `app/api/v2/`, `app/platform/courses.py`, `app/catalog/editor.py` |

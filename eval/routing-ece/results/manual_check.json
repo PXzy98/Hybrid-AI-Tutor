@@ -1,0 +1,74 @@
+[
+ {
+  "pack": "harvard_cs50x",
+  "question": "what is pseudocode and why write it before real code?",
+  "target": "local",
+  "cloud_probability": 0.01,
+  "reliable": true,
+  "evidence": "not_required",
+  "route_ms": 1400,
+  "answered_by": "Qwen3.5-9B",
+  "answer_s": 9.2,
+  "answer_start": "Based on the course material provided, here is an explanation of pseudocode and the reasons for using it.  ### What is Pseudocode? Pseudocod"
+ },
+ {
+  "pack": "harvard_cs50x",
+  "question": "which cs50 helper functions can I use to read an int or a float from the user in C?",
+  "target": "local",
+  "cloud_probability": 0.0,
+  "reliable": true,
+  "evidence": "not_required",
+  "route_ms": 17,
+  "answered_by": "Qwen3.5-9B",
+  "answer_s": 7.1,
+  "answer_start": "Based on the course material provided, here are the specific CS50 helper functions you can use to read input:  *   **To read an integer:** U"
+ },
+ {
+  "pack": "harvard_cs50x",
+  "question": "Prove that the average running time of quicksort is O(n log n) with a full recurrence analysis and compare it with merge sort.",
+  "target": "cloud",
+  "cloud_probability": 0.09,
+  "reliable": false,
+  "evidence": "unavailable",
+  "route_ms": 23,
+  "answered_by": "cloud model",
+  "answer_s": 19.1,
+  "answer_start": "## First, a note on the course material  The material you've been given ([1]–[4]) covers linear and binary search, running time, selection s"
+ },
+ {
+  "pack": "mit_6_002_circuits",
+  "question": "when can I treat a circuit as a lumped circuit instead of worrying about fields and wave effects?",
+  "target": "cloud",
+  "cloud_probability": 0.89,
+  "reliable": false,
+  "evidence": "unavailable",
+  "route_ms": 15,
+  "answered_by": "cloud model",
+  "answer_s": 11.9,
+  "answer_start": "## What the course material itself says  The material gives the criterion as the **lumped matter discipline (LMD)**. Lumped circuit abstract"
+ },
+ {
+  "pack": "mit_6_002_circuits",
+  "question": "what does the sum of the voltages around a loop have to equal?",
+  "target": "local",
+  "cloud_probability": 0.02,
+  "reliable": true,
+  "evidence": "not_required",
+  "route_ms": 14,
+  "answered_by": "Qwen3.5-9B",
+  "answer_s": 5.7,
+  "answer_start": "Based on the course material provided, the sum of the voltages around a closed loop must equal **0**.  This is known as **Kirchhoff's Voltag"
+ },
+ {
+  "pack": "mit_6_002_circuits",
+  "question": "What changed in the most recent standard for USB power delivery this year?",
+  "target": "cloud",
+  "cloud_probability": 0.02,
+  "reliable": true,
+  "evidence": "insufficient",
+  "route_ms": 13,
+  "answered_by": "cloud model",
+  "answer_s": 5.8,
+  "answer_start": "That question is outside this course material. The provided material [1]–[4] covers energy and power in 6.002 (static power in MOSFET logic "
+ }
+]
