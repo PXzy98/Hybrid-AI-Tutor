@@ -1729,7 +1729,8 @@ export interface paths {
         };
         /**
          * Conversation
-         * @description Sanitized turns of one of the caller's conversations in this course (oldest first).
+         * @description Sanitized turns of one of the caller's conversations in this course (oldest first). With a French
+         *     `language` the fixed texts of the stored answers (safe replacement, referral line) come in French.
          */
         get: operations["conversation_api_v2_courses__course_id__conversations__conversation_id__get"];
         put?: never;
@@ -8662,6 +8663,7 @@ export interface operations {
         parameters: {
             query?: {
                 last?: number;
+                language?: string;
             };
             header?: never;
             path: {
@@ -8731,7 +8733,7 @@ export interface operations {
         parameters: {
             query: {
                 module_id: number;
-                language?: "en" | "fr";
+                language?: string;
             };
             header?: never;
             path: {

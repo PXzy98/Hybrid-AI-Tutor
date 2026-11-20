@@ -21,6 +21,8 @@ FAILURE_MESSAGES = {
     "privacy_filter": "The privacy filter is unavailable, so the question was not processed.",
 }
 DEFAULT_FAILURE = "The tutor could not answer right now. Please try again."
+MODEL_UNAVAILABLE = ("The selected model is unavailable. Check the local server or Cloud configuration and "
+                     "retry.")
 
 
 class AskBody(BaseModel):
@@ -118,7 +120,7 @@ def _response(ctx: RequestContext) -> AskResponse:
 def _error(ctx, step):
     detail = FAILURE_MESSAGES.get(step, DEFAULT_FAILURE)
     if step == "generate" and ctx.semantic_analysis is not None:
-        detail = "The selected model is unavailable. Check the local server or Cloud configuration and retry."
+        detail = MODEL_UNAVAILABLE
     return ErrorBody(detail=detail, step=step, request_id=ctx.request_id)
 
 

@@ -10,13 +10,11 @@ from pathlib import Path
 
 import yaml
 
-from app.api.v1.ask import DEFAULT_FAILURE, FAILURE_MESSAGES
+from app.api.v1.ask import DEFAULT_FAILURE, FAILURE_MESSAGES, MODEL_UNAVAILABLE
 from app.api.v1.onboarding import PREFERENCE_QUESTIONS, Choice, PreferenceQuestion
+from app.learner.misconceptions import NOTE_HEADER
 from app.pipeline.steps import generate, route, verify
 from app.privacy.profiles import CONSENT_BASE, STATISTICS_ONLY_NOTE
-
-MODEL_UNAVAILABLE = ("The selected model is unavailable. Check the local server or Cloud configuration and "
-                     "retry.")  # app/api/v1/ask.py `_error`, generate step
 
 # the English constants, by the names fr.yaml uses
 ENGLISH = {
@@ -31,6 +29,8 @@ ENGLISH = {
     "REPLACED_WARNING": verify.REPLACED_WARNING,
     "GROUNDING_WARNING": verify.WARNINGS["grounding"],
     "LEAK_WARNING": verify.WARNINGS["pii_leak"],  # profile_leak has the same text
+    "REFERRAL": verify.REFERRAL,
+    "NOTE_HEADER": NOTE_HEADER,
     "SAFE_FALLBACK": verify.SAFE_FALLBACK,
     "SAFE_FALLBACK_SOURCES": verify.SAFE_FALLBACK_SOURCES,
     "DEFAULT_FAILURE": DEFAULT_FAILURE,
@@ -75,6 +75,21 @@ def text(value: str, language: str | None) -> str:
     return value
 
 
+def answer(value: str, language: str | None) -> str:
+    """An answer as sent to the student: the safe replacement answer, or the model's answer with the fixed
+    referral line and misconception header the pipeline appended translated; the model's words stay."""
+    if not is_french(language):
+        return value
+    value = text(value, language)
+    notes = _notes()
+    if value.endswith("\n\n" + verify.REFERRAL):
+        value = value[: -len(verify.REFERRAL)] + notes[verify.REFERRAL]
+    head, sep, tail = value.rpartition("\n\n" + NOTE_HEADER + " ")
+    if sep:
+        value = head + "\n\n" + notes[NOTE_HEADER] + " " + tail
+    return value
+
+
 def consent_text(profile_name: str, english: str, language: str | None, *, statistics_only: bool) -> str:
     """The v2 onboarding consent text in the student's language; `english` is the profile's text from
     `app.privacy.profiles.consent_text`, used for every other language."""
@@ -82,8 +97,11 @@ def consent_text(profile_name: str, english: str, language: str | None, *, stati
         return english.replace(CONSENT_BASE, CONSENT_EN, 1)
     fr = _french()
     parts = [fr["consent"]]
-    if profile_name in fr["consent_notes"]:
-        parts.append(fr["consent_notes"][profile_name])
+    note = fr["consent_notes"].get(profile_name)
+    if note is None:  # a profile note without a French text is shown in English, never dropped
+        note = english.removesuffix(" " + STATISTICS_ONLY_NOTE).removeprefix(CONSENT_BASE).strip()
+    if note:
+        parts.append(note)
     if statistics_only:
         parts.append(_notes()[STATISTICS_ONLY_NOTE])
     return " ".join(parts)
@@ -93,6 +111,7 @@ def preference_questions(language: str | None) -> list[PreferenceQuestion]:
     if not is_french(language):
         return PREFERENCE_QUESTIONS
     fr = _french()["preferences"]
-    return [PreferenceQuestion(id=q.id, question=fr[q.id]["question"],
-                               options=[Choice(value=c.value, label=fr[q.id][c.value]) for c in q.options])
+    return [PreferenceQuestion(id=q.id, question=fr.get(q.id, {}).get("question", q.question),
+                               options=[Choice(value=c.value, label=fr.get(q.id, {}).get(c.value, c.label))
+                                        for c in q.options])
             for q in PREFERENCE_QUESTIONS]

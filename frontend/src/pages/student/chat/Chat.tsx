@@ -53,8 +53,8 @@ function ChatPane({ course, initialConversation: initial, moduleId, onStarted }:
   const modules = useQuery({ queryKey: ["modules", course.id], queryFn: () => api.modules(course.id) });
   const profile = useQuery({ queryKey: ["profile", course.id], queryFn: () => api.profile(course.id) });
   const history = useQuery({
-    queryKey: ["conversation", course.id, initialConversation],
-    queryFn: () => api.conversation(course.id, initialConversation as string),
+    queryKey: ["conversation", course.id, initialConversation, lang],
+    queryFn: () => api.conversation(course.id, initialConversation as string, lang),
     enabled: !!initialConversation,
     staleTime: Infinity, refetchOnWindowFocus: false, refetchOnReconnect: false,
   });

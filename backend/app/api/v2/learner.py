@@ -10,7 +10,7 @@ from dataclasses import asdict
 from datetime import date, datetime
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, Request, Response, status
+from fastapi import APIRouter, Depends, Query, Request, Response, status
 from pydantic import BaseModel, Field
 
 from app.admin.summary import ClassSummary, class_summary
@@ -153,7 +153,7 @@ def check(body: CheckIn, access: CourseStudent, request: Request):
 @router.get("/courses/{course_id}/onboarding", response_model=OnboardingOut,
             operation_id="learner_onboarding_get")
 def get_onboarding(module_id: int, access: CourseStudent, request: Request,
-                   language: Literal["en", "fr"] = "en"):
+                   language: str = Query("en", max_length=8)):
     """The consent text and the preference questions come in `language` (the UI's language)."""
     services = _services(request)
     scope = _scope(services, access.course.id)

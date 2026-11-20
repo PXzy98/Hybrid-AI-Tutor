@@ -12,6 +12,8 @@ notes:
   REPLACED_WARNING: "La première réponse n’a pas passé la vérification de sécurité et a été remplacée par un message sûr."
   GROUNDING_WARNING: "Certaines parties de cette réponse peuvent dépasser le matériel du cours."
   LEAK_WARNING: "Une vérification de confidentialité a signalé cette demande ; elle est consignée pour examen."
+  REFERRAL: "Pour un avis sur votre propre situation, veuillez parler à un médecin, une infirmière ou un pharmacien."
+  NOTE_HEADER: "Un malentendu fréquent à surveiller :"
   SAFE_FALLBACK: "Je ne peux pas donner ici de réponse générale sûre à cette question. Les questions sur votre propre santé, vos médicaments ou vos doses demandent l’avis d’un médecin, d’une infirmière ou d’un pharmacien, qui peut examiner votre situation."
   SAFE_FALLBACK_SOURCES: " Le matériel du cours ci-dessous explique ce sujet en termes généraux."
   DEFAULT_FAILURE: "Le tuteur ne peut pas répondre pour le moment. Veuillez réessayer."

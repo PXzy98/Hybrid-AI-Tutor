@@ -56,6 +56,7 @@ export const fr: Messages = {
   "error.title": "Un problème est survenu sur cette page.",
   "error.body": "Veuillez recharger la page. Si cela se reproduit, prévenez votre enseignant.",
   "error.reload": "Recharger",
+  "error.modelFailed": "Le modèle choisi n’a pas pu répondre.",
   "error.usageLimit": "Vous avez atteint la limite de questions pour le moment. Réessayez dans {s} secondes.",
   "error.settingsApplying": "Les paramètres sont en cours d’application. Réessayez dans un instant.",
   "error.conflict": "Quelqu’un d’autre a modifié ceci.",

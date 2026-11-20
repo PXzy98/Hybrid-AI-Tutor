@@ -12,7 +12,7 @@ import uuid
 from datetime import datetime
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, Query, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 from sqlmodel import Session, col, func, select
@@ -168,7 +168,7 @@ def _out(ctx: RequestContext) -> AskOut:
     lang = ctx.request.language
     if localize.is_french(lang):  # the fixed notes and the safe replacement answer, never model output
         out.warnings = [localize.text(w, lang) for w in out.warnings]
-        out.answer = localize.text(out.answer, lang)
+        out.answer = localize.answer(out.answer, lang)
     return out
 
 
@@ -282,11 +282,16 @@ def conversations(access: CourseStudent, request: Request):
 
 
 @router.get("/courses/{course_id}/conversations/{conversation_id}", response_model=ConversationDetailOut)
-def conversation(conversation_id: str, access: CourseStudent, request: Request, last: int = 50):
-    """Sanitized turns of one of the caller's conversations in this course (oldest first)."""
+def conversation(conversation_id: str, access: CourseStudent, request: Request, last: int = 50,
+                 language: str = Query("en", max_length=8)):
+    """Sanitized turns of one of the caller's conversations in this course (oldest first). With a French
+    `language` the fixed texts of the stored answers (safe replacement, referral line) come in French."""
     services = _services(request)
     if not _owned(services, access, conversation_id):
         raise ApiError(404, ErrorCode.not_found, "conversation not found")
     scope = _scope(services, access.course.id)
-    return ConversationDetailOut(conversation_id=conversation_id,
-                                 turns=scope.sessions.history(conversation_id, last=max(1, min(last, 200))))
+    turns = scope.sessions.history(conversation_id, last=max(1, min(last, 200)))
+    for t in turns:
+        if t.role == "tutor":
+            t.text = localize.answer(t.text, language)
+    return ConversationDetailOut(conversation_id=conversation_id, turns=turns)
