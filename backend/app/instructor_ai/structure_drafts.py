@@ -118,7 +118,9 @@ def structure_messages(kind: str, materials: list[dict],
         # The model must pick its KC references from the course's accepted KCs (checked afterwards).
         request["accepted_kc_names"] = list(known_kc_names)
         request["kc_rule"] = ("Refer to knowledge components only by names from accepted_kc_names"
-                              + (" or by KCs drafted in this answer." if kind == "kcs" else "."))
+                              + (" or by KCs drafted in this answer. Draft only new knowledge components of "
+                                 "this evidence: never repeat a name from accepted_kc_names (they may be "
+                                 "prerequisites)." if kind == "kcs" else "."))
     return [
         {"role": "system", "content": _SYSTEM},
         {"role": "user", "content": json.dumps(request, ensure_ascii=False)},
@@ -211,7 +213,11 @@ def _check_kc_references(kind: str, items: list, known: Sequence[str]) -> list:
         # a repeated name keeps its first item (V17 W19: one repeat used to lose the whole draft)
         first: dict[str, object] = {}
         for item in items:
-            first.setdefault(item.name.casefold(), item)
+            # a KC the course already has is not drafted again (V17 W19: a Lecture 3 draft repeated Lecture 1)
+            if item.name.casefold() not in known_names:
+                first.setdefault(item.name.casefold(), item)
+        if not first:
+            raise DraftError("The draft only repeats knowledge components the course already has.")
         items = list(first.values())
         drafted = {item.name.casefold() for item in items}
         # A prerequisite link is a suggestion the instructor reviews: one to the item itself or to a KC that

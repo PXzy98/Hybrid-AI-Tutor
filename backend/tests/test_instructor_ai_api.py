@@ -203,8 +203,8 @@ def test_a_kcs_draft_for_another_module_skips_existing_kcs_and_cross_module_link
     assert kcs["Bus capacitance"]["prerequisite_ids"] == [kcs["Open drain outputs"]["id"]]
     again, _ = _generate(world, "kcs", reply.replace("Open drain outputs", "pull-up resistors")
                          .replace("Bus capacitance", "PULL-UP RESISTORS"))
-    r = prof.post(f"{url}/ai/drafts/{again['id']}/accept", json={"module_id": other["id"]})
-    assert r.status_code == 422 and "exists in the course already" in r.json()["detail"]
+    failed = _draft(world, again["id"])  # only KCs the course has: the draft fails, nothing to accept
+    assert failed["status"] == "failed" and "only repeats" in failed["error"]
 
 
 def test_check_items_and_misconceptions_accept_as_active_content(world):
