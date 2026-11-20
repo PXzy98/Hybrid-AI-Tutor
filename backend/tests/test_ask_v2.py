@@ -193,3 +193,40 @@ def test_ending_a_course_removes_its_conversations_and_logs(world):
         db.commit()
     assert {t["course_id"] for t in rows("session_turn")} == {world.demo}
     assert {t["course_id"] for t in rows("request_log")} == {world.demo}
+
+
+def test_a_course_rule_question_routed_to_the_cloud_carries_the_syllabus(make_client, monkeypatch):
+    """T17: the capability gate chooses the cloud, but inside a course the syllabus passage is still
+    retrieved; it reaches the cloud only as a CloudRequest passage and is listed among the sources."""
+    import numpy as np
+
+    from app.core.schemas import Chunk, SemanticAnalysis
+    from app.llm.cloud_guard import CloudClient
+    from app.rag.course import FakeCourseRetriever
+    from app.routing.semantic import SemanticRouter
+
+    monkeypatch.setattr(SemanticRouter, "embed", lambda self, text: np.zeros(3))
+    monkeypatch.setattr(SemanticRouter, "classify", lambda self, vector, method: SemanticAnalysis(
+        method=method, reliable=True, cloud_probability=0.99, requires_evidence=True, nearest_similarity=0.9))
+    monkeypatch.setattr(SemanticRouter, "question_kind", lambda self, vector: "logistics", raising=False)
+    pipeline = ["privacy_filter", "understand", "learner_context", "analyze_route", "retrieve", "route",
+                "generate", "restore", "verify", "attach_check", "record"]
+    rule = "Fictional syllabus: AI assistants may be used for the problem sets if the use is cited."
+    with make_client({"routing": {"impl": "semantic"}, "rag": {"impl": "fixture"},
+                      "pipeline": pipeline}) as client:
+        world = World(client)
+        retriever = FakeCourseRetriever([Chunk(source="course/1/_course/syllabus.md",
+                                               topic=f"course:{world.course}", text=rule, score=0.9)])
+        world.services.course_retriever = retriever
+        transport = FakeLLMClient("Cloud answer.", model="fake-cloud", backend="cloud")
+        world.services.cloud_llm = CloudClient(transport)
+        alice = _login(world.app, "alice")
+        question = "Can I use an AI assistant for the problem sets?"
+        body = alice.post(f"{world.url}/ask", json={"question": question}).json()
+        assert body["route_target"] == "cloud" and body["answer"] == "Cloud answer."
+        assert retriever.kinds == ["logistics"]  # course-level files first
+        assert [s["source"] for s in body["sources"]] == ["course/1/_course/syllabus.md"]
+        assert transport.calls and rule in transport.sent_text()
+        assert not world.services.local_llm.calls or rule not in world.services.local_llm.sent_text()
+        sent = transport.sent_text().lower()
+        assert "alice" not in sent and str(world.students["alice"].student_id).lower() not in sent

@@ -40,8 +40,8 @@ Reflection #2 (ethics, individual) 11/18 · video 11/25 · Design Day 12/3 · fi
 | S15 | Demo courses get knowledge components, check items and a quiz (drafted by the instructor AI); a test that a quiz attempt moves the mastery estimate | S | done: `build_demo.py --learner-content`; test in `test_quizzes_v2.py` |
 | S16 | Course type of the CS50x pack (`ece` gives a CS course the ECE subject prompt) | S | done: `computer_science` profile (ece recognizers, computing prompt) for CS50x and 6.006 |
 | T15 | Routing by subject: the routing heads are trained on medical questions only; harder ECE questions get no sources | T | not started |
-| T16 | Student chat: after opening a past conversation there is no way back to a new, empty conversation | T | to reproduce |
-| T17 | Course-rule questions routed to the cloud skip retrieval ("Can I use ChatGPT for the problem sets?" gets no syllabus) | T | not started |
+| T16 | Student chat: after opening a past conversation there is no way back to a new, empty conversation | T | done: New chat while the first answer was still streaming did nothing (`c` stays empty, no rebuild); it now carries a stamp in the router state and also closes the phone sheet; UI tests added |
+| T17 | Course-rule questions routed to the cloud skip retrieval ("Can I use ChatGPT for the problem sets?" gets no syllabus) | T | done: the capability gate no longer skips retrieval inside a course or for logistics questions; the passages reach the cloud only through the CloudRequest; end-to-end test added |
 | Z22 | Privacy filter tests: held-out ECE set, `life_science` and `general` sets, E6 scores for the v4 types, a fresh held-out medical set | Z | not started |
 | Z23 | vLLM capacity: tokens per second in the load test, runs at 1 to 32 at a time, model limits set from them, step timing of one ask, GPU for more than 5 students at once | Z | needs the test host |
 | Z24 | The deployment's local model is its vLLM (`VLLM_BASE_URL`, `VLLM_KEY` replace `OLLAMA_URL`) | Z | done (#107) |

@@ -20,7 +20,12 @@ class RetrieveStep(BaseStep):
             raise RuntimeError("retrieve needs the privacy filter result")
         cfg = self.services.settings
         if cfg.routing.impl == "semantic" and ctx.semantic_analysis is not None:
-            if not self.services.router.capable(ctx.semantic_analysis, routing_threshold(ctx, self.services)):
+            threshold = routing_threshold(ctx, self.services)
+            capable = self.services.router.capable(ctx.semantic_analysis, threshold)
+            # The shortcut only saves the lookup for a hard concept question on the demo corpus. Inside a
+            # course, and for a logistics question, the cloud answer must still see the course's own rules
+            # (syllabus, policies); its passages reach the cloud only through the CloudRequest allow-list.
+            if not capable and ctx.question_type != "logistics" and course_scope.current() is None:
                 ctx.retrieval_status = "skipped"
                 await ctx.report("retrieval", "skipped", "Capability gate selected Cloud before retrieval.")
                 return ctx

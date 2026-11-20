@@ -120,9 +120,11 @@ Until this plan is merged into [v4-implementation-guide.md](v4-implementation-gu
   course-wide retrieval ranks homework and exams above lectures; "when is homework 4 due" (circ-28) is not
   found; retrieval is only lexical (add a semantic step).
 - **Routing (T15, T17)**: routing heads trained on medical questions only; course-rule questions routed to the
-  cloud skip retrieval.
+  cloud skip retrieval (T17 done: retrieval now also runs when the capability gate chooses the cloud, inside a
+  course and for logistics questions).
 - **Privacy tests (Z22)**: held-out ECE set, `life_science` and `general` sets, a fresh medical set, E6 scores.
-- **T16 (chat)**: after opening a past conversation there is no way back to a new, empty conversation.
+- **T16 (chat, done)**: after opening a past conversation there is no way back to a new, empty conversation
+  (fixed: New chat also works while the first answer is still streaming).
   Note: three merged PRs reused IDs of the task list: #106 calls itself T16 (code splitting), #103 T15 (forms)
   and #105 Z22 (web security; Z22 is the privacy test sets). The task list IDs above keep their meaning.
 - **Web audit leftovers**: screen-reader names for wide tables; page title stays on the previous page while
