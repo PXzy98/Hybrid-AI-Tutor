@@ -350,11 +350,12 @@ class AccountService:
             db.commit()
             return account
 
-    def delete_student(self, account_id: int) -> dict[str, int]:
-        """Delete the account, its sessions and all data keyed by its student_id (request_log anonymized)."""
+    def delete_student(self, account_id: int, actor_id: int | None = None) -> dict[str, int]:
+        """Delete the account, its sessions and all data keyed by its student_id (request_log anonymized);
+        the audit row of `actor_id` is written in the same transaction."""
         with self._db() as db:
             account = self._get(db, account_id, role="student")
             auth_sessions.revoke_all(db, account.id)
-            counts = purge_student(db, account.student_id)  # includes the account row itself
+            counts = purge_student(db, account.student_id, account.id, actor_id)  # includes the account row
             db.commit()
         return counts
