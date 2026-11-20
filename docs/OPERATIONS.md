@@ -32,7 +32,7 @@ Volumes: `db-data` (database), `tutor-data` (uploaded materials and indexes), `c
 |---|---|---|
 | `POSTGRES_PASSWORD` | yes | database password; Compose refuses to start without it |
 | `SITE_ADDRESS`, `HTTP_PORT=80`, `HTTPS_PORT=443` | production | the domain name turns on HTTPS |
-| `AUTH__COOKIE_SECURE=true` | production | session cookie only over HTTPS |
+| `AUTH__COOKIE_SECURE=true` | production | session cookie only over HTTPS; `docker-compose.prod.yml` sets it |
 | `INSTRUCTOR_USERNAME`, `INSTRUCTOR_INITIAL_PASSWORD` | first start | creates the first account (an **admin**), which must change its password at first login; remove both afterwards |
 | `SETTINGS_ENCRYPTION_KEY` | before anyone saves a model connection with an API key | Fernet key; **keep a copy**: without it stored API keys cannot be read and the api refuses to start |
 | `VLLM_BASE_URL`, `VLLM_KEY` | yes | the local model server: its OpenAI-compatible API root ending in `/v1`, and its `--api-key`; without the URL no local answers |
@@ -49,13 +49,25 @@ value can be overridden in `.env` as `SECTION__FIELD`, for example `LIMITS__ACCO
 ```bash
 git clone https://github.com/PXzy98/Hybrid-AI-Tutor.git && cd Hybrid-AI-Tutor
 cp .env.example .env   # then fill in section 2
-docker compose -f docker-compose.yml up -d --build
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 docker compose ps      # all services healthy
 curl -fsS https://<domain>/api/v1/health
 ```
 
-Use only `docker-compose.yml` in production: `docker-compose.override.yml` is the local-development file that
-publishes the database on `127.0.0.1:5432`.
+Use only `docker-compose.yml` plus `docker-compose.prod.yml` in production (always `-f` both):
+`docker-compose.override.yml` is the local-development file that publishes the database on `127.0.0.1:5432`.
+The production file sets `AUTH__COOKIE_SECURE=true` and `API__V1_ENABLED=false` (API v1 is frozen, serves only the
+demo course and is not used by the web app; `/api/v1/health` keeps answering for the health checks), and Compose
+refuses to start without `SITE_ADDRESS` (the domain). Because the api starts with a log warning
+(`deployment: ...`) when `SITE_ADDRESS` is a domain and the cookie is not secure, or when `VLLM_BASE_URL` points
+outside the host's network without `https` or without `VLLM_KEY`, check `docker compose logs api | grep deployment`.
+
+**Deploy checklist** (security review, M2 to M4):
+- [ ] `SITE_ADDRESS` is the domain, `HTTP_PORT=80`, `HTTPS_PORT=443` (HTTPS certificate obtained: `curl -I https://<domain>`).
+- [ ] Started with both Compose files; `curl -i https://<domain>/api/v1/topics` answers 404 and `https://<domain>/api/v1/health` answers 200.
+- [ ] The login response sets the cookie with `Secure` (browser developer tools or `curl -i`).
+- [ ] The vLLM runs with `--api-key` equal to `VLLM_KEY`, `VLLM_BASE_URL` starts with `https://`, and only the API port is open ([DEMO_VLLM.md](DEMO_VLLM.md)).
+- [ ] `docker compose logs api | grep deployment` prints nothing.
 
 **First login**: sign in with `INSTRUCTOR_USERNAME` and the initial password, change the password, then remove
 both variables from `.env`. This admin then:
@@ -72,7 +84,7 @@ and share it with the class. The code is shown once; rotating it again makes a n
 ```bash
 docker compose exec -T db pg_dump -U tutor -d tutor -Fc > backup-$(date +%F).dump   # section 5
 git pull
-docker compose -f docker-compose.yml up -d --build
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 ```
 
 The api upgrades the schema to the newest migration at startup, under a lock, so several api processes can

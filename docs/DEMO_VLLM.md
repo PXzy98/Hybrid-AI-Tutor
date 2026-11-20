@@ -6,6 +6,10 @@ with the same rules. The decision is Z's (2026-11-17); the cost options for late
 
 ## Rules (both ways)
 
+The rules are required steps, not advice (security review M4): the server receives original student text. The app
+logs a `deployment:` warning at start when `VLLM_BASE_URL` is outside the host's network and is not `https` or
+has no `VLLM_KEY`.
+
 1. **A key is required.** vLLM runs with `--api-key <VLLM_KEY>`; a request without it gets HTTP 401. The key is a
    new random value (for example `python -c "import secrets; print(secrets.token_urlsafe(32))"`), stored only in
    the production server's `.env` (`VLLM_KEY`) and in the vLLM start command, never in the repository, chat or
@@ -47,6 +51,9 @@ vLLM itself still runs with `--api-key`, so the tunnel or proxy is not the only 
 to the public `https://.../v1` address and `VLLM_KEY` as in way A.
 
 ## Check before the demo
+
+All three must hold before the address goes into `.env`: the key is set, the address is `https://`, and a port scan
+of the machine shows only the API port (`nmap -Pn <host>`).
 
 ```
 curl -s -o /dev/null -w "%{http_code}\n" https://<address>/v1/models                                  # 401: the key is required

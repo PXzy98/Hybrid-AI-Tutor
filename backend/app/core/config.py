@@ -199,6 +199,11 @@ class AuthConfig(Section):
     lockout_minutes: float = Field(15, gt=0)
 
 
+class ApiConfig(Section):
+    # false: every /api/v1 route except /api/v1/health answers 404; the v2 frontend never uses API v1 (M2)
+    v1_enabled: bool = True
+
+
 class LocalLLMConfig(Section):
     """The deployment's own model on its OpenAI-compatible server (vLLM, VLLM_BASE_URL); thinking is always
     off (boundary test: loops, 5-7x latency) and structured answers follow their JSON schema."""
@@ -322,6 +327,7 @@ class Settings(BaseSettings):
     learner: LearnerConfig = LearnerConfig()
     limits: LimitsConfig = LimitsConfig()
     auth: AuthConfig = AuthConfig()
+    api: ApiConfig = ApiConfig()
     llm: LLMConfig = LLMConfig()
     content: ContentConfig = ContentConfig()
     courses: dict[str, CourseConfig] = {}
@@ -331,6 +337,8 @@ class Settings(BaseSettings):
     # key its --api-key expects; without a URL the local model is unavailable (a model connection can add one)
     vllm_base_url: str | None = None
     vllm_key: SecretStr | None = None
+    # the proxy's address (Caddy): a domain name means HTTPS; read here only for the startup check M3
+    site_address: str | None = None
     cloud_base_url: str = "https://api.openai.com/v1"
     cloud_api_key: SecretStr | None = None
     # web search keys, one per provider: TAVILY_API_KEY for `api`, OPENAI_API_KEY for `openai`
