@@ -82,6 +82,9 @@ type StudentAccount = AdminStudent;
 
 /** V9: student accounts across courses. Accounts stay from term to term (the next class list finds them); an
  *  account that left is deactivated or deleted with its learning data. */
+// V17 W14: on a phone the table scrolls sideways; its actions stay in view at the right edge
+const STICKY = "sticky right-0 bg-card";
+
 function StudentAccountsCard() {
   const { t } = useI18n();
   const fmt = useFormat();
@@ -124,18 +127,18 @@ function StudentAccountsCard() {
             <TableHeader><TableRow>
               <TableHead>{t("members.name")}</TableHead><TableHead>{t("members.email")}</TableHead>
               <TableHead>{t("admin.courses")}</TableHead><TableHead>{t("admin.lastLogin")}</TableHead><TableHead>{t("members.status")}</TableHead>
-              <TableHead><span className="sr-only">{t("students.actions")}</span></TableHead>
+              <TableHead className={STICKY}><span className="sr-only">{t("students.actions")}</span></TableHead>
             </TableRow></TableHeader>
             <TableBody>
               {shown.map((a) => (
                 <Fragment key={a.account_id}>
                 <TableRow>
-                  <TableCell className="font-medium">{a.display_name}</TableCell>
+                  <TableCell className="font-medium whitespace-nowrap">{a.display_name}</TableCell>
                   <TableCell className="break-words">{a.email ?? "—"}</TableCell>
                   <TableCell className="tabular-nums">{a.courses}</TableCell>
                   <TableCell>{a.last_login_at ? fmt.date(a.last_login_at) : "—"}</TableCell>
                   <TableCell><Badge variant={a.active ? "success" : "secondary"}>{t(a.active ? "admin.active" : "admin.disabled")}</Badge></TableCell>
-                  <TableCell className="space-x-1 whitespace-nowrap text-right">
+                  <TableCell className={`space-x-1 whitespace-nowrap text-right ${STICKY}`}>
                     <Button type="button" size="sm" variant="outline" aria-label={t(a.active ? "admin.disableFor" : "admin.enableFor", { name: a.display_name })}
                             onClick={() => { setTemporary(null); update.mutate(a); }}>{t(a.active ? "admin.disable" : "admin.enable")}</Button>
                     <Button type="button" size="sm" variant="outline" aria-label={t("admin.resetFor", { name: a.display_name })}
@@ -237,7 +240,7 @@ function StaffCard({ selfId }: { selfId?: number }) {
             <TableHeader><TableRow>
               <TableHead>{t("members.name")}</TableHead><TableHead>{t("members.email")}</TableHead>
               <TableHead>{t("members.role")}</TableHead><TableHead>{t("members.status")}</TableHead>
-              <TableHead><span className="sr-only">{t("students.actions")}</span></TableHead>
+              <TableHead className={STICKY}><span className="sr-only">{t("students.actions")}</span></TableHead>
             </TableRow></TableHeader>
             <TableBody>
               {staff.data.map((a) => (
@@ -253,7 +256,7 @@ function StaffCard({ selfId }: { selfId?: number }) {
                     </Select>
                   </TableCell>
                   <TableCell><Badge variant={a.active ? "success" : "secondary"}>{t(a.active ? "admin.active" : "admin.disabled")}</Badge></TableCell>
-                  <TableCell className="space-x-1 text-right">
+                  <TableCell className={`space-x-1 whitespace-nowrap text-right ${STICKY}`}>
                     <Button type="button" size="sm" variant="outline" disabled={a.account_id === selfId}
                             aria-label={t(a.active ? "admin.disableFor" : "admin.enableFor", { name: a.display_name })}
                             onClick={() => update.mutate({ id: a.account_id, changes: { active: !a.active } })}>{t(a.active ? "admin.disable" : "admin.enable")}</Button>
