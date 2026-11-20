@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 
 from app.api.v2.errors import ApiError, ErrorCode
 from app.auth.deps import AnyUser, CurrentUser
-from app.platform import end_of_term
+from app.platform import end_of_term, next_term
 from app.platform.access import CourseAccess, require_course_role, require_system_role
 from app.platform.courses import CourseError
 
@@ -145,6 +145,38 @@ def list_courses(request: Request, user: AnyUser):
 def create_course(request: Request, body: CourseIn, user: Creator):
     """The creator becomes the course's first instructor."""
     return _course_out(_courses(request).create(user.account_id, **body.model_dump()), request)
+
+
+class NextTermIn(BaseModel):
+    code: str = Field(min_length=1, max_length=32)
+    title: str = Field(min_length=1, max_length=200)
+    term_label: str = Field("", max_length=64)
+
+
+class NextTermOut(BaseModel):
+    course: CourseOut
+    copied: dict[str, int]  # modules, kcs, items, misconceptions, quizzes (as drafts), materials
+    rebuild_job_id: int | None  # the index rebuild of the new course (None: no materials)
+
+
+@router.post("/courses/{course_id}/copy", response_model=NextTermOut, status_code=201,
+             operation_id="courses_copy",
+             responses={409: {"description": "a course with this code exists"},
+                        422: {"description": "the course type is not enabled on this system"}})
+def copy_course(request: Request, body: NextTermIn, access: CourseInstructor):
+    """Start next term's course: a new course with this course's settings, modules, content, draft quizzes
+    and materials. The caller is its instructor. No student, learner data, log, survey answer or
+    invitation code is copied; the new course has none until a code is created."""
+    from app.api.v2.content import _editor
+
+    services = request.app.state.services
+    done = next_term.copy_course(
+        services.engine, services.courses, services.settings_service, _editor(request),
+        services.settings.data_path(), access.course.id, access.account_id, code=body.code,
+        title=body.title, term_label=body.term_label,
+        max_import_bytes=services.settings.limits.content.max_import_bytes)
+    return NextTermOut(course=_course_out(done.course, request), copied=done.copied,
+                       rebuild_job_id=done.rebuild_job_id)
 
 
 @router.get("/courses/{course_id}", response_model=CourseOut, operation_id="courses_get")

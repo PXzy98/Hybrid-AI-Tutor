@@ -1413,6 +1413,55 @@
         }
       }
     },
+    "/api/v2/courses/{course_id}/copy": {
+      "post": {
+        "tags": [
+          "courses"
+        ],
+        "summary": "Copy Course",
+        "description": "Start next term's course: a new course with this course's settings, modules, content, draft quizzes\nand materials. The caller is its instructor. No student, learner data, log, survey answer or\ninvitation code is copied; the new course has none until a code is created.",
+        "operationId": "courses_copy",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NextTermIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NextTermOut"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "a course with this code exists"
+          },
+          "422": {
+            "description": "the course type is not enabled on this system"
+          }
+        }
+      }
+    },
     "/api/v2/courses/{course_id}": {
       "get": {
         "tags": [
@@ -12023,6 +12072,66 @@
           "temporary_password"
         ],
         "title": "NewStaffOut"
+      },
+      "NextTermIn": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Code"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "term_label": {
+            "type": "string",
+            "maxLength": 64,
+            "title": "Term Label",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "title"
+        ],
+        "title": "NextTermIn"
+      },
+      "NextTermOut": {
+        "properties": {
+          "course": {
+            "$ref": "#/components/schemas/CourseOut"
+          },
+          "copied": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Copied"
+          },
+          "rebuild_job_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rebuild Job Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "course",
+          "copied",
+          "rebuild_job_id"
+        ],
+        "title": "NextTermOut"
       },
       "OllamaStatus": {
         "properties": {

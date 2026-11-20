@@ -234,6 +234,13 @@ code to confirm, then **Export and delete**:
 The course, modules, KCs, items, materials, settings, quizzes and instructors stay; accounts stay. A course
 that will not run again can be archived after an ended term (**API only**: `POST .../archive`).
 
+**Start next term's course.** On **Settings**, **Start next term's course**: enter the new code, title and term,
+then **Create the new course**. The new course gets this course's settings, guideline, modules, KCs, items,
+misconceptions, quizzes (as drafts, without results) and the course materials (files and web pages, with their
+module; the index is rebuilt in the background). Students and everything about them (class list, learner data,
+conversations, logs, survey answers) are not copied, and neither is the invitation code or a model connection
+of this course (with its key): create the code and add the class list in the new course. You are its instructor.
+
 ## 12a. Accounts from term to term
 
 Who does what each term (instructor I, administrator A):
@@ -241,7 +248,7 @@ Who does what each term (instructor I, administrator A):
 | When | Step | Who | Where |
 |---|---|---|---|
 | before the term | create instructor accounts (temporary password shown once) | A | **Administration** > instructor accounts |
-| before the term | a new course, or import last term's content into a new course (section 12) | I | **My courses**, **Course content** > import |
+| before the term | start next term's course from this one (section 12), or a new empty course | I | **Settings** > **Start next term's course**, or **My courses** |
 | first week | import the class list (CSV with e-mail and name); existing accounts are added, new students join with the invitation code | I | **Members** > import, invitation code |
 | during the term | a student forgot the password: **Reset password** (temporary, shown once) | I or A | **Members**, or **Administration** > **Student accounts** |
 | during the term | a student dropped the course: remove the membership | I | **Members** > remove |

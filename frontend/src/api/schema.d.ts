@@ -637,6 +637,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/courses/{course_id}/copy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Copy Course
+         * @description Start next term's course: a new course with this course's settings, modules, content, draft quizzes
+         *     and materials. The caller is its instructor. No student, learner data, log, survey answer or
+         *     invitation code is copied; the new course has none until a code is created.
+         */
+        post: operations["courses_copy"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/courses/{course_id}": {
         parameters: {
             query?: never;
@@ -4136,6 +4158,28 @@ export interface components {
             /** Temporary Password */
             temporary_password: string;
         };
+        /** NextTermIn */
+        NextTermIn: {
+            /** Code */
+            code: string;
+            /** Title */
+            title: string;
+            /**
+             * Term Label
+             * @default
+             */
+            term_label?: string;
+        };
+        /** NextTermOut */
+        NextTermOut: {
+            course: components["schemas"]["CourseOut"];
+            /** Copied */
+            copied: {
+                [key: string]: number;
+            };
+            /** Rebuild Job Id */
+            rebuild_job_id: number | null;
+        };
         /** OllamaStatus */
         OllamaStatus: {
             /** Reachable */
@@ -6399,6 +6443,46 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+        };
+    };
+    courses_copy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NextTermIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NextTermOut"];
+                };
+            };
+            /** @description a course with this code exists */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description the course type is not enabled on this system */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
