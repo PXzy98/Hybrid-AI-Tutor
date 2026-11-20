@@ -83,9 +83,9 @@ describe("system administration", () => {
   it("disables an account", async () => {
     const calls = mockApi(adminRoutes({ "PATCH /admin/instructors/2": (c: { body: unknown }) => ({ ...staff[1], ...(c.body as object) }) }));
     renderApp("/admin");
-    await userEvent.setup().click(await screen.findByRole("button", { name: "Disable Ida Instructor" }));
+    await userEvent.setup().click(await screen.findByRole("button", { name: "Deactivate Ida Instructor" }));
     await waitFor(() => expect(calls.find((c) => c.method === "PATCH")?.body).toEqual({ active: false }));
-    expect(screen.getByRole("button", { name: "Disable Ada Admin" })).toBeDisabled(); // not your own account
+    expect(screen.getByRole("button", { name: "Deactivate Ada Admin" })).toBeDisabled(); // not your own account
   });
 
   it("saves the system settings with the version that was read and explains a 409", async () => {

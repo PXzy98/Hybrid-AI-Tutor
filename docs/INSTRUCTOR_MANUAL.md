@@ -246,8 +246,8 @@ Who does what each term (instructor I, administrator A):
 | during the term | a student forgot the password: **Reset password** (temporary, shown once) | I or A | **Members**, or **Administration** > **Student accounts** |
 | during the term | a student dropped the course: remove the membership | I | **Members** > remove |
 | end of term | export, then end the term (deletes the course's student data and memberships) | I | **End of term** |
-| after the term | students who left the university: **Disable** (no more logins) or **Delete** (the account and all of its learning data in every course; cannot be undone) | A | **Administration** > **Student accounts** |
-| after the term | instructors who left: **Disable** | A | **Administration** > instructor accounts |
+| after the term | students who left the university: **Deactivate** (no more logins) or **Delete** (the account and all of its learning data in every course; cannot be undone) | A | **Administration** > **Student accounts** |
+| after the term | instructors who left: **Deactivate** | A | **Administration** > instructor accounts |
 
 Student accounts stay from term to term: next term's class list finds them by e-mail, and a student who keeps
 the account keeps the same login. There is no university login yet (section 13).
