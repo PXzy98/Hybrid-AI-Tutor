@@ -135,6 +135,12 @@ total, one more row (or the total) is hidden too, so "hidden" rows can be more t
 attempts show "hidden" below 5 and the average score is rounded to tenths (60%, 70%). The administrator sees the same counts for every course on
 **Administration** (**Use of the tutor in every course**).
 
+**Topics the class finds hard** (on **Class overview**): from quiz answers, the knowledge components that at
+least 5 students answered and fewer than 60% got right, with the share correct. **Draft extra material** opens
+the AI assistant with a custom request for that topic (another explanation, worked examples, practice
+questions); you review the draft before students see it. No student is named. Students who are weak on a topic
+get **Explain it another way** on their own **My progress** (you do not see who uses it).
+
 **Class overview**: totals per **Module**: **Students with a profile**, **Topics**, **Open misconceptions**,
 **Students per level**, and shared misconceptions. Groups smaller than 5 are hidden ("hidden"), in both modes.
 

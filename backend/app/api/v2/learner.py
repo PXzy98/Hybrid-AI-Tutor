@@ -27,12 +27,14 @@ from app.api.v2 import localize
 from app.api.v2.ask import _scope
 from app.api.v2.errors import ApiError, ErrorCode
 from app.core.schemas import CheckItemPublic, Preferences
+from app.instructor_ai.insights_source import MIN_GROUP as INSIGHTS_MIN_GROUP
 from app.learner import course_views
 from app.learner.checks import diagnostic_items, evidence_for, grade
 from app.learner.instructor_view import InstructorProfileView, NotVisible, profile_for_instructor
 from app.learner.preference import PreferenceSignal
 from app.learner.statistics import course_statistics
 from app.learner.visibility_policy import VisibilityDenied
+from app.learner.weak_topics import WEAK_BELOW, weak_topics
 from app.platform.access import CourseAccess, require_course_role
 from app.platform.course_scope import CourseScope
 from app.privacy.profiles import consent_text, privacy_profile
@@ -298,6 +300,32 @@ def get_course_statistics(access: CourseInstructor, request: Request):
     min_group = services.settings.learner.class_summary_min_group
     stats = course_statistics(services.engine, access.course.id, min_group)
     return CourseStatisticsOut(**{k: v for k, v in asdict(stats).items() if k != "course_id"})
+
+
+class WeakTopicOut(BaseModel):
+    kc_code: str
+    name: str
+    module_id: int | None
+    students: int
+    correct_rate: float
+
+
+class WeakTopicsOut(BaseModel):
+    """KCs the class answers badly in quizzes (v5 V8): only with at least `min_group` students each."""
+    min_group: int
+    weak_below: float
+    topics: list[WeakTopicOut]
+
+
+@router.get("/courses/{course_id}/weak-topics", response_model=WeakTopicsOut,
+            operation_id="learner_weak_topics")
+def get_weak_topics(access: CourseInstructor, request: Request):
+    """Topics the class finds hard, from quiz answers; counts and shares only, never a student."""
+    services = _services(request)
+    # the core's lower bound of 5, as for insights: the setting may raise it, never lower it
+    min_group = max(INSIGHTS_MIN_GROUP, services.settings.learner.class_summary_min_group)
+    found = weak_topics(services.engine, access.course.id, min_group)
+    return WeakTopicsOut(min_group=min_group, weak_below=WEAK_BELOW, topics=[asdict(w) for w in found])
 
 
 @router.get("/courses/{course_id}/students/{student_id}/overview", response_model=InstructorProfileView,

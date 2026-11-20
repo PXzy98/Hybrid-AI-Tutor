@@ -2066,6 +2066,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/courses/{course_id}/weak-topics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Weak Topics
+         * @description Topics the class finds hard, from quiz answers; counts and shares only, never a student.
+         */
+        get: operations["learner_weak_topics"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/courses/{course_id}/students/{student_id}/overview": {
         parameters: {
             query?: never;
@@ -5181,6 +5201,31 @@ export interface components {
             visible_to_instructor: boolean;
             /** Visible Since */
             visible_since?: string | null;
+        };
+        /** WeakTopicOut */
+        WeakTopicOut: {
+            /** Kc Code */
+            kc_code: string;
+            /** Name */
+            name: string;
+            /** Module Id */
+            module_id: number | null;
+            /** Students */
+            students: number;
+            /** Correct Rate */
+            correct_rate: number;
+        };
+        /**
+         * WeakTopicsOut
+         * @description KCs the class answers badly in quizzes (v5 V8): only with at least `min_group` students each.
+         */
+        WeakTopicsOut: {
+            /** Min Group */
+            min_group: number;
+            /** Weak Below */
+            weak_below: number;
+            /** Topics */
+            topics: components["schemas"]["WeakTopicOut"][];
         };
         /** WeekCountOut */
         WeekCountOut: {
@@ -9619,6 +9664,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CourseStatisticsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    learner_weak_topics: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WeakTopicsOut"];
                 };
             };
             /** @description Validation Error */
