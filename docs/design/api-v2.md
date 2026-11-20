@@ -80,6 +80,7 @@ logged in. Owner = component owner who implements it.
 | `POST /courses/{course_id}/exports` | I | an export of the course as it is now, without deleting anything (to check it before ending the term; audited `course.export`) |
 | `POST /courses/{course_id}/end-term` | I | export then delete student data (course-structure 3.5) |
 | `GET /courses/{course_id}/exports/{export_id}` | I | download the export |
+| `POST /courses/{course_id}/copy` | I | start next term's course (V17 W12): body `{code, title, term_label}`; a new course of the same type whose creator is its instructor, with the settings (not the source course's own model connections), guideline, modules, KCs, items, misconceptions, quizzes as drafts and the materials (files copied, index rebuild queued); no members, learner data, logs, survey answers or invitation code; 409 taken code, 422 type not enabled; audited `course.copy` |
 | `POST /courses/{course_id}/archive` | I | archive |
 | `GET /courses/{course_id}/settings`, `PUT /courses/{course_id}/settings` | I | course settings (course-structure 6); `PUT` sends the `version` it read, 409 if it changed |
 | `GET /courses/{course_id}/settings/history`, `POST /courses/{course_id}/settings/restore/{history_id}` | I | change history and undo |
