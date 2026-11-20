@@ -280,11 +280,14 @@ function SystemSettingsForm({ initial, onConflict }: { initial: SystemSettings; 
   const { t } = useI18n();
   const qc = useQueryClient();
   const [values, setValues] = useState<SystemValues>(initial.values);
-  const [types, setTypes] = useState((initial.values.enabled_course_types ?? []).join(", "));
+  const initialTypes = (initial.values.enabled_course_types ?? []).join(", ");
+  const [types, setTypes] = useState(initialTypes);
+  // untouched: keep what is stored ([] = course creation off, null = every type); typed: empty means every type
+  const typesToSave = () => (types === initialTypes ? initial.values.enabled_course_types ?? null
+                                                    : splitTypes(types).length ? splitTypes(types) : null);
   const endpoints = useQuery({ queryKey: endpointsKey(null), queryFn: () => api.modelEndpoints(null) });
   const save = useMutation({
-    // an empty field means every type (null); [] would turn course creation off
-    mutationFn: () => api.saveSystemSettings({ ...values, enabled_course_types: splitTypes(types).length ? splitTypes(types) : null }, initial.version),
+    mutationFn: () => api.saveSystemSettings({ ...values, enabled_course_types: typesToSave() }, initial.version),
     onSuccess: (fresh) => { onConflict(false); qc.setQueryData(["admin-settings"], fresh); },
     onError: (e) => {
       const stale = e instanceof ApiError && e.status === 409;
@@ -331,7 +334,8 @@ function SystemSettingsForm({ initial, onConflict }: { initial: SystemSettings; 
             <Input id="sys-llm" value={values.local_llm_model ?? ""} onChange={(e) => set({ local_llm_model: e.target.value })} /></div>
           <div className="grid gap-1.5 sm:col-span-2"><Label htmlFor="sys-types">{t("admin.courseTypes")}</Label>
             <Input id="sys-types" value={types} onChange={(e) => setTypes(e.target.value)} />
-            <p className="text-xs text-muted-foreground">{t("admin.courseTypesHint")}</p></div>
+            <p className="text-xs text-muted-foreground">{t("admin.courseTypesHint")}</p>
+            {initial.values.enabled_course_types?.length === 0 && types === "" && <p className="text-xs text-destructive">{t("admin.courseTypesNone")}</p>}</div>
           <div className="grid gap-1.5"><Label htmlFor="sys-dlocal">{t("admin.defaultLocal")}</Label>{endpointSelect("sys-dlocal", "default_local_endpoint_id", "trusted_local")}</div>
           <div className="grid gap-1.5"><Label htmlFor="sys-dcloud">{t("admin.defaultCloud")}</Label>{endpointSelect("sys-dcloud", "default_cloud_endpoint_id", "external")}</div>
           <div className="space-y-2 sm:col-span-2">
