@@ -152,14 +152,15 @@ Short prompts (no course passages):
 | 16 | 10.7 / 13.7 | 0.17 / 3.7 | 37 | 423 | 0 |
 | 32 | 14.2 / 21.4 | 3.8 / 10.9 | 28 | 476 | 0 |
 
-With about 1500 words of passages in the prompt, as a real ask sends (prefill dominates):
+With about 1500 words of passages in the prompt, as a real ask sends (prefill dominates; every request has its
+own passages, so a server with prefix caching cannot reuse an earlier prompt):
 
 | At the same time | Latency p50 / p95 (s) | First token p50 / p95 (s) | Tokens/s per request | Total tokens/s | Errors |
 |---|---|---|---|---|---|
-| 1 | 3.3 / 3.7 | 0.08 / 0.5 | 40 | 40 | 0 |
-| 8 | 14.2 / 22.2 | 2.1 / 12.9 | 25 | 122 | 0 |
-| 16 | 24.4 / 32.5 | 12.2 / 26.5 | 17 | 139 | 0 |
-| 32 | 43.4 / 66.9 | 30.2 / 58.3 | 12 | 157 | 0 |
+| 1 | 3.8 / 4.0 | 0.5 / 0.5 | 38 | 38 | 0 |
+| 8 | 14.8 / 22.6 | 2.3 / 13.2 | 24 | 122 | 0 |
+| 16 | 24.9 / 33.3 | 15.4 / 26.4 | 17 | 142 | 0 |
+| 32 | 41.3 / 65.9 | 30.1 / 56.3 | 12 | 161 | 0 |
 
 No request failed or timed out at any level. Findings:
 
@@ -167,14 +168,18 @@ No request failed or timed out at any level. Findings:
   never drops below 27 tokens/s (reading speed is about 5 to 10).
 - Real asks are limited by reading the passages, not by writing the answer: total throughput stops at about
   120 to 160 tokens/s from 8 at the same time on, so more concurrency only makes everyone wait longer
-  (first token p50 12 s at 16, 30 s at 32).
+  (first token p50 15 s at 16, 30 s at 32).
 - Recommendation for the model connection: `max_concurrent` 8 (now 4; more than 8 adds under 30% throughput and
-  doubles the wait) and `queue_timeout_seconds` stays 60 (with 8 slots and about 14 s per answer, a request
-  among 32 waits about 45 s for a slot; a check-item draft of 45 to 50 s holds a slot for that long). Not changed
+  doubles the wait) and `queue_timeout_seconds` stays 60. With 8 slots and about 15 s per answer, the queue
+  drains about 32 asks a minute: in a burst, the first 8 start at once and about 32 more get a slot within the
+  60 s limit, so roughly the first 40 asks of a burst are answered and the rest get "the model is busy" and
+  must ask again (a longer limit only makes them wait longer). A check-item draft of 45 to 50 s holds a slot
+  for that long. Not changed
   in `config.yaml` by this task; set it per connection in the admin page or change the default.
 - One GPU (this server) serves about 8 answers at the same time with p95 under 25 s. If a student asks about
   once every 2 minutes while working, that is roughly 60 students actively working at the same time (assumption,
-  not measured); a class of 100 where everyone asks in the same minute waits up to about 45 s in the queue.
+  not measured); if a class of 100 asks all at once, about 40 are answered within a minute and the others
+  are told the model is busy (about 13 rounds of 8, over 3 minutes, to answer all of them).
   For more than that, a second GPU (two connections) is cheaper than raising the limit.
 - Not measured: one full ask through the app (needs accounts; the retrieval, evidence and privacy steps add
   their own time on the app host) and the GPU model of the lab server.

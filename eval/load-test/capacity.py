@@ -10,6 +10,7 @@ The base URL and key are read from the env file (VLLM_BASE_URL, VLLM_KEY) and ne
 """
 import argparse
 import asyncio
+import itertools
 import json
 import statistics
 import time
@@ -42,11 +43,17 @@ def auth(key):
     return {"Authorization": f"Bearer {key}"} if key else {}
 
 
+_REQUEST_IDS = itertools.count(1)  # a new id for every request of the whole run
+
+
 async def one(client, url, key, model, i, max_tokens, timeout, context_words=0):
     context = ""
-    if context_words:  # fictional passages like retrieved course text; unique per request (no prefix cache)
+    if context_words:
+        # fictional passages like retrieved course text, unique for every request of the run (also across waves
+        # and levels), so a server with prefix caching cannot reuse an earlier prompt
+        uid = next(_REQUEST_IDS)
         passages = " ".join(
-            f"Passage {i}-{j}: the fictional module {j} covers topic {i * 7 + j} with definitions and examples."
+            f"Passage {uid}-{j}: the fictional module {j} covers topic {uid * 7 + j} with definitions and examples."
             for j in range(context_words // 14))
         context = "Course passages (fictional).\n" + passages + "\n\n"
     body = {"model": model, "stream": True, "max_tokens": max_tokens, "temperature": 0.2,
