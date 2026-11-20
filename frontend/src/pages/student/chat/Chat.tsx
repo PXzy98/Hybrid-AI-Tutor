@@ -25,13 +25,19 @@ export default function Chat({ course }: { course: Course }) {
   // itself starts is written to the URL, and must not rebuild it.
   const shown = useRef<string | null>(conversationId);
   const [epoch, setEpoch] = useState(0);
-  if (conversationId !== shown.current) {
+  // New chat also while `c` is already empty (the first answer of a conversation is still streaming): the sidebar
+  // sends a new stamp in the router state
+  const location = useLocation();
+  const newChat = (location.state as { newChat?: number } | null)?.newChat;
+  const newChatSeen = useRef(newChat);
+  const asked = newChat !== undefined && newChat !== newChatSeen.current;
+  newChatSeen.current = newChat ?? newChatSeen.current;
+  if (conversationId !== shown.current || asked) {
     shown.current = conversationId;
     setEpoch((e) => e + 1);
   }
   // V8: "Explain it another way" on My progress hands over a prepared request (router state, never the URL);
   // it fills the input of a new conversation, the student still decides to send it
-  const location = useLocation();
   const navigate = useNavigate();
   const ask = (location.state as { ask?: string } | null)?.ask;
   const [prefill, setPrefill] = useState<{ text: string; n: number } | null>(null);

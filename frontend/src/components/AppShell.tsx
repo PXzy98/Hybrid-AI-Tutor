@@ -50,7 +50,7 @@ export default function AppShell({ me }: { me: Me }) {
   }, []);
 
   // the mobile sheet closes on navigation
-  useEffect(() => setMobileOpen(false), [location.pathname, location.search]);
+  useEffect(() => setMobileOpen(false), [location.pathname, location.search, location.key]);
 
   // and when the window grows to the desktop layout: md:hidden hides only its content, not its overlay
   useEffect(() => {
