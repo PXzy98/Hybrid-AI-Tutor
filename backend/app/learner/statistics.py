@@ -1,6 +1,8 @@
 """Class statistics (v5 V2): how many students use the tutor, how many questions, which modules, quiz
 averages. Counts only, from `request_log` (one row per question, no question text is read here), course
-membership and quiz attempts. Only current active members of the course are counted.
+membership and quiz attempts. Every question and attempt of the course counts, also of students who left
+it: the counts must not change when an instructor removes a member, or two snapshots would give that student's
+activity by subtraction (so the active students may exceed the students enrolled now).
 
 Suppression (so that no number describes one or a few students):
 - the minimum group is `max(MIN_GROUP, learner.class_summary_min_group)`, as for the class insights;
@@ -20,7 +22,7 @@ from sqlmodel import Session, col, select
 
 from app.pipeline.steps.generate import LOCAL_CAPABILITY_NOTE
 from app.platform.course_scope import GENERAL_TOPIC
-from app.storage.models import Account, Course, CourseMember, Module, Quiz, QuizAttempt, RequestLog
+from app.storage.models import Course, CourseMember, Module, Quiz, QuizAttempt, RequestLog
 
 MIN_GROUP = 5  # the core's lower bound; the setting `learner.class_summary_min_group` may raise it
 WEEKS = 8  # weeks of the per-week counts, the current one included
@@ -54,7 +56,7 @@ class CourseStatistics:
     course_id: int
     min_group: int  # the minimum group in effect (at least MIN_GROUP)
     students_enrolled: int
-    active_students: int | None  # current members who asked at least one question
+    active_students: int | None  # students who asked at least one question (also those who left since)
     active_students_7d: int | None
     questions_total: int | None
     questions_7d: int | None
@@ -126,13 +128,8 @@ def _complement(total_shown: bool, parts: list[Tally], group: int, *, shown: lis
 
 
 def _member_rows(*columns):
-    """`request_log` rows of students who are currently active members of the row's course: a student who
-    left the course or deleted the account (student_id "deleted") is not counted."""
-    return (select(*columns).select_from(RequestLog)
-            .join(Account, col(Account.student_id) == col(RequestLog.student_id))
-            .join(CourseMember, (col(CourseMember.account_id) == col(Account.id))
-                  & (col(CourseMember.course_id) == col(RequestLog.course_id))
-                  & (col(CourseMember.role) == "student") & (col(CourseMember.status) == "active")))
+    """`request_log` rows, whoever is a member now: a stable cohort, so removing a member changes no count."""
+    return select(*columns).select_from(RequestLog)
 
 
 def _tally(*where) -> tuple:
@@ -204,10 +201,6 @@ def course_statistics(engine: Engine, course_id: int, min_group: int, *, now: da
         scored = (func.count(), func.avg(cast(QuizAttempt.score, Float) / func.nullif(QuizAttempt.total, 0)))
         by_quiz = {q: (n, avg) for q, n, avg in db.exec(
             select(QuizAttempt.quiz_id, *scored).select_from(QuizAttempt)
-            .join(Account, col(Account.student_id) == col(QuizAttempt.student_id))
-            .join(CourseMember, (col(CourseMember.account_id) == col(Account.id))
-                  & (col(CourseMember.course_id) == course_id) & (col(CourseMember.role) == "student")
-                  & (col(CourseMember.status) == "active"))
             .where(col(QuizAttempt.quiz_id).in_([q.id for q in quizzes]), QuizAttempt.total > 0)
             .group_by(QuizAttempt.quiz_id))} if quizzes else {}
         enrolled = _enrolled(db, course_id)

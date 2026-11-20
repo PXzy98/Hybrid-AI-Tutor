@@ -94,16 +94,22 @@ def test_nothing_asked_shows_zeros(world):
     assert all(w["questions"] == 0 and w["students"] == 0 for w in stats["weeks"])
 
 
-def test_only_current_members_count(world):
+def test_removing_a_member_changes_no_count(world):
+    """An instructor who removes a student and reads the statistics again must not learn that student's
+    activity by subtraction: the counts stay the same, only the students enrolled change."""
     for name in ("alice", "cara", "dan", "eve", "fay", "gus"):
         _ask(world, name, world.module)
+    _ask(world, "cara", world.module)
+    before = _stats(world)
     with Session(world.services.engine) as db:  # cara leaves the course
         db.delete(db.exec(select(CourseMember).where(CourseMember.account_id == world.students["cara"].id,
                                                      CourseMember.course_id == world.course)).one())
         db.commit()
-    stats = _stats(world)
-    assert stats["students_enrolled"] == 6 and stats["active_students"] == 5
-    assert stats["questions_total"] == 5 and stats["active_students"] <= stats["students_enrolled"]
+    after = _stats(world)
+    assert after["students_enrolled"] == before["students_enrolled"] - 1
+    unchanged = [k for k in before if k != "students_enrolled"]
+    assert {k: after[k] for k in unchanged} == {k: before[k] for k in unchanged}
+    assert after["questions_total"] == 7 and after["active_students"] == 6
 
 
 def _published_quiz(world) -> int:
