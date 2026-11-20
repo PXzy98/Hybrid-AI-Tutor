@@ -25,7 +25,7 @@ Until this plan is merged into [v4-implementation-guide.md](v4-implementation-gu
 | V15 a student's own answer instruction | merged (#121) |
 | V16 cloud drafts for public material | merged (#122); the before/after comparison of five drafts per kind needs the vLLM |
 | V11 to V14, T10 notes | merged (#116): `DOMAIN_NAMES.md`, `DEMO_VLLM.md`, `GPU_COST.md`, `design/extension-points.md`, `DEMO_SCRIPT.md` |
-| Z27 security review | merged (#117); H1, M1, L4 fixed; M2 to M4 and L1 to L3 open |
+| Z27 security review | merged (#117); H1, M1, L4 fixed; M2 to M4 fixed (#130); L1 to L3 fixed (#132) |
 | V17 browser test | admin and instructor parts done on the integration build (fictional data); student part and every flow that needs the local model still to run; findings in section 9 |
 | End of term to next term | done once in V17 (export, new course from the YAML export); gaps in W12 |
 | Settings bug from the meeting | Z to describe it; an empty "Enabled course types" field that switched course creation off was fixed in #127 |
@@ -134,7 +134,7 @@ Until this plan is merged into [v4-implementation-guide.md](v4-implementation-gu
   unit; empty top bar on some pages; long instructor sidebar; pale disabled buttons; favicon.
 - **Admin page gaps**: misconceptions can only be retired, not deleted; system settings do not edit `checkers` /
   `knowledge_model`; course types are a text field; instructors cannot pick system model connections.
-- **Dependencies**: `transformers` 5, `react-router` 7 (CI advisories).
+- **Dependencies**: done (Z27): `transformers` 5, `react-router` 7, `katex` 0.19; `vite`/`vitest` advisories are dev-only.
 - **Handover (T12, S12)**: routing, frontend and web search notes; `docs/HANDOVER.md` and the progress pages.
 - Lavin's second review of the 30 revised check items.
 - From the client: real course material and an instructor to try the drafts; a maintainer after December.

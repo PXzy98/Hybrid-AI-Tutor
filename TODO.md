@@ -31,7 +31,7 @@ Reflection #2 (ethics, individual) 11/18 · video 11/25 · Design Day 12/3 · fi
 | T10 | Video (11/25); French UI screenshots to Lavin | T | demo script merged (#116); screenshots not sent |
 | T11 | Renaming | T | waits for the project name |
 | T12 | Routing, frontend and web search handover notes | T | manuals done |
-| — | `transformers` 5, `react-router` 7, `vite`/`vitest` (CI advisories) | T, Z | open |
+| — | `transformers` 5, `react-router` 7, `katex` done (Z27); `vite`/`vitest` (dev-only advisories) | T, Z | partly done |
 | Z13, Z6, Z2 | Deploy on the test host with monitoring; vLLM load test; local speed of the 9B model | Z | waits for server access |
 | Z13 | Choose the alert receiver | Z | waits for the client |
 | S12 | Self-review and handover checklist | S | handover notes in `docs/history/s-tasks/` |
@@ -47,7 +47,7 @@ Reflection #2 (ethics, individual) 11/18 · video 11/25 · Design Day 12/3 · fi
 | Z24 | The deployment's local model is its vLLM (`VLLM_BASE_URL`, `VLLM_KEY` replace `OLLAMA_URL`) | Z | done (#107) |
 | Z25 | Document scan refuses public course text (CS50x `pset_5.md` as `GRADE`); check all eight packs | Z | done: three allele exceptions never matched (a backspace instead of `\b`); 0 of 304 pack files refused |
 | Z26 | The module guideline (Modules page) is stored but never reaches the answering model; use it for questions scoped to that module | Z | done: course and module guidelines reach the answering model (local and cloud) |
-| Z27 | Security review of the whole system (auth, CSRF, access, SSRF, uploads, prompt injection, proxy and networks, keys, logs, scans), report in `docs/SECURITY_REVIEW.md` | Z | report merged (#117); H1, M1, L4 fixed; M2, M3, M4 before the public deploy; L1 to L3 open |
+| Z27 | Security review of the whole system (auth, CSRF, access, SSRF, uploads, prompt injection, proxy and networks, keys, logs, scans), report in `docs/SECURITY_REVIEW.md` | Z | report merged (#117); H1, M1, L4 fixed; M2, M3, M4 fixed (#130); L1 to L3 fixed (#132) |
 
 Not this term: targeted material for single students (only the learning plan with notes now). Tests and demos
 use the eight open course packs in `data/demo_courses/`.
