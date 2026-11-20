@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 
 import { ApiError } from "@/api/client";
-import { api, type Staff, type SystemSettings, type SystemValues } from "@/api/endpoints";
+import { api, type AdminStudent, type Staff, type SystemSettings, type SystemValues } from "@/api/endpoints";
 import { useMe } from "@/auth";
 import { ErrorNote, Loading, PageHeader, StatCard, StatusText } from "@/components/common";
 import ModelEndpoints, { endpointsKey } from "@/components/ModelEndpoints";
@@ -10,11 +10,13 @@ import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useI18n } from "@/i18n";
+import { useFormat } from "@/lib/format";
 
 /** System administration: instructor accounts, system settings and model connections. Only the link is hidden for
  * other roles; every request below is checked by the server. */
@@ -27,6 +29,7 @@ export default function Admin() {
       <PageHeader level={1} title={t("admin.title")} />
       <UsageCard />
       <StaffCard selfId={me?.account_id} />
+      <StudentAccountsCard />
       <SystemSettingsCard />
       <ModelEndpoints courseId={null} />
     </div>
@@ -70,6 +73,90 @@ function UsageCard() {
             </Table>
           </>
         )}
+      </CardContent>
+    </Card>
+  );
+}
+
+type StudentAccount = AdminStudent;
+
+/** V9: student accounts across courses. Accounts stay from term to term (the next class list finds them); an
+ *  account that left is deactivated or deleted with its learning data. */
+function StudentAccountsCard() {
+  const { t } = useI18n();
+  const fmt = useFormat();
+  const qc = useQueryClient();
+  const students = useQuery({ queryKey: ["admin-students"], queryFn: api.students });
+  const refresh = () => qc.invalidateQueries({ queryKey: ["admin-students"] });
+  const [search, setSearch] = useState("");
+  const [temporary, setTemporary] = useState<{ name: string; password: string } | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<StudentAccount | null>(null);
+  const update = useMutation({ mutationFn: (a: StudentAccount) => api.updateStudent(a.account_id, !a.active), onSuccess: refresh });
+  const reset = useMutation({
+    mutationFn: async (a: StudentAccount) => ({ name: a.display_name, password: (await api.resetStudentPassword(a.account_id)).temporary_password }),
+    onSuccess: setTemporary,
+  });
+  const remove = useMutation({ mutationFn: (a: StudentAccount) => api.deleteStudent(a.account_id), onSuccess: () => { setPendingDelete(null); refresh(); } });
+  const query = search.trim().toLowerCase();
+  const shown = (students.data ?? []).filter((a) => !query || a.display_name.toLowerCase().includes(query) || (a.email ?? "").toLowerCase().includes(query));
+  return (
+    <Card>
+      <CardHeader><CardTitle>{t("admin.students")}</CardTitle><CardDescription>{t("admin.studentsHint")}</CardDescription></CardHeader>
+      <CardContent className="space-y-4">
+        <ErrorNote error={students.error ?? update.error ?? reset.error} />
+        {temporary && (
+          <Alert variant="warning" role="status">
+            {t("members.temporary", { name: temporary.name })} <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-foreground">{temporary.password}</code>
+            <p className="mt-1 text-xs">{t("admin.temporaryHint")}</p>
+          </Alert>
+        )}
+        <div className="grid gap-1.5 sm:max-w-sm">
+          <Label htmlFor="stu-search">{t("admin.searchStudents")}</Label>
+          <Input id="stu-search" type="search" value={search} onChange={(e) => setSearch(e.target.value)} />
+        </div>
+        {students.isLoading && <Loading variant="table" />}
+        {students.data && shown.length === 0 && <p className="text-sm text-muted-foreground">{t("admin.noStudents")}</p>}
+        {shown.length > 0 && (
+          <Table aria-label={t("admin.students")}>
+            <TableHeader><TableRow>
+              <TableHead>{t("members.name")}</TableHead><TableHead>{t("members.email")}</TableHead>
+              <TableHead>{t("admin.courses")}</TableHead><TableHead>{t("admin.lastLogin")}</TableHead><TableHead>{t("members.status")}</TableHead>
+              <TableHead><span className="sr-only">{t("students.actions")}</span></TableHead>
+            </TableRow></TableHeader>
+            <TableBody>
+              {shown.map((a) => (
+                <TableRow key={a.account_id}>
+                  <TableCell className="font-medium">{a.display_name}</TableCell>
+                  <TableCell className="break-words">{a.email ?? "—"}</TableCell>
+                  <TableCell className="tabular-nums">{a.courses}</TableCell>
+                  <TableCell>{a.last_login_at ? fmt.date(a.last_login_at) : "—"}</TableCell>
+                  <TableCell><Badge variant={a.active ? "success" : "secondary"}>{t(a.active ? "admin.active" : "admin.disabled")}</Badge></TableCell>
+                  <TableCell className="space-x-1 whitespace-nowrap text-right">
+                    <Button type="button" size="sm" variant="outline" aria-label={t(a.active ? "admin.disableFor" : "admin.enableFor", { name: a.display_name })}
+                            onClick={() => update.mutate(a)}>{t(a.active ? "admin.disable" : "admin.enable")}</Button>
+                    <Button type="button" size="sm" variant="outline" aria-label={t("admin.resetFor", { name: a.display_name })}
+                            onClick={() => reset.mutate(a)}>{t("members.reset")}</Button>
+                    <Button type="button" size="sm" variant="outline" className="text-destructive" aria-label={t("admin.deleteStudentFor", { name: a.display_name })}
+                            onClick={() => setPendingDelete(a)}>{t("admin.deleteStudent")}</Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+        <Dialog open={!!pendingDelete} onOpenChange={(o) => { if (!o) setPendingDelete(null); }}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t("admin.deleteStudentTitle")}</DialogTitle>
+              <DialogDescription>{t("admin.deleteStudentBody", { name: pendingDelete?.display_name ?? "" })}</DialogDescription>
+            </DialogHeader>
+            <ErrorNote error={remove.error} />
+            <DialogFooter>
+              <DialogClose asChild><Button type="button" variant="outline">{t("end.cancel")}</Button></DialogClose>
+              <Button type="button" variant="destructive" loading={remove.isPending} onClick={() => pendingDelete && remove.mutate(pendingDelete)}>{t("admin.deleteStudentConfirm")}</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );
