@@ -18,7 +18,7 @@ from app.auth.deps import CurrentUser
 from app.auth.service import AccountError, AccountNotFound, UsernameTaken
 from app.learner.statistics import system_statistics
 from app.platform.access import require_system_role
-from app.storage.models import AuditLog, CourseMember
+from app.storage.models import Course, CourseMember
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 Admin = Annotated[CurrentUser, Depends(require_system_role("admin"))]
@@ -161,8 +161,9 @@ def _student_out(a, courses: int) -> AdminStudentOut:
 
 def _memberships(request: Request) -> dict[int, int]:
     with Session(request.app.state.services.engine) as db:
-        rows = db.exec(select(CourseMember.account_id, func.count()).where(
-            CourseMember.role == "student", CourseMember.status == "active",
+        rows = db.exec(select(CourseMember.account_id, func.count()).join(
+            Course, Course.id == CourseMember.course_id).where(
+            Course.status == "active", CourseMember.role == "student", CourseMember.status == "active",
             CourseMember.account_id.is_not(None)).group_by(CourseMember.account_id)).all()
     return dict(rows)
 
@@ -206,11 +207,7 @@ def delete_student(request: Request, account_id: int, user: Admin):
     """Delete the account and all of its learning data in every course (request logs are anonymized). It
     cannot be undone."""
     try:
-        counts = _accounts(request).delete_student(account_id)
+        _accounts(request).delete_student(account_id, user.account_id)
     except AccountError as e:
         raise _student_error(e) from None
-    with Session(request.app.state.services.engine) as db:
-        db.add(AuditLog(account_id=user.account_id, action="admin.student.delete",
-                        target=f"account:{account_id}", details={"rows": sum(counts.values())}))
-        db.commit()
     return Response(status_code=204)

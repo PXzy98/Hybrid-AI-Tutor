@@ -88,15 +88,23 @@ function StudentAccountsCard() {
   const qc = useQueryClient();
   const students = useQuery({ queryKey: ["admin-students"], queryFn: api.students });
   const refresh = () => qc.invalidateQueries({ queryKey: ["admin-students"] });
+  const refreshAll = () => { refresh(); qc.invalidateQueries({ queryKey: ["system-statistics"] }); };
   const [search, setSearch] = useState("");
-  const [temporary, setTemporary] = useState<{ name: string; password: string } | null>(null);
+  const [temporary, setTemporary] = useState<{ id: number; name: string; password: string } | null>(null);
   const [pendingDelete, setPendingDelete] = useState<StudentAccount | null>(null);
-  const update = useMutation({ mutationFn: (a: StudentAccount) => api.updateStudent(a.account_id, !a.active), onSuccess: refresh });
+  const update = useMutation({ mutationFn: (a: StudentAccount) => api.updateStudent(a.account_id, !a.active), onSuccess: refreshAll });
   const reset = useMutation({
-    mutationFn: async (a: StudentAccount) => ({ name: a.display_name, password: (await api.resetStudentPassword(a.account_id)).temporary_password }),
+    mutationFn: async (a: StudentAccount) => ({ id: a.account_id, name: a.display_name, password: (await api.resetStudentPassword(a.account_id)).temporary_password }),
     onSuccess: setTemporary,
+    onError: () => setTemporary(null),
   });
-  const remove = useMutation({ mutationFn: (a: StudentAccount) => api.deleteStudent(a.account_id), onSuccess: () => { setPendingDelete(null); refresh(); } });
+  const remove = useMutation({ mutationFn: (a: StudentAccount) => api.deleteStudent(a.account_id), onSuccess: (_, a) => {
+      setPendingDelete(null);
+      setTemporary((cur) => (cur?.id === a.account_id ? null : cur));
+      refreshAll();
+    },
+  });
+  const askDelete = (a: StudentAccount | null) => { remove.reset(); setPendingDelete(a); };
   const query = search.trim().toLowerCase();
   const shown = (students.data ?? []).filter((a) => !query || a.display_name.toLowerCase().includes(query) || (a.email ?? "").toLowerCase().includes(query));
   return (
@@ -133,18 +141,18 @@ function StudentAccountsCard() {
                   <TableCell><Badge variant={a.active ? "success" : "secondary"}>{t(a.active ? "admin.active" : "admin.disabled")}</Badge></TableCell>
                   <TableCell className="space-x-1 whitespace-nowrap text-right">
                     <Button type="button" size="sm" variant="outline" aria-label={t(a.active ? "admin.disableFor" : "admin.enableFor", { name: a.display_name })}
-                            onClick={() => update.mutate(a)}>{t(a.active ? "admin.disable" : "admin.enable")}</Button>
+                            onClick={() => { setTemporary(null); update.mutate(a); }}>{t(a.active ? "admin.disable" : "admin.enable")}</Button>
                     <Button type="button" size="sm" variant="outline" aria-label={t("admin.resetFor", { name: a.display_name })}
-                            onClick={() => reset.mutate(a)}>{t("members.reset")}</Button>
+                            onClick={() => { setTemporary(null); reset.mutate(a); }}>{t("members.reset")}</Button>
                     <Button type="button" size="sm" variant="outline" className="text-destructive" aria-label={t("admin.deleteStudentFor", { name: a.display_name })}
-                            onClick={() => setPendingDelete(a)}>{t("admin.deleteStudent")}</Button>
+                            onClick={() => askDelete(a)}>{t("admin.deleteStudent")}</Button>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         )}
-        <Dialog open={!!pendingDelete} onOpenChange={(o) => { if (!o) setPendingDelete(null); }}>
+        <Dialog open={!!pendingDelete} onOpenChange={(o) => { if (!o) askDelete(null); }}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{t("admin.deleteStudentTitle")}</DialogTitle>
