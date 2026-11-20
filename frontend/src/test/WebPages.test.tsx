@@ -69,4 +69,24 @@ describe("web pages as material (V7)", () => {
     await waitFor(() => expect(calls.find((c) => c.path === "/courses/1/ai/drafts/url")?.body).toEqual({
       url: "https://example.org/pullups", kind: "custom", request: "Lab ideas", focus: "", add_to_course: false, module_id: null }));
   });
+
+  it("adds the page to the module chosen for it", async () => {
+    const calls = mockApi(instructorRoutes({
+      "GET /courses/1/ai/drafts": [], "GET /courses/1/materials": materials([]),
+      "POST /courses/1/ai/drafts/url": () => reply({ id: 7, kind: "custom", module_id: null, status: "generating", content: {}, cited_sources: [],
+        error: null, created_by: 2, created_at: "", updated_at: "", request: "Lab ideas", sources: {} }, 202),
+      "GET /courses/1/ai/drafts/7": { id: 7, kind: "custom", module_id: null, status: "generating", content: {}, cited_sources: [],
+        error: null, created_by: 2, created_at: "", updated_at: "", request: "Lab ideas", sources: {} },
+    }));
+    renderApp("/courses/1/ai");
+    const user = userEvent.setup();
+    await user.type(await screen.findByLabelText("What should be drafted?"), "Lab ideas");
+    await user.click(screen.getByLabelText("A web page"));
+    await user.type(screen.getByLabelText("Address of the page"), "https://example.org/pullups");
+    await user.click(screen.getByLabelText("Also add this file to the course material"));
+    await user.selectOptions(await screen.findByLabelText("Module of the added file"), "10");
+    await user.click(screen.getByRole("button", { name: "Draft with AI" }));
+    await waitFor(() => expect(calls.find((c) => c.path === "/courses/1/ai/drafts/url")?.body)
+      .toMatchObject({ add_to_course: true, module_id: 10 }));
+  });
 });
