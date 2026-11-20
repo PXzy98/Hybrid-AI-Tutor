@@ -4854,7 +4854,7 @@
           "instructor-ai"
         ],
         "summary": "Create",
-        "description": "Start drafting from the course material with the local model (a job; the draft is `generating`).",
+        "description": "Start drafting from the course material with the local model (a job; the draft is `generating`).\nThe material is the module's (and the course-level files), the whole course's, or only the chosen\nmodules or files (V5).",
         "operationId": "ai_drafts_create",
         "parameters": [
           {
@@ -4950,6 +4950,7 @@
                     "project_ideas",
                     "sample_proposal",
                     "faq",
+                    "custom",
                     "kcs",
                     "check_items",
                     "misconceptions"
@@ -4988,6 +4989,55 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/v2/courses/{course_id}/ai/drafts/upload": {
+      "post": {
+        "tags": [
+          "instructor-ai"
+        ],
+        "summary": "Create From Upload",
+        "description": "V6: draft from a file uploaded for this draft (for example a new paper). The file is scanned like\nevery upload; it is used for this draft only and deleted after it was read, unless `add_to_course` also\nadds it to the course material (in `module_id`, or course-level), where students see it like any other\nfile once the index is rebuilt.",
+        "operationId": "ai_drafts_create_from_upload",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_ai_drafts_create_from_upload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiDraftOut"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "add_to_course: a material with this name exists there"
+          },
+          "422": {
+            "description": "the file is refused (type, size, unreadable, privacy scan)"
           }
         }
       }
@@ -6761,6 +6811,7 @@
               "project_ideas",
               "sample_proposal",
               "faq",
+              "custom",
               "kcs",
               "check_items",
               "misconceptions"
@@ -6783,6 +6834,44 @@
             "maxLength": 300,
             "title": "Focus",
             "default": ""
+          },
+          "request": {
+            "type": "string",
+            "maxLength": 1000,
+            "title": "Request",
+            "default": ""
+          },
+          "module_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array",
+                "maxItems": 50,
+                "minItems": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Module Ids"
+          },
+          "material_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array",
+                "maxItems": 50,
+                "minItems": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Material Ids"
           }
         },
         "type": "object",
@@ -6803,6 +6892,7 @@
               "project_ideas",
               "sample_proposal",
               "faq",
+              "custom",
               "kcs",
               "check_items",
               "misconceptions"
@@ -6885,6 +6975,17 @@
               }
             ],
             "title": "Job Id"
+          },
+          "request": {
+            "type": "string",
+            "title": "Request",
+            "default": ""
+          },
+          "sources": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Sources",
+            "default": {}
           }
         },
         "type": "object",
@@ -6928,6 +7029,7 @@
               "project_ideas",
               "sample_proposal",
               "faq",
+              "custom",
               "kcs",
               "check_items",
               "misconceptions"
@@ -7504,6 +7606,63 @@
           "explanation"
         ],
         "title": "AttemptResult"
+      },
+      "Body_ai_drafts_create_from_upload": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "description": "PDF, PPTX, DOCX, Markdown, text or HTML"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "project_ideas",
+              "sample_proposal",
+              "faq",
+              "custom",
+              "kcs",
+              "check_items",
+              "misconceptions"
+            ],
+            "title": "Kind"
+          },
+          "request": {
+            "type": "string",
+            "maxLength": 1000,
+            "title": "Request",
+            "default": ""
+          },
+          "focus": {
+            "type": "string",
+            "maxLength": 300,
+            "title": "Focus",
+            "default": ""
+          },
+          "add_to_course": {
+            "type": "boolean",
+            "title": "Add To Course",
+            "default": false
+          },
+          "module_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Module Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file",
+          "kind"
+        ],
+        "title": "Body_ai_drafts_create_from_upload"
       },
       "Body_content_import": {
         "properties": {

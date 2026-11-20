@@ -1651,8 +1651,33 @@ export interface paths {
         /**
          * Create
          * @description Start drafting from the course material with the local model (a job; the draft is `generating`).
+         *     The material is the module's (and the course-level files), the whole course's, or only the chosen
+         *     modules or files (V5).
          */
         post: operations["ai_drafts_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/ai/drafts/upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create From Upload
+         * @description V6: draft from a file uploaded for this draft (for example a new paper). The file is scanned like
+         *     every upload; it is used for this draft only and deleted after it was read, unless `add_to_course` also
+         *     adds it to the course material (in `module_id`, or course-level), where students see it like any other
+         *     file once the index is rebuilt.
+         */
+        post: operations["ai_drafts_create_from_upload"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2193,7 +2218,7 @@ export interface components {
              * Kind
              * @enum {string}
              */
-            kind: "project_ideas" | "sample_proposal" | "faq" | "kcs" | "check_items" | "misconceptions";
+            kind: "project_ideas" | "sample_proposal" | "faq" | "custom" | "kcs" | "check_items" | "misconceptions";
             /** Module Id */
             module_id?: number | null;
             /**
@@ -2201,6 +2226,15 @@ export interface components {
              * @default
              */
             focus?: string;
+            /**
+             * Request
+             * @default
+             */
+            request?: string;
+            /** Module Ids */
+            module_ids?: number[] | null;
+            /** Material Ids */
+            material_ids?: number[] | null;
         };
         /** AiDraftOut */
         AiDraftOut: {
@@ -2210,7 +2244,7 @@ export interface components {
              * Kind
              * @enum {string}
              */
-            kind: "project_ideas" | "sample_proposal" | "faq" | "kcs" | "check_items" | "misconceptions";
+            kind: "project_ideas" | "sample_proposal" | "faq" | "custom" | "kcs" | "check_items" | "misconceptions";
             /** Module Id */
             module_id: number | null;
             /**
@@ -2240,6 +2274,18 @@ export interface components {
             updated_at: string;
             /** Job Id */
             job_id?: number | null;
+            /**
+             * Request
+             * @default
+             */
+            request?: string;
+            /**
+             * Sources
+             * @default {}
+             */
+            sources?: {
+                [key: string]: unknown;
+            };
         };
         /** AiDraftPatch */
         AiDraftPatch: {
@@ -2256,7 +2302,7 @@ export interface components {
              * Kind
              * @enum {string}
              */
-            kind: "project_ideas" | "sample_proposal" | "faq" | "kcs" | "check_items" | "misconceptions";
+            kind: "project_ideas" | "sample_proposal" | "faq" | "custom" | "kcs" | "check_items" | "misconceptions";
             /** Module Id */
             module_id: number | null;
             /**
@@ -2465,6 +2511,36 @@ export interface components {
             answer: number;
             /** Explanation */
             explanation: string;
+        };
+        /** Body_ai_drafts_create_from_upload */
+        Body_ai_drafts_create_from_upload: {
+            /**
+             * File
+             * @description PDF, PPTX, DOCX, Markdown, text or HTML
+             */
+            file: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "project_ideas" | "sample_proposal" | "faq" | "custom" | "kcs" | "check_items" | "misconceptions";
+            /**
+             * Request
+             * @default
+             */
+            request?: string;
+            /**
+             * Focus
+             * @default
+             */
+            focus?: string;
+            /**
+             * Add To Course
+             * @default false
+             */
+            add_to_course?: boolean;
+            /** Module Id */
+            module_id?: number | null;
         };
         /** Body_content_import */
         Body_content_import: {
@@ -8509,7 +8585,7 @@ export interface operations {
         parameters: {
             query?: {
                 status?: ("generating" | "draft" | "accepted" | "discarded" | "failed") | null;
-                kind?: ("project_ideas" | "sample_proposal" | "faq" | "kcs" | "check_items" | "misconceptions") | null;
+                kind?: ("project_ideas" | "sample_proposal" | "faq" | "custom" | "kcs" | "check_items" | "misconceptions") | null;
             };
             header?: never;
             path: {
@@ -8571,6 +8647,46 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+        };
+    };
+    ai_drafts_create_from_upload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_ai_drafts_create_from_upload"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiDraftOut"];
+                };
+            };
+            /** @description add_to_course: a material with this name exists there */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description the file is refused (type, size, unreadable, privacy scan) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

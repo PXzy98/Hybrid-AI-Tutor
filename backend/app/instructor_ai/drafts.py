@@ -13,12 +13,16 @@ from pydantic import BaseModel, ConfigDict, Field, StrictInt, ValidationError, f
 
 from app.core.schemas import Chunk
 
-Tier1Kind = Literal["project_ideas", "sample_proposal", "faq"]
+Tier1Kind = Literal["project_ideas", "sample_proposal", "faq", "custom"]
 
 _GUIDANCE = {
     "project_ideas": "Produce project directions, possible topics, difficulty, KCs and deliverables.",
     "sample_proposal": "Produce a writing guide or a fictional sample proposal, not a real submission.",
     "faq": "Produce course FAQs. Never invent dates, grading policies, or requirements.",
+    # V4: what to write is the instructor's own request (`instructor_request` in the user message)
+    "custom": "Write what the instructor_request asks for, as an editable Markdown draft for the instructor, "
+              "from the passages only. Where the passages do not cover part of the request, say so in the "
+              "draft instead of inventing it.",
 }
 
 _SYSTEM = (
@@ -33,6 +37,7 @@ _SYSTEM = (
 # Default input budget (fits the 9B local model's context); a caller may raise it up to the hard limits
 # for whole-course drafts such as a project list when the model's context allows.
 DEFAULT_PASSAGES, DEFAULT_CHARS = 8, 20_000
+REQUEST_CHARS = 1000  # the instructor's free request of a custom draft (V4)
 MAX_PASSAGES, MAX_CHARS = 24, 60_000
 
 
@@ -109,7 +114,7 @@ class Tier1Draft(BaseModel):
 async def generate_tier1_draft(
     *, course_id: int, kind: Tier1Kind, passages: Sequence[Chunk],
     gateway: DraftGateway, settings: object,
-    max_passages: int = DEFAULT_PASSAGES, max_chars: int = DEFAULT_CHARS,
+    max_passages: int = DEFAULT_PASSAGES, max_chars: int = DEFAULT_CHARS, request: str = "",
 ) -> Tier1Draft:
     """Build an unpublishable-in-isolation draft through Z's trusted-local gateway.
 
@@ -121,6 +126,8 @@ async def generate_tier1_draft(
         raise DraftError("A valid course ID is required.")
     if kind not in _GUIDANCE:
         raise DraftError("Unsupported instructor draft kind.")
+    if kind == "custom" and not request.strip():
+        raise DraftError("A custom draft needs the instructor's request.")
     check_budget(len(passages), sum(len(p.text) for p in passages), max_passages, max_chars)
     material = []
     for number, passage in enumerate(passages, 1):
@@ -134,6 +141,7 @@ async def generate_tier1_draft(
         {"role": "system", "content": _SYSTEM},
         {"role": "user", "content": json.dumps({
             "task": _GUIDANCE[kind], "passages": material,
+            **({"instructor_request": request.strip()[:REQUEST_CHARS]} if kind == "custom" else {}),
         }, ensure_ascii=False)},
     ]
     # Never send unreviewed full-course documents to an external provider here.

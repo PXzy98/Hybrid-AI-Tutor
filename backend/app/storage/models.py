@@ -501,11 +501,15 @@ class AiDraft(SQLModel, table=True):
                                             index=True))
     module_id: int | None = Field(default=None, sa_column=Column(ForeignKey("module.id", ondelete="SET NULL"),
                                                                  nullable=True))
-    # project_ideas | sample_proposal | faq | kcs | check_items | misconceptions
+    # project_ideas | sample_proposal | faq | custom | kcs | check_items | misconceptions
     kind: str
     # generating -> draft -> accepted | discarded; failed
     status: str = "generating"
     focus: str = ""  # the instructor's hint for finding the material (never student text)
+    request: str = Field(default="", sa_column_kwargs={"server_default": ""})  # kind custom: the request (V4)
+    # where the passages come from (V5, V6): {"module_ids": [...]} or {"material_ids": [...]} or
+    # {"upload": "<file name>"} (a file uploaded for this draft); {} = the module or the whole course
+    sources: dict = Field(default_factory=dict, sa_column=Column(JSON, nullable=False, server_default="{}"))
     content: dict = Field(default_factory=dict, sa_column=Column(JSON, nullable=False))
     cited_sources: list = Field(default_factory=list, sa_column=Column(JSON, nullable=False))
     error: str | None = None

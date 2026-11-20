@@ -27,7 +27,7 @@ describe("AI drafts", () => {
     expect(await screen.findByText(/Only the local model sees your course material/)).toBeInTheDocument();
     await user.selectOptions(screen.getByLabelText("What to draft"), "kcs");
     await user.click(screen.getByRole("button", { name: "Draft with AI" }));
-    expect(calls.find((c) => c.path === "/courses/1/ai/drafts" && c.method === "POST")!.body).toEqual({ kind: "kcs", module_id: null, focus: "" });
+    expect(calls.find((c) => c.path === "/courses/1/ai/drafts" && c.method === "POST")!.body).toEqual({ kind: "kcs", module_id: null, focus: "", request: "" });
     expect(await screen.findByText("The local model is drafting…")).toBeInTheDocument();
     expect(await screen.findByText("Not visible to students until you accept it.", {}, { timeout: 5000 })).toBeInTheDocument();
     expect(screen.getByText("lecture1.pdf")).toBeInTheDocument();
@@ -37,6 +37,47 @@ describe("AI drafts", () => {
     await user.click(screen.getByRole("button", { name: "Accept and publish" }));
     expect(await screen.findByText("Accepted: 2 items created.")).toBeInTheDocument();
     expect(calls.find((c) => c.path.endsWith("/accept"))!.body).toEqual({ module_id: 10 });
+  });
+
+  it("sends a custom request with the chosen files (V4, V5)", async () => {
+    const calls = mockApi(instructorRoutes({
+      "GET /courses/1/ai/drafts": [],
+      "GET /courses/1/materials": { index_version: 1, rebuild_job_id: null, materials: [
+        { id: 3, module_id: null, filename: "syllabus.md", size_bytes: 10, scan_status: "accepted", uploaded_at: "" },
+        { id: 4, module_id: 10, filename: "lecture1.pdf", size_bytes: 10, scan_status: "accepted", uploaded_at: "" }] },
+      "POST /courses/1/ai/drafts": () => reply(draft({ kind: "custom", status: "generating", content: {}, cited_sources: [] }), 202),
+      "GET /courses/1/ai/drafts/7": () => draft({ kind: "custom", status: "generating", content: {}, cited_sources: [] }),
+    }));
+    renderApp("/courses/1/ai");
+    const user = userEvent.setup();
+    const button = await screen.findByRole("button", { name: "Draft with AI" });
+    expect(button).toBeDisabled();  // a custom draft needs the request
+    await user.type(screen.getByLabelText("What should be drafted?"), "Thesis topics from the lectures");
+    await user.click(screen.getByLabelText("Some files"));
+    await user.click(await screen.findByRole("checkbox", { name: /lecture1\.pdf/ }));
+    await user.click(button);
+    await waitFor(() => expect(calls.find((c) => c.path === "/courses/1/ai/drafts" && c.method === "POST")?.body).toEqual(
+      { kind: "custom", focus: "", request: "Thesis topics from the lectures", module_id: null, material_ids: [4] }));
+  });
+
+  it("uploads a file for this draft only (V6)", async () => {
+    const calls = mockApi(instructorRoutes({
+      "GET /courses/1/ai/drafts": [],
+      "GET /courses/1/materials": { index_version: 0, rebuild_job_id: null, materials: [] },
+      "POST /courses/1/ai/drafts/upload": () => reply(draft({ kind: "custom", status: "generating", content: {}, cited_sources: [] }), 202),
+      "GET /courses/1/ai/drafts/7": () => draft({ kind: "custom", status: "generating", content: {}, cited_sources: [] }),
+    }));
+    renderApp("/courses/1/ai");
+    const user = userEvent.setup();
+    await user.type(await screen.findByLabelText("What should be drafted?"), "What this paper means for patients");
+    await user.click(screen.getByLabelText("Upload a file"));
+    await user.upload(screen.getByLabelText("File for this draft"), new File(["# Paper"], "paper.md", { type: "text/markdown" }));
+    await user.click(screen.getByRole("button", { name: "Draft with AI" }));
+    await waitFor(() => expect(calls.some((c) => c.path === "/courses/1/ai/drafts/upload")).toBe(true));
+    const form = calls.find((c) => c.path === "/courses/1/ai/drafts/upload")!.form!;
+    expect((form.get("file") as File).name).toBe("paper.md");
+    expect([form.get("kind"), form.get("request"), form.get("add_to_course"), form.get("module_id")])
+      .toEqual(["custom", "What this paper means for patients", "false", null]);
   });
 
   it("shows the server's 422 message when an accept is refused", async () => {

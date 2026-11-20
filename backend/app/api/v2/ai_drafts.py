@@ -9,15 +9,17 @@ and indexed like an upload). `DELETE` discards a draft.
 
 Tier 3: `GET .../insights` returns KC and misconception counts only, suppressed for small groups.
 """
+import asyncio
 import json
 import re
 from datetime import datetime
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, Request, Response
+from fastapi import APIRouter, Depends, File, Form, Request, Response, UploadFile
 from pydantic import BaseModel, Field
 from sqlmodel import Session, col, select
 
+from app.admin.materials import MAX_BYTES
 from app.api.v2.content import _editor
 from app.api.v2.errors import ApiError, ErrorCode
 from app.instructor_ai import draft_jobs
@@ -26,11 +28,12 @@ from app.platform import jobs
 from app.platform.access import CourseAccess, require_course_role
 from app.privacy.profiles import privacy_profile, scan_document
 from app.rag import index_jobs
-from app.storage.models import AiDraft, AuditLog, CatalogMisconception, Kc, Module, utcnow
+from app.storage.models import AiDraft, AuditLog, CatalogMisconception, Kc, Material, Module, utcnow
 
 router = APIRouter(tags=["instructor-ai"])
 CourseInstructor = Annotated[CourseAccess, Depends(require_course_role("instructor"))]
-DraftKind = Literal["project_ideas", "sample_proposal", "faq", "kcs", "check_items", "misconceptions"]
+DraftKind = Literal["project_ideas", "sample_proposal", "faq", "custom", "kcs", "check_items",
+                    "misconceptions"]
 DraftStatus = Literal["generating", "draft", "accepted", "discarded", "failed"]
 
 
@@ -38,6 +41,12 @@ class AiDraftIn(BaseModel):
     kind: DraftKind
     module_id: int | None = None  # the material of this module (and the course-level files); None: all
     focus: str = Field("", max_length=300)  # what to look for in the material (instructor's words)
+    # kind custom (V4): what to draft, in the instructor's words (for example "a summary of this paper and
+    # what it means for patients", "thesis topics", "what to add to the course next")
+    request: str = Field("", max_length=1000)
+    # V5: only these modules' material, or only these files (materials); instead of module_id
+    module_ids: list[int] | None = Field(None, min_length=1, max_length=50)
+    material_ids: list[int] | None = Field(None, min_length=1, max_length=50)
 
 
 class AiDraftPatch(BaseModel):
@@ -61,6 +70,8 @@ class AiDraftOut(BaseModel):
     created_at: datetime
     updated_at: datetime
     job_id: int | None = None  # the generation job started by this request
+    request: str = ""  # kind custom: the instructor's request (V4)
+    sources: dict = {}  # V5, V6: {"module_ids"}, {"material_ids"} or {"upload": file name}; {}: module_id
 
 
 class AiDraftSummary(BaseModel):
@@ -99,7 +110,8 @@ def _out(row: AiDraft, job_id: int | None = None) -> AiDraftOut:
     return AiDraftOut(id=row.id, kind=row.kind, module_id=row.module_id, status=row.status,
                       content=row.content,
                     cited_sources=row.cited_sources, error=row.error, created_by=row.created_by,
-                    created_at=row.created_at, updated_at=row.updated_at, job_id=job_id)
+                    created_at=row.created_at, updated_at=row.updated_at, job_id=job_id,
+                    request=row.request or "", sources=row.sources or {})
 
 
 def _get(db: Session, course_id: int, draft_id: int) -> AiDraft:
@@ -121,15 +133,103 @@ def _module(db: Session, course_id: int, module_id: int | None) -> None:
 @router.post("/courses/{course_id}/ai/drafts", response_model=AiDraftOut, status_code=202,
              operation_id="ai_drafts_create")
 def create(request: Request, body: AiDraftIn, access: CourseInstructor):
-    """Start drafting from the course material with the local model (a job; the draft is `generating`)."""
+    """Start drafting from the course material with the local model (a job; the draft is `generating`).
+    The material is the module's (and the course-level files), the whole course's, or only the chosen
+    modules or files (V5)."""
     engine = _engine(request)
     with Session(engine, expire_on_commit=False) as db:
-        _module(db, access.course.id, body.module_id)
+        sources = _sources(db, access.course.id, body)
+        text = _request(body.kind, body.request, body.focus, access.course.course_type)
         row = AiDraft(course_id=access.course.id, module_id=body.module_id, kind=body.kind,
-                      focus=body.focus.strip(), created_by=access.account_id)
+                      focus=body.focus.strip(), request=text, sources=sources,
+                      created_by=access.account_id)
         db.add(row)
         db.commit()
     job = jobs.enqueue(engine, draft_jobs.GENERATE, course_id=access.course.id, ref_id=row.id,
+                       created_by=access.account_id)
+    return _out(row, job.id)
+
+
+def _request(kind: str, text: str, focus: str, course_type: str) -> str:
+    """The custom request to store. It and the focus are the instructor's free text: scanned like an edited
+    draft before anything is stored, so student data never reaches the table or a model."""
+    if kind == "custom" and not text.strip():
+        raise ApiError(422, ErrorCode.invalid, "a custom draft needs a request: what should be drafted")
+    text = text.strip() if kind == "custom" else ""
+    found = scan_document(f"{text}\n\n{focus.strip()}", privacy_profile(course_type)).blocking
+    if found:
+        raise ApiError(422, ErrorCode.invalid, "the privacy scan found student data: " + ", ".join(found))
+    return text
+
+
+def _sources(db: Session, course_id: int, body: "AiDraftIn") -> dict:
+    """Checked choice of material (V5): modules or files of this course, not both, not with module_id."""
+    _module(db, course_id, body.module_id)
+    chosen = [n for n in ("module_ids", "material_ids") if getattr(body, n)]
+    if len(chosen) > 1 or (chosen and body.module_id is not None):
+        raise ApiError(422, ErrorCode.invalid, "choose one module, some modules or some files, not several")
+    if body.module_ids:
+        found = db.exec(select(Module.id).where(Module.course_id == course_id,
+                                                col(Module.id).in_(body.module_ids))).all()
+        if len(set(found)) != len(set(body.module_ids)):
+            raise ApiError(422, ErrorCode.invalid, "a module is not part of this course")
+        return {"module_ids": sorted(set(body.module_ids))}
+    if body.material_ids:
+        found = db.exec(select(Material.id).where(Material.course_id == course_id,
+                                                  col(Material.id).in_(body.material_ids))).all()
+        if len(set(found)) != len(set(body.material_ids)):
+            raise ApiError(422, ErrorCode.invalid, "a file is not part of this course")
+        return {"material_ids": sorted(set(body.material_ids))}
+    return {}
+
+
+@router.post("/courses/{course_id}/ai/drafts/upload", response_model=AiDraftOut, status_code=202,
+             operation_id="ai_drafts_create_from_upload",
+             responses={409: {"description": "add_to_course: a material with this name exists there"},
+                        422: {"description": "the file is refused (type, size, unreadable, privacy scan)"}})
+async def create_from_upload(
+        request: Request, access: CourseInstructor,
+        file: Annotated[UploadFile, File(description="PDF, PPTX, DOCX, Markdown, text or HTML")],
+        kind: Annotated[DraftKind, Form()],
+        draft_request: Annotated[str, Form(alias="request", max_length=1000)] = "",
+        focus: Annotated[str, Form(max_length=300)] = "", add_to_course: Annotated[bool, Form()] = False,
+        module_id: Annotated[int | None, Form()] = None):
+    """V6: draft from a file uploaded for this draft (for example a new paper). The file is scanned like
+    every upload; it is used for this draft only and deleted after it was read, unless `add_to_course` also
+    adds it to the course material (in `module_id`, or course-level), where students see it like any other
+    file once the index is rebuilt."""
+    services = request.app.state.services
+    with Session(services.engine) as db:
+        _module(db, access.course.id, module_id)
+    text = _request(kind, draft_request, focus, access.course.course_type)
+    data = await file.read(MAX_BYTES + 1)
+    try:
+        name = await asyncio.to_thread(index_jobs.check_upload, file.filename or "", data,
+                                       access.course.course_type)
+    except index_jobs.MaterialRefused as e:
+        raise ApiError(422, ErrorCode.invalid, str(e)) from None
+    added = None
+    if add_to_course:
+        try:
+            added = index_jobs.store(services.engine, services.settings.data_path(), access.course.id,
+                                     module_id, name, data)
+        except FileExistsError:
+            raise ApiError(409, ErrorCode.conflict, "a file with this name exists in the course material; "
+                           "rename it or delete that one") from None
+        index_jobs.request_rebuild(services.engine, access.course.id, access.account_id)
+    with Session(services.engine, expire_on_commit=False) as db:
+        sources = {"upload": name, **({"material_ids": [added.id]} if added else {})}
+        row = AiDraft(course_id=access.course.id, module_id=module_id, kind=kind, focus=focus.strip(),
+                      request=text, sources=sources, created_by=access.account_id)
+        db.add(row)
+        db.add(AuditLog(account_id=access.account_id, action="ai_draft.upload",
+                        target=f"course:{access.course.id}",
+                        details={"added_material_id": added.id if added else None}))
+        db.commit()
+    path = draft_jobs.upload_path(services.settings.data_path(), access.course.id, row.id, name)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(data)
+    job = jobs.enqueue(services.engine, draft_jobs.GENERATE, course_id=access.course.id, ref_id=row.id,
                        created_by=access.account_id)
     return _out(row, job.id)
 
