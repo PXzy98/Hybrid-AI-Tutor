@@ -12,6 +12,7 @@ from typing import Literal, Protocol
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, ValidationError, field_validator
 
 from app.core.schemas import Chunk
+from app.llm.cloud_guard import build_draft_cloud_request
 
 Tier1Kind = Literal["project_ideas", "sample_proposal", "faq", "custom"]
 
@@ -54,12 +55,22 @@ class DraftError(ValueError):
     """Invalid context or ungrounded model output; never echo source text."""
 
 
+def trust_for(model: str) -> str:
+    """V16: the local model must be trusted local; the cloud model is external (chosen and confirmed)."""
+    if model not in ("local", "cloud"):
+        raise DraftError("Unsupported draft model.")
+    return "trusted_local" if model == "local" else "external_ok"
+
+
 class ModelResult(Protocol):
     text: str
 
 
 class DraftGateway(Protocol):
     """The part of `app.llm.gateway.ModelGateway` the draft cores use."""
+
+    def cloud_client(self, settings: object):
+        """The CloudClient of the request: the only way a draft reaches the cloud model (V16)."""
 
     async def complete(self, role: str, messages: list[dict[str, str]], *,
                        settings: object, trust_required: str, json_schema: dict | None = None,
@@ -111,10 +122,23 @@ class Tier1Draft(BaseModel):
     status: Literal["draft"] = "draft"
 
 
+def tier1_messages(kind: str, material: list[dict], request: str) -> list[dict[str, str]]:
+    """The messages of a tier 1 draft: fixed instructions, the numbered passages and, for a custom draft, the
+    instructor's request. The same for the local and the cloud model."""
+    return [
+        {"role": "system", "content": _SYSTEM},
+        {"role": "user", "content": json.dumps({
+            "task": _GUIDANCE[kind], "passages": material,
+            **({"instructor_request": request.strip()[:REQUEST_CHARS]} if kind == "custom" else {}),
+        }, ensure_ascii=False)},
+    ]
+
+
 async def generate_tier1_draft(
     *, course_id: int, kind: Tier1Kind, passages: Sequence[Chunk],
     gateway: DraftGateway, settings: object,
     max_passages: int = DEFAULT_PASSAGES, max_chars: int = DEFAULT_CHARS, request: str = "",
+    model: str = "local",
 ) -> Tier1Draft:
     """Build an unpublishable-in-isolation draft through Z's trusted-local gateway.
 
@@ -137,16 +161,19 @@ async def generate_tier1_draft(
             raise DraftError("Every course passage must have text and a source.")
         material.append({"number": number, "source": passage.source, "text": passage.text})
 
-    messages = [
-        {"role": "system", "content": _SYSTEM},
-        {"role": "user", "content": json.dumps({
-            "task": _GUIDANCE[kind], "passages": material,
-            **({"instructor_request": request.strip()[:REQUEST_CHARS]} if kind == "custom" else {}),
-        }, ensure_ascii=False)},
-    ]
-    # Never send unreviewed full-course documents to an external provider here.
-    result = await gateway.complete("local", messages, settings=settings, trust_required="trusted_local",
-                                    json_schema=_Generated.model_json_schema(), stream=False)
+    if model == "cloud":
+        # V16: through the cloud gate, which accepts only a DraftCloudRequest (and so no learner data)
+        try:
+            cloud_request = build_draft_cloud_request(
+                kind=kind, passages=[(m["number"], m["source"], m["text"]) for m in material],
+                request=request.strip()[:REQUEST_CHARS] if kind == "custom" else "")
+        except ValidationError:
+            raise DraftError("The draft input is not accepted by the cloud gate.") from None
+        result = await gateway.cloud_client(settings).complete_draft(cloud_request)
+    else:
+        result = await gateway.complete(model, tier1_messages(kind, material, request), settings=settings,
+                                        trust_required=trust_for(model),
+                                        json_schema=_Generated.model_json_schema(), stream=False)
     try:
         generated = _Generated.model_validate(parse_model_json(result.text))
     except (ValidationError, ValueError, TypeError) as exc:

@@ -258,6 +258,27 @@ class CloudRequest(BaseModel):
     guidelines: list[str] = Field([], max_length=2)
 
 
+class DraftCloudPassage(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    number: int = Field(ge=1, le=24)
+    source: str = Field(max_length=300)
+    text: str = Field(max_length=60_000)
+
+
+class DraftCloudRequest(BaseModel):
+    """V16: the ONLY thing an instructor draft may send to the cloud model: public course material the caller
+    scanned, the instructor's own request and the course's accepted KC names, for one fixed draft kind. No
+    learner data, no student question and no free field beyond these can be attached."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    kind: Literal["project_ideas", "sample_proposal", "faq", "custom", "kcs", "check_items",
+                  "misconceptions"]
+    passages: list[DraftCloudPassage] = Field(min_length=1, max_length=24)
+    request: str = Field("", max_length=1000)  # the instructor's request of a custom draft
+    kc_names: list[str] = Field([], max_length=1000)  # the course's accepted KCs (tier 2)
+
+
 # --------------------------------------------------------------------------- answer
 class Source(BaseModel):
     title: str

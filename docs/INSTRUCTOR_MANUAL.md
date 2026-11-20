@@ -195,6 +195,10 @@ first (section 4).
   it, unless you tick **Also add this file to the course material** (then it appears under **Materials** and
   students' answers can use it after the index is rebuilt).
 - A draft is never shown to students until you accept it; a custom draft becomes a Markdown course material.
+- **Model**: **Local model** (the default; the material stays on the course's server) or **Cloud model, for public
+  material only**, which writes better drafts: tick the confirmation that the material is public (open course
+  pages, published papers) and may go to the cloud model. Not offered in a local-only course. Student data is
+  never part of a draft.
 
 ## 11. End-of-term survey
 

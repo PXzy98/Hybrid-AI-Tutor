@@ -197,7 +197,7 @@ export const api = {
   createAiDraft: (id: number, input: Schemas["AiDraftIn"]) => request<AiDraft>("POST", `${c(id)}/ai/drafts`, input),
   // V6: a file uploaded for this draft only, or also added to the course material
   createAiDraftFromUpload: (id: number, input: { file: File; kind: AiDraftKind; request: string; focus: string;
-                                                 addToCourse: boolean; moduleId: number | null }) => {
+                                                 addToCourse: boolean; moduleId: number | null; cloud?: boolean }) => {
     const form = new FormData();
     form.append("file", input.file);
     form.append("kind", input.kind);
@@ -205,6 +205,7 @@ export const api = {
     form.append("focus", input.focus);
     form.append("add_to_course", String(input.addToCourse));
     if (input.moduleId !== null) form.append("module_id", String(input.moduleId));
+    if (input.cloud) { form.append("model", "cloud"); form.append("confirm_cloud", "true"); }  // V16, confirmed in the form
     return upload<AiDraft>(`${c(id)}/ai/drafts/upload`, form);
   },
   createAiDraftFromUrl: (id: number, input: Schemas["AiDraftUrlIn"]) => request<AiDraft>("POST", `${c(id)}/ai/drafts/url`, input),

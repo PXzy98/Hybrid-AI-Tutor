@@ -3,7 +3,16 @@
 `build_cloud_request` decides WHAT may leave the privacy boundary; `CloudClient` is the only object that
 sends anything, and it accepts nothing but a validated `CloudRequest`.
 """
-from app.core.schemas import CloudRequest, LearnerContext, LLMResult, RequestContext
+from collections.abc import Sequence
+
+from app.core.schemas import (
+    CloudRequest,
+    DraftCloudPassage,
+    DraftCloudRequest,
+    LearnerContext,
+    LLMResult,
+    RequestContext,
+)
 from app.llm.base import LLMClient, LLMUnavailable
 from app.prompts import render_cloud
 
@@ -23,6 +32,15 @@ def build_cloud_request(ctx: RequestContext) -> CloudRequest:
         subject=ctx.profile.prompt if ctx.profile else "general",
         guidelines=list(ctx.guidelines),
     )
+
+
+def build_draft_cloud_request(*, kind: str, passages: Sequence[tuple[int, str, str]], request: str = "",
+                              kc_names: Sequence[str] = ()) -> DraftCloudRequest:
+    """V16 allow-list of an instructor draft: (number, source, text) of the scanned course passages, the
+    instructor's request and the accepted KC names, for one draft kind. Nothing else."""
+    return DraftCloudRequest(
+        kind=kind, request=request, kc_names=list(kc_names),
+        passages=[DraftCloudPassage(number=n, source=s, text=t) for n, s, t in passages])
 
 
 class CloudClient:
@@ -51,4 +69,18 @@ class CloudClient:
         if self._transport is None:
             raise LLMUnavailable("cloud model not configured (CLOUD_API_KEY / CLOUD_MODEL)")
         result = await self._transport.complete(render_cloud(req, safety_retry=safety_retry))
+        return result.model_copy(update={"backend": "cloud"})
+
+    async def complete_draft(self, req: DraftCloudRequest) -> LLMResult:
+        """V16: send an instructor draft request. The messages, the answer schema and the output limit are
+        built here from the validated request and fixed instructions; the caller supplies no text."""
+        if not isinstance(req, DraftCloudRequest):
+            raise TypeError("complete_draft accepts only a DraftCloudRequest")
+        req = DraftCloudRequest.model_validate(req.model_dump())
+        if self._transport is None:
+            raise LLMUnavailable("cloud model not configured (CLOUD_API_KEY / CLOUD_MODEL)")
+        from app.instructor_ai.draft_cloud import render_draft
+
+        messages, schema, max_tokens = render_draft(req)
+        result = await self._transport.complete(messages, json_schema=schema, max_tokens=max_tokens)
         return result.model_copy(update={"backend": "cloud"})

@@ -108,21 +108,28 @@ function StartForm({ course, onStarted }: { course: Course; onStarted: (d: AiDra
   const [addToCourse, setAddToCourse] = useState(false);
   const [addModuleId, setAddModuleId] = useState<number | null>(null); // where the uploaded file or page goes
   const [focus, setFocus] = useState("");
+  // V16: the cloud model for public material, only with the explicit confirmation below
+  const [cloud, setCloud] = useState(false);
+  const [confirmCloud, setConfirmCloud] = useState(false);
+  const cloudOffered = !course.local_only && !!course.cloud_available;  // else the model choice is hidden
+  const useCloud = cloud && confirmCloud && cloudOffered;
+  const model = useCloud ? { model: "cloud" as const, confirm_cloud: true } : {};
   const start = useMutation({
     mutationFn: () => {
       const text = kind === "custom" ? request : "";
       if (source === "upload" && file) {
-        return api.createAiDraftFromUpload(course.id, { file, kind, request: text, focus, addToCourse, moduleId: addToCourse ? addModuleId : null });
+        return api.createAiDraftFromUpload(course.id, { file, kind, request: text, focus, addToCourse, moduleId: addToCourse ? addModuleId : null, cloud: useCloud });
       }
       if (source === "url") {
         return api.createAiDraftFromUrl(course.id, { url: pageUrl.trim(), kind, request: text, focus, add_to_course: addToCourse,
-                                                     module_id: addToCourse ? addModuleId : null });
+                                                     module_id: addToCourse ? addModuleId : null, ...model });
       }
       return api.createAiDraft(course.id, {
         kind, focus, request: text,
         module_id: source === "module" ? moduleId : null,
         ...(source === "modules" ? { module_ids: moduleIds } : {}),
         ...(source === "files" ? { material_ids: materialIds } : {}),
+        ...model,
       });
     },
     onSuccess: (d) => {
@@ -135,7 +142,7 @@ function StartForm({ course, onStarted }: { course: Course; onStarted: (d: AiDra
   const moduleName = new Map((modules.data ?? []).map((m) => [m.id, m.title]));
   const missing = (kind === "custom" && !request.trim())
     || (source === "modules" && moduleIds.length === 0) || (source === "files" && materialIds.length === 0)
-    || (source === "upload" && !file) || (source === "url" && !pageUrl.trim()) || (source === "module" && moduleId === null);
+    || (cloud && cloudOffered && !confirmCloud) || (source === "upload" && !file) || (source === "url" && !pageUrl.trim()) || (source === "module" && moduleId === null);
   function submit(e: FormEvent) {
     e.preventDefault();
     if (!missing) start.mutate();
@@ -221,6 +228,30 @@ function StartForm({ course, onStarted }: { course: Course; onStarted: (d: AiDra
               </div>
             )}
           </fieldset>
+          {cloudOffered && (
+            <fieldset className="grid gap-2 sm:col-span-2">
+              <legend className="mb-1 text-sm font-medium">{t("ai.model")}</legend>
+              <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="radio" name="ai-model" className="accent-primary" checked={!cloud} onChange={() => { setCloud(false); setConfirmCloud(false); }} />
+                  {t("ai.modelLocal")}
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="radio" name="ai-model" className="accent-primary" checked={cloud} onChange={() => setCloud(true)} />
+                  {t("ai.modelCloud")}
+                </label>
+              </div>
+              {cloud && (
+                <Alert variant="warning" icon>
+                  <p>{t("ai.cloudNotice")}</p>
+                  <label className="mt-2 flex items-start gap-2 text-sm font-medium">
+                    <input type="checkbox" className="mt-0.5 accent-primary" checked={confirmCloud} onChange={(e) => setConfirmCloud(e.target.checked)} />
+                    {t("ai.cloudConfirm")}
+                  </label>
+                </Alert>
+              )}
+            </fieldset>
+          )}
           <div className="grid gap-1.5 sm:col-span-2"><Label htmlFor="ai-focus">{t("ai.focus")}</Label>
             <Input id="ai-focus" value={focus} maxLength={300} onChange={(e) => setFocus(e.target.value)} placeholder={t("ai.focusHint")} /></div>
           <div className="sm:col-span-2 space-y-2">
