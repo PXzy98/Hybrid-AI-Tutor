@@ -282,6 +282,37 @@ def test_a_page_deleted_while_it_is_fetched_again_gives_404_and_leaves_no_file(w
     assert list(_material_folder(world).glob("*web-*")) == []
 
 
+def test_two_refetches_of_one_page_keep_the_file_and_its_hash_together(world, site, monkeypatch):
+    """A second refetch that runs while the first one is fetching: each request stages its own file and the
+    row lock serializes the replacement, so the stored file always matches the recorded size and hash."""
+    import hashlib
+
+    from sqlmodel import Session
+
+    from app.storage.models import Material
+
+    prof, url = world["prof"], world["url"]
+    material = prof.post(f"{url}/materials/url", json={"url": "https://example.org/pullups"}).json()["material"]
+    inner = web_pages.fetch_page
+    nested = []
+
+    async def refetch_meanwhile(*args, **kwargs):
+        page = await inner(*args, **kwargs)
+        if not nested:
+            nested.append(True)
+            site["example.org/pullups"] = _html("<html><title>Pull-ups</title><p>A newer version.</p></html>")
+            assert prof.post(f"{url}/materials/{material['id']}/refetch").status_code == 200
+        return page
+
+    monkeypatch.setattr(web_pages, "fetch_page", refetch_meanwhile)
+    assert prof.post(f"{url}/materials/{material['id']}/refetch").status_code == 200
+    data = (_material_folder(world) / PULLUPS).read_bytes()
+    with Session(world["services"].engine) as db:
+        row = db.get(Material, material["id"])
+    assert (row.size_bytes, row.sha256) == (len(data), hashlib.sha256(data).hexdigest())
+    assert list(_material_folder(world).glob(".*.new")) == []
+
+
 def test_the_name_conflict_of_a_draft_from_a_page_talks_about_the_page(world, site):
     prof, url = world["prof"], world["url"]
     assert prof.post(f"{url}/materials/url", json={"url": "https://example.org/pullups"}).status_code == 201
