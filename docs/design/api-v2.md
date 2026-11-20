@@ -64,6 +64,7 @@ logged in. Owner = component owner who implements it.
 | `GET /admin/instructors`, `POST /admin/instructors` | A | list, create instructor accounts |
 | `PATCH /admin/instructors/{account_id}`, `POST /admin/instructors/{account_id}/reset-password` | A | deactivate, change role, reset |
 | `GET /admin/statistics` | A | v5 V2: per course and in total, students enrolled, active students (7 days), questions (7 days, term); question counts that fewer than `learner.class_summary_min_group` students contributed are null |
+| `GET /admin/students`, `PATCH /admin/students/{account_id}`, `POST /admin/students/{account_id}/reset-password`, `DELETE /admin/students/{account_id}` | A | V9: student accounts across courses (`courses` = active memberships); `PATCH {active}` deactivates (sessions end) or reactivates; `DELETE` removes the account and its learning data in every course (logs anonymized), audited; staff accounts are not student accounts (404) |
 | `GET /admin/settings`, `PUT /admin/settings` | A | system settings; `PUT` sends the `version` it read, 409 if it changed (course-structure 6.2) |
 | `GET /admin/settings/history`, `POST /admin/settings/restore/{history_id}` | A | change history and undo |
 | `GET /admin/settings/apply-status` | A | `apply_state`, target version, per-process progress and errors (course-structure 6.5); the page polls it while `applying` |
