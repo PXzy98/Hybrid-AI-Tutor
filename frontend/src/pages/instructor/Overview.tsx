@@ -121,7 +121,8 @@ function UsageCard({ course }: { course: Course }) {
               <StatCard label={t("usage.enrolled")} value={data.students_enrolled} icon={Users} />
               <StatCard label={t("usage.active7d")} value={show(data.active_students_7d)} icon={UserCheck} />
               <StatCard label={t("usage.questions7d")} value={show(data.questions_7d)} icon={MessageSquare} />
-              <StatCard label={t("usage.local")} value={pct(data.local_share) ?? hidden} icon={Cpu} />
+              {/* no question yet: nothing to hide, nothing to show */}
+              <StatCard label={t("usage.local")} value={data.questions_total === 0 ? "—" : pct(data.local_share) ?? hidden} icon={Cpu} />
             </div>
             <div className="grid gap-6 md:grid-cols-2">
               <div>
@@ -237,7 +238,8 @@ function InsightsCard({ course }: { course: Course }) {
  *  written out). */
 function RankedRow({ label, count, share }: { label: string; count: ReactNode; share: number }) {
   return (
-    <li className="relative flex justify-between gap-3 overflow-hidden rounded-md px-2.5 py-1.5">
+    // narrow: the count goes below the label instead of squeezing it to one word per line
+    <li className="relative flex flex-wrap justify-between gap-x-3 overflow-hidden rounded-md px-2.5 py-1.5">
       <span aria-hidden className="absolute inset-y-0 left-0 rounded-md bg-primary-soft" style={{ width: `${Math.round(share * 100)}%` }} />
       <span className="relative min-w-0">{label}</span>
       <span className="relative shrink-0 tabular-nums text-muted-foreground">{count}</span>
