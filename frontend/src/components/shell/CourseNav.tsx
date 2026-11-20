@@ -31,17 +31,17 @@ export default function CourseNav({ course, student, tab }: { course: Course; st
   const current = activeSection(student, tab, course.individual_view);
   const chatPath = `/courses/${courseId}/chat`;
 
-  function open(next: Record<string, string | null>) {
+  function open(next: Record<string, string | null>, state?: { newChat: number }) {
     const search = new URLSearchParams(params);
     for (const [k, v] of Object.entries(next)) v === null ? search.delete(k) : search.set(k, v);
-    if (student) navigate({ pathname: chatPath, search: search.toString() });
+    if (student) navigate({ pathname: chatPath, search: search.toString() }, { state });
     else setParams(search);
   }
 
   return (
     <>
       {student && (
-        <button type="button" onClick={() => open({ c: null })}
+        <button type="button" onClick={() => open({ c: null }, { newChat: Date.now() })}
                 className="mb-1 flex h-9 w-full items-center gap-2.5 rounded-md border bg-background px-2.5 text-sm font-medium shadow-xs outline-hidden transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring">
           <SquarePen aria-hidden className="size-4" />{t("nav.newChat")}
         </button>

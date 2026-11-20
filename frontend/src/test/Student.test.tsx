@@ -112,6 +112,54 @@ describe("chat", () => {
     expect(bodies[2]).not.toHaveProperty("conversation_id");
   });
 
+  it("goes back to a new, empty conversation from a past one opened in the history list", async () => {
+    const calls = mockApi(studentRoutes({
+      "GET /courses/1/conversations": [{ conversation_id: "c-9", turns: 2, last_at: "2020-01-01T10:00:00Z" }],
+      "GET /courses/1/conversations/c-9": { conversation_id: "c-9", turns: [{ role: "student", text: "Earlier question" }, { role: "tutor", text: "Earlier answer" }] },
+      "POST /courses/1/ask/stream": () => sse(["result", answer], ["done", {}]),
+    }));
+    renderApp("/courses/1/chat");
+    const user = userEvent.setup();
+    const history = await screen.findByRole("navigation", { name: "Conversations" });
+    await user.click(within(history).getByRole("button"));
+    expect(await screen.findByText("Earlier answer")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "New chat" }));
+    await waitFor(() => expect(screen.queryByText("Earlier answer")).not.toBeInTheDocument());
+    expect(screen.getByText("What would you like to understand today?")).toBeInTheDocument();
+    expect(within(history).getByRole("button")).not.toHaveAttribute("aria-current");
+    await user.type(screen.getByLabelText("Your question"), "Fresh question");
+    await user.click(screen.getByRole("button", { name: "Send" }));
+    await waitFor(() => expect(calls.some((c) => c.path === "/courses/1/ask/stream")).toBe(true));
+    expect(calls.find((c) => c.path === "/courses/1/ask/stream")!.body).not.toHaveProperty("conversation_id");
+  });
+
+  it("New chat gives an empty conversation while the first answer of the current one is still streaming", async () => {
+    let release!: () => void;
+    const gate = new Promise<void>((r) => { release = r; });
+    const bodies: Record<string, unknown>[] = [];
+    mockApi(studentRoutes());
+    interceptFetch("/ask/stream", async (init) => {
+      bodies.push(JSON.parse(String(init?.body)));
+      if (bodies.length === 1) await gate;
+      return sse(["result", answer], ["done", {}]);
+    });
+    renderApp("/courses/1/chat");
+    const user = userEvent.setup();
+    await user.type(await screen.findByLabelText("Your question"), "Slow question");
+    await user.click(screen.getByRole("button", { name: "Send" }));
+    await waitFor(() => expect(bodies).toHaveLength(1));
+    await user.click(screen.getByRole("button", { name: "New chat" }));
+    await waitFor(() => expect(screen.queryByText("Slow question")).not.toBeInTheDocument());
+    release();
+    await new Promise((r) => setTimeout(r, 100));
+    expect(screen.queryByText("Slow question")).not.toBeInTheDocument();
+    expect(screen.queryByText(/current times resistance/)).not.toBeInTheDocument();
+    await user.type(screen.getByLabelText("Your question"), "Next question");
+    await user.click(screen.getByRole("button", { name: "Send" }));
+    await waitFor(() => expect(bodies).toHaveLength(2));
+    expect(bodies[1]).not.toHaveProperty("conversation_id");
+  });
+
   it("loads a reopened conversation once and keeps live messages when the history is refetched", async () => {
     let historyCalls = 0;
     mockApi(studentRoutes({
