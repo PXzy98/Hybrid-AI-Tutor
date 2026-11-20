@@ -25,7 +25,7 @@ Until this plan is merged into [v4-implementation-guide.md](v4-implementation-gu
 | V15 a student's own answer instruction | merged (#121) |
 | V16 cloud drafts for public material | merged (#122); the before/after comparison of five drafts per kind needs the vLLM |
 | V11 to V14, T10 notes | merged (#116): `DOMAIN_NAMES.md`, `DEMO_VLLM.md`, `GPU_COST.md`, `design/extension-points.md`, `DEMO_SCRIPT.md` |
-| Z27 security review | merged (#117); H1, M1, L4 fixed; M2 to M4 and L1 to L3 open |
+| Z27 security review | merged (#117); H1, M1, L4 fixed; M2 to M4 fixed (#130); L1 to L3 fixed (#132) |
 | V17 browser test | admin and instructor parts done on the integration build (fictional data); student part and every flow that needs the local model still to run; findings in section 9 |
 | End of term to next term | done once in V17 (export, new course from the YAML export); gaps in W12 |
 | Settings bug from the meeting | Z to describe it; an empty "Enabled course types" field that switched course creation off was fixed in #127 |
@@ -72,12 +72,12 @@ Until this plan is merged into [v4-implementation-guide.md](v4-implementation-gu
 | V2 | **Class statistics**: active students, questions per week, most asked topics and misconceptions, quiz averages per question, all above the minimum group; the admin page shows the same counts across courses | S (UI T) | overview and admin show them with 5+ demo students |
 | V3 | **Privacy notice** at the top of the student side (first visit and a permanent short line), en and fr | T | text approved by Z; screenshot in both languages |
 | Z26 | Module and course guidelines reach the answering model, after the base rules; student preferences only apply where they do not conflict; a student cannot override them ("ignore the instructor") | Z | tests: right module only; override attempt fails |
-| — | **Routing test** asked for by Prof. Ismaeel: run the routing evaluation and a manual ask on the local and cloud paths with the new vLLM setting | T | short result table in the PR or HANDOVER |
+| — | **Routing test** asked for by Prof. Ismaeel: run the routing evaluation and a manual ask on the local and cloud paths with the new vLLM setting | T | done 2026-11-20: `eval/routing-ece/results/routing_test_2026-11-20.md` |
 | — | **Class overview test** with at least 5 demo students (`build_demo.py --students 6`), quizzes and the end-of-term survey answered (the survey showed "not available" in the meeting) | S | screenshots of the overview with data |
 | — | **Settings bug** shown in the meeting (routing / model connection settings) | Z | Z describes it; fixed with a test |
 | — | **End of term to next term**: export a course, import it as a new course with new dates, without student data, then invite a new class | Z | done once on the dev server; manual steps checked |
 | S15 | Demo courses get KCs, check items and a quiz; test that a quiz attempt moves the mastery estimate | S | test asserts `p_mastery` changes after an attempt |
-| S16 | Course type of the CS50x pack | S | CS questions get the CS prompt |
+| S16 | Course type of the CS50x pack | S | done (manifest `computer_science`, computing prompt; test `test_computer_science_courses_get_the_computing_prompt`; checked 2026-11-20 with a real answer) |
 | Z25 | Document scan refuses public course text; check all eight packs | Z | all packs upload |
 | — | Backend French texts: consent text, preference questions, chat error messages (still English in the French UI; consent text still says "What I know") | Z | French UI shows no English from the backend |
 | — | Send French UI screenshots to Lavin (she can check basic French; find a second reviewer for details) | Z | e-mail sent |
@@ -106,13 +106,13 @@ Until this plan is merged into [v4-implementation-guide.md](v4-implementation-gu
 | V13 | **Local model hosting cost**: options and costs (RunPod or another GPU in class hours only, 24/7, AWS GPU instance, own server), with the Z23 numbers; recommendation to Prof. Abbas | Z | report sent by 12/1 |
 | V14 | **Extension points for course-platform features** (assignments, grading, announcements, LTI, university login): a short design note in `docs/design/` on where they plug in (data model, API v2 routes, frontend nav, permissions), no implementation | Z | note reviewed |
 | Z27 | Security review of the whole system before going public (auth, CSRF, access, SSRF incl. V7, uploads, prompt injection incl. Z26, proxy, keys, logs, the public vLLM of V12) in `docs/SECURITY_REVIEW.md` | Z | report; high findings fixed before the deploy |
-| Z23 | vLLM capacity (tokens per second, 1 to 32 at a time), model limits set from it | Z | numbers in OPERATIONS.md |
+| Z23 | vLLM capacity (tokens per second, 1 to 32 at a time), model limits set from it | Z | measured 2026-11-20: numbers and recommendation (`max_concurrent` 8, timeout 60) in OPERATIONS.md section 10; limits not yet changed in `config.yaml`; full-ask timing open |
 | — | Alert receiver for monitoring (ask Prof. Abbas) | Z | set in `alertmanager.yml` |
 | T10 | Video on the v5 UI; Design Day live demo script on the production site; "Brightspace plus" story (teaching, research, industry training; learners include trainees and research groups, a bridge between academia, research and industry); one demo step uploads an open-access paper and drafts research topics from it | T, all | video submitted 11/25 |
 | — | Final report and Design Day material carry the same story and the value for future research | all | report 12/13 |
 | T13 | Web search evaluation (G1-106); Tongkai shows web search at the next meeting | T | report |
 | E4 | End-to-end privacy audit on v5 (after V1, V7, Z26) | Z | report |
-| — | Answer quality on non-medical courses (ECE, CS packs) with the vLLM model | S, T | short result table |
+| — | Answer quality on non-medical courses (ECE, CS packs) with the vLLM model | S, T | done 2026-11-20 for 6.002 and CS50x (10 questions each): `eval/course-rag-packs/results/answer_quality.md` |
 
 ## 6. Remaining v4 items (in order, when time allows)
 
@@ -122,7 +122,7 @@ Until this plan is merged into [v4-implementation-guide.md](v4-implementation-gu
 - **Routing (T15, T17)**: routing heads trained on medical questions only; course-rule questions routed to the
   cloud skip retrieval (T17 done: retrieval now also runs when the capability gate chooses the cloud, inside a
   course and for logistics questions).
-- **Privacy tests (Z22)**: held-out ECE set, `life_science` and `general` sets, a fresh medical set, E6 scores.
+- **Privacy tests (Z22)**: held-out sets for ECE (41), computer science (30), `life_science` (30) and `general` (25) are in `eval/privacy-filter/` (`make_course_sets.py`, `course_sets.py`, scores in `results/z22/metrics.json`). E6 on main is unchanged since the last report (Z25 and S16 did not affect it). New sets, leak / over-redaction with the course's profile: ECE 24.0% / 6.2%, computer science 12.5% / 7.1%, life science 13.3% / 13.3% (0 of 13 within the profile's scope), general 6.7% / 10.0%. Misses: AWS secret key, quoted `tok_` values, passwords in URLs and prose, 172.16.x addresses, `git@` URLs; over-redaction: eponyms and thinker names (Hardy-Weinberg, Mealy, Kant). Still open: a fresh held-out medical set, and the rule changes for these misses.
 - **T16 (chat, done)**: after opening a past conversation there is no way back to a new, empty conversation
   (fixed: New chat also works while the first answer is still streaming).
   Note: three merged PRs reused IDs of the task list: #106 calls itself T16 (code splitting), #103 T15 (forms)
@@ -136,7 +136,7 @@ Until this plan is merged into [v4-implementation-guide.md](v4-implementation-gu
   unit; empty top bar on some pages; long instructor sidebar; pale disabled buttons; favicon.
 - **Admin page gaps**: misconceptions can only be retired, not deleted; system settings do not edit `checkers` /
   `knowledge_model`; course types are a text field; instructors cannot pick system model connections.
-- **Dependencies**: `transformers` 5, `react-router` 7 (CI advisories).
+- **Dependencies**: done (Z27): `transformers` 5, `react-router` 7, `katex` 0.19; `vite`/`vitest` advisories are dev-only.
 - **Handover (T12, S12)**: routing, frontend and web search notes; `docs/HANDOVER.md` and the progress pages.
 - Lavin's second review of the 30 revised check items.
 - From the client: real course material and an instructor to try the drafts; a maintainer after December.
@@ -182,7 +182,19 @@ with the local model.
 | W17 | Course content | Knowledge components and check items can only be retired, not edited (misconceptions can be) | to decide |
 | W18 | Module codes | "Thévenin" becomes `th_venin` in codes and file names | cosmetic |
 | W19 | KC and quiz drafts (vLLM) | One duplicate KC name rejects the whole KC draft; a quiz draft with the 9B model gave "no usable question"; some 503s under load | to check with the vLLM |
+| W20 | Chat answers | Formulas written with \( \) and \[ \] are shown as raw text ("(V_{th})") | minor |
+| W21 | French interface | "cloud" and "Nuage" left in four strings | cosmetic |
+| W22 | Privacy notice | The full notice opens once per browser, not per student: a new student on a shared computer only sees the short line | minor |
+| W23 | French interface | "Explain it another way" and "Draft extra material" prepare a French request, but the course search and the privacy filter are English: no course material was found | major |
+| W24 | AI quiz drafts | Questions and explanations say "according to the text" and "Passage 3 states" | minor |
+| W25 | Quizzes | The editor shows no "Saved." after a save | cosmetic |
+| W26 | Members (instructor) | "Reset password" resets at once, without the confirmation W11 added on the admin page | minor |
+| W27 | Join page | Focusing the new-password field made the browser's password manager crash the browser during the automated test | to check by hand |
 
-Still to run: the student part (invitation sign-up, privacy notice, chat on the local and cloud paths, web
-search, quizzes, My progress, "explain it another way", survey) and every local-model flow once the vLLM is
-reachable.
+State on 2026-11-20 (second run, with the lab vLLM reachable and the student part done): W1 to W11, W13 to W16
+and W18 to W26 are fixed in #129; W12 ("Start next term's course", with materials) is #133; W17 is to decide;
+W27 is to check by hand. W19 retested with the vLLM: quiz drafts and custom drafts work (3 of 3 questions usable,
+a draft in under 30 s); the KC draft failed on accept as described and is fixed; no 503 was seen. Also checked:
+the end-of-term survey (a student answers once, averages appear at three answers), the student pages at phone
+width (no overflow), and a demo rebuild with the local model (new KCs for every module). Not run yet: web search
+answers.

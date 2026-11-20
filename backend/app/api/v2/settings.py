@@ -55,6 +55,8 @@ class SystemSettingsOut(BaseModel):
     values: SystemValues
     version: int
     apply_state: Literal["applied", "applying", "failed"]
+    # what a value left unset (null) means: the deployment's config file (V17 W9); not stored, not sent back
+    defaults: SystemValues | None = None
 
 
 class SystemSettingsIn(BaseModel):
@@ -110,7 +112,8 @@ def _history_out(e: ConfigHistory) -> HistoryEntryOut:
 
 def _system_out(request: Request) -> SystemSettingsOut:
     values, version, state = _service(request).system_values()
-    return SystemSettingsOut(values=SystemValues(**values), version=version, apply_state=state)
+    return SystemSettingsOut(values=SystemValues(**values), version=version, apply_state=state,
+                             defaults=SystemValues(**_service(request).system_defaults()))
 
 
 def _course_out(request: Request, course_id: int) -> CourseSettingsOut:

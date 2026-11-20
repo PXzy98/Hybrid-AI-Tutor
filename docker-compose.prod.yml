@@ -1,0 +1,19 @@
+# Production extras (security review M2 and M3). Use it together with the main file, never with the
+# development override:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+# SITE_ADDRESS must be the public domain name in .env (Caddy then serves HTTPS); the session cookie is sent
+# only over HTTPS and API v1 (frozen, demo course only) is switched off. /api/v1/health stays for the checks.
+x-prod: &prod
+  environment:
+    AUTH__COOKIE_SECURE: "true"
+    API__V1_ENABLED: "false"
+    SITE_ADDRESS: ${SITE_ADDRESS:?set SITE_ADDRESS to the public domain name in .env}
+
+services:
+  api:
+    <<: *prod
+  worker:
+    <<: *prod
+  proxy:
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:?set SITE_ADDRESS to the public domain name in .env}

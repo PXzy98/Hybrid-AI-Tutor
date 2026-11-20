@@ -16,8 +16,10 @@ export function ErrorNote({ error, id }: { error: unknown; id?: string }) {
     if (error.code === "model_failed") text = t("error.modelFailed");
     if (error.code === "usage_limit") text = t("error.usageLimit", { s: error.retryAfterSeconds ?? 0 });
     if (error.code === "settings_applying") text = t("error.settingsApplying");
-    if (error.code === "conflict") text = `${t("error.conflict")} ${error.message}`;
   }
+  // a server sentence may start in lower case ("an account with this e-mail exists"); a 409 is not always a
+  // change by someone else (duplicates, a quiz already answered), so its own sentence is shown as it is
+  text = text.charAt(0).toUpperCase() + text.slice(1);
   return <Alert variant="destructive" role="alert" id={id} icon>{text}</Alert>;
 }
 

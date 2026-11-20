@@ -20,10 +20,12 @@ const CHOICES = ["A", "B", "C", "D"] as const;
 
 /** Course management: modules, knowledge components (KCs), check items, misconceptions and YAML import/export. */
 export default function Content({ course }: { course: Course }) {
+  // kept here: the card below starts again after its own save (its key changes), and must still say "saved"
+  const [guidelineSaved, setGuidelineSaved] = useState(false);
   return (
     <div className="space-y-4">
       {/* keyed by the stored text: an import or another save replaces it, and the editor starts from it again */}
-      <CourseGuidelineCard key={course.guideline ?? ""} course={course} />
+      <CourseGuidelineCard key={course.guideline ?? ""} course={course} saved={guidelineSaved} onSaved={setGuidelineSaved} />
       <ModulesCard course={course} />
       <KcsCard course={course} />
       <ItemsCard course={course} />
@@ -34,13 +36,13 @@ export default function Content({ course }: { course: Course }) {
 }
 
 /** The instructor's rules for the tutor in the whole course (Z26); each module can add its own. */
-function CourseGuidelineCard({ course }: { course: Course }) {
+function CourseGuidelineCard({ course, saved, onSaved }: { course: Course; saved: boolean; onSaved: (saved: boolean) => void }) {
   const { t } = useI18n();
   const qc = useQueryClient();
   const [guideline, setGuideline] = useState(course.guideline ?? "");
   const save = useMutation({
     mutationFn: () => api.updateCourse(course.id, { guideline }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["courses"] }),
+    onSuccess: () => { onSaved(true); qc.invalidateQueries({ queryKey: ["courses"] }); },
   });
   function submit(e: FormEvent) {
     e.preventDefault();
@@ -52,9 +54,9 @@ function CourseGuidelineCard({ course }: { course: Course }) {
       <CardContent>
         <form onSubmit={submit} className="space-y-3">
           <Label htmlFor="course-guideline" className="sr-only">{t("content.courseGuideline")}</Label>
-          <Textarea id="course-guideline" value={guideline} maxLength={4000} onChange={(e) => setGuideline(e.target.value)} />
+          <Textarea id="course-guideline" value={guideline} maxLength={4000} onChange={(e) => { setGuideline(e.target.value); onSaved(false); }} />
           <ErrorNote error={save.error} />
-          {save.isSuccess && guideline === (course.guideline ?? "") && <p role="status" className="text-sm text-muted-foreground">{t("content.courseGuidelineSaved")}</p>}
+          {saved && guideline === (course.guideline ?? "") && <p role="status" className="text-sm text-muted-foreground">{t("content.courseGuidelineSaved")}</p>}
           <Button type="submit" size="sm" loading={save.isPending} disabled={save.isPending || guideline === (course.guideline ?? "")}>{t("settings.save")}</Button>
         </form>
       </CardContent>
@@ -128,6 +130,7 @@ function ModuleRow({ course, module, onSaved, actions }: { course: Course; modul
       <Textarea aria-label={t("content.guidelineOf", { name: module.title })} value={guideline} onChange={(e) => setGuideline(e.target.value)} />
       <ErrorNote error={save.error} />
       {changed && <Button type="button" size="sm" onClick={() => save.mutate()} disabled={save.isPending}>{t("settings.save")}</Button>}
+      {save.isSuccess && !changed && <p role="status" className="text-sm text-muted-foreground">{t("settings.saved")}</p>}
     </div>
   );
 }

@@ -32,7 +32,7 @@ dependencies = [
     "numpy>=1.26",
     "scikit-learn>=1.5,<2",  # training LR/SVM; portable NPZ weights at runtime
     "sentence-transformers>=3,<6",
-    "transformers>=4.41,<5",
+    "transformers>=5,<6",
     "torch>=2.6",  # CPU is sufficient; install the CPU build first if preferred
 ]
 

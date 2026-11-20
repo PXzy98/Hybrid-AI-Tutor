@@ -16,12 +16,12 @@ state.
 |---|---|---|---|---|
 | H1 | API v1 `PUT /admin/config`: any instructor could change system-wide settings, including the trusted local model address (which receives every course's original student text) and the answer checkers | High | Z | **fixed in this PR** |
 | M1 | API v1 `POST /admin/llm-server/test`: any instructor could make the server connect to arbitrary private addresses (internal network probing) | Medium | Z | **fixed in this PR** |
-| M2 | API v1 instructor routes are scoped to the demo course only by convention: any instructor reads the demo course's class summary, request logs (sanitized questions) and materials | Medium | Z | open: turn API v1 off in production (task below) |
-| M3 | `auth.cookie_secure` is `false` by default; a production deploy that forgets `AUTH__COOKIE_SECURE=true` sends the session cookie over HTTP before the HTTPS redirect | Medium | Z | open: V10 deploy checklist; make the production Compose file set it |
-| M4 | The demo vLLM (V12) will be on the internet: without `--api-key` anyone could use it, and it receives original student text | Medium | Z | open: V12 runbook requires the key, HTTPS and one open port |
-| L1 | `react-router-dom` 6.x: two moderate advisories (open redirect via a backslash in `Link`/`useNavigate`, SSR hydration). The app never navigates to an address taken from user input and has no SSR, so neither is reachable | Low | T | open: upgrade to a fixed release |
-| L2 | `katex` (through `rehype-katex`): low advisory, prototype pollution that bypasses `trust`; the app never enables `trust` | Low | T | open: upgrade with L1 |
-| L3 | `transformers` is held below 5 (CI advisories on 4.x concern loading untrusted model files); models are loaded with `local_files_only` from the deployment's own cache | Low | T | open (TODO "Dependencies") |
+| M2 | API v1 instructor routes are scoped to the demo course only by convention: any instructor reads the demo course's class summary, request logs (sanitized questions) and materials | Medium | Z | **fixed in this PR**: `api.v1_enabled` (`API__V1_ENABLED=false` in `docker-compose.prod.yml`) answers 404 for every `/api/v1` route except `/api/v1/health` |
+| M3 | `auth.cookie_secure` is `false` by default; a production deploy that forgets `AUTH__COOKIE_SECURE=true` sends the session cookie over HTTP before the HTTPS redirect | Medium | Z | **fixed in this PR**: `docker-compose.prod.yml` sets `AUTH__COOKIE_SECURE=true` and requires `SITE_ADDRESS`; startup warning when the site is HTTPS and the cookie is not secure; deploy checklist in OPERATIONS.md |
+| M4 | The demo vLLM (V12) will be on the internet: without `--api-key` anyone could use it, and it receives original student text | Medium | Z | **fixed in this PR** (runbook): DEMO_VLLM.md and OPERATIONS.md make key, HTTPS and one open port required steps; startup warning for a non-local `VLLM_BASE_URL` without https or `VLLM_KEY` |
+| L1 | `react-router-dom` 6.x: two moderate advisories (open redirect via a backslash in `Link`/`useNavigate`, SSR hydration). The app never navigates to an address taken from user input and has no SSR, so neither was reachable | Low | T | fixed: upgraded to `react-router-dom` 7.18 (Z27) |
+| L2 | `katex` (through `rehype-katex` and `remark-math`): low advisory, prototype pollution that bypasses `trust`; the app never enables `trust` | Low | T | fixed: `katex` 0.19.1, forced for the nested copies by an `overrides` entry (Z27) |
+| L3 | `transformers` was held below 5 (CI advisories on 4.x concern loading untrusted model files); models are loaded with `local_files_only` from the deployment cache | Low | T | fixed: `transformers` 5.23, the `.pip-audit-ignore` entries are removed (Z27) |
 | L4 | Answer prompt: course material and web results were not named as data in the base rules (draft prompts already said so) | Low | Z | **fixed in this PR** (base rule 5) |
 | L5 | CSP `style-src 'unsafe-inline'` (KaTeX and the UI library set style attributes) | Low | T | accepted: scripts stay `'self'` only |
 
@@ -40,7 +40,7 @@ No real secret was found in the history: the key-like strings are test fixtures 
 ### CSRF
 Every unsafe `/api/v2` request needs `X-CSRF-Token`: derived from the HttpOnly session token after login (another
 site can neither read nor compute it), a double-submit cookie before login. API v1 relies on `SameSite=Lax` only;
-see M2.
+see M2: off in production.
 
 ### Role checks (rules 3 and 9)
 Every `/api/v2` route was listed with the dependencies FastAPI resolves for it: all routes require a logged-in
@@ -50,7 +50,7 @@ routes have access tests (another course's instructor, another student, logged o
 permission (statistics-only UI follows `CourseOut.individual_view`; the backend refuses anyway, V1).
 
 API v1 is frozen and serves only the demo course; `require_instructor` lets every instructor and admin in (H1,
-M1 fixed here; M2 remains).
+M1 and M2 fixed here: production turns API v1 off).
 
 ### SSRF
 - Model connections: `app.llm.ssrf` checks the address when it is saved and pins the resolved address at every
@@ -97,8 +97,8 @@ repository or its history (search above).
 the course's request logs and conversations; deleting an account anonymizes its log rows.
 
 ### Dependencies and images
-`npm audit --omit=dev`: 0 high or critical, 2 moderate (L1), 4 low (L2). Python: CI advisories on `transformers`
-4.x (L3). Images are built from the repository's Dockerfiles on official base images; a container scan (for
+`npm audit --omit=dev`: 0 vulnerabilities (L1, L2 fixed). Python: no open advisories on `transformers` (L3 fixed;
+5.x). Images are built from the repository's Dockerfiles on official base images; a container scan (for
 example Trivy) is part of the V10 deploy checklist.
 
 ## Fixes in this PR
@@ -110,9 +110,9 @@ example Trivy) is part of the V10 deploy checklist.
   for a system field and for a server test, while the demo course's routing fields still work.
 
 ## Before the public deployment (V10, V12)
-1. Turn off API v1 in production, or restrict it to administrators (M2); the v2 frontend does not use it.
-2. Production Compose file: `AUTH__COOKIE_SECURE=true` and a domain in `SITE_ADDRESS` (M3).
-3. vLLM on RunPod or forwarded: `--api-key` set and equal to `VLLM_KEY`, HTTPS in front, only the API port open,
+1. Done (M2): `docker-compose.prod.yml` turns API v1 off; the v2 frontend does not use it.
+2. Done (M3): the same file sets `AUTH__COOKIE_SECURE=true` and requires a domain in `SITE_ADDRESS`.
+3. Runbook done (M4), to be followed at deployment: vLLM on RunPod or forwarded: `--api-key` set and equal to `VLLM_KEY`, HTTPS in front, only the API port open,
    `VLLM_BASE_URL` pointing at it (M4).
-4. Upgrade `react-router-dom` and `katex` (L1, L2); run a container scan of the built images.
+4. Run a container scan of the built images.
 5. Re-run this review's route inventory after the last v5 merge.

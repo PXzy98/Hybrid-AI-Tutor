@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent, type ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { ApiError } from "@/api/client";
 import { api, type Course, type CourseSettings, type CourseValues } from "@/api/endpoints";
@@ -26,8 +27,44 @@ export default function Settings({ course }: { course: Course }) {
       {settings.data && <SettingsForm key={settings.data.version} course={course} initial={settings.data}
                                        justSaved={savedVersion === settings.data.version} onSaved={setSavedVersion} />}
       <ModelEndpoints courseId={course.id} />
+      <NextTermCourse course={course} />
       <ArchiveCourse course={course} />
     </div>
+  );
+}
+
+/** Start next term's course from this one: settings, modules, content, draft quizzes and materials are
+ * copied; students and their data are not. The new course opens when the copy is done. */
+function NextTermCourse({ course }: { course: Course }) {
+  const { t } = useI18n();
+  const qc = useQueryClient();
+  const navigate = useNavigate();
+  const [form, setForm] = useState({ code: "", title: course.title, term_label: "" });
+  const copy = useMutation({
+    mutationFn: () => api.copyCourse(course.id, form),
+    onSuccess: (done) => {
+      qc.invalidateQueries({ queryKey: ["courses"] });
+      navigate(`/courses/${done.course.id}`);
+    },
+  });
+  const set = (k: keyof typeof form) => (e: { target: { value: string } }) => setForm({ ...form, [k]: e.target.value });
+  const taken = copy.error instanceof ApiError && copy.error.status === 409;
+  return (
+    <Card>
+      <CardHeader><CardTitle>{t("nextTerm.title")}</CardTitle><CardDescription>{t("nextTerm.hint")}</CardDescription></CardHeader>
+      <CardContent>
+        <form className="grid gap-4 sm:grid-cols-3" onSubmit={(e) => { e.preventDefault(); copy.mutate(); }}>
+          <div className="grid gap-1.5"><Label htmlFor="nt-code">{t("course.code")}</Label><Input id="nt-code" autoCapitalize="off" autoCorrect="off" spellCheck={false} value={form.code} onChange={set("code")} required /></div>
+          <div className="grid gap-1.5"><Label htmlFor="nt-title">{t("course.title")}</Label><Input id="nt-title" value={form.title} onChange={set("title")} required /></div>
+          <div className="grid gap-1.5"><Label htmlFor="nt-term">{t("course.term")}</Label><Input id="nt-term" value={form.term_label} onChange={set("term_label")} /></div>
+          <div className="sm:col-span-3 space-y-2">
+            {taken && <Alert variant="warning" role="alert" icon>{t("nextTerm.taken")}</Alert>}
+            <ErrorNote error={taken ? null : copy.error} />
+            <Button type="submit" loading={copy.isPending}>{t("nextTerm.button")}</Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 }
 

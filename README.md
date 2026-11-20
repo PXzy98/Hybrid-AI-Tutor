@@ -53,7 +53,7 @@ docker compose up -d --build
   creates instructor accounts and model connections. Production settings, upgrades and backups:
   [docs/OPERATIONS.md](docs/OPERATIONS.md).
 - `docker-compose.override.yml` is for local development (it publishes the database on `127.0.0.1:5432`);
-  production uses `docker compose -f docker-compose.yml`.
+  production uses `docker compose -f docker-compose.yml -f docker-compose.prod.yml`.
 - Demo courses from the open course packs, built through the API: `python scripts/build_demo.py`
   ([data/demo_courses/README.md](data/demo_courses/README.md)); `--learner-content` also drafts knowledge
   components, check items, misconceptions and a practice quiz with the local model, so My progress has data.

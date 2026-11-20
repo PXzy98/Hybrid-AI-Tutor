@@ -18,6 +18,8 @@ from app.api.v2.errors import (
 )
 from app.auth import csrf
 from app.catalog import CatalogError
+from app.core.config import get_settings
+from app.core.deploy_checks import deployment_warnings
 from app.core.services import build_services
 from app.platform import metrics
 from app.platform.access import DbCourseDirectory
@@ -30,6 +32,8 @@ DEV_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"]  # Vite dev ser
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     services = build_services()
+    for warning in deployment_warnings(services.settings):
+        logging.getLogger("app").warning("deployment: %s", warning)
     services.accounts.bootstrap_instructor()
     app.state.services = services
     app.state.course_directory = DbCourseDirectory(services.engine)  # require_course_role (Z9)
@@ -47,6 +51,17 @@ async def _csrf(request: Request, call_next):
     if not csrf.check(request, cookie_name):
         return error(403, ErrorCode.csrf_failed,
                      "Missing or invalid CSRF token. Get one from /api/v2/auth/csrf.")
+    return await call_next(request)
+
+
+async def _v1_gate(request: Request, call_next):
+    """API v1 can be switched off (api.v1_enabled, security review M2); its health check always answers."""
+    path = request.url.path
+    if path.startswith("/api/v1/") and path != "/api/v1/health":
+        services = getattr(request.app.state, "services", None)
+        settings = services.settings if services else get_settings()
+        if not settings.api.v1_enabled:
+            return error(404, ErrorCode.not_found, "API v1 is switched off on this server.")
     return await call_next(request)
 
 
@@ -71,6 +86,7 @@ def create_app() -> FastAPI:
     # innermost first: CSRF (API v2 only, app.auth.csrf), then Cache-Control (S3), then the metrics (Z13;
     # requests refused by CSRF are counted too, streamed answers until their last byte), then CORS around all
     app.middleware("http")(_csrf)
+    app.middleware("http")(_v1_gate)
     app.middleware("http")(_no_store)
     app.add_middleware(metrics.MetricsMiddleware)
     app.add_middleware(CORSMiddleware, allow_origins=DEV_ORIGINS, allow_credentials=True,  # session cookie

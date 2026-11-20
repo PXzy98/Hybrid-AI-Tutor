@@ -1,0 +1,74 @@
+[
+ {
+  "pack": "harvard_cs50x",
+  "question": "what is pseudocode and why write it before real code?",
+  "target": "local",
+  "cloud_probability": 0.01,
+  "reliable": true,
+  "evidence": "sufficient",
+  "route_ms": 4095,
+  "answered_by": "Qwen3.5-9B",
+  "answer_s": 9.3,
+  "answer_start": "Based on the course material provided, here is an explanation of pseudocode and the reasons for using it before writing real code.  ### What"
+ },
+ {
+  "pack": "harvard_cs50x",
+  "question": "which cs50 helper functions can I use to read an int or a float from the user in C?",
+  "target": "local",
+  "cloud_probability": 0.0,
+  "reliable": true,
+  "evidence": "not_required",
+  "route_ms": 1229,
+  "answered_by": "Qwen3.5-9B",
+  "answer_s": 6.4,
+  "answer_start": "In the CS50 course, you use specific helper functions from the `<cs50.h>` library to read input from the user. These functions are designed "
+ },
+ {
+  "pack": "harvard_cs50x",
+  "question": "Prove that the average running time of quicksort is O(n log n) with a full recurrence analysis and compare it with merge sort.",
+  "target": "cloud",
+  "cloud_probability": 0.09,
+  "reliable": false,
+  "evidence": "unavailable",
+  "route_ms": 23,
+  "answered_by": "not sent (rule 6)",
+  "answer_s": 0.0,
+  "answer_start": ""
+ },
+ {
+  "pack": "mit_6_002_circuits",
+  "question": "when can I treat a circuit as a lumped circuit instead of worrying about fields and wave effects?",
+  "target": "cloud",
+  "cloud_probability": 0.89,
+  "reliable": false,
+  "evidence": "unavailable",
+  "route_ms": 22,
+  "answered_by": "not sent (rule 6)",
+  "answer_s": 0.0,
+  "answer_start": ""
+ },
+ {
+  "pack": "mit_6_002_circuits",
+  "question": "what does the sum of the voltages around a loop have to equal?",
+  "target": "local",
+  "cloud_probability": 0.02,
+  "reliable": true,
+  "evidence": "not_required",
+  "route_ms": 760,
+  "answered_by": "Qwen3.5-9B",
+  "answer_s": 3.7,
+  "answer_start": "Based on the course material provided, the sum of the voltages around a loop must equal **0**.  This is known as **Kirchhoff's Voltage Law ("
+ },
+ {
+  "pack": "mit_6_002_circuits",
+  "question": "What changed in the most recent standard for USB power delivery this year?",
+  "target": "cloud",
+  "cloud_probability": 0.02,
+  "reliable": true,
+  "evidence": "insufficient",
+  "route_ms": 17,
+  "answered_by": "not sent (rule 6)",
+  "answer_s": 0.0,
+  "answer_start": ""
+ }
+]

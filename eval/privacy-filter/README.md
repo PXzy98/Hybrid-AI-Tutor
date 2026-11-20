@@ -15,6 +15,7 @@ which upgrade is worth it? All data is fictional.
 | `utility.py` | answer quality after redaction (placeholders, surrogates, hypothetical rewrite), judged by a second model → `results/utility.md` |
 | `spot_check.md` | 50 random labels of the main set checked |
 | `ece_cases.jsonl`, `ece.py` | engineering courses (task Z11): 47 fictional ECE questions (22 positive: fake keys and tokens, also inside JSON and Python dictionaries, lab addresses, repository URLs, names and numbers; 25 negative: course terms) → `results/ece/report.md`, `general` vs `ece` profile |
+| `make_course_sets.py` → `ece_holdout.jsonl`, `cs_holdout.jsonl`, `life_holdout.jsonl`, `general_holdout.jsonl`, `course_sets.py` | held-out sets per course type (task Z22), 25 to 41 fictional questions each, written blind; `course_sets.py` runs each with its course profile and with `general` → `results/z22/metrics.json` |
 
 ```
 .venv\Scripts\python eval\privacy-filter\run.py                       # main set, all configurations (~10 min with the local model, VLLM_BASE_URL)

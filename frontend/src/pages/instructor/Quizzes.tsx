@@ -73,7 +73,7 @@ function QuizList({ course, onOpen }: { course: Course; onOpen: (v: View) => voi
                     {pending > 0 && <Badge variant="warning">{t("quiz.unreviewedN", { n: pending })}</Badge>}
                   </CardTitle>
                   <CardDescription>
-                    {t("quiz.questionsN", { n: q.questions.length })} · {t("quiz.attemptsN", { n: q.attempts })}
+                    {q.questions.length === 1 ? t("quiz.questionsOne") : t("quiz.questionsN", { n: q.questions.length })} · {t("quiz.attemptsN", { n: q.attempts })}
                     {q.opens_at && ` · ${t("quiz.opens")} ${fmt.dateTime(q.opens_at)}`}
                     {q.closes_at && ` · ${t("quiz.closes")} ${fmt.dateTime(q.closes_at)}`}
                   </CardDescription>
@@ -115,17 +115,28 @@ function QuizList({ course, onOpen }: { course: Course; onOpen: (v: View) => voi
   );
 }
 
+/** Options after the first two may stay empty: they are left out when the quiz is saved (the answer keeps its option). */
+function dropEmptyOptions(q: QuizQuestion): QuizQuestion {
+  if (q.kind !== "mcq" || !q.options) return q;
+  const keep = q.options.map((o, j) => j < 2 || j === q.answer || o.trim() !== "");
+  return { ...q, options: q.options.filter((_, j) => keep[j]), answer: keep.slice(0, q.answer).filter(Boolean).length };
+}
+
 const blankQuestion = (): QuizQuestion => ({ kind: "mcq", kc: null, stem: "", options: ["", "", "", ""], answer: 0, explanation: "", sources: [], reviewed: true });
 
 function QuizEditor({ course, id, onClose, onCreated }: { course: Course; id: number | null; onClose: () => void; onCreated: (id: number) => void }) {
   const quizzes = useQuery({ queryKey: ["quizzes", course.id], queryFn: () => api.quizzes(course.id) });
+  // the version this editor saved: the form below starts again from it and must still say "saved" (V17 W25)
+  const [savedAt, setSavedAt] = useState<string | null>(null);
   if (quizzes.isLoading) return <Loading variant="list" />;
   const quiz = id === null ? undefined : quizzes.data?.find((q) => q.id === id);
   // a new form every time the server copy changes (after a save or after the AI draft arrives)
-  return <EditorForm key={quiz ? `${quiz.id}:${quiz.updated_at}` : "new"} course={course} quiz={quiz} onClose={onClose} onCreated={onCreated} />;
+  return <EditorForm key={quiz ? `${quiz.id}:${quiz.updated_at}` : "new"} course={course} quiz={quiz} onClose={onClose} onCreated={onCreated}
+                     saved={!!quiz && savedAt === quiz.updated_at} onSaved={setSavedAt} />;
 }
 
-function EditorForm({ course, quiz, onClose, onCreated }: { course: Course; quiz?: Quiz; onClose: () => void; onCreated: (id: number) => void }) {
+function EditorForm({ course, quiz, onClose, onCreated, saved, onSaved }: { course: Course; quiz?: Quiz; onClose: () => void;
+  onCreated: (id: number) => void; saved: boolean; onSaved: (updatedAt: string) => void }) {
   const { t } = useI18n();
   const qc = useQueryClient();
   const modules = useQuery({ queryKey: ["modules", course.id], queryFn: () => api.modules(course.id) });
@@ -139,6 +150,10 @@ function EditorForm({ course, quiz, onClose, onCreated }: { course: Course; quiz
   const [assigned, setAssigned] = useState<string[] | null>(quiz?.assigned_to ?? null);
   const [questions, setQuestions] = useState<QuizQuestion[]>((quiz?.questions ?? []).map((q) => ({ ...q, options: q.options ?? [] })));
   const locked = !!quiz && quiz.attempts > 0;
+  // "Saved." only while the form still shows what was saved: any edit hides it (V17 W25)
+  const snapshot = JSON.stringify([title, kind, moduleId, opens, closes, assigned, questions]);
+  const [loaded] = useState(snapshot);
+  const unchanged = snapshot === loaded;
   const students = (members.data ?? []).filter((m) => m.role === "student" && m.student_id);
   const pending = questions.filter((q) => !q.reviewed).length;
 
@@ -146,12 +161,13 @@ function EditorForm({ course, quiz, onClose, onCreated }: { course: Course; quiz
     mutationFn: () => {
       const body = { title, kind, module_id: moduleId, opens_at: fromLocalInput(opens), closes_at: fromLocalInput(closes), assigned_to: assigned };
       return quiz
-        ? api.updateQuiz(course.id, quiz.id, locked ? { ...body } : { ...body, questions })
-        : api.createQuiz(course.id, { ...body, questions });
+        ? api.updateQuiz(course.id, quiz.id, locked ? { ...body } : { ...body, questions: questions.map(dropEmptyOptions) })
+        : api.createQuiz(course.id, { ...body, questions: questions.map(dropEmptyOptions) });
     },
-    onSuccess: (saved) => {
+    onSuccess: (stored) => {
+      onSaved(stored.updated_at);
       qc.invalidateQueries({ queryKey: ["quizzes", course.id] });
-      if (!quiz) onCreated(saved.id);
+      if (!quiz) onCreated(stored.id);
     },
   });
   const setQuestion = (i: number, patch: Partial<QuizQuestion>) => setQuestions(questions.map((q, j) => (j === i ? { ...q, ...patch } : q)));
@@ -239,7 +255,7 @@ function EditorForm({ course, quiz, onClose, onCreated }: { course: Course; quiz
                       <input type="radio" name={`qq-answer-${i}`} className="accent-primary" checked={q.answer === j}
                              aria-label={t("quiz.correctOption", { n: j + 1 })} onChange={() => setQuestion(i, { answer: j })} />
                       {q.kind === "true_false" ? <span className="text-sm">{o}</span>
-                        : <Input aria-label={t("quiz.optionN", { n: j + 1 })} value={o} required
+                        : <Input aria-label={t("quiz.optionN", { n: j + 1 })} value={o} required={j < 2 || q.answer === j}
                                  onChange={(e) => setQuestion(i, { options: (q.options ?? []).map((x, k) => (k === j ? e.target.value : x)) })} />}
                       {q.kind === "mcq" && (q.options ?? []).length > 2 && (
                         <Button type="button" size="icon" variant="ghost" aria-label={t("quiz.removeOption", { n: j + 1 })}
@@ -262,11 +278,12 @@ function EditorForm({ course, quiz, onClose, onCreated }: { course: Course; quiz
       </section>
 
       <ErrorNote error={save.error} />
-      {save.isSuccess && <StatusText>{t("settings.saved")}</StatusText>}
+      {saved && unchanged && <StatusText>{t("settings.saved")}</StatusText>}
       <div className="flex flex-wrap gap-3">
         <Button loading={save.isPending} type="submit" disabled={save.isPending}>{save.isPending ? t("settings.saving") : t("quiz.save")}</Button>
       </div>
       {quiz && quiz.status === "draft" && !locked && <AiDraft course={course} quiz={quiz} />}
+      {!quiz && <p className="text-sm text-muted-foreground">{t("quiz.aiAfterSave")}</p>}
     </form>
   );
 }
@@ -308,7 +325,7 @@ function AiDraft({ course, quiz }: { course: Course; quiz: Quiz }) {
         <ErrorNote error={start.error ?? job.error} />
         {running && <p role="status" className="text-sm text-muted-foreground">{t("quiz.aiRunning")}</p>}
         {job.data?.status === "done" && <StatusText>{t("quiz.aiDone")}</StatusText>}
-        {job.data?.status === "failed" && <Alert variant="destructive" role="alert">{t("quiz.aiFailed")}</Alert>}
+        {job.data?.status === "failed" && <Alert variant="destructive" role="alert">{t("quiz.aiFailed")}{job.data.error ? ` ${job.data.error}` : ""}</Alert>}
       </CardContent>
     </Card>
   );

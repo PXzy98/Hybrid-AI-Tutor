@@ -24,7 +24,9 @@ SYSTEM = (
     '{"questions": [{"kind": "mcq" | "true_false", "kc": "<one of the KC codes or null>", "stem": "...", '
     '"options": ["..."], "answer": <index of the correct option>, "explanation": "<why, from the passages>", '
     '"passage": <number of the passage it comes from>}]}. Multiple choice questions have 4 options with one '
-    'correct answer; true/false questions have no options and answer 0 for True or 1 for False.')
+    'correct answer; true/false questions have no options and answer 0 for True or 1 for False. '
+    'Students read the stem, options and explanation without the passages: write them about the subject, '
+    'never "the text", "the passage" or a passage number (V17 W24).')
 
 
 def _modules(db: Session, quiz: Quiz) -> list[Module]:
