@@ -721,7 +721,7 @@ export const fr: Messages = {
   "admin.localUrl": "URL du modèle local",
   "admin.localModel": "Nom du modèle local",
   "admin.courseTypes": "Types de cours activés",
-  "admin.courseTypesHint": "Séparez les noms par des virgules.",
+  "admin.courseTypesHint": "Séparez les noms par des virgules. Vide : tous les types de cours.",
   "admin.defaultLocal": "Connexion locale par défaut",
   "admin.defaultCloud": "Connexion cloud par défaut",
   "admin.noDefault": "Aucune (utiliser le modèle du déploiement)",

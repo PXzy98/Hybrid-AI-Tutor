@@ -343,4 +343,18 @@ describe("follow-up fixes", () => {
     await waitFor(() => expect(calls.some((c) => c.method === "PUT")).toBe(true));
     expect(calls.find((c) => c.method === "PUT")!.body).toMatchObject({ values: { enabled_course_types: ["ece", "general"] } });
   });
+
+  it("keeps every course type enabled when the field is empty", async () => {
+    // not set (null) is shown as an empty field; saving it must not send [] (no type: course creation off)
+    const unset = { ...settings, values: { ...settings.values, enabled_course_types: null } };
+    const calls = mockApi(adminRoutes({ "GET /admin/settings": unset,
+                                        "PUT /admin/settings": (c: { body: { values: unknown } }) => ({ ...unset, values: c.body.values, version: 4 }) }));
+    renderApp("/admin");
+    const user = userEvent.setup();
+    expect(await screen.findByLabelText("Enabled course types")).toHaveValue("");
+    await user.click(screen.getByLabelText(/Use weak evidence/));
+    await user.click(screen.getByRole("button", { name: "Save" }));
+    await waitFor(() => expect(calls.some((c) => c.method === "PUT")).toBe(true));
+    expect((calls.find((c) => c.method === "PUT")!.body as { values: { enabled_course_types: unknown } }).values.enabled_course_types).toBeNull();
+  });
 });

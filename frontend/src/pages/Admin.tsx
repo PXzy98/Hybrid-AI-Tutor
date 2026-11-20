@@ -283,7 +283,8 @@ function SystemSettingsForm({ initial, onConflict }: { initial: SystemSettings; 
   const [types, setTypes] = useState((initial.values.enabled_course_types ?? []).join(", "));
   const endpoints = useQuery({ queryKey: endpointsKey(null), queryFn: () => api.modelEndpoints(null) });
   const save = useMutation({
-    mutationFn: () => api.saveSystemSettings({ ...values, enabled_course_types: splitTypes(types) }, initial.version),
+    // an empty field means every type (null); [] would turn course creation off
+    mutationFn: () => api.saveSystemSettings({ ...values, enabled_course_types: splitTypes(types).length ? splitTypes(types) : null }, initial.version),
     onSuccess: (fresh) => { onConflict(false); qc.setQueryData(["admin-settings"], fresh); },
     onError: (e) => {
       const stale = e instanceof ApiError && e.status === 409;

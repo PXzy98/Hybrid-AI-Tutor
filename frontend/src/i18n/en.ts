@@ -721,7 +721,7 @@ export const en = {
   "admin.localUrl": "Local model URL",
   "admin.localModel": "Local model name",
   "admin.courseTypes": "Enabled course types",
-  "admin.courseTypesHint": "Separate the names with commas.",
+  "admin.courseTypesHint": "Separate the names with commas. Empty: every course type.",
   "admin.defaultLocal": "Default local connection",
   "admin.defaultCloud": "Default cloud connection",
   "admin.noDefault": "None (use the deployment's model)",
