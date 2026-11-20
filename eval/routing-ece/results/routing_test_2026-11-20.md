@@ -24,18 +24,19 @@ ECE and CS questions to the cloud, mostly because they are outside the medical t
 ## 2. Manual check with real models (`manual_check.py`)
 
 The router decides (with the evidence step on passages from the unpacked pack), the chosen model answers. This is
-the routing decision plus the two model paths, not the full app pipeline (no accounts available).
+the routing decision plus the two model paths, not the full app pipeline (no accounts available). The router runs
+inside the course's scope, as in the app, so the evidence step counts the course's passages as on topic.
 
 | Question | Route | Cloud prob. | In support | Evidence | Answered by | Answer time (s) |
 |---|---|---|---|---|---|---|
-| what is pseudocode and why write it before real code? (CS50x) | local | 0.01 | yes | not required | Qwen3.5-9B | 9.2 |
-| which cs50 helper functions can I use to read an int or a float? (CS50x) | local | 0.00 | yes | not required | Qwen3.5-9B | 7.1 |
-| what does the sum of the voltages around a loop have to equal? (6.002) | local | 0.02 | yes | not required | Qwen3.5-9B | 5.7 |
-| Prove that the average running time of quicksort is O(n log n) with a full recurrence analysis ... (CS50x) | cloud | 0.09 | no | unavailable | cloud model | 19.1 |
-| when can I treat a circuit as a lumped circuit ...? (6.002) | cloud | 0.89 | no | unavailable | cloud model | 11.9 |
-| What changed in the most recent standard for USB power delivery this year? (6.002) | cloud | 0.02 | yes | insufficient | cloud model | 5.8 |
+| what is pseudocode and why write it before real code? (CS50x) | local | 0.01 | yes | sufficient | Qwen3.5-9B | 9.3 |
+| which cs50 helper functions can I use to read an int or a float? (CS50x) | local | 0.00 | yes | not required | Qwen3.5-9B | 3.9 |
+| what does the sum of the voltages around a loop have to equal? (6.002) | local | 0.02 | yes | not required | Qwen3.5-9B | 4.9 |
+| Prove that the average running time of quicksort is O(n log n) with a full recurrence analysis ... (CS50x) | cloud | 0.09 | no | unavailable | cloud model | 20.5 |
+| when can I treat a circuit as a lumped circuit ...? (6.002) | cloud | 0.89 | no | unavailable | cloud model | 10.2 |
+| What changed in the most recent standard for USB power delivery this year? (6.002) | cloud | 0.02 | yes | insufficient | cloud model | 4.8 |
 
-Both paths work: simple course questions answer locally in 6 to 9 s, a hard derivation and a question outside
+Both paths work: simple course questions answer locally in 4 to 9 s, a hard derivation and a question outside
 the material go to the cloud. Two observations: the lumped-circuit question is a basic concept question but
 goes to the cloud (outside the training support, a known effect of the medical-only seed); and the USB question
 went to the cloud only because the evidence step found the course passages insufficient, which is the intended

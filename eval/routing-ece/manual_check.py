@@ -28,6 +28,7 @@ import run as rag  # noqa: E402
 
 from app.core.config import get_settings  # noqa: E402
 from app.core.schemas import PIIResult, RouteInput  # noqa: E402
+from app.platform import course_scope  # noqa: E402
 from app.privacy.profiles import privacy_profile  # noqa: E402
 from app.prompts import system_prompt  # noqa: E402
 from app.prompts.render import material_block  # noqa: E402
@@ -69,7 +70,12 @@ async def main_async(a):
                     x = RouteInput(sanitized_question=row["question"], topic="general", pii=pii_stub(row["question"]),
                                    passage_count=len(hits), passages=hits)
                     t0 = time.perf_counter()
-                    score = router.route_score(x)
+                    # as in the app: the request runs inside its course, so passages tagged course:<id> are on
+                    # topic for the evidence step
+                    scope = course_scope.CourseScope(course_id=rag.COURSE_ID, content=None, learner=None,
+                                                     retriever=retriever, sessions=None, modules={})
+                    with course_scope.use(scope):
+                        score = router.route_score(x)
                     route_ms = (time.perf_counter() - t0) * 1000
                     system = system_prompt(subject=privacy_profile(manifest["course_type"]).prompt)
                     user = f"Topic: {pack}\n\n{material_block([h.text for h in hits])}\n\nStudent question: {row['question']}"

@@ -5,11 +5,11 @@
   "target": "local",
   "cloud_probability": 0.01,
   "reliable": true,
-  "evidence": "not_required",
-  "route_ms": 1400,
+  "evidence": "sufficient",
+  "route_ms": 4163,
   "answered_by": "Qwen3.5-9B",
-  "answer_s": 9.2,
-  "answer_start": "Based on the course material provided, here is an explanation of pseudocode and the reasons for using it.  ### What is Pseudocode? Pseudocod"
+  "answer_s": 9.3,
+  "answer_start": "Based on the course material provided, here is an explanation of pseudocode and its importance.  ### What is Pseudocode? Pseudocode is a way"
  },
  {
   "pack": "harvard_cs50x",
@@ -18,9 +18,9 @@
   "cloud_probability": 0.0,
   "reliable": true,
   "evidence": "not_required",
-  "route_ms": 17,
+  "route_ms": 1218,
   "answered_by": "Qwen3.5-9B",
-  "answer_s": 7.1,
+  "answer_s": 3.9,
   "answer_start": "Based on the course material provided, here are the specific CS50 helper functions you can use to read input:  *   **To read an integer:** U"
  },
  {
@@ -30,10 +30,10 @@
   "cloud_probability": 0.09,
   "reliable": false,
   "evidence": "unavailable",
-  "route_ms": 23,
+  "route_ms": 21,
   "answered_by": "cloud model",
-  "answer_s": 19.1,
-  "answer_start": "## First, a note on the course material  The material you've been given ([1]–[4]) covers linear and binary search, running time, selection s"
+  "answer_s": 20.5,
+  "answer_start": "## First, a note on the course material  Lecture 3 [1] covers linear search, binary search, running time, selection sort, bubble sort, recur"
  },
  {
   "pack": "mit_6_002_circuits",
@@ -42,10 +42,10 @@
   "cloud_probability": 0.89,
   "reliable": false,
   "evidence": "unavailable",
-  "route_ms": 15,
+  "route_ms": 21,
   "answered_by": "cloud model",
-  "answer_s": 11.9,
-  "answer_start": "## What the course material itself says  The material gives the criterion as the **lumped matter discipline (LMD)**. Lumped circuit abstract"
+  "answer_s": 10.2,
+  "answer_start": "## Short answer  You can use the lumped circuit abstraction (LCA) when the circuit obeys the **lumped matter discipline (LMD)**. The course "
  },
  {
   "pack": "mit_6_002_circuits",
@@ -54,10 +54,10 @@
   "cloud_probability": 0.02,
   "reliable": true,
   "evidence": "not_required",
-  "route_ms": 14,
+  "route_ms": 762,
   "answered_by": "Qwen3.5-9B",
-  "answer_s": 5.7,
-  "answer_start": "Based on the course material provided, the sum of the voltages around a closed loop must equal **0**.  This is known as **Kirchhoff's Voltag"
+  "answer_s": 4.9,
+  "answer_start": "Based on the course material provided, the sum of the voltages around a loop must equal **0**.  This is known as **Kirchhoff's Voltage Law ("
  },
  {
   "pack": "mit_6_002_circuits",
@@ -66,9 +66,9 @@
   "cloud_probability": 0.02,
   "reliable": true,
   "evidence": "insufficient",
-  "route_ms": 13,
+  "route_ms": 17,
   "answered_by": "cloud model",
-  "answer_s": 5.8,
-  "answer_start": "That question is outside this course material. The provided material [1]–[4] covers energy and power in 6.002 (static power in MOSFET logic "
+  "answer_s": 4.8,
+  "answer_start": "The course material here doesn't cover USB Power Delivery, so I can't answer that from [1]–[4]. Those materials are about 6.002 topics: ener"
  }
 ]
