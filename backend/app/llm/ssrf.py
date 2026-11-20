@@ -8,6 +8,7 @@ Checked when a connection is saved and again before every call (the name may res
 - external connections also never private ranges (10/8, 172.16/12, 192.168/16, fc00::/7) or loopback: they
   must be public services. A trusted local connection may be private (the deployment's own vLLM/Ollama).
 """
+import asyncio
 import ipaddress
 import socket
 from functools import lru_cache
@@ -86,8 +87,6 @@ class PinnedTransport(httpx.AsyncBaseTransport):
         """One connection pool per event loop (a pool belongs to the loop that opened it)."""
         if self._given is not None:
             return self._given
-        import asyncio
-
         loop = id(asyncio.get_running_loop())
         if loop not in self._inners:
             self._inners = {loop: httpx.AsyncHTTPTransport(retries=0)}
@@ -95,9 +94,10 @@ class PinnedTransport(httpx.AsyncBaseTransport):
 
     async def handle_async_request(self, request):
         host = request.url.host
-        addresses = self._resolve(host)  # ONE lookup: the addresses checked are the ones connected to
-        check_endpoint_url(str(request.url), trust=self.trust, resolve=lambda _: addresses,
-                           system=self._system)
+        # ONE lookup: the addresses checked are the ones connected to. DNS blocks: off the event loop
+        addresses = await asyncio.to_thread(self._resolve, host)
+        await asyncio.to_thread(check_endpoint_url, str(request.url), trust=self.trust,
+                                resolve=lambda _: addresses, system=self._system)
         try:
             ipaddress.ip_address(host)
             pinned = request  # already an address literal: checked above

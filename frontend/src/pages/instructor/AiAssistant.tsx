@@ -21,7 +21,7 @@ const KINDS: AiDraftKind[] = ["custom", "faq", "project_ideas", "sample_proposal
 const STATUSES: AiDraftStatus[] = ["generating", "draft", "accepted", "discarded", "failed"];
 const TIER1: AiDraftKind[] = ["faq", "project_ideas", "sample_proposal", "custom"];
 // where the draft's material comes from (V5, V6)
-const SOURCES = ["course", "module", "modules", "files", "upload"] as const;
+const SOURCES = ["course", "module", "modules", "files", "upload", "url"] as const;
 type SourceChoice = (typeof SOURCES)[number];
 
 /** Instructor AI: drafts from the course material (tiers 1 and 2) and the cloud evaluation (tier 4). */
@@ -85,6 +85,7 @@ function Drafts({ course }: { course: Course }) {
 
 function StartForm({ course, onStarted }: { course: Course; onStarted: (d: AiDraft) => void }) {
   const { t } = useI18n();
+  const qc = useQueryClient();
   const modules = useQuery({ queryKey: ["modules", course.id], queryFn: () => api.modules(course.id) });
   const materials = useQuery({ queryKey: ["materials", course.id], queryFn: () => api.materials(course.id) });
   const [kind, setKind] = useState<AiDraftKind>("custom");
@@ -94,13 +95,19 @@ function StartForm({ course, onStarted }: { course: Course; onStarted: (d: AiDra
   const [moduleIds, setModuleIds] = useState<number[]>([]);
   const [materialIds, setMaterialIds] = useState<number[]>([]);
   const [file, setFile] = useState<File | null>(null);
+  const [pageUrl, setPageUrl] = useState("");
   const [addToCourse, setAddToCourse] = useState(false);
+  const [addModuleId, setAddModuleId] = useState<number | null>(null); // where the uploaded file or page goes
   const [focus, setFocus] = useState("");
   const start = useMutation({
     mutationFn: () => {
       const text = kind === "custom" ? request : "";
       if (source === "upload" && file) {
-        return api.createAiDraftFromUpload(course.id, { file, kind, request: text, focus, addToCourse, moduleId: addToCourse ? moduleId : null });
+        return api.createAiDraftFromUpload(course.id, { file, kind, request: text, focus, addToCourse, moduleId: addToCourse ? addModuleId : null });
+      }
+      if (source === "url") {
+        return api.createAiDraftFromUrl(course.id, { url: pageUrl.trim(), kind, request: text, focus, add_to_course: addToCourse,
+                                                     module_id: addToCourse ? addModuleId : null });
       }
       return api.createAiDraft(course.id, {
         kind, focus, request: text,
@@ -109,14 +116,17 @@ function StartForm({ course, onStarted }: { course: Course; onStarted: (d: AiDra
         ...(source === "files" ? { material_ids: materialIds } : {}),
       });
     },
-    onSuccess: onStarted,
+    onSuccess: (d) => {
+      if ((source === "upload" || source === "url") && addToCourse) qc.invalidateQueries({ queryKey: ["materials", course.id] });
+      onStarted(d);
+    },
   });
   const toggle = (list: number[], set: (v: number[]) => void, id: number) =>
     set(list.includes(id) ? list.filter((x) => x !== id) : [...list, id]);
   const moduleName = new Map((modules.data ?? []).map((m) => [m.id, m.title]));
   const missing = (kind === "custom" && !request.trim())
     || (source === "modules" && moduleIds.length === 0) || (source === "files" && materialIds.length === 0)
-    || (source === "upload" && !file) || (source === "module" && moduleId === null);
+    || (source === "upload" && !file) || (source === "url" && !pageUrl.trim()) || (source === "module" && moduleId === null);
   function submit(e: FormEvent) {
     e.preventDefault();
     if (!missing) start.mutate();
@@ -174,17 +184,27 @@ function StartForm({ course, onStarted }: { course: Course; onStarted: (d: AiDra
                 {materials.data?.materials.length === 0 && <p className="text-sm text-muted-foreground">{t("ai.noFiles")}</p>}
               </div>
             )}
-            {source === "upload" && (
+            {(source === "upload" || source === "url") && (
               <div className="grid gap-2 rounded-md border p-3">
-                <Label htmlFor="ai-file">{t("ai.uploadFile")}</Label>
-                <Input id="ai-file" type="file" accept=".pdf,.pptx,.docx,.md,.txt,.html" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
-                <p className="text-xs text-muted-foreground">{t("ai.uploadHint")}</p>
+                {source === "upload" ? (
+                  <>
+                    <Label htmlFor="ai-file">{t("ai.uploadFile")}</Label>
+                    <Input id="ai-file" type="file" accept=".pdf,.pptx,.docx,.md,.txt,.html" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+                    <p className="text-xs text-muted-foreground">{t("ai.uploadHint")}</p>
+                  </>
+                ) : (
+                  <>
+                    <Label htmlFor="ai-url">{t("ai.pageUrl")}</Label>
+                    <Input id="ai-url" type="url" inputMode="url" placeholder="https://" value={pageUrl} onChange={(e) => setPageUrl(e.target.value)} />
+                    <p className="text-xs text-muted-foreground">{t("ai.pageHint")}</p>
+                  </>
+                )}
                 <label className="flex items-center gap-2 text-sm">
                   <input type="checkbox" className="accent-primary" checked={addToCourse} onChange={(e) => setAddToCourse(e.target.checked)} />
                   {t("ai.addToCourse")}
                 </label>
                 {addToCourse && (
-                  <Select aria-label={t("ai.addToModule")} value={moduleId ?? ""} onChange={(e) => setModuleId(e.target.value ? Number(e.target.value) : null)}>
+                  <Select aria-label={t("ai.addToModule")} value={addModuleId ?? ""} onChange={(e) => setAddModuleId(e.target.value ? Number(e.target.value) : null)}>
                     <option value="">{t("nav.wholeCourse")}</option>
                     {modules.data?.map((m) => <option key={m.id} value={m.id}>{m.title}</option>)}
                   </Select>

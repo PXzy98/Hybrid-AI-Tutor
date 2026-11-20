@@ -161,6 +161,11 @@ export const api = {
     return upload<Schemas["UploadOut"]>(`${c(id)}/materials`, form);
   },
   deleteMaterial: (id: number, materialId: number) => request<void>("DELETE", `${c(id)}/materials/${materialId}`),
+  // V7: a web page as material (fetched by the server under the outbound rules), and fetched again
+  addUrlMaterial: (id: number, url: string, moduleId: number | null) =>
+    request<Schemas["UploadOut"]>("POST", `${c(id)}/materials/url`, { url, module_id: moduleId }),
+  refetchMaterial: (id: number, materialId: number) =>
+    request<Schemas["UploadOut"]>("POST", `${c(id)}/materials/${materialId}/refetch`),
   deleteLearningData: (id: number) => request<void>("DELETE", `${c(id)}/me/learning-data`),
 
   // quizzes
@@ -199,6 +204,7 @@ export const api = {
     if (input.moduleId !== null) form.append("module_id", String(input.moduleId));
     return upload<AiDraft>(`${c(id)}/ai/drafts/upload`, form);
   },
+  createAiDraftFromUrl: (id: number, input: Schemas["AiDraftUrlIn"]) => request<AiDraft>("POST", `${c(id)}/ai/drafts/url`, input),
   updateAiDraft: (id: number, draftId: number, content: Record<string, unknown>) =>
     request<AiDraft>("PATCH", `${c(id)}/ai/drafts/${draftId}`, { content }),
   acceptAiDraft: (id: number, draftId: number, moduleId: number | null) =>

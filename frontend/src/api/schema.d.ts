@@ -1091,6 +1091,47 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/courses/{course_id}/materials/url": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add Url
+         * @description V7: a web page as course material. The page is fetched once (https, public addresses only, at most
+         *     2 MB, redirects checked), converted to Markdown with its address, scanned like an upload and indexed.
+         */
+        post: operations["materials_add_url"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/materials/{material_id}/refetch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Refetch
+         * @description V7: fetch a web material again from its address and replace its text (scanned again).
+         */
+        post: operations["materials_refetch"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/courses/{course_id}/materials/{material_id}": {
         parameters: {
             query?: never;
@@ -1678,6 +1719,27 @@ export interface paths {
          *     file once the index is rebuilt.
          */
         post: operations["ai_drafts_create_from_upload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/ai/drafts/url": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create From Url
+         * @description V7: draft from a web page. The page is fetched with the rules of `POST .../materials/url` and then
+         *     used like a file uploaded for this draft (V6): for this draft only, or also added to the material.
+         */
+        post: operations["ai_drafts_create_from_url"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2320,6 +2382,33 @@ export interface components {
              * Format: date-time
              */
             updated_at: string;
+        };
+        /** AiDraftUrlIn */
+        AiDraftUrlIn: {
+            /** Url */
+            url: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "project_ideas" | "sample_proposal" | "faq" | "custom" | "kcs" | "check_items" | "misconceptions";
+            /**
+             * Request
+             * @default
+             */
+            request?: string;
+            /**
+             * Focus
+             * @default
+             */
+            focus?: string;
+            /**
+             * Add To Course
+             * @default false
+             */
+            add_to_course?: boolean;
+            /** Module Id */
+            module_id?: number | null;
         };
         /** ApplyStatusOut */
         ApplyStatusOut: {
@@ -3703,6 +3792,8 @@ export interface components {
              * Format: date-time
              */
             uploaded_at: string;
+            /** Source Url */
+            source_url?: string | null;
         };
         /** MaterialsOut */
         MaterialsOut: {
@@ -4965,6 +5056,13 @@ export interface components {
             ingested: boolean;
             /** Ingest Error */
             ingest_error?: string | null;
+        };
+        /** UrlIn */
+        UrlIn: {
+            /** Url */
+            url: string;
+            /** Module Id */
+            module_id?: number | null;
         };
         /** ValidationError */
         ValidationError: {
@@ -7332,6 +7430,76 @@ export interface operations {
             };
         };
     };
+    materials_add_url: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UrlIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadOut"];
+                };
+            };
+            /** @description this page was added here already (fetch it again instead) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description the address or the page is refused, or the scan found student data */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    materials_refetch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                material_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadOut"];
+                };
+            };
+            /** @description not a web page, or the page is refused now */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     materials_delete: {
         parameters: {
             query?: never;
@@ -8682,6 +8850,46 @@ export interface operations {
                 content?: never;
             };
             /** @description the file is refused (type, size, unreadable, privacy scan) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ai_drafts_create_from_url: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AiDraftUrlIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiDraftOut"];
+                };
+            };
+            /** @description add_to_course: this page is in the material already */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description the address or the page is refused (V7 rules, privacy scan) */
             422: {
                 headers: {
                     [name: string]: unknown;

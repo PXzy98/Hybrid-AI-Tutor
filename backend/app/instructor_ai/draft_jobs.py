@@ -6,6 +6,7 @@ material never leaves the course's server), and the result is stored on the `ai_
 draft. Nothing is visible to students until the instructor accepts it. No student data is used.
 """
 import shutil
+from datetime import UTC, datetime
 from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, TypeAdapter, ValidationError, field_validator
@@ -114,6 +115,39 @@ def _bounded(paragraphs):
             yield current
 
 
+def remove_upload(data_root: Path, course_id: int, draft_id: int) -> None:
+    """Delete the file uploaded for one draft (V6): the draft is done, discarded or failed."""
+    folder = data_root / "courses" / str(course_id) / "draft_uploads" / str(draft_id)
+    shutil.rmtree(folder, ignore_errors=True)
+
+
+def sweep_uploads(engine, data_root: Path) -> int:
+    """Worker maintenance: a draft still `generating` long after it was started (its job never ran or the
+    worker stopped) becomes failed, and the uploads of drafts that are not generating are deleted. Returns
+    how many folders were removed."""
+    old = utcnow() - jobs.STALE_AFTER
+    with Session(engine) as db:
+        for row in db.exec(select(AiDraft).where(AiDraft.status == "generating",
+                                                 AiDraft.updated_at < old)).all():
+            row.status, row.error, row.updated_at = "failed", "interrupted: the worker stopped", utcnow()
+            db.add(row)
+        db.commit()
+    removed = 0
+    for folder in (data_root / "courses").glob("*/draft_uploads/*"):
+        if not folder.is_dir() or not folder.name.isdecimal():
+            continue
+        with Session(engine) as db:
+            row = db.get(AiDraft, int(folder.name))
+        if row is None:  # the request is still writing it, or its draft was never saved
+            gone = datetime.fromtimestamp(folder.stat().st_mtime, UTC) < old
+        else:
+            gone = row.status != "generating"
+        if gone:
+            shutil.rmtree(folder, ignore_errors=True)
+            removed += 1
+    return removed
+
+
 def _upload_passages(path: Path, course_id: int, query: str) -> list[Chunk]:
     """Passages of a file uploaded for this draft (scanned at upload): its paragraphs, the ones sharing the
     most words with the query first, then in the file's order."""
@@ -122,7 +156,7 @@ def _upload_passages(path: Path, course_id: int, query: str) -> list[Chunk]:
     for paragraph in _bounded(p.strip() for p in text.split("\n\n")):
         if not paragraph:
             continue
-        if current and len(current) + len(paragraph) > PASSAGE_CHARS:
+        if current and len(current) + 2 + len(paragraph) > PASSAGE_CHARS:  # 2: the blank line
             pieces.append(current)
             current = ""
         current = f"{current}\n\n{paragraph}".strip()
@@ -153,9 +187,10 @@ def _passages(services, course_id: int, module: Module | None, query: str,
               sources: dict | None = None) -> list[Chunk]:
     """Material of the module (and the course-level files), or of the whole course, or only of the chosen
     modules or files (V5); scanned at upload."""
+    sources = sources or {}
     retriever = getattr(services, "course_retriever", None)
     found: list[Chunk] = []
-    where = _chosen(services.engine, course_id, sources or {})
+    where = _chosen(services.engine, course_id, sources)
     if retriever is not None:
         try:
             if where is None:
@@ -163,14 +198,40 @@ def _passages(services, course_id: int, module: Module | None, query: str,
             else:  # the whole course, then only the chosen files or modules
                 ranked = retriever.retrieve(course_id, None, query, CHOSEN_POOL)
                 found = [c for c in ranked if where(c)][:PASSAGES]
+                found += _in_order(retriever, course_id, where, found)[:PASSAGES - len(found)]
         except Exception:  # noqa: BLE001 - no index yet: fall back below
             found = []
-    if not found and module is not None and where is None:  # the demo course without a course index
+    if not found and where is None and module is not None:  # the demo course without a course index
         texts = fallback_passages(services, course_id, module, query, k=PASSAGES)
         found = [Chunk(text=t, source="course material", topic=module.code, score=0.0) for t in texts]
+    if not found and sources.get("module_ids"):
+        found = _module_fallback(services, course_id, sources["module_ids"], query)
+    if not found and sources.get("material_ids"):
+        raise DraftError("the chosen files are not indexed yet; wait for the index rebuild")
     # the retriever is scoped to the course: stamp the scope the core checks, and cap the size
     return [c.model_copy(update={"text": c.text[:PASSAGE_CHARS],
                                  "metadata": {**c.metadata, "course_id": course_id}}) for c in found]
+
+
+def _in_order(retriever, course_id: int, where, have: list[Chunk]) -> list[Chunk]:
+    """Passages of the chosen sources in the order of the files, for what ranking by the query did not
+    find (a request sharing no word with the file): the ones not found yet."""
+    in_order = getattr(retriever, "in_order", None)
+    if in_order is None:
+        return []
+    seen = {(c.source, c.text) for c in have}
+    return [c for c in in_order(course_id) if where(c) and (c.source, c.text) not in seen]
+
+
+def _module_fallback(services, course_id: int, module_ids: list[int], query: str) -> list[Chunk]:
+    """The demo course without a course index: the chosen modules' material, by topic."""
+    with Session(services.engine) as db:
+        modules = [m for m in (db.get(Module, i) for i in module_ids) if m and m.course_id == course_id]
+    found: list[Chunk] = []
+    for m in modules:
+        texts = fallback_passages(services, course_id, m, query, k=max(1, PASSAGES // len(modules)))
+        found += [Chunk(text=t, source="course material", topic=m.code, score=0.0) for t in texts]
+    return found[:PASSAGES]
 
 
 def _save(engine, draft_id: int, **changes) -> None:
@@ -203,7 +264,9 @@ async def generate(services, job) -> None:
               if sources.get("upload") else None)
     try:
         if upload is not None:
-            chunks = _upload_passages(upload, course_id, query) if upload.is_file() else []
+            if not upload.is_file():
+                raise DraftError("the uploaded file is gone; upload it again")
+            chunks = _upload_passages(upload, course_id, query)
         else:
             chunks = _passages(services, course_id, module, query, sources)
         if not chunks:

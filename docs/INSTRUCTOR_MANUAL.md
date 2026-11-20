@@ -66,6 +66,12 @@ HTML).
   are used for answers when it is done."). If it fails ("The index could not be rebuilt"), upload again or
   contact an administrator. The list shows the scan status and the **Index version**.
 - Delete a file with **Delete file**; the index is rebuilt without it.
+- **Add a web page**: give its address (https only) and a module or the whole course, then **Add the page**.
+  The server fetches the page once (public sites only, never addresses inside the university network or the
+  server itself; at most 2 MB; at most 3 redirects, each checked the same way), keeps its text as a Markdown
+  file with the address on top, scans it like an upload and indexes it. The list shows the address; **Fetch
+  again** replaces the text with the page's current version (scanned again). Images and attached files of the
+  page are not fetched. The AI assistant can also draft from a web page (section 10).
 
 Course material goes only to models your settings allow: the local model for drafts (section 8), and to a cloud
 model only in answers and in the tier 4 evaluation after your explicit confirmation.
@@ -184,8 +190,8 @@ first (section 4).
   research topics", "a summary of this new paper and what it means for patients", "examples for a lecture" or
   "what to add to the course next". It is drafted as Markdown, like an FAQ.
 - **Material to use**: **Whole course**, **One module** (with the course-level files), **Some modules** (only
-  their files), **Some files** (only the files you tick), or **Upload a file**. An uploaded file (for example a
-  new paper) is scanned like any upload and used for this draft only; it is deleted once the model has read
+  their files), **Some files** (only the files you tick), or **Upload a file** or **A web page**. An uploaded file or page (for example
+  a new paper) is scanned like any upload and used for this draft only; it is deleted once the model has read
   it, unless you tick **Also add this file to the course material** (then it appears under **Materials** and
   students' answers can use it after the index is rebuilt).
 - A draft is never shown to students until you accept it; a custom draft becomes a Markdown course material.
