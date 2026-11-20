@@ -127,7 +127,7 @@ B applies to a student only after that student agrees, and then only data after 
 
 **Use of the tutor** (top of **Class overview**): **Students enrolled**, **Active students (7 days)**,
 **Questions (7 days)**, the share **Answered by the local model**, **Questions per week** (the last 8 weeks, with
-the number of students who asked), **Questions per module** (and **Whole course**) and **Quiz averages** (answers
+the number of students who asked), **Questions per module** (and **Course-wide (no module)**) and **Quiz averages** (answers
 and average score per published quiz). Counts only: no question, no name, and every number that fewer than 5
 students contributed shows "hidden" (a count of 0 is shown as 0; the minimum is 5 even if the setting is lower).
 Questions and quiz answers of students who left the course still count, so the active students can exceed the students enrolled now. When one row would give a hidden one by subtraction from the

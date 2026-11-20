@@ -33,6 +33,7 @@ import secrets
 import subprocess
 import sys
 import time
+import unicodedata
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -168,7 +169,9 @@ def load_manifest(pack: str, packs_dir: Path = PACKS_DIR) -> dict:
 
 
 def module_code(raw: str, position: int) -> str:
-    code = re.sub(r"[^A-Za-z0-9._-]+", "_", raw).strip("_")[:64]
+    # accents are dropped, not replaced: "Thévenin" gives "Thevenin", not "Th_venin"
+    plain = unicodedata.normalize("NFKD", raw).encode("ascii", "ignore").decode("ascii")
+    code = re.sub(r"[^A-Za-z0-9._-]+", "_", plain).strip("_")[:64]
     return code or f"module_{position}"
 
 

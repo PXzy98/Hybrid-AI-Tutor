@@ -208,3 +208,11 @@ def test_instructor_only_files_are_never_uploaded(tmp_path):
     assert build_demo.safe_path(pack, "../outside.md") is None
     assert build_demo.safe_path(pack, "ok.md") == (pack / "ok.md").resolve()
     assert build_demo.document_name("exams/final.pdf") == "exams_final.pdf"
+
+
+def test_a_module_code_keeps_accented_letters_without_their_accent():
+    """V17 W18: "Thévenin" became "th_venin" in the demo codes."""
+    code = build_demo.module_code("lecture_3_superposition_thévenin_and_norton", 3)
+    assert code == "lecture_3_superposition_thevenin_and_norton"
+    assert build_demo.module_code("Équations", 4) == "Equations"
+    assert build_demo.module_code("Ωμ", 5) == "module_5"  # nothing left in ASCII: the position
