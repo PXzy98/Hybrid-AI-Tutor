@@ -103,6 +103,23 @@ async def test_invalid_draft_kind_rejected():
 
 
 @pytest.mark.asyncio
+async def test_a_kc_draft_drops_kcs_the_course_has_and_repeats_inside_the_draft():
+    """V17 W19: a KC draft for one module repeated the KCs of another module and failed on accept."""
+    old = dict(_item("kcs"), name="quartzzyme overview")  # the course has "Quartzzyme Overview"
+    new = dict(_item("kcs"), name="Quartzzyme Detail", prerequisite_names=["Quartzzyme Overview"])
+    again = dict(new, definition="The same KC drafted twice in one answer.")
+    draft = await generate_structure_draft(course_id=101, kind="kcs", passages=[_chunk()],
+                                           gateway=FakeGateway([old, new, again]), settings=None,
+                                           known_kc_names=["Quartzzyme Overview"])
+    assert [(i.name, i.prerequisite_names) for i in draft.items] == [
+        ("Quartzzyme Detail", ["Quartzzyme Overview"])]
+    with pytest.raises(DraftError, match="only repeats"):
+        await generate_structure_draft(course_id=101, kind="kcs", passages=[_chunk()],
+                                       gateway=FakeGateway([old]), settings=None,
+                                       known_kc_names=["Quartzzyme Overview"])
+
+
+@pytest.mark.asyncio
 async def test_unknown_or_own_prerequisites_are_dropped_and_unknown_kc_is_rejected():
     """A prerequisite link is a suggestion: an invalid one is dropped (a real model writes some on a course
     without KCs), the draft survives. A check item for an unknown KC is still rejected."""

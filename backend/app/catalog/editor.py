@@ -309,6 +309,11 @@ class CatalogEditor:
             module = _get(db, Module, course_id, module_id, "module")
             taken = set(db.exec(select(Kc.code).where(Kc.course_id == course_id)))
             by_name = {k.name.casefold(): k for k in db.exec(select(Kc).where(Kc.course_id == course_id))}
+            # V17 W19: the model may draft KCs the course already has (another module); those are left out
+            # instead of failing the whole draft, and a prerequisite by that name means the existing KC
+            drafts = [d for d in drafts if d["name"].strip().casefold() not in by_name]
+            if not drafts:
+                raise CatalogError("every KC of the draft exists in the course already")
             created: list[Kc] = []
             for d in drafts:
                 code = _free_code(taken, f"{module.code}.", 1)
@@ -321,8 +326,12 @@ class CatalogEditor:
             for d, kc in zip(drafts, created, strict=True):
                 for name in d.get("prerequisite_names", []):
                     prerequisite = by_name.get(name.casefold())
-                    if prerequisite is None:
-                        raise CatalogError(f"unknown prerequisite KC: {name}")
+                    # the content model links prerequisites within a module only: an unknown name or a KC of
+                    # another module is dropped (the instructor adds it by hand), not a failed draft
+                    if prerequisite is None or prerequisite.id == kc.id:
+                        continue
+                    if prerequisite.module_id != module_id:
+                        continue
                     db.add(KcPrerequisite(kc_id=kc.id, prerequisite_id=prerequisite.id))
             self._commit(db, course_id)
             return created

@@ -262,7 +262,8 @@ class AccountLimits(Section):
     """Enrollment (course-structure.md 3.1, 3.3; task Z9)."""
 
     # e-mail domains a roster import and an activation accept (lower-case); demo accounts use demo.invalid
-    allowed_email_domains: list[str] = ["uottawa.ca"]
+    # (a reserved name, never a real mailbox; joining still needs an invitation and a roster entry)
+    allowed_email_domains: list[str] = ["uottawa.ca", "demo.invalid"]
     invite_code_length: int = Field(10, ge=8, le=32)
     invite_expiry_days: float = Field(120, gt=0, le=730)
     join_attempts_per_hour: int = Field(20, ge=1, le=10_000)  # per client address, for POST /auth/join

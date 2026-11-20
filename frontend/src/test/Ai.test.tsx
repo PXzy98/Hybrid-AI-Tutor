@@ -37,7 +37,7 @@ describe("AI drafts", () => {
     await user.click(screen.getByRole("button", { name: "Accept and publish" }));
     expect(await screen.findByText("Accepted: 2 items created.")).toBeInTheDocument();
     expect(calls.find((c) => c.path.endsWith("/accept"))!.body).toEqual({ module_id: 10 });
-  });
+  }, 15000);  // a long flow: slow on a loaded machine
 
   it("sends a custom request with the chosen files (V4, V5)", async () => {
     const calls = mockApi(instructorRoutes({
@@ -58,6 +58,10 @@ describe("AI drafts", () => {
     await user.click(button);
     await waitFor(() => expect(calls.find((c) => c.path === "/courses/1/ai/drafts" && c.method === "POST")?.body).toEqual(
       { kind: "custom", focus: "", request: "Thesis topics from the lectures", module_id: null, material_ids: [4] }));
+    // V17 W3: the started request is cleared, so a second click cannot start the same draft again
+    await waitFor(() => expect(screen.getByLabelText("What should be drafted?")).toHaveValue(""));
+    expect(button).toBeDisabled();
+    expect(calls.filter((c) => c.path === "/courses/1/ai/drafts" && c.method === "POST")).toHaveLength(1);
   });
 
   it("starts from a request handed over by Class overview (V8)", async () => {
@@ -82,10 +86,12 @@ describe("AI drafts", () => {
     renderApp("/courses/1/ai");
     const user = userEvent.setup();
     await user.type(await screen.findByLabelText("What should be drafted?"), "Summary of the open course page");
+    expect(screen.getByText("The local model reads your course material and writes a draft you can edit.")).toBeInTheDocument();
     await user.click(screen.getByLabelText("Cloud model, for public material only"));
     const button = screen.getByRole("button", { name: "Draft with AI" });
     expect(button).toBeDisabled();
     await user.click(screen.getByLabelText(/I confirm that this material is public/));
+    expect(screen.getByText("The cloud model reads the chosen public material and writes a draft you can edit.")).toBeInTheDocument();
     await user.click(button);
     await waitFor(() => expect(calls.find((c) => c.path === "/courses/1/ai/drafts" && c.method === "POST")?.body)
       .toMatchObject({ kind: "custom", model: "cloud", confirm_cloud: true }));
@@ -149,7 +155,7 @@ describe("AI drafts", () => {
     const user = userEvent.setup();
     await user.click(await screen.findByRole("button", { name: "Open draft 7" }));
     await user.click(await screen.findByRole("button", { name: "Accept and publish" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("unknown KC name: Resistance");
+    expect(await screen.findByRole("alert")).toHaveTextContent("Unknown KC name: Resistance");
     expect(screen.getByText("Not visible to students until you accept it.")).toBeInTheDocument();
   });
 

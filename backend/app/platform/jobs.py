@@ -81,7 +81,11 @@ def _finish(engine, job_id: int, error: str | None) -> None:
 
 
 def _message(e: Exception) -> str:
+    from app.llm.base import LLMError
+
     first = (str(e).splitlines() or [""])[0]
+    if isinstance(e, LLMError):  # written for the instructor (which model, what to check)
+        return first[:300]
     return f"{type(e).__name__}: {first}"[:300]
 
 

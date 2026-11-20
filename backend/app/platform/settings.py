@@ -251,6 +251,18 @@ class SettingsService:
             state = row.apply_state if row else "applied"
             return _values(row, SYSTEM_FIELDS), (row.version if row else 0), state
 
+    def system_defaults(self) -> dict:
+        """What an unset system value means: the config file's value (V17 W9, shown next to empty fields)."""
+        base = from_config(0, self.base)
+        return {"checkers": list(base.checkers), "weak_evidence": base.weak_evidence,
+                "level_basic_below": base.level_basic_below,
+                "level_advanced_above": base.level_advanced_above,
+                "level_hysteresis": base.level_hysteresis, "knowledge_model": base.knowledge_model,
+                "default_routing_method": base.default_routing_method,
+                "local_llm_url": self.base.vllm_base_url, "local_llm_model": self.base.llm.local.model,
+                "enabled_course_types": course_types(),  # unset: every course type
+                "default_local_endpoint_id": None, "default_cloud_endpoint_id": None}
+
     def course_values(self, course_id: int) -> tuple[dict, int]:
         with Session(self.engine) as db:
             row = db.get(CourseSettings, course_id)

@@ -30,6 +30,23 @@ describe("class statistics (V2)", () => {
     expect(within(card).getByText("60%")).toBeInTheDocument();
   });
 
+  it("shows a course without questions as empty, not hidden, and names the course-wide row (V17 W13)", async () => {
+    mockApi(instructorRoutes({
+      "GET /courses/1/statistics": {
+        min_group: 5, students_enrolled: 0, active_students: 0, active_students_7d: 0, questions_total: 0, questions_7d: 0,
+        local_share: null, weeks: [], modules: [{ module_id: null, title: "", questions: 3 }], quizzes: [],
+      },
+      "GET /courses/1/insights": { min_group: 5, suppressed: true, kc_question_counts: [], misconception_counts: [] },
+    }));
+    renderApp("/courses/1/overview");
+    const card = await screen.findByLabelText("Use of the tutor");
+    const local = (await within(card).findByText("Answered by the local model")).parentElement!.parentElement!;
+    expect(local).toHaveTextContent("—");
+    expect(within(card).queryByText("hidden")).toBeNull();
+    expect(within(card).getByText("Course-wide (no module)")).toBeInTheDocument();
+    expect(screen.getByLabelText("Module for the topic levels below")).toBeInTheDocument();
+  });
+
   it("shows the admin the counts of every course", async () => {
     mockApi({
       "GET /auth/me": { ...ME_INSTRUCTOR, system_role: "admin" }, "GET /courses": [],

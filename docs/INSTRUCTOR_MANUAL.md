@@ -127,7 +127,7 @@ B applies to a student only after that student agrees, and then only data after 
 
 **Use of the tutor** (top of **Class overview**): **Students enrolled**, **Active students (7 days)**,
 **Questions (7 days)**, the share **Answered by the local model**, **Questions per week** (the last 8 weeks, with
-the number of students who asked), **Questions per module** (and **Whole course**) and **Quiz averages** (answers
+the number of students who asked), **Questions per module** (and **Course-wide (no module)**) and **Quiz averages** (answers
 and average score per published quiz). Counts only: no question, no name, and every number that fewer than 5
 students contributed shows "hidden" (a count of 0 is shown as 0; the minimum is 5 even if the setting is lower).
 Questions and quiz answers of students who left the course still count, so the active students can exceed the students enrolled now. When one row would give a hidden one by subtraction from the
@@ -246,8 +246,8 @@ Who does what each term (instructor I, administrator A):
 | during the term | a student forgot the password: **Reset password** (temporary, shown once) | I or A | **Members**, or **Administration** > **Student accounts** |
 | during the term | a student dropped the course: remove the membership | I | **Members** > remove |
 | end of term | export, then end the term (deletes the course's student data and memberships) | I | **End of term** |
-| after the term | students who left the university: **Disable** (no more logins) or **Delete** (the account and all of its learning data in every course; cannot be undone) | A | **Administration** > **Student accounts** |
-| after the term | instructors who left: **Disable** | A | **Administration** > instructor accounts |
+| after the term | students who left the university: **Deactivate** (no more logins) or **Delete** (the account and all of its learning data in every course; cannot be undone) | A | **Administration** > **Student accounts** |
+| after the term | instructors who left: **Deactivate** | A | **Administration** > instructor accounts |
 
 Student accounts stay from term to term: next term's class list finds them by e-mail, and a student who keeps
 the account keeps the same login. There is no university login yet (section 13).

@@ -38,6 +38,17 @@ describe("language switch", () => {
     expect(document.documentElement.lang).toBe("fr");
   });
 
+  it("shows the scan status of a material in French (V17 W6)", async () => {
+    mockApi(instructorRoutes({
+      "GET /courses/1/materials": { index_version: 1, rebuild_job_id: null, materials: [
+        { id: 1, module_id: null, filename: "syllabus.md", size_bytes: 10, scan_status: "accepted", uploaded_at: "2026-11-01T00:00:00Z" }] },
+    }));
+    renderApp("/courses/1/materials", "fr");
+    expect(await screen.findByText("syllabus.md")).toBeInTheDocument();
+    expect(screen.getByText("accepté")).toBeInTheDocument();
+    expect(screen.queryByText("accepted")).toBeNull();
+  });
+
   it("shows the student dashboard, the cloud notice and the English-only note in French", async () => {
     mockApi(studentRoutes());
     renderApp("/courses/1/chat", "fr");

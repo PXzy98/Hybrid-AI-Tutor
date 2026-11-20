@@ -56,6 +56,20 @@ class OpenAICompatClient:
             self._clients = {loop: openai.AsyncOpenAI(**self._args, **extra)}
         return self._clients[loop]
 
+    @property
+    def _who(self) -> str:
+        return "local" if self.backend == "local" else "cloud"
+
+    def _unavailable(self, e: Exception) -> str:
+        """Shown to instructors (a failed draft): which model, and what to check; no class names."""
+        if isinstance(e, openai.RateLimitError):
+            return f"the {self._who} model is busy; try again in a moment"
+        if isinstance(e, openai.AuthenticationError):
+            return f"the {self._who} model refused the key; check the model connection"
+        if isinstance(e, openai.APITimeoutError):
+            return f"the {self._who} model did not answer in time; try again or check the model connection"
+        return f"the {self._who} model cannot be reached; check the model connection"
+
     async def complete(self, messages: list[Message], *, json_schema: dict | None = None,
                        max_tokens: int | None = None) -> LLMResult:
         kwargs: dict = dict(self._extra)
@@ -69,16 +83,16 @@ class OpenAICompatClient:
             )
         except (openai.APIConnectionError, openai.APITimeoutError, openai.RateLimitError,
                 openai.AuthenticationError) as e:
-            raise LLMUnavailable(f"cloud API unavailable ({type(e).__name__})") from e
+            raise LLMUnavailable(self._unavailable(e)) from e
         except openai.APIError as e:
-            raise LLMError(f"cloud API error ({type(e).__name__})") from e
+            raise LLMError(f"the {self._who} model returned an error") from e
         choice = resp.choices[0] if resp.choices else None
         text = strip_think(choice.message.content if choice else "")
         cut_off = getattr(choice, "finish_reason", None) == "length"
         if not text:
             # reasoning models (e.g. deepseek-flash) count their hidden reasoning against max_tokens
-            raise LLMError("cloud answer cut off at max_tokens before any text" if cut_off
-                           else "cloud API returned an empty answer")
+            raise LLMError(f"the {self._who} model's answer was cut off at max_tokens before any text"
+                           if cut_off else f"the {self._who} model returned an empty answer")
         if cut_off:
             log.warning("cloud answer cut off at max_tokens=%s (raise llm.cloud.max_tokens)",
                         max_tokens or self.max_tokens)
@@ -109,6 +123,6 @@ class OpenAICompatClient:
                     yield piece
         except (openai.APIConnectionError, openai.APITimeoutError, openai.RateLimitError,
                 openai.AuthenticationError) as e:
-            raise LLMUnavailable(f"model API unavailable ({type(e).__name__})") from e
+            raise LLMUnavailable(self._unavailable(e)) from e
         except openai.APIError as e:
-            raise LLMError(f"model API error ({type(e).__name__})") from e
+            raise LLMError(f"the {self._who} model returned an error") from e

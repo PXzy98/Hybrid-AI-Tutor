@@ -2,7 +2,7 @@ import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { COURSE, mockApi, renderApp, studentRoutes } from "./helpers";
+import { COURSE, ME_STUDENT, mockApi, renderApp, studentRoutes } from "./helpers";
 
 // v5 V3, with the deployment default of V1 (individual views off)
 const STATS_ONLY = { ...COURSE, visibility_mode: "A" as const, individual_view: false };
@@ -37,6 +37,19 @@ describe("privacy notice", () => {
     expect(line).toHaveTextContent("Private: only you see your questions, answers and progress.");
     expect(screen.queryByText(/No one, not even your instructor/)).not.toBeInTheDocument();
     await userEvent.setup().click(screen.getByRole("button", { name: "What is private?" }));
+    expect(await screen.findByText(/No one, not even your instructor/)).toBeInTheDocument();
+  });
+
+  it("opens in full for another student on the same computer (V17 W22)", async () => {
+    mockApi(routes());
+    const first = renderApp("/courses/1/progress");
+    await screen.findByRole("region", { name: "Your privacy in this course" });
+    await userEvent.setup().click(screen.getByRole("button", { name: "Got it" }));
+    await waitFor(() => expect(screen.queryByText(/No one, not even your instructor/)).not.toBeInTheDocument());
+    first.unmount();
+
+    mockApi({ ...routes(), "GET /auth/me": { ...ME_STUDENT, account_id: 99, username: "kim", display_name: "Kim Student" } });
+    renderApp("/courses/1/progress");
     expect(await screen.findByText(/No one, not even your instructor/)).toBeInTheDocument();
   });
 

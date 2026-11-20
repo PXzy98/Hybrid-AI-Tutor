@@ -30,6 +30,19 @@ describe("closed loop (V8)", () => {
     expect(calls.some((c) => c.path.includes("/ask"))).toBe(false);  // the student decides to send it
   });
 
+  it("prepares the request in English in the French interface too (V17 W23)", async () => {
+    mockApi(studentRoutes({
+      "GET /courses/1/me/profile": { personalized: true, modules: [{ module_id: 10, code: "M1", title: "Ohm's law", misconceptions: [],
+        kcs: [{ kc_id: "K1", name: "Resistance", band: "basic" }] }],
+        visibility: { mode: "A", acknowledged: false, opted_out: false, visible_to_instructor: false, visible_since: null } },
+    }));
+    renderApp("/courses/1/progress", "fr");
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("link", { name: "Expliquer Resistance autrement" }));
+    await waitFor(() => expect((screen.getByRole("textbox") as HTMLTextAreaElement).value).toBe(
+      "Explain Resistance in another way than before: a different explanation, a new example, and where I can read more about it."));
+  });
+
   it("the prepared request is used once: a new chat after sending it starts empty", async () => {
     mockApi(studentRoutes({
       "GET /courses/1/me/profile": { personalized: true, modules: [{ module_id: 10, code: "M1", title: "Ohm's law", misconceptions: [],
