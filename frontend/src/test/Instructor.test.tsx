@@ -138,6 +138,23 @@ describe("member import", () => {
   });
 });
 
+describe("member password reset (V17 W26)", () => {
+  it("asks before resetting a student's password", async () => {
+    const calls = mockApi(instructorRoutes({
+      "GET /courses/1/members": members,
+      "GET /courses/1/invite": { expires_at: null, uses: 0, max_uses: null, created_at: "2026-09-01T00:00:00Z", expired: false, code: "JOIN-0001" },
+      "POST /courses/1/members/2/reset-password": { temporary_password: "temp-fictional-456" },
+    }));
+    renderApp("/courses/1/members");
+    const user = userEvent.setup();
+    await user.click((await screen.findAllByRole("button", { name: "Reset password" }))[0]);
+    expect(screen.getByRole("dialog")).toHaveTextContent("Ana Example gets a new temporary password");
+    expect(calls.some((c) => c.path.endsWith("/reset-password"))).toBe(false);
+    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Reset password" }));
+    expect(await screen.findByText("temp-fictional-456")).toBeInTheDocument();
+  });
+});
+
 describe("end of term", () => {
   it("needs the course code typed in the dialog, then exports and offers the download", async () => {
     vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => undefined);

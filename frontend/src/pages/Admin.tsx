@@ -6,6 +6,7 @@ import { api, type AdminStudent, type Staff, type SystemSettings, type SystemVal
 import { useMe } from "@/auth";
 import { ErrorNote, Loading, PageHeader, StatCard, StatusText } from "@/components/common";
 import ModelEndpoints, { endpointsKey } from "@/components/ModelEndpoints";
+import ResetPasswordDialog from "@/components/ResetPasswordDialog";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -153,7 +154,7 @@ function StudentAccountsCard() {
             </TableBody>
           </Table>
         )}
-        <ResetDialog name={pendingReset?.display_name} onClose={() => setPendingReset(null)}
+        <ResetPasswordDialog name={pendingReset?.display_name} onClose={() => setPendingReset(null)}
                      onConfirm={() => { if (pendingReset) reset.mutate(pendingReset); setPendingReset(null); }} />
         <Dialog open={!!pendingDelete} onOpenChange={(o) => { if (!o) askDelete(null); }}>
           <DialogContent>
@@ -186,25 +187,6 @@ function TemporaryNote({ temporary }: { temporary: { name: string; password: str
 
 function TemporaryRow({ columns, temporary }: { columns: number; temporary: { name: string; password: string } }) {
   return <TableRow><TableCell colSpan={columns} className="whitespace-normal"><TemporaryNote temporary={temporary} /></TableCell></TableRow>;
-}
-
-/** A reset ends the current password at once, so it is confirmed first (V17 W11). */
-function ResetDialog({ name, onClose, onConfirm }: { name?: string; onClose: () => void; onConfirm: () => void }) {
-  const { t } = useI18n();
-  return (
-    <Dialog open={name !== undefined} onOpenChange={(o) => { if (!o) onClose(); }}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t("admin.resetTitle")}</DialogTitle>
-          <DialogDescription>{t("admin.resetBody", { name: name ?? "" })}</DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <DialogClose asChild><Button type="button" variant="outline">{t("end.cancel")}</Button></DialogClose>
-          <Button type="button" onClick={onConfirm}>{t("admin.resetConfirm")}</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
 }
 
 function StaffCard({ selfId }: { selfId?: number }) {
@@ -270,7 +252,7 @@ function StaffCard({ selfId }: { selfId?: number }) {
             </TableBody>
           </Table>
         )}
-        <ResetDialog name={pendingReset?.display_name} onClose={() => setPendingReset(null)}
+        <ResetPasswordDialog name={pendingReset?.display_name} onClose={() => setPendingReset(null)}
                      onConfirm={() => { if (pendingReset) reset.mutate(pendingReset); setPendingReset(null); }} />
         <form className="grid gap-3 border-t pt-4 sm:grid-cols-3" aria-label={t("admin.addStaff")}
               onSubmit={(e: FormEvent) => { e.preventDefault(); create.mutate(); }}>
