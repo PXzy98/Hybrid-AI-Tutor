@@ -180,7 +180,17 @@ with the local model.
 | W17 | Course content | Knowledge components and check items can only be retired, not edited (misconceptions can be) | to decide |
 | W18 | Module codes | "Thévenin" becomes `th_venin` in codes and file names | cosmetic |
 | W19 | KC and quiz drafts (vLLM) | One duplicate KC name rejects the whole KC draft; a quiz draft with the 9B model gave "no usable question"; some 503s under load | to check with the vLLM |
+| W20 | Chat answers | Formulas written with \( \) and \[ \] are shown as raw text ("(V_{th})") | minor |
+| W21 | French interface | "cloud" and "Nuage" left in four strings | cosmetic |
+| W22 | Privacy notice | The full notice opens once per browser, not per student: a new student on a shared computer only sees the short line | minor |
+| W23 | French interface | "Explain it another way" and "Draft extra material" prepare a French request, but the course search and the privacy filter are English: no course material was found | major |
+| W24 | AI quiz drafts | Questions and explanations say "according to the text" and "Passage 3 states" | minor |
+| W25 | Quizzes | The editor shows no "Saved." after a save | cosmetic |
+| W26 | Members (instructor) | "Reset password" resets at once, without the confirmation W11 added on the admin page | minor |
+| W27 | Join page | Focusing the new-password field made the browser's password manager crash the browser during the automated test | to check by hand |
 
-Still to run: the student part (invitation sign-up, privacy notice, chat on the local and cloud paths, web
-search, quizzes, My progress, "explain it another way", survey) and every local-model flow once the vLLM is
-reachable.
+State on 2026-11-20 (second run, with the lab vLLM reachable and the student part done): W1 to W11, W13 to W16
+and W18 to W26 are fixed in #129; W12 ("Start next term's course", with materials) is #133; W17 is to decide;
+W27 is to check by hand. W19 retested with the vLLM: quiz drafts and custom drafts work (3 of 3 questions usable,
+a draft in under 30 s); the KC draft failed on accept as described and is fixed; no 503 was seen. Not run yet:
+the end-of-term survey as a student, web search answers and the student pages at phone width.
