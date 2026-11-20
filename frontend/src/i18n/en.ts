@@ -647,6 +647,7 @@ export const en = {
   "ai.open": "Open",
   "ai.start": "New draft",
   "ai.startHint": "The local model reads your course material and writes a draft you can edit.",
+  "ai.startHintCloud": "The cloud model reads the chosen public material and writes a draft you can edit.",
   "ai.kindLabel": "What to draft",
   "ai.focus": "Focus (optional)",
   "ai.focusHint": "For example: the final project",

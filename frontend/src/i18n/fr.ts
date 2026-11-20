@@ -647,6 +647,7 @@ export const fr: Messages = {
   "ai.open": "Ouvrir",
   "ai.start": "Nouveau brouillon",
   "ai.startHint": "Le modèle local lit votre matériel de cours et rédige un brouillon que vous pouvez modifier.",
+  "ai.startHintCloud": "Le modèle infonuagique lit le matériel public choisi et rédige un brouillon que vous pouvez modifier.",
   "ai.kindLabel": "Quoi rédiger",
   "ai.focus": "Sujet précis (facultatif)",
   "ai.focusHint": "Par exemple : le projet final",

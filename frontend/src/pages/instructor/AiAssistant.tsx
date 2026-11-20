@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Sparkles } from "lucide-react";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { api, type AiDraft, type AiDraftAccept, type AiDraftKind, type AiDraftStatus, type Course } from "@/api/endpoints";
@@ -49,6 +49,9 @@ function Drafts({ course }: { course: Course }) {
   const qc = useQueryClient();
   const [filter, setFilter] = useState<AiDraftStatus | "">("");
   const [selected, setSelected] = useState<number | null>(null);
+  const detail = useRef<HTMLDivElement>(null);
+  // the opened draft is below the list: bring it into view
+  useEffect(() => { if (selected !== null) detail.current?.scrollIntoView?.({ block: "start" }); }, [selected]);
   const drafts = useQuery({ queryKey: ["ai-drafts", course.id, filter], queryFn: () => api.aiDrafts(course.id, filter || undefined) });
   return (
     <div className="space-y-4">
@@ -79,7 +82,9 @@ function Drafts({ course }: { course: Course }) {
           </ul>
         </CardContent>
       </Card>
-      {selected !== null && <DraftDetail key={selected} course={course} id={selected} onGone={() => setSelected(null)} />}
+      <div ref={detail} className="scroll-mt-4">
+        {selected !== null && <DraftDetail key={selected} course={course} id={selected} onGone={() => setSelected(null)} />}
+      </div>
     </div>
   );
 }
@@ -104,6 +109,7 @@ function StartForm({ course, onStarted }: { course: Course; onStarted: (d: AiDra
   const [moduleIds, setModuleIds] = useState<number[]>([]);
   const [materialIds, setMaterialIds] = useState<number[]>([]);
   const [file, setFile] = useState<File | null>(null);
+  const [round, setRound] = useState(0);  // a new file input after each started draft
   const [pageUrl, setPageUrl] = useState("");
   const [addToCourse, setAddToCourse] = useState(false);
   const [addModuleId, setAddModuleId] = useState<number | null>(null); // where the uploaded file or page goes
@@ -134,6 +140,8 @@ function StartForm({ course, onStarted }: { course: Course; onStarted: (d: AiDra
     },
     onSuccess: (d) => {
       if ((source === "upload" || source === "url") && addToCourse) qc.invalidateQueries({ queryKey: ["materials", course.id] });
+      // a started draft empties what it was made from, so a second click does not start the same draft again
+      setRequest(""); setFocus(""); setFile(null); setPageUrl(""); setAddToCourse(false); setConfirmCloud(false); setRound((r) => r + 1);
       onStarted(d);
     },
   });
@@ -149,7 +157,7 @@ function StartForm({ course, onStarted }: { course: Course; onStarted: (d: AiDra
   }
   return (
     <Card>
-      <CardHeader><CardTitle className="flex items-center gap-2"><Sparkles aria-hidden className="size-4" />{t("ai.start")}</CardTitle><CardDescription>{t("ai.startHint")}</CardDescription></CardHeader>
+      <CardHeader><CardTitle className="flex items-center gap-2"><Sparkles aria-hidden className="size-4" />{t("ai.start")}</CardTitle><CardDescription>{t(useCloud ? "ai.startHintCloud" : "ai.startHint")}</CardDescription></CardHeader>
       <CardContent>
         <form onSubmit={submit} className="grid gap-4 sm:grid-cols-2" aria-label={t("ai.start")}>
           <div className="grid gap-1.5"><Label htmlFor="ai-kind">{t("ai.kindLabel")}</Label>
@@ -167,7 +175,7 @@ function StartForm({ course, onStarted }: { course: Course; onStarted: (d: AiDra
             <div className="flex flex-wrap gap-x-4 gap-y-1.5">
               {SOURCES.map((s) => (
                 <label key={s} className="flex items-center gap-2 text-sm">
-                  <input type="radio" name="ai-source" className="accent-primary" checked={source === s} onChange={() => setSource(s)} />
+                  <input type="radio" name="ai-source" value={s} className="accent-primary" checked={source === s} onChange={() => setSource(s)} />
                   {t(`ai.source.${s}` as MessageKey)}
                 </label>
               ))}
@@ -205,7 +213,7 @@ function StartForm({ course, onStarted }: { course: Course; onStarted: (d: AiDra
                 {source === "upload" ? (
                   <>
                     <Label htmlFor="ai-file">{t("ai.uploadFile")}</Label>
-                    <Input id="ai-file" type="file" accept=".pdf,.pptx,.docx,.md,.txt,.html" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+                    <Input key={round} id="ai-file" type="file" accept=".pdf,.pptx,.docx,.md,.txt,.html" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
                     <p className="text-xs text-muted-foreground">{t("ai.uploadHint")}</p>
                   </>
                 ) : (
@@ -233,11 +241,11 @@ function StartForm({ course, onStarted }: { course: Course; onStarted: (d: AiDra
               <legend className="mb-1 text-sm font-medium">{t("ai.model")}</legend>
               <div className="flex flex-wrap gap-x-4 gap-y-1.5">
                 <label className="flex items-center gap-2 text-sm">
-                  <input type="radio" name="ai-model" className="accent-primary" checked={!cloud} onChange={() => { setCloud(false); setConfirmCloud(false); }} />
+                  <input type="radio" name="ai-model" value="local" className="accent-primary" checked={!cloud} onChange={() => { setCloud(false); setConfirmCloud(false); }} />
                   {t("ai.modelLocal")}
                 </label>
                 <label className="flex items-center gap-2 text-sm">
-                  <input type="radio" name="ai-model" className="accent-primary" checked={cloud} onChange={() => setCloud(true)} />
+                  <input type="radio" name="ai-model" value="cloud" className="accent-primary" checked={cloud} onChange={() => setCloud(true)} />
                   {t("ai.modelCloud")}
                 </label>
               </div>
