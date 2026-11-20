@@ -481,6 +481,8 @@ export const en = {
   "quiz.status.published": "published",
   "quiz.status.closed": "closed",
   "quiz.questionsN": "{n} questions",
+  "quiz.questionsOne": "1 question",
+  "quiz.aiAfterSave": "Save the quiz first to draft questions with AI.",
   "quiz.attemptsN": "{n} answered",
   "quiz.unreviewed": "AI draft, not reviewed",
   "quiz.unreviewedN": "{n} not reviewed",

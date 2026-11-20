@@ -481,6 +481,8 @@ export const fr: Messages = {
   "quiz.status.published": "publié",
   "quiz.status.closed": "fermé",
   "quiz.questionsN": "{n} questions",
+  "quiz.questionsOne": "1 question",
+  "quiz.aiAfterSave": "Enregistrez d’abord le quiz pour rédiger des questions avec l’IA.",
   "quiz.attemptsN": "{n} réponses",
   "quiz.unreviewed": "Brouillon de l’IA, non révisé",
   "quiz.unreviewedN": "{n} non révisées",
