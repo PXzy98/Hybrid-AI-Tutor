@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Sparkles } from "lucide-react";
-import { useState, type FormEvent } from "react";
-import { useLocation } from "react-router-dom";
+import { useEffect, useState, type FormEvent } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { api, type AiDraft, type AiDraftAccept, type AiDraftKind, type AiDraftStatus, type Course } from "@/api/endpoints";
 import { ErrorNote, Loading, PageHeader, StatusText } from "@/components/common";
@@ -90,7 +90,13 @@ function StartForm({ course, onStarted }: { course: Course; onStarted: (d: AiDra
   const modules = useQuery({ queryKey: ["modules", course.id], queryFn: () => api.modules(course.id) });
   const materials = useQuery({ queryKey: ["materials", course.id], queryFn: () => api.materials(course.id) });
   // V8: "Draft extra material" on Class overview hands over a request and its module (router state)
-  const handed = (useLocation().state as { draft?: { request: string; moduleId: number | null } } | null)?.draft;
+  const location = useLocation();
+  const navigate = useNavigate();
+  const handed = (location.state as { draft?: { request: string; moduleId: number | null } } | null)?.draft;
+  // read once into the form: a reload or Back does not fill it again
+  useEffect(() => {
+    if (handed) navigate(location.pathname + location.search, { replace: true, state: null });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const [kind, setKind] = useState<AiDraftKind>("custom");
   const [request, setRequest] = useState(handed?.request ?? "");
   const [source, setSource] = useState<SourceChoice>(handed?.moduleId ? "module" : "course");
