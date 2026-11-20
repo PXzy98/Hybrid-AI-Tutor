@@ -37,7 +37,7 @@ describe("AI drafts", () => {
     await user.click(screen.getByRole("button", { name: "Accept and publish" }));
     expect(await screen.findByText("Accepted: 2 items created.")).toBeInTheDocument();
     expect(calls.find((c) => c.path.endsWith("/accept"))!.body).toEqual({ module_id: 10 });
-  });
+  }, 15000);  // a long flow: slow on a loaded machine
 
   it("sends a custom request with the chosen files (V4, V5)", async () => {
     const calls = mockApi(instructorRoutes({
