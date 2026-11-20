@@ -38,6 +38,22 @@ describe("the student's own answer instruction (V15)", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("remove personal details");
   });
 
+  it("clears the refusal and the saved note as soon as the text changes", async () => {
+    mockApi(studentRoutes({
+      "GET /courses/1/me/profile": profile,
+      "GET /me/answer-instruction": { text: "" },
+      "PUT /me/answer-instruction": () => reply({ detail: "remove personal details from the instruction: PERSON" }, 422),
+    }));
+    renderApp("/courses/1/progress");
+    const user = userEvent.setup();
+    const box = await screen.findByRole("textbox", { name: "How answers should look" });
+    await user.type(box, "Call me Ana");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("remove personal details");
+    await user.type(box, "!");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
   it("is not offered without a profile (no consent)", async () => {
     mockApi(studentRoutes({ "GET /courses/1/me/profile": { ...profile, personalized: false } }));
     renderApp("/courses/1/progress");

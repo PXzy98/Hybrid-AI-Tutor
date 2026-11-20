@@ -75,9 +75,11 @@ export default function Materials({ course }: { course: Course }) {
                       <span aria-hidden className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground"><FileText className="size-4" /></span>
                       <span className="max-w-64 min-w-0 break-words">{m.filename}</span>
                     </span>
-                    {m.source_url && (
+                    {m.source_url && (isHttps(m.source_url) ? (
                       <a href={m.source_url} target="_blank" rel="noopener noreferrer nofollow" className="mt-1 block max-w-64 break-words text-xs text-muted-foreground underline underline-offset-2">{m.source_url}</a>
-                    )}
+                    ) : (
+                      <span className="mt-1 block max-w-64 break-words text-xs text-muted-foreground">{m.source_url}</span>
+                    ))}
                   </TableCell>
                   <TableCell>{moduleName(m.module_id)}</TableCell>
                   <TableCell className="tabular-nums text-muted-foreground">{Math.max(1, Math.round(m.size_bytes / 1024))} KB</TableCell>
@@ -210,4 +212,13 @@ function scanVariant(status: string): "success" | "secondary" | "destructive" {
   if (status === "clean") return "success";
   if (status === "infected" || status === "failed" || status === "rejected") return "destructive";
   return "secondary";
+}
+
+/** A link is made only for an https address: the address comes from the first line of a file. */
+function isHttps(value: string): boolean {
+  try {
+    return new URL(value).protocol === "https:";
+  } catch {
+    return false;
+  }
 }

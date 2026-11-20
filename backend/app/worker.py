@@ -37,6 +37,7 @@ def run(stop: threading.Event | None = None) -> None:
     manager.kind = "worker"
     poll = services.settings.limits.settings.poll_seconds
     log.info("worker started (%s)", manager.process_id)
+    from app.instructor_ai import draft_jobs
     from app.platform import end_of_term, jobs
 
     def job_loop() -> None:
@@ -47,6 +48,7 @@ def run(stop: threading.Event | None = None) -> None:
                     last_maintenance = time.monotonic()
                     end_of_term.maintenance(services.engine, services.settings.data_path(),
                                             services.settings.limits.courses.export_retention_hours)
+                    draft_jobs.sweep_uploads(services.engine, services.settings.data_path())
                 # every round, not only at start: a job interrupted just before a restart becomes stale later
                 if jobs.fail_stale(services.engine):
                     log.warning("jobs left running by a stopped worker were marked failed")

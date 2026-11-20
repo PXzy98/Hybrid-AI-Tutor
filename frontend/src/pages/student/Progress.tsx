@@ -174,7 +174,7 @@ function AnswerInstruction() {
       <CardContent className="space-y-3 text-sm">
         <Label htmlFor="own-text" className="sr-only">{t("own.title")}</Label>
         <Textarea id="own-text" value={value} maxLength={300} placeholder={t("own.placeholder")}
-                  onChange={(e) => setText(e.target.value)} />
+                  onChange={(e) => { setText(e.target.value); save.reset(); }} />
         <p className="text-xs text-muted-foreground">{t("own.privacy")}</p>
         <ErrorNote error={save.error ?? saved.error} />
         {save.isSuccess && !dirty && <StatusText>{t("own.saved")}</StatusText>}

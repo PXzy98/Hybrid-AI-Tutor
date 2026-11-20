@@ -44,7 +44,8 @@ STUDENT_INSTRUCTION_INTRO = (
 
 def student_instruction_block(text: str) -> str | None:
     """V15: the student's own presentation request, last and subordinate; None without one."""
-    text = (text or "").strip()[:STUDENT_INSTRUCTION_MAX_CHARS]
+    # the angle brackets could close the tag and pose as rules of the system prompt (rows saved earlier)
+    text = " ".join((text or "").replace("<", " ").replace(">", " ").split())[:STUDENT_INSTRUCTION_MAX_CHARS]
     if not text:
         return None
     return f"{STUDENT_INSTRUCTION_INTRO}\n<student_request>\n{text}\n</student_request>"

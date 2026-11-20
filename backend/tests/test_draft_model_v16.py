@@ -2,6 +2,7 @@
 that the material goes to it, and never in a local-only course. The local model stays the default. Fakes."""
 # ruff: noqa: F811  (the `world` fixture of test_instructor_ai_api is reused as a test argument)
 import asyncio
+import functools
 
 import pytest
 from pydantic import ValidationError
@@ -14,6 +15,7 @@ from app.llm.cloud_guard import CloudClient, build_draft_cloud_request
 from app.llm.fake import FakeLLMClient
 from app.llm.gateway import FakeGateway
 from app.platform import jobs
+from app.rag import web_pages
 from app.storage.models import AiDraft, Kc
 from tests.test_ai_drafts_v5 import _upload
 from tests.test_instructor_ai_api import PASSAGE, TIER1, FakeCourseRetriever, _draft, world  # noqa: F401
@@ -44,14 +46,16 @@ def test_the_local_model_stays_the_default(world):
     assert len(local.calls) == 1 and world["cloud"].calls == []
 
 
-def test_a_local_only_course_never_drafts_with_the_cloud(world):
+def test_a_local_only_course_never_drafts_with_the_cloud(world, monkeypatch):
     world["use"](TIER1)
     prof, url = world["prof"], world["url"]
     current = prof.get(f"{url}/settings").json()
     assert prof.put(f"{url}/settings", json={"values": {"local_only": True},
                                              "version": current["version"]}).status_code == 200
     assert _start(world, {"kind": "faq", "model": "cloud", "confirm_cloud": True}).status_code == 409
-    world["services"].web_fetch_options = {"resolve": _resolver(), "inner": _site({"example.org/p": _html()})}
+    fake = functools.partial(web_pages.fetch_page, resolve=_resolver(),
+                             inner=_site({"example.org/p": _html()}))
+    monkeypatch.setattr(web_pages, "fetch_page", fake)  # no DNS, no network
     page = {"url": "https://example.org/p", "kind": "faq", "model": "cloud", "confirm_cloud": True}
     assert prof.post(f"{url}/ai/drafts/url", json=page).status_code == 409
     assert world["cloud"].calls == []

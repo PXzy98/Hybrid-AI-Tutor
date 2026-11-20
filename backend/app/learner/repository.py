@@ -179,11 +179,17 @@ class LearnerRepository:
             db.commit()
 
     def reset(self, student_id: str) -> None:
-        """API v1 "reset my profile": this course's data and the preferences; consent and the account stay."""
+        """API v1 "reset my profile": this course's data and the preferences; consent, the account and the
+        student's own answer instruction (V15, not a learned preference) stay."""
         self.delete_course_data(student_id)
         with self._db() as db:
-            db.exec(delete(LearnerPreference).where(LearnerPreference.student_id == student_id))
-            db.commit()
+            row = db.exec(select(LearnerPreference).where(LearnerPreference.student_id == student_id)).first()
+            if row is not None:
+                for name in ("sequencing", "detail", "source"):
+                    setattr(row, name, LearnerPreference.model_fields[name].default)
+                row.implicit, row.updated_at = {}, utcnow()
+                db.add(row)
+                db.commit()
 
     def forget(self, student_id: str) -> None:
         """Consent withdrawn (it is global): the learning data of every course and the preferences."""

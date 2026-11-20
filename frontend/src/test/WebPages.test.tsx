@@ -31,6 +31,15 @@ describe("web pages as material (V7)", () => {
     await waitFor(() => expect(calls.some((c) => c.path === "/courses/1/materials/5/refetch" && c.method === "POST")).toBe(true));
   });
 
+  it("makes no link from an address that is not https", async () => {
+    mockApi(instructorRoutes({
+      "GET /courses/1/materials": materials([{ ...web, source_url: "javascript:alert(1)" }]),
+    }));
+    renderApp("/courses/1/materials");
+    expect(await screen.findByText("javascript:alert(1)")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /javascript/ })).toBeNull();
+  });
+
   it("shows why a page was refused", async () => {
     mockApi(instructorRoutes({
       "GET /courses/1/materials": materials([]),

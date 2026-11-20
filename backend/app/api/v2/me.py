@@ -6,13 +6,15 @@ consent nothing is stored, and withdrawing consent forgets the learning profile.
 from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Request, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from app.auth.deps import Student
 from app.core.schemas import Preferences
 from app.learner.preference.interface import PreferenceSignal
 
 router = APIRouter(prefix="/me", tags=["me"])
+
+INSTRUCTION_MAX_CHARS = 300
 
 
 class PreferencesIn(BaseModel):
@@ -22,7 +24,15 @@ class PreferencesIn(BaseModel):
 
 class InstructionIO(BaseModel):
     # V15: how answers should be presented, in the student's words; "" removes it
-    text: str = Field("", max_length=300)
+    text: str = Field("", max_length=1000)  # raw bound; 300 counted after collapsing spaces
+
+    @field_validator("text")
+    @classmethod
+    def _normalized(cls, value: str) -> str:
+        value = " ".join(value.split())
+        if len(value) > INSTRUCTION_MAX_CHARS:
+            raise ValueError(f"at most {INSTRUCTION_MAX_CHARS} characters")
+        return value
 
 
 class ConsentOut(BaseModel):
@@ -63,7 +73,7 @@ def get_instruction(request: Request, user: Student):
 
 @router.put("/answer-instruction", response_model=InstructionIO, operation_id="me_instruction_update",
             responses={409: {"description": "consent required"},
-                       422: {"description": "the text contains personal data"}})
+                       422: {"description": "the text contains personal data or the characters < and >"}})
 def put_instruction(request: Request, body: InstructionIO, user: Student):
     """Saved with consent only, like the other preferences. It is scanned like a question: text with personal
     data (names, numbers, health details, ...) is refused, never stored. It reaches the local model only,
@@ -71,7 +81,10 @@ def put_instruction(request: Request, body: InstructionIO, user: Student):
     learner = _learner(request)
     if not learner.has_consent(user.student_id):
         raise HTTPException(status.HTTP_409_CONFLICT, "consent required: give consent first")
-    text = " ".join(body.text.split())
+    text = body.text
+    if "<" in text or ">" in text:  # the text sits inside a tag of the system prompt: it must not close it
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY,
+                            "remove the characters < and > from the instruction")
     if text:
         # the student's own name and username too, as in the privacy filter: NER misses some of them
         names, usernames = request.app.state.services.accounts.identity_terms(user.student_id)
@@ -84,13 +97,12 @@ def put_instruction(request: Request, body: InstructionIO, user: Student):
 
 
 def _analyzer(request: Request):
-    from app.privacy.analyzer import PIIAnalyzer
-
-    services = request.app.state.services
-    analyzer = getattr(services, "_instruction_analyzer", None)
-    if analyzer is None:  # every recognizer: the instruction belongs to no course
-        analyzer = services._instruction_analyzer = PIIAnalyzer(services.settings.privacy)
-    return analyzer
+    """The analyzer of the privacy filter step (built at startup, all recognizers): the instruction belongs to
+    no course."""
+    for step in request.app.state.services.components.runner.pipeline:
+        if step.name == "privacy_filter":
+            return step.analyzer
+    raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "the privacy filter is not available")
 
 
 @router.get("/consent", response_model=ConsentOut, operation_id="me_consent_get")

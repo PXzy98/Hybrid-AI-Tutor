@@ -51,13 +51,17 @@ def _out(row: Material, data_root=None) -> MaterialOut:
 
 
 def _source_url(row: Material, data_root) -> str | None:
-    if not row.filename.startswith("web-"):
+    """The address of a web page material: a `web-*.md` file whose first line is the source comment with an
+    https address. Any other file (a PDF named `web-...`) is not a web page; its bytes are never decoded
+    beyond a short prefix."""
+    if not (row.filename.startswith("web-") and row.filename.endswith(".md")):
         return None
     try:
-        with index_jobs.material_path(data_root, row).open(encoding="utf-8") as f:
-            return web_pages.source_url(f.readline())
+        with index_jobs.material_path(data_root, row).open("rb") as f:
+            first = f.readline(web_pages.MAX_FIRST_LINE)
     except OSError:
         return None
+    return web_pages.source_url(first.decode("utf-8", errors="replace"))
 
 
 class UrlIn(BaseModel):
@@ -74,10 +78,10 @@ def _module_of(services, course_id: int, module_id: int | None) -> None:
         raise ApiError(404, ErrorCode.not_found, "module not found")
 
 
-async def fetch_as_material(services, url: str, course_type: str) -> tuple[str, bytes]:
+async def fetch_as_material(url: str, course_type: str) -> tuple[str, bytes]:
     """The page at `url` as a scanned Markdown material: (file name, bytes); ApiError 422 when refused."""
     try:
-        page = await web_pages.fetch_page(url, **getattr(services, "web_fetch_options", {}))
+        page = await web_pages.fetch_page(url)
     except web_pages.PageRefused as e:
         raise ApiError(422, ErrorCode.invalid, str(e)) from None
     data = web_pages.material_text(page).encode("utf-8")
@@ -149,7 +153,7 @@ async def add_url(body: UrlIn, access: CourseInstructor, request: Request):
     2 MB, redirects checked), converted to Markdown with its address, scanned like an upload and indexed."""
     services = _services(request)
     _module_of(services, access.course.id, body.module_id)
-    name, data = await fetch_as_material(services, body.url, access.course.course_type)
+    name, data = await fetch_as_material(body.url, access.course.course_type)
     try:
         row = index_jobs.store(services.engine, services.settings.data_path(), access.course.id,
                                body.module_id, name, data)
@@ -179,13 +183,19 @@ async def refetch(material_id: int, access: CourseInstructor, request: Request):
     url = _source_url(row, root)
     if url is None:
         raise ApiError(422, ErrorCode.invalid, "only a web page added by its address can be fetched again")
-    _, data = await fetch_as_material(services, url, access.course.course_type)
+    _, data = await fetch_as_material(url, access.course.course_type)
     path = index_jobs.material_path(root, row)
     staging = path.with_name(f".{path.name}.new")
-    staging.write_bytes(data)
-    staging.replace(path)  # atomic: the index never sees half a file
     with Session(services.engine) as db:
-        stored = db.get(Material, material_id)
+        stored = db.get(Material, material_id)  # the fetch took seconds: it may have been deleted meanwhile
+        if stored is None:
+            raise ApiError(404, ErrorCode.not_found, "material not found")
+        try:
+            staging.write_bytes(data)
+            staging.replace(path)  # atomic: the index never sees half a file
+        except OSError:
+            staging.unlink(missing_ok=True)
+            raise
         stored.size_bytes, stored.sha256 = len(data), hashlib.sha256(data).hexdigest()
         stored.uploaded_at = utcnow()
         db.add(stored)

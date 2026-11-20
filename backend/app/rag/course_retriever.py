@@ -259,6 +259,15 @@ class IndexedCourseRetriever:
         self._cache[course_id] = result
         return result
 
+    def in_order(self, course_id: int) -> list[Chunk]:
+        """Every passage of the current index in the order of the files (instructor drafts from chosen
+        files, when ranking by a request finds nothing)."""
+        try:
+            with self._lock(course_id):
+                return list(self._snapshot(course_id).passages)
+        except (OSError, ValueError, TypeError):
+            return []
+
     def retrieve(self, course_id: int, module_id: int | None, query: str, k: int = 4,
                  question_kind: str = "concept") -> list[Chunk]:
         """Retrieve only from this course and, when selected, the active module + course-level files.
