@@ -107,7 +107,8 @@ export default function EndOfTerm({ course }: { course: Course }) {
       {done && (
         <Alert variant="info" role="status" className="space-y-3">
           <p className="font-medium">{t("end.done")}</p>
-          <p>{t("end.result", { exported: done.students_exported, removed: done.students_removed })}</p>
+          <p>{course.individual_view ? t("end.result", { exported: done.students_exported, removed: done.students_removed })
+                                     : t("end.resultStatistics", { removed: done.students_removed })}</p>
           <p>{t("end.expires", { date: fmt.dateTime(done.expires_at) })}</p>
           <Button type="button" onClick={() => save.mutate(done.export_id)} disabled={save.isPending}><Download aria-hidden />{t("end.download")}</Button>
           <ErrorNote error={save.error} />

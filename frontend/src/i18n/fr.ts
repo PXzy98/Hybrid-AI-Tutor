@@ -449,7 +449,8 @@ export const fr: Messages = {
   "end.working": "Traitement…",
   "end.done": "La session est terminée.",
   "end.result": "{exported} étudiants exportés, {removed} supprimés.",
-  "end.expires": "L’exportation peut être téléchargée jusqu’au {date}.",
+  "end.resultStatistics": "{removed} étudiants retirés du cours avec leurs données d’apprentissage ; l’exportation ne contient aucune donnée individuelle d’étudiant.",
+  "end.expires": "L’exportation peut être téléchargée jusqu’au {date}",
   "end.download": "Télécharger l’exportation",
 
   "quiz.title": "Quiz",

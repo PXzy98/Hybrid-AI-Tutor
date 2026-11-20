@@ -2,7 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { instructorRoutes, mockApi, reply, renderApp } from "./helpers";
+import { COURSE, instructorRoutes, mockApi, reply, renderApp } from "./helpers";
 
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
@@ -159,6 +159,23 @@ describe("end of term", () => {
     expect(calls.find((c) => c.path.endsWith("/end-term"))!.body).toEqual({ confirm: true });
     await user.click(screen.getByRole("button", { name: "Download the export" }));
     await waitFor(() => expect(calls.some((c) => c.path === "/courses/1/exports/exp-1")).toBe(true));
+  });
+});
+
+describe("end of term in a statistics-only course (V17 W12)", () => {
+  it("says the students were removed and that the export holds no individual data", async () => {
+    mockApi(instructorRoutes({
+      "GET /courses": [{ ...COURSE, my_role: "instructor", individual_view: false, visibility_mode: "A" }],
+      "POST /courses/1/end-term": { export_id: "exp-1", expires_at: "2026-12-30T00:00:00Z", students_removed: 6, students_exported: 0, deleted: {} },
+    }));
+    renderApp("/courses/1/endterm");
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: "End the term…" }));
+    await user.type(screen.getByLabelText("Type ECE 1000 to confirm"), "ECE 1000");
+    await user.click(screen.getByRole("button", { name: "Export and delete" }));
+    expect(await screen.findByText(/^6 students removed from the course with their learning data/)).toBeInTheDocument();
+    expect(screen.queryByText(/students exported/)).toBeNull();
+    expect(screen.getByText(/can be downloaded until/).textContent).not.toMatch(/\.\.$/);
   });
 });
 

@@ -449,7 +449,8 @@ export const en = {
   "end.working": "Working…",
   "end.done": "The term has ended.",
   "end.result": "{exported} students exported, {removed} removed.",
-  "end.expires": "The export can be downloaded until {date}.",
+  "end.resultStatistics": "{removed} students removed from the course with their learning data; the export holds no individual student data.",
+  "end.expires": "The export can be downloaded until {date}",
   "end.download": "Download the export",
 
   "quiz.title": "Quizzes",
