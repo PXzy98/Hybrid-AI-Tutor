@@ -192,5 +192,7 @@ with the local model.
 State on 2026-11-20 (second run, with the lab vLLM reachable and the student part done): W1 to W11, W13 to W16
 and W18 to W26 are fixed in #129; W12 ("Start next term's course", with materials) is #133; W17 is to decide;
 W27 is to check by hand. W19 retested with the vLLM: quiz drafts and custom drafts work (3 of 3 questions usable,
-a draft in under 30 s); the KC draft failed on accept as described and is fixed; no 503 was seen. Not run yet:
-the end-of-term survey as a student, web search answers and the student pages at phone width.
+a draft in under 30 s); the KC draft failed on accept as described and is fixed; no 503 was seen. Also checked:
+the end-of-term survey (a student answers once, averages appear at three answers), the student pages at phone
+width (no overflow), and a demo rebuild with the local model (new KCs for every module). Not run yet: web search
+answers.
