@@ -54,6 +54,7 @@ logged in. Owner = component owner who implements it.
 | `GET /auth/csrf` | public | CSRF token (anonymous before login, bound to the session after) |
 | `POST /auth/join` | public or logged in | new student: invitation code + e-mail + display name + password creates the account and activates all his pending memberships; logged-in student: invitation code only, activates that course's pending membership (course-structure 3.3) |
 | `GET /me/preferences`, `PUT /me/preferences` | S | global learning preferences |
+| `GET /me/answer-instruction`, `PUT /me/answer-instruction` | S | V15: `{text}` (at most 300 characters, "" removes it), the student's own presentation request; `PUT` needs consent (409) and refuses text in which the privacy filter finds personal data (422, the types only); local model only, after the instructor's rules; never in an instructor view |
 | `GET /me/consent`, `PUT /me/consent` | S | global consent |
 
 ### 3.2 Admin (owner Z)

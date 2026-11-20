@@ -240,6 +240,11 @@ export const fr: Messages = {
   "plan.save": "Enregistrer le plan",
   "plan.saved": "Plan enregistré.",
 
+  "own.title": "La forme des réponses",
+  "own.hint": "Facultatif : dites au tuteur avec vos propres mots comment présenter les réponses, par exemple « termine toujours par un court résumé » ou « utilise des listes à puces ». Les règles de votre enseignant pour le cours passent en premier.",
+  "own.placeholder": "Par exemple : termine toujours par un résumé d’une ligne.",
+  "own.privacy": "Seul le modèle du cours lit ceci, jamais votre enseignant ni un modèle infonuagique. N’écrivez pas de détails personnels : un texte avec des noms, des numéros ou des détails de santé est refusé.",
+  "own.saved": "Enregistré.",
   "privacy.title": "Votre vie privée dans ce cours",
   "privacy.line": "Privé : vous seul voyez vos questions, les réponses et votre progression. Votre enseignant ne voit que des statistiques de la classe.",
   "privacy.lineIndividual": "Vos questions et les réponses sont privées. Ma progression indique ce que votre enseignant peut voir.",

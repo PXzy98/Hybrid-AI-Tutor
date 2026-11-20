@@ -1543,6 +1543,32 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/me/answer-instruction": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Instruction
+         * @description The student's own answer instruction (V15): only the student reads it, never an instructor.
+         */
+        get: operations["me_instruction_get"];
+        /**
+         * Put Instruction
+         * @description Saved with consent only, like the other preferences. It is scanned like a question: text with personal
+         *     data (names, numbers, health details, ...) is refused, never stored. It reaches the local model only,
+         *     after the safety and instructor rules, and never overrides them (Z26).
+         */
+        put: operations["me_instruction_update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/me/consent": {
         parameters: {
             query?: never;
@@ -3377,6 +3403,14 @@ export interface components {
             kc_question_counts: components["schemas"]["LabelCountOut"][];
             /** Misconception Counts */
             misconception_counts: components["schemas"]["LabelCountOut"][];
+        };
+        /** InstructionIO */
+        InstructionIO: {
+            /**
+             * Text
+             * @default
+             */
+            text?: string;
         };
         /** InstructorIn */
         InstructorIn: {
@@ -8447,6 +8481,64 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+        };
+    };
+    me_instruction_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InstructionIO"];
+                };
+            };
+        };
+    };
+    me_instruction_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InstructionIO"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InstructionIO"];
+                };
+            };
+            /** @description consent required */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description the text contains personal data or the characters < and > */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

@@ -11,6 +11,8 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, Di
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/i18n";
 import { useFormat } from "@/lib/format";
 import type { MessageKey } from "@/i18n/en";
@@ -74,6 +76,7 @@ export default function Progress({ course }: { course: Course }) {
       </div>
       <div className="min-w-0 space-y-4">
         <VisibilityCard course={course} profile={data} />
+        {data.personalized && <AnswerInstruction />}
         <DeleteData course={course} />
       </div>
     </div>
@@ -147,6 +150,35 @@ function VisibilityCard({ course, profile }: { course: Course; profile: CoursePr
           </>
         )}
         <ErrorNote error={change.error} />
+      </CardContent>
+    </Card>
+  );
+}
+
+/** V15: how the student wants answers presented, in their own words. Only the course's own model reads it,
+ *  after the instructor's rules; nobody else sees it. Needs consent (shown only with a profile). */
+function AnswerInstruction() {
+  const { t } = useI18n();
+  const qc = useQueryClient();
+  const saved = useQuery({ queryKey: ["answer-instruction"], queryFn: api.answerInstruction });
+  const [text, setText] = useState<string | null>(null);
+  const value = text ?? saved.data?.text ?? "";
+  const save = useMutation({
+    mutationFn: () => api.saveAnswerInstruction(value),
+    onSuccess: (fresh) => { qc.setQueryData(["answer-instruction"], fresh); setText(null); },
+  });
+  const dirty = text !== null && text !== (saved.data?.text ?? "");
+  return (
+    <Card aria-label={t("own.title")}>
+      <CardHeader><CardTitle>{t("own.title")}</CardTitle><CardDescription>{t("own.hint")}</CardDescription></CardHeader>
+      <CardContent className="space-y-3 text-sm">
+        <Label htmlFor="own-text" className="sr-only">{t("own.title")}</Label>
+        <Textarea id="own-text" value={value} maxLength={300} placeholder={t("own.placeholder")}
+                  onChange={(e) => { setText(e.target.value); save.reset(); }} />
+        <p className="text-xs text-muted-foreground">{t("own.privacy")}</p>
+        <ErrorNote error={save.error ?? saved.error} />
+        {save.isSuccess && !dirty && <StatusText>{t("own.saved")}</StatusText>}
+        <Button type="button" size="sm" loading={save.isPending} disabled={!dirty || save.isPending} onClick={() => save.mutate()}>{t("settings.save")}</Button>
       </CardContent>
     </Card>
   );

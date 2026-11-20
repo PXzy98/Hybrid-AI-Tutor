@@ -4484,6 +4484,64 @@
         }
       }
     },
+    "/api/v2/me/answer-instruction": {
+      "get": {
+        "tags": [
+          "me"
+        ],
+        "summary": "Get Instruction",
+        "description": "The student's own answer instruction (V15): only the student reads it, never an instructor.",
+        "operationId": "me_instruction_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstructionIO"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "me"
+        ],
+        "summary": "Put Instruction",
+        "description": "Saved with consent only, like the other preferences. It is scanned like a question: text with personal\ndata (names, numbers, health details, ...) is refused, never stored. It reaches the local model only,\nafter the safety and instructor rules, and never overrides them (Z26).",
+        "operationId": "me_instruction_update",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InstructionIO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstructionIO"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "consent required"
+          },
+          "422": {
+            "description": "the text contains personal data or the characters < and >"
+          }
+        }
+      }
+    },
     "/api/v2/me/consent": {
       "get": {
         "tags": [
@@ -9863,6 +9921,18 @@
           "misconception_counts"
         ],
         "title": "InsightsOut"
+      },
+      "InstructionIO": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 1000,
+            "title": "Text",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "InstructionIO"
       },
       "InstructorIn": {
         "properties": {

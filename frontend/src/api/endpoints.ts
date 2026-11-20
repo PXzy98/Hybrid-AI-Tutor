@@ -167,6 +167,9 @@ export const api = {
   refetchMaterial: (id: number, materialId: number) =>
     request<Schemas["UploadOut"]>("POST", `${c(id)}/materials/${materialId}/refetch`),
   deleteLearningData: (id: number) => request<void>("DELETE", `${c(id)}/me/learning-data`),
+  // V15: the student's own answer instruction (global, like the preferences; local model only)
+  answerInstruction: () => request<Schemas["InstructionIO"]>("GET", "/me/answer-instruction"),
+  saveAnswerInstruction: (text: string) => request<Schemas["InstructionIO"]>("PUT", "/me/answer-instruction", { text }),
 
   // quizzes
   quizzes: (id: number) => request<Quiz[]>("GET", `${c(id)}/quizzes`),

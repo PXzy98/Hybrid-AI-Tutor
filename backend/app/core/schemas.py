@@ -202,6 +202,8 @@ class LearnerContext(BaseModel):
     preferences: Preferences = Preferences()
     next_kc: KcRecommendation | None = None
     personalized: bool = True
+    # V15: the student's own presentation request (scanned at save); below the instructor's rules
+    answer_instruction: str = ""
 
     def to_cloud_labels(self) -> CloudLabels:
         return CloudLabels(

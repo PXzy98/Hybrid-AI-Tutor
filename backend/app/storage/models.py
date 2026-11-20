@@ -145,6 +145,9 @@ class LearnerPreference(SQLModel, table=True):
     detail: str = "concise"
     source: str = "default"
     implicit: dict = Field(default_factory=dict, sa_column=Column(JSON))  # streak counters per dimension
+    # V15: how the student wants answers presented, in their words (at most 300 characters, scanned for
+    # personal data before it is saved); local model only, never shown to an instructor
+    instruction: str = Field(default="", sa_column_kwargs={"server_default": ""})
     updated_at: datetime = _ts(default_factory=utcnow)
 
 
