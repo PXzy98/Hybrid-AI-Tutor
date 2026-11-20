@@ -35,6 +35,8 @@ class CourseOut(BaseModel):
     status: Literal["active", "archived"]
     my_role: Literal["instructor", "student"] | None
     local_only: bool = False  # the course's effective setting: no question goes to a cloud model
+    # whether a cloud model can be used for this course (V16: instructor drafts); false when it is local-only
+    cloud_available: bool = False
     # the instructor's rules for the tutor in the whole course (Z26); null for students
     guideline: str | None = None
     # whether visibility mode B can be chosen in this deployment (learner.instructor_individual_view, V1);
@@ -115,7 +117,12 @@ def _course_out(view, request: Request) -> CourseOut:
     # the effective settings, not the course row's initial values: the course settings may change them
     values = {**view.__dict__, "visibility_mode": eff.visibility_mode,
               "guideline": view.guideline if view.my_role == "instructor" else None}
-    return CourseOut(**values, local_only=bool(eff.local_only),
+    services = request.app.state.services
+    try:
+        cloud = bool(services.gateway.cloud_client(eff).available)
+    except Exception:  # noqa: BLE001  a stored connection that cannot be resolved is not available
+        cloud = False
+    return CourseOut(**values, local_only=bool(eff.local_only), cloud_available=cloud,
                      individual_view=request.app.state.services.settings.learner.instructor_individual_view)
 
 

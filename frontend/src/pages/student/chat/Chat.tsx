@@ -39,7 +39,7 @@ export default function Chat({ course }: { course: Course }) {
 
 function ChatPane({ course, initialConversation: initial, moduleId, onStarted }: { course: Course; initialConversation: string | null; moduleId: number | null; onStarted: (id: string) => void }) {
   const [initialConversation] = useState(initial); // fixed for the life of the pane
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const qc = useQueryClient();
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversation, setConversation] = useState<string | null>(initialConversation);
@@ -53,8 +53,8 @@ function ChatPane({ course, initialConversation: initial, moduleId, onStarted }:
   const modules = useQuery({ queryKey: ["modules", course.id], queryFn: () => api.modules(course.id) });
   const profile = useQuery({ queryKey: ["profile", course.id], queryFn: () => api.profile(course.id) });
   const history = useQuery({
-    queryKey: ["conversation", course.id, initialConversation],
-    queryFn: () => api.conversation(course.id, initialConversation as string),
+    queryKey: ["conversation", course.id, initialConversation, lang],
+    queryFn: () => api.conversation(course.id, initialConversation as string, lang),
     enabled: !!initialConversation,
     staleTime: Infinity, refetchOnWindowFocus: false, refetchOnReconnect: false,
   });
@@ -78,7 +78,7 @@ function ChatPane({ course, initialConversation: initial, moduleId, onStarted }:
       controller.current = new AbortController();
       setPartial("");
       return api.askStream(course.id, {
-        question: input.question, module_id: moduleId, language: "en",
+        question: input.question, module_id: moduleId, language: lang,  // fixed notes come back in it
         ...(conversation ? { conversation_id: conversation } : {}),
       }, (event) => {
         if (event.type === "meta") updateTrace(input.traceId, { visible: event.data.show_progress, method: event.data.method });

@@ -28,7 +28,10 @@ export async function askStream(courseId: number, body: Schemas["AskIn"], onEven
     }
     if (!data.length) return;
     const parsed = JSON.parse(data.join("\n"));
-    if (kind === "error") throw new ApiError(503, parsed.detail ?? "The selected model could not answer.");
+    if (kind === "error") {
+      // without a detail the code lets the error note show the translated sentence (error.modelFailed)
+      throw new ApiError(503, parsed.detail ?? "The selected model could not answer.", parsed.detail ? "" : "model_failed");
+    }
     if (kind === "done") { doneEvent = true; return; }
     if (kind === "result") reply = parsed;
     if (kind === "meta" || kind === "progress" || kind === "token" || kind === "result") {

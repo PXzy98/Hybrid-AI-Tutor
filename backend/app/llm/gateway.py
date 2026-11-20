@@ -40,6 +40,15 @@ class FakeGateway:
         self.clients = clients
         self.trusted = trusted
 
+    def cloud_client(self, settings: EffectiveSettings | None):
+        """As `Gateway.cloud_client`: the cloud client behind the gate (none in a local-only course)."""
+        from app.llm.cloud_guard import CloudClient
+
+        client = self.clients.get("cloud")
+        if client is None or "cloud" in self.trusted or (settings is not None and settings.local_only):
+            return CloudClient(None)
+        return CloudClient(client)
+
     async def complete(self, role: EndpointRole, messages: list[Message], *, settings: EffectiveSettings,
                        trust_required: TrustRequired, json_schema: dict | None = None,
                        stream: bool = False, max_tokens: int | None = None) -> LLMResult | AsyncIterator[str]:
@@ -223,3 +232,7 @@ class _QueuedCloud:
     async def complete(self, req, *, safety_retry: bool = False):
         async with self.gateway._slot(self.key):
             return await self.cloud.complete(req, safety_retry=safety_retry)
+
+    async def complete_draft(self, req):
+        async with self.gateway._slot(self.key):
+            return await self.cloud.complete_draft(req)

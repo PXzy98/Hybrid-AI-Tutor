@@ -66,6 +66,12 @@ HTML).
   are used for answers when it is done."). If it fails ("The index could not be rebuilt"), upload again or
   contact an administrator. The list shows the scan status and the **Index version**.
 - Delete a file with **Delete file**; the index is rebuilt without it.
+- **Add a web page**: give its address (https only) and a module or the whole course, then **Add the page**.
+  The server fetches the page once (public sites only, never addresses inside the university network or the
+  server itself; at most 2 MB; at most 3 redirects, each checked the same way), keeps its text as a Markdown
+  file with the address on top, scans it like an upload and indexes it. The list shows the address; **Fetch
+  again** replaces the text with the page's current version (scanned again). Images and attached files of the
+  page are not fetched. The AI assistant can also draft from a web page (section 10).
 
 Course material goes only to models your settings allow: the local model for drafts (section 8), and to a cloud
 model only in answers and in the tier 4 evaluation after your explicit confirmation.
@@ -181,6 +187,22 @@ Quizzes are course content: they stay after the term, but published ones are clo
 Drafts are visible to students only after you accept them. No tier receives student data. Uploads are scanned
 first (section 4).
 
+**AI assistant** > **New draft** (tiers 1 and 2):
+- **What to draft**: **Custom request** (the default) or one of the fixed kinds. A custom request is your own
+  description of the draft, up to 1000 characters, for example "expand the material on one topic", "thesis or
+  research topics", "a summary of this new paper and what it means for patients", "examples for a lecture" or
+  "what to add to the course next". It is drafted as Markdown, like an FAQ.
+- **Material to use**: **Whole course**, **One module** (with the course-level files), **Some modules** (only
+  their files), **Some files** (only the files you tick), or **Upload a file** or **A web page**. An uploaded file or page (for example
+  a new paper) is scanned like any upload and used for this draft only; it is deleted once the model has read
+  it, unless you tick **Also add this file to the course material** (then it appears under **Materials** and
+  students' answers can use it after the index is rebuilt).
+- A draft is never shown to students until you accept it; a custom draft becomes a Markdown course material.
+- **Model**: **Local model** (the default; the material stays on the course's server) or **Cloud model, for public
+  material only**, which writes better drafts: tick the confirmation that the material is public (open course
+  pages, published papers) and may go to the cloud model. Not offered in a local-only course. Student data is
+  never part of a draft.
+
 ## 11. End-of-term survey
 
 **End-of-term survey**: set **Survey window** (opening and closing time, usually the last week of term) and
@@ -205,6 +227,24 @@ code to confirm, then **Export and delete**:
    deleted. **This cannot be undone**, so download it before leaving the page.
 The course, modules, KCs, items, materials, settings, quizzes and instructors stay; accounts stay. A course
 that will not run again can be archived after an ended term (**API only**: `POST .../archive`).
+
+## 12a. Accounts from term to term
+
+Who does what each term (instructor I, administrator A):
+
+| When | Step | Who | Where |
+|---|---|---|---|
+| before the term | create instructor accounts (temporary password shown once) | A | **Administration** > instructor accounts |
+| before the term | a new course, or import last term's content into a new course (section 12) | I | **My courses**, **Course content** > import |
+| first week | import the class list (CSV with e-mail and name); existing accounts are added, new students join with the invitation code | I | **Members** > import, invitation code |
+| during the term | a student forgot the password: **Reset password** (temporary, shown once) | I or A | **Members**, or **Administration** > **Student accounts** |
+| during the term | a student dropped the course: remove the membership | I | **Members** > remove |
+| end of term | export, then end the term (deletes the course's student data and memberships) | I | **End of term** |
+| after the term | students who left the university: **Disable** (no more logins) or **Delete** (the account and all of its learning data in every course; cannot be undone) | A | **Administration** > **Student accounts** |
+| after the term | instructors who left: **Disable** | A | **Administration** > instructor accounts |
+
+Student accounts stay from term to term: next term's class list finds them by e-mail, and a student who keeps
+the account keeps the same login. There is no university login yet (section 13).
 
 ## 13. Not in the app yet
 

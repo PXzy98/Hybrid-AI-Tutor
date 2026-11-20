@@ -12,12 +12,13 @@ import uuid
 from datetime import datetime
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, Query, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 from sqlmodel import Session, col, func, select
 
 from app.api.v1.ask import _error, _response
+from app.api.v2 import localize
 from app.api.v2.errors import ApiError, ErrorCode
 from app.catalog import CatalogError
 from app.core.schemas import AskRequest, AskResponse, RequestContext, Turn
@@ -163,7 +164,18 @@ def _release(ctx: RequestContext) -> None:
 
 
 def _out(ctx: RequestContext) -> AskOut:
-    return AskOut(**_response(ctx).model_dump(), conversation_id=ctx.request.session_id)
+    out = AskOut(**_response(ctx).model_dump(), conversation_id=ctx.request.session_id)
+    lang = ctx.request.language
+    if localize.is_french(lang):  # the fixed notes and the safe replacement answer, never model output
+        out.warnings = [localize.text(w, lang) for w in out.warnings]
+        out.answer = localize.answer(out.answer, lang)
+    return out
+
+
+def _error_out(ctx: RequestContext, step: str) -> dict:
+    body = _error(ctx, step).model_dump()
+    body["detail"] = localize.text(body["detail"], ctx.request.language)
+    return body
 
 
 async def _post(runner, ctx: RequestContext, scope: CourseScope) -> None:
@@ -181,7 +193,7 @@ async def ask(body: AskIn, access: CourseStudent, request: Request, background: 
             ctx = await runner.run(ctx)
     except PipelineError as e:
         _release(ctx)
-        return JSONResponse(status_code=503, content=_error(ctx, e.step).model_dump())
+        return JSONResponse(status_code=503, content=_error_out(ctx, e.step))
     except BaseException:
         _release(ctx)
         raise
@@ -217,11 +229,11 @@ async def ask_stream(body: AskIn, access: CourseStudent, request: Request):
                 await queue.put(("result", _out(ctx).model_dump(mode="json")))
                 await runner.run_post(ctx)
         except PipelineError as e:
-            await queue.put(("error", _error(ctx, e.step).model_dump()))
+            await queue.put(("error", _error_out(ctx, e.step)))
         except asyncio.CancelledError:
             raise
         except Exception:  # noqa: BLE001 - the stream ends with an error event, never with a broken body
-            await queue.put(("error", _error(ctx, "pipeline").model_dump()))
+            await queue.put(("error", _error_out(ctx, "pipeline")))
         finally:
             if not answered:
                 _release(ctx)
@@ -270,11 +282,16 @@ def conversations(access: CourseStudent, request: Request):
 
 
 @router.get("/courses/{course_id}/conversations/{conversation_id}", response_model=ConversationDetailOut)
-def conversation(conversation_id: str, access: CourseStudent, request: Request, last: int = 50):
-    """Sanitized turns of one of the caller's conversations in this course (oldest first)."""
+def conversation(conversation_id: str, access: CourseStudent, request: Request, last: int = 50,
+                 language: str = Query("en", max_length=8)):
+    """Sanitized turns of one of the caller's conversations in this course (oldest first). With a French
+    `language` the fixed texts of the stored answers (safe replacement, referral line) come in French."""
     services = _services(request)
     if not _owned(services, access, conversation_id):
         raise ApiError(404, ErrorCode.not_found, "conversation not found")
     scope = _scope(services, access.course.id)
-    return ConversationDetailOut(conversation_id=conversation_id,
-                                 turns=scope.sessions.history(conversation_id, last=max(1, min(last, 200))))
+    turns = scope.sessions.history(conversation_id, last=max(1, min(last, 200)))
+    for t in turns:
+        if t.role == "tutor":
+            t.text = localize.answer(t.text, language)
+    return ConversationDetailOut(conversation_id=conversation_id, turns=turns)

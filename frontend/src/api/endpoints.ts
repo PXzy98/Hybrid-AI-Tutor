@@ -3,6 +3,7 @@ import { download, request, resetCsrf, type Schemas, upload } from "./client";
 
 export type Me = Schemas["MeOut"];
 export type Course = Schemas["CourseOut"];
+export type AdminStudent = Schemas["AdminStudentOut"];
 export type Module = Schemas["ModuleOut"];
 export type Kc = Schemas["KcOut"];
 export type Misconception = Schemas["MisconceptionOut"];
@@ -135,9 +136,11 @@ export const api = {
   check: (id: number, item_id: string, choice: string) =>
     request<CheckResponse>("POST", `${c(id)}/check`, { item_id, choice }),
   conversations: (id: number) => request<Conversation[]>("GET", `${c(id)}/conversations`),
-  conversation: (id: number, conversationId: string) =>
-    request<ConversationDetail>("GET", `${c(id)}/conversations/${encodeURIComponent(conversationId)}`),
-  onboarding: (id: number, moduleId: number) => request<Onboarding>("GET", `${c(id)}/onboarding?module_id=${moduleId}`),
+  conversation: (id: number, conversationId: string, language = "en") =>
+    request<ConversationDetail>("GET", `${c(id)}/conversations/${encodeURIComponent(conversationId)}?language=${language}`),
+  // the consent text and the preference questions come in the interface language
+  onboarding: (id: number, moduleId: number, language: "en" | "fr" = "en") =>
+    request<Onboarding>("GET", `${c(id)}/onboarding?module_id=${moduleId}&language=${language}`),
   submitOnboarding: (id: number, input: OnboardingBody) => request<OnboardingResult>("POST", `${c(id)}/onboarding`, input),
   profile: (id: number) => request<CourseProfile>("GET", `${c(id)}/me/profile`),
   setVisibility: (id: number, action: VisibilityAction) => request<Visibility>("POST", `${c(id)}/me/visibility`, { action }),
@@ -160,7 +163,15 @@ export const api = {
     return upload<Schemas["UploadOut"]>(`${c(id)}/materials`, form);
   },
   deleteMaterial: (id: number, materialId: number) => request<void>("DELETE", `${c(id)}/materials/${materialId}`),
+  // V7: a web page as material (fetched by the server under the outbound rules), and fetched again
+  addUrlMaterial: (id: number, url: string, moduleId: number | null) =>
+    request<Schemas["UploadOut"]>("POST", `${c(id)}/materials/url`, { url, module_id: moduleId }),
+  refetchMaterial: (id: number, materialId: number) =>
+    request<Schemas["UploadOut"]>("POST", `${c(id)}/materials/${materialId}/refetch`),
   deleteLearningData: (id: number) => request<void>("DELETE", `${c(id)}/me/learning-data`),
+  // V15: the student's own answer instruction (global, like the preferences; local model only)
+  answerInstruction: () => request<Schemas["InstructionIO"]>("GET", "/me/answer-instruction"),
+  saveAnswerInstruction: (text: string) => request<Schemas["InstructionIO"]>("PUT", "/me/answer-instruction", { text }),
 
   // quizzes
   quizzes: (id: number) => request<Quiz[]>("GET", `${c(id)}/quizzes`),
@@ -186,6 +197,20 @@ export const api = {
     request<AiDraftSummary[]>("GET", `${c(id)}/ai/drafts${status ? `?status=${status}` : ""}`),
   aiDraft: (id: number, draftId: number) => request<AiDraft>("GET", `${c(id)}/ai/drafts/${draftId}`),
   createAiDraft: (id: number, input: Schemas["AiDraftIn"]) => request<AiDraft>("POST", `${c(id)}/ai/drafts`, input),
+  // V6: a file uploaded for this draft only, or also added to the course material
+  createAiDraftFromUpload: (id: number, input: { file: File; kind: AiDraftKind; request: string; focus: string;
+                                                 addToCourse: boolean; moduleId: number | null; cloud?: boolean }) => {
+    const form = new FormData();
+    form.append("file", input.file);
+    form.append("kind", input.kind);
+    form.append("request", input.request);
+    form.append("focus", input.focus);
+    form.append("add_to_course", String(input.addToCourse));
+    if (input.moduleId !== null) form.append("module_id", String(input.moduleId));
+    if (input.cloud) { form.append("model", "cloud"); form.append("confirm_cloud", "true"); }  // V16, confirmed in the form
+    return upload<AiDraft>(`${c(id)}/ai/drafts/upload`, form);
+  },
+  createAiDraftFromUrl: (id: number, input: Schemas["AiDraftUrlIn"]) => request<AiDraft>("POST", `${c(id)}/ai/drafts/url`, input),
   updateAiDraft: (id: number, draftId: number, content: Record<string, unknown>) =>
     request<AiDraft>("PATCH", `${c(id)}/ai/drafts/${draftId}`, { content }),
   acceptAiDraft: (id: number, draftId: number, moduleId: number | null) =>
@@ -209,6 +234,13 @@ export const api = {
   updateStaff: (accountId: number, changes: Schemas["StaffPatch"]) => request<Staff>("PATCH", `/admin/instructors/${accountId}`, changes),
   resetStaffPassword: (accountId: number) =>
     request<Schemas["TemporaryPasswordOut"]>("POST", `/admin/instructors/${accountId}/reset-password`),
+  // V9: student accounts, kept from term to term
+  students: () => request<AdminStudent[]>("GET", "/admin/students"),
+  updateStudent: (accountId: number, active: boolean) =>
+    request<AdminStudent>("PATCH", `/admin/students/${accountId}`, { active }),
+  resetStudentPassword: (accountId: number) =>
+    request<Schemas["TemporaryPasswordOut"]>("POST", `/admin/students/${accountId}/reset-password`),
+  deleteStudent: (accountId: number) => request<void>("DELETE", `/admin/students/${accountId}`),
   systemSettings: () => request<SystemSettings>("GET", "/admin/settings"),
   systemStatistics: () => request<Schemas["SystemStatisticsOut"]>("GET", "/admin/statistics"),
   applyStatus: () => request<Schemas["ApplyStatusOut"]>("GET", "/admin/settings/apply-status"),

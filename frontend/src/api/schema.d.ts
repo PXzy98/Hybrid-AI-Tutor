@@ -1091,6 +1091,47 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/courses/{course_id}/materials/url": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add Url
+         * @description V7: a web page as course material. The page is fetched once (https, public addresses only, at most
+         *     2 MB, redirects checked), converted to Markdown with its address, scanned like an upload and indexed.
+         */
+        post: operations["materials_add_url"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/materials/{material_id}/refetch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Refetch
+         * @description V7: fetch a web material again from its address and replace its text (scanned again).
+         */
+        post: operations["materials_refetch"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/courses/{course_id}/materials/{material_id}": {
         parameters: {
             query?: never;
@@ -1295,6 +1336,71 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/admin/students": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Students
+         * @description Every student account with its number of courses (V9: the accounts kept from term to term).
+         */
+        get: operations["admin_students_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/admin/students/{account_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete Student
+         * @description Delete the account and all of its learning data in every course (request logs are anonymized). It
+         *     cannot be undone.
+         */
+        delete: operations["admin_students_delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Update Student
+         * @description Deactivate (every session ends, the student cannot log in) or reactivate a student account.
+         */
+        patch: operations["admin_students_update"];
+        trace?: never;
+    };
+    "/api/v2/admin/students/{account_id}/reset-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reset Student Password
+         * @description A temporary password, shown once; the student chooses a new one at the next login.
+         */
+        post: operations["admin_students_reset_password"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/admin/settings": {
         parameters: {
             query?: never;
@@ -1430,6 +1536,32 @@ export interface paths {
         get: operations["me_preferences_get"];
         /** Put Preferences */
         put: operations["me_preferences_update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/me/answer-instruction": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Instruction
+         * @description The student's own answer instruction (V15): only the student reads it, never an instructor.
+         */
+        get: operations["me_instruction_get"];
+        /**
+         * Put Instruction
+         * @description Saved with consent only, like the other preferences. It is scanned like a question: text with personal
+         *     data (names, numbers, health details, ...) is refused, never stored. It reaches the local model only,
+         *     after the safety and instructor rules, and never overrides them (Z26).
+         */
+        put: operations["me_instruction_update"];
         post?: never;
         delete?: never;
         options?: never;
@@ -1585,9 +1717,55 @@ export interface paths {
         put?: never;
         /**
          * Create
-         * @description Start drafting from the course material with the local model (a job; the draft is `generating`).
+         * @description Start drafting from the course material (a job; the draft is `generating`), with the local model, or
+         *     with the cloud model when the instructor confirmed it (V16). The material is the module's (and the
+         *     course-level files), the whole course's, or only the chosen modules or files (V5).
          */
         post: operations["ai_drafts_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/ai/drafts/upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create From Upload
+         * @description V6: draft from a file uploaded for this draft (for example a new paper). The file is scanned like
+         *     every upload; it is used for this draft only and deleted after it was read, unless `add_to_course` also
+         *     adds it to the course material (in `module_id`, or course-level), where students see it like any other
+         *     file once the index is rebuilt.
+         */
+        post: operations["ai_drafts_create_from_upload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/ai/drafts/url": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create From Url
+         * @description V7: draft from a web page. The page is fetched with the rules of `POST .../materials/url` and then
+         *     used like a file uploaded for this draft (V6): for this draft only, or also added to the material.
+         */
+        post: operations["ai_drafts_create_from_url"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1729,7 +1907,8 @@ export interface paths {
         };
         /**
          * Conversation
-         * @description Sanitized turns of one of the caller's conversations in this course (oldest first).
+         * @description Sanitized turns of one of the caller's conversations in this course (oldest first). With a French
+         *     `language` the fixed texts of the stored answers (safe replacement, referral line) come in French.
          */
         get: operations["conversation_api_v2_courses__course_id__conversations__conversation_id__get"];
         put?: never;
@@ -1767,7 +1946,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get Onboarding */
+        /**
+         * Get Onboarding
+         * @description The consent text and the preference questions come in `language` (the UI's language).
+         */
         get: operations["learner_onboarding_get"];
         put?: never;
         /**
@@ -2085,6 +2267,28 @@ export interface components {
             /** History */
             history: components["schemas"]["ConfigChange"][];
         };
+        /** AdminStudentOut */
+        AdminStudentOut: {
+            /** Account Id */
+            account_id: number;
+            /** Display Name */
+            display_name: string;
+            /** Email */
+            email: string | null;
+            /** Active */
+            active: boolean;
+            /** Must Change Password */
+            must_change_password: boolean;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Last Login At */
+            last_login_at: string | null;
+            /** Courses */
+            courses: number;
+        };
         /** AiDraftAcceptIn */
         AiDraftAcceptIn: {
             /** Module Id */
@@ -2106,7 +2310,7 @@ export interface components {
              * Kind
              * @enum {string}
              */
-            kind: "project_ideas" | "sample_proposal" | "faq" | "kcs" | "check_items" | "misconceptions";
+            kind: "project_ideas" | "sample_proposal" | "faq" | "custom" | "kcs" | "check_items" | "misconceptions";
             /** Module Id */
             module_id?: number | null;
             /**
@@ -2114,6 +2318,26 @@ export interface components {
              * @default
              */
             focus?: string;
+            /**
+             * Request
+             * @default
+             */
+            request?: string;
+            /** Module Ids */
+            module_ids?: number[] | null;
+            /** Material Ids */
+            material_ids?: number[] | null;
+            /**
+             * Model
+             * @default local
+             * @enum {string}
+             */
+            model?: "local" | "cloud";
+            /**
+             * Confirm Cloud
+             * @default false
+             */
+            confirm_cloud?: boolean;
         };
         /** AiDraftOut */
         AiDraftOut: {
@@ -2123,7 +2347,7 @@ export interface components {
              * Kind
              * @enum {string}
              */
-            kind: "project_ideas" | "sample_proposal" | "faq" | "kcs" | "check_items" | "misconceptions";
+            kind: "project_ideas" | "sample_proposal" | "faq" | "custom" | "kcs" | "check_items" | "misconceptions";
             /** Module Id */
             module_id: number | null;
             /**
@@ -2153,6 +2377,18 @@ export interface components {
             updated_at: string;
             /** Job Id */
             job_id?: number | null;
+            /**
+             * Request
+             * @default
+             */
+            request?: string;
+            /**
+             * Sources
+             * @default {}
+             */
+            sources?: {
+                [key: string]: unknown;
+            };
         };
         /** AiDraftPatch */
         AiDraftPatch: {
@@ -2169,7 +2405,7 @@ export interface components {
              * Kind
              * @enum {string}
              */
-            kind: "project_ideas" | "sample_proposal" | "faq" | "kcs" | "check_items" | "misconceptions";
+            kind: "project_ideas" | "sample_proposal" | "faq" | "custom" | "kcs" | "check_items" | "misconceptions";
             /** Module Id */
             module_id: number | null;
             /**
@@ -2187,6 +2423,44 @@ export interface components {
              * Format: date-time
              */
             updated_at: string;
+        };
+        /** AiDraftUrlIn */
+        AiDraftUrlIn: {
+            /** Url */
+            url: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "project_ideas" | "sample_proposal" | "faq" | "custom" | "kcs" | "check_items" | "misconceptions";
+            /**
+             * Request
+             * @default
+             */
+            request?: string;
+            /**
+             * Focus
+             * @default
+             */
+            focus?: string;
+            /**
+             * Add To Course
+             * @default false
+             */
+            add_to_course?: boolean;
+            /** Module Id */
+            module_id?: number | null;
+            /**
+             * Model
+             * @default local
+             * @enum {string}
+             */
+            model?: "local" | "cloud";
+            /**
+             * Confirm Cloud
+             * @default false
+             */
+            confirm_cloud?: boolean;
         };
         /** ApplyStatusOut */
         ApplyStatusOut: {
@@ -2378,6 +2652,47 @@ export interface components {
             answer: number;
             /** Explanation */
             explanation: string;
+        };
+        /** Body_ai_drafts_create_from_upload */
+        Body_ai_drafts_create_from_upload: {
+            /**
+             * File
+             * @description PDF, PPTX, DOCX, Markdown, text or HTML
+             */
+            file: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "project_ideas" | "sample_proposal" | "faq" | "custom" | "kcs" | "check_items" | "misconceptions";
+            /**
+             * Request
+             * @default
+             */
+            request?: string;
+            /**
+             * Focus
+             * @default
+             */
+            focus?: string;
+            /**
+             * Add To Course
+             * @default false
+             */
+            add_to_course?: boolean;
+            /** Module Id */
+            module_id?: number | null;
+            /**
+             * Model
+             * @default local
+             * @enum {string}
+             */
+            model?: "local" | "cloud";
+            /**
+             * Confirm Cloud
+             * @default false
+             */
+            confirm_cloud?: boolean;
         };
         /** Body_content_import */
         Body_content_import: {
@@ -2643,6 +2958,11 @@ export interface components {
              * @default false
              */
             local_only?: boolean;
+            /**
+             * Cloud Available
+             * @default false
+             */
+            cloud_available?: boolean;
             /** Guideline */
             guideline?: string | null;
             /**
@@ -3127,6 +3447,14 @@ export interface components {
             /** Misconception Counts */
             misconception_counts: components["schemas"]["LabelCountOut"][];
         };
+        /** InstructionIO */
+        InstructionIO: {
+            /**
+             * Text
+             * @default
+             */
+            text?: string;
+        };
         /** InstructorIn */
         InstructorIn: {
             /** Email */
@@ -3541,6 +3869,8 @@ export interface components {
              * Format: date-time
              */
             uploaded_at: string;
+            /** Source Url */
+            source_url?: string | null;
         };
         /** MaterialsOut */
         MaterialsOut: {
@@ -4508,6 +4838,11 @@ export interface components {
             /** Last Login At */
             last_login_at: string | null;
         };
+        /** StudentPatch */
+        StudentPatch: {
+            /** Active */
+            active: boolean;
+        };
         /**
          * StudentQuizOut
          * @description The student's view: no answers before the student has answered.
@@ -4799,6 +5134,13 @@ export interface components {
             ingested: boolean;
             /** Ingest Error */
             ingest_error?: string | null;
+        };
+        /** UrlIn */
+        UrlIn: {
+            /** Url */
+            url: string;
+            /** Module Id */
+            module_id?: number | null;
         };
         /** ValidationError */
         ValidationError: {
@@ -7166,6 +7508,76 @@ export interface operations {
             };
         };
     };
+    materials_add_url: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UrlIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadOut"];
+                };
+            };
+            /** @description this page was added here already (fetch it again instead) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description the address or the page is refused, or the scan found student data */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    materials_refetch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                material_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadOut"];
+                };
+            };
+            /** @description not a web page, or the page is refused now */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     materials_delete: {
         parameters: {
             query?: never;
@@ -7654,6 +8066,121 @@ export interface operations {
             };
         };
     };
+    admin_students_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminStudentOut"][];
+                };
+            };
+        };
+    };
+    admin_students_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                account_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_students_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                account_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StudentPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminStudentOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_students_reset_password: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                account_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TemporaryPasswordOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     admin_settings_get: {
         parameters: {
             query?: never;
@@ -8001,6 +8528,64 @@ export interface operations {
             };
         };
     };
+    me_instruction_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InstructionIO"];
+                };
+            };
+        };
+    };
+    me_instruction_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InstructionIO"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InstructionIO"];
+                };
+            };
+            /** @description consent required */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description the text contains personal data or the characters < and > */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     me_consent_get: {
         parameters: {
             query?: never;
@@ -8304,7 +8889,7 @@ export interface operations {
         parameters: {
             query?: {
                 status?: ("generating" | "draft" | "accepted" | "discarded" | "failed") | null;
-                kind?: ("project_ideas" | "sample_proposal" | "faq" | "kcs" | "check_items" | "misconceptions") | null;
+                kind?: ("project_ideas" | "sample_proposal" | "faq" | "custom" | "kcs" | "check_items" | "misconceptions") | null;
             };
             header?: never;
             path: {
@@ -8358,14 +8943,99 @@ export interface operations {
                     "application/json": components["schemas"]["AiDraftOut"];
                 };
             };
-            /** @description Validation Error */
+            /** @description model cloud: the course is local-only or no cloud model is configured */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description model cloud without confirm_cloud, a custom draft without a request, or the privacy scan found student data */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                content?: never;
+            };
+        };
+    };
+    ai_drafts_create_from_upload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_ai_drafts_create_from_upload"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
                 };
+                content: {
+                    "application/json": components["schemas"]["AiDraftOut"];
+                };
+            };
+            /** @description add_to_course: a material with this name exists there; model cloud: the course is local-only or no cloud model */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description the file is refused (type, size, unreadable, privacy scan), or model cloud without confirm_cloud */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ai_drafts_create_from_url: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AiDraftUrlIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiDraftOut"];
+                };
+            };
+            /** @description add_to_course: this page is in the material already; model cloud: the course is local-only or no cloud model */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description the address or the page is refused (V7 rules, privacy scan), or model cloud without confirm_cloud */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -8661,6 +9331,7 @@ export interface operations {
         parameters: {
             query?: {
                 last?: number;
+                language?: string;
             };
             header?: never;
             path: {
@@ -8730,6 +9401,7 @@ export interface operations {
         parameters: {
             query: {
                 module_id: number;
+                language?: string;
             };
             header?: never;
             path: {
