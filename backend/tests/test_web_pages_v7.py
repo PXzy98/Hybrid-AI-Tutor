@@ -59,6 +59,17 @@ def test_a_public_page_becomes_markdown_with_its_address():
     assert web_pages.material_name(page.url) == PULLUPS
 
 
+def test_the_fetcher_names_itself_with_a_contact_address():
+    seen = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request.headers["user-agent"])
+        return _html()
+    asyncio.run(web_pages.fetch_page("https://example.org/pullups", resolve=_resolver(),
+                                     inner=httpx.MockTransport(handler)))
+    assert seen and seen[0].startswith("PACT-course-material-fetcher/") and "(+https://" in seen[0]
+
+
 def test_pages_that_differ_only_in_the_query_get_different_names():
     urls = ("https://example.org/lesson?id=1", "https://example.org/lesson?id=2", "https://example.org/Lesson",
             "https://example.org/lesson")

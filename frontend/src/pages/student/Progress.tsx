@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useI18n } from "@/i18n";
+import { tEnglish, useI18n } from "@/i18n";
 import { useFormat } from "@/lib/format";
 import type { MessageKey } from "@/i18n/en";
 
@@ -53,7 +53,7 @@ export default function Progress({ course }: { course: Course }) {
                             {k.band === "basic" && (
                               // V8: a weak topic gets another explanation; the request goes to the chat in router state, not the URL
                               <Button asChild size="sm" variant="outline">
-                                <Link to={`/courses/${course.id}/chat?module=${m.module_id}`} state={{ ask: t("loop.ask", { kc: k.name }) }}
+                                <Link to={`/courses/${course.id}/chat?module=${m.module_id}`} state={{ ask: tEnglish("loop.ask", { kc: k.name }) }}
                                       aria-label={t("loop.explainFor", { kc: k.name })}>{t("loop.explain")}</Link>
                               </Button>
                             )}

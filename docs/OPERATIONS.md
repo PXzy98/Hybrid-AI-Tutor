@@ -32,7 +32,7 @@ Volumes: `db-data` (database), `tutor-data` (uploaded materials and indexes), `c
 |---|---|---|
 | `POSTGRES_PASSWORD` | yes | database password; Compose refuses to start without it |
 | `SITE_ADDRESS`, `HTTP_PORT=80`, `HTTPS_PORT=443` | production | the domain name turns on HTTPS |
-| `AUTH__COOKIE_SECURE=true` | production | session cookie only over HTTPS |
+| `AUTH__COOKIE_SECURE=true` | production | session cookie only over HTTPS; `docker-compose.prod.yml` sets it |
 | `INSTRUCTOR_USERNAME`, `INSTRUCTOR_INITIAL_PASSWORD` | first start | creates the first account (an **admin**), which must change its password at first login; remove both afterwards |
 | `SETTINGS_ENCRYPTION_KEY` | before anyone saves a model connection with an API key | Fernet key; **keep a copy**: without it stored API keys cannot be read and the api refuses to start |
 | `VLLM_BASE_URL`, `VLLM_KEY` | yes | the local model server: its OpenAI-compatible API root ending in `/v1`, and its `--api-key`; without the URL no local answers |
@@ -49,13 +49,25 @@ value can be overridden in `.env` as `SECTION__FIELD`, for example `LIMITS__ACCO
 ```bash
 git clone https://github.com/PXzy98/Hybrid-AI-Tutor.git && cd Hybrid-AI-Tutor
 cp .env.example .env   # then fill in section 2
-docker compose -f docker-compose.yml up -d --build
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 docker compose ps      # all services healthy
 curl -fsS https://<domain>/api/v1/health
 ```
 
-Use only `docker-compose.yml` in production: `docker-compose.override.yml` is the local-development file that
-publishes the database on `127.0.0.1:5432`.
+Use only `docker-compose.yml` plus `docker-compose.prod.yml` in production (always `-f` both):
+`docker-compose.override.yml` is the local-development file that publishes the database on `127.0.0.1:5432`.
+The production file sets `AUTH__COOKIE_SECURE=true` and `API__V1_ENABLED=false` (API v1 is frozen, serves only the
+demo course and is not used by the web app; `/api/v1/health` keeps answering for the health checks), and Compose
+refuses to start without `SITE_ADDRESS` (the domain). Because the api starts with a log warning
+(`deployment: ...`) when `SITE_ADDRESS` is a domain and the cookie is not secure, or when `VLLM_BASE_URL` points
+outside the host's network without `https` or without `VLLM_KEY`, check `docker compose logs api | grep deployment`.
+
+**Deploy checklist** (security review, M2 to M4):
+- [ ] `SITE_ADDRESS` is the domain, `HTTP_PORT=80`, `HTTPS_PORT=443` (HTTPS certificate obtained: `curl -I https://<domain>`).
+- [ ] Started with both Compose files; `curl -i https://<domain>/api/v1/topics` answers 404 and `https://<domain>/api/v1/health` answers 200.
+- [ ] The login response sets the cookie with `Secure` (browser developer tools or `curl -i`).
+- [ ] The vLLM runs with `--api-key` equal to `VLLM_KEY`, `VLLM_BASE_URL` starts with `https://`, and only the API port is open ([DEMO_VLLM.md](DEMO_VLLM.md)).
+- [ ] `docker compose logs api | grep deployment` prints nothing.
 
 **First login**: sign in with `INSTRUCTOR_USERNAME` and the initial password, change the password, then remove
 both variables from `.env`. This admin then:
@@ -72,7 +84,7 @@ and share it with the class. The code is shown once; rotating it again makes a n
 ```bash
 docker compose exec -T db pg_dump -U tutor -d tutor -Fc > backup-$(date +%F).dump   # section 5
 git pull
-docker compose -f docker-compose.yml up -d --build
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 ```
 
 The api upgrades the schema to the newest migration at startup, under a lock, so several api processes can
@@ -133,6 +145,54 @@ Prometheus, alert rules and Grafana are ready to start (`--profile monitoring`, 
 | Missing | Effect for operations | Task |
 |---|---|---|
 | Deployment on the test host; an alert receiver; the vLLM address for scraping | the monitoring stack is ready but not started anywhere yet | Z13 part 2 |
-| Measured capacity of the app on the real servers | the model connection was measured through the gateway (0.40 answers/s alone, 0.71 at 8 at a time, no gain at 20); tokens per second and the app under load were not; `eval/load-test/run.py` is ready | Z23 |
+| The app under load on the real servers | the vLLM server was measured on 2026-11-20 (section 10); one full ask through the app (accounts needed) and the app's own queue under load were not | Z23 |
 | A health check for vLLM | `/api/v1/health` asks Ollama's `/api/tags`; a vLLM-only deployment shows the local model as unreachable although answers work | audit I6 |
 | A vLLM connection in the deployment's configuration | a vLLM-only deployment needs an administrator to add a trusted local connection after the first start (`MODEL_CONNECTIONS.md`) | audit A4 |
+
+## 10. Capacity of the local model (Z23, measured 2026-11-20)
+
+Lab vLLM, Qwen3.5-9B, thinking off, streaming, max_tokens 400, straight to the server (`eval/load-test/capacity.py`,
+reports in `eval/load-test/results/`). Total tokens/s is generated tokens over the wall time of the run.
+
+Short prompts (no course passages):
+
+| At the same time | Latency p50 / p95 (s) | First token p50 / p95 (s) | Tokens/s per request | Total tokens/s | Errors |
+|---|---|---|---|---|---|
+| 1 | 3.1 / 3.2 | 0.06 / 0.06 | 43 | 43 | 0 |
+| 4 | 9.4 / 9.4 | 0.08 / 0.09 | 42 | 142 | 0 |
+| 8 | 9.8 / 9.8 | 0.12 / 0.13 | 41 | 293 | 0 |
+| 16 | 10.7 / 13.7 | 0.17 / 3.7 | 37 | 423 | 0 |
+| 32 | 14.2 / 21.4 | 3.8 / 10.9 | 28 | 476 | 0 |
+
+With about 1500 words of passages in the prompt, as a real ask sends (prefill dominates; every request has its
+own passages, so a server with prefix caching cannot reuse an earlier prompt):
+
+| At the same time | Latency p50 / p95 (s) | First token p50 / p95 (s) | Tokens/s per request | Total tokens/s | Errors |
+|---|---|---|---|---|---|
+| 1 | 3.8 / 4.0 | 0.5 / 0.5 | 38 | 38 | 0 |
+| 8 | 14.8 / 22.6 | 2.3 / 13.2 | 24 | 122 | 0 |
+| 16 | 24.9 / 33.3 | 15.4 / 26.4 | 17 | 142 | 0 |
+| 32 | 41.3 / 65.9 | 30.1 / 56.3 | 12 | 161 | 0 |
+
+No request failed or timed out at any level. Findings:
+
+- Decoding scales well: total throughput grows to about 475 tokens/s at 32 at the same time, and one answer
+  never drops below 27 tokens/s (reading speed is about 5 to 10).
+- Real asks are limited by reading the passages, not by writing the answer: total throughput stops at about
+  120 to 160 tokens/s from 8 at the same time on, so more concurrency only makes everyone wait longer
+  (first token p50 15 s at 16, 30 s at 32).
+- Recommendation for the model connection: `max_concurrent` 8 (now 4; more than 8 adds under 30% throughput and
+  doubles the wait) and `queue_timeout_seconds` stays 60. With 8 slots and about 15 s per answer, the queue
+  drains about 32 asks a minute: in a burst, the first 8 start at once and about 32 more get a slot within the
+  60 s limit, so roughly the first 40 asks of a burst are answered and the rest get "the model is busy" and
+  must ask again (a longer limit only makes them wait longer). A check-item draft of 45 to 50 s holds a slot
+  for that long. Not changed by this task. The limit is one deployment setting that applies to each model
+  connection on its own (the admin page cannot change it per connection): set `limits.models.max_concurrent`
+  (and `queue_timeout_seconds`) in the deployment's `config.yaml` and restart the app and the worker.
+- One GPU (this server) serves about 8 answers at the same time with p95 under 25 s. If a student asks about
+  once every 2 minutes while working, that is roughly 60 students actively working at the same time (assumption,
+  not measured); if a class of 100 asks all at once, about 40 are answered within a minute and the others
+  are told the model is busy (about 13 rounds of 8, over 3 minutes, to answer all of them).
+  For more than that, a second GPU (two connections) is cheaper than raising the limit.
+- Not measured: one full ask through the app (needs accounts; the retrieval, evidence and privacy steps add
+  their own time on the app host) and the GPU model of the lab server.

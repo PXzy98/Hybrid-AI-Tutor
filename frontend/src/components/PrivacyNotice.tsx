@@ -2,26 +2,28 @@ import { ChevronDown, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 
 import type { Course } from "@/api/endpoints";
+import { useMe } from "@/auth";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useI18n } from "@/i18n";
 import type { MessageKey } from "@/i18n/en";
 
-// courses whose full notice this browser has already shown (a per-browser convenience, no user data)
-const SEEN_KEY = "pact.privacyNotice.seen";
+// "<account>:<course>" pairs whose full notice this browser has already shown (a per-browser convenience, ids
+// only). Per account, so a new student on a shared computer still sees the full notice first (V17 W22).
+const SEEN_KEY = "pact.privacyNotice.seenBy";
 
-function seenCourses(): number[] {
+function seen(): string[] {
   try {
     const raw = JSON.parse(window.localStorage.getItem(SEEN_KEY) ?? "[]");
-    return Array.isArray(raw) ? raw.filter((n) => typeof n === "number") : [];
+    return Array.isArray(raw) ? raw.filter((n) => typeof n === "string") : [];
   } catch {
     return [];
   }
 }
 
-function markSeen(courseId: number) {
+function markSeen(pair: string) {
   try {
-    window.localStorage.setItem(SEEN_KEY, JSON.stringify([...new Set([...seenCourses(), courseId])]));
+    window.localStorage.setItem(SEEN_KEY, JSON.stringify([...new Set([...seen(), pair])]));
   } catch {
     // storage blocked: the full notice shows again next time
   }
@@ -41,11 +43,12 @@ const INDIVIDUAL: Partial<Record<MessageKey, MessageKey>> = {
  *  Keyed by course where it is used, so switching course starts from that course's first-visit state. */
 export default function PrivacyNotice({ course }: { course: Course }) {
   const { t } = useI18n();
-  const [open, setOpen] = useState(() => !seenCourses().includes(course.id));
+  const pair = `${useMe().data?.account_id ?? 0}:${course.id}`;
+  const [open, setOpen] = useState(() => !seen().includes(pair));
   const statisticsOnly = !course.individual_view;
   function toggle(next: boolean) {
     setOpen(next);
-    if (!next) markSeen(course.id);
+    if (!next) markSeen(pair);
   }
   return (
     <Collapsible open={open} onOpenChange={toggle}

@@ -4,6 +4,7 @@ import { useRef, useState, type FormEvent } from "react";
 
 import { api, type Course, type ImportReport } from "@/api/endpoints";
 import { ErrorNote } from "@/components/common";
+import ResetPasswordDialog from "@/components/ResetPasswordDialog";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ export default function Members({ course }: { course: Course }) {
   const members = useQuery({ queryKey: ["members", course.id], queryFn: () => api.members(course.id) });
   const refresh = () => qc.invalidateQueries({ queryKey: ["members", course.id] });
   const [temporary, setTemporary] = useState<{ name: string; password: string } | null>(null);
+  const [pendingReset, setPendingReset] = useState<{ id: number; name: string } | null>(null);
   const remove = useMutation({ mutationFn: (id: number) => api.removeMember(course.id, id), onSuccess: refresh });
   const reset = useMutation({
     mutationFn: async (m: { id: number; name: string }) => ({ name: m.name, password: (await api.resetMemberPassword(course.id, m.id)).temporary_password }),
@@ -40,6 +42,8 @@ export default function Members({ course }: { course: Course }) {
         </Alert>
       )}
       <ErrorNote error={members.error ?? remove.error ?? reset.error} />
+      <ResetPasswordDialog name={pendingReset?.name} onClose={() => setPendingReset(null)}
+                           onConfirm={() => { if (pendingReset) reset.mutate(pendingReset); setPendingReset(null); }} />
       <Card>
         <CardHeader><CardTitle>{t("members.title", { n: members.data?.length ?? 0 })}</CardTitle></CardHeader>
         <CardContent>
@@ -58,7 +62,7 @@ export default function Members({ course }: { course: Course }) {
                   <TableCell><Badge variant={m.status === "active" ? "success" : "secondary"}>{t(`members.status.${m.status}`)}</Badge></TableCell>
                   <TableCell className="space-x-2 text-right whitespace-nowrap">
                     {m.role === "student" && m.status === "active" && (
-                      <Button type="button" size="sm" variant="outline" onClick={() => reset.mutate({ id: m.id, name: m.display_name ?? "" })}>{t("members.reset")}</Button>
+                      <Button type="button" size="sm" variant="outline" onClick={() => { setTemporary(null); setPendingReset({ id: m.id, name: m.display_name ?? "" }); }}>{t("members.reset")}</Button>
                     )}
                     <Button type="button" size="sm" variant="outline" aria-label={t("members.removeFor", { name: m.display_name ?? m.email ?? "" })}
                             onClick={() => remove.mutate(m.id)}>{t("members.remove")}</Button>

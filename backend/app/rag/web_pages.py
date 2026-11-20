@@ -30,7 +30,8 @@ MAX_REDIRECTS = 3
 MAX_FIRST_LINE = 2200  # bytes read to find the source comment: an address is at most 2000 characters
 TYPES = ("text/html", "application/xhtml+xml", "text/plain", "text/markdown")
 SOURCE_PREFIX = "<!-- source: "  # the first line of a web material: <!-- source: https://... -->
-USER_AGENT = "PACT-course-material-fetcher/1.0"
+# sites such as Wikipedia refuse an agent without a way to reach its operator (HTTP 403)
+USER_AGENT = "PACT-course-material-fetcher/1.0 (+https://github.com/PXzy98/Hybrid-AI-Tutor)"
 
 
 class PageRefused(ValueError):

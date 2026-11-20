@@ -5,9 +5,12 @@ learner-profile prompt goes there, never to a cloud model. Prof. Abbas set no fi
 cost to be justified. Prices are USD, on-demand, checked on 2026-11-19 from public price lists and comparison
 sites; check the providers' own pages before buying, prices change often.
 
-**Still missing:** the capacity numbers of Z23 (tokens per second and answers at the same time on one GPU).
-They decide how many students one GPU serves; they are measured on the lab vLLM, which was not reachable on
-2026-11-19. Until then the table assumes one GPU for one course section.
+**Capacity (Z23, lab vLLM, measured 2026-11-20, OPERATIONS.md section 10):** about 43 tokens/s for one answer,
+up to about 475 tokens/s in total with short prompts and 120 to 160 tokens/s with course passages in the prompt.
+One GPU of that class serves about 8 answers at the same time with p95 under 25 s, roughly 60 students working
+at the same time (one question every 2 minutes, an assumption); a larger class needs a second GPU. The GPU model
+of the lab server was not recorded, so the numbers do not yet say which rented GPU matches them: repeat
+`eval/load-test/capacity.py` on the rented GPU before buying.
 
 ## What the model needs
 

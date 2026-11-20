@@ -125,6 +125,62 @@ describe("instructor quiz review gate", () => {
   });
 });
 
+describe("instructor quiz editor (V17)", () => {
+  it("saves a new question with an empty extra option left out, and says when AI drafting becomes possible", async () => {
+    const calls = mockApi(instructorRoutes({
+      "GET /courses/1/quizzes": [], "GET /courses/1/members": [], "GET /courses/1/kcs": [],
+      "POST /courses/1/quizzes": () => reply({ id: 8, title: "Week 2", module_id: null, kind: "practice", status: "draft", opens_at: null,
+        closes_at: null, assigned_to: null, questions: [], attempts: 0, created_at: "", updated_at: "" }, 201),
+    }));
+    renderApp("/courses/1/quizzes");
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: "New quiz" }));
+    expect(screen.getByText("Save the quiz first to draft questions with AI.")).toBeInTheDocument();
+    await user.type(screen.getByLabelText("Title"), "Week 2");
+    await user.click(screen.getByRole("button", { name: "Add question" }));
+    await user.type(screen.getByLabelText("Question"), "Unit of current?");
+    await user.type(screen.getByLabelText("Option 1"), "Ampere");
+    await user.type(screen.getByLabelText("Option 2"), "Volt");
+    await user.type(screen.getByLabelText("Option 3"), "Ohm");
+    await user.click(screen.getByRole("button", { name: "Save quiz" }));
+    await waitFor(() => expect((calls.find((c) => c.method === "POST" && c.path === "/courses/1/quizzes")?.body as
+      { questions: { options: string[]; answer: number }[] }).questions[0]).toMatchObject({ options: ["Ampere", "Volt", "Ohm"], answer: 0 }));
+  });
+
+  it("says saved after the saved quiz is loaded again (V17 W25)", async () => {
+    let quiz = { id: 4, title: "Draft quiz", module_id: null, kind: "practice", status: "draft", opens_at: null, closes_at: null, assigned_to: null,
+      questions: [question("Typed by hand", true)], attempts: 0, created_at: "2026-11-01T00:00:00Z", updated_at: "2026-11-01T00:00:00Z" };
+    mockApi(instructorRoutes({
+      "GET /courses/1/quizzes": () => [quiz], "GET /courses/1/members": [], "GET /courses/1/kcs": [],
+      "PATCH /courses/1/quizzes/4": () => { quiz = { ...quiz, updated_at: "2026-11-02T00:00:00Z" }; return quiz; },
+    }));
+    renderApp("/courses/1/quizzes");
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: "Edit Draft quiz" }));
+    await user.click(await screen.findByRole("button", { name: "Save quiz" }));
+    expect(await screen.findByText("Saved.")).toBeInTheDocument();
+    await user.type(screen.getByLabelText("Title"), " v2");  // an edit after the save hides it
+    expect(screen.queryByText("Saved.")).not.toBeInTheDocument();
+  });
+
+  it("counts one question in the singular and says why an AI draft failed", async () => {
+    const quiz = { id: 4, title: "Draft quiz", module_id: null, kind: "practice", status: "draft", opens_at: null, closes_at: null, assigned_to: null,
+      questions: [question("Typed by hand", true)], attempts: 0, created_at: "2026-11-01T00:00:00Z", updated_at: "2026-11-01T00:00:00Z" };
+    mockApi(instructorRoutes({
+      "GET /courses/1/quizzes": [quiz], "GET /courses/1/members": [], "GET /courses/1/kcs": [],
+      "POST /courses/1/quizzes/4/drafts": () => ({ job_id: 9 }),
+      "GET /courses/1/jobs/9": { id: 9, kind: "quiz.draft", status: "failed", progress: 0,
+        error: "the local model cannot be reached; check the model connection", created_at: "", started_at: null, finished_at: null },
+    }));
+    renderApp("/courses/1/quizzes");
+    const user = userEvent.setup();
+    expect(await screen.findByText(/1 question ·/)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Edit Draft quiz" }));
+    await user.click(await screen.findByRole("button", { name: "Draft with AI" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("The draft failed. Try again. the local model cannot be reached");
+  });
+});
+
 describe("instructor quiz delete", () => {
   it("asks before deleting a quiz and deletes only after the confirmation", async () => {
     let quizzes = [{ id: 4, title: "Quiz A", module_id: null, kind: "practice", status: "published", opens_at: null, closes_at: null,

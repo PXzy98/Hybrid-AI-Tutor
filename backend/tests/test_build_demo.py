@@ -69,6 +69,8 @@ def test_build_demo_twice_and_sample_activity(world, packs_dir, tmp_path):
     # the accounts file holds generated passwords; the run printed none of them (log is silent here)
     accounts = json.loads((tmp_path / "var" / "demo_accounts.json").read_text(encoding="utf-8"))["students"]
     assert len(accounts) == 2 and all(len(a["password"]) >= 12 for a in accounts)
+    # fictional addresses at a reserved name that the default server settings accept (V17 W7)
+    assert all(a["email"].endswith("@demo.invalid") for a in accounts)
 
     # students acknowledged mode B and asked two questions each
     student = next(m for m in members if m["display_name"] == "Demo Student 1")
@@ -206,3 +208,22 @@ def test_instructor_only_files_are_never_uploaded(tmp_path):
     assert build_demo.safe_path(pack, "../outside.md") is None
     assert build_demo.safe_path(pack, "ok.md") == (pack / "ok.md").resolve()
     assert build_demo.document_name("exams/final.pdf") == "exams_final.pdf"
+
+
+def test_a_module_code_keeps_accented_letters_without_their_accent():
+    """V17 W18: "Thévenin" became "th_venin" in the demo codes."""
+    code = build_demo.module_code("lecture_3_superposition_thévenin_and_norton", 3)
+    assert code == "lecture_3_superposition_thevenin_and_norton"
+    assert build_demo.module_code("Équations", 4) == "Equations"
+    assert build_demo.module_code("Ωμ", 5) == "module_5"  # nothing left in ASCII: the position
+
+
+def test_an_accounts_file_of_an_older_run_at_a_real_domain_is_started_again(tmp_path):
+    """V17 W7: a rebuild kept demo.studentN@uottawa.ca from an older accounts file."""
+    path = tmp_path / "demo_accounts.json"
+    build_demo.save_accounts(path, [{"display_name": "Demo Student 1", "email": "demo.student1@uottawa.ca",
+                                     "password": "old-fictional"}])
+    students = build_demo.ensure_students(path, 2)
+    assert [s["email"] for s in students] == ["demo.student1@demo.invalid", "demo.student2@demo.invalid"]
+    assert students[0]["password"] != "old-fictional"
+    assert build_demo.ensure_students(path, 2) == students  # a file at the demo domain is kept

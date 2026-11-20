@@ -5007,6 +5007,7 @@ export interface components {
              * @enum {string}
              */
             apply_state: "applied" | "applying" | "failed";
+            defaults?: components["schemas"]["SystemValues"] | null;
         };
         /**
          * SystemStatisticsOut

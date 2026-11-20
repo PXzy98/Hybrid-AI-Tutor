@@ -18,6 +18,10 @@ function translate(lang: Lang): T {
   };
 }
 
+/** For text the app writes for the tutor or the instructor AI (a prepared request): it stays English in every
+ *  interface language, because the privacy filter, the course search and the course material are English (V17 W23). */
+export const tEnglish: T = translate("en");
+
 type I18n = { lang: Lang; setLang: (lang: Lang) => void; t: T; locale: string };
 // without a provider (unit tests of single components) the interface is English
 const Context = createContext<I18n>({ lang: "en", setLang: () => undefined, t: translate("en"), locale: LOCALES.en });

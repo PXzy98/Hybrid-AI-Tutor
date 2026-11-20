@@ -124,7 +124,8 @@ def test_a_failing_model_marks_the_evaluation_and_the_job_failed(world):
     ev = prof.get(f"{url}/ai/evaluations/{evaluation_id}").json()
     assert ev["status"] == "failed" and "no model connection" in ev["error"]
     job = prof.get(f"{url}/jobs/{job_id}").json()
-    assert job["status"] == "failed" and job["error"].startswith("LLMUnavailable")
+    assert job["status"] == "failed" and "no model connection" in job["error"]
+    assert "LLMUnavailable" not in job["error"]  # no internal class names in what an instructor reads
 
 
 def test_no_material_means_no_questions(world):

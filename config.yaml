@@ -108,6 +108,9 @@ auth:
   max_failed_logins: 5
   lockout_minutes: 15
 
+api:
+  v1_enabled: true                  # false in production (docker-compose.prod.yml): API v1 is frozen
+
 llm:
   # the deployment's vLLM (VLLM_BASE_URL, VLLM_KEY in .env); model = the name the server lists under /models
   local: { model: "Qwen3.5-9B", temperature: 0.2, max_tokens: 1024, timeout_s: 60 }
@@ -122,7 +125,7 @@ limits:
     max_concurrent: 4            # requests at the same time per model connection (vLLM batches them)
     queue_timeout_seconds: 60    # a request waiting longer for a slot gets "the model is busy"
   accounts:
-    allowed_email_domains: [uottawa.ca]  # roster import and activation (demo accounts use demo.invalid)
+    allowed_email_domains: [uottawa.ca, demo.invalid]  # roster import and activation; demo.invalid: demo accounts
     invite_code_length: 10
     invite_expiry_days: 120      # a course invitation code expires after this; rotate it to get a new one
     join_attempts_per_hour: 20   # POST /api/v2/auth/join, per client address

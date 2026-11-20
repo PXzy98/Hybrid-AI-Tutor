@@ -17,6 +17,25 @@ it("renders math and does not render raw HTML", () => {
   expect(container.querySelector("script")).toBeNull();
 });
 
+it("renders math written with \\( \\) and \\[ \\], but not inside code (V17 W20)", () => {
+  const { container } = render(
+    <Markdown>{"Thevenin: \\(V_{th}\\) in series with \\(R_{th}\\).\n\n\\[ I_N = \\frac{V_{th}}{R_{th}} \\]\n\nCode: `\\(x\\)`"}</Markdown>,
+  );
+  expect(container.querySelectorAll(".katex")).toHaveLength(3);
+  expect(container.querySelector(".katex-display")).not.toBeNull();
+  expect(container.textContent).not.toContain("(V_{th})");
+  expect(container.querySelector("code")?.textContent).toBe("\\(x\\)");
+});
+
+it("leaves \\( \\) alone in tilde-fenced and indented code blocks", () => {
+  const { container } = render(
+    <Markdown>{"Before:\n\n~~~python\nprint(\"\\(a\\)\")\n~~~\n\nIndented:\n\n    s = \"\\[b\\]\"\n\nAfter \\(c\\)."}</Markdown>,
+  );
+  const code = [...container.querySelectorAll("pre code")].map((c) => c.textContent);
+  expect(code).toEqual(["print(\"\\(a\\)\")\n", "s = \"\\[b\\]\"\n"]);
+  expect(container.querySelectorAll(".katex")).toHaveLength(1);
+});
+
 it("never renders an image, only its alt text", () => {
   const { container } = render(
     <Markdown>{"See ![a lung](https://tracker.example/p.png) and ![][ref]\n\n[ref]: https://tracker.example/q.png"}</Markdown>,

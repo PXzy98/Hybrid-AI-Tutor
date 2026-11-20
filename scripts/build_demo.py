@@ -33,6 +33,7 @@ import secrets
 import subprocess
 import sys
 import time
+import unicodedata
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -44,8 +45,9 @@ PACKS_DIR = ROOT / "data" / "demo_courses"
 ACCOUNTS_FILE = ROOT / "var" / "demo_accounts.json"
 DEFAULT_PACKS = ["mit_hst151_pharmacology", "mit_7_016_intro_biology", "mit_6_002_circuits", "harvard_cs50x"]
 V2 = "/api/v2"
-# must be in limits.accounts.allowed_email_domains of the server (default uottawa.ca); fictional addresses
-EMAIL_DOMAIN = os.environ.get("DEMO_EMAIL_DOMAIN", "uottawa.ca")
+# must be in limits.accounts.allowed_email_domains of the server (default uottawa.ca and demo.invalid);
+# fictional addresses at a reserved name, never a real university domain
+EMAIL_DOMAIN = os.environ.get("DEMO_EMAIL_DOMAIN", "demo.invalid")
 JOB_TIMEOUT_SECONDS = 900
 
 # Fictional questions written from the pack material; the tutor answers them from the uploaded files.
@@ -167,7 +169,9 @@ def load_manifest(pack: str, packs_dir: Path = PACKS_DIR) -> dict:
 
 
 def module_code(raw: str, position: int) -> str:
-    code = re.sub(r"[^A-Za-z0-9._-]+", "_", raw).strip("_")[:64]
+    # accents are dropped, not replaced: "Thévenin" gives "Thevenin", not "Th_venin"
+    plain = unicodedata.normalize("NFKD", raw).encode("ascii", "ignore").decode("ascii")
+    code = re.sub(r"[^A-Za-z0-9._-]+", "_", plain).strip("_")[:64]
     return code or f"module_{position}"
 
 
@@ -381,8 +385,11 @@ def save_accounts(path: Path, students: list[dict]) -> None:
 
 
 def ensure_students(path: Path, count: int) -> list[dict]:
-    """Student number 1..count with a generated password; existing entries are kept."""
+    """Student number 1..count with a generated password; existing entries are kept. A file of an older run
+    with addresses at another domain (a real university domain, before V17 W7) is started again."""
     students = load_accounts(path)
+    if any(not s["email"].endswith(f"@{EMAIL_DOMAIN}") for s in students):
+        students = []
     for n in range(len(students) + 1, count + 1):
         students.append({"display_name": f"Demo Student {n}", "email": f"demo.student{n}@{EMAIL_DOMAIN}",
                          "password": secrets.token_urlsafe(12)})
