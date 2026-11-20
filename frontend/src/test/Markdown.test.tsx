@@ -27,6 +27,15 @@ it("renders math written with \\( \\) and \\[ \\], but not inside code (V17 W20)
   expect(container.querySelector("code")?.textContent).toBe("\\(x\\)");
 });
 
+it("leaves \\( \\) alone in tilde-fenced and indented code blocks", () => {
+  const { container } = render(
+    <Markdown>{"Before:\n\n~~~python\nprint(\"\\(a\\)\")\n~~~\n\nIndented:\n\n    s = \"\\[b\\]\"\n\nAfter \\(c\\)."}</Markdown>,
+  );
+  const code = [...container.querySelectorAll("pre code")].map((c) => c.textContent);
+  expect(code).toEqual(["print(\"\\(a\\)\")\n", "s = \"\\[b\\]\"\n"]);
+  expect(container.querySelectorAll(".katex")).toHaveLength(1);
+});
+
 it("never renders an image, only its alt text", () => {
   const { container } = render(
     <Markdown>{"See ![a lung](https://tracker.example/p.png) and ![][ref]\n\n[ref]: https://tracker.example/q.png"}</Markdown>,

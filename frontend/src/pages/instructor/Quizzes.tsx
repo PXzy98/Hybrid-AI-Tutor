@@ -150,6 +150,10 @@ function EditorForm({ course, quiz, onClose, onCreated, saved, onSaved }: { cour
   const [assigned, setAssigned] = useState<string[] | null>(quiz?.assigned_to ?? null);
   const [questions, setQuestions] = useState<QuizQuestion[]>((quiz?.questions ?? []).map((q) => ({ ...q, options: q.options ?? [] })));
   const locked = !!quiz && quiz.attempts > 0;
+  // "Saved." only while the form still shows what was saved: any edit hides it (V17 W25)
+  const snapshot = JSON.stringify([title, kind, moduleId, opens, closes, assigned, questions]);
+  const [loaded] = useState(snapshot);
+  const unchanged = snapshot === loaded;
   const students = (members.data ?? []).filter((m) => m.role === "student" && m.student_id);
   const pending = questions.filter((q) => !q.reviewed).length;
 
@@ -274,7 +278,7 @@ function EditorForm({ course, quiz, onClose, onCreated, saved, onSaved }: { cour
       </section>
 
       <ErrorNote error={save.error} />
-      {saved && <StatusText>{t("settings.saved")}</StatusText>}
+      {saved && unchanged && <StatusText>{t("settings.saved")}</StatusText>}
       <div className="flex flex-wrap gap-3">
         <Button loading={save.isPending} type="submit" disabled={save.isPending}>{save.isPending ? t("settings.saving") : t("quiz.save")}</Button>
       </div>

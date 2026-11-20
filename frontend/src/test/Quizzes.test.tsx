@@ -159,6 +159,8 @@ describe("instructor quiz editor (V17)", () => {
     await user.click(await screen.findByRole("button", { name: "Edit Draft quiz" }));
     await user.click(await screen.findByRole("button", { name: "Save quiz" }));
     expect(await screen.findByText("Saved.")).toBeInTheDocument();
+    await user.type(screen.getByLabelText("Title"), " v2");  // an edit after the save hides it
+    expect(screen.queryByText("Saved.")).not.toBeInTheDocument();
   });
 
   it("counts one question in the singular and says why an AI draft failed", async () => {

@@ -21,7 +21,8 @@ const components: Components = {
 
 // Models often write LaTeX as \( ... \) and \[ ... \]; Markdown reads "\(" as an escaped "(" and the formula is shown
 // as raw text ("(V_{th})"). These delimiters become $ ... $ and $$ ... $$, outside code (V17 W20).
-const CODE = /(```[\s\S]*?```|`[^`\n]*`)/;
+// code is left alone: ``` and ~~~ fences, indented code lines and inline code
+const CODE = /(```[\s\S]*?```|~~~[\s\S]*?~~~|(?:^(?: {4}|\t)[^\n]*(?:\n|$))+|`[^`\n]*`)/m;
 
 function mathDelimiters(text: string): string {
   return text
