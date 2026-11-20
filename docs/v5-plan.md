@@ -7,6 +7,31 @@ view is taken; Prof. Ismaeel's ideas are added where they do not conflict.
 Until this plan is merged into [v4-implementation-guide.md](v4-implementation-guide.md), the guide's rules
 (section 2) still apply unchanged. Task IDs: `V1`... are new in v5; v4 IDs (`S14`, `Z26`, ...) are kept.
 
+## 0. Status on 2026-11-20
+
+| Task | State |
+|---|---|
+| Open v4 PRs #102 to #107 | merged |
+| V1 statistics-only instructor view | merged (#109) |
+| V2 class statistics | merged (#115); small groups, differences and single scores hidden (#126) |
+| V3 privacy notice | merged (#114); screenshots to Lavin not sent yet |
+| Z26 instructor guidelines reach the model | merged (#110) |
+| S15 demo learner content, S16 CS course type, Z25 pack scan | merged (#113, #111, #112); S16 check with the vLLM open |
+| Backend French texts | merged (#124) |
+| V4, V5, V6 free request, chosen sources, a file for one draft | merged (#119, review fixes in #120) |
+| V7 web pages as material and as a draft source | merged (#120); Wikipedia refuses the fetcher (V17 finding W1) |
+| V8 closed loop | merged (#123) |
+| V9 accounts from term to term | merged (#118, review fixes #125) |
+| V15 a student's own answer instruction | merged (#121) |
+| V16 cloud drafts for public material | merged (#122); the before/after comparison of five drafts per kind needs the vLLM |
+| V11 to V14, T10 notes | merged (#116): `DOMAIN_NAMES.md`, `DEMO_VLLM.md`, `GPU_COST.md`, `design/extension-points.md`, `DEMO_SCRIPT.md` |
+| Z27 security review | merged (#117); H1, M1, L4 fixed; M2 to M4 and L1 to L3 open |
+| V17 browser test | admin and instructor parts done on the integration build (fictional data); student part and every flow that needs the local model still to run; findings in section 9 |
+| End of term to next term | done once in V17 (export, new course from the YAML export); gaps in W12 |
+| Settings bug from the meeting | Z to describe it; an empty "Enabled course types" field that switched course creation off was fixed in #127 |
+| Routing test, Z23 capacity, V16 comparison, answer quality on ECE and CS | open: need the lab vLLM, which was unreachable on 2026-11-20 |
+| V10 AWS deployment | on hold (AWS details) |
+
 ## 1. Dates
 
 | Date | What |
@@ -127,3 +152,35 @@ Until this plan is merged into [v4-implementation-guide.md](v4-implementation-gu
 
 1. AWS: access, region, limits, and who receives monitoring alerts.
 2. Domain name (V11).
+
+## 9. V17 findings (browser test of 2026-11-19/20)
+
+From the admin and instructor parts of V17 on the integration build of all v5 branches, demo course packs and
+fictional accounts only. Severity as the tester rated it. "vLLM" marks findings that can only be checked again
+with the local model.
+
+| ID | Where | Finding | Severity |
+|---|---|---|---|
+| W1 | Materials, AI assistant: web page | Wikipedia answers HTTP 403 to the fetcher's User-Agent (`PACT-course-material-fetcher/1.0`, no contact address); the same request with a descriptive agent and an address gets 200 | major |
+| W2 | AI drafts, quiz drafts (vLLM) | With the local model unreachable every draft fails with `LLMUnavailable: cloud API unavailable (APIConnectionError)`: it names the cloud and an internal class although the local model was chosen; the quiz draft says only "The draft failed" after about 90 s | major |
+| W3 | AI assistant | The form keeps its values after "Draft with AI" and the button stays active, so a second click starts a duplicate draft | minor |
+| W4 | Quizzes | A new quiz starts with an empty 4th option that is required, so Save fails until it is removed; "Draft with AI" appears only after the first save | minor |
+| W5 | Quizzes list | "1 questions" (no singular) | cosmetic |
+| W6 | French interface | File status "accepted" and the draft status chips are not translated | minor |
+| W7 | Demo data | Demo students use e-mail addresses at a real university domain; fictional data should use `.invalid` | minor |
+| W8 | Course content, system settings | Saving a course or module guideline, or the system settings, shows no "Saved." (the course Settings page does) | minor |
+| W9 | Administration, system settings | Empty fields (levels, hysteresis, local model URL and name, course types) do not show the value in effect or say that empty means the default | minor |
+| W10 | Administration, create an account | A duplicate e-mail shows "This was changed by someone else. an account with this e-mail exists" (the generic 409 text is put in front of the server's detail) | minor |
+| W11 | Administration, reset password | The temporary password appears above the search box, out of view when the list is scrolled; no confirmation before the reset; an earlier banner stays | minor |
+| W12 | End of term | No step that starts the next term's course from this one (only the YAML export and import on Content; materials are not carried); "0 students exported, 6 removed." next to "no individual student data" is unclear; the date line ends with ".." | minor |
+| W13 | Class overview | The Module selector shows a module while "Whole course" is highlighted; week rows wrap one word per line at about 816 px; an empty course shows "hidden" for 0 questions | minor |
+| W14 | Phone width | Admin tables and Materials scroll sideways inside their card; the action buttons and the module column are off screen | minor |
+| W15 | Account menu, admin tables | Theme items read as actions while the check mark marks a state; "Disable"/"Enable" next to "Deactivate" in English | cosmetic |
+| W16 | AI assistant | Sub-title still says the local model reads the material when the cloud model is chosen; an opened draft is far below the list without scrolling to it; the source radios have no accessible name | cosmetic (radios: minor) |
+| W17 | Course content | Knowledge components and check items can only be retired, not edited (misconceptions can be) | to decide |
+| W18 | Module codes | "Thévenin" becomes `th_venin` in codes and file names | cosmetic |
+| W19 | KC and quiz drafts (vLLM) | One duplicate KC name rejects the whole KC draft; a quiz draft with the 9B model gave "no usable question"; some 503s under load | to check with the vLLM |
+
+Still to run: the student part (invitation sign-up, privacy notice, chat on the local and cloud paths, web
+search, quizzes, My progress, "explain it another way", survey) and every local-model flow once the vLLM is
+reachable.
