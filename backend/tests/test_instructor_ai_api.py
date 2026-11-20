@@ -183,6 +183,30 @@ def test_kcs_accept_into_the_content_tables(world):
     assert len(prof.get(f"{url}/kcs").json()) == 3
 
 
+def test_a_kcs_draft_for_another_module_skips_existing_kcs_and_cross_module_links(world):
+    """V17 W19: a draft repeated KCs of another module and linked to them: the whole accept failed."""
+    prof, url = world["prof"], world["url"]
+    other = prof.post(f"{url}/modules", json={"code": "buses", "title": "Buses"}).json()
+    reply = json.dumps({"items": [
+        {"name": "pull-up resistors", "definition": "A resistor that holds a line high.",
+         "prerequisite_names": [], "citations": [1]},
+        {"name": "Open drain outputs", "definition": "Outputs that only pull a line low.",
+         "prerequisite_names": ["Pull-up resistors", "Nonexistent KC"], "citations": [1]},
+        {"name": "Bus capacitance", "definition": "Load that limits the rise time of a line.",
+         "prerequisite_names": ["Open drain outputs"], "citations": [1]}]})
+    created, _ = _generate(world, "kcs", reply)
+    r = prof.post(f"{url}/ai/drafts/{created['id']}/accept", json={"module_id": other["id"]})
+    assert r.status_code == 200 and len(r.json()["created"]["kcs"]) == 2  # the existing KC is not repeated
+    kcs = {k["name"]: k for k in prof.get(f"{url}/kcs").json()}
+    assert len(kcs) == 3 and kcs["Open drain outputs"]["module_id"] == other["id"]
+    assert kcs["Open drain outputs"]["prerequisite_ids"] == []  # "Pull-up resistors" is in another module
+    assert kcs["Bus capacitance"]["prerequisite_ids"] == [kcs["Open drain outputs"]["id"]]
+    again, _ = _generate(world, "kcs", reply.replace("Open drain outputs", "pull-up resistors")
+                         .replace("Bus capacitance", "PULL-UP RESISTORS"))
+    r = prof.post(f"{url}/ai/drafts/{again['id']}/accept", json={"module_id": other["id"]})
+    assert r.status_code == 422 and "exists in the course already" in r.json()["detail"]
+
+
 def test_check_items_and_misconceptions_accept_as_active_content(world):
     prof, url = world["prof"], world["url"]
     created, _ = _generate(world, "check_items", ITEMS)

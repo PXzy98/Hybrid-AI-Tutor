@@ -208,9 +208,12 @@ def response_schema(kind: StructureKind, known_kc_names: Sequence[str] = ()) -> 
 def _check_kc_references(kind: str, items: list, known: Sequence[str]) -> list:
     known_names = {name.casefold() for name in known}
     if kind == "kcs":
+        # a repeated name keeps its first item (V17 W19: one repeat used to lose the whole draft)
+        first: dict[str, object] = {}
+        for item in items:
+            first.setdefault(item.name.casefold(), item)
+        items = list(first.values())
         drafted = {item.name.casefold() for item in items}
-        if len(drafted) != len(items):
-            raise DraftError("The draft repeats a knowledge component.")
         # A prerequisite link is a suggestion the instructor reviews: one to the item itself or to a KC that
         # is neither drafted nor accepted is dropped, not a reason to lose the whole draft.
         return [item.model_copy(update={"prerequisite_names": [
