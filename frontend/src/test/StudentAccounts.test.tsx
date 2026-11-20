@@ -29,7 +29,12 @@ describe("student accounts (V9)", () => {
     await user.type(screen.getByLabelText("Search by name or e-mail"), "ben@");
     expect(screen.queryByText("Ana Example")).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Reset the password of Ben Example" }));
-    expect(await screen.findByText("temp-fictional-123")).toBeInTheDocument();
+    // V17 W11: confirmed first, then shown in the row under the account
+    expect(screen.getByRole("dialog")).toHaveTextContent("Ben Example gets a new temporary password");
+    expect(calls.some((c) => c.path.endsWith("/reset-password"))).toBe(false);
+    await user.click(screen.getByRole("button", { name: "Reset password" }));
+    const note = await screen.findByText("temp-fictional-123");
+    expect(note.closest("tr")!.previousElementSibling).toHaveTextContent("Ben Example");
     await user.clear(screen.getByLabelText("Search by name or e-mail"));
     await user.click(screen.getByRole("button", { name: "Disable Ana Example" }));
     await waitFor(() => expect(calls.find((c) => c.method === "PATCH")?.body).toEqual({ active: false }));
@@ -56,10 +61,12 @@ describe("student accounts (V9)", () => {
     renderApp("/admin");
     const user = userEvent.setup();
     await user.click(await screen.findByRole("button", { name: "Reset the password of Ben Example" }));
+    await user.click(screen.getByRole("button", { name: "Reset password" }));
     expect(await screen.findByText("temp-fictional-123")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Disable Ana Example" }));
     expect(screen.queryByText("temp-fictional-123")).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Reset the password of Ben Example" }));
+    await user.click(screen.getByRole("button", { name: "Reset password" }));
     expect(await screen.findByText("temp-fictional-123")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Delete the account of Ben Example" }));
     await user.click(screen.getByRole("button", { name: "Delete the account" }));

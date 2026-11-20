@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, type FormEvent } from "react";
+import { Fragment, useState, type FormEvent } from "react";
 
 import { ApiError } from "@/api/client";
 import { api, type AdminStudent, type Staff, type SystemSettings, type SystemValues } from "@/api/endpoints";
@@ -92,6 +92,7 @@ function StudentAccountsCard() {
   const [search, setSearch] = useState("");
   const [temporary, setTemporary] = useState<{ id: number; name: string; password: string } | null>(null);
   const [pendingDelete, setPendingDelete] = useState<StudentAccount | null>(null);
+  const [pendingReset, setPendingReset] = useState<StudentAccount | null>(null);
   const update = useMutation({ mutationFn: (a: StudentAccount) => api.updateStudent(a.account_id, !a.active), onSuccess: refreshAll });
   const reset = useMutation({
     mutationFn: async (a: StudentAccount) => ({ id: a.account_id, name: a.display_name, password: (await api.resetStudentPassword(a.account_id)).temporary_password }),
@@ -112,12 +113,6 @@ function StudentAccountsCard() {
       <CardHeader><CardTitle>{t("admin.students")}</CardTitle><CardDescription>{t("admin.studentsHint")}</CardDescription></CardHeader>
       <CardContent className="space-y-4">
         <ErrorNote error={students.error ?? update.error ?? reset.error} />
-        {temporary && (
-          <Alert variant="warning" role="status">
-            {t("members.temporary", { name: temporary.name })} <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-foreground">{temporary.password}</code>
-            <p className="mt-1 text-xs">{t("admin.temporaryHint")}</p>
-          </Alert>
-        )}
         <div className="grid gap-1.5 sm:max-w-sm">
           <Label htmlFor="stu-search">{t("admin.searchStudents")}</Label>
           <Input id="stu-search" type="search" value={search} onChange={(e) => setSearch(e.target.value)} />
@@ -133,7 +128,8 @@ function StudentAccountsCard() {
             </TableRow></TableHeader>
             <TableBody>
               {shown.map((a) => (
-                <TableRow key={a.account_id}>
+                <Fragment key={a.account_id}>
+                <TableRow>
                   <TableCell className="font-medium">{a.display_name}</TableCell>
                   <TableCell className="break-words">{a.email ?? "—"}</TableCell>
                   <TableCell className="tabular-nums">{a.courses}</TableCell>
@@ -143,15 +139,19 @@ function StudentAccountsCard() {
                     <Button type="button" size="sm" variant="outline" aria-label={t(a.active ? "admin.disableFor" : "admin.enableFor", { name: a.display_name })}
                             onClick={() => { setTemporary(null); update.mutate(a); }}>{t(a.active ? "admin.disable" : "admin.enable")}</Button>
                     <Button type="button" size="sm" variant="outline" aria-label={t("admin.resetFor", { name: a.display_name })}
-                            onClick={() => { setTemporary(null); reset.mutate(a); }}>{t("members.reset")}</Button>
+                            onClick={() => { setTemporary(null); setPendingReset(a); }}>{t("members.reset")}</Button>
                     <Button type="button" size="sm" variant="outline" className="text-destructive" aria-label={t("admin.deleteStudentFor", { name: a.display_name })}
                             onClick={() => askDelete(a)}>{t("admin.deleteStudent")}</Button>
                   </TableCell>
                 </TableRow>
+                {temporary?.id === a.account_id && <TemporaryRow columns={6} temporary={temporary} />}
+                </Fragment>
               ))}
             </TableBody>
           </Table>
         )}
+        <ResetDialog name={pendingReset?.display_name} onClose={() => setPendingReset(null)}
+                     onConfirm={() => { if (pendingReset) reset.mutate(pendingReset); setPendingReset(null); }} />
         <Dialog open={!!pendingDelete} onOpenChange={(o) => { if (!o) askDelete(null); }}>
           <DialogContent>
             <DialogHeader>
@@ -170,24 +170,59 @@ function StudentAccountsCard() {
   );
 }
 
+/** A new temporary password, shown once (V17 W11: next to the account it belongs to). */
+function TemporaryNote({ temporary }: { temporary: { name: string; password: string } }) {
+  const { t } = useI18n();
+  return (
+    <Alert variant="warning" role="status">
+      {t("members.temporary", { name: temporary.name })} <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-foreground">{temporary.password}</code>
+      <p className="mt-1 text-xs">{t("admin.temporaryHint")}</p>
+    </Alert>
+  );
+}
+
+function TemporaryRow({ columns, temporary }: { columns: number; temporary: { name: string; password: string } }) {
+  return <TableRow><TableCell colSpan={columns} className="whitespace-normal"><TemporaryNote temporary={temporary} /></TableCell></TableRow>;
+}
+
+/** A reset ends the current password at once, so it is confirmed first (V17 W11). */
+function ResetDialog({ name, onClose, onConfirm }: { name?: string; onClose: () => void; onConfirm: () => void }) {
+  const { t } = useI18n();
+  return (
+    <Dialog open={name !== undefined} onOpenChange={(o) => { if (!o) onClose(); }}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t("admin.resetTitle")}</DialogTitle>
+          <DialogDescription>{t("admin.resetBody", { name: name ?? "" })}</DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <DialogClose asChild><Button type="button" variant="outline">{t("end.cancel")}</Button></DialogClose>
+          <Button type="button" onClick={onConfirm}>{t("admin.resetConfirm")}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function StaffCard({ selfId }: { selfId?: number }) {
   const { t } = useI18n();
   const qc = useQueryClient();
   const staff = useQuery({ queryKey: ["admin-staff"], queryFn: api.staff });
   const refresh = () => qc.invalidateQueries({ queryKey: ["admin-staff"] });
-  const [temporary, setTemporary] = useState<{ name: string; password: string } | null>(null);
+  const [temporary, setTemporary] = useState<{ id: number; name: string; password: string } | null>(null);
+  const [pendingReset, setPendingReset] = useState<Staff | null>(null);
   const [form, setForm] = useState({ email: "", display_name: "", role: "instructor" as Staff["role"] });
   const create = useMutation({
     mutationFn: () => api.createStaff(form),
     onSuccess: (a) => {
-      setTemporary({ name: a.display_name, password: a.temporary_password });
+      setTemporary({ id: a.account_id, name: a.display_name, password: a.temporary_password });
       setForm({ email: "", display_name: "", role: "instructor" });
       refresh();
     },
   });
   const update = useMutation({ mutationFn: (v: { id: number; changes: { active?: boolean; role?: Staff["role"] } }) => api.updateStaff(v.id, v.changes), onSuccess: refresh });
   const reset = useMutation({
-    mutationFn: async (a: Staff) => ({ name: a.display_name, password: (await api.resetStaffPassword(a.account_id)).temporary_password }),
+    mutationFn: async (a: Staff) => ({ id: a.account_id, name: a.display_name, password: (await api.resetStaffPassword(a.account_id)).temporary_password }),
     onSuccess: setTemporary,
   });
   return (
@@ -195,12 +230,8 @@ function StaffCard({ selfId }: { selfId?: number }) {
       <CardHeader><CardTitle>{t("admin.staff")}</CardTitle><CardDescription>{t("admin.staffHint")}</CardDescription></CardHeader>
       <CardContent className="space-y-4">
         <ErrorNote error={staff.error ?? update.error ?? reset.error} />
-        {temporary && (
-          <Alert variant="warning" role="status">
-            {t("members.temporary", { name: temporary.name })} <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-foreground">{temporary.password}</code>
-            <p className="mt-1 text-xs">{t("admin.temporaryHint")}</p>
-          </Alert>
-        )}
+        {/* a new account is shown here until the list has it; a reset is shown under its row */}
+        {temporary && !staff.data?.some((a) => a.account_id === temporary.id) && <TemporaryNote temporary={temporary} />}
         {!!staff.data?.length && (
           <Table>
             <TableHeader><TableRow>
@@ -210,7 +241,8 @@ function StaffCard({ selfId }: { selfId?: number }) {
             </TableRow></TableHeader>
             <TableBody>
               {staff.data.map((a) => (
-                <TableRow key={a.account_id}>
+                <Fragment key={a.account_id}>
+                <TableRow>
                   <TableCell className="font-medium">{a.display_name}</TableCell>
                   <TableCell>{a.email ?? "—"}</TableCell>
                   <TableCell>
@@ -226,13 +258,17 @@ function StaffCard({ selfId }: { selfId?: number }) {
                             aria-label={t(a.active ? "admin.disableFor" : "admin.enableFor", { name: a.display_name })}
                             onClick={() => update.mutate({ id: a.account_id, changes: { active: !a.active } })}>{t(a.active ? "admin.disable" : "admin.enable")}</Button>
                     <Button type="button" size="sm" variant="outline" aria-label={t("admin.resetFor", { name: a.display_name })}
-                            onClick={() => reset.mutate(a)}>{t("members.reset")}</Button>
+                            onClick={() => { setTemporary(null); setPendingReset(a); }}>{t("members.reset")}</Button>
                   </TableCell>
                 </TableRow>
+                {temporary?.id === a.account_id && <TemporaryRow columns={5} temporary={temporary} />}
+                </Fragment>
               ))}
             </TableBody>
           </Table>
         )}
+        <ResetDialog name={pendingReset?.display_name} onClose={() => setPendingReset(null)}
+                     onConfirm={() => { if (pendingReset) reset.mutate(pendingReset); setPendingReset(null); }} />
         <form className="grid gap-3 border-t pt-4 sm:grid-cols-3" aria-label={t("admin.addStaff")}
               onSubmit={(e: FormEvent) => { e.preventDefault(); create.mutate(); }}>
           <div className="grid gap-1.5"><Label htmlFor="st-email">{t("members.email")}</Label>
