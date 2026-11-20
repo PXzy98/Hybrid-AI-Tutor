@@ -4381,7 +4381,7 @@
             "description": "consent required"
           },
           "422": {
-            "description": "the text contains personal data"
+            "description": "the text contains personal data or the characters < and >"
           }
         }
       }
@@ -9706,7 +9706,7 @@
         "properties": {
           "text": {
             "type": "string",
-            "maxLength": 300,
+            "maxLength": 1000,
             "title": "Text",
             "default": ""
           }

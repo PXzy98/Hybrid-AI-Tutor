@@ -8326,7 +8326,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description the text contains personal data */
+            /** @description the text contains personal data or the characters < and > */
             422: {
                 headers: {
                     [name: string]: unknown;
