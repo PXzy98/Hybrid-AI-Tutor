@@ -385,8 +385,11 @@ def save_accounts(path: Path, students: list[dict]) -> None:
 
 
 def ensure_students(path: Path, count: int) -> list[dict]:
-    """Student number 1..count with a generated password; existing entries are kept."""
+    """Student number 1..count with a generated password; existing entries are kept. A file of an older run
+    with addresses at another domain (a real university domain, before V17 W7) is started again."""
     students = load_accounts(path)
+    if any(not s["email"].endswith(f"@{EMAIL_DOMAIN}") for s in students):
+        students = []
     for n in range(len(students) + 1, count + 1):
         students.append({"display_name": f"Demo Student {n}", "email": f"demo.student{n}@{EMAIL_DOMAIN}",
                          "password": secrets.token_urlsafe(12)})
