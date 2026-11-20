@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useI18n } from "@/i18n";
+import type { MessageKey } from "@/i18n/en";
 
 /** Course materials: upload (privacy-scanned by the server), delete, and the state of the search index. */
 export default function Materials({ course }: { course: Course }) {
@@ -83,7 +84,7 @@ export default function Materials({ course }: { course: Course }) {
                   </TableCell>
                   <TableCell>{moduleName(m.module_id)}</TableCell>
                   <TableCell className="tabular-nums text-muted-foreground">{Math.max(1, Math.round(m.size_bytes / 1024))} KB</TableCell>
-                  <TableCell><Badge variant={scanVariant(m.scan_status)}>{m.scan_status}</Badge></TableCell>
+                  <TableCell><Badge variant={scanVariant(m.scan_status)}>{SCAN_STATES.includes(m.scan_status) ? t(`materials.scan.${m.scan_status}` as MessageKey) : m.scan_status}</Badge></TableCell>
                   <TableCell className="text-right">
                     {m.source_url && (
                       <Button type="button" size="sm" variant="ghost" loading={refetch.isPending && refetch.variables?.id === m.id}
@@ -208,8 +209,10 @@ function WebPageCard({ course, modules, onDone }: { course: Course; modules: { i
   );
 }
 
+const SCAN_STATES = ["pending", "accepted", "rejected"];
+
 function scanVariant(status: string): "success" | "secondary" | "destructive" {
-  if (status === "clean") return "success";
+  if (status === "accepted") return "success";
   if (status === "infected" || status === "failed" || status === "rejected") return "destructive";
   return "secondary";
 }
