@@ -136,9 +136,11 @@ export const api = {
   check: (id: number, item_id: string, choice: string) =>
     request<CheckResponse>("POST", `${c(id)}/check`, { item_id, choice }),
   conversations: (id: number) => request<Conversation[]>("GET", `${c(id)}/conversations`),
-  conversation: (id: number, conversationId: string) =>
-    request<ConversationDetail>("GET", `${c(id)}/conversations/${encodeURIComponent(conversationId)}`),
-  onboarding: (id: number, moduleId: number) => request<Onboarding>("GET", `${c(id)}/onboarding?module_id=${moduleId}`),
+  conversation: (id: number, conversationId: string, language = "en") =>
+    request<ConversationDetail>("GET", `${c(id)}/conversations/${encodeURIComponent(conversationId)}?language=${language}`),
+  // the consent text and the preference questions come in the interface language
+  onboarding: (id: number, moduleId: number, language: "en" | "fr" = "en") =>
+    request<Onboarding>("GET", `${c(id)}/onboarding?module_id=${moduleId}&language=${language}`),
   submitOnboarding: (id: number, input: OnboardingBody) => request<OnboardingResult>("POST", `${c(id)}/onboarding`, input),
   profile: (id: number) => request<CourseProfile>("GET", `${c(id)}/me/profile`),
   setVisibility: (id: number, action: VisibilityAction) => request<Visibility>("POST", `${c(id)}/me/visibility`, { action }),

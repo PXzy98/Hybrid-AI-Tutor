@@ -56,6 +56,7 @@ export const en = {
   "error.title": "Something went wrong on this page.",
   "error.body": "Please reload the page. If it happens again, tell your instructor.",
   "error.reload": "Reload",
+  "error.modelFailed": "The selected model could not answer.",
   "error.usageLimit": "You reached the question limit for now. Try again in {s} seconds.",
   "error.settingsApplying": "The settings are being applied. Try again in a moment.",
   "error.conflict": "This was changed by someone else.",

@@ -5664,7 +5664,7 @@
           "ask"
         ],
         "summary": "Conversation",
-        "description": "Sanitized turns of one of the caller's conversations in this course (oldest first).",
+        "description": "Sanitized turns of one of the caller's conversations in this course (oldest first). With a French\n`language` the fixed texts of the stored answers (safe replacement, referral line) come in French.",
         "operationId": "conversation_api_v2_courses__course_id__conversations__conversation_id__get",
         "parameters": [
           {
@@ -5693,6 +5693,17 @@
               "type": "integer",
               "default": 50,
               "title": "Last"
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 8,
+              "default": "en",
+              "title": "Language"
             }
           }
         ],
@@ -5779,6 +5790,7 @@
           "learner"
         ],
         "summary": "Get Onboarding",
+        "description": "The consent text and the preference questions come in `language` (the UI's language).",
         "operationId": "learner_onboarding_get",
         "parameters": [
           {
@@ -5797,6 +5809,17 @@
             "schema": {
               "type": "integer",
               "title": "Module Id"
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 8,
+              "default": "en",
+              "title": "Language"
             }
           }
         ],
