@@ -28,7 +28,7 @@ Reflection #2 (ethics, individual) 11/18 · video 11/25 · Design Day 12/3 · fi
 | T10 | Video (11/25); French UI screenshots to Lavin | T | not started |
 | T11 | Renaming | T | waits for the project name |
 | T12 | Routing, frontend and web search handover notes | T | manuals done |
-| — | `transformers` 5, `react-router` 7, `vite`/`vitest` (CI advisories) | T, Z | open |
+| — | `transformers` 5, `react-router` 7, `katex` done (Z27); `vite`/`vitest` (dev-only advisories) | T, Z | partly done |
 | Z13, Z6, Z2 | Deploy on the test host with monitoring; vLLM load test; local speed of the 9B model | Z | waits for server access |
 | Z13 | Choose the alert receiver | Z | waits for the client |
 | S12 | Self-review and handover checklist | S | handover notes in `docs/history/s-tasks/` |

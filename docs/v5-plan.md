@@ -109,7 +109,7 @@ Until this plan is merged into [v4-implementation-guide.md](v4-implementation-gu
   unit; empty top bar on some pages; long instructor sidebar; pale disabled buttons; favicon.
 - **Admin page gaps**: misconceptions can only be retired, not deleted; system settings do not edit `checkers` /
   `knowledge_model`; course types are a text field; instructors cannot pick system model connections.
-- **Dependencies**: `transformers` 5, `react-router` 7 (CI advisories).
+- **Dependencies**: done (Z27): `transformers` 5, `react-router` 7, `katex` 0.19; `vite`/`vitest` advisories are dev-only.
 - **Handover (T12, S12)**: routing, frontend and web search notes; `docs/HANDOVER.md` and the progress pages.
 - Lavin's second review of the 30 revised check items.
 - From the client: real course material and an instructor to try the drafts; a maintainer after December.

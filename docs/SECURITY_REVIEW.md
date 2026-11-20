@@ -19,9 +19,9 @@ state.
 | M2 | API v1 instructor routes are scoped to the demo course only by convention: any instructor reads the demo course's class summary, request logs (sanitized questions) and materials | Medium | Z | open: turn API v1 off in production (task below) |
 | M3 | `auth.cookie_secure` is `false` by default; a production deploy that forgets `AUTH__COOKIE_SECURE=true` sends the session cookie over HTTP before the HTTPS redirect | Medium | Z | open: V10 deploy checklist; make the production Compose file set it |
 | M4 | The demo vLLM (V12) will be on the internet: without `--api-key` anyone could use it, and it receives original student text | Medium | Z | open: V12 runbook requires the key, HTTPS and one open port |
-| L1 | `react-router-dom` 6.x: two moderate advisories (open redirect via a backslash in `Link`/`useNavigate`, SSR hydration). The app never navigates to an address taken from user input and has no SSR, so neither is reachable | Low | T | open: upgrade to a fixed release |
-| L2 | `katex` (through `rehype-katex`): low advisory, prototype pollution that bypasses `trust`; the app never enables `trust` | Low | T | open: upgrade with L1 |
-| L3 | `transformers` is held below 5 (CI advisories on 4.x concern loading untrusted model files); models are loaded with `local_files_only` from the deployment's own cache | Low | T | open (TODO "Dependencies") |
+| L1 | `react-router-dom` 6.x: two moderate advisories (open redirect via a backslash in `Link`/`useNavigate`, SSR hydration). The app never navigates to an address taken from user input and has no SSR, so neither was reachable | Low | T | fixed: upgraded to `react-router-dom` 7.18 (Z27) |
+| L2 | `katex` (through `rehype-katex` and `remark-math`): low advisory, prototype pollution that bypasses `trust`; the app never enables `trust` | Low | T | fixed: `katex` 0.19.1, forced for the nested copies by an `overrides` entry (Z27) |
+| L3 | `transformers` was held below 5 (CI advisories on 4.x concern loading untrusted model files); models are loaded with `local_files_only` from the deployment cache | Low | T | fixed: `transformers` 5.23, the `.pip-audit-ignore` entries are removed (Z27) |
 | L4 | Answer prompt: course material and web results were not named as data in the base rules (draft prompts already said so) | Low | Z | **fixed in this PR** (base rule 5) |
 | L5 | CSP `style-src 'unsafe-inline'` (KaTeX and the UI library set style attributes) | Low | T | accepted: scripts stay `'self'` only |
 
@@ -97,8 +97,8 @@ repository or its history (search above).
 the course's request logs and conversations; deleting an account anonymizes its log rows.
 
 ### Dependencies and images
-`npm audit --omit=dev`: 0 high or critical, 2 moderate (L1), 4 low (L2). Python: CI advisories on `transformers`
-4.x (L3). Images are built from the repository's Dockerfiles on official base images; a container scan (for
+`npm audit --omit=dev`: 0 vulnerabilities (L1, L2 fixed). Python: no open advisories on `transformers` (L3 fixed;
+5.x). Images are built from the repository's Dockerfiles on official base images; a container scan (for
 example Trivy) is part of the V10 deploy checklist.
 
 ## Fixes in this PR
@@ -114,5 +114,5 @@ example Trivy) is part of the V10 deploy checklist.
 2. Production Compose file: `AUTH__COOKIE_SECURE=true` and a domain in `SITE_ADDRESS` (M3).
 3. vLLM on RunPod or forwarded: `--api-key` set and equal to `VLLM_KEY`, HTTPS in front, only the API port open,
    `VLLM_BASE_URL` pointing at it (M4).
-4. Upgrade `react-router-dom` and `katex` (L1, L2); run a container scan of the built images.
+4. Run a container scan of the built images.
 5. Re-run this review's route inventory after the last v5 merge.
