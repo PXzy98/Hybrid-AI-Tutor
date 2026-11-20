@@ -145,6 +145,54 @@ Prometheus, alert rules and Grafana are ready to start (`--profile monitoring`, 
 | Missing | Effect for operations | Task |
 |---|---|---|
 | Deployment on the test host; an alert receiver; the vLLM address for scraping | the monitoring stack is ready but not started anywhere yet | Z13 part 2 |
-| Measured capacity of the app on the real servers | the model connection was measured through the gateway (0.40 answers/s alone, 0.71 at 8 at a time, no gain at 20); tokens per second and the app under load were not; `eval/load-test/run.py` is ready | Z23 |
+| The app under load on the real servers | the vLLM server was measured on 2026-11-20 (section 10); one full ask through the app (accounts needed) and the app's own queue under load were not | Z23 |
 | A health check for vLLM | `/api/v1/health` asks Ollama's `/api/tags`; a vLLM-only deployment shows the local model as unreachable although answers work | audit I6 |
 | A vLLM connection in the deployment's configuration | a vLLM-only deployment needs an administrator to add a trusted local connection after the first start (`MODEL_CONNECTIONS.md`) | audit A4 |
+
+## 10. Capacity of the local model (Z23, measured 2026-11-20)
+
+Lab vLLM, Qwen3.5-9B, thinking off, streaming, max_tokens 400, straight to the server (`eval/load-test/capacity.py`,
+reports in `eval/load-test/results/`). Total tokens/s is generated tokens over the wall time of the run.
+
+Short prompts (no course passages):
+
+| At the same time | Latency p50 / p95 (s) | First token p50 / p95 (s) | Tokens/s per request | Total tokens/s | Errors |
+|---|---|---|---|---|---|
+| 1 | 3.1 / 3.2 | 0.06 / 0.06 | 43 | 43 | 0 |
+| 4 | 9.4 / 9.4 | 0.08 / 0.09 | 42 | 142 | 0 |
+| 8 | 9.8 / 9.8 | 0.12 / 0.13 | 41 | 293 | 0 |
+| 16 | 10.7 / 13.7 | 0.17 / 3.7 | 37 | 423 | 0 |
+| 32 | 14.2 / 21.4 | 3.8 / 10.9 | 28 | 476 | 0 |
+
+With about 1500 words of passages in the prompt, as a real ask sends (prefill dominates; every request has its
+own passages, so a server with prefix caching cannot reuse an earlier prompt):
+
+| At the same time | Latency p50 / p95 (s) | First token p50 / p95 (s) | Tokens/s per request | Total tokens/s | Errors |
+|---|---|---|---|---|---|
+| 1 | 3.8 / 4.0 | 0.5 / 0.5 | 38 | 38 | 0 |
+| 8 | 14.8 / 22.6 | 2.3 / 13.2 | 24 | 122 | 0 |
+| 16 | 24.9 / 33.3 | 15.4 / 26.4 | 17 | 142 | 0 |
+| 32 | 41.3 / 65.9 | 30.1 / 56.3 | 12 | 161 | 0 |
+
+No request failed or timed out at any level. Findings:
+
+- Decoding scales well: total throughput grows to about 475 tokens/s at 32 at the same time, and one answer
+  never drops below 27 tokens/s (reading speed is about 5 to 10).
+- Real asks are limited by reading the passages, not by writing the answer: total throughput stops at about
+  120 to 160 tokens/s from 8 at the same time on, so more concurrency only makes everyone wait longer
+  (first token p50 15 s at 16, 30 s at 32).
+- Recommendation for the model connection: `max_concurrent` 8 (now 4; more than 8 adds under 30% throughput and
+  doubles the wait) and `queue_timeout_seconds` stays 60. With 8 slots and about 15 s per answer, the queue
+  drains about 32 asks a minute: in a burst, the first 8 start at once and about 32 more get a slot within the
+  60 s limit, so roughly the first 40 asks of a burst are answered and the rest get "the model is busy" and
+  must ask again (a longer limit only makes them wait longer). A check-item draft of 45 to 50 s holds a slot
+  for that long. Not changed by this task. The limit is one deployment setting that applies to each model
+  connection on its own (the admin page cannot change it per connection): set `limits.models.max_concurrent`
+  (and `queue_timeout_seconds`) in the deployment's `config.yaml` and restart the app and the worker.
+- One GPU (this server) serves about 8 answers at the same time with p95 under 25 s. If a student asks about
+  once every 2 minutes while working, that is roughly 60 students actively working at the same time (assumption,
+  not measured); if a class of 100 asks all at once, about 40 are answered within a minute and the others
+  are told the model is busy (about 13 rounds of 8, over 3 minutes, to answer all of them).
+  For more than that, a second GPU (two connections) is cheaper than raising the limit.
+- Not measured: one full ask through the app (needs accounts; the retrieval, evidence and privacy steps add
+  their own time on the app host) and the GPU model of the lab server.
