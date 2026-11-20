@@ -18,8 +18,9 @@ AUDIT_PERSONAL = ("student_id", "focus_kcs", "goal")  # audit details that ident
 def _scrub_json(db: Session, student_id: str, account_id: int | None, actor_id: int | None) -> int:
     """Remove the student from JSON columns: quiz assignments and audit rows (the rows stay, anonymized)."""
     touched = 0
+    # a quiz for every student stores JSON null, which passes `IS NOT NULL` and reads back as None
     for quiz in db.exec(select(Quiz).where(Quiz.assigned_to.is_not(None))).all():
-        if student_id in quiz.assigned_to:
+        if quiz.assigned_to and student_id in quiz.assigned_to:
             quiz.assigned_to = [s for s in quiz.assigned_to if s != student_id]  # [] stays "nobody"
             db.add(quiz)
             touched += 1

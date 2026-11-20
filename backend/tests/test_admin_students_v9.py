@@ -68,6 +68,7 @@ def test_delete_leaves_nothing_with_the_students_id(world):
     with Session(world.services.engine) as db:
         cid = world.course
         db.add(Quiz(course_id=cid, title="Q", assigned_to=[sid, bob.student_id]))
+        db.add(Quiz(course_id=cid, title="Everyone", assigned_to=None))  # every student: JSON null
         db.add(AuditLog(account_id=None, action="learner.plan.update", target=f"course:{cid}",
                         details={"student_id": sid, "focus_kcs": ["k"], "goal": "pass"}))
         db.add(AuditLog(account_id=alice.id, action="learner.visibility.ack", target=f"course:{cid}",
@@ -76,6 +77,7 @@ def test_delete_leaves_nothing_with_the_students_id(world):
     assert world.admin.delete(f"{URL}/{alice.id}").status_code == 204
     quizzes, audit = rows("quiz"), rows("audit_log")
     assert [q["assigned_to"] for q in quizzes if q["title"] == "Q"] == [[bob.student_id]]
+    assert [q["assigned_to"] for q in quizzes if q["title"] == "Everyone"] == [None]
     assert sid not in str(audit) and "pass" not in str(audit)
     assert all(a["account_id"] != alice.id for a in audit)
     assert any(a["action"] == "learner.plan.update" for a in audit)  # the trail stays
