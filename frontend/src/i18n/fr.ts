@@ -59,7 +59,6 @@ export const fr: Messages = {
   "error.modelFailed": "Le modèle choisi n’a pas pu répondre.",
   "error.usageLimit": "Vous avez atteint la limite de questions pour le moment. Réessayez dans {s} secondes.",
   "error.settingsApplying": "Les paramètres sont en cours d’application. Réessayez dans un instant.",
-  "error.conflict": "Quelqu’un d’autre a modifié ceci.",
 
   "login.intro": "Connectez-vous avec votre nom d’utilisateur ou votre adresse courriel.",
   "login.username": "Nom d’utilisateur ou courriel",

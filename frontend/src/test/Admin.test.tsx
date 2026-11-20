@@ -67,6 +67,19 @@ describe("system administration", () => {
     expect(await screen.findByText("New Person")).toBeInTheDocument();
   });
 
+  it("shows a duplicate e-mail as the server says it, not as a change by someone else (V17 W10)", async () => {
+    mockApi(adminRoutes({
+      "POST /admin/instructors": () => reply({ detail: "an account with this e-mail exists", code: "conflict" }, 409),
+    }));
+    renderApp("/admin");
+    const user = userEvent.setup();
+    await user.type(await screen.findByLabelText("E-mail"), "ida@example.test");
+    await user.type(screen.getByLabelText("Display name"), "Ida Again");
+    await user.click(screen.getByRole("button", { name: "Create account" }));
+    expect(await screen.findByText("An account with this e-mail exists")).toBeInTheDocument();
+    expect(screen.queryByText(/changed by someone else/)).toBeNull();
+  });
+
   it("disables an account", async () => {
     const calls = mockApi(adminRoutes({ "PATCH /admin/instructors/2": (c: { body: unknown }) => ({ ...staff[1], ...(c.body as object) }) }));
     renderApp("/admin");
@@ -154,7 +167,7 @@ describe("system administration", () => {
     await user.selectOptions(within(dialog).getByLabelText("Trust level"), "trusted_local");
     await user.click(within(dialog).getByLabelText(/I control this service/));
     await user.click(within(dialog).getByRole("button", { name: "Save" }));
-    expect(await within(dialog).findByRole("alert")).toHaveTextContent("connection test failed");
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent("Connection test failed");
     expect(calls.find((c) => c.method === "POST")!.body).toMatchObject({ trust: "trusted_local", confirm_controlled: true, kind: "openai_compat" });
   });
 });

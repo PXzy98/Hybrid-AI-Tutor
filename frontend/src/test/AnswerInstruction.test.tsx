@@ -35,7 +35,7 @@ describe("the student's own answer instruction (V15)", () => {
     const user = userEvent.setup();
     await user.type(await screen.findByRole("textbox", { name: "How answers should look" }), "Call me Ana");
     await user.click(screen.getByRole("button", { name: "Save" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("remove personal details");
+    expect(await screen.findByRole("alert")).toHaveTextContent("Remove personal details");
   });
 
   it("clears the refusal and the saved note as soon as the text changes", async () => {
@@ -49,7 +49,7 @@ describe("the student's own answer instruction (V15)", () => {
     const box = await screen.findByRole("textbox", { name: "How answers should look" });
     await user.type(box, "Call me Ana");
     await user.click(screen.getByRole("button", { name: "Save" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("remove personal details");
+    expect(await screen.findByRole("alert")).toHaveTextContent("Remove personal details");
     await user.type(box, "!");
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });

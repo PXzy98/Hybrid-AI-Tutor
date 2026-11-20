@@ -155,7 +155,7 @@ describe("AI drafts", () => {
     const user = userEvent.setup();
     await user.click(await screen.findByRole("button", { name: "Open draft 7" }));
     await user.click(await screen.findByRole("button", { name: "Accept and publish" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("unknown KC name: Resistance");
+    expect(await screen.findByRole("alert")).toHaveTextContent("Unknown KC name: Resistance");
     expect(screen.getByText("Not visible to students until you accept it.")).toBeInTheDocument();
   });
 

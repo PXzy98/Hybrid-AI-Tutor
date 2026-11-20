@@ -59,7 +59,6 @@ export const en = {
   "error.modelFailed": "The selected model could not answer.",
   "error.usageLimit": "You reached the question limit for now. Try again in {s} seconds.",
   "error.settingsApplying": "The settings are being applied. Try again in a moment.",
-  "error.conflict": "This was changed by someone else.",
 
   "login.intro": "Log in with your username or e-mail address.",
   "login.username": "Username or e-mail",
