@@ -8,9 +8,12 @@ Suppression (so that no number describes one or a few students):
 - the minimum group is `max(MIN_GROUP, learner.class_summary_min_group)`, as for the class insights;
 - a count that between 1 and `min_group - 1` students contributed is None; a count of 0 describes nobody and
   is shown as 0;
-- complementary suppression: a total shown next to a breakdown (weeks, modules, courses, recent versus older)
-  must not let a hidden row be derived by subtraction, so when exactly one small part would be unknown, the
-  smallest shown part (or the total) is hidden as well;
+- complementary suppression, applied jointly: the released question counts form a system of sums (the total
+  is the 7-day count plus the older ones, the weeks plus the questions before the window, the module rows plus
+  the other topics; for the admin the system total is the sum of the course totals, and so on). A cell that is
+  hidden or not shown is unknown; when exactly one cell of a sum is unknown and it is small (or hidden), a
+  shown cell of that sum is hidden as well, and this repeats over all sums until nothing changes, because one
+  cell belongs to several sums;
 - quiz attempts below the minimum group are hidden and the mean score is rounded to tenths (0.1 steps), so two
   snapshots of the averages do not give one student's score.
 """
@@ -109,22 +112,37 @@ def _count(value: int, students: int, group: int) -> int | None:
     return None if 0 < students < group else value
 
 
-def _complement(total_shown: bool, parts: list[Tally], group: int, *, shown: list[bool] | None = None,
-                virtual: int = 0, hide_parts: bool = True) -> tuple[bool, set[int]]:
-    """Complementary suppression of a total and its breakdown. `parts` are the displayed rows, `virtual` the
-    number of trailing entries of `parts` that are not displayed (rows older than the window, other topics).
-    When the total is shown and exactly one part is unknown to the viewer (hidden, or not displayed but not
-    empty) and that part is small, the viewer could subtract: hide the smallest shown row as well (or the
-    total, when there is none or `hide_parts` is False). Returns (hide the total, indexes of rows to hide)."""
-    n = len(parts) - virtual
-    hidden = {i for i in range(n) if _small(parts[i], group)}
-    unknown = hidden | {i for i in range(n, len(parts)) if parts[i].questions > 0}
-    if not total_shown or len(unknown) != 1 or not _small(parts[next(iter(unknown))], group):
-        return False, set()
-    candidates = [i for i in range(n) if i not in hidden and parts[i].questions > 0] if hide_parts else []
-    if not candidates:
-        return True, set()
-    return False, {min(candidates, key=lambda i: (parts[i].questions, i))}
+def _suppress(cells: dict[str, Tally], virtual: set[str], sums: list[tuple[str, list[str]]], group: int
+              ) -> set[str]:
+    """Joint complementary suppression. `cells` are all counts that take part, `virtual` the keys that are
+    never displayed (rows older than the window, other topics, ...), `sums` the equations `total = parts`.
+    A cell is unknown to the viewer when hidden, or virtual and not empty; it is sensitive when between 1 and
+    `group - 1` students contributed. Until nothing changes: in a sum with exactly one unknown cell that is
+    sensitive or hidden, hide one more displayed cell of it (the smallest non-empty part, else the total).
+    Returns the keys of the hidden cells."""
+    hidden = {k for k, t in cells.items() if k not in virtual and _small(t, group)}
+
+    def unknown(key: str) -> bool:
+        return key in hidden or (key in virtual and cells[key].questions > 0)
+
+    def shown(key: str) -> bool:
+        return key not in virtual and key not in hidden and cells[key].questions > 0
+
+    changed = True
+    while changed:
+        changed = False
+        for total, parts in sums:
+            gaps = [k for k in (total, *parts) if unknown(k)]
+            if len(gaps) != 1 or not (gaps[0] in hidden or _small(cells[gaps[0]], group)):
+                continue
+            candidates = [k for k in parts if shown(k)]
+            if candidates:
+                hidden.add(min(candidates, key=lambda k: cells[k].questions))
+                changed = True
+            elif shown(total):
+                hidden.add(total)
+                changed = True
+    return hidden
 
 
 def _member_rows(*columns):
@@ -206,39 +224,34 @@ def course_statistics(engine: Engine, course_id: int, min_group: int, *, now: da
         enrolled = _enrolled(db, course_id)
     everything, recent = Tally(total[0], total[1]), Tally(total[2], total[3])
     older, before = Tally(total[4], total[5]), Tally(total[6], total[7])
-    questions_total, questions_7d = (_count(t.questions, t.students, group) for t in (everything, recent))
-    # the total next to the recent count: the difference is the older questions, which may be few students
-    hide_total, _ = _complement(questions_total is not None, [recent, older], group, virtual=1,
-                                hide_parts=False)
-    if hide_total:
-        questions_total = None
     local_questions = total[9] + sum(LOCAL_CAPABILITY_NOTE in (w or []) for w in fallbacks)
+    starts = [first_week + timedelta(weeks=i) for i in range(WEEKS)]
+    weeks = [by_week.get(d, Tally()) for d in starts]
+    listed = [(None, "", GENERAL_TOPIC), *[(m.id, m.title, m.code) for m in modules]]
+    rows = [by_topic.get(code, Tally()) for _, _, code in listed]
+    cells = {"total": everything, "7d": recent, "older": older, "before": before, "other": other_topics,
+             **{f"w{i}": t for i, t in enumerate(weeks)}, **{f"m{i}": t for i, t in enumerate(rows)}}
+    week_keys, module_keys = [f"w{i}" for i in range(WEEKS)], [f"m{i}" for i in range(len(rows))]
+    hidden = _suppress(cells, {"older", "before", "other"}, [
+        ("total", ["7d", "older"]), ("total", [*week_keys, "before"]), ("total", [*module_keys, "other"])],
+        group)
+
+    def released(key: str) -> int | None:
+        return None if key in hidden else cells[key].questions
+
     out = CourseStatistics(
         course_id=course_id, min_group=group, students_enrolled=enrolled,
         active_students=_count(everything.students, everything.students, group),
         active_students_7d=_count(recent.students, recent.students, group),
-        questions_total=questions_total, questions_7d=questions_7d,
+        questions_total=released("total"), questions_7d=released("7d"),
         local_share=(round(local_questions / total[8], 3) if total[8] and everything.students >= group
                      else None))
-    starts = [first_week + timedelta(weeks=i) for i in range(WEEKS)]
-    weeks = [by_week.get(d, Tally()) for d in starts]
-    hide_total, hidden_weeks = _complement(out.questions_total is not None, [*weeks, before], group,
-                                           virtual=1)
-    if hide_total:
-        out.questions_total = None
     for i, (start, t) in enumerate(zip(starts, weeks, strict=True)):
-        gone = i in hidden_weeks
-        out.weeks.append(WeekCount(start, None if gone else _count(t.questions, t.students, group),
-                                   None if gone else _count(t.students, t.students, group)))
-    listed = [(None, "", GENERAL_TOPIC), *[(m.id, m.title, m.code) for m in modules]]
-    rows = [by_topic.get(code, Tally()) for _, _, code in listed]
-    other = other_topics
-    hide_total, hidden_rows = _complement(out.questions_total is not None, [*rows, other], group, virtual=1)
-    if hide_total:
-        out.questions_total = None
-    for i, ((module_id, title, _), t) in enumerate(zip(listed, rows, strict=True)):
-        out.modules.append(ModuleCount(module_id, title, None if i in hidden_rows
-                                       else _count(t.questions, t.students, group)))
+        gone = f"w{i}" in hidden
+        out.weeks.append(WeekCount(start, released(f"w{i}"), None if gone else _count(t.students, t.students,
+                                                                                       group)))
+    for i, (module_id, title, _) in enumerate(listed):
+        out.modules.append(ModuleCount(module_id, title, released(f"m{i}")))
     for q in quizzes:
         n, avg = by_quiz.get(q.id, (0, None))
         shown = n == 0 or n >= group
@@ -268,25 +281,19 @@ def system_statistics(engine: Engine, min_group: int, *, now: datetime | None = 
     recents = [per_course.get(c.id, empty)[1] for c in courses]
     everything, recent, older = Tally(overall[0], overall[1]), Tally(overall[2], overall[3]), Tally(
         overall[4], overall[5])
-    total_q, recent_q = (_count(t.questions, t.students, group) for t in (everything, recent))
-    # the same rule as for a course, per course row and for the system rows
-    shown_total = [_count(t.questions, t.students, group) for t in totals]
-    shown_recent = [_count(t.questions, t.students, group) for t in recents]
+    cells = {"T": everything, "R": recent, "O": older}
     for i, c in enumerate(courses):
-        _, new, old = per_course.get(c.id, empty)
-        if _complement(shown_total[i] is not None and shown_recent[i] is not None, [new, old], group,
-                       virtual=1, hide_parts=False)[0]:
-            shown_total[i] = None
-    if _complement(total_q is not None, [recent, older], group, virtual=1, hide_parts=False)[0]:
-        total_q = None
-    hide_total, hidden = _complement(total_q is not None, totals, group)
-    total_q = None if hide_total else total_q
-    for i in hidden:
-        shown_total[i] = None
-    hide_total, hidden = _complement(recent_q is not None, recents, group)
-    recent_q = None if hide_total else recent_q
-    for i in hidden:
-        shown_recent[i] = None
+        cells.update({f"t{i}": totals[i], f"r{i}": recents[i], f"o{i}": per_course.get(c.id, empty)[2]})
+    ids = range(len(courses))
+    hidden = _suppress(cells, {"O", *(f"o{i}" for i in ids)}, [
+        ("T", ["R", "O"]), ("T", [f"t{i}" for i in ids]), ("R", [f"r{i}" for i in ids]),
+        *[(f"t{i}", [f"r{i}", f"o{i}"]) for i in ids]], group)
+
+    def released(key: str) -> int | None:
+        return None if key in hidden else cells[key].questions
+
+    shown_total, shown_recent = [released(f"t{i}") for i in ids], [released(f"r{i}") for i in ids]
+    total_q, recent_q = released("T"), released("R")
     rows = [CourseRow(c.id, c.code, c.title, c.status, enrolled.get(c.id, 0),
                       _count(recents[i].students, recents[i].students, group), shown_total[i],
                       shown_recent[i]) for i, c in enumerate(courses)]
