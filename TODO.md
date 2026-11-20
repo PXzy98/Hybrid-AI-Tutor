@@ -36,7 +36,7 @@ Reflection #2 (ethics, individual) 11/18 · video 11/25 · Design Day 12/3 · fi
 | Z13 | Choose the alert receiver | Z | waits for the client |
 | S12 | Self-review and handover checklist | S | handover notes in `docs/history/s-tasks/` |
 | S13 | Learning profile for the whole course: one onboarding and diagnostic per course (not per module), a course summary on My progress and in the instructor's view | S (frontend with T) | not started |
-| S14 | Review how retrieval passes course material to the local model, above all the syllabus: paraphrased questions must still be answered (paraphrase test set per pack); dev server 2026-11-17: "When does the course end?" and a misspelled question miss the CS50x syllabus | S | not started |
+| S14 | Review how retrieval passes course material to the local model, above all the syllabus: paraphrased questions must still be answered (paraphrase test set per pack); dev server 2026-11-17: "When does the course end?" and a misspelled question miss the CS50x syllabus | S | retrieval part done (PR feature/s14-retrieval-paraphrases); circ-28, garbled questions and the evidence step left |
 | S15 | Demo courses get knowledge components, check items and a quiz (drafted by the instructor AI); a test that a quiz attempt moves the mastery estimate | S | done: `build_demo.py --learner-content`; test in `test_quizzes_v2.py` |
 | S16 | Course type of the CS50x pack (`ece` gives a CS course the ECE subject prompt) | S | done: `computer_science` profile (ece recognizers, computing prompt) for CS50x and 6.006 |
 | T15 | Routing by subject: the routing heads are trained on medical questions only; harder ECE questions get no sources | T | not started |

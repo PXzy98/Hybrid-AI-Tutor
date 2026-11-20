@@ -18,6 +18,7 @@ from app.platform import jobs
 from app.privacy.profiles import privacy_profile, scan_document
 from app.rag.course_retriever import IndexedCourseRetriever
 from app.rag.documents import DocumentError, extract_text
+from app.rag.encoder import course_embedder
 from app.rag.privacy_adapter import privacy_scan_callback
 from app.storage.models import Course, IndexVersion, Job, Material, utcnow
 
@@ -110,7 +111,8 @@ async def rebuild(services, job) -> None:
         course = db.get(Course, job.course_id)
         course_type = course.course_type
     builder = IndexedCourseRetriever(services.settings.data_path(),
-                                     scan=privacy_scan_callback(privacy_profile(course_type)))
+                                     scan=privacy_scan_callback(privacy_profile(course_type)),
+                                     embedder=course_embedder(services.settings))
     with services.engine.connect() as lock:
         lock.execute(text("SELECT pg_advisory_lock(:n, :c)"), {"n": LOCK_NAMESPACE, "c": job.course_id})
         try:

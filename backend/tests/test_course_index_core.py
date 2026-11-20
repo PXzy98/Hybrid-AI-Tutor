@@ -1,7 +1,7 @@
 """Stand-in v4 per-course retriever tests; no real course files or student data."""
 import pytest
 
-from app.rag.course_retriever import COURSE_LEVEL_WEIGHT, IndexedCourseRetriever
+from app.rag.course_retriever import ASSESSMENT_WEIGHT, COURSE_LEVEL_WEIGHT, IndexedCourseRetriever
 from app.rag.documents import DocumentError
 
 
@@ -202,5 +202,6 @@ def test_scoped_retrieval_prefers_the_module_over_equal_course_level_text(tmp_pa
     assert [x.source for x in scoped] == ["course/303/9/lecture.md", "course/303/_course/homework.md"]
     whole = {x.source: x.score for x in rag.retrieve(303, None, "Glimmerwave sampling", 2)}
     homework = "course/303/_course/homework.md"
-    assert scoped[1].score == pytest.approx(whole[homework] * COURSE_LEVEL_WEIGHT, abs=1e-5)  # weighted down
-    assert whole[homework] > 0.9 * whole["course/303/9/lecture.md"]  # course-wide: not weighted
+    unweighted = whole[homework] / ASSESSMENT_WEIGHT  # course-wide, a homework file is weighted (S14)
+    assert scoped[1].score == pytest.approx(unweighted * COURSE_LEVEL_WEIGHT, abs=1e-5)  # weighted down
+    assert whole[homework] > 0.7 * whole["course/303/9/lecture.md"]  # course-wide: only the S14 weight

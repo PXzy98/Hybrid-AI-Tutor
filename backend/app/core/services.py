@@ -138,10 +138,12 @@ def build_services(settings: Settings | None = None) -> Services:
                                      lambda: settings_service.system_values()[0].get("enabled_course_types"),
                                      encryption_key=secret)  # invitation codes can be shown again
     from app.rag.course_retriever import IndexedCourseRetriever
+    from app.rag.encoder import course_embedder
 
     # retrieval from the published course indexes (index/current.json); no scanner here, so this object can
     # never publish an index (rebuilds belong to the worker job with scan_document, S4/Z11)
-    services.course_retriever = IndexedCourseRetriever(settings.data_path())
+    services.course_retriever = IndexedCourseRetriever(settings.data_path(),
+                                                       embedder=course_embedder(settings))
     from app.platform.course_scope import CourseScopes
 
     services.course_scopes = CourseScopes(services)

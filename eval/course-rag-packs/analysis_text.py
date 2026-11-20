@@ -61,4 +61,12 @@ lexical score; fix the scan false positives.
 files not weighted down, boosted by 1.5), and Markdown table rows such as calendar rows are indexed one
 passage per row with their column names ("Lecture 11. TOPICS: Midterm Exam ..."). Before: logistics hit@1 0.69,
 hit@4 0.85; calendar questions hit@4 0.60. The question-type head and the numbers are in `eval/question-type/`.
+
+**S14 (paraphrases, misspellings, semantic step).** The tables above are from the run after S14 (2026-11-20);
+the analysis text before this paragraph describes the run of 2026-11-12. Retrieval now stems words, adds
+corrected spellings and logistics synonyms to the question, weights homework and exam files by 0.8 in
+course-wide concept questions and adds the router's sentence encoder as a semantic score. Over the eight packs
+course-wide hit@1 went 0.71 -> 0.82 and hit@4 0.93 -> 0.95, scoped hit@1 0.93 -> 0.94 and hit@4 stays 0.98.
+Five questions fell out of the top 4 (listed in `s14-comparison.md`). The paraphrase and misspelling set is in
+`paraphrase_questions/` with its report in `results/paraphrase/`; before and after in `results/s14-comparison.md`.
 """

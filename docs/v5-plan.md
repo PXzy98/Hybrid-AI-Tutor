@@ -116,9 +116,12 @@ Until this plan is merged into [v4-implementation-guide.md](v4-implementation-gu
 
 ## 6. Remaining v4 items (in order, when time allows)
 
-- **Retrieval (S14)**: paraphrased and misspelled questions miss the syllabus ("When does the course end?");
-  course-wide retrieval ranks homework and exams above lectures; "when is homework 4 due" (circ-28) is not
-  found; retrieval is only lexical (add a semantic step).
+- **Retrieval (S14)**: done (PR `feature/s14-retrieval-paraphrases`): stemming, typo correction, logistics
+  synonyms, a weight for homework and exam files in course-wide questions and a semantic step with the router's
+  encoder (`rag.semantic_retrieval`). Paraphrase set course-wide hit@4 0.48 -> 0.81, S11 course-wide hit@4
+  0.93 -> 0.95 (`eval/course-rag-packs/results/s14-comparison.md`). Left: "when is homework 4 due" (circ-28)
+  still misses (the calendar row names another homework's due date), very garbled questions, and the evidence
+  step (cross-encoder) can still drop a retrieved passage.
 - **Routing (T15, T17)**: routing heads trained on medical questions only; course-rule questions routed to the
   cloud skip retrieval (T17 done: retrieval now also runs when the capability gate chooses the cloud, inside a
   course and for logistics questions).

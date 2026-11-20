@@ -1,0 +1,3438 @@
+{
+  "k": 4,
+  "smoke": false,
+  "packs": {
+    "harvard_cs50x": {
+      "skipped_gold_refused": [],
+      "scoped": {
+        "concept": {
+          "n": 16,
+          "hit@1": 0.938,
+          "hit@4": 1.0,
+          "mrr": 0.969
+        },
+        "application": {
+          "n": 0,
+          "hit@1": null,
+          "hit@4": null,
+          "mrr": null
+        },
+        "logistics": {
+          "n": 16,
+          "hit@1": 0.375,
+          "hit@4": 0.562,
+          "mrr": 0.448
+        },
+        "all": {
+          "n": 32,
+          "hit@1": 0.656,
+          "hit@4": 0.781,
+          "mrr": 0.708
+        }
+      },
+      "course": {
+        "concept": {
+          "n": 16,
+          "hit@1": 0.875,
+          "hit@4": 0.938,
+          "mrr": 0.906
+        },
+        "application": {
+          "n": 0,
+          "hit@1": null,
+          "hit@4": null,
+          "mrr": null
+        },
+        "logistics": {
+          "n": 16,
+          "hit@1": 0.375,
+          "hit@4": 0.562,
+          "mrr": 0.448
+        },
+        "all": {
+          "n": 32,
+          "hit@1": 0.625,
+          "hit@4": 0.75,
+          "mrr": 0.677
+        }
+      },
+      "variants": {
+        "scoped": {
+          "misspelled": {
+            "n": 16,
+            "hit@1": 0.688,
+            "hit@4": 0.75,
+            "mrr": 0.708
+          },
+          "paraphrase": {
+            "n": 16,
+            "hit@1": 0.625,
+            "hit@4": 0.812,
+            "mrr": 0.708
+          }
+        },
+        "course": {
+          "misspelled": {
+            "n": 16,
+            "hit@1": 0.688,
+            "hit@4": 0.75,
+            "mrr": 0.708
+          },
+          "paraphrase": {
+            "n": 16,
+            "hit@1": 0.562,
+            "hit@4": 0.75,
+            "mrr": 0.646
+          }
+        }
+      },
+      "logistics_in_module": {
+        "n": 16,
+        "hit@1": 0.375,
+        "hit@4": 0.562,
+        "mrr": 0.448
+      },
+      "scoped_top_score": {
+        "answerable_median": 0.247,
+        "answerable_p10": 0.165,
+        "unanswerable_n": 0,
+        "unanswerable_mean": null,
+        "unanswerable_max": null,
+        "auc": null
+      },
+      "course_top_score": {
+        "answerable_median": 0.247,
+        "answerable_p10": 0.165,
+        "unanswerable_n": 0,
+        "unanswerable_mean": null,
+        "unanswerable_max": null,
+        "auc": null
+      }
+    },
+    "mit_6_002_circuits": {
+      "skipped_gold_refused": [],
+      "scoped": {
+        "concept": {
+          "n": 16,
+          "hit@1": 1.0,
+          "hit@4": 1.0,
+          "mrr": 1.0
+        },
+        "application": {
+          "n": 0,
+          "hit@1": null,
+          "hit@4": null,
+          "mrr": null
+        },
+        "logistics": {
+          "n": 16,
+          "hit@1": 0.688,
+          "hit@4": 0.812,
+          "mrr": 0.734
+        },
+        "all": {
+          "n": 32,
+          "hit@1": 0.844,
+          "hit@4": 0.906,
+          "mrr": 0.867
+        }
+      },
+      "course": {
+        "concept": {
+          "n": 16,
+          "hit@1": 0.438,
+          "hit@4": 0.938,
+          "mrr": 0.661
+        },
+        "application": {
+          "n": 0,
+          "hit@1": null,
+          "hit@4": null,
+          "mrr": null
+        },
+        "logistics": {
+          "n": 16,
+          "hit@1": 0.688,
+          "hit@4": 0.812,
+          "mrr": 0.734
+        },
+        "all": {
+          "n": 32,
+          "hit@1": 0.562,
+          "hit@4": 0.875,
+          "mrr": 0.698
+        }
+      },
+      "variants": {
+        "scoped": {
+          "misspelled": {
+            "n": 16,
+            "hit@1": 0.812,
+            "hit@4": 0.938,
+            "mrr": 0.859
+          },
+          "paraphrase": {
+            "n": 16,
+            "hit@1": 0.875,
+            "hit@4": 0.875,
+            "mrr": 0.875
+          }
+        },
+        "course": {
+          "misspelled": {
+            "n": 16,
+            "hit@1": 0.625,
+            "hit@4": 0.938,
+            "mrr": 0.766
+          },
+          "paraphrase": {
+            "n": 16,
+            "hit@1": 0.5,
+            "hit@4": 0.812,
+            "mrr": 0.63
+          }
+        }
+      },
+      "logistics_in_module": {
+        "n": 16,
+        "hit@1": 0.688,
+        "hit@4": 0.812,
+        "mrr": 0.734
+      },
+      "scoped_top_score": {
+        "answerable_median": 0.265,
+        "answerable_p10": 0.155,
+        "unanswerable_n": 0,
+        "unanswerable_mean": null,
+        "unanswerable_max": null,
+        "auc": null
+      },
+      "course_top_score": {
+        "answerable_median": 0.321,
+        "answerable_p10": 0.199,
+        "unanswerable_n": 0,
+        "unanswerable_mean": null,
+        "unanswerable_max": null,
+        "auc": null
+      }
+    }
+  },
+  "details": {
+    "harvard_cs50x": {
+      "index": "whole course",
+      "passages": 1467,
+      "refused_files": [],
+      "questions": [
+        {
+          "id": "cs50-p01a",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "paraphrase",
+          "gold": [
+            "syllabus.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "syllabus.md",
+              "assignments/final_project.md",
+              "assignments/pset_0.md",
+              "assignments/pset_1.md"
+            ],
+            "scores": [
+              0.243406,
+              0.240731,
+              0.231219,
+              0.231219
+            ],
+            "rank": 1,
+            "top_score": 0.243406
+          },
+          "course": {
+            "files": [
+              "syllabus.md",
+              "assignments/final_project.md",
+              "assignments/pset_0.md",
+              "assignments/pset_1.md"
+            ],
+            "scores": [
+              0.243406,
+              0.240731,
+              0.231219,
+              0.231219
+            ],
+            "rank": 1,
+            "top_score": 0.243406
+          },
+          "in_module": {
+            "files": [
+              "syllabus.md",
+              "assignments/final_project.md",
+              "assignments/pset_0.md",
+              "assignments/pset_1.md"
+            ],
+            "scores": [
+              0.243406,
+              0.240731,
+              0.231219,
+              0.231219
+            ],
+            "rank": 1,
+            "top_score": 0.243406
+          }
+        },
+        {
+          "id": "cs50-p01b",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "misspelled",
+          "gold": [
+            "syllabus.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "assignments/pset_0.md",
+              "assignments/pset_1.md",
+              "assignments/pset_2.md",
+              "assignments/pset_3.md"
+            ],
+            "scores": [
+              0.178887,
+              0.178887,
+              0.178887,
+              0.178887
+            ],
+            "rank": null,
+            "top_score": 0.178887
+          },
+          "course": {
+            "files": [
+              "assignments/pset_0.md",
+              "assignments/pset_1.md",
+              "assignments/pset_2.md",
+              "assignments/pset_3.md"
+            ],
+            "scores": [
+              0.178887,
+              0.178887,
+              0.178887,
+              0.178887
+            ],
+            "rank": null,
+            "top_score": 0.178887
+          },
+          "in_module": {
+            "files": [
+              "assignments/pset_0.md",
+              "assignments/pset_1.md",
+              "assignments/pset_2.md",
+              "assignments/pset_3.md"
+            ],
+            "scores": [
+              0.178887,
+              0.178887,
+              0.178887,
+              0.178887
+            ],
+            "rank": null,
+            "top_score": 0.178887
+          }
+        },
+        {
+          "id": "cs50-p02a",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "paraphrase",
+          "gold": [
+            "syllabus.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "assignments/pset_7.md",
+              "assignments/pset_7.md",
+              "assignments/pset_9.md",
+              "assignments/pset_5.md"
+            ],
+            "scores": [
+              0.226611,
+              0.222982,
+              0.214631,
+              0.192987
+            ],
+            "rank": null,
+            "top_score": 0.226611
+          },
+          "course": {
+            "files": [
+              "assignments/pset_7.md",
+              "assignments/pset_7.md",
+              "assignments/pset_9.md",
+              "assignments/pset_5.md"
+            ],
+            "scores": [
+              0.226611,
+              0.222982,
+              0.214631,
+              0.192987
+            ],
+            "rank": null,
+            "top_score": 0.226611
+          },
+          "in_module": {
+            "files": [
+              "assignments/pset_7.md",
+              "assignments/pset_7.md",
+              "assignments/pset_9.md",
+              "assignments/pset_5.md"
+            ],
+            "scores": [
+              0.226611,
+              0.222982,
+              0.214631,
+              0.192987
+            ],
+            "rank": null,
+            "top_score": 0.226611
+          }
+        },
+        {
+          "id": "cs50-p02b",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "misspelled",
+          "gold": [
+            "syllabus.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "assignments/pset_1.md",
+              "assignments/pset_1.md",
+              "assignments/pset_1.md",
+              "assignments/pset_9.md"
+            ],
+            "scores": [
+              0.225122,
+              0.213248,
+              0.151798,
+              0.149892
+            ],
+            "rank": null,
+            "top_score": 0.225122
+          },
+          "course": {
+            "files": [
+              "assignments/pset_1.md",
+              "assignments/pset_1.md",
+              "assignments/pset_1.md",
+              "assignments/pset_9.md"
+            ],
+            "scores": [
+              0.225122,
+              0.213248,
+              0.151798,
+              0.149892
+            ],
+            "rank": null,
+            "top_score": 0.225122
+          },
+          "in_module": {
+            "files": [
+              "assignments/pset_1.md",
+              "assignments/pset_1.md",
+              "assignments/pset_1.md",
+              "assignments/pset_9.md"
+            ],
+            "scores": [
+              0.225122,
+              0.213248,
+              0.151798,
+              0.149892
+            ],
+            "rank": null,
+            "top_score": 0.225122
+          }
+        },
+        {
+          "id": "cs50-p03a",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "paraphrase",
+          "gold": [
+            "syllabus.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "assignments/final_project.md",
+              "syllabus.md",
+              "assignments/pset_2.md",
+              "assignments/final_project.md"
+            ],
+            "scores": [
+              0.489908,
+              0.427819,
+              0.263753,
+              0.252415
+            ],
+            "rank": 2,
+            "top_score": 0.489908
+          },
+          "course": {
+            "files": [
+              "assignments/final_project.md",
+              "syllabus.md",
+              "assignments/pset_2.md",
+              "assignments/final_project.md"
+            ],
+            "scores": [
+              0.489908,
+              0.427819,
+              0.263753,
+              0.252415
+            ],
+            "rank": 2,
+            "top_score": 0.489908
+          },
+          "in_module": {
+            "files": [
+              "assignments/final_project.md",
+              "syllabus.md",
+              "assignments/pset_2.md",
+              "assignments/final_project.md"
+            ],
+            "scores": [
+              0.489908,
+              0.427819,
+              0.263753,
+              0.252415
+            ],
+            "rank": 2,
+            "top_score": 0.489908
+          }
+        },
+        {
+          "id": "cs50-p03b",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "misspelled",
+          "gold": [
+            "syllabus.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "assignments/final_project.md",
+              "assignments/pset_2.md",
+              "syllabus.md",
+              "assignments/pset_6.md"
+            ],
+            "scores": [
+              0.297408,
+              0.290015,
+              0.264305,
+              0.243839
+            ],
+            "rank": 3,
+            "top_score": 0.297408
+          },
+          "course": {
+            "files": [
+              "assignments/final_project.md",
+              "assignments/pset_2.md",
+              "syllabus.md",
+              "assignments/pset_6.md"
+            ],
+            "scores": [
+              0.297408,
+              0.290015,
+              0.264305,
+              0.243839
+            ],
+            "rank": 3,
+            "top_score": 0.297408
+          },
+          "in_module": {
+            "files": [
+              "assignments/final_project.md",
+              "assignments/pset_2.md",
+              "syllabus.md",
+              "assignments/pset_6.md"
+            ],
+            "scores": [
+              0.297408,
+              0.290015,
+              0.264305,
+              0.243839
+            ],
+            "rank": 3,
+            "top_score": 0.297408
+          }
+        },
+        {
+          "id": "cs50-p04a",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "paraphrase",
+          "gold": [
+            "syllabus.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "assignments/pset_2.md",
+              "assignments/pset_2.md",
+              "syllabus.md",
+              "assignments/pset_6.md"
+            ],
+            "scores": [
+              0.351568,
+              0.237953,
+              0.213529,
+              0.189409
+            ],
+            "rank": 3,
+            "top_score": 0.351568
+          },
+          "course": {
+            "files": [
+              "assignments/pset_2.md",
+              "assignments/pset_2.md",
+              "syllabus.md",
+              "assignments/pset_6.md"
+            ],
+            "scores": [
+              0.351568,
+              0.237953,
+              0.213529,
+              0.189409
+            ],
+            "rank": 3,
+            "top_score": 0.351568
+          },
+          "in_module": {
+            "files": [
+              "assignments/pset_2.md",
+              "assignments/pset_2.md",
+              "syllabus.md",
+              "assignments/pset_6.md"
+            ],
+            "scores": [
+              0.351568,
+              0.237953,
+              0.213529,
+              0.189409
+            ],
+            "rank": 3,
+            "top_score": 0.351568
+          }
+        },
+        {
+          "id": "cs50-p04b",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "misspelled",
+          "gold": [
+            "syllabus.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "assignments/pset_2.md",
+              "assignments/pset_2.md",
+              "modules/03_week_2_arrays.md",
+              "assignments/pset_2.md"
+            ],
+            "scores": [
+              0.182143,
+              0.171423,
+              0.171075,
+              0.148394
+            ],
+            "rank": null,
+            "top_score": 0.182143
+          },
+          "course": {
+            "files": [
+              "assignments/pset_2.md",
+              "assignments/pset_2.md",
+              "modules/03_week_2_arrays.md",
+              "assignments/pset_2.md"
+            ],
+            "scores": [
+              0.182143,
+              0.171423,
+              0.171075,
+              0.148394
+            ],
+            "rank": null,
+            "top_score": 0.182143
+          },
+          "in_module": {
+            "files": [
+              "assignments/pset_2.md",
+              "assignments/pset_2.md",
+              "assignments/pset_2.md",
+              "assignments/pset_9.md"
+            ],
+            "scores": [
+              0.182143,
+              0.171423,
+              0.148394,
+              0.145397
+            ],
+            "rank": null,
+            "top_score": 0.182143
+          }
+        },
+        {
+          "id": "cs50-p05a",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "paraphrase",
+          "gold": [
+            "syllabus.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "assignments/pset_9.md",
+              "assignments/pset_9.md",
+              "assignments/pset_2.md",
+              "assignments/pset_6.md"
+            ],
+            "scores": [
+              0.365424,
+              0.344667,
+              0.326397,
+              0.300036
+            ],
+            "rank": null,
+            "top_score": 0.365424
+          },
+          "course": {
+            "files": [
+              "assignments/pset_9.md",
+              "assignments/pset_9.md",
+              "assignments/pset_2.md",
+              "assignments/pset_6.md"
+            ],
+            "scores": [
+              0.365424,
+              0.344667,
+              0.326397,
+              0.300036
+            ],
+            "rank": null,
+            "top_score": 0.365424
+          },
+          "in_module": {
+            "files": [
+              "assignments/pset_9.md",
+              "assignments/pset_9.md",
+              "assignments/pset_2.md",
+              "assignments/pset_6.md"
+            ],
+            "scores": [
+              0.365424,
+              0.344667,
+              0.326397,
+              0.300036
+            ],
+            "rank": null,
+            "top_score": 0.365424
+          }
+        },
+        {
+          "id": "cs50-p05b",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "misspelled",
+          "gold": [
+            "syllabus.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "assignments/pset_1.md",
+              "assignments/pset_2.md",
+              "assignments/pset_3.md",
+              "assignments/pset_1.md"
+            ],
+            "scores": [
+              0.307192,
+              0.296703,
+              0.263545,
+              0.261905
+            ],
+            "rank": null,
+            "top_score": 0.307192
+          },
+          "course": {
+            "files": [
+              "assignments/pset_1.md",
+              "assignments/pset_2.md",
+              "assignments/pset_3.md",
+              "assignments/pset_1.md"
+            ],
+            "scores": [
+              0.307192,
+              0.296703,
+              0.263545,
+              0.261905
+            ],
+            "rank": null,
+            "top_score": 0.307192
+          },
+          "in_module": {
+            "files": [
+              "assignments/pset_1.md",
+              "assignments/pset_2.md",
+              "assignments/pset_3.md",
+              "assignments/pset_1.md"
+            ],
+            "scores": [
+              0.307192,
+              0.296703,
+              0.263545,
+              0.261905
+            ],
+            "rank": null,
+            "top_score": 0.307192
+          }
+        },
+        {
+          "id": "cs50-p06a",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "paraphrase",
+          "gold": [
+            "assignments/final_project.md",
+            "syllabus.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "assignments/final_project.md",
+              "syllabus.md",
+              "assignments/final_project.md",
+              "assignments/final_project.md"
+            ],
+            "scores": [
+              0.390254,
+              0.390254,
+              0.208812,
+              0.206825
+            ],
+            "rank": 1,
+            "top_score": 0.390254
+          },
+          "course": {
+            "files": [
+              "assignments/final_project.md",
+              "syllabus.md",
+              "assignments/final_project.md",
+              "assignments/final_project.md"
+            ],
+            "scores": [
+              0.390254,
+              0.390254,
+              0.208812,
+              0.206825
+            ],
+            "rank": 1,
+            "top_score": 0.390254
+          },
+          "in_module": {
+            "files": [
+              "assignments/final_project.md",
+              "syllabus.md",
+              "assignments/final_project.md",
+              "assignments/final_project.md"
+            ],
+            "scores": [
+              0.390254,
+              0.390254,
+              0.208812,
+              0.206825
+            ],
+            "rank": 1,
+            "top_score": 0.390254
+          }
+        },
+        {
+          "id": "cs50-p06b",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "misspelled",
+          "gold": [
+            "assignments/final_project.md",
+            "syllabus.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "assignments/final_project.md",
+              "syllabus.md",
+              "assignments/final_project.md",
+              "syllabus.md"
+            ],
+            "scores": [
+              0.332058,
+              0.332058,
+              0.266741,
+              0.266741
+            ],
+            "rank": 1,
+            "top_score": 0.332058
+          },
+          "course": {
+            "files": [
+              "assignments/final_project.md",
+              "syllabus.md",
+              "assignments/final_project.md",
+              "syllabus.md"
+            ],
+            "scores": [
+              0.332058,
+              0.332058,
+              0.266741,
+              0.266741
+            ],
+            "rank": 1,
+            "top_score": 0.332058
+          },
+          "in_module": {
+            "files": [
+              "assignments/final_project.md",
+              "syllabus.md",
+              "assignments/final_project.md",
+              "syllabus.md"
+            ],
+            "scores": [
+              0.332058,
+              0.332058,
+              0.266741,
+              0.266741
+            ],
+            "rank": 1,
+            "top_score": 0.332058
+          }
+        },
+        {
+          "id": "cs50-p07a",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "paraphrase",
+          "gold": [
+            "syllabus.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "assignments/pset_5.md",
+              "assignments/pset_4.md",
+              "assignments/pset_6.md",
+              "assignments/pset_6.md"
+            ],
+            "scores": [
+              0.121993,
+              0.120632,
+              0.119081,
+              0.116724
+            ],
+            "rank": null,
+            "top_score": 0.121993
+          },
+          "course": {
+            "files": [
+              "assignments/pset_5.md",
+              "assignments/pset_4.md",
+              "assignments/pset_6.md",
+              "assignments/pset_6.md"
+            ],
+            "scores": [
+              0.121993,
+              0.120632,
+              0.119081,
+              0.116724
+            ],
+            "rank": null,
+            "top_score": 0.121993
+          },
+          "in_module": {
+            "files": [
+              "assignments/pset_5.md",
+              "assignments/pset_4.md",
+              "assignments/pset_6.md",
+              "assignments/pset_6.md"
+            ],
+            "scores": [
+              0.121993,
+              0.120632,
+              0.119081,
+              0.116724
+            ],
+            "rank": null,
+            "top_score": 0.121993
+          }
+        },
+        {
+          "id": "cs50-p07b",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "misspelled",
+          "gold": [
+            "syllabus.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "syllabus.md",
+              "modules/07_week_6_python.md",
+              "modules/02_week_1_c.md",
+              "syllabus.md"
+            ],
+            "scores": [
+              0.265756,
+              0.142542,
+              0.126814,
+              0.125454
+            ],
+            "rank": 1,
+            "top_score": 0.265756
+          },
+          "course": {
+            "files": [
+              "syllabus.md",
+              "modules/07_week_6_python.md",
+              "modules/02_week_1_c.md",
+              "syllabus.md"
+            ],
+            "scores": [
+              0.265756,
+              0.142542,
+              0.126814,
+              0.125454
+            ],
+            "rank": 1,
+            "top_score": 0.265756
+          },
+          "in_module": {
+            "files": [
+              "syllabus.md",
+              "syllabus.md",
+              "assignments/pset_2.md",
+              "assignments/pset_7.md"
+            ],
+            "scores": [
+              0.265756,
+              0.125454,
+              0.096013,
+              0.094931
+            ],
+            "rank": 1,
+            "top_score": 0.265756
+          }
+        },
+        {
+          "id": "cs50-p08a",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "paraphrase",
+          "gold": [
+            "syllabus.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "syllabus.md",
+              "syllabus.md",
+              "syllabus.md",
+              "assignments/pset_8.md"
+            ],
+            "scores": [
+              0.434187,
+              0.411736,
+              0.377179,
+              0.354295
+            ],
+            "rank": 1,
+            "top_score": 0.434187
+          },
+          "course": {
+            "files": [
+              "syllabus.md",
+              "syllabus.md",
+              "syllabus.md",
+              "assignments/pset_8.md"
+            ],
+            "scores": [
+              0.434187,
+              0.411736,
+              0.377179,
+              0.354295
+            ],
+            "rank": 1,
+            "top_score": 0.434187
+          },
+          "in_module": {
+            "files": [
+              "syllabus.md",
+              "syllabus.md",
+              "syllabus.md",
+              "assignments/pset_8.md"
+            ],
+            "scores": [
+              0.434187,
+              0.411736,
+              0.377179,
+              0.354295
+            ],
+            "rank": 1,
+            "top_score": 0.434187
+          }
+        },
+        {
+          "id": "cs50-p08b",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "misspelled",
+          "gold": [
+            "syllabus.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "syllabus.md",
+              "assignments/pset_1.md",
+              "assignments/pset_1.md",
+              "assignments/pset_3.md"
+            ],
+            "scores": [
+              0.460069,
+              0.348582,
+              0.344138,
+              0.344001
+            ],
+            "rank": 1,
+            "top_score": 0.460069
+          },
+          "course": {
+            "files": [
+              "syllabus.md",
+              "assignments/pset_1.md",
+              "assignments/pset_1.md",
+              "assignments/pset_3.md"
+            ],
+            "scores": [
+              0.460069,
+              0.348582,
+              0.344138,
+              0.344001
+            ],
+            "rank": 1,
+            "top_score": 0.460069
+          },
+          "in_module": {
+            "files": [
+              "syllabus.md",
+              "assignments/pset_1.md",
+              "assignments/pset_1.md",
+              "assignments/pset_3.md"
+            ],
+            "scores": [
+              0.460069,
+              0.348582,
+              0.344138,
+              0.344001
+            ],
+            "rank": 1,
+            "top_score": 0.460069
+          }
+        },
+        {
+          "id": "cs50-p09a",
+          "type": "concept",
+          "module_order": 4,
+          "variant": "paraphrase",
+          "gold": [
+            "modules/04_week_3_algorithms.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "modules/04_week_3_algorithms.md",
+              "modules/04_week_3_algorithms.md",
+              "modules/04_week_3_algorithms.md",
+              "modules/04_week_3_algorithms.md"
+            ],
+            "scores": [
+              0.288197,
+              0.225298,
+              0.134941,
+              0.130244
+            ],
+            "rank": 1,
+            "top_score": 0.288197
+          },
+          "course": {
+            "files": [
+              "modules/04_week_3_algorithms.md",
+              "modules/04_week_3_algorithms.md",
+              "modules/06_week_5_data_structures.md",
+              "assignments/pset_3.md"
+            ],
+            "scores": [
+              0.288197,
+              0.225298,
+              0.184688,
+              0.152389
+            ],
+            "rank": 1,
+            "top_score": 0.288197
+          }
+        },
+        {
+          "id": "cs50-p09b",
+          "type": "concept",
+          "module_order": 4,
+          "variant": "misspelled",
+          "gold": [
+            "modules/04_week_3_algorithms.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "modules/04_week_3_algorithms.md",
+              "modules/04_week_3_algorithms.md",
+              "modules/04_week_3_algorithms.md",
+              "modules/04_week_3_algorithms.md"
+            ],
+            "scores": [
+              0.235354,
+              0.230004,
+              0.199062,
+              0.171809
+            ],
+            "rank": 1,
+            "top_score": 0.235354
+          },
+          "course": {
+            "files": [
+              "modules/04_week_3_algorithms.md",
+              "modules/04_week_3_algorithms.md",
+              "modules/04_week_3_algorithms.md",
+              "modules/06_week_5_data_structures.md"
+            ],
+            "scores": [
+              0.235354,
+              0.230004,
+              0.199062,
+              0.198387
+            ],
+            "rank": 1,
+            "top_score": 0.235354
+          }
+        },
+        {
+          "id": "cs50-p10a",
+          "type": "concept",
+          "module_order": 6,
+          "variant": "paraphrase",
+          "gold": [
+            "modules/06_week_5_data_structures.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "modules/06_week_5_data_structures.md",
+              "modules/06_week_5_data_structures.md",
+              "modules/06_week_5_data_structures.md",
+              "modules/06_week_5_data_structures.md"
+            ],
+            "scores": [
+              0.169194,
+              0.168413,
+              0.167078,
+              0.162142
+            ],
+            "rank": 1,
+            "top_score": 0.169194
+          },
+          "course": {
+            "files": [
+              "modules/06_week_5_data_structures.md",
+              "modules/06_week_5_data_structures.md",
+              "modules/06_week_5_data_structures.md",
+              "modules/06_week_5_data_structures.md"
+            ],
+            "scores": [
+              0.169194,
+              0.168413,
+              0.167078,
+              0.162142
+            ],
+            "rank": 1,
+            "top_score": 0.169194
+          }
+        },
+        {
+          "id": "cs50-p10b",
+          "type": "concept",
+          "module_order": 6,
+          "variant": "misspelled",
+          "gold": [
+            "modules/06_week_5_data_structures.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "modules/06_week_5_data_structures.md",
+              "modules/06_week_5_data_structures.md",
+              "modules/06_week_5_data_structures.md",
+              "modules/06_week_5_data_structures.md"
+            ],
+            "scores": [
+              0.187776,
+              0.168793,
+              0.163917,
+              0.162586
+            ],
+            "rank": 1,
+            "top_score": 0.187776
+          },
+          "course": {
+            "files": [
+              "modules/06_week_5_data_structures.md",
+              "modules/06_week_5_data_structures.md",
+              "modules/06_week_5_data_structures.md",
+              "modules/06_week_5_data_structures.md"
+            ],
+            "scores": [
+              0.187776,
+              0.168793,
+              0.163917,
+              0.162586
+            ],
+            "rank": 1,
+            "top_score": 0.187776
+          }
+        },
+        {
+          "id": "cs50-p11a",
+          "type": "concept",
+          "module_order": 8,
+          "variant": "paraphrase",
+          "gold": [
+            "modules/08_week_7_sql.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "modules/08_week_7_sql.md",
+              "modules/08_week_7_sql.md",
+              "modules/08_week_7_sql.md",
+              "modules/08_week_7_sql.md"
+            ],
+            "scores": [
+              0.154045,
+              0.098764,
+              0.095361,
+              0.092004
+            ],
+            "rank": 1,
+            "top_score": 0.154045
+          },
+          "course": {
+            "files": [
+              "modules/08_week_7_sql.md",
+              "modules/08_week_7_sql.md",
+              "modules/08_week_7_sql.md",
+              "modules/08_week_7_sql.md"
+            ],
+            "scores": [
+              0.154045,
+              0.098764,
+              0.095361,
+              0.092004
+            ],
+            "rank": 1,
+            "top_score": 0.154045
+          }
+        },
+        {
+          "id": "cs50-p11b",
+          "type": "concept",
+          "module_order": 8,
+          "variant": "misspelled",
+          "gold": [
+            "modules/08_week_7_sql.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "modules/08_week_7_sql.md",
+              "modules/08_week_7_sql.md",
+              "modules/08_week_7_sql.md",
+              "modules/08_week_7_sql.md"
+            ],
+            "scores": [
+              0.284993,
+              0.277672,
+              0.210196,
+              0.206024
+            ],
+            "rank": 1,
+            "top_score": 0.284993
+          },
+          "course": {
+            "files": [
+              "modules/08_week_7_sql.md",
+              "modules/08_week_7_sql.md",
+              "modules/08_week_7_sql.md",
+              "modules/08_week_7_sql.md"
+            ],
+            "scores": [
+              0.284993,
+              0.277672,
+              0.210196,
+              0.206024
+            ],
+            "rank": 1,
+            "top_score": 0.284993
+          }
+        },
+        {
+          "id": "cs50-p12a",
+          "type": "concept",
+          "module_order": 5,
+          "variant": "paraphrase",
+          "gold": [
+            "modules/05_week_4_memory.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "modules/05_week_4_memory.md",
+              "modules/05_week_4_memory.md",
+              "modules/05_week_4_memory.md",
+              "modules/05_week_4_memory.md"
+            ],
+            "scores": [
+              0.174019,
+              0.162399,
+              0.157557,
+              0.138042
+            ],
+            "rank": 1,
+            "top_score": 0.174019
+          },
+          "course": {
+            "files": [
+              "modules/06_week_5_data_structures.md",
+              "modules/05_week_4_memory.md",
+              "modules/06_week_5_data_structures.md",
+              "modules/05_week_4_memory.md"
+            ],
+            "scores": [
+              0.207345,
+              0.174019,
+              0.169606,
+              0.162399
+            ],
+            "rank": 2,
+            "top_score": 0.207345
+          }
+        },
+        {
+          "id": "cs50-p12b",
+          "type": "concept",
+          "module_order": 5,
+          "variant": "misspelled",
+          "gold": [
+            "modules/05_week_4_memory.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "modules/05_week_4_memory.md",
+              "modules/05_week_4_memory.md",
+              "modules/05_week_4_memory.md",
+              "modules/05_week_4_memory.md"
+            ],
+            "scores": [
+              0.169197,
+              0.163639,
+              0.152093,
+              0.149084
+            ],
+            "rank": 1,
+            "top_score": 0.169197
+          },
+          "course": {
+            "files": [
+              "modules/05_week_4_memory.md",
+              "modules/05_week_4_memory.md",
+              "modules/06_week_5_data_structures.md",
+              "modules/05_week_4_memory.md"
+            ],
+            "scores": [
+              0.169197,
+              0.163639,
+              0.162465,
+              0.152093
+            ],
+            "rank": 1,
+            "top_score": 0.169197
+          }
+        },
+        {
+          "id": "cs50-p13a",
+          "type": "concept",
+          "module_order": 6,
+          "variant": "paraphrase",
+          "gold": [
+            "modules/06_week_5_data_structures.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "assignments/pset_6.md",
+              "modules/06_week_5_data_structures.md",
+              "assignments/pset_2.md",
+              "modules/06_week_5_data_structures.md"
+            ],
+            "scores": [
+              0.065085,
+              0.06433,
+              0.059105,
+              0.054894
+            ],
+            "rank": 2,
+            "top_score": 0.065085
+          },
+          "course": {
+            "files": [
+              "modules/08_week_7_sql.md",
+              "modules/08_week_7_sql.md",
+              "assignments/pset_6.md",
+              "assignments/pset_2.md"
+            ],
+            "scores": [
+              0.109186,
+              0.108534,
+              0.094669,
+              0.085971
+            ],
+            "rank": null,
+            "top_score": 0.109186
+          }
+        },
+        {
+          "id": "cs50-p13b",
+          "type": "concept",
+          "module_order": 6,
+          "variant": "misspelled",
+          "gold": [
+            "modules/06_week_5_data_structures.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "modules/06_week_5_data_structures.md",
+              "modules/06_week_5_data_structures.md",
+              "modules/06_week_5_data_structures.md",
+              "assignments/pset_5.md"
+            ],
+            "scores": [
+              0.241933,
+              0.099904,
+              0.065669,
+              0.062956
+            ],
+            "rank": 1,
+            "top_score": 0.241933
+          },
+          "course": {
+            "files": [
+              "modules/06_week_5_data_structures.md",
+              "modules/06_week_5_data_structures.md",
+              "modules/08_week_7_sql.md",
+              "assignments/pset_5.md"
+            ],
+            "scores": [
+              0.241933,
+              0.099904,
+              0.096141,
+              0.091572
+            ],
+            "rank": 1,
+            "top_score": 0.241933
+          }
+        },
+        {
+          "id": "cs50-p14a",
+          "type": "concept",
+          "module_order": 9,
+          "variant": "paraphrase",
+          "gold": [
+            "modules/09_week_8_html_css_javascript.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "modules/09_week_8_html_css_javascript.md",
+              "modules/09_week_8_html_css_javascript.md",
+              "modules/09_week_8_html_css_javascript.md",
+              "modules/09_week_8_html_css_javascript.md"
+            ],
+            "scores": [
+              0.299843,
+              0.257645,
+              0.156124,
+              0.129153
+            ],
+            "rank": 1,
+            "top_score": 0.299843
+          },
+          "course": {
+            "files": [
+              "modules/09_week_8_html_css_javascript.md",
+              "modules/09_week_8_html_css_javascript.md",
+              "modules/10_week_9_flask.md",
+              "modules/10_week_9_flask.md"
+            ],
+            "scores": [
+              0.299843,
+              0.257645,
+              0.169192,
+              0.164746
+            ],
+            "rank": 1,
+            "top_score": 0.299843
+          }
+        },
+        {
+          "id": "cs50-p14b",
+          "type": "concept",
+          "module_order": 9,
+          "variant": "misspelled",
+          "gold": [
+            "modules/09_week_8_html_css_javascript.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "modules/09_week_8_html_css_javascript.md",
+              "modules/09_week_8_html_css_javascript.md",
+              "modules/09_week_8_html_css_javascript.md",
+              "modules/09_week_8_html_css_javascript.md"
+            ],
+            "scores": [
+              0.266817,
+              0.191341,
+              0.12513,
+              0.05006
+            ],
+            "rank": 1,
+            "top_score": 0.266817
+          },
+          "course": {
+            "files": [
+              "modules/09_week_8_html_css_javascript.md",
+              "modules/09_week_8_html_css_javascript.md",
+              "modules/09_week_8_html_css_javascript.md",
+              "modules/01_week_0_scratch.md"
+            ],
+            "scores": [
+              0.266817,
+              0.191341,
+              0.12513,
+              0.101497
+            ],
+            "rank": 1,
+            "top_score": 0.266817
+          }
+        },
+        {
+          "id": "cs50-p15a",
+          "type": "concept",
+          "module_order": 10,
+          "variant": "paraphrase",
+          "gold": [
+            "modules/10_week_9_flask.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "modules/10_week_9_flask.md",
+              "modules/10_week_9_flask.md",
+              "modules/10_week_9_flask.md",
+              "modules/10_week_9_flask.md"
+            ],
+            "scores": [
+              0.260307,
+              0.251574,
+              0.251574,
+              0.197257
+            ],
+            "rank": 1,
+            "top_score": 0.260307
+          },
+          "course": {
+            "files": [
+              "modules/10_week_9_flask.md",
+              "modules/10_week_9_flask.md",
+              "modules/10_week_9_flask.md",
+              "modules/10_week_9_flask.md"
+            ],
+            "scores": [
+              0.260307,
+              0.251574,
+              0.251574,
+              0.197257
+            ],
+            "rank": 1,
+            "top_score": 0.260307
+          }
+        },
+        {
+          "id": "cs50-p15b",
+          "type": "concept",
+          "module_order": 10,
+          "variant": "misspelled",
+          "gold": [
+            "modules/10_week_9_flask.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "modules/10_week_9_flask.md",
+              "modules/10_week_9_flask.md",
+              "modules/10_week_9_flask.md",
+              "modules/10_week_9_flask.md"
+            ],
+            "scores": [
+              0.185191,
+              0.173971,
+              0.161718,
+              0.158552
+            ],
+            "rank": 1,
+            "top_score": 0.185191
+          },
+          "course": {
+            "files": [
+              "modules/10_week_9_flask.md",
+              "modules/10_week_9_flask.md",
+              "modules/10_week_9_flask.md",
+              "modules/10_week_9_flask.md"
+            ],
+            "scores": [
+              0.185191,
+              0.173971,
+              0.161718,
+              0.158552
+            ],
+            "rank": 1,
+            "top_score": 0.185191
+          }
+        },
+        {
+          "id": "cs50-p16a",
+          "type": "concept",
+          "module_order": 5,
+          "variant": "paraphrase",
+          "gold": [
+            "modules/05_week_4_memory.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "modules/05_week_4_memory.md",
+              "assignments/pset_4.md",
+              "assignments/pset_4.md",
+              "modules/05_week_4_memory.md"
+            ],
+            "scores": [
+              0.164578,
+              0.091265,
+              0.091265,
+              0.085243
+            ],
+            "rank": 1,
+            "top_score": 0.164578
+          },
+          "course": {
+            "files": [
+              "modules/05_week_4_memory.md",
+              "modules/01_week_0_scratch.md",
+              "modules/01_week_0_scratch.md",
+              "assignments/pset_4.md"
+            ],
+            "scores": [
+              0.164578,
+              0.163645,
+              0.148555,
+              0.13275
+            ],
+            "rank": 1,
+            "top_score": 0.164578
+          }
+        },
+        {
+          "id": "cs50-p16b",
+          "type": "concept",
+          "module_order": 5,
+          "variant": "misspelled",
+          "gold": [
+            "modules/05_week_4_memory.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "modules/05_week_4_memory.md",
+              "modules/05_week_4_memory.md",
+              "modules/05_week_4_memory.md",
+              "modules/05_week_4_memory.md"
+            ],
+            "scores": [
+              0.251175,
+              0.172833,
+              0.119316,
+              0.093889
+            ],
+            "rank": 1,
+            "top_score": 0.251175
+          },
+          "course": {
+            "files": [
+              "modules/05_week_4_memory.md",
+              "modules/05_week_4_memory.md",
+              "modules/05_week_4_memory.md",
+              "assignments/pset_4.md"
+            ],
+            "scores": [
+              0.251175,
+              0.172833,
+              0.119316,
+              0.105234
+            ],
+            "rank": 1,
+            "top_score": 0.251175
+          }
+        }
+      ]
+    },
+    "mit_6_002_circuits": {
+      "index": "whole course",
+      "passages": 1217,
+      "refused_files": [],
+      "questions": [
+        {
+          "id": "circ-p01a",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "paraphrase",
+          "gold": [
+            "calendar.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "syllabus.md",
+              "syllabus.md",
+              "syllabus.md",
+              "syllabus.md"
+            ],
+            "scores": [
+              0.582908,
+              0.493367,
+              0.373861,
+              0.336222
+            ],
+            "rank": null,
+            "top_score": 0.582908
+          },
+          "course": {
+            "files": [
+              "syllabus.md",
+              "syllabus.md",
+              "syllabus.md",
+              "syllabus.md"
+            ],
+            "scores": [
+              0.582908,
+              0.493367,
+              0.373861,
+              0.336222
+            ],
+            "rank": null,
+            "top_score": 0.582908
+          },
+          "in_module": {
+            "files": [
+              "syllabus.md",
+              "syllabus.md",
+              "syllabus.md",
+              "syllabus.md"
+            ],
+            "scores": [
+              0.582908,
+              0.493367,
+              0.373861,
+              0.336222
+            ],
+            "rank": null,
+            "top_score": 0.582908
+          }
+        },
+        {
+          "id": "circ-p01b",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "misspelled",
+          "gold": [
+            "calendar.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "syllabus.md",
+              "syllabus.md",
+              "assignments.md",
+              "syllabus.md"
+            ],
+            "scores": [
+              0.215367,
+              0.206975,
+              0.205555,
+              0.202224
+            ],
+            "rank": null,
+            "top_score": 0.215367
+          },
+          "course": {
+            "files": [
+              "syllabus.md",
+              "syllabus.md",
+              "assignments.md",
+              "syllabus.md"
+            ],
+            "scores": [
+              0.215367,
+              0.206975,
+              0.205555,
+              0.202224
+            ],
+            "rank": null,
+            "top_score": 0.215367
+          },
+          "in_module": {
+            "files": [
+              "syllabus.md",
+              "syllabus.md",
+              "assignments.md",
+              "syllabus.md"
+            ],
+            "scores": [
+              0.215367,
+              0.206975,
+              0.205555,
+              0.202224
+            ],
+            "rank": null,
+            "top_score": 0.215367
+          }
+        },
+        {
+          "id": "circ-p02a",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "paraphrase",
+          "gold": [
+            "calendar.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "syllabus.md",
+              "syllabus.md",
+              "syllabus.md",
+              "assignments.md"
+            ],
+            "scores": [
+              0.367097,
+              0.32733,
+              0.312032,
+              0.289497
+            ],
+            "rank": null,
+            "top_score": 0.367097
+          },
+          "course": {
+            "files": [
+              "syllabus.md",
+              "syllabus.md",
+              "syllabus.md",
+              "assignments.md"
+            ],
+            "scores": [
+              0.367097,
+              0.32733,
+              0.312032,
+              0.289497
+            ],
+            "rank": null,
+            "top_score": 0.367097
+          },
+          "in_module": {
+            "files": [
+              "syllabus.md",
+              "syllabus.md",
+              "syllabus.md",
+              "assignments.md"
+            ],
+            "scores": [
+              0.367097,
+              0.32733,
+              0.312032,
+              0.289497
+            ],
+            "rank": null,
+            "top_score": 0.367097
+          }
+        },
+        {
+          "id": "circ-p02b",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "misspelled",
+          "gold": [
+            "calendar.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "syllabus.md",
+              "exams/quiz_1_spring_2007.pdf",
+              "syllabus.md",
+              "calendar.md"
+            ],
+            "scores": [
+              0.212445,
+              0.210942,
+              0.190367,
+              0.185086
+            ],
+            "rank": 4,
+            "top_score": 0.212445
+          },
+          "course": {
+            "files": [
+              "syllabus.md",
+              "exams/quiz_1_spring_2007.pdf",
+              "syllabus.md",
+              "calendar.md"
+            ],
+            "scores": [
+              0.212445,
+              0.210942,
+              0.190367,
+              0.185086
+            ],
+            "rank": 4,
+            "top_score": 0.212445
+          },
+          "in_module": {
+            "files": [
+              "syllabus.md",
+              "exams/quiz_1_spring_2007.pdf",
+              "syllabus.md",
+              "calendar.md"
+            ],
+            "scores": [
+              0.212445,
+              0.210942,
+              0.190367,
+              0.185086
+            ],
+            "rank": 4,
+            "top_score": 0.212445
+          }
+        },
+        {
+          "id": "circ-p03a",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "paraphrase",
+          "gold": [
+            "syllabus.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "syllabus.md",
+              "syllabus.md",
+              "syllabus.md",
+              "syllabus.md"
+            ],
+            "scores": [
+              0.383132,
+              0.36573,
+              0.360719,
+              0.298562
+            ],
+            "rank": 1,
+            "top_score": 0.383132
+          },
+          "course": {
+            "files": [
+              "syllabus.md",
+              "syllabus.md",
+              "syllabus.md",
+              "syllabus.md"
+            ],
+            "scores": [
+              0.383132,
+              0.36573,
+              0.360719,
+              0.298562
+            ],
+            "rank": 1,
+            "top_score": 0.383132
+          },
+          "in_module": {
+            "files": [
+              "syllabus.md",
+              "syllabus.md",
+              "syllabus.md",
+              "syllabus.md"
+            ],
+            "scores": [
+              0.383132,
+              0.36573,
+              0.360719,
+              0.298562
+            ],
+            "rank": 1,
+            "top_score": 0.383132
+          }
+        },
+        {
+          "id": "circ-p03b",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "misspelled",
+          "gold": [
+            "syllabus.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "syllabus.md",
+              "syllabus.md",
+              "syllabus.md",
+              "exams/quiz_1_spring_2007.pdf"
+            ],
+            "scores": [
+              0.317388,
+              0.277017,
+              0.218367,
+              0.171368
+            ],
+            "rank": 1,
+            "top_score": 0.317388
+          },
+          "course": {
+            "files": [
+              "syllabus.md",
+              "syllabus.md",
+              "syllabus.md",
+              "exams/quiz_1_spring_2007.pdf"
+            ],
+            "scores": [
+              0.317388,
+              0.277017,
+              0.218367,
+              0.171368
+            ],
+            "rank": 1,
+            "top_score": 0.317388
+          },
+          "in_module": {
+            "files": [
+              "syllabus.md",
+              "syllabus.md",
+              "syllabus.md",
+              "exams/quiz_1_spring_2007.pdf"
+            ],
+            "scores": [
+              0.317388,
+              0.277017,
+              0.218367,
+              0.171368
+            ],
+            "rank": 1,
+            "top_score": 0.317388
+          }
+        },
+        {
+          "id": "circ-p04a",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "paraphrase",
+          "gold": [
+            "syllabus.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "syllabus.md",
+              "syllabus.md",
+              "modules/01_lecture_1_introduction_and_lumped_abstraction.pdf",
+              "assignments.md"
+            ],
+            "scores": [
+              0.633449,
+              0.356898,
+              0.351609,
+              0.289517
+            ],
+            "rank": 1,
+            "top_score": 0.633449
+          },
+          "course": {
+            "files": [
+              "syllabus.md",
+              "syllabus.md",
+              "modules/01_lecture_1_introduction_and_lumped_abstraction.pdf",
+              "assignments.md"
+            ],
+            "scores": [
+              0.633449,
+              0.356898,
+              0.351609,
+              0.289517
+            ],
+            "rank": 1,
+            "top_score": 0.633449
+          },
+          "in_module": {
+            "files": [
+              "syllabus.md",
+              "syllabus.md",
+              "assignments.md",
+              "syllabus.md"
+            ],
+            "scores": [
+              0.633449,
+              0.356898,
+              0.289517,
+              0.258405
+            ],
+            "rank": 1,
+            "top_score": 0.633449
+          }
+        },
+        {
+          "id": "circ-p04b",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "misspelled",
+          "gold": [
+            "syllabus.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "syllabus.md",
+              "assignments/homework_11.pdf",
+              "assignments.md",
+              "syllabus.md"
+            ],
+            "scores": [
+              0.335277,
+              0.230055,
+              0.226772,
+              0.220693
+            ],
+            "rank": 1,
+            "top_score": 0.335277
+          },
+          "course": {
+            "files": [
+              "syllabus.md",
+              "assignments/homework_11.pdf",
+              "assignments.md",
+              "syllabus.md"
+            ],
+            "scores": [
+              0.335277,
+              0.230055,
+              0.226772,
+              0.220693
+            ],
+            "rank": 1,
+            "top_score": 0.335277
+          },
+          "in_module": {
+            "files": [
+              "syllabus.md",
+              "assignments/homework_11.pdf",
+              "assignments.md",
+              "syllabus.md"
+            ],
+            "scores": [
+              0.335277,
+              0.230055,
+              0.226772,
+              0.220693
+            ],
+            "rank": 1,
+            "top_score": 0.335277
+          }
+        },
+        {
+          "id": "circ-p05a",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "paraphrase",
+          "gold": [
+            "syllabus.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "syllabus.md",
+              "syllabus.md",
+              "exams/quiz_1_spring_2007.pdf",
+              "exams/quiz_2_fall_2004.pdf"
+            ],
+            "scores": [
+              0.178626,
+              0.176973,
+              0.161917,
+              0.159025
+            ],
+            "rank": 1,
+            "top_score": 0.178626
+          },
+          "course": {
+            "files": [
+              "syllabus.md",
+              "syllabus.md",
+              "exams/quiz_1_spring_2007.pdf",
+              "exams/quiz_2_fall_2004.pdf"
+            ],
+            "scores": [
+              0.178626,
+              0.176973,
+              0.161917,
+              0.159025
+            ],
+            "rank": 1,
+            "top_score": 0.178626
+          },
+          "in_module": {
+            "files": [
+              "syllabus.md",
+              "syllabus.md",
+              "exams/quiz_1_spring_2007.pdf",
+              "exams/quiz_2_fall_2004.pdf"
+            ],
+            "scores": [
+              0.178626,
+              0.176973,
+              0.161917,
+              0.159025
+            ],
+            "rank": 1,
+            "top_score": 0.178626
+          }
+        },
+        {
+          "id": "circ-p05b",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "misspelled",
+          "gold": [
+            "syllabus.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "syllabus.md",
+              "assignments/homework_3.pdf",
+              "exams/quiz_1_spring_2007.pdf",
+              "modules/16_lecture_15b_damped_second_order_systems.pdf"
+            ],
+            "scores": [
+              0.24289,
+              0.241487,
+              0.122323,
+              0.119954
+            ],
+            "rank": 1,
+            "top_score": 0.24289
+          },
+          "course": {
+            "files": [
+              "syllabus.md",
+              "assignments/homework_3.pdf",
+              "exams/quiz_1_spring_2007.pdf",
+              "modules/16_lecture_15b_damped_second_order_systems.pdf"
+            ],
+            "scores": [
+              0.24289,
+              0.241487,
+              0.122323,
+              0.119954
+            ],
+            "rank": 1,
+            "top_score": 0.24289
+          },
+          "in_module": {
+            "files": [
+              "syllabus.md",
+              "assignments/homework_3.pdf",
+              "exams/quiz_1_spring_2007.pdf",
+              "assignments/homework_9.pdf"
+            ],
+            "scores": [
+              0.24289,
+              0.241487,
+              0.122323,
+              0.112862
+            ],
+            "rank": 1,
+            "top_score": 0.24289
+          }
+        },
+        {
+          "id": "circ-p06a",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "paraphrase",
+          "gold": [
+            "syllabus.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "syllabus.md",
+              "exams.md",
+              "exams.md",
+              "exams.md"
+            ],
+            "scores": [
+              0.467653,
+              0.266477,
+              0.26582,
+              0.258393
+            ],
+            "rank": 1,
+            "top_score": 0.467653
+          },
+          "course": {
+            "files": [
+              "syllabus.md",
+              "exams.md",
+              "exams.md",
+              "exams.md"
+            ],
+            "scores": [
+              0.467653,
+              0.266477,
+              0.26582,
+              0.258393
+            ],
+            "rank": 1,
+            "top_score": 0.467653
+          },
+          "in_module": {
+            "files": [
+              "syllabus.md",
+              "exams.md",
+              "exams.md",
+              "exams.md"
+            ],
+            "scores": [
+              0.467653,
+              0.266477,
+              0.26582,
+              0.258393
+            ],
+            "rank": 1,
+            "top_score": 0.467653
+          }
+        },
+        {
+          "id": "circ-p06b",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "misspelled",
+          "gold": [
+            "syllabus.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "syllabus.md",
+              "syllabus.md",
+              "syllabus.md",
+              "exams/quiz_2_spring_2004.pdf"
+            ],
+            "scores": [
+              0.536675,
+              0.288057,
+              0.224892,
+              0.179014
+            ],
+            "rank": 1,
+            "top_score": 0.536675
+          },
+          "course": {
+            "files": [
+              "syllabus.md",
+              "syllabus.md",
+              "syllabus.md",
+              "exams/quiz_2_spring_2004.pdf"
+            ],
+            "scores": [
+              0.536675,
+              0.288057,
+              0.224892,
+              0.179014
+            ],
+            "rank": 1,
+            "top_score": 0.536675
+          },
+          "in_module": {
+            "files": [
+              "syllabus.md",
+              "syllabus.md",
+              "syllabus.md",
+              "exams/quiz_2_spring_2004.pdf"
+            ],
+            "scores": [
+              0.536675,
+              0.288057,
+              0.224892,
+              0.179014
+            ],
+            "rank": 1,
+            "top_score": 0.536675
+          }
+        },
+        {
+          "id": "circ-p07a",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "paraphrase",
+          "gold": [
+            "syllabus.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "syllabus.md",
+              "exams/final_exam_fall_2000.pdf",
+              "modules/02_lecture_2_basic_circuit_analysis_method.pdf",
+              "syllabus.md"
+            ],
+            "scores": [
+              0.185553,
+              0.151789,
+              0.151338,
+              0.134087
+            ],
+            "rank": 1,
+            "top_score": 0.185553
+          },
+          "course": {
+            "files": [
+              "syllabus.md",
+              "exams/final_exam_fall_2000.pdf",
+              "modules/02_lecture_2_basic_circuit_analysis_method.pdf",
+              "syllabus.md"
+            ],
+            "scores": [
+              0.185553,
+              0.151789,
+              0.151338,
+              0.134087
+            ],
+            "rank": 1,
+            "top_score": 0.185553
+          },
+          "in_module": {
+            "files": [
+              "syllabus.md",
+              "exams/final_exam_fall_2000.pdf",
+              "syllabus.md",
+              "exams/final_exam_spring_2007.pdf"
+            ],
+            "scores": [
+              0.185553,
+              0.151789,
+              0.134087,
+              0.080745
+            ],
+            "rank": 1,
+            "top_score": 0.185553
+          }
+        },
+        {
+          "id": "circ-p07b",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "misspelled",
+          "gold": [
+            "syllabus.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "syllabus.md",
+              "exams/quiz_1_spring_2007.pdf",
+              "exams/quiz_1_spring_2007.pdf",
+              "modules/09_lecture_9_mosfet_amplifier_large_signal_analysis.pdf"
+            ],
+            "scores": [
+              0.344893,
+              0.119834,
+              0.115618,
+              0.082816
+            ],
+            "rank": 1,
+            "top_score": 0.344893
+          },
+          "course": {
+            "files": [
+              "syllabus.md",
+              "exams/quiz_1_spring_2007.pdf",
+              "exams/quiz_1_spring_2007.pdf",
+              "modules/09_lecture_9_mosfet_amplifier_large_signal_analysis.pdf"
+            ],
+            "scores": [
+              0.344893,
+              0.119834,
+              0.115618,
+              0.082816
+            ],
+            "rank": 1,
+            "top_score": 0.344893
+          },
+          "in_module": {
+            "files": [
+              "syllabus.md",
+              "exams/quiz_1_spring_2007.pdf",
+              "exams/quiz_1_spring_2007.pdf",
+              "assignments/homework_2.pdf"
+            ],
+            "scores": [
+              0.344893,
+              0.119834,
+              0.115618,
+              0.078844
+            ],
+            "rank": 1,
+            "top_score": 0.344893
+          }
+        },
+        {
+          "id": "circ-p08a",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "paraphrase",
+          "gold": [
+            "syllabus.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "syllabus.md",
+              "exams/quiz_2_spring_2004.pdf",
+              "exams/quiz_1_spring_2004.pdf",
+              "modules/04_lecture_4_the_digital_abstraction.pdf"
+            ],
+            "scores": [
+              0.63539,
+              0.253293,
+              0.231292,
+              0.225997
+            ],
+            "rank": 1,
+            "top_score": 0.63539
+          },
+          "course": {
+            "files": [
+              "syllabus.md",
+              "exams/quiz_2_spring_2004.pdf",
+              "exams/quiz_1_spring_2004.pdf",
+              "modules/04_lecture_4_the_digital_abstraction.pdf"
+            ],
+            "scores": [
+              0.63539,
+              0.253293,
+              0.231292,
+              0.225997
+            ],
+            "rank": 1,
+            "top_score": 0.63539
+          },
+          "in_module": {
+            "files": [
+              "syllabus.md",
+              "exams/quiz_2_spring_2004.pdf",
+              "exams/quiz_1_spring_2004.pdf",
+              "exams/quiz_2_spring_2004.pdf"
+            ],
+            "scores": [
+              0.63539,
+              0.253293,
+              0.231292,
+              0.201254
+            ],
+            "rank": 1,
+            "top_score": 0.63539
+          }
+        },
+        {
+          "id": "circ-p08b",
+          "type": "logistics",
+          "module_order": null,
+          "variant": "misspelled",
+          "gold": [
+            "syllabus.md"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "exams/quiz_2_spring_2004.pdf",
+              "syllabus.md",
+              "modules/04_lecture_4_the_digital_abstraction.pdf",
+              "exams/quiz_1_spring_2004.pdf"
+            ],
+            "scores": [
+              0.223172,
+              0.215032,
+              0.214013,
+              0.191397
+            ],
+            "rank": 2,
+            "top_score": 0.223172
+          },
+          "course": {
+            "files": [
+              "exams/quiz_2_spring_2004.pdf",
+              "syllabus.md",
+              "modules/04_lecture_4_the_digital_abstraction.pdf",
+              "exams/quiz_1_spring_2004.pdf"
+            ],
+            "scores": [
+              0.223172,
+              0.215032,
+              0.214013,
+              0.191397
+            ],
+            "rank": 2,
+            "top_score": 0.223172
+          },
+          "in_module": {
+            "files": [
+              "exams/quiz_2_spring_2004.pdf",
+              "syllabus.md",
+              "exams/quiz_1_spring_2004.pdf",
+              "exams/quiz_2_spring_2004.pdf"
+            ],
+            "scores": [
+              0.223172,
+              0.215032,
+              0.191397,
+              0.176351
+            ],
+            "rank": 2,
+            "top_score": 0.223172
+          }
+        },
+        {
+          "id": "circ-p09a",
+          "type": "concept",
+          "module_order": 3,
+          "variant": "paraphrase",
+          "gold": [
+            "modules/03_lecture_3_superposition_th_venin_and_norton.pdf"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "modules/03_lecture_3_superposition_th_venin_and_norton.pdf",
+              "exams/quiz_1_spring_2007.pdf",
+              "modules/03_lecture_3_superposition_th_venin_and_norton.pdf",
+              "calendar.md"
+            ],
+            "scores": [
+              0.233791,
+              0.222968,
+              0.211438,
+              0.174599
+            ],
+            "rank": 1,
+            "top_score": 0.233791
+          },
+          "course": {
+            "files": [
+              "exams/quiz_1_spring_2007.pdf",
+              "calendar.md",
+              "modules/03_lecture_3_superposition_th_venin_and_norton.pdf",
+              "exams/quiz_1_spring_2007.pdf"
+            ],
+            "scores": [
+              0.324318,
+              0.317452,
+              0.233791,
+              0.233165
+            ],
+            "rank": 3,
+            "top_score": 0.324318
+          }
+        },
+        {
+          "id": "circ-p09b",
+          "type": "concept",
+          "module_order": 3,
+          "variant": "misspelled",
+          "gold": [
+            "modules/03_lecture_3_superposition_th_venin_and_norton.pdf"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "modules/03_lecture_3_superposition_th_venin_and_norton.pdf",
+              "modules/03_lecture_3_superposition_th_venin_and_norton.pdf",
+              "exams/quiz_1_spring_2007.pdf",
+              "calendar.md"
+            ],
+            "scores": [
+              0.247648,
+              0.192711,
+              0.165296,
+              0.153134
+            ],
+            "rank": 1,
+            "top_score": 0.247648
+          },
+          "course": {
+            "files": [
+              "calendar.md",
+              "modules/03_lecture_3_superposition_th_venin_and_norton.pdf",
+              "exams/quiz_1_spring_2007.pdf",
+              "modules/03_lecture_3_superposition_th_venin_and_norton.pdf"
+            ],
+            "scores": [
+              0.278425,
+              0.247648,
+              0.240431,
+              0.192711
+            ],
+            "rank": 2,
+            "top_score": 0.278425
+          }
+        },
+        {
+          "id": "circ-p10a",
+          "type": "concept",
+          "module_order": 3,
+          "variant": "paraphrase",
+          "gold": [
+            "modules/03_lecture_3_superposition_th_venin_and_norton.pdf"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "modules/03_lecture_3_superposition_th_venin_and_norton.pdf",
+              "syllabus.md",
+              "assignments/homework_9.pdf",
+              "assignments/homework_4.pdf"
+            ],
+            "scores": [
+              0.149126,
+              0.081507,
+              0.060221,
+              0.056408
+            ],
+            "rank": 1,
+            "top_score": 0.149126
+          },
+          "course": {
+            "files": [
+              "modules/02_lecture_2_basic_circuit_analysis_method.pdf",
+              "modules/03_lecture_3_superposition_th_venin_and_norton.pdf",
+              "syllabus.md",
+              "modules/20_lecture_19_the_operational_amplifier_abstraction.pdf"
+            ],
+            "scores": [
+              0.251152,
+              0.149126,
+              0.148195,
+              0.142202
+            ],
+            "rank": 2,
+            "top_score": 0.251152
+          }
+        },
+        {
+          "id": "circ-p10b",
+          "type": "concept",
+          "module_order": 3,
+          "variant": "misspelled",
+          "gold": [
+            "modules/03_lecture_3_superposition_th_venin_and_norton.pdf"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "modules/03_lecture_3_superposition_th_venin_and_norton.pdf",
+              "modules/03_lecture_3_superposition_th_venin_and_norton.pdf",
+              "modules/03_lecture_3_superposition_th_venin_and_norton.pdf",
+              "modules/03_lecture_3_superposition_th_venin_and_norton.pdf"
+            ],
+            "scores": [
+              0.157362,
+              0.14155,
+              0.14073,
+              0.108212
+            ],
+            "rank": 1,
+            "top_score": 0.157362
+          },
+          "course": {
+            "files": [
+              "modules/09_lecture_9_mosfet_amplifier_large_signal_analysis.pdf",
+              "modules/03_lecture_3_superposition_th_venin_and_norton.pdf",
+              "modules/03_lecture_3_superposition_th_venin_and_norton.pdf",
+              "modules/03_lecture_3_superposition_th_venin_and_norton.pdf"
+            ],
+            "scores": [
+              0.215828,
+              0.157362,
+              0.14155,
+              0.14073
+            ],
+            "rank": 2,
+            "top_score": 0.215828
+          }
+        },
+        {
+          "id": "circ-p11a",
+          "type": "concept",
+          "module_order": 4,
+          "variant": "paraphrase",
+          "gold": [
+            "modules/04_lecture_4_the_digital_abstraction.pdf"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "modules/04_lecture_4_the_digital_abstraction.pdf",
+              "modules/04_lecture_4_the_digital_abstraction.pdf",
+              "modules/04_lecture_4_the_digital_abstraction.pdf",
+              "modules/04_lecture_4_the_digital_abstraction.pdf"
+            ],
+            "scores": [
+              0.146716,
+              0.139751,
+              0.102599,
+              0.09346
+            ],
+            "rank": 1,
+            "top_score": 0.146716
+          },
+          "course": {
+            "files": [
+              "modules/05_lecture_5_inside_the_digital_gate.pdf",
+              "modules/05_lecture_5_inside_the_digital_gate.pdf",
+              "modules/05_lecture_5_inside_the_digital_gate.pdf",
+              "modules/05_lecture_5_inside_the_digital_gate.pdf"
+            ],
+            "scores": [
+              0.385291,
+              0.344989,
+              0.235137,
+              0.20498
+            ],
+            "rank": null,
+            "top_score": 0.385291
+          }
+        },
+        {
+          "id": "circ-p11b",
+          "type": "concept",
+          "module_order": 4,
+          "variant": "misspelled",
+          "gold": [
+            "modules/04_lecture_4_the_digital_abstraction.pdf"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "modules/04_lecture_4_the_digital_abstraction.pdf",
+              "modules/04_lecture_4_the_digital_abstraction.pdf",
+              "modules/04_lecture_4_the_digital_abstraction.pdf",
+              "modules/04_lecture_4_the_digital_abstraction.pdf"
+            ],
+            "scores": [
+              0.47183,
+              0.393661,
+              0.281106,
+              0.249704
+            ],
+            "rank": 1,
+            "top_score": 0.47183
+          },
+          "course": {
+            "files": [
+              "modules/04_lecture_4_the_digital_abstraction.pdf",
+              "modules/04_lecture_4_the_digital_abstraction.pdf",
+              "modules/04_lecture_4_the_digital_abstraction.pdf",
+              "modules/04_lecture_4_the_digital_abstraction.pdf"
+            ],
+            "scores": [
+              0.47183,
+              0.393661,
+              0.281106,
+              0.249704
+            ],
+            "rank": 1,
+            "top_score": 0.47183
+          }
+        },
+        {
+          "id": "circ-p12a",
+          "type": "concept",
+          "module_order": 9,
+          "variant": "paraphrase",
+          "gold": [
+            "modules/09_lecture_9_mosfet_amplifier_large_signal_analysis.pdf"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "modules/09_lecture_9_mosfet_amplifier_large_signal_analysis.pdf",
+              "modules/09_lecture_9_mosfet_amplifier_large_signal_analysis.pdf",
+              "modules/09_lecture_9_mosfet_amplifier_large_signal_analysis.pdf",
+              "modules/09_lecture_9_mosfet_amplifier_large_signal_analysis.pdf"
+            ],
+            "scores": [
+              0.119749,
+              0.10694,
+              0.105449,
+              0.084027
+            ],
+            "rank": 1,
+            "top_score": 0.119749
+          },
+          "course": {
+            "files": [
+              "modules/05_lecture_5_inside_the_digital_gate.pdf",
+              "modules/23_lecture_22_energy_and_power.pdf",
+              "modules/24_lecture_23_energy_cmos.pdf",
+              "modules/09_lecture_9_mosfet_amplifier_large_signal_analysis.pdf"
+            ],
+            "scores": [
+              0.263633,
+              0.136651,
+              0.121122,
+              0.119749
+            ],
+            "rank": 4,
+            "top_score": 0.263633
+          }
+        },
+        {
+          "id": "circ-p12b",
+          "type": "concept",
+          "module_order": 9,
+          "variant": "misspelled",
+          "gold": [
+            "modules/09_lecture_9_mosfet_amplifier_large_signal_analysis.pdf"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "modules/09_lecture_9_mosfet_amplifier_large_signal_analysis.pdf",
+              "modules/09_lecture_9_mosfet_amplifier_large_signal_analysis.pdf",
+              "modules/09_lecture_9_mosfet_amplifier_large_signal_analysis.pdf",
+              "modules/09_lecture_9_mosfet_amplifier_large_signal_analysis.pdf"
+            ],
+            "scores": [
+              0.276629,
+              0.263454,
+              0.261227,
+              0.225307
+            ],
+            "rank": 1,
+            "top_score": 0.276629
+          },
+          "course": {
+            "files": [
+              "modules/09_lecture_9_mosfet_amplifier_large_signal_analysis.pdf",
+              "modules/09_lecture_9_mosfet_amplifier_large_signal_analysis.pdf",
+              "modules/09_lecture_9_mosfet_amplifier_large_signal_analysis.pdf",
+              "modules/09_lecture_9_mosfet_amplifier_large_signal_analysis.pdf"
+            ],
+            "scores": [
+              0.276629,
+              0.263454,
+              0.261227,
+              0.225307
+            ],
+            "rank": 1,
+            "top_score": 0.276629
+          }
+        },
+        {
+          "id": "circ-p13a",
+          "type": "concept",
+          "module_order": 12,
+          "variant": "paraphrase",
+          "gold": [
+            "modules/12_lecture_12_capacitors_and_first_order_systems.pdf"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "modules/12_lecture_12_capacitors_and_first_order_systems.pdf",
+              "modules/12_lecture_12_capacitors_and_first_order_systems.pdf",
+              "modules/12_lecture_12_capacitors_and_first_order_systems.pdf",
+              "exams/quiz_2_spring_2007.pdf"
+            ],
+            "scores": [
+              0.170959,
+              0.159276,
+              0.131854,
+              0.074225
+            ],
+            "rank": 1,
+            "top_score": 0.170959
+          },
+          "course": {
+            "files": [
+              "modules/12_lecture_12_capacitors_and_first_order_systems.pdf",
+              "modules/12_lecture_12_capacitors_and_first_order_systems.pdf",
+              "modules/14_lecture_14_state_and_memory.pdf",
+              "modules/25_lecture_25_violating_the_abstraction_barrier.pdf"
+            ],
+            "scores": [
+              0.170959,
+              0.159276,
+              0.14613,
+              0.133373
+            ],
+            "rank": 1,
+            "top_score": 0.170959
+          }
+        },
+        {
+          "id": "circ-p13b",
+          "type": "concept",
+          "module_order": 12,
+          "variant": "misspelled",
+          "gold": [
+            "modules/12_lecture_12_capacitors_and_first_order_systems.pdf"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "modules/12_lecture_12_capacitors_and_first_order_systems.pdf",
+              "modules/12_lecture_12_capacitors_and_first_order_systems.pdf",
+              "modules/12_lecture_12_capacitors_and_first_order_systems.pdf",
+              "exams/final_exam_spring_2007.pdf"
+            ],
+            "scores": [
+              0.252798,
+              0.123062,
+              0.112281,
+              0.103025
+            ],
+            "rank": 1,
+            "top_score": 0.252798
+          },
+          "course": {
+            "files": [
+              "modules/12_lecture_12_capacitors_and_first_order_systems.pdf",
+              "modules/23_lecture_22_energy_and_power.pdf",
+              "modules/15_lecture_15_second_order_systems.pdf",
+              "syllabus.md"
+            ],
+            "scores": [
+              0.252798,
+              0.176014,
+              0.164412,
+              0.15233
+            ],
+            "rank": 1,
+            "top_score": 0.252798
+          }
+        },
+        {
+          "id": "circ-p14a",
+          "type": "concept",
+          "module_order": 16,
+          "variant": "paraphrase",
+          "gold": [
+            "modules/16_lecture_15b_damped_second_order_systems.pdf"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "modules/16_lecture_15b_damped_second_order_systems.pdf",
+              "modules/16_lecture_15b_damped_second_order_systems.pdf",
+              "modules/16_lecture_15b_damped_second_order_systems.pdf",
+              "modules/16_lecture_15b_damped_second_order_systems.pdf"
+            ],
+            "scores": [
+              0.155278,
+              0.106361,
+              0.092064,
+              0.077405
+            ],
+            "rank": 1,
+            "top_score": 0.155278
+          },
+          "course": {
+            "files": [
+              "modules/15_lecture_15_second_order_systems.pdf",
+              "modules/16_lecture_15b_damped_second_order_systems.pdf",
+              "syllabus.md",
+              "modules/16_lecture_15b_damped_second_order_systems.pdf"
+            ],
+            "scores": [
+              0.199206,
+              0.155278,
+              0.11002,
+              0.106361
+            ],
+            "rank": 2,
+            "top_score": 0.199206
+          }
+        },
+        {
+          "id": "circ-p14b",
+          "type": "concept",
+          "module_order": 16,
+          "variant": "misspelled",
+          "gold": [
+            "modules/16_lecture_15b_damped_second_order_systems.pdf"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "modules/16_lecture_15b_damped_second_order_systems.pdf",
+              "modules/16_lecture_15b_damped_second_order_systems.pdf",
+              "modules/16_lecture_15b_damped_second_order_systems.pdf",
+              "modules/16_lecture_15b_damped_second_order_systems.pdf"
+            ],
+            "scores": [
+              0.5877,
+              0.228848,
+              0.140944,
+              0.135097
+            ],
+            "rank": 1,
+            "top_score": 0.5877
+          },
+          "course": {
+            "files": [
+              "modules/16_lecture_15b_damped_second_order_systems.pdf",
+              "modules/16_lecture_15b_damped_second_order_systems.pdf",
+              "modules/16_lecture_15b_damped_second_order_systems.pdf",
+              "modules/16_lecture_15b_damped_second_order_systems.pdf"
+            ],
+            "scores": [
+              0.5877,
+              0.228848,
+              0.140944,
+              0.135097
+            ],
+            "rank": 1,
+            "top_score": 0.5877
+          }
+        },
+        {
+          "id": "circ-p15a",
+          "type": "concept",
+          "module_order": 20,
+          "variant": "paraphrase",
+          "gold": [
+            "modules/20_lecture_19_the_operational_amplifier_abstraction.pdf"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "modules/20_lecture_19_the_operational_amplifier_abstraction.pdf",
+              "modules/20_lecture_19_the_operational_amplifier_abstraction.pdf",
+              "modules/20_lecture_19_the_operational_amplifier_abstraction.pdf",
+              "calendar.md"
+            ],
+            "scores": [
+              0.293649,
+              0.187182,
+              0.168974,
+              0.161426
+            ],
+            "rank": 1,
+            "top_score": 0.293649
+          },
+          "course": {
+            "files": [
+              "modules/22_lecture_21_op_amps_positive_feedback.pdf",
+              "modules/20_lecture_19_the_operational_amplifier_abstraction.pdf",
+              "calendar.md",
+              "modules/22_lecture_21_op_amps_positive_feedback.pdf"
+            ],
+            "scores": [
+              0.445755,
+              0.293649,
+              0.293502,
+              0.289295
+            ],
+            "rank": 2,
+            "top_score": 0.445755
+          }
+        },
+        {
+          "id": "circ-p15b",
+          "type": "concept",
+          "module_order": 20,
+          "variant": "misspelled",
+          "gold": [
+            "modules/20_lecture_19_the_operational_amplifier_abstraction.pdf"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "modules/20_lecture_19_the_operational_amplifier_abstraction.pdf",
+              "modules/20_lecture_19_the_operational_amplifier_abstraction.pdf",
+              "modules/20_lecture_19_the_operational_amplifier_abstraction.pdf",
+              "modules/20_lecture_19_the_operational_amplifier_abstraction.pdf"
+            ],
+            "scores": [
+              0.394202,
+              0.336995,
+              0.241018,
+              0.195651
+            ],
+            "rank": 1,
+            "top_score": 0.394202
+          },
+          "course": {
+            "files": [
+              "modules/21_lecture_20_operational_amplifier_circuits.pdf",
+              "modules/20_lecture_19_the_operational_amplifier_abstraction.pdf",
+              "modules/20_lecture_19_the_operational_amplifier_abstraction.pdf",
+              "modules/20_lecture_19_the_operational_amplifier_abstraction.pdf"
+            ],
+            "scores": [
+              0.409076,
+              0.394202,
+              0.336995,
+              0.241018
+            ],
+            "rank": 2,
+            "top_score": 0.409076
+          }
+        },
+        {
+          "id": "circ-p16a",
+          "type": "concept",
+          "module_order": 19,
+          "variant": "paraphrase",
+          "gold": [
+            "modules/19_lecture_18_filters.pdf"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "modules/19_lecture_18_filters.pdf",
+              "modules/19_lecture_18_filters.pdf",
+              "modules/19_lecture_18_filters.pdf",
+              "assignments/homework_11.pdf"
+            ],
+            "scores": [
+              0.396049,
+              0.34749,
+              0.215445,
+              0.191365
+            ],
+            "rank": 1,
+            "top_score": 0.396049
+          },
+          "course": {
+            "files": [
+              "modules/19_lecture_18_filters.pdf",
+              "modules/19_lecture_18_filters.pdf",
+              "assignments/homework_11.pdf",
+              "assignments/homework_11.pdf"
+            ],
+            "scores": [
+              0.396049,
+              0.34749,
+              0.27835,
+              0.224073
+            ],
+            "rank": 1,
+            "top_score": 0.396049
+          }
+        },
+        {
+          "id": "circ-p16b",
+          "type": "concept",
+          "module_order": 19,
+          "variant": "misspelled",
+          "gold": [
+            "modules/19_lecture_18_filters.pdf"
+          ],
+          "gold_refused": [],
+          "scoped": {
+            "files": [
+              "modules/19_lecture_18_filters.pdf",
+              "modules/19_lecture_18_filters.pdf",
+              "modules/19_lecture_18_filters.pdf",
+              "modules/19_lecture_18_filters.pdf"
+            ],
+            "scores": [
+              0.234811,
+              0.209318,
+              0.194646,
+              0.129592
+            ],
+            "rank": 1,
+            "top_score": 0.234811
+          },
+          "course": {
+            "files": [
+              "modules/19_lecture_18_filters.pdf",
+              "modules/19_lecture_18_filters.pdf",
+              "modules/19_lecture_18_filters.pdf",
+              "modules/14_lecture_14_state_and_memory.pdf"
+            ],
+            "scores": [
+              0.234811,
+              0.209318,
+              0.194646,
+              0.136814
+            ],
+            "rank": 1,
+            "top_score": 0.234811
+          }
+        }
+      ]
+    }
+  }
+}

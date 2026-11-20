@@ -32,6 +32,7 @@ routing:
 rag:
   impl: medical_hybrid                # BM25 + word/char TF-IDF, section-aware retrieval
   k: 4
+  semantic_retrieval: true            # S14: sentence embeddings in course indexes for paraphrased questions
   materials_dir: data/topics          # instructor uploads (admin dashboard), one folder per topic
 
 websearch:                        # task T13; docs/WEB_SEARCH.md

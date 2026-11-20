@@ -72,6 +72,11 @@ class RagConfig(Section):
     impl: str = "stub"
     k: int = Field(4, ge=1)
     materials_dir: str = "data/topics"  # instructor uploads: <materials_dir>/<topic>/ (relative to the repo)
+    # S14: course indexes also store sentence embeddings (the router's local encoder) and retrieval adds a
+    # semantic score, so paraphrased questions find their passage. Needs the model files of
+    # `python -m app.routing.prepare`; without them retrieval stays lexical. Courses indexed while it was
+    # off get embeddings with their next rebuild.
+    semantic_retrieval: bool = True
 
 
 class WebSearchConfig(Section):

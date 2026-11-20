@@ -4,22 +4,18 @@ Retrieval of k=4 passages by `IndexedCourseRetriever` (word and character TF-IDF
 
 ## harvard_cs50x
 
-Course type `ece`; 1393 passages; index built per file (refused files skipped).
-
-Files refused by the privacy scan (not indexed): `assignments/pset_5.md`.
-
-Questions left out because every gold file was refused: cs50-22.
+Course type `computer_science`; 1467 passages; index built whole course.
 
 | Type | n | scoped hit@1 | scoped hit@4 | scoped MRR | course-wide hit@1 | course-wide hit@4 | course-wide MRR |
 |---|---|---|---|---|---|---|---|
-| concept | 12 | 1.00 | 1.00 | 1.00 | 0.58 | 0.92 | 0.75 |
-| application | 9 | 1.00 | 1.00 | 1.00 | 0.89 | 1.00 | 0.94 |
-| logistics | 6 | 0.50 | 0.67 | 0.56 | 0.50 | 0.67 | 0.56 |
-| all | 27 | 0.89 | 0.93 | 0.90 | 0.67 | 0.89 | 0.77 |
+| concept | 12 | 1.00 | 1.00 | 1.00 | 0.83 | 1.00 | 0.89 |
+| application | 10 | 1.00 | 1.00 | 1.00 | 0.90 | 1.00 | 0.93 |
+| logistics | 6 | 0.67 | 0.83 | 0.75 | 0.67 | 0.83 | 0.75 |
+| all | 28 | 0.93 | 0.96 | 0.95 | 0.82 | 0.96 | 0.88 |
 
-Logistics questions asked from inside a module (the middle one): n=6, hit@1 0.50, hit@4 0.67, MRR 0.56.
+Logistics questions asked from inside a module (the middle one): n=6, hit@1 0.67, hit@4 0.83, MRR 0.75.
 
-Top score (course-wide): answerable median 0.26, 10th percentile 0.17; 3 questions not in the material: mean 0.10, max 0.11; chance that an answerable question outscores an unanswerable one 1.00.
+Top score (course-wide): answerable median 0.33, 10th percentile 0.25; 3 questions not in the material: mean 0.11, max 0.14; chance that an answerable question outscores an unanswerable one 1.00.
 
 ## mit_6_002_circuits
 
@@ -27,29 +23,29 @@ Course type `ece`; 1217 passages; index built whole course.
 
 | Type | n | scoped hit@1 | scoped hit@4 | scoped MRR | course-wide hit@1 | course-wide hit@4 | course-wide MRR |
 |---|---|---|---|---|---|---|---|
-| concept | 15 | 1.00 | 1.00 | 1.00 | 0.67 | 1.00 | 0.79 |
-| application | 7 | 1.00 | 1.00 | 1.00 | 0.71 | 0.86 | 0.79 |
+| concept | 15 | 1.00 | 1.00 | 1.00 | 0.87 | 1.00 | 0.92 |
+| application | 7 | 1.00 | 1.00 | 1.00 | 0.71 | 1.00 | 0.83 |
 | logistics | 6 | 0.83 | 0.83 | 0.83 | 0.83 | 0.83 | 0.83 |
-| all | 28 | 0.96 | 0.96 | 0.96 | 0.71 | 0.93 | 0.80 |
+| all | 28 | 0.96 | 0.96 | 0.96 | 0.82 | 0.96 | 0.88 |
 
 Logistics questions asked from inside a module (the middle one): n=6, hit@1 0.83, hit@4 0.83, MRR 0.83.
 
-Top score (course-wide): answerable median 0.30, 10th percentile 0.17; 3 questions not in the material: mean 0.21, max 0.37; chance that an answerable question outscores an unanswerable one 0.75.
+Top score (course-wide): answerable median 0.36, 10th percentile 0.24; 3 questions not in the material: mean 0.24, max 0.46; chance that an answerable question outscores an unanswerable one 0.76.
 
 ## mit_6_006_algorithms
 
-Course type `ece`; 639 passages; index built whole course.
+Course type `computer_science`; 639 passages; index built whole course.
 
 | Type | n | scoped hit@1 | scoped hit@4 | scoped MRR | course-wide hit@1 | course-wide hit@4 | course-wide MRR |
 |---|---|---|---|---|---|---|---|
-| concept | 14 | 1.00 | 1.00 | 1.00 | 0.57 | 0.93 | 0.71 |
+| concept | 14 | 1.00 | 1.00 | 1.00 | 0.57 | 0.86 | 0.69 |
 | application | 5 | 1.00 | 1.00 | 1.00 | 0.80 | 0.80 | 0.80 |
-| logistics | 6 | 0.50 | 0.83 | 0.62 | 0.50 | 0.83 | 0.62 |
-| all | 25 | 0.88 | 0.96 | 0.91 | 0.60 | 0.88 | 0.71 |
+| logistics | 6 | 0.67 | 0.83 | 0.71 | 0.67 | 0.83 | 0.71 |
+| all | 25 | 0.92 | 0.96 | 0.93 | 0.64 | 0.84 | 0.71 |
 
-Logistics questions asked from inside a module (the middle one): n=6, hit@1 0.50, hit@4 0.83, MRR 0.62.
+Logistics questions asked from inside a module (the middle one): n=6, hit@1 0.67, hit@4 0.83, MRR 0.71.
 
-Top score (course-wide): answerable median 0.23, 10th percentile 0.17; 3 questions not in the material: mean 0.15, max 0.19; chance that an answerable question outscores an unanswerable one 0.89.
+Top score (course-wide): answerable median 0.28, 10th percentile 0.23; 3 questions not in the material: mean 0.14, max 0.22; chance that an answerable question outscores an unanswerable one 0.99.
 
 ## mit_7_016_intro_biology
 
@@ -57,14 +53,14 @@ Course type `life_science`; 831 passages; index built whole course.
 
 | Type | n | scoped hit@1 | scoped hit@4 | scoped MRR | course-wide hit@1 | course-wide hit@4 | course-wide MRR |
 |---|---|---|---|---|---|---|---|
-| concept | 19 | 0.95 | 1.00 | 0.96 | 0.68 | 0.95 | 0.79 |
-| application | 3 | 1.00 | 1.00 | 1.00 | 0.67 | 1.00 | 0.75 |
+| concept | 19 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| application | 3 | 1.00 | 1.00 | 1.00 | 0.67 | 1.00 | 0.83 |
 | logistics | 6 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
-| all | 28 | 0.96 | 1.00 | 0.97 | 0.75 | 0.96 | 0.83 |
+| all | 28 | 1.00 | 1.00 | 1.00 | 0.96 | 1.00 | 0.98 |
 
 Logistics questions asked from inside a module (the middle one): n=6, hit@1 1.00, hit@4 1.00, MRR 1.00.
 
-Top score (course-wide): answerable median 0.20, 10th percentile 0.14; 3 questions not in the material: mean 0.23, max 0.45; chance that an answerable question outscores an unanswerable one 0.66.
+Top score (course-wide): answerable median 0.30, 10th percentile 0.23; 3 questions not in the material: mean 0.23, max 0.41; chance that an answerable question outscores an unanswerable one 0.74.
 
 ## mit_7_03_genetics
 
@@ -72,14 +68,14 @@ Course type `life_science`; 795 passages; index built whole course.
 
 | Type | n | scoped hit@1 | scoped hit@4 | scoped MRR | course-wide hit@1 | course-wide hit@4 | course-wide MRR |
 |---|---|---|---|---|---|---|---|
-| concept | 15 | 0.93 | 1.00 | 0.97 | 0.53 | 0.93 | 0.71 |
-| application | 5 | 1.00 | 1.00 | 1.00 | 0.60 | 0.80 | 0.67 |
-| logistics | 6 | 0.83 | 1.00 | 0.92 | 0.83 | 1.00 | 0.92 |
-| all | 26 | 0.92 | 1.00 | 0.96 | 0.61 | 0.92 | 0.75 |
+| concept | 15 | 0.87 | 1.00 | 0.92 | 0.80 | 0.87 | 0.83 |
+| application | 5 | 1.00 | 1.00 | 1.00 | 0.60 | 1.00 | 0.77 |
+| logistics | 6 | 0.67 | 0.83 | 0.75 | 0.67 | 0.83 | 0.75 |
+| all | 26 | 0.85 | 0.96 | 0.90 | 0.73 | 0.89 | 0.80 |
 
-Logistics questions asked from inside a module (the middle one): n=6, hit@1 0.83, hit@4 1.00, MRR 0.92.
+Logistics questions asked from inside a module (the middle one): n=6, hit@1 0.67, hit@4 0.83, MRR 0.75.
 
-Top score (course-wide): answerable median 0.23, 10th percentile 0.14; 3 questions not in the material: mean 0.19, max 0.26; chance that an answerable question outscores an unanswerable one 0.67.
+Top score (course-wide): answerable median 0.35, 10th percentile 0.21; 3 questions not in the material: mean 0.31, max 0.51; chance that an answerable question outscores an unanswerable one 0.64.
 
 ## mit_hst035_pathology
 
@@ -87,14 +83,14 @@ Course type `medical_science`; 546 passages; index built whole course.
 
 | Type | n | scoped hit@1 | scoped hit@4 | scoped MRR | course-wide hit@1 | course-wide hit@4 | course-wide MRR |
 |---|---|---|---|---|---|---|---|
-| concept | 18 | 0.94 | 1.00 | 0.96 | 0.83 | 0.83 | 0.83 |
-| application | 2 | 1.00 | 1.00 | 1.00 | 0.50 | 1.00 | 0.75 |
+| concept | 18 | 1.00 | 1.00 | 1.00 | 0.89 | 1.00 | 0.93 |
+| application | 2 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
 | logistics | 6 | 0.50 | 0.83 | 0.67 | 0.50 | 0.83 | 0.67 |
-| all | 26 | 0.85 | 0.96 | 0.90 | 0.73 | 0.85 | 0.79 |
+| all | 26 | 0.89 | 0.96 | 0.92 | 0.81 | 0.96 | 0.88 |
 
 Logistics questions asked from inside a module (the middle one): n=6, hit@1 0.50, hit@4 0.83, MRR 0.67.
 
-Top score (course-wide): answerable median 0.28, 10th percentile 0.17; 3 questions not in the material: mean 0.18, max 0.23; chance that an answerable question outscores an unanswerable one 0.82.
+Top score (course-wide): answerable median 0.37, 10th percentile 0.21; 3 questions not in the material: mean 0.20, max 0.32; chance that an answerable question outscores an unanswerable one 0.89.
 
 ## mit_hst151_pharmacology
 
@@ -102,14 +98,14 @@ Course type `medical_science`; 958 passages; index built whole course.
 
 | Type | n | scoped hit@1 | scoped hit@4 | scoped MRR | course-wide hit@1 | course-wide hit@4 | course-wide MRR |
 |---|---|---|---|---|---|---|---|
-| concept | 16 | 1.00 | 1.00 | 1.00 | 0.94 | 1.00 | 0.95 |
-| application | 5 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| concept | 16 | 1.00 | 1.00 | 1.00 | 0.94 | 1.00 | 0.97 |
+| application | 5 | 1.00 | 1.00 | 1.00 | 0.80 | 1.00 | 0.90 |
 | logistics | 6 | 0.83 | 1.00 | 0.89 | 0.83 | 1.00 | 0.89 |
-| all | 27 | 0.96 | 1.00 | 0.97 | 0.93 | 1.00 | 0.95 |
+| all | 27 | 0.96 | 1.00 | 0.97 | 0.89 | 1.00 | 0.94 |
 
 Logistics questions asked from inside a module (the middle one): n=6, hit@1 0.83, hit@4 1.00, MRR 0.89.
 
-Top score (course-wide): answerable median 0.22, 10th percentile 0.13; 3 questions not in the material: mean 0.11, max 0.12; chance that an answerable question outscores an unanswerable one 0.95.
+Top score (course-wide): answerable median 0.28, 10th percentile 0.21; 3 questions not in the material: mean 0.14, max 0.19; chance that an answerable question outscores an unanswerable one 0.99.
 
 ## mit_res_6_007_signals
 
@@ -117,46 +113,41 @@ Course type `ece`; 890 passages; index built whole course.
 
 | Type | n | scoped hit@1 | scoped hit@4 | scoped MRR | course-wide hit@1 | course-wide hit@4 | course-wide MRR |
 |---|---|---|---|---|---|---|---|
-| concept | 14 | 1.00 | 1.00 | 1.00 | 0.50 | 1.00 | 0.74 |
-| application | 5 | 1.00 | 1.00 | 1.00 | 0.60 | 0.80 | 0.70 |
+| concept | 14 | 1.00 | 1.00 | 1.00 | 0.71 | 1.00 | 0.83 |
+| application | 5 | 1.00 | 1.00 | 1.00 | 0.80 | 0.80 | 0.80 |
 | logistics | 6 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
-| all | 25 | 1.00 | 1.00 | 1.00 | 0.64 | 0.96 | 0.79 |
+| all | 25 | 1.00 | 1.00 | 1.00 | 0.80 | 0.96 | 0.87 |
 
 Logistics questions asked from inside a module (the middle one): n=6, hit@1 1.00, hit@4 1.00, MRR 1.00.
 
-Top score (course-wide): answerable median 0.26, 10th percentile 0.20; 3 questions not in the material: mean 0.19, max 0.31; chance that an answerable question outscores an unanswerable one 0.76.
+Top score (course-wide): answerable median 0.34, 10th percentile 0.25; 3 questions not in the material: mean 0.21, max 0.42; chance that an answerable question outscores an unanswerable one 0.75.
 
 ## All packs
 
 | Pack | scoped hit@1 | scoped hit@4 | scoped MRR | course-wide hit@1 | course-wide hit@4 | course-wide MRR | unanswerable max top score |
 |---|---|---|---|---|---|---|---|
-| harvard_cs50x | 0.89 | 0.93 | 0.90 | 0.67 | 0.89 | 0.77 | 0.11 |
-| mit_6_002_circuits | 0.96 | 0.96 | 0.96 | 0.71 | 0.93 | 0.80 | 0.37 |
-| mit_6_006_algorithms | 0.88 | 0.96 | 0.91 | 0.60 | 0.88 | 0.71 | 0.19 |
-| mit_7_016_intro_biology | 0.96 | 1.00 | 0.97 | 0.75 | 0.96 | 0.83 | 0.45 |
-| mit_7_03_genetics | 0.92 | 1.00 | 0.96 | 0.61 | 0.92 | 0.75 | 0.26 |
-| mit_hst035_pathology | 0.85 | 0.96 | 0.90 | 0.73 | 0.85 | 0.79 | 0.23 |
-| mit_hst151_pharmacology | 0.96 | 1.00 | 0.97 | 0.93 | 1.00 | 0.95 | 0.12 |
-| mit_res_6_007_signals | 1.00 | 1.00 | 1.00 | 0.64 | 0.96 | 0.79 | 0.31 |
+| harvard_cs50x | 0.93 | 0.96 | 0.95 | 0.82 | 0.96 | 0.88 | 0.14 |
+| mit_6_002_circuits | 0.96 | 0.96 | 0.96 | 0.82 | 0.96 | 0.88 | 0.46 |
+| mit_6_006_algorithms | 0.92 | 0.96 | 0.93 | 0.64 | 0.84 | 0.71 | 0.22 |
+| mit_7_016_intro_biology | 1.00 | 1.00 | 1.00 | 0.96 | 1.00 | 0.98 | 0.41 |
+| mit_7_03_genetics | 0.85 | 0.96 | 0.90 | 0.73 | 0.89 | 0.80 | 0.51 |
+| mit_hst035_pathology | 0.89 | 0.96 | 0.92 | 0.81 | 0.96 | 0.88 | 0.32 |
+| mit_hst151_pharmacology | 0.96 | 1.00 | 0.97 | 0.89 | 1.00 | 0.94 | 0.19 |
+| mit_res_6_007_signals | 1.00 | 1.00 | 1.00 | 0.80 | 0.96 | 0.87 | 0.42 |
 
 ## Misses (course-wide, no gold file in the top results)
 
-- `cs50-16` (concept): gold `modules/08_week_7_sql.md`; top result `modules/07_week_6_python.md` (score 0.43); scoped rank 1
-- `cs50-24` (logistics): gold `syllabus.md`; top result `assignments/pset_9.md` (score 0.33); scoped rank None
-- `cs50-25` (logistics): gold `syllabus.md`; top result `assignments/pset_1.md` (score 0.40); scoped rank None
-- `circ-03` (application): gold `modules/02_lecture_2_basic_circuit_analysis_method.pdf`; top result `modules/06_lecture_6_nonlinear_analysis.pdf` (score 0.43); scoped rank 1
-- `circ-28` (logistics): gold `calendar.md`; top result `syllabus.md` (score 0.34); scoped rank None
-- `alg-07` (application): gold `modules/09_lecture_9_breadth_first_search.pdf`; top result `modules/11_lecture_11_weighted_shortest_paths.pdf` (score 0.12); scoped rank 1
-- `alg-17` (concept): gold `modules/16_lecture_17_dynamic_programming_part_3.pdf`; top result `modules/17_lecture_18_pseudopolynomial.pdf` (score 0.20); scoped rank 1
-- `alg-24` (logistics): gold `calendar.md`; top result `assignments.md` (score 0.44); scoped rank None
-- `bio7016-02` (concept): gold `modules/02_recitation_2.pdf`, `modules/09_recitation_9.pdf`; top result `modules/13_recitation_13.pdf` (score 0.15); scoped rank 4
-- `gen-02` (application): gold `modules/04_lecture_4_probability_and_pedigrees.pdf`; top result `modules/33_lecture_35_genetics_of_cancer_ii.pdf` (score 0.17); scoped rank 1
-- `gen-08` (concept): gold `modules/12_lecture_12_bacterial_genetics_transposition.pdf`; top result `exams/exam1_2004.pdf` (score 0.10); scoped rank 1
-- `path-05` (concept): gold `modules/05_acute_and_chronic_inflammation.pdf`; top result `calendar.md` (score 0.19); scoped rank 3
-- `path-18` (concept): gold `modules/03_the_immune_system.pdf`; top result `modules/06_tissue_repair_fibrosis_and_healing.pdf` (score 0.19); scoped rank 1
-- `path-20` (concept): gold `modules/07_infectious_diseases.pdf`; top result `modules/02_epithelial_structure_and_function.pdf` (score 0.16); scoped rank 1
-- `path-25` (logistics): gold `assignments.md`; top result `syllabus.md` (score 0.26); scoped rank None
-- `sig-16` (application): gold `modules/23_lecture_23_mapping_continuous_time_filters_to_di.pdf`; top result `modules/18_lecture_18_mapping_continuous_time_filters_to_di.pdf` (score 0.26); scoped rank 1
+- `cs50-24` (logistics): gold `syllabus.md`; top result `assignments/pset_9.md` (score 0.24); scoped rank None
+- `circ-28` (logistics): gold `calendar.md`; top result `syllabus.md` (score 0.37); scoped rank None
+- `alg-07` (application): gold `modules/09_lecture_9_breadth_first_search.pdf`; top result `modules/11_lecture_11_weighted_shortest_paths.pdf` (score 0.20); scoped rank 1
+- `alg-16` (concept): gold `modules/06_lecture_6_binary_trees_part_1.pdf`; top result `modules/07_lecture_7_binary_trees_part_2_avl.pdf` (score 0.26); scoped rank 1
+- `alg-17` (concept): gold `modules/16_lecture_17_dynamic_programming_part_3.pdf`; top result `modules/17_lecture_18_pseudopolynomial.pdf` (score 0.27); scoped rank 1
+- `alg-24` (logistics): gold `calendar.md`; top result `assignments.md` (score 0.56); scoped rank None
+- `gen-08` (concept): gold `modules/12_lecture_12_bacterial_genetics_transposition.pdf`; top result `modules/19_lecture_19_eukaryotic_genes_and_genomes_i.pdf` (score 0.14); scoped rank 3
+- `gen-20` (concept): gold `modules/01_lecture_1_physical_structure_of_the_gene.pdf`; top result `calendar.md` (score 0.53); scoped rank 2
+- `gen-26` (logistics): gold `calendar.md`; top result `syllabus.md` (score 0.57); scoped rank None
+- `path-25` (logistics): gold `assignments.md`; top result `syllabus.md` (score 0.32); scoped rank None
+- `sig-10` (application): gold `modules/17_lecture_17_interpolation.pdf`; top result `modules/16_lecture_16_sampling.pdf` (score 0.30); scoped rank 1
 
 ## Analysis
 
@@ -218,3 +209,12 @@ lexical score; fix the scan false positives.
 files not weighted down, boosted by 1.5), and Markdown table rows such as calendar rows are indexed one
 passage per row with their column names ("Lecture 11. TOPICS: Midterm Exam ..."). Before: logistics hit@1 0.69,
 hit@4 0.85; calendar questions hit@4 0.60. The question-type head and the numbers are in `eval/question-type/`.
+
+**S14 (paraphrases, misspellings, semantic step).** The tables above are from the run after S14 (2026-11-20);
+the analysis text before this paragraph describes the run of 2026-11-12. Retrieval now stems words, adds
+corrected spellings and logistics synonyms to the question, weights homework and exam files by 0.8 in
+course-wide concept questions and adds the router's sentence encoder as a semantic score. Over the eight packs
+course-wide hit@1 went 0.71 -> 0.82 and hit@4 0.93 -> 0.95, scoped hit@1 0.93 -> 0.94 and hit@4 stays 0.98.
+Five questions fell out of the top 4 (listed in `s14-comparison.md`). The paraphrase and misspelling set is in
+`paraphrase_questions/` with its report in `results/paraphrase/`; before and after in `results/s14-comparison.md`.
+
