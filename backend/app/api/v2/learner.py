@@ -10,20 +10,20 @@ from dataclasses import asdict
 from datetime import date, datetime
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, Request, Response, status
+from fastapi import APIRouter, Depends, Query, Request, Response, status
 from pydantic import BaseModel, Field
 
 from app.admin.summary import ClassSummary, class_summary
 from app.api.v1.check import CheckResponse
 from app.api.v1.learner_me import OpenMisconception
 from app.api.v1.onboarding import (
-    PREFERENCE_QUESTIONS,
     DiagnosticAnswer,
     KcBand,
     OnboardingResult,
     PreferenceAnswers,
     PreferenceQuestion,
 )
+from app.api.v2 import localize
 from app.api.v2.ask import _scope
 from app.api.v2.errors import ApiError, ErrorCode
 from app.core.schemas import CheckItemPublic, Preferences
@@ -154,16 +154,20 @@ def check(body: CheckIn, access: CourseStudent, request: Request):
 
 @router.get("/courses/{course_id}/onboarding", response_model=OnboardingOut,
             operation_id="learner_onboarding_get")
-def get_onboarding(module_id: int, access: CourseStudent, request: Request):
+def get_onboarding(module_id: int, access: CourseStudent, request: Request,
+                   language: str = Query("en", max_length=8)):
+    """The consent text and the preference questions come in `language` (the UI's language)."""
     services = _services(request)
     scope = _scope(services, access.course.id)
     code = _module_code(scope, module_id)
     statistics_only = not services.settings.learner.instructor_individual_view
+    profile = privacy_profile(access.course.course_type)
+    english = consent_text(profile, statistics_only=statistics_only)
     return OnboardingOut(module_id=module_id,
-                         consent_text=consent_text(privacy_profile(access.course.course_type),
-                                                   statistics_only=statistics_only),
+                         consent_text=localize.consent_text(profile.name, english, language,
+                                                            statistics_only=statistics_only),
                          consent_given=scope.learner.repo.consent(access.student_id),
-                         preference_questions=PREFERENCE_QUESTIONS,
+                         preference_questions=localize.preference_questions(language),
                          diagnostic=[i.public() for i in diagnostic_items(scope.content, code)])
 
 

@@ -13,6 +13,7 @@ export function ErrorNote({ error, id }: { error: unknown; id?: string }) {
   if (!error) return null;
   let text = error instanceof Error ? error.message : t("app.serverUnreachable");
   if (error instanceof ApiError) {
+    if (error.code === "model_failed") text = t("error.modelFailed");
     if (error.code === "usage_limit") text = t("error.usageLimit", { s: error.retryAfterSeconds ?? 0 });
     if (error.code === "settings_applying") text = t("error.settingsApplying");
     if (error.code === "conflict") text = `${t("error.conflict")} ${error.message}`;

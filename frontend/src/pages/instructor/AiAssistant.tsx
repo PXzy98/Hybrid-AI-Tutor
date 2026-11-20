@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Sparkles } from "lucide-react";
-import { useState, type FormEvent } from "react";
-import { useLocation } from "react-router-dom";
+import { useEffect, useState, type FormEvent } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { api, type AiDraft, type AiDraftAccept, type AiDraftKind, type AiDraftStatus, type Course } from "@/api/endpoints";
 import { ErrorNote, Loading, PageHeader, StatusText } from "@/components/common";
@@ -18,9 +18,12 @@ import { useI18n } from "@/i18n";
 import type { MessageKey } from "@/i18n/en";
 import AiEvaluation from "./AiEvaluation";
 
-const KINDS: AiDraftKind[] = ["faq", "project_ideas", "sample_proposal", "kcs", "check_items", "misconceptions"];
+const KINDS: AiDraftKind[] = ["custom", "faq", "project_ideas", "sample_proposal", "kcs", "check_items", "misconceptions"];
 const STATUSES: AiDraftStatus[] = ["generating", "draft", "accepted", "discarded", "failed"];
-const TIER1: AiDraftKind[] = ["faq", "project_ideas", "sample_proposal"];
+const TIER1: AiDraftKind[] = ["faq", "project_ideas", "sample_proposal", "custom"];
+// where the draft's material comes from (V5, V6)
+const SOURCES = ["course", "module", "modules", "files", "upload", "url"] as const;
+type SourceChoice = (typeof SOURCES)[number];
 
 /** Instructor AI: drafts from the course material (tiers 1 and 2) and the cloud evaluation (tier 4). */
 export default function AiAssistant({ course }: { course: Course }) {
@@ -83,39 +86,177 @@ function Drafts({ course }: { course: Course }) {
 
 function StartForm({ course, onStarted }: { course: Course; onStarted: (d: AiDraft) => void }) {
   const { t } = useI18n();
+  const qc = useQueryClient();
   const modules = useQuery({ queryKey: ["modules", course.id], queryFn: () => api.modules(course.id) });
+  const materials = useQuery({ queryKey: ["materials", course.id], queryFn: () => api.materials(course.id) });
   // V8: "Draft extra material" on Class overview hands over a request and its module (router state)
-  const handed = (useLocation().state as { draft?: { request: string; moduleId: number | null } } | null)?.draft;
-  const [kind, setKind] = useState<AiDraftKind>("faq");
+  const location = useLocation();
+  const navigate = useNavigate();
+  const handed = (location.state as { draft?: { request: string; moduleId: number | null } } | null)?.draft;
+  // read once into the form: a reload or Back does not fill it again
+  useEffect(() => {
+    if (handed) navigate(location.pathname + location.search, { replace: true, state: null });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const [kind, setKind] = useState<AiDraftKind>("custom");
+  const [request, setRequest] = useState(handed?.request ?? "");
+  const [source, setSource] = useState<SourceChoice>(handed?.moduleId ? "module" : "course");
   const [moduleId, setModuleId] = useState<number | null>(handed?.moduleId ?? null);
-  const [focus, setFocus] = useState(handed?.request ?? "");
+  const [moduleIds, setModuleIds] = useState<number[]>([]);
+  const [materialIds, setMaterialIds] = useState<number[]>([]);
+  const [file, setFile] = useState<File | null>(null);
+  const [pageUrl, setPageUrl] = useState("");
+  const [addToCourse, setAddToCourse] = useState(false);
+  const [addModuleId, setAddModuleId] = useState<number | null>(null); // where the uploaded file or page goes
+  const [focus, setFocus] = useState("");
+  // V16: the cloud model for public material, only with the explicit confirmation below
+  const [cloud, setCloud] = useState(false);
+  const [confirmCloud, setConfirmCloud] = useState(false);
+  const cloudOffered = !course.local_only && !!course.cloud_available;  // else the model choice is hidden
+  const useCloud = cloud && confirmCloud && cloudOffered;
+  const model = useCloud ? { model: "cloud" as const, confirm_cloud: true } : {};
   const start = useMutation({
-    mutationFn: () => api.createAiDraft(course.id, { kind, module_id: moduleId, focus }),
-    onSuccess: onStarted,
+    mutationFn: () => {
+      const text = kind === "custom" ? request : "";
+      if (source === "upload" && file) {
+        return api.createAiDraftFromUpload(course.id, { file, kind, request: text, focus, addToCourse, moduleId: addToCourse ? addModuleId : null, cloud: useCloud });
+      }
+      if (source === "url") {
+        return api.createAiDraftFromUrl(course.id, { url: pageUrl.trim(), kind, request: text, focus, add_to_course: addToCourse,
+                                                     module_id: addToCourse ? addModuleId : null, ...model });
+      }
+      return api.createAiDraft(course.id, {
+        kind, focus, request: text,
+        module_id: source === "module" ? moduleId : null,
+        ...(source === "modules" ? { module_ids: moduleIds } : {}),
+        ...(source === "files" ? { material_ids: materialIds } : {}),
+        ...model,
+      });
+    },
+    onSuccess: (d) => {
+      if ((source === "upload" || source === "url") && addToCourse) qc.invalidateQueries({ queryKey: ["materials", course.id] });
+      onStarted(d);
+    },
   });
+  const toggle = (list: number[], set: (v: number[]) => void, id: number) =>
+    set(list.includes(id) ? list.filter((x) => x !== id) : [...list, id]);
+  const moduleName = new Map((modules.data ?? []).map((m) => [m.id, m.title]));
+  const missing = (kind === "custom" && !request.trim())
+    || (source === "modules" && moduleIds.length === 0) || (source === "files" && materialIds.length === 0)
+    || (cloud && cloudOffered && !confirmCloud) || (source === "upload" && !file) || (source === "url" && !pageUrl.trim()) || (source === "module" && moduleId === null);
   function submit(e: FormEvent) {
     e.preventDefault();
-    start.mutate();
+    if (!missing) start.mutate();
   }
   return (
     <Card>
       <CardHeader><CardTitle className="flex items-center gap-2"><Sparkles aria-hidden className="size-4" />{t("ai.start")}</CardTitle><CardDescription>{t("ai.startHint")}</CardDescription></CardHeader>
       <CardContent>
-        <form onSubmit={submit} className="grid gap-3 sm:grid-cols-2" aria-label={t("ai.start")}>
+        <form onSubmit={submit} className="grid gap-4 sm:grid-cols-2" aria-label={t("ai.start")}>
           <div className="grid gap-1.5"><Label htmlFor="ai-kind">{t("ai.kindLabel")}</Label>
             <Select id="ai-kind" value={kind} onChange={(e) => setKind(e.target.value as AiDraftKind)}>
               {KINDS.map((k) => <option key={k} value={k}>{t(`ai.kind.${k}` as MessageKey)}</option>)}
             </Select></div>
-          <div className="grid gap-1.5"><Label htmlFor="ai-module">{t("content.module")}</Label>
-            <Select id="ai-module" value={moduleId ?? ""} onChange={(e) => setModuleId(e.target.value ? Number(e.target.value) : null)}>
-              <option value="">{t("nav.wholeCourse")}</option>
-              {modules.data?.map((m) => <option key={m.id} value={m.id}>{m.title}</option>)}
-            </Select></div>
+          {kind === "custom" && (
+            <div className="grid gap-1.5 sm:col-span-2"><Label htmlFor="ai-request">{t("ai.request")}</Label>
+              <Textarea id="ai-request" value={request} maxLength={1000} required onChange={(e) => setRequest(e.target.value)}
+                        placeholder={t("ai.requestHint")} aria-describedby="ai-request-examples" />
+              <p id="ai-request-examples" className="text-xs text-muted-foreground">{t("ai.requestExamples")}</p></div>
+          )}
+          <fieldset className="grid gap-2 sm:col-span-2">
+            <legend className="mb-1 text-sm font-medium">{t("ai.sourcesChoice")}</legend>
+            <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+              {SOURCES.map((s) => (
+                <label key={s} className="flex items-center gap-2 text-sm">
+                  <input type="radio" name="ai-source" className="accent-primary" checked={source === s} onChange={() => setSource(s)} />
+                  {t(`ai.source.${s}` as MessageKey)}
+                </label>
+              ))}
+            </div>
+            {source === "module" && (
+              <Select aria-label={t("content.module")} value={moduleId ?? ""} onChange={(e) => setModuleId(e.target.value ? Number(e.target.value) : null)}>
+                <option value="">{t("ai.chooseModule")}</option>
+                {modules.data?.map((m) => <option key={m.id} value={m.id}>{m.title}</option>)}
+              </Select>
+            )}
+            {source === "modules" && (
+              <div className="grid gap-1 rounded-md border p-2 sm:grid-cols-2" role="group" aria-label={t("ai.source.modules")}>
+                {modules.data?.map((m) => (
+                  <label key={m.id} className="flex items-center gap-2 text-sm">
+                    <input type="checkbox" className="accent-primary" checked={moduleIds.includes(m.id)} onChange={() => toggle(moduleIds, setModuleIds, m.id)} />
+                    {m.title}
+                  </label>
+                ))}
+              </div>
+            )}
+            {source === "files" && (
+              <div className="grid max-h-56 gap-1 overflow-y-auto rounded-md border p-2" role="group" aria-label={t("ai.source.files")}>
+                {(materials.data?.materials ?? []).map((m) => (
+                  <label key={m.id} className="flex min-w-0 items-center gap-2 text-sm">
+                    <input type="checkbox" className="accent-primary" checked={materialIds.includes(m.id)} onChange={() => toggle(materialIds, setMaterialIds, m.id)} />
+                    <span className="min-w-0 break-words">{m.filename}</span>
+                    <span className="shrink-0 text-xs text-muted-foreground">{m.module_id === null ? t("nav.wholeCourse") : moduleName.get(m.module_id) ?? ""}</span>
+                  </label>
+                ))}
+                {materials.data?.materials.length === 0 && <p className="text-sm text-muted-foreground">{t("ai.noFiles")}</p>}
+              </div>
+            )}
+            {(source === "upload" || source === "url") && (
+              <div className="grid gap-2 rounded-md border p-3">
+                {source === "upload" ? (
+                  <>
+                    <Label htmlFor="ai-file">{t("ai.uploadFile")}</Label>
+                    <Input id="ai-file" type="file" accept=".pdf,.pptx,.docx,.md,.txt,.html" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+                    <p className="text-xs text-muted-foreground">{t("ai.uploadHint")}</p>
+                  </>
+                ) : (
+                  <>
+                    <Label htmlFor="ai-url">{t("ai.pageUrl")}</Label>
+                    <Input id="ai-url" type="url" inputMode="url" placeholder="https://" value={pageUrl} onChange={(e) => setPageUrl(e.target.value)} />
+                    <p className="text-xs text-muted-foreground">{t("ai.pageHint")}</p>
+                  </>
+                )}
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" className="accent-primary" checked={addToCourse} onChange={(e) => setAddToCourse(e.target.checked)} />
+                  {t("ai.addToCourse")}
+                </label>
+                {addToCourse && (
+                  <Select aria-label={t("ai.addToModule")} value={addModuleId ?? ""} onChange={(e) => setAddModuleId(e.target.value ? Number(e.target.value) : null)}>
+                    <option value="">{t("nav.wholeCourse")}</option>
+                    {modules.data?.map((m) => <option key={m.id} value={m.id}>{m.title}</option>)}
+                  </Select>
+                )}
+              </div>
+            )}
+          </fieldset>
+          {cloudOffered && (
+            <fieldset className="grid gap-2 sm:col-span-2">
+              <legend className="mb-1 text-sm font-medium">{t("ai.model")}</legend>
+              <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="radio" name="ai-model" className="accent-primary" checked={!cloud} onChange={() => { setCloud(false); setConfirmCloud(false); }} />
+                  {t("ai.modelLocal")}
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="radio" name="ai-model" className="accent-primary" checked={cloud} onChange={() => setCloud(true)} />
+                  {t("ai.modelCloud")}
+                </label>
+              </div>
+              {cloud && (
+                <Alert variant="warning" icon>
+                  <p>{t("ai.cloudNotice")}</p>
+                  <label className="mt-2 flex items-start gap-2 text-sm font-medium">
+                    <input type="checkbox" className="mt-0.5 accent-primary" checked={confirmCloud} onChange={(e) => setConfirmCloud(e.target.checked)} />
+                    {t("ai.cloudConfirm")}
+                  </label>
+                </Alert>
+              )}
+            </fieldset>
+          )}
           <div className="grid gap-1.5 sm:col-span-2"><Label htmlFor="ai-focus">{t("ai.focus")}</Label>
             <Input id="ai-focus" value={focus} maxLength={300} onChange={(e) => setFocus(e.target.value)} placeholder={t("ai.focusHint")} /></div>
           <div className="sm:col-span-2 space-y-2">
             <ErrorNote error={start.error} />
-            <Button type="submit" disabled={start.isPending}>{t("ai.startButton")}</Button>
+            <Button type="submit" disabled={start.isPending || missing}>{t("ai.startButton")}</Button>
           </div>
         </form>
       </CardContent>

@@ -1,0 +1,57 @@
+# French versions of the fixed texts the backend shows students (app/api/v2/localize.py). Keys under `notes`
+# are the names of the English constants; a new constant needs its entry here (tests/test_localize_fr.py).
+notes:
+  CLOUD_FALLBACK_WARNING: "Le modèle infonuagique n’était pas disponible : le modèle local a répondu."
+  CLOUD_MISSING_WARNING: "Aucun modèle infonuagique n’est connecté : le modèle local a répondu à cette question."
+  PRIVACY_BLOCK_WARNING: "Une vérification de confidentialité a gardé cette question sur le modèle local."
+  LOCAL_ONLY_WARNING: "Ce cours utilise seulement le modèle local."
+  CLOUD_LIMIT_NOTE: "La limite quotidienne de réponses infonuagiques est atteinte : cette réponse vient du modèle local."
+  GENERALIZED_NOTE: "Pour votre vie privée, le modèle infonuagique a reçu une version générale de votre question, sans vos détails de santé personnels."
+  LOCAL_CAPABILITY_NOTE: "Cette question dépasse peut-être ce que le modèle local fait bien ; vérifiez la réponse à l’aide des sources ci-dessous."
+  UNVERIFIED_SOURCES_NOTE: "Les sources du cours ci-dessous ont été trouvées par la recherche, mais leur pertinence n’a pas été vérifiée."
+  REPLACED_WARNING: "La première réponse n’a pas passé la vérification de sécurité et a été remplacée par un message sûr."
+  GROUNDING_WARNING: "Certaines parties de cette réponse peuvent dépasser le matériel du cours."
+  LEAK_WARNING: "Une vérification de confidentialité a signalé cette demande ; elle est consignée pour examen."
+  REFERRAL: "Pour un avis sur votre propre situation, veuillez parler à un médecin, une infirmière ou un pharmacien."
+  NOTE_HEADER: "Un malentendu fréquent à surveiller :"
+  SAFE_FALLBACK: "Je ne peux pas donner ici de réponse générale sûre à cette question. Les questions sur votre propre santé, vos médicaments ou vos doses demandent l’avis d’un médecin, d’une infirmière ou d’un pharmacien, qui peut examiner votre situation."
+  SAFE_FALLBACK_SOURCES: " Le matériel du cours ci-dessous explique ce sujet en termes généraux."
+  DEFAULT_FAILURE: "Le tuteur ne peut pas répondre pour le moment. Veuillez réessayer."
+  PRIVACY_FILTER_FAILURE: "Le filtre de confidentialité n’est pas disponible : la question n’a pas été traitée."
+  MODEL_UNAVAILABLE: "Le modèle choisi n’est pas disponible. Vérifiez le serveur local ou la configuration infonuagique, puis réessayez."
+  STATISTICS_ONLY_NOTE: "Votre enseignant ne voit que des statistiques de la classe, par exemple combien d’étudiants utilisent le tuteur, les sujets les plus fréquents et les moyennes des quiz. Personne, pas même l’enseignant, ne voit votre propre profil, vos questions ou vos réponses."
+
+step_failed: "{step} : n’a pas pu être terminé"
+
+consent: >-
+  Pour adapter les explications à vous, le tuteur tient un profil d’apprentissage : une estimation de votre
+  maîtrise de chaque partie du sujet, des malentendus courants que vous pourriez avoir, et de la façon dont vous
+  préférez les explications (des exemples d’abord ou l’idée générale d’abord, courtes ou détaillées). Il ne
+  conserve pas vos questions sous forme lisible avec votre nom. Le profil est stocké seulement sur les serveurs
+  du cours et n’est jamais envoyé à des services d’IA externes ; ils peuvent seulement recevoir un niveau
+  général comme « de base ». Vous pouvez consulter ou réinitialiser votre profil à tout moment dans « Ma
+  progression », et l’enseignant peut supprimer votre compte et ses données. Sans consentement, le tuteur
+  répond quand même, mais ne s’adapte pas à vous.
+
+# the privacy profiles' consent notes (app/privacy/profiles/<name>.yaml)
+consent_notes:
+  ece: >-
+    Veuillez retirer les mots de passe, les clés d’API et les adresses réseau du laboratoire du code que vous
+    collez ; le tuteur retire aussi ceux qu’il reconnaît avant que quoi que ce soit ne quitte les serveurs du cours.
+  computer_science: >-
+    Veuillez retirer les mots de passe, les clés d’API et les adresses de serveur du code que vous collez ; le
+    tuteur retire aussi ceux qu’il reconnaît avant que quoi que ce soit ne quitte les serveurs du cours.
+  medical_science: >-
+    Les questions sur votre propre santé reçoivent une réponse du modèle local du cours ; au plus une
+    reformulation générale sans vos détails personnels peut aller à un service externe. Le tuteur ne donne pas
+    d’avis médical.
+
+preferences:
+  sequencing:
+    question: "Quand vous apprenez quelque chose de nouveau, qu’est-ce qui vous aide le plus au début ?"
+    example_first: "Un exemple concret d’abord"
+    concept_first: "L’idée générale d’abord"
+  detail:
+    question: "Quelle longueur devraient avoir les explications, en général ?"
+    concise: "Courtes et directes"
+    detailed: "Détaillées, étape par étape"

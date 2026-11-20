@@ -11,7 +11,7 @@ import json
 import threading
 from pathlib import Path
 
-from app.core.schemas import CloudRequest, LLMResult
+from app.core.schemas import CloudRequest, DraftCloudRequest, LLMResult
 from app.llm.base import Message
 from app.llm.cloud_guard import CloudClient
 from app.prompts import render_cloud
@@ -44,3 +44,14 @@ class RecordingCloudClient(CloudClient):
             with self._lock, self.path.open("a", encoding="utf-8") as f:
                 f.write(json.dumps(record, ensure_ascii=False) + "\n")
         return await super().complete(req, safety_retry=safety_retry)
+
+    async def complete_draft(self, req: DraftCloudRequest) -> LLMResult:
+        if isinstance(req, DraftCloudRequest) and self.available:
+            from app.instructor_ai.draft_cloud import render_draft
+
+            checked = DraftCloudRequest.model_validate(req.model_dump())
+            record = {"draft_cloud_request": checked.model_dump(mode="json"),
+                      "messages": render_draft(checked)[0]}
+            with self._lock, self.path.open("a", encoding="utf-8") as f:
+                f.write(json.dumps(record, ensure_ascii=False) + "\n")
+        return await super().complete_draft(req)

@@ -40,6 +40,7 @@ export default function Materials({ course }: { course: Course }) {
     mutationFn: (m: Material) => api.deleteMaterial(course.id, m.id),
     onSuccess: () => { setPendingDelete(null); refresh(); },
   });
+  const refetch = useMutation({ mutationFn: (m: Material) => api.refetchMaterial(course.id, m.id), onSuccess: refresh });
   const moduleName = (id: number | null) => (id === null ? t("materials.courseLevel") : modules.data?.find((m) => m.id === id)?.title ?? String(id));
 
   return (
@@ -74,11 +75,20 @@ export default function Materials({ course }: { course: Course }) {
                       <span aria-hidden className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground"><FileText className="size-4" /></span>
                       <span className="max-w-64 min-w-0 break-words">{m.filename}</span>
                     </span>
+                    {m.source_url && (isHttps(m.source_url) ? (
+                      <a href={m.source_url} target="_blank" rel="noopener noreferrer nofollow" className="mt-1 block max-w-64 break-words text-xs text-muted-foreground underline underline-offset-2">{m.source_url}</a>
+                    ) : (
+                      <span className="mt-1 block max-w-64 break-words text-xs text-muted-foreground">{m.source_url}</span>
+                    ))}
                   </TableCell>
                   <TableCell>{moduleName(m.module_id)}</TableCell>
                   <TableCell className="tabular-nums text-muted-foreground">{Math.max(1, Math.round(m.size_bytes / 1024))} KB</TableCell>
                   <TableCell><Badge variant={scanVariant(m.scan_status)}>{m.scan_status}</Badge></TableCell>
                   <TableCell className="text-right">
+                    {m.source_url && (
+                      <Button type="button" size="sm" variant="ghost" loading={refetch.isPending && refetch.variables?.id === m.id}
+                              aria-label={t("materials.refetchFor", { name: m.filename })} onClick={() => refetch.mutate(m)}>{t("materials.refetch")}</Button>
+                    )}
                     <Button type="button" size="icon-sm" variant="ghost" className="text-muted-foreground hover:text-destructive" aria-label={t("materials.deleteFor", { name: m.filename })} onClick={() => setPendingDelete(m)}><Trash2 aria-hidden /></Button>
                   </TableCell>
                 </TableRow>
@@ -87,7 +97,9 @@ export default function Materials({ course }: { course: Course }) {
           </Table>
         )}
       </section>
+      <ErrorNote error={refetch.error} />
       <UploadCard course={course} modules={modules.data ?? []} onDone={refresh} />
+      <WebPageCard course={course} modules={modules.data ?? []} onDone={refresh} />
       <Dialog open={!!pendingDelete} onOpenChange={(o) => { if (!o) setPendingDelete(null); }}>
         <DialogContent>
           <DialogHeader>
@@ -159,8 +171,54 @@ function UploadCard({ course, modules, onDone }: { course: Course; modules: { id
   );
 }
 
+/** V7: a web page as course material. The server fetches it (https, public addresses only, size and time
+ *  limits), keeps its address and scans it like an upload. */
+function WebPageCard({ course, modules, onDone }: { course: Course; modules: { id: number; title: string }[]; onDone: () => void }) {
+  const { t } = useI18n();
+  const [url, setUrl] = useState("");
+  const [moduleId, setModuleId] = useState<number | null>(null);
+  const add = useMutation({ mutationFn: () => api.addUrlMaterial(course.id, url.trim(), moduleId), onSuccess: () => { setUrl(""); onDone(); } });
+  function submit(e: FormEvent) {
+    e.preventDefault();
+    if (url.trim()) add.mutate();
+  }
+  return (
+    <Card>
+      <CardHeader><CardTitle>{t("materials.webTitle")}</CardTitle><CardDescription>{t("materials.webHint")}</CardDescription></CardHeader>
+      <CardContent>
+        <form onSubmit={submit} className="space-y-3">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-1.5 sm:col-span-2">
+              <Label htmlFor="mat-url">{t("materials.webUrl")}</Label>
+              <Input id="mat-url" type="url" inputMode="url" placeholder="https://" value={url} onChange={(e) => setUrl(e.target.value)} />
+            </div>
+            <div className="grid gap-1.5">
+              <Label htmlFor="mat-url-module">{t("materials.webModule")}</Label>
+              <Select id="mat-url-module" value={moduleId ?? ""} onChange={(e) => setModuleId(e.target.value ? Number(e.target.value) : null)}>
+                <option value="">{t("materials.courseLevel")}</option>
+                {modules.map((m) => <option key={m.id} value={m.id}>{m.title}</option>)}
+              </Select>
+            </div>
+          </div>
+          <ErrorNote error={add.error} />
+          <Button loading={add.isPending} type="submit" disabled={!url.trim() || add.isPending}>{t("materials.webAdd")}</Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
 function scanVariant(status: string): "success" | "secondary" | "destructive" {
   if (status === "clean") return "success";
   if (status === "infected" || status === "failed" || status === "rejected") return "destructive";
   return "secondary";
+}
+
+/** A link is made only for an https address: the address comes from the first line of a file. */
+function isHttps(value: string): boolean {
+  try {
+    return new URL(value).protocol === "https:";
+  } catch {
+    return false;
+  }
 }

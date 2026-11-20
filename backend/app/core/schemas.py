@@ -202,6 +202,8 @@ class LearnerContext(BaseModel):
     preferences: Preferences = Preferences()
     next_kc: KcRecommendation | None = None
     personalized: bool = True
+    # V15: the student's own presentation request (scanned at save); below the instructor's rules
+    answer_instruction: str = ""
 
     def to_cloud_labels(self) -> CloudLabels:
         return CloudLabels(
@@ -254,6 +256,27 @@ class CloudRequest(BaseModel):
     subject: str = Field("general", pattern=r"^[a-z_]{1,40}$")
     # the instructor's rules for the tutor (course, then module; Z26): instructor text, not student data
     guidelines: list[str] = Field([], max_length=2)
+
+
+class DraftCloudPassage(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    number: int = Field(ge=1, le=24)
+    source: str = Field(max_length=300)
+    text: str = Field(max_length=60_000)
+
+
+class DraftCloudRequest(BaseModel):
+    """V16: the ONLY thing an instructor draft may send to the cloud model: public course material the caller
+    scanned, the instructor's own request and the course's accepted KC names, for one fixed draft kind. No
+    learner data, no student question and no free field beyond these can be attached."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    kind: Literal["project_ideas", "sample_proposal", "faq", "custom", "kcs", "check_items",
+                  "misconceptions"]
+    passages: list[DraftCloudPassage] = Field(min_length=1, max_length=24)
+    request: str = Field("", max_length=1000)  # the instructor's request of a custom draft
+    kc_names: list[str] = Field([], max_length=1000)  # the course's accepted KCs (tier 2)
 
 
 # --------------------------------------------------------------------------- answer

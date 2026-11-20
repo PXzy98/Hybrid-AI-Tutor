@@ -54,6 +54,7 @@ logged in. Owner = component owner who implements it.
 | `GET /auth/csrf` | public | CSRF token (anonymous before login, bound to the session after) |
 | `POST /auth/join` | public or logged in | new student: invitation code + e-mail + display name + password creates the account and activates all his pending memberships; logged-in student: invitation code only, activates that course's pending membership (course-structure 3.3) |
 | `GET /me/preferences`, `PUT /me/preferences` | S | global learning preferences |
+| `GET /me/answer-instruction`, `PUT /me/answer-instruction` | S | V15: `{text}` (at most 300 characters, "" removes it), the student's own presentation request; `PUT` needs consent (409) and refuses text in which the privacy filter finds personal data (422, the types only); local model only, after the instructor's rules; never in an instructor view |
 | `GET /me/consent`, `PUT /me/consent` | S | global consent |
 
 ### 3.2 Admin (owner Z)
@@ -63,6 +64,7 @@ logged in. Owner = component owner who implements it.
 | `GET /admin/instructors`, `POST /admin/instructors` | A | list, create instructor accounts |
 | `PATCH /admin/instructors/{account_id}`, `POST /admin/instructors/{account_id}/reset-password` | A | deactivate, change role, reset |
 | `GET /admin/statistics` | A | v5 V2: per course and in total, students enrolled, active students (7 days), questions (7 days, term); question counts that fewer than `learner.class_summary_min_group` students contributed are null |
+| `GET /admin/students`, `PATCH /admin/students/{account_id}`, `POST /admin/students/{account_id}/reset-password`, `DELETE /admin/students/{account_id}` | A | V9: student accounts across courses (`courses` = active memberships); `PATCH {active}` deactivates (sessions end) or reactivates; `DELETE` removes the account and its learning data in every course (logs anonymized), audited; staff accounts are not student accounts (404) |
 | `GET /admin/settings`, `PUT /admin/settings` | A | system settings; `PUT` sends the `version` it read, 409 if it changed (course-structure 6.2) |
 | `GET /admin/settings/history`, `POST /admin/settings/restore/{history_id}` | A | change history and undo |
 | `GET /admin/settings/apply-status` | A | `apply_state`, target version, per-process progress and errors (course-structure 6.5); the page polls it while `applying` |
@@ -104,6 +106,8 @@ logged in. Owner = component owner who implements it.
 | `POST /courses/{course_id}/content/import`, `GET /courses/{course_id}/content/export` | I | Z | YAML import/export |
 | `GET /courses/{course_id}/materials` | I | S | materials, scan and index status |
 | `POST /courses/{course_id}/materials` | I | S | upload (field `module_id` optional = course-level) |
+| `POST /courses/{course_id}/materials/url` | I | S | V7: `{url, module_id?}`; the server fetches the page (`app.rag.web_pages.fetch_page`: https only, no credentials, public addresses only and pinned per request, every redirect checked, at most 3, 2 MB, 15 s for the whole fetch, HTML/text/Markdown only), stores it as `web-<host>-<path>-<digest>.md` (the digest of the full address) with the address on its first line, scans and indexes it; 422 when refused, 409 when that page is there already; `MaterialOut.source_url` |
+| `POST /courses/{course_id}/materials/{material_id}/refetch` | I | S | V7: fetch a web material again from its address and replace its text (scanned again) |
 | `DELETE /courses/{course_id}/materials/{material_id}` | I | S | delete and re-index |
 | `GET /courses/{course_id}/jobs/{job_id}` | I | Z | background job status (also for quiz drafts, 3.9) |
 
@@ -115,7 +119,7 @@ logged in. Owner = component owner who implements it.
 | `POST /courses/{course_id}/ask/stream` | S | Z | same, SSE |
 | `POST /courses/{course_id}/check` | S | S | answer a check item |
 | `GET /courses/{course_id}/conversations`, `GET .../conversations/{conversation_id}` | S | Z | own conversations in this course |
-| `GET /courses/{course_id}/onboarding`, `POST /courses/{course_id}/onboarding` | S | S | course diagnostic |
+| `GET /courses/{course_id}/onboarding`, `POST /courses/{course_id}/onboarding` | S | S | course diagnostic; `GET ?language=` (any `fr*` is French, else English) gives the consent text and the preference questions in that language. `POST /ask` with `language: "fr"` returns the fixed notes (warnings, the safe replacement answer, error details) in French; the referral line and the misconception header the pipeline appends are translated too; model output is never translated (`app/api/v2/fr.yaml`). `GET .../conversations/{conversation_id}?language=fr` translates the fixed texts of the stored answers the same way; without `language` the stored history is English |
 | `GET /courses/{course_id}/me/profile` | S | S | "What I know" in this course, the visibility mode, what the instructor can see, the instructor's plan |
 | `POST /courses/{course_id}/me/visibility` | S | S | acknowledge mode B, or opt out / opt back in |
 | `DELETE /courses/{course_id}/me/learning-data` | S | S | delete own data in this course |
@@ -150,7 +154,9 @@ Draft statuses: `generating`, `draft`, `accepted`, `discarded`, `failed` (with `
 
 | Method and path | Who | Owner | Purpose |
 |---|---|---|---|
-| `POST /courses/{course_id}/ai/drafts` | I | S | start a generation job (`kind`: `project_ideas`, `sample_proposal`, `faq`, `kcs`, `check_items`, `misconceptions`; optional `module_id`, `focus`); 202 with the draft (`status: generating`) and its `job_id` (`GET .../jobs/{id}`); the local model only |
+| `POST /courses/{course_id}/ai/drafts` | I | S | start a generation job (`kind`: `project_ideas`, `sample_proposal`, `faq`, `custom`, `kcs`, `check_items`, `misconceptions`; optional `module_id`, `focus`; `custom` needs `request`, the instructor's own description, up to 1000 characters (V4); `module_ids` or `material_ids` limit the material to those modules or files, instead of `module_id` (V5); `model: "cloud"` with `confirm_cloud: true` drafts with the cloud model (V16; 422 without the confirmation, 409 in a local-only course; also 409 when no cloud model is configured; also on `.../upload` and `.../url`; the cloud call goes through the cloud gate as a `DraftCloudRequest`: scanned course passages, the instructor's request and the KC names, never learner data, and the job fails when the scan finds personal data or the course became local-only meanwhile); 202 with the draft (`status: generating`) and its `job_id` (`GET .../jobs/{id}`); the local model unless the cloud model was chosen |
+| `POST /courses/{course_id}/ai/drafts/upload` | I | S | V6: multipart `file`, `kind`, optional `request`, `focus`, `add_to_course`, `module_id`; the file is scanned like a material upload (422 when refused, nothing stored), used for this draft only and deleted after the job read it; with `add_to_course` it is also stored as a material (409 when the name exists there); 202 with the draft (`sources: {upload, material_ids?}`) |
+| `POST /courses/{course_id}/ai/drafts/url` | I | S | V7: `{url, kind, request?, focus?, add_to_course?, module_id?}`; the page is fetched like `POST .../materials/url` and used like a file uploaded for this draft (V6) |
 | `GET /courses/{course_id}/ai/drafts`, `GET .../ai/drafts/{draft_id}` | I | S | drafts |
 | `PATCH /courses/{course_id}/ai/drafts/{draft_id}` | I | S | replace the `content` of a draft (tier 1 `{title, body}`, tier 2 `{items: [...]}`); 409 unless `draft` |
 | `POST /courses/{course_id}/ai/drafts/{draft_id}/accept` | I | S | tier 2: create the KCs (need `module_id` in the draft or the body), check items and misconceptions as `active` rows, all or none, with the content checks; tier 1: store a Markdown material (scanned, indexed by a rebuild job). Returns `{draft, created, rebuild_job_id}`; 409 unless `draft` |

@@ -44,10 +44,11 @@ export const ME_INSTRUCTOR: Me = { ...ME_STUDENT, account_id: 2, username: "ida"
 export const COURSE: Course = { id: 1, code: "ECE 1000", title: "Fictional Circuits", term_label: "Fall", course_type: "ece",
   // the kept individual views (visibility mode B) are tested with them switched on; StatisticsOnly.test.tsx
   // covers the deployment default (v5 V1)
-  visibility_mode: "B", status: "active", my_role: "student", individual_view: true };
+  visibility_mode: "B", status: "active", my_role: "student", individual_view: true, cloud_available: true };
 export const MODULES = [{ id: 10, code: "M1", title: "Ohm's law", position: 1, guideline: null }];
 
-export function renderApp(path: string, lang: Lang = "en") {
+/** `path` may carry router state: `{ pathname, state }` (pages that receive a hand-over, e.g. V8). */
+export function renderApp(path: string | { pathname: string; state: unknown }, lang: Lang = "en") {
   resetCsrf();
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   return render(

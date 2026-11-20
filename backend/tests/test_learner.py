@@ -145,7 +145,8 @@ def test_reset_keeps_consent(make):
     lm.observe(S, strong("HBP.1", True))
     lm.update_preferences(S, PreferenceSignal(dimension="detail", value="detailed", explicit=True))
     lm.reset(S)
-    assert rows("evidence_log") == [] and rows("learner_preference") == []
+    # the preference row stays (V15: it holds the student's answer instruction), with the defaults back
+    assert rows("evidence_log") == []
     ctx = lm.context(S, "high_blood_pressure")
     assert ctx.personalized and ctx.kc_states["HBP.1"].p_mastery == 0.2
     assert ctx.preferences.detail == "concise"

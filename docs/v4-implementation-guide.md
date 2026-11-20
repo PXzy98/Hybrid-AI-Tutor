@@ -116,8 +116,9 @@ Read before changing code. A PR that breaks any of these is not merged.
     - **English only**: comments and docstrings (describe a Chinese pattern in English, for example
       "Chinese self-introduction followed by a name"), identifiers, log and error messages, commit
       messages, PR descriptions and every `.md` file outside `docs/`.
-    - **French**: only French UI strings (`frontend/src/i18n/fr.ts`) and French test text for French
-      recognizers.
+    - **French**: only French UI strings (`frontend/src/i18n/fr.ts`), the French catalog of the fixed texts
+      the backend shows users (`backend/app/api/v2/fr.yaml`, read by `app/api/v2/localize.py`; never in
+      Python code), and French test text for French recognizers and for that catalog.
     - **`docs/` is exempt**: it may hold Chinese companion files named `<name>_zh.md` for the team. The
       English file is the one agents follow; whoever changes an English document updates its `_zh`
       companion in the same PR, or adds a line at the top of the companion saying it is out of date.

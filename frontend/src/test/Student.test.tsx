@@ -141,6 +141,15 @@ describe("chat", () => {
     await user.click(screen.getByRole("button", { name: "Send" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("The model is busy.");
   });
+
+  it("shows a stream error without detail in the interface language", async () => {
+    mockApi(studentRoutes({ "POST /courses/1/ask/stream": () => sse(["error", {}], ["done", {}]) }));
+    renderApp("/courses/1/chat", "fr");
+    const user = userEvent.setup();
+    await user.type(await screen.findByLabelText("Votre question"), "Expliquer la résonance");
+    await user.click(screen.getByRole("button", { name: "Envoyer" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Le modèle choisi n’a pas pu répondre.");
+  });
 });
 
 /** Lets one request path wait for `release()` or stream until the request is aborted; everything else goes to mockApi. */

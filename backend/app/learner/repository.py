@@ -120,6 +120,19 @@ class LearnerRepository:
             db.add(row)
             db.commit()
 
+    def instruction(self, student_id: str) -> str:
+        """The student's own answer instruction (V15), or ""."""
+        row = self.preference_row(student_id)
+        return (row.instruction or "") if row is not None else ""
+
+    def save_instruction(self, student_id: str, text: str) -> None:
+        with self._db() as db:
+            row = db.exec(select(LearnerPreference).where(LearnerPreference.student_id == student_id)).first()
+            row = row or LearnerPreference(student_id=student_id)
+            row.instruction = text  # not a preference change of the visibility window: updated_at stays
+            db.add(row)
+            db.commit()
+
     # ------------------------------------------------------------- misconceptions
     def misconceptions(self, student_id: str, statuses: tuple[str, ...] | None = None
                        ) -> list[LearnerMisconception]:
@@ -166,11 +179,17 @@ class LearnerRepository:
             db.commit()
 
     def reset(self, student_id: str) -> None:
-        """API v1 "reset my profile": this course's data and the preferences; consent and the account stay."""
+        """API v1 "reset my profile": this course's data and the preferences; consent, the account and the
+        student's own answer instruction (V15, not a learned preference) stay."""
         self.delete_course_data(student_id)
         with self._db() as db:
-            db.exec(delete(LearnerPreference).where(LearnerPreference.student_id == student_id))
-            db.commit()
+            row = db.exec(select(LearnerPreference).where(LearnerPreference.student_id == student_id)).first()
+            if row is not None:
+                for name in ("sequencing", "detail", "source"):
+                    setattr(row, name, LearnerPreference.model_fields[name].default)
+                row.implicit, row.updated_at = {}, utcnow()
+                db.add(row)
+                db.commit()
 
     def forget(self, student_id: str) -> None:
         """Consent withdrawn (it is global): the learning data of every course and the preferences."""
