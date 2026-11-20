@@ -33,10 +33,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "backend"))
 
+from app.core.config import RoutingConfig  # noqa: E402
 from app.privacy.profiles import privacy_profile  # noqa: E402
 from app.rag.course_retriever import IndexedCourseRetriever  # noqa: E402
 from app.rag.demo_courses import stage_demo_course  # noqa: E402
 from app.rag.documents import DocumentError, extract_text  # noqa: E402
+from app.rag.encoder import routing_embedder  # noqa: E402
 from app.rag.privacy_adapter import privacy_scan_callback  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
@@ -48,8 +50,11 @@ TYPES = ("concept", "application", "logistics")
 COURSE_ID = 1
 
 
-def load_questions(pack: str) -> list[dict]:
-    rows = [json.loads(line) for line in (HERE / "questions" / f"{pack}.jsonl").read_text(
+QUESTION_SETS = {"s11": "questions", "paraphrase": "paraphrase_questions"}
+
+
+def load_questions(pack: str, folder: str = "questions") -> list[dict]:
+    rows = [json.loads(line) for line in (HERE / folder / f"{pack}.jsonl").read_text(
         encoding="utf-8").splitlines() if line.strip()]
     ids = [row["id"] for row in rows]
     if len(ids) != len(set(ids)):
@@ -83,13 +88,14 @@ def file_map(pack_dir: Path, manifest: dict) -> dict[tuple[str, str], str]:
     return mapping
 
 
-def build_index(pack_dir: Path, manifest: dict,
-                data_root: Path) -> tuple[IndexedCourseRetriever, list[str], str]:
+def build_index(pack_dir: Path, manifest: dict, data_root: Path,
+                semantic: bool = True) -> tuple[IndexedCourseRetriever, list[str], str]:
     """Stage and index the pack. Returns (retriever, refused file paths, how the index was built)."""
     stage_demo_course(pack_dir, data_root, COURSE_ID)
     mapping = file_map(pack_dir, manifest)
     scan = privacy_scan_callback(privacy_profile(manifest["course_type"]))
-    retriever = IndexedCourseRetriever(data_root, scan=scan)
+    retriever = IndexedCourseRetriever(data_root, scan=scan,
+                                       embedder=routing_embedder(RoutingConfig()) if semantic else None)
     try:
         retriever.rebuild(COURSE_ID)
         return retriever, [], "whole course"
@@ -133,20 +139,22 @@ def metrics(ranks: list[int | None], k: int) -> dict:
             "mrr": round(sum(1 / r for r in ranks if r) / n, 3)}
 
 
-def evaluate_pack(pack: str, rows: list[dict], k: int, question_kind: str = "gold") -> dict:
+def evaluate_pack(pack: str, rows: list[dict], k: int, question_kind: str = "gold",
+                  semantic: bool = True) -> dict:
     pack_dir = PACKS_DIR / pack
     manifest = json.loads((pack_dir / "manifest.json").read_text(encoding="utf-8"))
     orders = sorted(m["module_order"] for m in manifest["modules"])
     middle_module = orders[len(orders) // 2]
     mapping = file_map(pack_dir, manifest)
     with tempfile.TemporaryDirectory(prefix="pack-eval-") as tmp:
-        retriever, refused, how = build_index(pack_dir, manifest, Path(tmp))
+        retriever, refused, how = build_index(pack_dir, manifest, Path(tmp), semantic)
         indexed = len(retriever._snapshot(COURSE_ID).passages)
         results = []
         for row in rows:
             gold = set(row["gold"])
             entry = {"id": row["id"], "type": row["type"], "module_order": row["module_order"],
-                     "gold": sorted(gold), "gold_refused": sorted(gold & set(refused))}
+                     "variant": row.get("variant"), "gold": sorted(gold),
+                     "gold_refused": sorted(gold & set(refused))}
             kind = "logistics" if row["type"] == "logistics" and question_kind == "gold" else "concept"
             modes = [("scoped", row["module_order"]), ("course", None)]
             if row["type"] == "logistics":
@@ -174,6 +182,10 @@ def summarize(pack_result: dict, k: int) -> dict:
         per_type = {t: metrics([r[mode]["rank"] for r in answerable if r["type"] == t], k) for t in TYPES}
         per_type["all"] = metrics([r[mode]["rank"] for r in answerable], k)
         out[mode] = per_type
+    # Question sets with a `variant` field (paraphrase set): metrics per variant, both modes.
+    out["variants"] = {mode: {v: metrics([r[mode]["rank"] for r in answerable if r.get("variant") == v], k)
+                              for v in sorted({r["variant"] for r in answerable if r.get("variant")})}
+                       for mode in ("scoped", "course")}
     logistics = [r for r in answerable if r["type"] == "logistics"]
     out["logistics_in_module"] = metrics([r["in_module"]["rank"] for r in logistics], k)
     for mode in ("scoped", "course"):
@@ -192,13 +204,13 @@ def summarize(pack_result: dict, k: int) -> dict:
     return out
 
 
-def check_questions(packs: list[str]) -> int:
+def check_questions(packs: list[str], folder: str = "questions") -> int:
     """Every evidence pattern must occur in at least one gold file; gold files must exist."""
     problems = 0
     for pack in packs:
         pack_dir = PACKS_DIR / pack
         text: dict[str, str] = {}
-        for row in load_questions(pack):
+        for row in load_questions(pack, folder):
             for rel in row["gold"]:
                 if rel not in text:
                     path = pack_dir / rel
@@ -219,8 +231,10 @@ def fmt(value) -> str:
     return "-" if value is None else f"{value:.2f}"
 
 
-def write_report(summary: dict, packs: list[dict], k: int, smoke: bool, path: Path) -> None:
-    lines = ["# Retrieval evaluation on the open course packs (S11)", ""]
+def write_report(summary: dict, packs: list[dict], k: int, smoke: bool, path: Path,
+                 question_set: str = "s11") -> None:
+    title = "S11" if question_set == "s11" else "S14, paraphrased and misspelled questions"
+    lines = [f"# Retrieval evaluation on the open course packs ({title})", ""]
     if smoke:
         lines += ["Smoke run (3 questions per course): not a result.", ""]
     lines += [
@@ -247,6 +261,13 @@ def write_report(summary: dict, packs: list[dict], k: int, smoke: bool, path: Pa
             a, b = s["scoped"][t], s["course"][t]
             lines.append(f"| {t} | {a['n']} | {fmt(a['hit@1'])} | {fmt(a[f'hit@{k}'])} | {fmt(a['mrr'])} | "
                          f"{fmt(b['hit@1'])} | {fmt(b[f'hit@{k}'])} | {fmt(b['mrr'])} |")
+        if s["variants"]["course"]:
+            lines += ["", f"| Variant | n | scoped hit@1 | scoped hit@{k} | course-wide hit@1 | "
+                      f"course-wide hit@{k} | course-wide MRR |", "|---|---|---|---|---|---|---|"]
+            for v, b in s["variants"]["course"].items():
+                a = s["variants"]["scoped"][v]
+                lines.append(f"| {v} | {b['n']} | {fmt(a['hit@1'])} | {fmt(a[f'hit@{k}'])} | "
+                             f"{fmt(b['hit@1'])} | {fmt(b[f'hit@{k}'])} | {fmt(b['mrr'])} |")
         c = s["course_top_score"]
         m = s["logistics_in_module"]
         lines += ["", f"Logistics questions asked from inside a module (the middle one): n={m['n']}, "
@@ -273,7 +294,7 @@ def write_report(summary: dict, packs: list[dict], k: int, smoke: bool, path: Pa
                 lines.append(f"- `{r['id']}` ({r['type']}): gold {', '.join(f'`{g}`' for g in r['gold'])}; "
                              f"top result `{top}` (score {r['course']['top_score']:.2f}); scoped rank "
                              f"{r['scoped']['rank']}")
-    if not smoke:
+    if not smoke and question_set == "s11":
         lines += ["", ANALYSIS.rstrip(), ""]
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -284,26 +305,31 @@ def main() -> int:
     parser.add_argument("--packs", help="comma-separated pack names (default: every pack with questions)")
     parser.add_argument("--k", type=int, default=4)
     parser.add_argument("--out", type=Path, help="output folder (default: results/; none for --smoke)")
+    parser.add_argument("--set", choices=sorted(QUESTION_SETS), default="s11", dest="question_set",
+                        help="s11: the S11 questions; paraphrase: paraphrased and misspelled questions (S14)")
+    parser.add_argument("--no-semantic", action="store_true",
+                        help="index without sentence embeddings (lexical retrieval only)")
     parser.add_argument("--check", action="store_true", help="verify the question files and stop")
     parser.add_argument("--question-kind", choices=["gold", "none"], default="gold",
                         help="gold: logistics questions are retrieved as logistics (T5, the labels of the "
                         "question files); none: every question as a concept question (before T5)")
     args = parser.parse_args()
+    folder = QUESTION_SETS[args.question_set]
     packs = args.packs.split(",") if args.packs else sorted(
-        p.stem for p in (HERE / "questions").glob("*.jsonl"))
+        p.stem for p in (HERE / folder).glob("*.jsonl"))
     missing = [p for p in packs if not (PACKS_DIR / p / "manifest.json").is_file()]
     if missing:
         print(f"Not unpacked: {', '.join(missing)}. Run: python scripts/fetch_open_courses.py unpack")
         return 2
     if args.check:
-        return 1 if check_questions(packs) else 0
+        return 1 if check_questions(packs, folder) else 0
 
     results, summary = [], {}
     for pack in packs:
-        rows = load_questions(pack)
+        rows = load_questions(pack, folder)
         if args.smoke:
             rows = smoke_subset(rows)
-        result = evaluate_pack(pack, rows, args.k, args.question_kind)
+        result = evaluate_pack(pack, rows, args.k, args.question_kind, not args.no_semantic)
         results.append(result)
         summary[pack] = summarize(result, args.k)
         a = summary[pack]["course"]["all"]
@@ -316,7 +342,7 @@ def main() -> int:
         out = args.out
     else:
         weak = []
-        out = args.out or HERE / "results"
+        out = args.out or HERE / "results" / ("" if args.question_set == "s11" else args.question_set)
     if out:
         out.mkdir(parents=True, exist_ok=True)
         (out / "metrics.json").write_text(json.dumps(
@@ -324,7 +350,7 @@ def main() -> int:
              "details": {r["pack"]: {"index": r["index"], "passages": r["passages"],
                                      "refused_files": r["refused_files"], "questions": r["results"]}
                          for r in results}}, indent=2) + "\n", encoding="utf-8")
-        write_report(summary, results, args.k, args.smoke, out / "report.md")
+        write_report(summary, results, args.k, args.smoke, out / "report.md", args.question_set)
         print(f"wrote {out / 'metrics.json'} and {out / 'report.md'}")
     return 1 if weak else 0
 
