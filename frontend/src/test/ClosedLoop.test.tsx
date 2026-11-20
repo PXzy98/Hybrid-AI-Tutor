@@ -67,11 +67,30 @@ describe("closed loop (V8)", () => {
     renderApp("/courses/1/overview");
     const user = userEvent.setup();
     await user.click(await screen.findByRole("link", { name: "Draft extra material on Resistance" }));
-    const focus = await screen.findByLabelText("Focus (optional)");
-    expect(focus).toHaveValue("Extra material on Resistance for the whole class: another explanation than in the course material, worked examples and a few practice questions with answers.");
+    const request = await screen.findByLabelText("What should be drafted?");
+    expect(request).toHaveValue("Extra material on Resistance for the whole class: another explanation than in the course material, worked examples and a few practice questions with answers.");
     await waitFor(() => expect(screen.getByLabelText("Module")).toHaveValue("10"));
     await user.click(screen.getByRole("button", { name: "Draft with AI" }));
     await waitFor(() => expect(calls.find((c) => c.method === "POST" && c.path.endsWith("/ai/drafts"))?.body)
-      .toMatchObject({ module_id: 10, focus: expect.stringContaining("Resistance") }));
+      .toMatchObject({ kind: "custom", module_id: 10, request: expect.stringContaining("Resistance"), focus: "" }));
   });
+
+  it("the request for a topic with the longest name stays within the request limit", async () => {
+    const name = "R".repeat(200);  // the longest KC name the API accepts
+    const calls = mockApi(instructorRoutes({
+      "GET /courses/1/weak-topics": { min_group: 5, weak_below: 0.6, topics: [
+        { kc_code: "K1", name, module_id: 10, students: 7, correct_rate: 0.43 }] },
+      "GET /courses/1/ai/drafts": [],
+    }));
+    renderApp("/courses/1/overview");
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("link", { name: `Draft extra material on ${name}` }));
+    await waitFor(() => expect((screen.getByLabelText("What should be drafted?") as HTMLTextAreaElement).value).toContain(name));
+    await user.click(screen.getByRole("button", { name: "Draft with AI" }));
+    await waitFor(() => {
+      const body = calls.find((c) => c.method === "POST" && c.path.endsWith("/ai/drafts"))?.body as { request: string };
+      expect(body.request).toContain(name);
+      expect(body.request.length).toBeLessThanOrEqual(1000);
+    });
+  }, 20000);
 });
