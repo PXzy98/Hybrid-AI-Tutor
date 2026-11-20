@@ -26,3 +26,6 @@ class FakeCourseRetriever:
         self.calls.append((course_id, module_id, query, k))
         self.kinds.append(question_kind)
         return self.passages[:k]
+
+    def in_order(self, course_id: int) -> list[Chunk]:
+        return list(self.passages)
