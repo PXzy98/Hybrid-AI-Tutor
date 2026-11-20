@@ -7,12 +7,10 @@ from app.core.config import Settings
 
 def _is_local_host(host: str) -> bool:
     """Loopback, a private address, or a name only the host's own network resolves (a Compose service)."""
-    if host == "localhost" or "." not in host or host.endswith((".local", ".internal")):
-        return True
-    try:
-        address = ipaddress.ip_address(host)
+    try:  # an address literal first: a public IPv6 address has no dot either
+        address = ipaddress.ip_address(host.strip("[]"))
     except ValueError:
-        return False
+        return host == "localhost" or "." not in host or host.endswith((".local", ".internal"))
     return address.is_loopback or address.is_private or address.is_link_local
 
 

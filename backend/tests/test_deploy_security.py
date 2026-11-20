@@ -44,13 +44,17 @@ def test_no_warnings_for_local_defaults(use_config, monkeypatch):
     assert deployment_warnings(s) == []
 
 
-@pytest.mark.parametrize("url", ["http://vllm:8000/v1", "http://192.168.1.5:8000/v1", "http://gpu.local/v1"])
+@pytest.mark.parametrize("url", ["http://vllm:8000/v1", "http://192.168.1.5:8000/v1", "http://gpu.local/v1",
+                                 "http://[fd00::5]:8000/v1", "http://[::1]:8000/v1"])
 def test_private_vllm_without_key_is_fine(use_config, monkeypatch, url):
     assert deployment_warnings(_settings(use_config, monkeypatch, VLLM_BASE_URL=url)) == []
 
 
 def test_public_vllm_needs_https_and_key(use_config, monkeypatch):
     s = _settings(use_config, monkeypatch, VLLM_BASE_URL="http://93.184.216.34:8000/v1")
+    assert len(deployment_warnings(s)) == 2
+    # a public IPv6 literal has no dot, like a Compose service name, but is not local
+    s = _settings(use_config, monkeypatch, VLLM_BASE_URL="http://[2606:4700:4700::1111]:8000/v1")
     assert len(deployment_warnings(s)) == 2
     s = _settings(use_config, monkeypatch, VLLM_BASE_URL="https://pod-8000.proxy.example.com/v1",
                   VLLM_KEY="k")
