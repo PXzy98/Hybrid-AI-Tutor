@@ -254,21 +254,50 @@ def _draft_from_file(services, access, name: str, data: bytes, *, kind: str, tex
                                      module_id, name, data)
         except FileExistsError:
             raise ApiError(409, ErrorCode.conflict, exists) from None
+    data_root, draft_id, committed = services.settings.data_path(), None, False
+    try:
+        with Session(services.engine, expire_on_commit=False) as db:
+            sources = {"upload": name, **({"material_ids": [added.id]} if added else {})}
+            row = AiDraft(course_id=access.course.id, module_id=module_id, kind=kind, focus=focus.strip(),
+                          request=text, sources=sources, created_by=access.account_id)
+            db.add(row)
+            db.flush()  # the id names the folder: the file is written before the row is committed
+            draft_id = row.id
+            db.add(AuditLog(account_id=access.account_id, action=action,
+                            target=f"course:{access.course.id}",
+                            details={"added_material_id": added.id if added else None}))
+            path = draft_jobs.upload_path(data_root, access.course.id, draft_id, name)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(data)
+            db.commit()
+            committed = True
+        job = jobs.enqueue(services.engine, draft_jobs.GENERATE, course_id=access.course.id, ref_id=draft_id,
+                           created_by=access.account_id)
+    except Exception:
+        _undo_upload(services, access.course.id, draft_id, committed, added)
+        raise
+    if added:
         index_jobs.request_rebuild(services.engine, access.course.id, access.account_id)
-    with Session(services.engine, expire_on_commit=False) as db:
-        sources = {"upload": name, **({"material_ids": [added.id]} if added else {})}
-        row = AiDraft(course_id=access.course.id, module_id=module_id, kind=kind, focus=focus.strip(),
-                      request=text, sources=sources, created_by=access.account_id)
-        db.add(row)
-        db.add(AuditLog(account_id=access.account_id, action=action, target=f"course:{access.course.id}",
-                        details={"added_material_id": added.id if added else None}))
-        db.commit()
-    path = draft_jobs.upload_path(services.settings.data_path(), access.course.id, row.id, name)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_bytes(data)
-    job = jobs.enqueue(services.engine, draft_jobs.GENERATE, course_id=access.course.id, ref_id=row.id,
-                       created_by=access.account_id)
     return _out(row, job.id)
+
+
+def _undo_upload(services, course_id: int, draft_id: int | None, committed: bool, added) -> None:
+    """A failed upload request leaves nothing behind: no file, no `generating` draft, no stray material."""
+    if draft_id is not None:
+        draft_jobs.remove_upload(services.settings.data_path(), course_id, draft_id)
+    with Session(services.engine) as db:
+        if committed and draft_id is not None:
+            row = db.get(AiDraft, draft_id)
+            if row is not None:
+                db.delete(row)
+        if added is not None:
+            material = db.get(Material, added.id)
+            if material is not None:
+                db.delete(material)
+        db.commit()
+    if added is not None:
+        folder = index_jobs.material_folder(services.settings.data_path(), course_id, added.module_id)
+        (folder / added.filename).unlink(missing_ok=True)
 
 
 @router.get("/courses/{course_id}/ai/drafts", response_model=list[AiDraftSummary],
@@ -332,6 +361,8 @@ def discard(request: Request, draft_id: int, access: CourseInstructor):
         row.status, row.updated_at = "discarded", utcnow()
         db.add(row)
         db.commit()
+    # a file uploaded for this draft only (V6) is not kept for a draft nobody will read
+    draft_jobs.remove_upload(request.app.state.services.settings.data_path(), access.course.id, draft_id)
     return Response(status_code=204)
 
 

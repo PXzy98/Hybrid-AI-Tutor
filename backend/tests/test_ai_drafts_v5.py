@@ -168,3 +168,105 @@ def test_chosen_files_are_not_crowded_out_by_other_material(world):
     r, local = _start(world, {"kind": "faq", "material_ids": [chosen]})
     assert r.status_code == 202 and _draft(world, r.json()["id"])["status"] == "draft"
     assert "CHOSEN-PASSAGE" in local.sent_text()
+
+
+class _NoOverlap(FakeCourseRetriever):
+    """Ranking by the request finds nothing (no shared word); the files' passages are still there."""
+
+    def retrieve(self, course_id, module_id, query, k=4, question_kind="concept"):
+        return []
+
+
+def _material(world, name: str) -> int:
+    with Session(world["services"].engine) as db:
+        db.add(Material(course_id=world["course_id"], module_id=world["module"]["id"], filename=name,
+                        size_bytes=1, sha256="0" * 64, scan_status="accepted"))
+        db.commit()
+        return db.exec(select(Material).where(Material.filename == name)).one().id
+
+
+def test_chosen_files_are_used_in_order_when_the_request_shares_no_word_with_them(world):
+    cid, module = world["course_id"], world["module"]["id"]
+    chosen = _material(world, "thesis.md")
+    world["services"].course_retriever = _NoOverlap(
+        [_passage("ORDERED-PASSAGE alpha", module, "thesis.md", cid),
+         _passage("OTHER-PASSAGE beta", module, "other.md", cid)])
+    r, local = _start(world, {"kind": "custom", "request": "thesis topics", "material_ids": [chosen]})
+    assert r.status_code == 202 and _draft(world, r.json()["id"])["status"] == "draft"
+    sent = local.sent_text()
+    assert "ORDERED-PASSAGE" in sent and "OTHER-PASSAGE" not in sent
+
+
+def test_chosen_files_that_are_not_indexed_yet_give_a_clear_error(world):
+    chosen = _material(world, "new.md")
+    world["services"].course_retriever = FakeCourseRetriever([])
+    world["use"](TIER1)
+    r = world["prof"].post(f"{world['url']}/ai/drafts", json={"kind": "faq", "material_ids": [chosen]})
+    jobs.run_pending(world["services"])
+    draft = _draft(world, r.json()["id"])
+    assert draft["status"] == "failed" and "not indexed yet" in draft["error"]
+
+
+def _upload_dir(world, draft_id: int) -> Path:
+    return Path(world["tmp"]) / "courses" / str(world["course_id"]) / "draft_uploads" / str(draft_id)
+
+
+def test_a_discarded_draft_and_a_stale_one_do_not_keep_the_uploaded_file(world):
+    from datetime import timedelta
+
+    from app.instructor_ai import draft_jobs
+    from app.storage.models import AiDraft, utcnow
+    world["use"](TIER1)
+    first = _upload(world["prof"], world["url"], "paper.md", PAPER, kind="faq").json()["id"]
+    second = _upload(world["prof"], world["url"], "paper.md", PAPER, kind="faq").json()["id"]
+    assert _upload_dir(world, first).exists()
+    assert world["prof"].delete(f"{world['url']}/ai/drafts/{first}").status_code == 204
+    assert not _upload_dir(world, first).exists()
+    root = Path(world["tmp"])
+    assert draft_jobs.sweep_uploads(world["services"].engine, root) == 0  # still generating, recent
+    with Session(world["services"].engine) as db:
+        row = db.get(AiDraft, second)
+        row.updated_at = utcnow() - timedelta(days=1)
+        db.add(row)
+        db.commit()
+    assert draft_jobs.sweep_uploads(world["services"].engine, root) == 1
+    assert not _upload_dir(world, second).exists()
+    assert _draft(world, second)["status"] == "failed"
+
+
+def test_a_failed_upload_request_leaves_no_draft_file_or_material(world, monkeypatch):
+    def boom(*args, **kwargs):
+        raise RuntimeError("queue down")
+
+    monkeypatch.setattr(jobs, "enqueue", boom)
+    client = world["prof"]
+    try:
+        r = _upload(client, world["url"], "paper.md", PAPER, kind="faq", add_to_course=True)
+        assert r.status_code == 500
+    except RuntimeError:
+        pass
+    assert client.get(f"{world['url']}/ai/drafts").json() == []
+    assert client.get(f"{world['url']}/materials").json()["materials"] == []
+    assert not (Path(world["tmp"]) / "courses" / str(world["course_id"]) / "draft_uploads").exists() or \
+        not any((Path(world["tmp"]) / "courses" / str(world["course_id"]) / "draft_uploads").iterdir())
+
+
+def test_a_missing_upload_gives_a_clear_error(world):
+    import shutil
+    world["use"](TIER1)
+    draft_id = _upload(world["prof"], world["url"], "paper.md", PAPER, kind="faq").json()["id"]
+    shutil.rmtree(_upload_dir(world, draft_id))
+    jobs.run_pending(world["services"])
+    draft = _draft(world, draft_id)
+    assert draft["status"] == "failed" and "upload it again" in draft["error"]
+
+
+def test_passages_of_an_uploaded_file_keep_every_character(tmp_path):
+    from app.instructor_ai import draft_jobs
+    first, second = "a" * 600, "b" * 600  # 1200 without the separator: two passages, not one cut at 1200
+    third = "c" * 5
+    path = tmp_path / "f.md"
+    path.write_bytes(f"{first}\n\n{second}\n\n{third}".encode())
+    texts = [c.text for c in draft_jobs._upload_passages(path, 1, "zzzz")]
+    assert "".join(texts).replace("\n", "") == first + second + third
+    assert all(len(t) <= draft_jobs.PASSAGE_CHARS for t in texts)
