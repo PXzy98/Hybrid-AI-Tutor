@@ -121,7 +121,7 @@ Until this plan is merged into [v4-implementation-guide.md](v4-implementation-gu
   found; retrieval is only lexical (add a semantic step).
 - **Routing (T15, T17)**: routing heads trained on medical questions only; course-rule questions routed to the
   cloud skip retrieval.
-- **Privacy tests (Z22)**: held-out ECE set, `life_science` and `general` sets, a fresh medical set, E6 scores.
+- **Privacy tests (Z22)**: held-out sets for ECE (41), computer science (30), `life_science` (30) and `general` (25) are in `eval/privacy-filter/` (`make_course_sets.py`, `course_sets.py`, scores in `results/z22/metrics.json`). E6 on main is unchanged since the last report (Z25 and S16 did not affect it). New sets, leak / over-redaction with the course's profile: ECE 24.0% / 6.2%, computer science 12.5% / 7.1%, life science 13.3% / 13.3% (0 of 13 within the profile's scope), general 6.7% / 10.0%. Misses: AWS secret key, quoted `tok_` values, passwords in URLs and prose, 172.16.x addresses, `git@` URLs; over-redaction: eponyms and thinker names (Hardy-Weinberg, Mealy, Kant). Still open: a fresh held-out medical set, and the rule changes for these misses.
 - **T16 (chat)**: after opening a past conversation there is no way back to a new, empty conversation.
   Note: three merged PRs reused IDs of the task list: #106 calls itself T16 (code splitting), #103 T15 (forms)
   and #105 Z22 (web security; Z22 is the privacy test sets). The task list IDs above keep their meaning.
