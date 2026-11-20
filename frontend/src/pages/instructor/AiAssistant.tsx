@@ -97,7 +97,7 @@ function StartForm({ course, onStarted }: { course: Course; onStarted: (d: AiDra
   const [file, setFile] = useState<File | null>(null);
   const [pageUrl, setPageUrl] = useState("");
   const [addToCourse, setAddToCourse] = useState(false);
-  const [addModuleId, setAddModuleId] = useState<number | null>(null); // where the uploaded file goes
+  const [addModuleId, setAddModuleId] = useState<number | null>(null); // where the uploaded file or page goes
   const [focus, setFocus] = useState("");
   const start = useMutation({
     mutationFn: () => {
@@ -107,7 +107,7 @@ function StartForm({ course, onStarted }: { course: Course; onStarted: (d: AiDra
       }
       if (source === "url") {
         return api.createAiDraftFromUrl(course.id, { url: pageUrl.trim(), kind, request: text, focus, add_to_course: addToCourse,
-                                                     module_id: addToCourse ? moduleId : null });
+                                                     module_id: addToCourse ? addModuleId : null });
       }
       return api.createAiDraft(course.id, {
         kind, focus, request: text,
@@ -117,7 +117,7 @@ function StartForm({ course, onStarted }: { course: Course; onStarted: (d: AiDra
       });
     },
     onSuccess: (d) => {
-      if (source === "upload" && addToCourse) qc.invalidateQueries({ queryKey: ["materials", course.id] });
+      if ((source === "upload" || source === "url") && addToCourse) qc.invalidateQueries({ queryKey: ["materials", course.id] });
       onStarted(d);
     },
   });
