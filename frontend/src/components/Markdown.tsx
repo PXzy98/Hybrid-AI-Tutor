@@ -19,13 +19,26 @@ const components: Components = {
   },
 };
 
+// Models often write LaTeX as \( ... \) and \[ ... \]; Markdown reads "\(" as an escaped "(" and the formula is shown
+// as raw text ("(V_{th})"). These delimiters become $ ... $ and $$ ... $$, outside code (V17 W20).
+const CODE = /(```[\s\S]*?```|`[^`\n]*`)/;
+
+function mathDelimiters(text: string): string {
+  return text
+    .split(CODE)
+    .map((part, i) => (i % 2 === 1 ? part : part
+      .replace(/\\\[([\s\S]+?)\\\]/g, (_m, body: string) => `\n$$\n${body.trim()}\n$$\n`)
+      .replace(/\\\(([\s\S]+?)\\\)/g, (_m, body: string) => `$${body.trim()}$`)))
+    .join("");
+}
+
 /** Renders a tutor answer as Markdown (GitHub flavour, KaTeX math), styled by `.markdown` in index.css. Raw HTML in
  *  the text is not rendered; images are shown as their alt text. */
 export default function Markdown({ children }: { children: string }) {
   return (
     <div className="markdown">
       <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]} components={components}>
-        {children}
+        {mathDelimiters(children)}
       </ReactMarkdown>
     </div>
   );
