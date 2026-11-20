@@ -2,6 +2,7 @@
 before it is stored (`app.rag.index_jobs`); a change starts an index rebuild job (`GET .../jobs/{id}`)."""
 import asyncio
 import hashlib
+import uuid
 from datetime import datetime
 from typing import Annotated
 
@@ -185,9 +186,11 @@ async def refetch(material_id: int, access: CourseInstructor, request: Request):
         raise ApiError(422, ErrorCode.invalid, "only a web page added by its address can be fetched again")
     _, data = await fetch_as_material(url, access.course.course_type)
     path = index_jobs.material_path(root, row)
-    staging = path.with_name(f".{path.name}.new")
+    staging = path.with_name(f".{path.name}.{uuid.uuid4().hex}.new")  # one per request
     with Session(services.engine) as db:
-        stored = db.get(Material, material_id)  # the fetch took seconds: it may have been deleted meanwhile
+        # the fetch took seconds: it may have been deleted meanwhile. The row lock serializes two refetches of
+        # the same material, so the file and its size and hash always come from the same response.
+        stored = db.exec(select(Material).where(Material.id == material_id).with_for_update()).first()
         if stored is None:
             raise ApiError(404, ErrorCode.not_found, "material not found")
         try:
