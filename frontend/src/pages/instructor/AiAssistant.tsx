@@ -85,6 +85,7 @@ function Drafts({ course }: { course: Course }) {
 
 function StartForm({ course, onStarted }: { course: Course; onStarted: (d: AiDraft) => void }) {
   const { t } = useI18n();
+  const qc = useQueryClient();
   const modules = useQuery({ queryKey: ["modules", course.id], queryFn: () => api.modules(course.id) });
   const materials = useQuery({ queryKey: ["materials", course.id], queryFn: () => api.materials(course.id) });
   const [kind, setKind] = useState<AiDraftKind>("custom");
@@ -95,12 +96,13 @@ function StartForm({ course, onStarted }: { course: Course; onStarted: (d: AiDra
   const [materialIds, setMaterialIds] = useState<number[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [addToCourse, setAddToCourse] = useState(false);
+  const [addModuleId, setAddModuleId] = useState<number | null>(null); // where the uploaded file goes
   const [focus, setFocus] = useState("");
   const start = useMutation({
     mutationFn: () => {
       const text = kind === "custom" ? request : "";
       if (source === "upload" && file) {
-        return api.createAiDraftFromUpload(course.id, { file, kind, request: text, focus, addToCourse, moduleId: addToCourse ? moduleId : null });
+        return api.createAiDraftFromUpload(course.id, { file, kind, request: text, focus, addToCourse, moduleId: addToCourse ? addModuleId : null });
       }
       return api.createAiDraft(course.id, {
         kind, focus, request: text,
@@ -109,7 +111,10 @@ function StartForm({ course, onStarted }: { course: Course; onStarted: (d: AiDra
         ...(source === "files" ? { material_ids: materialIds } : {}),
       });
     },
-    onSuccess: onStarted,
+    onSuccess: (d) => {
+      if (source === "upload" && addToCourse) qc.invalidateQueries({ queryKey: ["materials", course.id] });
+      onStarted(d);
+    },
   });
   const toggle = (list: number[], set: (v: number[]) => void, id: number) =>
     set(list.includes(id) ? list.filter((x) => x !== id) : [...list, id]);
@@ -184,7 +189,7 @@ function StartForm({ course, onStarted }: { course: Course; onStarted: (d: AiDra
                   {t("ai.addToCourse")}
                 </label>
                 {addToCourse && (
-                  <Select aria-label={t("ai.addToModule")} value={moduleId ?? ""} onChange={(e) => setModuleId(e.target.value ? Number(e.target.value) : null)}>
+                  <Select aria-label={t("ai.addToModule")} value={addModuleId ?? ""} onChange={(e) => setAddModuleId(e.target.value ? Number(e.target.value) : null)}>
                     <option value="">{t("nav.wholeCourse")}</option>
                     {modules.data?.map((m) => <option key={m.id} value={m.id}>{m.title}</option>)}
                   </Select>
