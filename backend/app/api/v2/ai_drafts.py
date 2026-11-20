@@ -234,13 +234,17 @@ async def create_from_url(request: Request, body: AiDraftUrlIn, access: CourseIn
     with Session(services.engine) as db:
         _module(db, access.course.id, body.module_id)
     text = _request(body.kind, body.request, body.focus, access.course.course_type)
-    name, data = await fetch_as_material(services, body.url, access.course.course_type)
+    name, data = await fetch_as_material(body.url, access.course.course_type)
     return _draft_from_file(services, access, name, data, kind=body.kind, text=text, focus=body.focus,
-                            add_to_course=body.add_to_course, module_id=body.module_id, action="ai_draft.url")
+                            add_to_course=body.add_to_course, module_id=body.module_id, action="ai_draft.url",
+                            exists="this page is in the course material already; delete it there or "
+                                   "draft without adding it")
 
 
 def _draft_from_file(services, access, name: str, data: bytes, *, kind: str, text: str, focus: str,
-                     add_to_course: bool, module_id: int | None, action: str) -> AiDraftOut:
+                     add_to_course: bool, module_id: int | None, action: str,
+                     exists: str = "a file with this name exists in the course material; "
+                                   "rename it or delete that one") -> AiDraftOut:
     """A scanned file for one draft (V6, V7): kept until the job read it, and stored as a material too
     when `add_to_course`."""
     added = None
@@ -249,8 +253,7 @@ def _draft_from_file(services, access, name: str, data: bytes, *, kind: str, tex
             added = index_jobs.store(services.engine, services.settings.data_path(), access.course.id,
                                      module_id, name, data)
         except FileExistsError:
-            raise ApiError(409, ErrorCode.conflict, "a file with this name exists in the course material; "
-                           "rename it or delete that one") from None
+            raise ApiError(409, ErrorCode.conflict, exists) from None
         index_jobs.request_rebuild(services.engine, access.course.id, access.account_id)
     with Session(services.engine, expire_on_commit=False) as db:
         sources = {"upload": name, **({"material_ids": [added.id]} if added else {})}

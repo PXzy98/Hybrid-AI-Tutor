@@ -13,6 +13,7 @@ The page becomes a Markdown material (`web-<host>-<path>-<digest>.md`) whose fir
 so it can be fetched again. Like every upload it is scanned (`index_jobs.check_upload`) before it is stored.
 """
 import asyncio
+import codecs
 import hashlib
 import re
 from dataclasses import dataclass
@@ -21,11 +22,12 @@ from urllib.parse import urljoin, urlparse
 
 import httpx
 
-from app.llm.ssrf import PinnedTransport, UnsafeEndpoint, check_endpoint_url
+from app.llm.ssrf import PinnedTransport, UnsafeEndpoint, _system_addresses, check_endpoint_url
 
 MAX_BYTES = 2_000_000
 TIMEOUT_S = 15.0
 MAX_REDIRECTS = 3
+MAX_FIRST_LINE = 2200  # bytes read to find the source comment: an address is at most 2000 characters
 TYPES = ("text/html", "application/xhtml+xml", "text/plain", "text/markdown")
 SOURCE_PREFIX = "<!-- source: "  # the first line of a web material: <!-- source: https://... -->
 USER_AGENT = "PACT-course-material-fetcher/1.0"
@@ -45,7 +47,9 @@ class Page:
 class _Html(HTMLParser):
     """Visible text with paragraph breaks; the <title>; no scripts, styles or navigation."""
 
-    BLOCK = {"p", "div", "br", "li", "h1", "h2", "h3", "h4", "tr", "section", "article", "pre", "table"}
+    BLOCK = {"p", "div", "br", "li", "ul", "ol", "blockquote", "h1", "h2", "h3", "h4", "h5", "h6", "tr",
+             "section", "article", "pre", "table"}
+    CELLS = {"td", "th"}
     HIDDEN = {"script", "style", "nav", "header", "footer", "noscript", "svg", "form"}
 
     def __init__(self) -> None:
@@ -54,12 +58,15 @@ class _Html(HTMLParser):
         self.title = ""
         self._hidden = 0
         self._in_title = False
+        self._title_done = False
 
     def handle_starttag(self, tag, attrs):
         if tag in self.HIDDEN:
             self._hidden += 1
         elif tag == "title":
-            self._in_title = True
+            self._in_title = not self._hidden and not self._title_done  # the first one outside hidden content
+        elif tag in self.CELLS and not self._hidden:
+            self.parts.append(" ")
         elif tag in self.BLOCK:
             self.parts.append("\n\n" if tag != "br" else "\n")
         if tag in {"h1", "h2", "h3"} and not self._hidden:
@@ -69,6 +76,8 @@ class _Html(HTMLParser):
         if tag in self.HIDDEN and self._hidden:
             self._hidden -= 1
         elif tag == "title":
+            if self._in_title:
+                self._title_done = True
             self._in_title = False
         elif tag in self.BLOCK:
             self.parts.append("\n\n")
@@ -78,6 +87,15 @@ class _Html(HTMLParser):
             self.title += data
         elif not self._hidden:
             self.parts.append(data)
+
+
+def is_https_url(url: str) -> bool:
+    """An https address with a host and no credentials (what `check_url` accepts, no DNS check)."""
+    try:
+        parsed = urlparse((url or "").strip())
+        return parsed.scheme == "https" and bool(parsed.hostname) and not (parsed.username or parsed.password)
+    except ValueError:
+        return False
 
 
 def check_url(url: str, resolve=None) -> str:
@@ -110,9 +128,10 @@ def to_text(body: str, content_type: str) -> tuple[str, str]:
 async def fetch_page(url: str, *, resolve=None, inner: httpx.AsyncBaseTransport | None = None) -> Page:
     """Fetch one page under the rules of the module docstring; PageRefused otherwise. `resolve` and `inner`
     (the connection under the pinned transport) are for tests only."""
-    current = check_url(url, resolve)
+    await asyncio.to_thread(_system_addresses)  # the system's own addresses: looked up once, then cached
     try:
         async with asyncio.timeout(TIMEOUT_S):  # httpx's timeout is per network operation, this one is total
+            current = await asyncio.to_thread(check_url, url, resolve)  # DNS blocks: off the event loop
             return await _fetch(current, resolve, inner)
     except TimeoutError:
         raise PageRefused("the page did not answer in time") from None
@@ -129,7 +148,7 @@ async def _fetch(current: str, resolve, inner) -> Page:
                 async with client.stream("GET", current) as response:
                     if response.is_redirect:
                         target = response.headers.get("location", "")
-                        current = check_url(urljoin(current, target), resolve)
+                        current = await asyncio.to_thread(check_url, urljoin(current, target), resolve)
                         continue
                     if response.status_code != 200:
                         raise PageRefused(f"the page answered HTTP {response.status_code}")
@@ -141,7 +160,7 @@ async def _fetch(current: str, resolve, inner) -> Page:
                         body += piece
                         if len(body) > MAX_BYTES:
                             raise PageRefused(f"the page is larger than {MAX_BYTES // 1_000_000} MB")
-                    encoding = response.encoding or "utf-8"
+                    encoding = _encoding(response.charset_encoding, bytes(body[:2048]))
             except UnsafeEndpoint as e:  # the pinned transport refused the resolved address
                 raise PageRefused(str(e)) from None
             except httpx.TimeoutException:
@@ -153,6 +172,18 @@ async def _fetch(current: str, resolve, inner) -> Page:
                 raise PageRefused("the page has no text")
             return Page(url=current, title=title or urlparse(current).hostname or "web page", text=text)
     raise PageRefused("too many redirects")
+
+
+def _encoding(declared: str | None, head: bytes) -> str:
+    """The charset of the Content-Type header, else of a <meta> tag in the first bytes, else UTF-8."""
+    found = declared
+    if not found:
+        meta = re.search(rb"<meta[^>]+charset\s*=\s*[\"']?\s*([A-Za-z0-9_.:-]+)", head, re.IGNORECASE)
+        found = meta.group(1).decode("ascii") if meta else None
+    try:
+        return codecs.lookup(found).name if found else "utf-8"
+    except LookupError:
+        return "utf-8"
 
 
 def material_name(url: str) -> str:
@@ -170,8 +201,10 @@ def material_text(page: Page) -> str:
 
 
 def source_url(first_line: str) -> str | None:
-    """The address recorded on the first line of a web material, or None."""
+    """The address recorded on the first line of a web material, or None (also when it is not an https
+    address: the first line of an uploaded file is not trusted)."""
     line = first_line.strip()
     if line.startswith(SOURCE_PREFIX) and line.endswith("-->"):
-        return line[len(SOURCE_PREFIX):-3].strip() or None
+        url = line[len(SOURCE_PREFIX):-3].strip()
+        return url if is_https_url(url) else None
     return None
