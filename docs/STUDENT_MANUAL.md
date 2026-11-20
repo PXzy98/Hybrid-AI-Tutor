@@ -89,6 +89,11 @@ on", "A common mix-up:" with "What is true:" for misconceptions the tutor notice
 answers" or "may have come up in a question"), and your explanation preferences. You are never graded: the
 bands are only there to adapt answers.
 
+A topic in the **basic** band (for example after a quiz) has **Explain it another way**: it opens the chat in
+that module with a request for a different explanation, a new example and where to read more, ready for you to
+send or change. Where the course allows web search, the answer can also point to outside sources. This stays
+between you and the tutor: your instructor only sees class totals.
+
 **How answers should look** (on **My progress**, once you gave consent): tell the tutor in your own words how
 to present answers, up to 300 characters, for example "always end with a one-line summary" or "use bullet
 points", then **Save**. Your instructor's rules for the course come first: where your request conflicts with

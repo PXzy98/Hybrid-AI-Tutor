@@ -47,8 +47,18 @@ export default function Progress({ course }: { course: Course }) {
                   <CardContent className="space-y-4">
                     <ul className="divide-y">
                       {m.kcs.map((k) => (
-                        <li key={k.kc_id} className="flex items-center justify-between gap-3 py-2.5 text-sm first:pt-0 last:pb-0">
-                          <span className="min-w-0">{k.name}</span><Band band={k.band} />
+                        <li key={k.kc_id} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 py-2.5 text-sm first:pt-0 last:pb-0">
+                          <span className="min-w-0">{k.name}</span>
+                          <span className="flex items-center gap-2">
+                            {k.band === "basic" && (
+                              // V8: a weak topic gets another explanation; the request goes to the chat in router state, not the URL
+                              <Button asChild size="sm" variant="outline">
+                                <Link to={`/courses/${course.id}/chat?module=${m.module_id}`} state={{ ask: t("loop.ask", { kc: k.name }) }}
+                                      aria-label={t("loop.explainFor", { kc: k.name })}>{t("loop.explain")}</Link>
+                              </Button>
+                            )}
+                            <Band band={k.band} />
+                          </span>
                         </li>
                       ))}
                     </ul>

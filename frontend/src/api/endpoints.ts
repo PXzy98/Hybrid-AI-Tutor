@@ -218,6 +218,7 @@ export const api = {
   discardAiDraft: (id: number, draftId: number) => request<void>("DELETE", `${c(id)}/ai/drafts/${draftId}`),
   insights: (id: number) => request<Insights>("GET", `${c(id)}/insights`),
   courseStatistics: (id: number) => request<Schemas["CourseStatisticsOut"]>("GET", `${c(id)}/statistics`),
+  weakTopics: (id: number) => request<Schemas["WeakTopicsOut"]>("GET", `${c(id)}/weak-topics`),
   evaluations: (id: number) => request<EvaluationSummary[]>("GET", `${c(id)}/ai/evaluations`),
   evaluation: (id: number, evalId: number) => request<Evaluation>("GET", `${c(id)}/ai/evaluations/${evalId}`),
   createEvaluation: (id: number, input: Schemas["EvaluationIn"]) => request<Evaluation>("POST", `${c(id)}/ai/evaluations`, input),

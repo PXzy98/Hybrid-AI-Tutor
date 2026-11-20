@@ -6128,6 +6128,49 @@
         }
       }
     },
+    "/api/v2/courses/{course_id}/weak-topics": {
+      "get": {
+        "tags": [
+          "learner"
+        ],
+        "summary": "Get Weak Topics",
+        "description": "Topics the class finds hard, from quiz answers; counts and shares only, never a student.",
+        "operationId": "learner_weak_topics",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeakTopicsOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/courses/{course_id}/students/{student_id}/overview": {
       "get": {
         "tags": [
@@ -14978,6 +15021,73 @@
         ],
         "title": "VisibilityOut",
         "description": "What the instructor can see of this student (course-structure.md 4.5)."
+      },
+      "WeakTopicOut": {
+        "properties": {
+          "kc_code": {
+            "type": "string",
+            "title": "Kc Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "module_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Module Id"
+          },
+          "students": {
+            "type": "integer",
+            "title": "Students"
+          },
+          "correct_rate": {
+            "type": "number",
+            "title": "Correct Rate"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kc_code",
+          "name",
+          "module_id",
+          "students",
+          "correct_rate"
+        ],
+        "title": "WeakTopicOut"
+      },
+      "WeakTopicsOut": {
+        "properties": {
+          "min_group": {
+            "type": "integer",
+            "title": "Min Group"
+          },
+          "weak_below": {
+            "type": "number",
+            "title": "Weak Below"
+          },
+          "topics": {
+            "items": {
+              "$ref": "#/components/schemas/WeakTopicOut"
+            },
+            "type": "array",
+            "title": "Topics"
+          }
+        },
+        "type": "object",
+        "required": [
+          "min_group",
+          "weak_below",
+          "topics"
+        ],
+        "title": "WeakTopicsOut",
+        "description": "KCs the class answers badly in quizzes (v5 V8): only with at least `min_group` students each."
       },
       "WeekCountOut": {
         "properties": {
