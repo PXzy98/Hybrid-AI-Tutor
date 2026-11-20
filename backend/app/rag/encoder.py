@@ -19,6 +19,7 @@ def routing_embedder(cfg: RoutingConfig):
             return np.asarray(encoder.encode(texts, normalize_embeddings=True, show_progress_bar=False,
                                              batch_size=32), dtype=np.float32)
 
+    embed.identity = cfg.embedding_model  # stored with the embeddings: another encoder must not reuse them
     return embed
 
 

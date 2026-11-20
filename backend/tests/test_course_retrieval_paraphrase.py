@@ -68,7 +68,7 @@ def test_synonyms_add_the_other_words_of_a_group_only():
 
 
 def test_vocabulary_corrects_misspellings_and_leaves_known_or_short_words():
-    vocab = Vocabulary({"margin": 3, "marine": 1, "cours": 5, "textbook": 2, "noise": 4})
+    vocab = Vocabulary({"margin": 3, "marine": 1, "cour": 5, "textbook": 2, "noise": 4})
     assert vocab.correct("marjin") == "margin"
     assert vocab.correct("textbok") == "textbook"
     assert vocab.correct("courses") is None  # known
@@ -153,3 +153,27 @@ def test_index_without_embeddings_and_a_failing_encoder_fall_back_to_lexical(tmp
     built = _course(other, embedder=broken)  # rebuild still publishes, without embeddings
     assert not (other / "courses" / "1" / "index" / "v1" / "embeddings.npy").exists()
     assert _names(built.retrieve(1, None, "quartzzyme kinetics", 1)) == ["lecture_2.md"]
+
+
+def test_stem_is_its_own_stem_so_a_correction_matches_the_index(tmp_path):
+    for word in ("impulse", "response", "course", "charges", "studies", "running"):
+        assert stem(stem(word)) == stem(word)
+    _material(tmp_path, 3, "lecture_3.md", "# Lecture 3\n\nThe impulse of a force changes the momentum.\n")
+    rag = IndexedCourseRetriever(tmp_path, scan=lambda _: True)
+    rag.rebuild(1)
+    assert _names(rag.retrieve(1, None, "what is an impulze", 1)) == ["lecture_3.md"]
+
+
+def test_embeddings_of_another_encoder_are_not_used(tmp_path):
+    def encoder_a(texts):
+        return _fake_embedder(texts)
+
+    def encoder_b(texts):
+        return _fake_embedder(texts)
+
+    encoder_a.identity, encoder_b.identity = "encoder-a", "encoder-b"
+    _course(tmp_path, embedder=encoder_a)
+    assert IndexedCourseRetriever(tmp_path, embedder=encoder_a)._snapshot(1).dense is not None
+    other = IndexedCourseRetriever(tmp_path, embedder=encoder_b)  # same dimension, another space
+    assert other._snapshot(1).dense is None
+    assert other.retrieve(1, None, "what must I buy?", 1, question_kind="logistics") == []

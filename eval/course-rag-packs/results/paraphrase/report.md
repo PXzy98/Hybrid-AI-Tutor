@@ -20,7 +20,7 @@ Course type `computer_science`; 1467 passages; index built whole course.
 
 Logistics questions asked from inside a module (the middle one): n=16, hit@1 0.38, hit@4 0.56, MRR 0.45.
 
-Top score (course-wide): answerable median 0.25, 10th percentile 0.16; 0 questions not in the material: mean -, max -; chance that an answerable question outscores an unanswerable one -.
+Top score (course-wide): answerable median 0.25, 10th percentile 0.17; 0 questions not in the material: mean -, max -; chance that an answerable question outscores an unanswerable one -.
 
 ## mit_6_002_circuits
 
@@ -51,10 +51,10 @@ Top score (course-wide): answerable median 0.32, 10th percentile 0.20; 0 questio
 
 ## Misses (course-wide, no gold file in the top results)
 
-- `cs50-p01b` (logistics): gold `syllabus.md`; top result `assignments/pset_1.md` (score 0.16); scoped rank None
+- `cs50-p01b` (logistics): gold `syllabus.md`; top result `assignments/pset_0.md` (score 0.18); scoped rank None
 - `cs50-p02a` (logistics): gold `syllabus.md`; top result `assignments/pset_7.md` (score 0.23); scoped rank None
 - `cs50-p02b` (logistics): gold `syllabus.md`; top result `assignments/pset_1.md` (score 0.23); scoped rank None
-- `cs50-p04b` (logistics): gold `syllabus.md`; top result `assignments/pset_2.md` (score 0.20); scoped rank None
+- `cs50-p04b` (logistics): gold `syllabus.md`; top result `assignments/pset_2.md` (score 0.18); scoped rank None
 - `cs50-p05a` (logistics): gold `syllabus.md`; top result `assignments/pset_9.md` (score 0.37); scoped rank None
 - `cs50-p05b` (logistics): gold `syllabus.md`; top result `assignments/pset_1.md` (score 0.31); scoped rank None
 - `cs50-p07a` (logistics): gold `syllabus.md`; top result `assignments/pset_5.md` (score 0.12); scoped rank None

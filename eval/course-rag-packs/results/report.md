@@ -24,9 +24,9 @@ Course type `ece`; 1217 passages; index built whole course.
 | Type | n | scoped hit@1 | scoped hit@4 | scoped MRR | course-wide hit@1 | course-wide hit@4 | course-wide MRR |
 |---|---|---|---|---|---|---|---|
 | concept | 15 | 1.00 | 1.00 | 1.00 | 0.87 | 1.00 | 0.92 |
-| application | 7 | 1.00 | 1.00 | 1.00 | 0.86 | 1.00 | 0.91 |
+| application | 7 | 1.00 | 1.00 | 1.00 | 0.71 | 1.00 | 0.83 |
 | logistics | 6 | 0.83 | 0.83 | 0.83 | 0.83 | 0.83 | 0.83 |
-| all | 28 | 0.96 | 0.96 | 0.96 | 0.86 | 0.96 | 0.90 |
+| all | 28 | 0.96 | 0.96 | 0.96 | 0.82 | 0.96 | 0.88 |
 
 Logistics questions asked from inside a module (the middle one): n=6, hit@1 0.83, hit@4 0.83, MRR 0.83.
 
@@ -127,7 +127,7 @@ Top score (course-wide): answerable median 0.34, 10th percentile 0.25; 3 questio
 | Pack | scoped hit@1 | scoped hit@4 | scoped MRR | course-wide hit@1 | course-wide hit@4 | course-wide MRR | unanswerable max top score |
 |---|---|---|---|---|---|---|---|
 | harvard_cs50x | 0.93 | 0.96 | 0.95 | 0.82 | 0.96 | 0.88 | 0.14 |
-| mit_6_002_circuits | 0.96 | 0.96 | 0.96 | 0.86 | 0.96 | 0.90 | 0.46 |
+| mit_6_002_circuits | 0.96 | 0.96 | 0.96 | 0.82 | 0.96 | 0.88 | 0.46 |
 | mit_6_006_algorithms | 0.92 | 0.96 | 0.93 | 0.64 | 0.84 | 0.71 | 0.22 |
 | mit_7_016_intro_biology | 1.00 | 1.00 | 1.00 | 0.96 | 1.00 | 0.98 | 0.41 |
 | mit_7_03_genetics | 0.85 | 0.96 | 0.90 | 0.73 | 0.89 | 0.80 | 0.51 |
@@ -217,3 +217,4 @@ course-wide concept questions and adds the router's sentence encoder as a semant
 course-wide hit@1 went 0.71 -> 0.82 and hit@4 0.93 -> 0.95, scoped hit@1 0.93 -> 0.94 and hit@4 stays 0.98.
 Five questions fell out of the top 4 (listed in `s14-comparison.md`). The paraphrase and misspelling set is in
 `paraphrase_questions/` with its report in `results/paraphrase/`; before and after in `results/s14-comparison.md`.
+

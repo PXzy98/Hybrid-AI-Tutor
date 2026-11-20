@@ -29,7 +29,16 @@ SYNONYM_GROUPS: tuple[frozenset[str], ...] = tuple(frozenset(g.split()) for g in
 
 
 def stem(word: str) -> str:
-    """A small suffix stripper (plurals, -ing, -ed, -ly, final -e): charge, charging, charged agree."""
+    """A small suffix stripper (plurals, -ing, -ed, -ly, final -e): charge, charging, charged agree.
+
+    Applied until nothing changes, so a stem is its own stem: a typo correction (an index stem added to the
+    question) is analysed again and must still match the index (impulse -> impuls -> impul)."""
+    while (shorter := _stem_once(word)) != word:
+        word = shorter
+    return word
+
+
+def _stem_once(word: str) -> str:
     w = word
     if len(w) <= 3 or w.isdigit():
         return w

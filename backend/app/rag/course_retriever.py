@@ -240,8 +240,13 @@ class IndexedCourseRetriever:
             if dense.shape[0] != len(passages) or not np.isfinite(dense).all():
                 return
             np.save(folder / "embeddings.npy", dense.astype(np.float16))
+            meta = {"encoder": self._encoder_identity(), "dim": int(dense.shape[1])}
+            (folder / "embeddings.json").write_text(json.dumps(meta), encoding="utf-8")
         except Exception:  # noqa: BLE001 - missing model files, memory: index without embeddings
             return
+
+    def _encoder_identity(self) -> str:
+        return str(getattr(self.embedder, "identity", "") or "")
 
     def _versions_on_disk(self, course_id: int) -> list[int]:
         base = self._folder(course_id) / "index"
@@ -290,11 +295,15 @@ class IndexedCourseRetriever:
             except (OSError, ValueError, TypeError):
                 result.passages = []  # corrupted/missing versions fail closed
         if result.passages and self.embedder is not None:
+            folder = self._folder(course_id) / "index" / f"v{version}"
             try:
-                dense = np.load(self._folder(course_id) / "index" / f"v{version}" / "embeddings.npy")
-                if dense.ndim == 2 and dense.shape[0] == len(result.passages):
+                # Embeddings of another encoder live in another space: lexical only until the next rebuild.
+                meta = json.loads((folder / "embeddings.json").read_text(encoding="utf-8"))
+                dense = np.load(folder / "embeddings.npy")
+                if (meta.get("encoder") == self._encoder_identity() and dense.ndim == 2
+                        and dense.shape[0] == len(result.passages) and meta.get("dim") == dense.shape[1]):
                     result.dense = dense.astype(np.float32)
-            except (OSError, ValueError):
+            except (OSError, ValueError, AttributeError):
                 pass  # an index built without embeddings
         if result.passages:
             corpus = [p.text for p in result.passages]

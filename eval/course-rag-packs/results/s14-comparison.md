@@ -2,11 +2,13 @@
 
 Hit@1, hit@4 and MRR over passages, course-wide and scoped (module plus course-level files). *Before*: the S11 retriever (word and character TF-IDF), measured on the same day with the same questions. *After*: stemming, typo correction against the index vocabulary, logistics synonyms (weight 0.3), weight 0.8 for homework and exam files in course-wide concept questions, and the semantic step (the router's MiniLM encoder, weight 0.2, floor 0.2). Question sets: `questions/` (S11, eight packs) and `paraphrase_questions/` (S14: for CS50x and MIT 6.002 16 questions each, as a paraphrase and as a misspelled variant; gold files as in the S11 sets or the file that states the fact). Full reports: `report.md` (S11) and `paraphrase/report.md`.
 
+Re-run after the review fix (stemming applied until nothing changes, so a typo correction matches the index): only MIT 6.002 course-wide moved, one question of 28 (hit@1 0.86 to 0.82, MRR 0.90 to 0.88); the paraphrase set is unchanged.
+
 | Set | Pack | Mode | n | before hit@1 | after hit@1 | before hit@4 | after hit@4 | before MRR | after MRR |
 |---|---|---|---|---|---|---|---|---|---|
 | S11 | harvard_cs50x | course | 28 | 0.68 | 0.82 | 0.89 | 0.96 | 0.78 | 0.88 |
 | S11 | harvard_cs50x | scoped | 28 | 0.89 | 0.93 | 0.93 | 0.96 | 0.91 | 0.95 |
-| S11 | mit_6_002_circuits | course | 28 | 0.71 | 0.86 | 0.93 | 0.96 | 0.80 | 0.90 |
+| S11 | mit_6_002_circuits | course | 28 | 0.71 | 0.82 | 0.93 | 0.96 | 0.80 | 0.88 |
 | S11 | mit_6_002_circuits | scoped | 28 | 0.96 | 0.96 | 0.96 | 0.96 | 0.96 | 0.96 |
 | S11 | mit_6_006_algorithms | course | 25 | 0.60 | 0.64 | 0.88 | 0.84 | 0.71 | 0.71 |
 | S11 | mit_6_006_algorithms | scoped | 25 | 0.88 | 0.92 | 0.96 | 0.96 | 0.91 | 0.93 |
