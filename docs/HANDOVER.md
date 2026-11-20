@@ -1,6 +1,6 @@
 # Handover (task Z14)
 
-State of the v4 work on 2026-11-17, for whoever continues it. The rules, owners and task list are in
+State of the v4 work on 2026-11-17 and of v5 on 2026-11-20, for whoever continues it. The rules, owners and task list are in
 [v4-implementation-guide.md](v4-implementation-guide.md) (the source of truth); this page says where things
 stand and where to look. Running the system: [OPERATIONS.md](OPERATIONS.md).
 
@@ -57,6 +57,26 @@ stand and where to look. Running the system: [OPERATIONS.md](OPERATIONS.md).
 | F1 frontend on API v2 (carries T6, T7, T8) | merged (#71, #78; UI upgrade #81 to #85): student and instructor dashboards, admin, model connections, quizzes, survey, materials | `frontend/`, `docs/design/ui-upgrade.md` |
 | T11 accessibility and renaming, T12 manuals | merged (#74, #101, #73); the product is named PACT (Privacy-Aware Course Tutor); routing, frontend and web search handover notes still open | `docs/ACCESSIBILITY.md`, `docs/STUDENT_MANUAL.md`, `docs/INSTRUCTOR_MANUAL.md` |
 | T13 web search | merged (#88, #90, #92 to #94): modes `off`, `openai` (the default), hosted `api` (Tavily) and self-hosted `searxng`; runs for cloud answers that need recent information, query from `search_query()`, allow-listed sites per course type; evaluated on 79 questions (G1-106: OpenAI 48 of 59, Tavily 40, no search 30) | `app/websearch/`, `app/pipeline/steps/web_search.py`, [WEB_SEARCH.md](WEB_SEARCH.md) |
+
+### v5 (2026-11-20)
+
+The v5 tasks come from the meeting of 2026-11-17; [v5-plan.md](v5-plan.md) section 0 has the state of each
+one and section 9 the findings of the V17 browser test.
+
+| Task | State | Where |
+|---|---|---|
+| V1 statistics-only instructor view | merged (#109); mode B code kept, switched off by `learner.instructor_individual_view` (default false) | `app/learner/visibility_policy.py`, `app/api/v2/learner.py` |
+| V2 class statistics | merged (#115, #126): minimum group `max(5, setting)`, every row of the course counts (also of students who left), complementary suppression over all sums, quiz mean to 0.1 | `app/learner/statistics.py`, api-v2.md 3.4 |
+| V3 privacy notice | merged (#114) | `frontend/src/components/PrivacyNotice.tsx` |
+| V4 to V6 drafts from a free request, chosen sources, a file for one draft | merged (#119, #120) | `app/instructor_ai/drafts.py`, `app/api/v2/ai_drafts.py` |
+| V7 web pages | merged (#120): fetched through `PinnedTransport` (https, public addresses only, size and time limits), stored as `web-*.md`, re-fetch under a row lock | `app/rag/web_pages.py`, `app/api/v2/materials.py` |
+| V8 closed loop | merged (#123): "Explain it another way" for the student; topics weak for the class (minimum group) hand a request to the AI assistant | `app/learner/weak_topics.py`, `frontend/src/pages/instructor/Overview.tsx` |
+| V9 accounts from term to term | merged (#118, #125): admin student list, deactivate, reset, delete with audit and scrub | `app/api/v2/admin.py`, `app/auth/purge.py` |
+| V15 a student's own answer instruction | merged (#121): scanned, `<` and `>` refused, only to the trusted local model, below the instructor's rules | `app/learner/facade.py`, `app/prompts/render.py`, migration 0017 |
+| V16 cloud drafts for public material | merged (#122): only through `DraftCloudRequest` and `CloudClient.complete_draft` (cloud gate), everything sent is scanned | `app/instructor_ai/draft_cloud.py`, `app/llm/cloud_guard.py` |
+| Backend French texts | merged (#124) | `app/api/v2/fr.yaml`, `localize.py` |
+| Z26, S15, S16, Z25 | merged (#110, #113, #111, #112) | |
+| Z27 security review | merged (#117) | [SECURITY_REVIEW.md](SECURITY_REVIEW.md) |
 
 ## 3. Decisions taken during the work (not obvious from the code)
 
