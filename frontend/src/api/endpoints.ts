@@ -3,6 +3,7 @@ import { download, request, resetCsrf, type Schemas, upload } from "./client";
 
 export type Me = Schemas["MeOut"];
 export type Course = Schemas["CourseOut"];
+export type AdminStudent = Schemas["AdminStudentOut"];
 export type Module = Schemas["ModuleOut"];
 export type Kc = Schemas["KcOut"];
 export type Misconception = Schemas["MisconceptionOut"];
@@ -227,6 +228,13 @@ export const api = {
   updateStaff: (accountId: number, changes: Schemas["StaffPatch"]) => request<Staff>("PATCH", `/admin/instructors/${accountId}`, changes),
   resetStaffPassword: (accountId: number) =>
     request<Schemas["TemporaryPasswordOut"]>("POST", `/admin/instructors/${accountId}/reset-password`),
+  // V9: student accounts, kept from term to term
+  students: () => request<AdminStudent[]>("GET", "/admin/students"),
+  updateStudent: (accountId: number, active: boolean) =>
+    request<AdminStudent>("PATCH", `/admin/students/${accountId}`, { active }),
+  resetStudentPassword: (accountId: number) =>
+    request<Schemas["TemporaryPasswordOut"]>("POST", `/admin/students/${accountId}/reset-password`),
+  deleteStudent: (accountId: number) => request<void>("DELETE", `/admin/students/${accountId}`),
   systemSettings: () => request<SystemSettings>("GET", "/admin/settings"),
   systemStatistics: () => request<Schemas["SystemStatisticsOut"]>("GET", "/admin/statistics"),
   applyStatus: () => request<Schemas["ApplyStatusOut"]>("GET", "/admin/settings/apply-status"),
