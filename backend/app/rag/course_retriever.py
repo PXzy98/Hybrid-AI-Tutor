@@ -12,6 +12,7 @@ Old index versions hold the text of every file that was indexed at the time, so 
 import asyncio
 import json
 import os
+import re
 import shutil
 import tempfile
 import textwrap
@@ -20,12 +21,14 @@ from dataclasses import dataclass
 from pathlib import Path
 from threading import RLock
 
+import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 from app.core.schemas import Chunk
 from app.rag.documents import SUFFIXES, DocumentError, extract_text
 from app.rag.medical_hybrid import _chunk_section, _segments, _slide_sections
+from app.rag.query_text import Vocabulary, analyze, expand_question
 from app.rag.tables import split_tables
 
 MAX_COURSE_CHARS = 2_000_000
@@ -39,10 +42,28 @@ COURSE_LEVEL_WEIGHT = 0.55
 # scores are multiplied by this boost. Chosen on the same packs with the question types of S11.
 LOGISTICS_COURSE_LEVEL_BOOST = 1.5
 
+# S14: a question without a module ("course-wide") is mostly a concept question; the lectures explain it,
+# while homework and exam files repeat its words in problems. Their scores are multiplied by this weight.
+# Chosen on the eight open course packs (eval/course-rag-packs): course-wide hit@1 0.72 -> 0.75 at 0.8.
+ASSESSMENT_WEIGHT = 0.8
+_ASSESSMENT_FILE = re.compile(r"homework|assignment|pset|problem[_ ]?set|exam|quiz|midterm|final[_ ]project",
+                              re.IGNORECASE)
+# Semantic step (only with an embedder): cosine similarity above SEMANTIC_FLOOR adds SEMANTIC_WEIGHT times
+# the excess to the lexical score, and a passage at SEMANTIC_ACCEPT or above is a candidate without any
+# shared word. Chosen on the packs (S14 report).
+# Logistics synonyms count less than the student's own words (scored apart, then added with this weight).
+SYNONYM_WEIGHT = 0.3
+SEMANTIC_WEIGHT = 0.2
+SEMANTIC_FLOOR = 0.2
+SEMANTIC_ACCEPT = 0.4
+
 # Z11 will supply a wrapper around scan_document(text, privacy_profile(course_type)).
 # It returns True only when the full extracted document is accepted for indexing.
 DocumentScanner = Callable[[str], bool]
 IndexVersion = Callable[[int], int]
+# S14: texts -> one unit vector per text (the sentence encoder the app already ships). Optional: without it
+# retrieval is lexical only.
+Embedder = Callable[[list[str]], np.ndarray]
 # Z4 supplies the course's KC catalog: (course_id, module_id, passage text) -> (kc_ids, level).
 KcTagger = Callable[[int, int | None, str], tuple[list[str], str | None]]
 
@@ -52,9 +73,11 @@ class _Snapshot:
     version: int
     passages: list[Chunk]
     word: TfidfVectorizer | None = None
+    vocabulary: Vocabulary | None = None
     char: TfidfVectorizer | None = None
     word_matrix: object = None
     char_matrix: object = None
+    dense: np.ndarray | None = None  # one row per passage; None when the index has no embeddings
 
 
 class IndexedCourseRetriever:
@@ -65,11 +88,13 @@ class IndexedCourseRetriever:
     """
 
     def __init__(self, data_root: Path, *, scan: DocumentScanner | None = None,
-                 index_version: IndexVersion | None = None, kc_tagger: KcTagger | None = None) -> None:
+                 index_version: IndexVersion | None = None, kc_tagger: KcTagger | None = None,
+                 embedder: Embedder | None = None) -> None:
         self.data_root = Path(data_root)
         self.scan = scan
         self.index_version = index_version
         self.kc_tagger = kc_tagger
+        self.embedder = embedder
         self._cache: dict[int, _Snapshot] = {}
         self._locks: dict[int, RLock] = {}
         self._locks_guard = RLock()
@@ -191,6 +216,7 @@ class IndexedCourseRetriever:
                     json.dumps([p.model_dump() for p in passages], ensure_ascii=False),
                     encoding="utf-8",
                 )
+                self._write_embeddings(staging, passages)
                 os.replace(staging, base / f"v{version}")
                 pointer = base / f".current-{version}.json"
                 pointer.write_text(json.dumps({"index_version": version}), encoding="utf-8")
@@ -203,6 +229,19 @@ class IndexedCourseRetriever:
             # until the caller updates the database and calls prune().
             self._delete_versions(course_id, keep={version, self._current_version(course_id)})
             return version
+
+    def _write_embeddings(self, folder: Path, passages: list[Chunk]) -> None:
+        """Embed every passage next to passages.json; an encoder that is not available leaves the index
+        lexical only (the same files, the same results as before S14)."""
+        if self.embedder is None or not passages:
+            return
+        try:
+            dense = np.asarray(self.embedder([p.text for p in passages]), dtype=np.float32)
+            if dense.shape[0] != len(passages) or not np.isfinite(dense).all():
+                return
+            np.save(folder / "embeddings.npy", dense.astype(np.float16))
+        except Exception:  # noqa: BLE001 - missing model files, memory: index without embeddings
+            return
 
     def _versions_on_disk(self, course_id: int) -> list[int]:
         base = self._folder(course_id) / "index"
@@ -250,11 +289,21 @@ class IndexedCourseRetriever:
                     raise ValueError("course ID mismatch")
             except (OSError, ValueError, TypeError):
                 result.passages = []  # corrupted/missing versions fail closed
+        if result.passages and self.embedder is not None:
+            try:
+                dense = np.load(self._folder(course_id) / "index" / f"v{version}" / "embeddings.npy")
+                if dense.ndim == 2 and dense.shape[0] == len(result.passages):
+                    result.dense = dense.astype(np.float32)
+            except (OSError, ValueError):
+                pass  # an index built without embeddings
         if result.passages:
             corpus = [p.text for p in result.passages]
-            result.word = TfidfVectorizer(stop_words="english", ngram_range=(1, 2), sublinear_tf=True)
+            result.word = TfidfVectorizer(analyzer=analyze, sublinear_tf=True)
             result.char = TfidfVectorizer(analyzer="char_wb", ngram_range=(3, 5))
             result.word_matrix = result.word.fit_transform(corpus)
+            doc_freq = (result.word_matrix > 0).sum(axis=0).A1
+            names = result.word.get_feature_names_out().tolist()
+            result.vocabulary = Vocabulary(dict(zip(names, doc_freq.tolist(), strict=True)))
             result.char_matrix = result.char.fit_transform(corpus)
         self._cache[course_id] = result
         return result
@@ -267,6 +316,16 @@ class IndexedCourseRetriever:
                 return list(self._snapshot(course_id).passages)
         except (OSError, ValueError, TypeError):
             return []
+
+    def _semantic(self, snap: _Snapshot, query: str) -> np.ndarray | None:
+        """Cosine similarity of the question to every passage, or None without embeddings or encoder."""
+        if snap.dense is None or self.embedder is None:
+            return None
+        try:
+            vector = np.asarray(self.embedder([query]), dtype=np.float32).reshape(-1)
+            return snap.dense @ vector if vector.shape[0] == snap.dense.shape[1] else None
+        except Exception:  # noqa: BLE001 - encoder failure: lexical only
+            return None
 
     def retrieve(self, course_id: int, module_id: int | None, query: str, k: int = 4,
                  question_kind: str = "concept") -> list[Chunk]:
@@ -283,18 +342,28 @@ class IndexedCourseRetriever:
                 snap = self._snapshot(course_id)
                 if not snap.passages or snap.word is None or snap.char is None:
                     return []
-                word = cosine_similarity(snap.word.transform([query]), snap.word_matrix).ravel()
+                asked, synonyms = expand_question(query, snap.vocabulary)
+                word = cosine_similarity(snap.word.transform([asked]), snap.word_matrix).ravel()
+                if synonyms:
+                    word = word + SYNONYM_WEIGHT * cosine_similarity(
+                        snap.word.transform([synonyms]), snap.word_matrix).ravel()
                 char = cosine_similarity(snap.char.transform([query]), snap.char_matrix).ravel()
+                sem = self._semantic(snap, query)
                 accepted = []
                 for i, chunk in enumerate(snap.passages):
                     belongs = module_id is None or chunk.metadata["module_id"] in (None, module_id)
-                    if belongs and (word[i] > 0.001 or char[i] >= 0.70):
+                    close = sem is not None and sem[i] >= SEMANTIC_ACCEPT
+                    if belongs and (word[i] > 0.001 or char[i] >= 0.70 or close):
                         score = 0.75 * word[i] + 0.25 * char[i]
+                        if sem is not None:
+                            score += SEMANTIC_WEIGHT * max(0.0, float(sem[i]) - SEMANTIC_FLOOR)
                         if chunk.metadata["module_id"] is None:
                             if question_kind == "logistics":
                                 score *= LOGISTICS_COURSE_LEVEL_BOOST
                             elif module_id is not None:
                                 score *= COURSE_LEVEL_WEIGHT  # the chosen module's own material first
+                            elif _ASSESSMENT_FILE.search(chunk.source.rsplit("/", 1)[-1]):
+                                score *= ASSESSMENT_WEIGHT  # course-wide: lectures before homework and exams
                         accepted.append((i, score))
                 ranked = sorted(accepted, key=lambda item: (-item[1], item[0]))[:k]
                 return [snap.passages[i].model_copy(update={"score": round(float(score), 6)})

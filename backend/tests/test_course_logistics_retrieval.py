@@ -3,6 +3,7 @@ Fictional course material only."""
 import pytest
 
 from app.rag.course_retriever import (
+    ASSESSMENT_WEIGHT,
     COURSE_LEVEL_WEIGHT,
     LOGISTICS_COURSE_LEVEL_BOOST,
     IndexedCourseRetriever,
@@ -117,14 +118,15 @@ def test_logistics_questions_do_not_weight_course_level_files_down(tmp_path):
     rag = _same_text_course(tmp_path)
     homework = "course/303/_course/homework.md"
     course_wide = {x.source: x.score for x in rag.retrieve(303, None, "Glimmerwave sampling", 2)}
+    unweighted = course_wide[homework] / ASSESSMENT_WEIGHT  # course-wide, a homework file is weighted (S14)
     concept = rag.retrieve(303, 9, "Glimmerwave sampling", 2)
     logistics = rag.retrieve(303, 9, "Glimmerwave sampling", 2, question_kind="logistics")
     assert [x.source for x in concept][0] == "course/303/9/lecture.md"
     assert {x.source: x.score for x in concept}[homework] == pytest.approx(
-        course_wide[homework] * COURSE_LEVEL_WEIGHT, abs=1e-5)
+        unweighted * COURSE_LEVEL_WEIGHT, abs=1e-5)
     assert [x.source for x in logistics][0] == homework  # the course-level file now comes first
     assert {x.source: x.score for x in logistics}[homework] == pytest.approx(
-        course_wide[homework] * LOGISTICS_COURSE_LEVEL_BOOST, abs=1e-5)
+        unweighted * LOGISTICS_COURSE_LEVEL_BOOST, abs=1e-5)
     module_score = {x.source: x.score for x in logistics}["course/303/9/lecture.md"]
     assert module_score == pytest.approx(course_wide["course/303/9/lecture.md"], abs=1e-5)  # unchanged
 
