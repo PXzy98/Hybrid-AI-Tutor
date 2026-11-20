@@ -327,8 +327,10 @@ class CatalogEditor:
                 for name in d.get("prerequisite_names", []):
                     prerequisite = by_name.get(name.casefold())
                     # the content model links prerequisites within a module only: an unknown name or a KC of
-                    # another module is dropped (the instructor can add the link by hand), not a failed draft
-                    if prerequisite is None or prerequisite.module_id != module_id or prerequisite.id == kc.id:
+                    # another module is dropped (the instructor adds it by hand), not a failed draft
+                    if prerequisite is None or prerequisite.id == kc.id:
+                        continue
+                    if prerequisite.module_id != module_id:
                         continue
                     db.add(KcPrerequisite(kc_id=kc.id, prerequisite_id=prerequisite.id))
             self._commit(db, course_id)
