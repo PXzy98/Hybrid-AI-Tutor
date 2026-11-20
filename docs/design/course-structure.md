@@ -78,9 +78,10 @@ privacy profile), visibility mode, status (`active`, `archived`).
   (random UUID for students, used by every learner table; unchanged from v3), `active`,
   `must_change_password`, failed-login and lock fields (unchanged).
 - **Allowed e-mail domains** for import and activation: `limits.accounts.allowed_email_domains`
-  (default `["uottawa.ca"]`). Accounts created by the migration or the demo seed may use `demo.invalid`.
+  (default `["uottawa.ca", "demo.invalid"]`; `demo.invalid` is reserved, never a real mailbox). Accounts
+  created by the migration, the demo seed and `scripts/build_demo.py` use `demo.invalid`.
 - **Username collisions**: two e-mails with the same prefix in different allowed domains get a numeric
-  suffix on the second (`jdoe123-2`). With only `uottawa.ca` allowed this does not happen.
+  suffix on the second (`jdoe123-2`).
 - Identity data (e-mail, username, display name) lives **only** in `account` (v3 privacy invariant 6).
   Every other table uses `student_id` or `account_id`.
 - `login_identity` (`account_id`, `provider`, `subject`) is created now with one provider (`password`), so

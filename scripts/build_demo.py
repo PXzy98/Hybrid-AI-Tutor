@@ -44,8 +44,9 @@ PACKS_DIR = ROOT / "data" / "demo_courses"
 ACCOUNTS_FILE = ROOT / "var" / "demo_accounts.json"
 DEFAULT_PACKS = ["mit_hst151_pharmacology", "mit_7_016_intro_biology", "mit_6_002_circuits", "harvard_cs50x"]
 V2 = "/api/v2"
-# must be in limits.accounts.allowed_email_domains of the server (default uottawa.ca); fictional addresses
-EMAIL_DOMAIN = os.environ.get("DEMO_EMAIL_DOMAIN", "uottawa.ca")
+# must be in limits.accounts.allowed_email_domains of the server (default uottawa.ca and demo.invalid);
+# fictional addresses at a reserved name, never a real university domain
+EMAIL_DOMAIN = os.environ.get("DEMO_EMAIL_DOMAIN", "demo.invalid")
 JOB_TIMEOUT_SECONDS = 900
 
 # Fictional questions written from the pack material; the tutor answers them from the uploaded files.

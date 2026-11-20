@@ -69,6 +69,8 @@ def test_build_demo_twice_and_sample_activity(world, packs_dir, tmp_path):
     # the accounts file holds generated passwords; the run printed none of them (log is silent here)
     accounts = json.loads((tmp_path / "var" / "demo_accounts.json").read_text(encoding="utf-8"))["students"]
     assert len(accounts) == 2 and all(len(a["password"]) >= 12 for a in accounts)
+    # fictional addresses at a reserved name that the default server settings accept (V17 W7)
+    assert all(a["email"].endswith("@demo.invalid") for a in accounts)
 
     # students acknowledged mode B and asked two questions each
     student = next(m for m in members if m["display_name"] == "Demo Student 1")
