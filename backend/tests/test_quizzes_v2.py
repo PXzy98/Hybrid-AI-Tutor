@@ -322,3 +322,35 @@ def test_a_quiz_attempt_moves_the_mastery_estimate_only_with_consent(world):
     assert mastery("bob") == []  # no consent: no learner state at all
     profile = alice.get(f"{world.url}/me/profile").json()  # My progress shows the KC now
     assert any(k["kc_id"] == "C.1" for m in profile["modules"] for k in m["kcs"])
+
+
+def test_a_wording_edit_keeps_the_mastery_estimate_and_the_quiz_statistics(world):
+    """V18: renaming a KC and rewording its check item keep the learners' records and the class statistics,
+    since both are counted by the code."""
+    quiz = _quiz(world)
+    _publish(world, quiz["id"])
+    for name, answers in (("alice", [0, 0]), ("bob", [1, 1])):
+        student = _login(world.app, name)
+        r = student.post(f"{world.url}/quizzes/{quiz['id']}/attempt", json={"answers": answers})
+        assert r.status_code == 201, r.text
+
+    def state() -> tuple:
+        mastery = sorted((r["student_id"], r["p_mastery"]) for r in rows("learner_kc_state")
+                         if r["course_id"] == world.course and r["kc_id"] == "C.1")
+        evidence = sorted((e["kc_id"], e["correct"]) for e in rows("evidence_log")
+                          if e["course_id"] == world.course)
+        results = world.prof.get(f"{world.url}/quizzes/{quiz['id']}/results").json()
+        return mastery, evidence, results
+
+    before = state()
+    assert len(before[0]) == 2 and before[2]["sufficient_sample"]
+    kc = next(k for k in world.prof.get(f"{world.url}/kcs").json() if k["code"] == "C.1")
+    item = next(i for i in world.prof.get(f"{world.url}/check-items").json() if i["code"] == "C.1-q1")
+    assert world.prof.patch(f"{world.url}/kcs/{kc['id']}", json={
+        "name": "Ohm's law for resistors", "definition": "V = I R for a resistor."}).status_code == 200
+    assert world.prof.patch(f"{world.url}/check-items/{item['id']}", json={
+        "stem": "How often, in other words?", "explanation": "Reworded."}).status_code == 200
+    assert state() == before
+    profile = _login(world.app, "alice").get(f"{world.url}/me/profile").json()
+    shown = [k for m in profile["modules"] for k in m["kcs"] if k["kc_id"] == "C.1"]
+    assert [k["name"] for k in shown] == ["Ohm's law for resistors"]  # My progress shows the new wording

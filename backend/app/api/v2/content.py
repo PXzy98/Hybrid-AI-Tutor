@@ -144,8 +144,11 @@ def create_kc(request: Request, body: KcIn, access: CourseInstructor):
 
 @router.patch("/courses/{course_id}/kcs/{kc_id}", response_model=KcOut, operation_id="kcs_update")
 def update_kc(request: Request, kc_id: int, body: KcPatch, access: CourseInstructor):
-    """Change a KC, its prerequisites (the full list), or retire it (`status: retired`)."""
-    return _kc_out(_editor(request).update_kc(access.course.id, kc_id, body.model_dump(exclude_none=True)))
+    """Change a KC, its prerequisites (the full list), or retire it (`status: retired`). The code stays, so a
+    change of name or description keeps the learners' records (V18); a change of meaning is a retire and a
+    new KC. 409 when another active KC of the course has the name."""
+    return _kc_out(_editor(request).update_kc(access.course.id, kc_id, body.model_dump(exclude_none=True),
+                                              actor_id=access.account_id))
 
 
 # ---------------------------------------------------------------------------------------- check items
@@ -225,8 +228,10 @@ def create_item(request: Request, body: ItemIn, access: CourseInstructor):
 @router.patch("/courses/{course_id}/check-items/{item_id}", response_model=ItemOut,
               operation_id="check_items_update")
 def update_item(request: Request, item_id: int, body: ItemPatch, access: CourseInstructor):
-    """Edit an item; `status: active` publishes a draft, `retired` takes it out of use."""
-    return _item_out(_editor(request).update_item(access.course.id, item_id, _item_values(body)))
+    """Edit an item; `status: active` publishes a draft, `retired` takes it out of use. The code stays, so
+    answers already given keep counting for the item (V18)."""
+    return _item_out(_editor(request).update_item(access.course.id, item_id, _item_values(body),
+                                                  actor_id=access.account_id))
 
 
 # ------------------------------------------------------------------------------------- misconceptions
@@ -285,7 +290,8 @@ def create_misconception(request: Request, body: MisconceptionIn, access: Course
 def update_misconception(request: Request, misconception_id: int, body: MisconceptionPatch,
                          access: CourseInstructor):
     return _mc_out(_editor(request).update_misconception(access.course.id, misconception_id,
-                                                         body.model_dump(exclude_none=True)))
+                                                         body.model_dump(exclude_none=True),
+                                                         actor_id=access.account_id))
 
 
 # ---------------------------------------------------------------------------------- YAML import/export

@@ -196,10 +196,12 @@ def test_every_content_endpoint_refuses_other_instructors_students_and_anonymous
         ("get", "kcs", {}), ("get", f"kcs/{kc}", {}),
         ("post", "kcs", {"json": {"module_id": m, "code": "Z.1", "name": "Z", "difficulty": "basic"}}),
         ("patch", f"kcs/{kc}", {"json": {"status": "retired"}}),
+        ("patch", f"kcs/{kc}", {"json": {"name": "Renamed", "definition": "New wording"}}),
         ("get", "check-items", {}), ("get", f"check-items/{item}", {}),
         ("post", "check-items", {"json": {"kc_id": kc, "code": "Z.1-q", "level": "basic", "stem": "S?",
                                           "options": OPTIONS, "answer": "A"}}),
         ("patch", f"check-items/{item}", {"json": {"status": "active"}}),
+        ("patch", f"check-items/{item}", {"json": {"stem": "Reworded?", "explanation": "Because."}}),
         ("get", "misconceptions", {}), ("get", f"misconceptions/{mc}", {}),
         ("post", "misconceptions", {"json": {"kc_id": kc, "code": "Z.MC", "statement": "s",
                                              "correction": "c"}}),
@@ -215,6 +217,8 @@ def test_every_content_endpoint_refuses_other_instructors_students_and_anonymous
             assert r.status_code == expected, (who, method, path, r.status_code)
     assert csrf_client(app).get(f"{url}/modules").status_code == 401
     assert world["prof"].get(f"{url}/check-items/{item}").json()["status"] == "draft"  # nothing changed
+    assert world["prof"].get(f"{url}/kcs/{kc}").json()["name"] == "What it is"
+    assert world["prof"].get(f"{url}/check-items/{item}").json()["stem"] == "How often?"
 
 
 def test_duplicate_codes_are_conflicts_not_server_errors(world):
@@ -271,3 +275,51 @@ def test_edits_of_the_served_course_reach_the_running_tutor(make_client):
             db.commit()
         services.component_manager.sync()
         assert services.content.item(target["code"]).active
+
+
+def test_wording_edits_keep_the_identity_and_are_audited_without_the_text(world):
+    """V18: the name and description of a KC and the text, options and explanation of a check item can change;
+    the code and the module stay. A name of another active KC is refused; blank text and an answer that is
+    not among the options are refused like on creation."""
+    prof, url = world["prof"], world["url"]
+    built = _build(prof, url)
+    a, b, item = built["a"], built["b"], built["item"]
+    r = prof.patch(f"{url}/kcs/{b['id']}", json={"name": "  Taking a reading ",
+                                                  "definition": "Cuff and arm."})
+    assert r.status_code == 200, r.text
+    kc = r.json()
+    assert (kc["code"], kc["module_id"], kc["name"], kc["definition"], kc["prerequisite_ids"]) == (
+        "BP.2", b["module_id"], "Taking a reading", "Cuff and arm.", [a["id"]])
+    options = {**OPTIONS, "C": {"text": "Once a year"}}
+    r = prof.patch(f"{url}/check-items/{item['id']}", json={"stem": "How often should you measure?",
+                                                           "options": options, "explanation": "Hint: more."})
+    assert r.status_code == 200, r.text
+    edited = r.json()
+    assert (edited["code"], edited["kc_id"], edited["answer"]) == ("BP.2-q1", b["id"], "A")
+    assert edited["options"]["C"]["text"] == "Once a year"
+    assert edited["options"]["B"]["misconception"] == "BP.MC1"
+
+    # another active KC's name (any case) is a conflict; a retired KC's name may be used again
+    assert prof.patch(f"{url}/kcs/{b['id']}", json={"name": "what IT is"}).status_code == 409
+    assert prof.patch(f"{url}/kcs/{a['id']}", json={"status": "retired"}).status_code == 200
+    assert prof.patch(f"{url}/kcs/{b['id']}", json={"name": "What it is"}).status_code == 200
+    assert prof.patch(f"{url}/kcs/{a['id']}", json={"status": "active"}).status_code == 409  # same name now
+
+    refused = [
+        ("kcs", b["id"], {"name": "   "}),
+        ("kcs", b["id"], {"name": ""}),
+        ("check-items", item["id"], {"stem": "  "}),
+        ("check-items", item["id"], {"options": {**OPTIONS, "D": {"text": " "}}}),
+        ("check-items", item["id"], {"options": {k: v for k, v in OPTIONS.items() if k != "D"}}),
+        ("check-items", item["id"], {"stem": "x" * 2001}),
+    ]
+    for path, row_id, body in refused:
+        assert prof.patch(f"{url}/{path}/{row_id}", json=body).status_code == 422, (path, body)
+    assert prof.get(f"{url}/check-items/{item['id']}").json()["stem"] == "How often should you measure?"
+
+    from tests.test_ask_v2 import rows
+    audit = [r for r in rows("audit_log") if r["action"].startswith("content.")]
+    assert {r["action"] for r in audit} == {"content.kc.update", "content.check_item.update"}
+    assert {r["target"] for r in audit} == {f"course:{world['course']}"}
+    logged = str([r["details"] for r in audit])
+    assert "fields" in logged and "Taking a reading" not in logged and "Once a year" not in logged
