@@ -16,14 +16,15 @@ class SemanticRouter:
     def embed(self, question: str):
         return encode([question], self.cfg)[0]
 
-    def question_kind(self, vector) -> str:
+    def question_kind(self, vector, course_type: str | None = None) -> str:
         """Course logistics or concept (T5); independent of the route decision."""
-        return question_type.classify(vector, self.cfg)
+        return question_type.classify(vector, self.cfg, course_type)
 
-    def classify(self, vector, method: str) -> SemanticAnalysis:
+    def classify(self, vector, method: str, course_type: str | None = None) -> SemanticAnalysis:
+        """The heads of the course type when it has its own (V19), otherwise the shared heads."""
         if method not in self.cfg.enabled_methods:
             raise ValueError("routing method disabled")
-        metadata, arrays = load_weights(self.cfg, method)
+        metadata, arrays = load_weights(self.cfg, method, course_type)
         values = predict_heads(vector, metadata, arrays)
         fresh = values["requires_fresh_evidence"] >= self.cfg.freshness_required_threshold
         reliable = values["nearest_similarity"] >= self.cfg.ood_similarity_threshold
@@ -47,7 +48,7 @@ class SemanticRouter:
         if not x.sanitized_question.strip():
             return SemanticAnalysis(method=method, reason="Empty semantic input.")
         try:
-            return self.classify(self.embed(x.contextual_question), method)
+            return self.classify(self.embed(x.contextual_question), method, x.course_type)
         except Exception:
             return SemanticAnalysis(
                 method=method, reason="Semantic assets unavailable, invalid, or input too long."

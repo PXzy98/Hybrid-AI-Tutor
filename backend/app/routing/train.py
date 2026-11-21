@@ -14,7 +14,7 @@ import numpy as np
 
 from app.core.config import REPO_ROOT, get_settings
 from app.routing.methods import estimator
-from app.routing.models import HEADS, encode, weights_path
+from app.routing.models import HEADS, TYPE_NAME, encode, model_dir
 
 
 def read_rows(path: Path) -> list[dict]:
@@ -65,11 +65,24 @@ def portable_arrays(models: dict, prototypes: np.ndarray) -> dict:
     return arrays
 
 
-def train(data: Path, methods: list[str], allow_download=False, label_origin="prototype_policy"):
+def output_dir(cfg, course_type: str | None) -> Path:
+    """`<model_dir>` for the shared heads, `<model_dir>/<type>/` for one course type's own heads (V19)."""
+    if course_type is None:
+        return model_dir(cfg)
+    from app.privacy.profiles import profile_names
+
+    if not TYPE_NAME.fullmatch(course_type) or course_type not in profile_names():
+        raise ValueError(f"unknown course type {course_type!r}: one of {', '.join(profile_names())}")
+    return model_dir(cfg) / course_type
+
+
+def train(data: Path, methods: list[str], allow_download=False, label_origin="prototype_policy",
+          course_type: str | None = None):
     from sklearn.metrics import accuracy_score, brier_score_loss, recall_score
     from sklearn.model_selection import GroupShuffleSplit
 
     cfg = get_settings().routing
+    out = output_dir(cfg, course_type)
     rows = read_rows(data)
     x = encode([r["question"] for r in rows], cfg, allow_download=allow_download)
     a, b = next(
@@ -79,6 +92,7 @@ def train(data: Path, methods: list[str], allow_download=False, label_origin="pr
     )
     report = {
         "label_origin": label_origin,
+        "course_type": course_type,
         "rows": len(rows),
         "heldout_rows": len(b),
         "warning": "Policy-label holdout is NOT a benchmark of local LLM answer quality.",
@@ -107,12 +121,14 @@ def train(data: Path, methods: list[str], allow_download=False, label_origin="pr
             "training_count": len(rows),
             "dataset_sha256": hashlib.sha256(data.read_bytes()).hexdigest(),
         }
-        path = weights_path(cfg, method)
+        if course_type is not None:
+            metadata["course_type"] = course_type
+        path = out / f"semantic_{method}.npz"
         path.parent.mkdir(parents=True, exist_ok=True)
         # No pickle/joblib deserialization and no sklearn-version-dependent runtime object.
         np.savez_compressed(path, metadata=np.array(json.dumps(metadata)), **portable_arrays(models, x))
         print(f"Saved {method}: {path}")
-    path.parent.joinpath("training_report.json").write_text(
+    out.joinpath("training_report.json").write_text(
         json.dumps(report, indent=2) + "\n", encoding="utf-8"
     )
     return report
@@ -124,12 +140,15 @@ def main():
     parser.add_argument("--methods", nargs="+", choices=["lr", "svm"])
     parser.add_argument("--allow-download", action="store_true")
     parser.add_argument("--label-origin", default="prototype_policy")
+    parser.add_argument("--course-type",
+                        help="train the heads of one course type (data/routing/models/<type>/)")
     args = parser.parse_args()
     report = train(
         args.data,
         args.methods or get_settings().routing.enabled_methods,
         args.allow_download,
         args.label_origin,
+        args.course_type,
     )
     print(json.dumps(report, indent=2))
 

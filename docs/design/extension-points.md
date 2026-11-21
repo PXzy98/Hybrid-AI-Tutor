@@ -59,7 +59,7 @@ Background work (long jobs such as grading a batch or importing a gradebook) use
 
 ## A new course type as one package (task V19)
 
-**Status: design for review by Z; no code yet.** A course has one course type (`courses.course_type`). A new
+**Status: design agreed by Z (2026-11-20); plan items 1 to 6 built (PR for V19, task V19); no type has its own heads yet.** A course has one course type (`courses.course_type`). A new
 type should be a set of files another team adds, without changes to the core.
 
 ### What a type selects today

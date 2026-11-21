@@ -5,6 +5,7 @@ No generative LLM is used to classify questions or grade evidence.
 """
 
 import json
+import re
 from functools import lru_cache
 from pathlib import Path
 from threading import RLock
@@ -16,6 +17,7 @@ from app.routing.revisions import REVISIONS
 
 MODEL_LOCK = RLock()
 HEADS = ("cloud_required", "requires_evidence", "requires_fresh_evidence")
+TYPE_NAME = re.compile(r"[a-z_]+")
 
 
 def asset_path(name: str, cache_dir: str | None, local_only: bool) -> str:
@@ -30,9 +32,32 @@ def asset_path(name: str, cache_dir: str | None, local_only: bool) -> str:
                              revision=REVISIONS.get(name))
 
 
-def weights_path(cfg: RoutingConfig, method: str) -> Path:
+def model_dir(cfg: RoutingConfig) -> Path:
     base = Path(cfg.model_dir)
-    return (base if base.is_absolute() else REPO_ROOT / base) / f"semantic_{method}.npz"
+    return base if base.is_absolute() else REPO_ROOT / base
+
+
+def type_dir(cfg: RoutingConfig, course_type: str | None) -> Path | None:
+    """The folder of a course type's own heads (V19): `<model_dir>/<type>/`. None without a type, for a
+    name that is not a course type (never a path: only `[a-z_]+` names of a privacy profile) or without the
+    folder."""
+    if not course_type or not TYPE_NAME.fullmatch(course_type):
+        return None
+    from app.privacy.profiles import profile_names
+
+    if course_type not in profile_names():
+        return None
+    folder = model_dir(cfg) / course_type
+    return folder if folder.is_dir() else None
+
+
+def weights_path(cfg: RoutingConfig, method: str, course_type: str | None = None) -> Path:
+    """The course type's own heads when it has them, otherwise the shared ones."""
+    name = f"semantic_{method}.npz"
+    folder = type_dir(cfg, course_type)
+    if folder is not None and (folder / name).is_file():
+        return folder / name
+    return model_dir(cfg) / name
 
 
 @lru_cache(maxsize=4)
@@ -118,12 +143,14 @@ def _load_weights(path: str, modified_ns: int, size: int):
     return metadata, arrays
 
 
-def load_weights(cfg: RoutingConfig, method: str):
-    path = weights_path(cfg, method)
+def load_weights(cfg: RoutingConfig, method: str, course_type: str | None = None):
+    path = weights_path(cfg, method, course_type)
     stat = path.stat()
     metadata, arrays = _load_weights(str(path.resolve()), stat.st_mtime_ns, stat.st_size)
     if metadata["embedding_model"] != cfg.embedding_model or metadata["method"] != method:
         raise ValueError("weights and configured encoder/method do not match")
+    if metadata.get("course_type") not in (None, course_type):
+        raise ValueError("weights of another course type")
     if metadata.get("schema_version") != 1:
         raise ValueError("unsupported routing weight format")
     return metadata, arrays

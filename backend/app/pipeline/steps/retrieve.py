@@ -3,7 +3,7 @@ import asyncio
 from app.core.registry import steps
 from app.core.schemas import RequestContext
 from app.pipeline.base import BaseStep
-from app.pipeline.settings_view import routing_threshold
+from app.pipeline.settings_view import router_of, routing_threshold
 from app.pipeline.steps.analyze_route import route_input
 from app.platform import course_scope
 
@@ -19,9 +19,10 @@ class RetrieveStep(BaseStep):
         if ctx.pii is None:
             raise RuntimeError("retrieve needs the privacy filter result")
         cfg = self.services.settings
-        if cfg.routing.impl == "semantic" and ctx.semantic_analysis is not None:
+        impl, router = router_of(ctx, self.services)
+        if impl == "semantic" and ctx.semantic_analysis is not None:
             threshold = routing_threshold(ctx, self.services)
-            capable = self.services.router.capable(ctx.semantic_analysis, threshold)
+            capable = router.capable(ctx.semantic_analysis, threshold)
             # The shortcut only saves the lookup for a hard concept question on the demo corpus. Inside a
             # course, and for a logistics question, the cloud answer must still see the course's own rules
             # (syllabus, policies); its passages reach the cloud only through the CloudRequest allow-list.

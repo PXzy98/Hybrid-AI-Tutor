@@ -28,6 +28,9 @@ routing:
   answerability_model: cross-encoder/qnli-electra-base
   relevance_threshold: 0.6
   answerability_threshold: 0.8
+  # V19: another router for the courses of one type ({course_type: router name}); empty: impl for all.
+  # Heads of one type: data/routing/models/<type>/ (python -m app.routing.train --course-type <type>).
+  by_course_type: {}
 
 rag:
   impl: medical_hybrid                # BM25 + word/char TF-IDF, section-aware retrieval
