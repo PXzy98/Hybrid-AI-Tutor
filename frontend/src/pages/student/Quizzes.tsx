@@ -58,7 +58,7 @@ function QuizCard({ course, quiz }: { course: Course; quiz: StudentQuiz }) {
       <CardContent className="space-y-4">
         {attempt ? (
           <div role="status" className="space-y-3">
-            <p className="font-medium">{t("quiz.score", { })}: {attempt.score} / {attempt.total}</p>
+            <p className="font-medium">{t("quiz.scoreLine", { score: attempt.score, total: attempt.total })}</p>
             <ol className="space-y-3">
               {attempt.results.map((r, i) => {
                 const q = questions[i];
@@ -70,7 +70,7 @@ function QuizCard({ course, quiz }: { course: Course; quiz: StudentQuiz }) {
                     </p>
                     {q && <p className="mt-1">{q.stem}</p>}
                     <p className="text-muted-foreground">
-                      {t("quiz.yourAnswer")}: {q ? (q.options ?? [])[r.chosen] : r.chosen + 1} · {t("quiz.rightAnswer")}: {q ? (q.options ?? [])[r.answer] : r.answer + 1}
+                      {t("quiz.yourAnswerIs", { answer: q ? (q.options ?? [])[r.chosen] : r.chosen + 1 })} · {t("quiz.rightAnswerIs", { answer: q ? (q.options ?? [])[r.answer] : r.answer + 1 })}
                     </p>
                     {r.explanation && <p className="mt-1">{r.explanation}</p>}
                   </li>

@@ -56,7 +56,8 @@ export default function PrivacyNotice({ course }: { course: Course }) {
                  role="region">
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <ShieldCheck aria-hidden className="size-4 shrink-0 text-success" />
-        <p className="min-w-0 flex-1">{t(statisticsOnly ? "privacy.line" : "privacy.lineIndividual")}</p>
+        {/* basis-48: on a narrow screen the text keeps a readable width and the button wraps below it */}
+        <p className="min-w-0 flex-1 basis-48">{t(statisticsOnly ? "privacy.line" : "privacy.lineIndividual")}</p>
         <CollapsibleTrigger asChild>
           <Button type="button" variant="ghost" size="sm" className="h-7 px-2" aria-expanded={open}>
             {t(open ? "privacy.hide" : "privacy.more")}

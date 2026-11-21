@@ -21,14 +21,15 @@ const useAnnouncements = (course: Course) =>
   useQuery({ queryKey: ["announcements", course.id], queryFn: () => api.announcements(course.id) });
 
 /** One announcement: title, date, pinned mark and the plain text body (line breaks kept, nothing rendered as
- *  Markdown or HTML). `actions` are the instructor's buttons. */
-function AnnouncementCard({ item, actions, level = 3 }: { item: Announcement; actions?: ReactNode; level?: 3 | 4 }) {
+ *  Markdown or HTML). `actions` are the instructor's buttons; `compact` clamps the body to two lines (the full
+ *  text stays in the page for screen readers and is on the Announcements page). */
+function AnnouncementCard({ item, actions, level = 3, compact = false }: { item: Announcement; actions?: ReactNode; level?: 3 | 4; compact?: boolean }) {
   const { t } = useI18n();
   const fmt = useFormat();
   const Heading = level === 3 ? "h3" : "h4";
   const edited = item.updated_at !== item.created_at;
   return (
-    <article className="space-y-2 rounded-xl border bg-card p-4">
+    <article className={`rounded-xl border bg-card ${compact ? "space-y-1 px-3 py-2" : "space-y-2 p-4"}`}>
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0 space-y-1">
           <Heading className="flex flex-wrap items-center gap-2 text-sm font-semibold break-words">
@@ -42,7 +43,7 @@ function AnnouncementCard({ item, actions, level = 3 }: { item: Announcement; ac
         </div>
         {actions && <div className="flex flex-wrap gap-1">{actions}</div>}
       </div>
-      {item.body && <p className="text-sm whitespace-pre-wrap break-words">{item.body}</p>}
+      {item.body && <p className={`text-sm whitespace-pre-wrap break-words ${compact ? "line-clamp-2" : ""}`}>{item.body}</p>}
     </article>
   );
 }
@@ -60,15 +61,15 @@ export function LatestAnnouncements({ course }: { course: Course }) {
         <h3 id="home-announcements" className="flex items-center gap-2 text-sm font-semibold">
           <Megaphone aria-hidden className="size-4 text-muted-foreground" />{t("ann.title")}
         </h3>
-        {list.data.length > HOME_COUNT && (
+        {shown.length > 0 && (
           <Link to={`/courses/${course.id}/announcements`} className="text-sm font-medium underline underline-offset-2">
-            {t("ann.seeAll", { n: list.data.length })}
+            {list.data.length > HOME_COUNT ? t("ann.seeAll", { n: list.data.length }) : t("ann.readMore")}
           </Link>
         )}
       </div>
       {shown.length === 0
         ? <p className="text-sm text-muted-foreground">{t("ann.noneStudent")}</p>
-        : <ul className="space-y-2">{shown.map((a) => <li key={a.id}><AnnouncementCard item={a} level={4} /></li>)}</ul>}
+        : <ul className="space-y-2">{shown.map((a) => <li key={a.id}><AnnouncementCard item={a} level={4} compact /></li>)}</ul>}
     </section>
   );
 }
