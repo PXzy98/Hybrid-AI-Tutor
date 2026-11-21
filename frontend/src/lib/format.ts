@@ -17,9 +17,9 @@ export function formatDay(value: string, lang: Lang = "en"): string {
   return new Date(value).toLocaleDateString(LOCALES[lang], { timeZone: "UTC" });
 }
 
-/** A date and time in the interface language. */
+/** A date and time in the interface language: hours and minutes, no seconds. */
 export function formatDateTime(value: Input, lang: Lang = "en"): string {
-  return new Date(value).toLocaleString(LOCALES[lang]);
+  return new Date(value).toLocaleString(LOCALES[lang], { dateStyle: "short", timeStyle: "short" });
 }
 
 /** The formatters bound to the current interface language. */

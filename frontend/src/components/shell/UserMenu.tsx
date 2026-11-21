@@ -42,7 +42,7 @@ export default function UserMenu({ me, compact = false }: { me: Me; compact?: bo
           {initials(me.display_name)}
         </span>
         <span className={cn("min-w-0 flex-1 truncate font-medium", compact && "sr-only")}>
-          <span className="sr-only">{t("nav.account")}: </span>{me.display_name}
+          <span className="sr-only">{t("nav.account")}{" "}</span>{me.display_name}
         </span>
         {!compact && <ChevronsUpDown aria-hidden className="size-4 shrink-0 text-muted-foreground" />}
       </DropdownMenuTrigger>
