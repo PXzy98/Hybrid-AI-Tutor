@@ -101,9 +101,9 @@ logged in. Owner = component owner who implements it.
 |---|---|---|---|
 | `GET /courses/{course_id}/modules` | I, S | Z | modules in order |
 | `POST`, `PATCH`, `DELETE /courses/{course_id}/modules[/{module_id}]`, `POST .../modules/reorder` | I | Z | edit modules |
-| `GET/POST/PATCH /courses/{course_id}/kcs[/{kc_id}]` | I | Z | KCs and prerequisites (retire instead of delete) |
-| `GET/POST/PATCH /courses/{course_id}/check-items[/{item_id}]` | I | Z | check items |
-| `GET/POST/PATCH /courses/{course_id}/misconceptions[/{misconception_id}]` | I | Z | misconceptions |
+| `GET/POST/PATCH /courses/{course_id}/kcs[/{kc_id}]` | I | Z | KCs and prerequisites (retire instead of delete); V18: `PATCH` with `name` / `definition` changes the wording only, the code, the module and every learner record stay; 409 when another active KC of the course has the name; audited (`content.kc.update`, field names only) |
+| `GET/POST/PATCH /courses/{course_id}/check-items[/{item_id}]` | I | Z | check items; V18: `PATCH` with `stem`, `options` (texts; the editor keeps the answer and the misconception tags) and `explanation` keeps the code, so answers already given still count; blank text 422; audited (`content.check_item.update`) |
+| `GET/POST/PATCH /courses/{course_id}/misconceptions[/{misconception_id}]` | I | Z | misconceptions; edits audited (`content.misconception.update`) |
 | `POST /courses/{course_id}/content/import`, `GET /courses/{course_id}/content/export` | I | Z | YAML import/export |
 | `GET /courses/{course_id}/materials` | I | S | materials, scan and index status |
 | `POST /courses/{course_id}/materials` | I | S | upload (field `module_id` optional = course-level) |

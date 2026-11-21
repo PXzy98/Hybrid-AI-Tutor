@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/i18n";
+import { ItemEditDialog, KcEditDialog } from "./ContentEdit";
 import ContentTransfer from "./ContentTransfer";
 import Misconceptions from "./Misconceptions";
 
@@ -148,17 +149,24 @@ function KcsCard({ course }: { course: Course }) {
     onSuccess: () => { setForm({ ...form, code: "", name: "", definition: "" }); refresh(); },
   });
   const retire = useMutation({ mutationFn: (id: number) => api.updateKc(course.id, id, { status: "retired" }), onSuccess: refresh });
+  const [saved, setSaved] = useState(false);
   return (
     <Card>
       <CardHeader><CardTitle>{t("content.kcs")}</CardTitle><CardDescription>{t("content.kcsHint")}</CardDescription></CardHeader>
       <CardContent className="space-y-4">
         <ErrorNote error={kcs.error ?? create.error ?? retire.error} />
+        {saved && <p role="status" className="text-sm text-muted-foreground">{t("settings.saved")}</p>}
         <ul className="divide-y text-sm">
           {kcs.data?.map((k) => (
             <li key={k.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
               <span><span className="font-medium">{k.code}</span> {k.name} <Badge variant="outline">{t(`band.${k.difficulty}`)}</Badge>{" "}
                 <Badge variant={k.status === "active" ? "success" : "secondary"}>{t(`content.status.${k.status}`)}</Badge></span>
-              {k.status !== "retired" && <Button type="button" size="sm" variant="outline" aria-label={t("content.retireFor", { name: k.name })} onClick={() => retire.mutate(k.id)}>{t("content.retire")}</Button>}
+              {k.status !== "retired" && (
+                <span className="flex shrink-0 gap-1">
+                  <KcEditDialog course={course} kc={k} onSaved={() => setSaved(true)} />
+                  <Button type="button" size="sm" variant="outline" aria-label={t("content.retireFor", { name: k.name })} onClick={() => { setSaved(false); retire.mutate(k.id); }}>{t("content.retire")}</Button>
+                </span>
+              )}
             </li>
           ))}
           {kcs.data?.length === 0 && <li className="py-2 text-muted-foreground">{t("content.noKcs")}</li>}
@@ -202,17 +210,24 @@ function ItemsCard({ course }: { course: Course }) {
     onSuccess: () => { setForm({ ...blank, kc_id: kcId }); refresh(); },
   });
   const retire = useMutation({ mutationFn: (id: number) => api.updateCheckItem(course.id, id, { status: "retired" }), onSuccess: refresh });
+  const [saved, setSaved] = useState(false);
   return (
     <Card>
       <CardHeader><CardTitle>{t("content.items")}</CardTitle><CardDescription>{t("content.itemsHint")}</CardDescription></CardHeader>
       <CardContent className="space-y-4">
         <ErrorNote error={items.error ?? create.error ?? retire.error} />
+        {saved && <p role="status" className="text-sm text-muted-foreground">{t("settings.saved")}</p>}
         <ul className="divide-y text-sm">
           {items.data?.map((it) => (
             <li key={it.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
               <span><span className="font-medium">{it.code}</span> {it.stem}{" "}
                 <Badge variant={it.status === "active" ? "success" : "secondary"}>{t(`content.status.${it.status}`)}</Badge></span>
-              {it.status !== "retired" && <Button type="button" size="sm" variant="outline" aria-label={t("content.retireFor", { name: it.code })} onClick={() => retire.mutate(it.id)}>{t("content.retire")}</Button>}
+              {it.status !== "retired" && (
+                <span className="flex shrink-0 gap-1">
+                  <ItemEditDialog course={course} item={it} onSaved={() => setSaved(true)} />
+                  <Button type="button" size="sm" variant="outline" aria-label={t("content.retireFor", { name: it.code })} onClick={() => { setSaved(false); retire.mutate(it.id); }}>{t("content.retire")}</Button>
+                </span>
+              )}
             </li>
           ))}
           {items.data?.length === 0 && <li className="py-2 text-muted-foreground">{t("content.noItems")}</li>}

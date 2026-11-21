@@ -24,7 +24,16 @@ from sqlmodel import Session, col, delete, func, select
 
 from app.catalog import CatalogError, course_topics, import_topics
 from app.learner.content import TopicContent, validate
-from app.storage.models import CatalogMisconception, CheckItem, Course, Kc, KcPrerequisite, Material, Module
+from app.storage.models import (
+    AuditLog,
+    CatalogMisconception,
+    CheckItem,
+    Course,
+    Kc,
+    KcPrerequisite,
+    Material,
+    Module,
+)
 
 STATUSES = ("draft", "active", "retired")
 _FILES = ("kcs.yaml", "items.yaml", "misconceptions.yaml")
@@ -93,6 +102,26 @@ def _tags_known(db: Session, course_id: int, options: dict) -> None:
     unknown = sorted(codes - known)
     if unknown:
         raise CatalogError(f"unknown misconception tag(s): {', '.join(unknown)}")
+
+
+def _audit(db: Session, actor_id: int | None, action: str, course_id: int, details: dict) -> None:
+    """An edit in the audit log: IDs and field names only, never the text (V18)."""
+    if actor_id is not None:
+        db.add(AuditLog(account_id=actor_id, action=action, target=f"course:{course_id}", details=details))
+
+
+def _not_blank(value: str, what: str) -> None:
+    if not value.strip():
+        raise CatalogError(f"{what} cannot be empty")
+
+
+def _item_text_checked(values: dict) -> None:
+    """The stem and every option text of a check item must have some text (V18; the lengths are checked by
+    the API models)."""
+    if "stem" in values:
+        _not_blank(values["stem"], "the question")
+    for key, option in (values.get("options") or {}).items():
+        _not_blank(option.get("text") or "", f"option {key}")
 
 
 def _free_code(taken: set[str], prefix: str, start: int) -> str:
@@ -227,18 +256,29 @@ class CatalogEditor:
             kc_id = kc.id
         return self.kc(course_id, kc_id)
 
-    def update_kc(self, course_id: int, kc_id: int, changes: dict) -> tuple[Kc, list[int]]:
+    def update_kc(self, course_id: int, kc_id: int, changes: dict,
+                  actor_id: int | None = None) -> tuple[Kc, list[int]]:
+        """The code stays, so learner state and quiz statistics keep counting the same KC after a change of
+        wording (V18); a name may not be the name of another active KC of the course."""
         with self._db() as db:
             kc = _get(db, Kc, course_id, kc_id, "KC")
             if "module_id" in changes:
                 _get(db, Module, course_id, changes["module_id"], "module")
                 kc.module_id = changes["module_id"]
+            if "name" in changes:
+                _not_blank(changes["name"], "the name")
             for name in ("name", "definition", "difficulty", "status"):
                 if name in changes:
                     setattr(kc, name, changes[name].strip() if name == "name" else changes[name])
+            if kc.status == "active" and ("name" in changes or "status" in changes):
+                others = db.exec(select(Kc.name).where(Kc.course_id == course_id, Kc.status == "active",
+                                                       Kc.id != kc.id)).all()
+                if kc.name.casefold() in {n.casefold() for n in others}:
+                    raise CatalogConflict("another active KC of this course has this name")
             db.add(kc)
             if "prerequisite_ids" in changes:
                 self._set_prerequisites(db, course_id, kc, changes["prerequisite_ids"])
+            _audit(db, actor_id, "content.kc.update", course_id, {"kc_id": kc_id, "fields": sorted(changes)})
             self._commit(db, course_id)
         return self.kc(course_id, kc_id)
 
@@ -254,22 +294,28 @@ class CatalogEditor:
         with self._db() as db:
             _get(db, Kc, course_id, values["kc_id"], "KC")
             _tags_known(db, course_id, values["options"])
+            _item_text_checked(values)
             item = CheckItem(course_id=course_id, **{**values, "code": values["code"].strip()})
             db.add(item)
             self._commit(db, course_id)
             return item
 
-    def update_item(self, course_id: int, item_id: int, changes: dict) -> CheckItem:
+    def update_item(self, course_id: int, item_id: int, changes: dict,
+                    actor_id: int | None = None) -> CheckItem:
+        """The code stays, so answers already given keep counting for the same item (V18)."""
         with self._db() as db:
             item = _get(db, CheckItem, course_id, item_id, "check item")
             if "kc_id" in changes:
                 _get(db, Kc, course_id, changes["kc_id"], "KC")
             if "options" in changes:
                 _tags_known(db, course_id, changes["options"])
+            _item_text_checked(changes)
             for name, value in changes.items():
                 if name != "code":
                     setattr(item, name, value)
             db.add(item)
+            _audit(db, actor_id, "content.check_item.update", course_id,
+                   {"item_id": item_id, "fields": sorted(changes)})
             self._commit(db, course_id)
             return item
 
@@ -288,8 +334,8 @@ class CatalogEditor:
             self._commit(db, course_id)
             return row
 
-    def update_misconception(self, course_id: int, misconception_id: int,
-                             changes: dict) -> CatalogMisconception:
+    def update_misconception(self, course_id: int, misconception_id: int, changes: dict,
+                             actor_id: int | None = None) -> CatalogMisconception:
         with self._db() as db:
             row = _get(db, CatalogMisconception, course_id, misconception_id, "misconception")
             if "kc_id" in changes:
@@ -298,6 +344,8 @@ class CatalogEditor:
                 if name != "code":
                     setattr(row, name, value)
             db.add(row)
+            _audit(db, actor_id, "content.misconception.update", course_id,
+                   {"misconception_id": misconception_id, "fields": sorted(changes)})
             self._commit(db, course_id)
             return row
 

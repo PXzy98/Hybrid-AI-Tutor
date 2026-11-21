@@ -974,7 +974,9 @@ export interface paths {
         head?: never;
         /**
          * Update Kc
-         * @description Change a KC, its prerequisites (the full list), or retire it (`status: retired`).
+         * @description Change a KC, its prerequisites (the full list), or retire it (`status: retired`). The code stays, so a
+         *     change of name or description keeps the learners' records (V18); a change of meaning is a retire and a
+         *     new KC. 409 when another active KC of the course has the name.
          */
         patch: operations["kcs_update"];
         trace?: never;
@@ -1013,7 +1015,8 @@ export interface paths {
         head?: never;
         /**
          * Update Item
-         * @description Edit an item; `status: active` publishes a draft, `retired` takes it out of use.
+         * @description Edit an item; `status: active` publishes a draft, `retired` takes it out of use. The code stays, so
+         *     answers already given keep counting for the item (V18).
          */
         patch: operations["check_items_update"];
         trace?: never;
