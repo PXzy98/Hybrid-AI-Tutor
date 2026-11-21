@@ -148,6 +148,8 @@ def test_credentials_with_quoted_names_are_found(text, value):
     ("general", "My Wi-Fi password for the library is Campus!Fake2026 -- is that OK?", "SECRET",
      "Campus!Fake2026"),
     ("general", "The passcode to the lab door is 4471-FAKE.", "SECRET", "4471-FAKE"),
+    ("ece", "I pasted this by accident: AWS_SECRET_ACCESS_KEY=wJalrFAKE/K7MDENG/bPxRfiCYFAKEKEY. Oops",
+     "SECRET", "wJalrFAKE/K7MDENG/bPxRfiCYFAKEKEY"),
     ("ece", "The scope is on the lab VLAN at 172.16.8.203.", "INTERNAL_ADDRESS", "172.16.8.203"),
     ("ece", "and the gateway is 172.31.255.1:8443, right?", "INTERNAL_ADDRESS", "172.31.255.1:8443"),
     ("ece", "My Pi is at 192.168.4.20.", "INTERNAL_ADDRESS", "192.168.4.20"),
@@ -196,3 +198,15 @@ def test_a_value_on_an_exact_piece_boundary_is_found_once():
     overlap = " " * (SCAN_CHUNK_CHARS - 2000) + "student 300418277 " + " " * 30_000  # inside the overlap
     assert dict((f.type, f.count) for f in scan_document(overlap, privacy_profile("general")).findings) \
         .get("STUDENT_ID") == 1
+
+
+def test_z22b_long_names_without_an_assignment_are_scanned_in_linear_time():
+    """A 20,000-character name made of credential words and no "=" (one scan window) must not backtrack."""
+    import time
+
+    from app.privacy.recognizers.engineering import SecretTokenRecognizer
+
+    for text in ("token_" * 3333 + "x", "API_SECRET-" * 1800, "a_" * 10000):
+        start = time.perf_counter()
+        assert list(SecretTokenRecognizer._z22b_values(text)) == []
+        assert time.perf_counter() - start < 0.5

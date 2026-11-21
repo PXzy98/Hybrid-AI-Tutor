@@ -52,13 +52,17 @@ CONSTANT_NAME_RE = re.compile(r"(?:[A-Z]+_)+(?:KEY|TOKEN|SECRET)")
 # Z22b: a credential name with a prefix or suffix joined by "_" or "-" (AWS_SECRET_ACCESS_KEY, API_TOKEN,
 # db-password, aws_secret_access_key) followed by "=" or ":" (a dict entry or a Python argument too). These
 # names are wider than the plain ones above, so the value must look like a credential (see _credential_like).
+# The whole name (with a prefix or suffix) is matched once, atomically, and must end in a credential word, so
+# a long name without "=" costs linear time and "accident: AWS_SECRET_ACCESS_KEY=..." still finds the key;
+# whether the name really is a credential is decided by _credential_name below.
 PREFIXED_SECRET_RE = re.compile(
-    r"(?<![A-Za-z0-9_-])((?:[A-Za-z0-9]+[_-])*(?:pass(?:word|wd|phrase)?|pwd|key|secret|token)(?:[_-][A-Za-z0-9]+)*)"
+    r"(?<![A-Za-z0-9_-])((?>[A-Za-z0-9]+(?:[_-][A-Za-z0-9]+)+))"
+    r"(?:(?<=pass)|(?<=passwd)|(?<=password)|(?<=passphrase)|(?<=pwd)|(?<=key)|(?<=secret)|(?<=token))"
     r"[\"']?\s*[:=]\s*[\"']?([^\s\"',;)}]{8,})", re.I)
 # A prefixed name is a credential name when its last part is one (AWS_SECRET_ACCESS_KEY, API_TOKEN,
 # db_password; not token_count, cache_key_prefix), and a name ending in "key" also needs a credential word
 # before it (api_key, secret_access_key; not cache_key, primary_key, sort_key).
-_CREDENTIAL_LAST = re.compile(r"(?:pass(?:word|wd|phrase)?|pwd|secret|token|key)$", re.I)
+_CREDENTIAL_LAST = re.compile(r"(?:^|[_-])(?:pass(?:word|wd|phrase)?|pwd|secret|token|key)$", re.I)
 _KEY_QUALIFIER = re.compile(
     r"(?:^|[_-])(?:api|secret|access|private|auth|client|signing|master|encryption|app|service|account"
     r"|session|webhook|license|stripe|aws|ssh|gpg|pgp)(?:[_-]|$)", re.I)
