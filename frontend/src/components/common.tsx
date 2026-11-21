@@ -5,7 +5,23 @@ import { ApiError } from "@/api/client";
 import { Alert } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/i18n";
+import type { MessageKey } from "@/i18n/en";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
+
+/** The fixed sentences of the announcement and quiz endpoints in the UI's language (the server sentence is English). The
+ *  privacy refusal names the entity types only, never the text. */
+function serverSentence(message: string, t: ReturnType<typeof useI18n>["t"]): string | null {
+  const found = /^the privacy scan found student data: (.+)$/i.exec(message);
+  if (found) return t("error.privacyFound", { types: found[1] });
+  const fixed: Record<string, MessageKey> = {
+    "the title cannot be empty": "error.titleEmpty",
+    "the course is archived": "error.courseArchived",
+    "announcement not found": "error.announcementGone",
+    "options must differ": "error.optionsDiffer",
+  };
+  const key = fixed[message.toLowerCase()] as MessageKey | undefined;
+  return key ? t(key) : null;
+}
 
 /** A failed request, shown with the server's English sentence (the codes below get a translated one). */
 export function ErrorNote({ error, id }: { error: unknown; id?: string }) {
@@ -16,6 +32,7 @@ export function ErrorNote({ error, id }: { error: unknown; id?: string }) {
     if (error.code === "model_failed") text = t("error.modelFailed");
     if (error.code === "usage_limit") text = t("error.usageLimit", { s: error.retryAfterSeconds ?? 0 });
     if (error.code === "settings_applying") text = t("error.settingsApplying");
+    text = serverSentence(error.message, t) ?? text;
   }
   // a server sentence may start in lower case ("an account with this e-mail exists"); a 409 is not always a
   // change by someone else (duplicates, a quiz already answered), so its own sentence is shown as it is
@@ -113,6 +130,22 @@ export const choiceRow = (selected: boolean) =>
     selected ? "border-primary bg-primary-soft" : "bg-card hover:bg-accent"}`;
 
 /** A success line ("Saved", "Plan saved"): an icon and the text, announced politely. */
+/** The class of a label whose field is required: a visible marker (CSS, so the label text stays the same). */
+export const REQUIRED_LABEL = "after:ml-0.5 after:text-destructive after:content-['*']";
+
+/** A short hint next to a disabled Save that says what is missing ("Fill in the title."). */
+export function SaveHint({ children, id }: { children: ReactNode; id?: string }) {
+  return <p id={id} className="text-xs text-muted-foreground">{children}</p>;
+}
+
+/** The character count of a text field, shown once it is near the limit (80 %). */
+export function CharCount({ value, max }: { value: string; max: number }) {
+  const { t } = useI18n();
+  if (value.length < max * 0.8) return null;
+  return <p className={`text-xs ${value.length >= max ? "text-destructive" : "text-muted-foreground"}`} aria-live="polite">
+    {t("form.charCount", { n: value.length, max })}</p>;
+}
+
 export function StatusText({ children }: { children: ReactNode }) {
   return (
     <p role="status" className="flex items-center gap-1.5 text-sm text-success">

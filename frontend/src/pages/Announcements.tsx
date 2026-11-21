@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Megaphone, Pencil, Pin, PinOff, Plus, Trash2 } from "lucide-react";
-import { useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 
 import { api, type Announcement, type Course } from "@/api/endpoints";
-import { EmptyState, ErrorNote, Loading, PageHeader, StatusText } from "@/components/common";
+import { CharCount, EmptyState, ErrorNote, Loading, PageHeader, REQUIRED_LABEL, SaveHint, StatusText } from "@/components/common";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -98,11 +98,18 @@ export default function InstructorAnnouncements({ course }: { course: Course }) 
   const [pendingDelete, setPendingDelete] = useState<Announcement | null>(null);
   const newButton = useRef<HTMLButtonElement>(null);
   const deleted = useRef(false);
+  const refocus = useRef<number | null>(null);
   const refresh = () => qc.invalidateQueries({ queryKey: ["announcements", course.id] });
   const pin = useMutation({
     mutationFn: (a: Announcement) => api.updateAnnouncement(course.id, a.id, { pinned: !a.pinned }),
-    onSuccess: async () => { await refresh(); setSaved(true); },
+    onSuccess: async (_, a) => { refocus.current = a.id; await refresh(); setSaved(true); },
   });
+  // the pinned item moves in the list: its pin button keeps the focus (the old node is gone)
+  useEffect(() => {
+    if (refocus.current === null || pin.isPending) return;
+    document.getElementById(`ann-pin-${refocus.current}`)?.focus();
+    refocus.current = null;
+  }, [list.data, pin.isPending]);
   const remove = useMutation({
     mutationFn: (a: Announcement) => api.deleteAnnouncement(course.id, a.id),
     onSuccess: async () => { deleted.current = true; setPendingDelete(null); await refresh(); },
@@ -123,7 +130,7 @@ export default function InstructorAnnouncements({ course }: { course: Course }) 
           {list.data.map((a) => (
             <li key={a.id}>
               <AnnouncementCard item={a} actions={<>
-                <Button type="button" size="sm" variant="ghost" aria-pressed={a.pinned} loading={pin.isPending && pin.variables?.id === a.id}
+                <Button type="button" size="sm" variant="ghost" id={`ann-pin-${a.id}`} aria-pressed={a.pinned} loading={pin.isPending && pin.variables?.id === a.id}
                         aria-label={t(a.pinned ? "ann.unpinFor" : "ann.pinFor", { name: a.title })}
                         onClick={() => { setSaved(false); pin.mutate(a); }}>
                   {a.pinned ? <PinOff aria-hidden /> : <Pin aria-hidden />}{t(a.pinned ? "ann.unpin" : "ann.pin")}
@@ -193,16 +200,21 @@ function AnnouncementDialog({ course, item, trigger, onSaved }: { course: Course
             <DialogTitle>{t(item ? "ann.editTitle" : "ann.newTitle")}</DialogTitle>
             <DialogDescription>{t("ann.formHint")}</DialogDescription>
           </DialogHeader>
-          <div className="grid gap-1.5"><Label htmlFor={`${p}-title`}>{t("ann.fieldTitle")}</Label>
-            <Input id={`${p}-title`} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required maxLength={200} /></div>
+          <div className="grid gap-1.5"><Label htmlFor={`${p}-title`} className={REQUIRED_LABEL}>{t("ann.fieldTitle")}</Label>
+            <Input id={`${p}-title`} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required aria-required maxLength={200} />
+            <CharCount value={form.title} max={200} /></div>
           <div className="grid gap-1.5"><Label htmlFor={`${p}-body`}>{t("ann.fieldBody")}</Label>
-            <Textarea id={`${p}-body`} value={form.body} rows={6} onChange={(e) => setForm({ ...form, body: e.target.value })} maxLength={4000} /></div>
+            <Textarea id={`${p}-body`} value={form.body} rows={6} onChange={(e) => setForm({ ...form, body: e.target.value })} maxLength={4000} />
+            <CharCount value={form.body} max={4000} /></div>
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" className="accent-primary" checked={form.pinned} onChange={(e) => setForm({ ...form, pinned: e.target.checked })} />
             {t("ann.fieldPinned")}
           </label>
           <ErrorNote error={save.error} />
-          <DialogFooter><Button loading={save.isPending} type="submit" disabled={save.isPending || !form.title.trim()}>{save.isPending ? t("settings.saving") : t("settings.save")}</Button></DialogFooter>
+          <DialogFooter className="items-center">
+            {!form.title.trim() && <SaveHint id={`${p}-hint`}>{t("ann.fillTitle")}</SaveHint>}
+            <Button loading={save.isPending} type="submit" aria-describedby={form.title.trim() ? undefined : `${p}-hint`} disabled={save.isPending || !form.title.trim()}>{save.isPending ? t("settings.saving") : t("settings.save")}</Button>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

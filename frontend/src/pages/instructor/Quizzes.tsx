@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ListChecks, Plus, Sparkles, Trash2 } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 
 import { api, type Course, type DraftBody, type Quiz, type QuizQuestion, type QuizResults } from "@/api/endpoints";
-import { EmptyState, ErrorNote, Loading, PageHeader, StatusText } from "@/components/common";
+import { EmptyState, ErrorNote, Loading, PageHeader, REQUIRED_LABEL, StatusText } from "@/components/common";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -49,14 +49,16 @@ function QuizList({ course, onOpen }: { course: Course; onOpen: (v: View) => voi
     onSuccess: refresh,
   });
   const [pendingDelete, setPendingDelete] = useState<Quiz | null>(null);
+  const newButton = useRef<HTMLButtonElement>(null);
+  const deleted = useRef(false);
   const remove = useMutation({
     mutationFn: (id: number) => api.deleteQuiz(course.id, id),
-    onSuccess: () => { setPendingDelete(null); refresh(); },
+    onSuccess: () => { deleted.current = true; setPendingDelete(null); refresh(); },
   });
   return (
     <div className="space-y-4">
       <PageHeader title={t("quiz.title")} description={t("quiz.intro")}
-                  actions={<Button type="button" onClick={() => onOpen({ kind: "edit", id: null })}><Plus aria-hidden />{t("quiz.new")}</Button>} />
+                  actions={<Button ref={newButton} type="button" onClick={() => onOpen({ kind: "edit", id: null })}><Plus aria-hidden />{t("quiz.new")}</Button>} />
       <ErrorNote error={quizzes.error ?? change.error} />
       {quizzes.isLoading && <Loading variant="list" />}
       {quizzes.data?.length === 0 && <EmptyState icon={ListChecks} title={t("empty.quizzes.title")}>{t("quiz.none")}</EmptyState>}
@@ -98,7 +100,13 @@ function QuizList({ course, onOpen }: { course: Course; onOpen: (v: View) => voi
         })}
       </ul>
       <Dialog open={!!pendingDelete} onOpenChange={(o) => { if (!o) setPendingDelete(null); }}>
-        <DialogContent>
+        {/* the deleted quiz's button is gone: focus goes to "New quiz" instead */}
+        <DialogContent onCloseAutoFocus={(e) => {
+          if (!deleted.current) return;
+          deleted.current = false;
+          e.preventDefault();
+          newButton.current?.focus();
+        }}>
           <DialogHeader>
             <DialogTitle>{t("quiz.deleteTitle")}</DialogTitle>
             <DialogDescription>{t("quiz.deleteBody", { name: pendingDelete?.title ?? "" })}</DialogDescription>
@@ -122,6 +130,20 @@ function dropEmptyOptions(q: QuizQuestion): QuizQuestion {
   return { ...q, options: q.options.filter((_, j) => keep[j]), answer: keep.slice(0, q.answer).filter(Boolean).length };
 }
 
+/** The number of the first multiple choice question with two options that read the same (spacing and empty
+ *  options do not count; case does: genotypes "AA" and "aa" differ), or null. */
+export function firstDuplicateOptions(questions: QuizQuestion[]): number | null {
+  const i = questions.findIndex((q) => {
+    if (q.kind !== "mcq") return false;
+    const options = (dropEmptyOptions(q).options ?? []).map((o) => o.split(/\s+/).filter(Boolean).join(" "));
+    return new Set(options).size !== options.length;
+  });
+  return i < 0 ? null : i + 1;
+}
+
+/** The server writes the time with or without the zone; the same instant must compare equal. */
+const sameTime = (a: string, b: string) => a.replace(/(Z|[+-]00:?00)$/, "") === b.replace(/(Z|[+-]00:?00)$/, "");
+
 const blankQuestion = (): QuizQuestion => ({ kind: "mcq", kc: null, stem: "", options: ["", "", "", ""], answer: 0, explanation: "", sources: [], reviewed: true });
 
 function QuizEditor({ course, id, onClose, onCreated }: { course: Course; id: number | null; onClose: () => void; onCreated: (id: number) => void }) {
@@ -132,7 +154,7 @@ function QuizEditor({ course, id, onClose, onCreated }: { course: Course; id: nu
   const quiz = id === null ? undefined : quizzes.data?.find((q) => q.id === id);
   // a new form every time the server copy changes (after a save or after the AI draft arrives)
   return <EditorForm key={quiz ? `${quiz.id}:${quiz.updated_at}` : "new"} course={course} quiz={quiz} onClose={onClose} onCreated={onCreated}
-                     saved={!!quiz && savedAt === quiz.updated_at} onSaved={setSavedAt} />;
+                     saved={!!quiz && !!savedAt && sameTime(savedAt, quiz.updated_at)} onSaved={setSavedAt} />;
 }
 
 function EditorForm({ course, quiz, onClose, onCreated, saved, onSaved }: { course: Course; quiz?: Quiz; onClose: () => void;
@@ -157,6 +179,7 @@ function EditorForm({ course, quiz, onClose, onCreated, saved, onSaved }: { cour
   const students = (members.data ?? []).filter((m) => m.role === "student" && m.student_id);
   const pending = questions.filter((q) => !q.reviewed).length;
 
+  const [problem, setProblem] = useState<string | null>(null);
   const save = useMutation({
     mutationFn: () => {
       const body = { title, kind, module_id: moduleId, opens_at: fromLocalInput(opens), closes_at: fromLocalInput(closes), assigned_to: assigned };
@@ -173,7 +196,9 @@ function EditorForm({ course, quiz, onClose, onCreated, saved, onSaved }: { cour
   const setQuestion = (i: number, patch: Partial<QuizQuestion>) => setQuestions(questions.map((q, j) => (j === i ? { ...q, ...patch } : q)));
   function submit(e: FormEvent) {
     e.preventDefault();
-    save.mutate();
+    const duplicate = locked ? null : firstDuplicateOptions(questions);
+    setProblem(duplicate === null ? null : t("quiz.duplicateOptions", { n: duplicate }));
+    if (duplicate === null) save.mutate();
   }
 
   return (
@@ -185,8 +210,8 @@ function EditorForm({ course, quiz, onClose, onCreated, saved, onSaved }: { cour
       {locked && <Alert variant="info" icon>{t("quiz.locked")}</Alert>}
       <Card>
         <CardContent className="grid gap-4 sm:grid-cols-2">
-          <div className="grid gap-1.5 sm:col-span-2"><Label htmlFor="q-title">{t("course.title")}</Label>
-            <Input id="q-title" value={title} onChange={(e) => setTitle(e.target.value)} required /></div>
+          <div className="grid gap-1.5 sm:col-span-2"><Label htmlFor="q-title" className={REQUIRED_LABEL}>{t("course.title")}</Label>
+            <Input id="q-title" value={title} onChange={(e) => setTitle(e.target.value)} required aria-required /></div>
           <div className="grid gap-1.5"><Label htmlFor="q-kind">{t("quiz.kind")}</Label>
             <Select id="q-kind" value={kind} onChange={(e) => setKind(e.target.value as Quiz["kind"])}>
               <option value="practice">{t("quiz.kind.practice")}</option><option value="final">{t("quiz.kind.final")}</option>
@@ -246,8 +271,8 @@ function EditorForm({ course, quiz, onClose, onCreated, saved, onSaved }: { cour
                       {kcs.data?.map((k) => <option key={k.id} value={k.code}>{k.code} {k.name}</option>)}
                     </Select></div>
                 </div>
-                <div className="grid gap-1.5"><Label htmlFor={`qq-stem-${i}`}>{t("content.stem")}</Label>
-                  <Textarea id={`qq-stem-${i}`} value={q.stem} onChange={(e) => setQuestion(i, { stem: e.target.value })} required /></div>
+                <div className="grid gap-1.5"><Label htmlFor={`qq-stem-${i}`} className={REQUIRED_LABEL}>{t("content.stem")}</Label>
+                  <Textarea id={`qq-stem-${i}`} value={q.stem} onChange={(e) => setQuestion(i, { stem: e.target.value })} required aria-required /></div>
                 <div className="space-y-2">
                   <p className="text-sm font-medium">{t("quiz.options")}</p>
                   {(q.options ?? []).map((o, j) => (
@@ -277,7 +302,7 @@ function EditorForm({ course, quiz, onClose, onCreated, saved, onSaved }: { cour
         {!locked && <Button type="button" variant="outline" onClick={() => setQuestions([...questions, blankQuestion()])}><Plus aria-hidden />{t("quiz.addQuestion")}</Button>}
       </section>
 
-      <ErrorNote error={save.error} />
+      <ErrorNote error={problem ? new Error(problem) : save.error} />
       {saved && unchanged && <StatusText>{t("settings.saved")}</StatusText>}
       <div className="flex flex-wrap gap-3">
         <Button loading={save.isPending} type="submit" disabled={save.isPending}>{save.isPending ? t("settings.saving") : t("quiz.save")}</Button>

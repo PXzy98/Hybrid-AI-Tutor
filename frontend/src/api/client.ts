@@ -43,7 +43,8 @@ function detailOf(body: unknown): string {
   if (body && typeof body === "object" && "detail" in body) {
     const d = (body as { detail: unknown }).detail;
     if (typeof d === "string") return d;
-    if (Array.isArray(d) && d[0]?.msg) return String(d[0].msg);
+    // a pydantic validation message starts with "Value error, "
+    if (Array.isArray(d) && d[0]?.msg) return String(d[0].msg).replace(/^Value error, /, "");
   }
   return "Something went wrong. Please try again.";
 }
