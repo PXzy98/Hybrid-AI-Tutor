@@ -13,6 +13,12 @@ from app.llm.base import LLMError, LLMUnavailable, Message, strip_think
 log = logging.getLogger("app.llm")
 
 
+
+def _status(e) -> str:
+    """The HTTP status of a provider error, for the log (never the body: it may quote the request)."""
+    code = getattr(e, "status_code", None)
+    return f" (HTTP {code})" if code else ""
+
 class OpenAICompatClient:
     def __init__(self, base_url: str, api_key: str, model: str, *, timeout_s: float = 30,
                  max_tokens: int = 800, temperature: float = 0.2,
@@ -85,7 +91,7 @@ class OpenAICompatClient:
                 openai.AuthenticationError) as e:
             raise LLMUnavailable(self._unavailable(e)) from e
         except openai.APIError as e:
-            raise LLMError(f"the {self._who} model returned an error") from e
+            raise LLMError(f"the {self._who} model returned an error{_status(e)}") from e
         choice = resp.choices[0] if resp.choices else None
         text = strip_think(choice.message.content if choice else "")
         cut_off = getattr(choice, "finish_reason", None) == "length"
@@ -126,4 +132,4 @@ class OpenAICompatClient:
                 openai.AuthenticationError) as e:
             raise LLMUnavailable(self._unavailable(e)) from e
         except openai.APIError as e:
-            raise LLMError(f"the {self._who} model returned an error") from e
+            raise LLMError(f"the {self._who} model returned an error{_status(e)}") from e

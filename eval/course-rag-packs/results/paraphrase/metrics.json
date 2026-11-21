@@ -33,9 +33,9 @@
       "course": {
         "concept": {
           "n": 16,
-          "hit@1": 0.875,
+          "hit@1": 0.812,
           "hit@4": 0.938,
-          "mrr": 0.906
+          "mrr": 0.875
         },
         "application": {
           "n": 0,
@@ -51,9 +51,9 @@
         },
         "all": {
           "n": 32,
-          "hit@1": 0.625,
+          "hit@1": 0.594,
           "hit@4": 0.75,
-          "mrr": 0.677
+          "mrr": 0.661
         }
       },
       "variants": {
@@ -80,9 +80,9 @@
           },
           "paraphrase": {
             "n": 16,
-            "hit@1": 0.562,
+            "hit@1": 0.5,
             "hit@4": 0.75,
-            "mrr": 0.646
+            "mrr": 0.615
           }
         }
       },
@@ -93,16 +93,16 @@
         "mrr": 0.448
       },
       "scoped_top_score": {
-        "answerable_median": 0.247,
-        "answerable_p10": 0.165,
+        "answerable_median": 0.243,
+        "answerable_p10": 0.162,
         "unanswerable_n": 0,
         "unanswerable_mean": null,
         "unanswerable_max": null,
         "auc": null
       },
       "course_top_score": {
-        "answerable_median": 0.247,
-        "answerable_p10": 0.165,
+        "answerable_median": 0.243,
+        "answerable_p10": 0.163,
         "unanswerable_n": 0,
         "unanswerable_mean": null,
         "unanswerable_max": null,
@@ -126,15 +126,15 @@
         },
         "logistics": {
           "n": 16,
-          "hit@1": 0.688,
-          "hit@4": 0.812,
-          "mrr": 0.734
+          "hit@1": 0.75,
+          "hit@4": 0.875,
+          "mrr": 0.802
         },
         "all": {
           "n": 32,
-          "hit@1": 0.844,
-          "hit@4": 0.906,
-          "mrr": 0.867
+          "hit@1": 0.875,
+          "hit@4": 0.938,
+          "mrr": 0.901
         }
       },
       "course": {
@@ -142,7 +142,7 @@
           "n": 16,
           "hit@1": 0.438,
           "hit@4": 0.938,
-          "mrr": 0.661
+          "mrr": 0.641
         },
         "application": {
           "n": 0,
@@ -152,15 +152,15 @@
         },
         "logistics": {
           "n": 16,
-          "hit@1": 0.688,
-          "hit@4": 0.812,
-          "mrr": 0.734
+          "hit@1": 0.75,
+          "hit@4": 0.875,
+          "mrr": 0.802
         },
         "all": {
           "n": 32,
-          "hit@1": 0.562,
-          "hit@4": 0.875,
-          "mrr": 0.698
+          "hit@1": 0.594,
+          "hit@4": 0.906,
+          "mrr": 0.721
         }
       },
       "variants": {
@@ -168,48 +168,48 @@
           "misspelled": {
             "n": 16,
             "hit@1": 0.812,
-            "hit@4": 0.938,
-            "mrr": 0.859
+            "hit@4": 0.875,
+            "mrr": 0.844
           },
           "paraphrase": {
             "n": 16,
-            "hit@1": 0.875,
-            "hit@4": 0.875,
-            "mrr": 0.875
+            "hit@1": 0.938,
+            "hit@4": 1.0,
+            "mrr": 0.958
           }
         },
         "course": {
           "misspelled": {
             "n": 16,
             "hit@1": 0.625,
-            "hit@4": 0.938,
-            "mrr": 0.766
+            "hit@4": 0.875,
+            "mrr": 0.75
           },
           "paraphrase": {
             "n": 16,
-            "hit@1": 0.5,
-            "hit@4": 0.812,
-            "mrr": 0.63
+            "hit@1": 0.562,
+            "hit@4": 0.938,
+            "mrr": 0.693
           }
         }
       },
       "logistics_in_module": {
         "n": 16,
-        "hit@1": 0.688,
-        "hit@4": 0.812,
-        "mrr": 0.734
+        "hit@1": 0.75,
+        "hit@4": 0.875,
+        "mrr": 0.802
       },
       "scoped_top_score": {
-        "answerable_median": 0.265,
-        "answerable_p10": 0.155,
+        "answerable_median": 0.261,
+        "answerable_p10": 0.151,
         "unanswerable_n": 0,
         "unanswerable_mean": null,
         "unanswerable_max": null,
         "auc": null
       },
       "course_top_score": {
-        "answerable_median": 0.321,
-        "answerable_p10": 0.199,
+        "answerable_median": 0.317,
+        "answerable_p10": 0.196,
         "unanswerable_n": 0,
         "unanswerable_mean": null,
         "unanswerable_max": null,
@@ -241,7 +241,7 @@
             ],
             "scores": [
               0.243406,
-              0.240731,
+              0.239526,
               0.231219,
               0.231219
             ],
@@ -257,7 +257,7 @@
             ],
             "scores": [
               0.243406,
-              0.240731,
+              0.239526,
               0.231219,
               0.231219
             ],
@@ -273,7 +273,7 @@
             ],
             "scores": [
               0.243406,
-              0.240731,
+              0.239526,
               0.231219,
               0.231219
             ],
@@ -356,13 +356,13 @@
               "assignments/pset_5.md"
             ],
             "scores": [
-              0.226611,
-              0.222982,
+              0.226557,
+              0.222941,
               0.214631,
               0.192987
             ],
             "rank": null,
-            "top_score": 0.226611
+            "top_score": 0.226557
           },
           "course": {
             "files": [
@@ -372,13 +372,13 @@
               "assignments/pset_5.md"
             ],
             "scores": [
-              0.226611,
-              0.222982,
+              0.226557,
+              0.222941,
               0.214631,
               0.192987
             ],
             "rank": null,
-            "top_score": 0.226611
+            "top_score": 0.226557
           },
           "in_module": {
             "files": [
@@ -388,13 +388,13 @@
               "assignments/pset_5.md"
             ],
             "scores": [
-              0.226611,
-              0.222982,
+              0.226557,
+              0.222941,
               0.214631,
               0.192987
             ],
             "rank": null,
-            "top_score": 0.226611
+            "top_score": 0.226557
           }
         },
         {
@@ -410,49 +410,49 @@
             "files": [
               "assignments/pset_1.md",
               "assignments/pset_1.md",
-              "assignments/pset_1.md",
-              "assignments/pset_9.md"
+              "assignments/pset_9.md",
+              "assignments/pset_4.md"
             ],
             "scores": [
-              0.225122,
-              0.213248,
-              0.151798,
-              0.149892
+              0.206926,
+              0.205599,
+              0.149892,
+              0.141745
             ],
             "rank": null,
-            "top_score": 0.225122
+            "top_score": 0.206926
           },
           "course": {
             "files": [
               "assignments/pset_1.md",
               "assignments/pset_1.md",
-              "assignments/pset_1.md",
-              "assignments/pset_9.md"
+              "assignments/pset_9.md",
+              "assignments/pset_4.md"
             ],
             "scores": [
-              0.225122,
-              0.213248,
-              0.151798,
-              0.149892
+              0.206926,
+              0.205599,
+              0.149892,
+              0.141745
             ],
             "rank": null,
-            "top_score": 0.225122
+            "top_score": 0.206926
           },
           "in_module": {
             "files": [
               "assignments/pset_1.md",
               "assignments/pset_1.md",
-              "assignments/pset_1.md",
-              "assignments/pset_9.md"
+              "assignments/pset_9.md",
+              "assignments/pset_4.md"
             ],
             "scores": [
-              0.225122,
-              0.213248,
-              0.151798,
-              0.149892
+              0.206926,
+              0.205599,
+              0.149892,
+              0.141745
             ],
             "rank": null,
-            "top_score": 0.225122
+            "top_score": 0.206926
           }
         },
         {
@@ -472,13 +472,13 @@
               "assignments/final_project.md"
             ],
             "scores": [
-              0.489908,
-              0.427819,
-              0.263753,
-              0.252415
+              0.485822,
+              0.423489,
+              0.261506,
+              0.252235
             ],
             "rank": 2,
-            "top_score": 0.489908
+            "top_score": 0.485822
           },
           "course": {
             "files": [
@@ -488,13 +488,13 @@
               "assignments/final_project.md"
             ],
             "scores": [
-              0.489908,
-              0.427819,
-              0.263753,
-              0.252415
+              0.485822,
+              0.423489,
+              0.261506,
+              0.252235
             ],
             "rank": 2,
-            "top_score": 0.489908
+            "top_score": 0.485822
           },
           "in_module": {
             "files": [
@@ -504,13 +504,13 @@
               "assignments/final_project.md"
             ],
             "scores": [
-              0.489908,
-              0.427819,
-              0.263753,
-              0.252415
+              0.485822,
+              0.423489,
+              0.261506,
+              0.252235
             ],
             "rank": 2,
-            "top_score": 0.489908
+            "top_score": 0.485822
           }
         },
         {
@@ -530,13 +530,13 @@
               "assignments/pset_6.md"
             ],
             "scores": [
-              0.297408,
-              0.290015,
-              0.264305,
-              0.243839
+              0.295714,
+              0.287452,
+              0.262347,
+              0.240993
             ],
             "rank": 3,
-            "top_score": 0.297408
+            "top_score": 0.295714
           },
           "course": {
             "files": [
@@ -546,13 +546,13 @@
               "assignments/pset_6.md"
             ],
             "scores": [
-              0.297408,
-              0.290015,
-              0.264305,
-              0.243839
+              0.295714,
+              0.287452,
+              0.262347,
+              0.240993
             ],
             "rank": 3,
-            "top_score": 0.297408
+            "top_score": 0.295714
           },
           "in_module": {
             "files": [
@@ -562,13 +562,13 @@
               "assignments/pset_6.md"
             ],
             "scores": [
-              0.297408,
-              0.290015,
-              0.264305,
-              0.243839
+              0.295714,
+              0.287452,
+              0.262347,
+              0.240993
             ],
             "rank": 3,
-            "top_score": 0.297408
+            "top_score": 0.295714
           }
         },
         {
@@ -589,9 +589,9 @@
             ],
             "scores": [
               0.351568,
-              0.237953,
-              0.213529,
-              0.189409
+              0.234438,
+              0.208708,
+              0.188242
             ],
             "rank": 3,
             "top_score": 0.351568
@@ -605,9 +605,9 @@
             ],
             "scores": [
               0.351568,
-              0.237953,
-              0.213529,
-              0.189409
+              0.234438,
+              0.208708,
+              0.188242
             ],
             "rank": 3,
             "top_score": 0.351568
@@ -621,9 +621,9 @@
             ],
             "scores": [
               0.351568,
-              0.237953,
-              0.213529,
-              0.189409
+              0.234438,
+              0.208708,
+              0.188242
             ],
             "rank": 3,
             "top_score": 0.351568
@@ -646,13 +646,13 @@
               "assignments/pset_2.md"
             ],
             "scores": [
-              0.182143,
+              0.178826,
               0.171423,
               0.171075,
-              0.148394
+              0.147604
             ],
             "rank": null,
-            "top_score": 0.182143
+            "top_score": 0.178826
           },
           "course": {
             "files": [
@@ -662,13 +662,13 @@
               "assignments/pset_2.md"
             ],
             "scores": [
-              0.182143,
+              0.178826,
               0.171423,
               0.171075,
-              0.148394
+              0.147604
             ],
             "rank": null,
-            "top_score": 0.182143
+            "top_score": 0.178826
           },
           "in_module": {
             "files": [
@@ -678,13 +678,13 @@
               "assignments/pset_9.md"
             ],
             "scores": [
-              0.182143,
+              0.178826,
               0.171423,
-              0.148394,
+              0.147604,
               0.145397
             ],
             "rank": null,
-            "top_score": 0.182143
+            "top_score": 0.178826
           }
         },
         {
@@ -704,13 +704,13 @@
               "assignments/pset_6.md"
             ],
             "scores": [
-              0.365424,
-              0.344667,
-              0.326397,
-              0.300036
+              0.365177,
+              0.341701,
+              0.323172,
+              0.296435
             ],
             "rank": null,
-            "top_score": 0.365424
+            "top_score": 0.365177
           },
           "course": {
             "files": [
@@ -720,13 +720,13 @@
               "assignments/pset_6.md"
             ],
             "scores": [
-              0.365424,
-              0.344667,
-              0.326397,
-              0.300036
+              0.365177,
+              0.341701,
+              0.323172,
+              0.296435
             ],
             "rank": null,
-            "top_score": 0.365424
+            "top_score": 0.365177
           },
           "in_module": {
             "files": [
@@ -736,13 +736,13 @@
               "assignments/pset_6.md"
             ],
             "scores": [
-              0.365424,
-              0.344667,
-              0.326397,
-              0.300036
+              0.365177,
+              0.341701,
+              0.323172,
+              0.296435
             ],
             "rank": null,
-            "top_score": 0.365424
+            "top_score": 0.365177
           }
         },
         {
@@ -763,7 +763,7 @@
             ],
             "scores": [
               0.307192,
-              0.296703,
+              0.29361,
               0.263545,
               0.261905
             ],
@@ -779,7 +779,7 @@
             ],
             "scores": [
               0.307192,
-              0.296703,
+              0.29361,
               0.263545,
               0.261905
             ],
@@ -795,7 +795,7 @@
             ],
             "scores": [
               0.307192,
-              0.296703,
+              0.29361,
               0.263545,
               0.261905
             ],
@@ -823,8 +823,8 @@
             "scores": [
               0.390254,
               0.390254,
-              0.208812,
-              0.206825
+              0.206825,
+              0.20322
             ],
             "rank": 1,
             "top_score": 0.390254
@@ -839,8 +839,8 @@
             "scores": [
               0.390254,
               0.390254,
-              0.208812,
-              0.206825
+              0.206825,
+              0.20322
             ],
             "rank": 1,
             "top_score": 0.390254
@@ -855,8 +855,8 @@
             "scores": [
               0.390254,
               0.390254,
-              0.208812,
-              0.206825
+              0.206825,
+              0.20322
             ],
             "rank": 1,
             "top_score": 0.390254
@@ -933,50 +933,50 @@
           "scoped": {
             "files": [
               "assignments/pset_5.md",
-              "assignments/pset_4.md",
               "assignments/pset_6.md",
+              "assignments/pset_4.md",
               "assignments/pset_6.md"
             ],
             "scores": [
-              0.121993,
-              0.120632,
-              0.119081,
-              0.116724
+              0.118311,
+              0.118261,
+              0.117084,
+              0.115903
             ],
             "rank": null,
-            "top_score": 0.121993
+            "top_score": 0.118311
           },
           "course": {
             "files": [
               "assignments/pset_5.md",
-              "assignments/pset_4.md",
               "assignments/pset_6.md",
+              "assignments/pset_4.md",
               "assignments/pset_6.md"
             ],
             "scores": [
-              0.121993,
-              0.120632,
-              0.119081,
-              0.116724
+              0.118311,
+              0.118261,
+              0.117084,
+              0.115903
             ],
             "rank": null,
-            "top_score": 0.121993
+            "top_score": 0.118311
           },
           "in_module": {
             "files": [
               "assignments/pset_5.md",
-              "assignments/pset_4.md",
               "assignments/pset_6.md",
+              "assignments/pset_4.md",
               "assignments/pset_6.md"
             ],
             "scores": [
-              0.121993,
-              0.120632,
-              0.119081,
-              0.116724
+              0.118311,
+              0.118261,
+              0.117084,
+              0.115903
             ],
             "rank": null,
-            "top_score": 0.121993
+            "top_score": 0.118311
           }
         },
         {
@@ -1031,7 +1031,7 @@
               0.265756,
               0.125454,
               0.096013,
-              0.094931
+              0.093215
             ],
             "rank": 1,
             "top_score": 0.265756
@@ -1055,9 +1055,9 @@
             ],
             "scores": [
               0.434187,
-              0.411736,
+              0.41071,
               0.377179,
-              0.354295
+              0.350401
             ],
             "rank": 1,
             "top_score": 0.434187
@@ -1071,9 +1071,9 @@
             ],
             "scores": [
               0.434187,
-              0.411736,
+              0.41071,
               0.377179,
-              0.354295
+              0.350401
             ],
             "rank": 1,
             "top_score": 0.434187
@@ -1087,9 +1087,9 @@
             ],
             "scores": [
               0.434187,
-              0.411736,
+              0.41071,
               0.377179,
-              0.354295
+              0.350401
             ],
             "rank": 1,
             "top_score": 0.434187
@@ -1170,29 +1170,29 @@
               "modules/04_week_3_algorithms.md"
             ],
             "scores": [
-              0.288197,
-              0.225298,
-              0.134941,
+              0.285254,
+              0.162594,
+              0.132468,
               0.130244
             ],
             "rank": 1,
-            "top_score": 0.288197
+            "top_score": 0.285254
           },
           "course": {
             "files": [
               "modules/04_week_3_algorithms.md",
-              "modules/04_week_3_algorithms.md",
               "modules/06_week_5_data_structures.md",
+              "modules/04_week_3_algorithms.md",
               "assignments/pset_3.md"
             ],
             "scores": [
-              0.288197,
-              0.225298,
-              0.184688,
+              0.285254,
+              0.184282,
+              0.162594,
               0.152389
             ],
             "rank": 1,
-            "top_score": 0.288197
+            "top_score": 0.285254
           }
         },
         {
@@ -1212,29 +1212,29 @@
               "modules/04_week_3_algorithms.md"
             ],
             "scores": [
-              0.235354,
-              0.230004,
-              0.199062,
+              0.226064,
+              0.223581,
+              0.195123,
               0.171809
             ],
             "rank": 1,
-            "top_score": 0.235354
+            "top_score": 0.226064
           },
           "course": {
             "files": [
               "modules/04_week_3_algorithms.md",
               "modules/04_week_3_algorithms.md",
-              "modules/04_week_3_algorithms.md",
-              "modules/06_week_5_data_structures.md"
+              "modules/06_week_5_data_structures.md",
+              "modules/04_week_3_algorithms.md"
             ],
             "scores": [
-              0.235354,
-              0.230004,
-              0.199062,
-              0.198387
+              0.226064,
+              0.223581,
+              0.198259,
+              0.195123
             ],
             "rank": 1,
-            "top_score": 0.235354
+            "top_score": 0.226064
           }
         },
         {
@@ -1254,13 +1254,13 @@
               "modules/06_week_5_data_structures.md"
             ],
             "scores": [
-              0.169194,
-              0.168413,
-              0.167078,
-              0.162142
+              0.168412,
+              0.167503,
+              0.165454,
+              0.161517
             ],
             "rank": 1,
-            "top_score": 0.169194
+            "top_score": 0.168412
           },
           "course": {
             "files": [
@@ -1270,13 +1270,13 @@
               "modules/06_week_5_data_structures.md"
             ],
             "scores": [
-              0.169194,
-              0.168413,
-              0.167078,
-              0.162142
+              0.168412,
+              0.167503,
+              0.165454,
+              0.161517
             ],
             "rank": 1,
-            "top_score": 0.169194
+            "top_score": 0.168412
           }
         },
         {
@@ -1296,13 +1296,13 @@
               "modules/06_week_5_data_structures.md"
             ],
             "scores": [
-              0.187776,
+              0.186876,
               0.168793,
               0.163917,
-              0.162586
+              0.161995
             ],
             "rank": 1,
-            "top_score": 0.187776
+            "top_score": 0.186876
           },
           "course": {
             "files": [
@@ -1312,13 +1312,13 @@
               "modules/06_week_5_data_structures.md"
             ],
             "scores": [
-              0.187776,
+              0.186876,
               0.168793,
               0.163917,
-              0.162586
+              0.161995
             ],
             "rank": 1,
-            "top_score": 0.187776
+            "top_score": 0.186876
           }
         },
         {
@@ -1338,13 +1338,13 @@
               "modules/08_week_7_sql.md"
             ],
             "scores": [
-              0.154045,
-              0.098764,
-              0.095361,
+              0.154033,
+              0.097813,
+              0.095351,
               0.092004
             ],
             "rank": 1,
-            "top_score": 0.154045
+            "top_score": 0.154033
           },
           "course": {
             "files": [
@@ -1354,13 +1354,13 @@
               "modules/08_week_7_sql.md"
             ],
             "scores": [
-              0.154045,
-              0.098764,
-              0.095361,
+              0.154033,
+              0.097813,
+              0.095351,
               0.092004
             ],
             "rank": 1,
-            "top_score": 0.154045
+            "top_score": 0.154033
           }
         },
         {
@@ -1381,9 +1381,9 @@
             ],
             "scores": [
               0.284993,
-              0.277672,
+              0.27271,
               0.210196,
-              0.206024
+              0.205989
             ],
             "rank": 1,
             "top_score": 0.284993
@@ -1397,9 +1397,9 @@
             ],
             "scores": [
               0.284993,
-              0.277672,
+              0.27271,
               0.210196,
-              0.206024
+              0.205989
             ],
             "rank": 1,
             "top_score": 0.284993
@@ -1422,13 +1422,13 @@
               "modules/05_week_4_memory.md"
             ],
             "scores": [
-              0.174019,
-              0.162399,
-              0.157557,
-              0.138042
+              0.172103,
+              0.161728,
+              0.156289,
+              0.138024
             ],
             "rank": 1,
-            "top_score": 0.174019
+            "top_score": 0.172103
           },
           "course": {
             "files": [
@@ -1438,13 +1438,13 @@
               "modules/05_week_4_memory.md"
             ],
             "scores": [
-              0.207345,
-              0.174019,
-              0.169606,
-              0.162399
+              0.203813,
+              0.172103,
+              0.169489,
+              0.161728
             ],
             "rank": 2,
-            "top_score": 0.207345
+            "top_score": 0.203813
           }
         },
         {
@@ -1464,13 +1464,13 @@
               "modules/05_week_4_memory.md"
             ],
             "scores": [
-              0.169197,
-              0.163639,
-              0.152093,
-              0.149084
+              0.169176,
+              0.163589,
+              0.151601,
+              0.144178
             ],
             "rank": 1,
-            "top_score": 0.169197
+            "top_score": 0.169176
           },
           "course": {
             "files": [
@@ -1480,13 +1480,13 @@
               "modules/05_week_4_memory.md"
             ],
             "scores": [
-              0.169197,
-              0.163639,
-              0.162465,
-              0.152093
+              0.169176,
+              0.163589,
+              0.158881,
+              0.151601
             ],
             "rank": 1,
-            "top_score": 0.169197
+            "top_score": 0.169176
           }
         },
         {
@@ -1506,13 +1506,13 @@
               "modules/06_week_5_data_structures.md"
             ],
             "scores": [
-              0.065085,
-              0.06433,
-              0.059105,
+              0.06463,
+              0.06432,
+              0.058571,
               0.054894
             ],
             "rank": 2,
-            "top_score": 0.065085
+            "top_score": 0.06463
           },
           "course": {
             "files": [
@@ -1524,8 +1524,8 @@
             "scores": [
               0.109186,
               0.108534,
-              0.094669,
-              0.085971
+              0.094007,
+              0.085194
             ],
             "rank": null,
             "top_score": 0.109186
@@ -1550,8 +1550,8 @@
             "scores": [
               0.241933,
               0.099904,
-              0.065669,
-              0.062956
+              0.064921,
+              0.062932
             ],
             "rank": 1,
             "top_score": 0.241933
@@ -1566,8 +1566,8 @@
             "scores": [
               0.241933,
               0.099904,
-              0.096141,
-              0.091572
+              0.096117,
+              0.091537
             ],
             "rank": 1,
             "top_score": 0.241933
@@ -1591,7 +1591,7 @@
             ],
             "scores": [
               0.299843,
-              0.257645,
+              0.256903,
               0.156124,
               0.129153
             ],
@@ -1607,7 +1607,7 @@
             ],
             "scores": [
               0.299843,
-              0.257645,
+              0.256903,
               0.169192,
               0.164746
             ],
@@ -1633,7 +1633,7 @@
             ],
             "scores": [
               0.266817,
-              0.191341,
+              0.186574,
               0.12513,
               0.05006
             ],
@@ -1649,7 +1649,7 @@
             ],
             "scores": [
               0.266817,
-              0.191341,
+              0.186574,
               0.12513,
               0.101497
             ],
@@ -1674,13 +1674,13 @@
               "modules/10_week_9_flask.md"
             ],
             "scores": [
-              0.260307,
+              0.260071,
               0.251574,
               0.251574,
               0.197257
             ],
             "rank": 1,
-            "top_score": 0.260307
+            "top_score": 0.260071
           },
           "course": {
             "files": [
@@ -1690,13 +1690,13 @@
               "modules/10_week_9_flask.md"
             ],
             "scores": [
-              0.260307,
+              0.260071,
               0.251574,
               0.251574,
               0.197257
             ],
             "rank": 1,
-            "top_score": 0.260307
+            "top_score": 0.260071
           }
         },
         {
@@ -1719,7 +1719,7 @@
               0.185191,
               0.173971,
               0.161718,
-              0.158552
+              0.155042
             ],
             "rank": 1,
             "top_score": 0.185191
@@ -1735,7 +1735,7 @@
               0.185191,
               0.173971,
               0.161718,
-              0.158552
+              0.155042
             ],
             "rank": 1,
             "top_score": 0.185191
@@ -1758,29 +1758,29 @@
               "modules/05_week_4_memory.md"
             ],
             "scores": [
-              0.164578,
-              0.091265,
-              0.091265,
-              0.085243
+              0.161847,
+              0.089192,
+              0.089192,
+              0.085026
             ],
             "rank": 1,
-            "top_score": 0.164578
+            "top_score": 0.161847
           },
           "course": {
             "files": [
-              "modules/05_week_4_memory.md",
               "modules/01_week_0_scratch.md",
+              "modules/05_week_4_memory.md",
               "modules/01_week_0_scratch.md",
               "assignments/pset_4.md"
             ],
             "scores": [
-              0.164578,
-              0.163645,
-              0.148555,
-              0.13275
+              0.163439,
+              0.161847,
+              0.148457,
+              0.129733
             ],
-            "rank": 1,
-            "top_score": 0.164578
+            "rank": 2,
+            "top_score": 0.163439
           }
         },
         {
@@ -1800,13 +1800,13 @@
               "modules/05_week_4_memory.md"
             ],
             "scores": [
-              0.251175,
-              0.172833,
-              0.119316,
-              0.093889
+              0.243554,
+              0.171829,
+              0.119291,
+              0.092757
             ],
             "rank": 1,
-            "top_score": 0.251175
+            "top_score": 0.243554
           },
           "course": {
             "files": [
@@ -1816,13 +1816,13 @@
               "assignments/pset_4.md"
             ],
             "scores": [
-              0.251175,
-              0.172833,
-              0.119316,
-              0.105234
+              0.243554,
+              0.171829,
+              0.119291,
+              0.103968
             ],
             "rank": 1,
-            "top_score": 0.251175
+            "top_score": 0.243554
           }
         }
       ]
@@ -1845,49 +1845,49 @@
             "files": [
               "syllabus.md",
               "syllabus.md",
-              "syllabus.md",
-              "syllabus.md"
+              "calendar.md",
+              "assignments.md"
             ],
             "scores": [
-              0.582908,
-              0.493367,
-              0.373861,
-              0.336222
+              0.490116,
+              0.438201,
+              0.36654,
+              0.344616
             ],
-            "rank": null,
-            "top_score": 0.582908
+            "rank": 3,
+            "top_score": 0.490116
           },
           "course": {
             "files": [
               "syllabus.md",
               "syllabus.md",
-              "syllabus.md",
-              "syllabus.md"
+              "calendar.md",
+              "assignments.md"
             ],
             "scores": [
-              0.582908,
-              0.493367,
-              0.373861,
-              0.336222
+              0.490116,
+              0.438201,
+              0.36654,
+              0.344616
             ],
-            "rank": null,
-            "top_score": 0.582908
+            "rank": 3,
+            "top_score": 0.490116
           },
           "in_module": {
             "files": [
               "syllabus.md",
               "syllabus.md",
-              "syllabus.md",
-              "syllabus.md"
+              "calendar.md",
+              "assignments.md"
             ],
             "scores": [
-              0.582908,
-              0.493367,
-              0.373861,
-              0.336222
+              0.490116,
+              0.438201,
+              0.36654,
+              0.344616
             ],
-            "rank": null,
-            "top_score": 0.582908
+            "rank": 3,
+            "top_score": 0.490116
           }
         },
         {
@@ -1901,51 +1901,51 @@
           "gold_refused": [],
           "scoped": {
             "files": [
-              "syllabus.md",
-              "syllabus.md",
               "assignments.md",
+              "syllabus.md",
+              "syllabus.md",
               "syllabus.md"
             ],
             "scores": [
-              0.215367,
-              0.206975,
-              0.205555,
-              0.202224
+              0.22532,
+              0.207964,
+              0.207882,
+              0.199162
             ],
             "rank": null,
-            "top_score": 0.215367
+            "top_score": 0.22532
           },
           "course": {
             "files": [
-              "syllabus.md",
-              "syllabus.md",
               "assignments.md",
+              "syllabus.md",
+              "syllabus.md",
               "syllabus.md"
             ],
             "scores": [
-              0.215367,
-              0.206975,
-              0.205555,
-              0.202224
+              0.22532,
+              0.207964,
+              0.207882,
+              0.199162
             ],
             "rank": null,
-            "top_score": 0.215367
+            "top_score": 0.22532
           },
           "in_module": {
             "files": [
-              "syllabus.md",
-              "syllabus.md",
               "assignments.md",
+              "syllabus.md",
+              "syllabus.md",
               "syllabus.md"
             ],
             "scores": [
-              0.215367,
-              0.206975,
-              0.205555,
-              0.202224
+              0.22532,
+              0.207964,
+              0.207882,
+              0.199162
             ],
             "rank": null,
-            "top_score": 0.215367
+            "top_score": 0.22532
           }
         },
         {
@@ -1959,51 +1959,51 @@
           "gold_refused": [],
           "scoped": {
             "files": [
+              "calendar.md",
+              "assignments.md",
               "syllabus.md",
-              "syllabus.md",
-              "syllabus.md",
-              "assignments.md"
+              "syllabus.md"
             ],
             "scores": [
-              0.367097,
-              0.32733,
-              0.312032,
-              0.289497
+              0.348038,
+              0.342402,
+              0.3372,
+              0.31256
             ],
-            "rank": null,
-            "top_score": 0.367097
+            "rank": 1,
+            "top_score": 0.348038
           },
           "course": {
             "files": [
+              "calendar.md",
+              "assignments.md",
               "syllabus.md",
-              "syllabus.md",
-              "syllabus.md",
-              "assignments.md"
+              "syllabus.md"
             ],
             "scores": [
-              0.367097,
-              0.32733,
-              0.312032,
-              0.289497
+              0.348038,
+              0.342402,
+              0.3372,
+              0.31256
             ],
-            "rank": null,
-            "top_score": 0.367097
+            "rank": 1,
+            "top_score": 0.348038
           },
           "in_module": {
             "files": [
+              "calendar.md",
+              "assignments.md",
               "syllabus.md",
-              "syllabus.md",
-              "syllabus.md",
-              "assignments.md"
+              "syllabus.md"
             ],
             "scores": [
-              0.367097,
-              0.32733,
-              0.312032,
-              0.289497
+              0.348038,
+              0.342402,
+              0.3372,
+              0.31256
             ],
-            "rank": null,
-            "top_score": 0.367097
+            "rank": 1,
+            "top_score": 0.348038
           }
         },
         {
@@ -2017,51 +2017,51 @@
           "gold_refused": [],
           "scoped": {
             "files": [
-              "syllabus.md",
               "exams/quiz_1_spring_2007.pdf",
               "syllabus.md",
-              "calendar.md"
+              "assignments.md",
+              "syllabus.md"
             ],
             "scores": [
-              0.212445,
-              0.210942,
-              0.190367,
-              0.185086
+              0.219984,
+              0.206999,
+              0.197754,
+              0.191375
             ],
-            "rank": 4,
-            "top_score": 0.212445
+            "rank": null,
+            "top_score": 0.219984
           },
           "course": {
             "files": [
-              "syllabus.md",
               "exams/quiz_1_spring_2007.pdf",
               "syllabus.md",
-              "calendar.md"
+              "assignments.md",
+              "syllabus.md"
             ],
             "scores": [
-              0.212445,
-              0.210942,
-              0.190367,
-              0.185086
+              0.219984,
+              0.206999,
+              0.197754,
+              0.191375
             ],
-            "rank": 4,
-            "top_score": 0.212445
+            "rank": null,
+            "top_score": 0.219984
           },
           "in_module": {
             "files": [
-              "syllabus.md",
               "exams/quiz_1_spring_2007.pdf",
               "syllabus.md",
-              "calendar.md"
+              "assignments.md",
+              "syllabus.md"
             ],
             "scores": [
-              0.212445,
-              0.210942,
-              0.190367,
-              0.185086
+              0.219984,
+              0.206999,
+              0.197754,
+              0.191375
             ],
-            "rank": 4,
-            "top_score": 0.212445
+            "rank": null,
+            "top_score": 0.219984
           }
         },
         {
@@ -2082,9 +2082,9 @@
             ],
             "scores": [
               0.383132,
-              0.36573,
-              0.360719,
-              0.298562
+              0.36447,
+              0.353751,
+              0.282688
             ],
             "rank": 1,
             "top_score": 0.383132
@@ -2098,9 +2098,9 @@
             ],
             "scores": [
               0.383132,
-              0.36573,
-              0.360719,
-              0.298562
+              0.36447,
+              0.353751,
+              0.282688
             ],
             "rank": 1,
             "top_score": 0.383132
@@ -2114,9 +2114,9 @@
             ],
             "scores": [
               0.383132,
-              0.36573,
-              0.360719,
-              0.298562
+              0.36447,
+              0.353751,
+              0.282688
             ],
             "rank": 1,
             "top_score": 0.383132
@@ -2139,13 +2139,13 @@
               "exams/quiz_1_spring_2007.pdf"
             ],
             "scores": [
-              0.317388,
-              0.277017,
+              0.315595,
+              0.269399,
               0.218367,
-              0.171368
+              0.170771
             ],
             "rank": 1,
-            "top_score": 0.317388
+            "top_score": 0.315595
           },
           "course": {
             "files": [
@@ -2155,13 +2155,13 @@
               "exams/quiz_1_spring_2007.pdf"
             ],
             "scores": [
-              0.317388,
-              0.277017,
+              0.315595,
+              0.269399,
               0.218367,
-              0.171368
+              0.170771
             ],
             "rank": 1,
-            "top_score": 0.317388
+            "top_score": 0.315595
           },
           "in_module": {
             "files": [
@@ -2171,13 +2171,13 @@
               "exams/quiz_1_spring_2007.pdf"
             ],
             "scores": [
-              0.317388,
-              0.277017,
+              0.315595,
+              0.269399,
               0.218367,
-              0.171368
+              0.170771
             ],
             "rank": 1,
-            "top_score": 0.317388
+            "top_score": 0.315595
           }
         },
         {
@@ -2197,13 +2197,13 @@
               "assignments.md"
             ],
             "scores": [
-              0.633449,
-              0.356898,
-              0.351609,
-              0.289517
+              0.61844,
+              0.355885,
+              0.348994,
+              0.280277
             ],
             "rank": 1,
-            "top_score": 0.633449
+            "top_score": 0.61844
           },
           "course": {
             "files": [
@@ -2213,13 +2213,13 @@
               "assignments.md"
             ],
             "scores": [
-              0.633449,
-              0.356898,
-              0.351609,
-              0.289517
+              0.61844,
+              0.355885,
+              0.348994,
+              0.280277
             ],
             "rank": 1,
-            "top_score": 0.633449
+            "top_score": 0.61844
           },
           "in_module": {
             "files": [
@@ -2229,13 +2229,13 @@
               "syllabus.md"
             ],
             "scores": [
-              0.633449,
-              0.356898,
-              0.289517,
+              0.61844,
+              0.355885,
+              0.280277,
               0.258405
             ],
             "rank": 1,
-            "top_score": 0.633449
+            "top_score": 0.61844
           }
         },
         {
@@ -2251,49 +2251,49 @@
             "files": [
               "syllabus.md",
               "assignments/homework_11.pdf",
-              "assignments.md",
-              "syllabus.md"
+              "syllabus.md",
+              "assignments.md"
             ],
             "scores": [
-              0.335277,
-              0.230055,
-              0.226772,
-              0.220693
+              0.325771,
+              0.224491,
+              0.217214,
+              0.216371
             ],
             "rank": 1,
-            "top_score": 0.335277
+            "top_score": 0.325771
           },
           "course": {
             "files": [
               "syllabus.md",
               "assignments/homework_11.pdf",
-              "assignments.md",
-              "syllabus.md"
+              "syllabus.md",
+              "assignments.md"
             ],
             "scores": [
-              0.335277,
-              0.230055,
-              0.226772,
-              0.220693
+              0.325771,
+              0.224491,
+              0.217214,
+              0.216371
             ],
             "rank": 1,
-            "top_score": 0.335277
+            "top_score": 0.325771
           },
           "in_module": {
             "files": [
               "syllabus.md",
               "assignments/homework_11.pdf",
-              "assignments.md",
-              "syllabus.md"
+              "syllabus.md",
+              "assignments.md"
             ],
             "scores": [
-              0.335277,
-              0.230055,
-              0.226772,
-              0.220693
+              0.325771,
+              0.224491,
+              0.217214,
+              0.216371
             ],
             "rank": 1,
-            "top_score": 0.335277
+            "top_score": 0.325771
           }
         },
         {
@@ -2315,8 +2315,8 @@
             "scores": [
               0.178626,
               0.176973,
-              0.161917,
-              0.159025
+              0.156329,
+              0.156305
             ],
             "rank": 1,
             "top_score": 0.178626
@@ -2331,8 +2331,8 @@
             "scores": [
               0.178626,
               0.176973,
-              0.161917,
-              0.159025
+              0.156329,
+              0.156305
             ],
             "rank": 1,
             "top_score": 0.178626
@@ -2347,8 +2347,8 @@
             "scores": [
               0.178626,
               0.176973,
-              0.161917,
-              0.159025
+              0.156329,
+              0.156305
             ],
             "rank": 1,
             "top_score": 0.178626
@@ -2367,14 +2367,14 @@
             "files": [
               "syllabus.md",
               "assignments/homework_3.pdf",
-              "exams/quiz_1_spring_2007.pdf",
-              "modules/16_lecture_15b_damped_second_order_systems.pdf"
+              "modules/05_lecture_5_inside_the_digital_gate.pdf",
+              "exams/quiz_1_spring_2007.pdf"
             ],
             "scores": [
               0.24289,
-              0.241487,
-              0.122323,
-              0.119954
+              0.222018,
+              0.117526,
+              0.115811
             ],
             "rank": 1,
             "top_score": 0.24289
@@ -2383,14 +2383,14 @@
             "files": [
               "syllabus.md",
               "assignments/homework_3.pdf",
-              "exams/quiz_1_spring_2007.pdf",
-              "modules/16_lecture_15b_damped_second_order_systems.pdf"
+              "modules/05_lecture_5_inside_the_digital_gate.pdf",
+              "exams/quiz_1_spring_2007.pdf"
             ],
             "scores": [
               0.24289,
-              0.241487,
-              0.122323,
-              0.119954
+              0.222018,
+              0.117526,
+              0.115811
             ],
             "rank": 1,
             "top_score": 0.24289
@@ -2404,9 +2404,9 @@
             ],
             "scores": [
               0.24289,
-              0.241487,
-              0.122323,
-              0.112862
+              0.222018,
+              0.115811,
+              0.112122
             ],
             "rank": 1,
             "top_score": 0.24289
@@ -2430,9 +2430,9 @@
             ],
             "scores": [
               0.467653,
-              0.266477,
-              0.26582,
-              0.258393
+              0.259394,
+              0.257183,
+              0.2511
             ],
             "rank": 1,
             "top_score": 0.467653
@@ -2446,9 +2446,9 @@
             ],
             "scores": [
               0.467653,
-              0.266477,
-              0.26582,
-              0.258393
+              0.259394,
+              0.257183,
+              0.2511
             ],
             "rank": 1,
             "top_score": 0.467653
@@ -2462,9 +2462,9 @@
             ],
             "scores": [
               0.467653,
-              0.266477,
-              0.26582,
-              0.258393
+              0.259394,
+              0.257183,
+              0.2511
             ],
             "rank": 1,
             "top_score": 0.467653
@@ -2487,13 +2487,13 @@
               "exams/quiz_2_spring_2004.pdf"
             ],
             "scores": [
-              0.536675,
+              0.529439,
               0.288057,
               0.224892,
-              0.179014
+              0.178267
             ],
             "rank": 1,
-            "top_score": 0.536675
+            "top_score": 0.529439
           },
           "course": {
             "files": [
@@ -2503,13 +2503,13 @@
               "exams/quiz_2_spring_2004.pdf"
             ],
             "scores": [
-              0.536675,
+              0.529439,
               0.288057,
               0.224892,
-              0.179014
+              0.178267
             ],
             "rank": 1,
-            "top_score": 0.536675
+            "top_score": 0.529439
           },
           "in_module": {
             "files": [
@@ -2519,13 +2519,13 @@
               "exams/quiz_2_spring_2004.pdf"
             ],
             "scores": [
-              0.536675,
+              0.529439,
               0.288057,
               0.224892,
-              0.179014
+              0.178267
             ],
             "rank": 1,
-            "top_score": 0.536675
+            "top_score": 0.529439
           }
         },
         {
@@ -2546,9 +2546,9 @@
             ],
             "scores": [
               0.185553,
-              0.151789,
-              0.151338,
-              0.134087
+              0.150967,
+              0.14982,
+              0.133226
             ],
             "rank": 1,
             "top_score": 0.185553
@@ -2562,9 +2562,9 @@
             ],
             "scores": [
               0.185553,
-              0.151789,
-              0.151338,
-              0.134087
+              0.150967,
+              0.14982,
+              0.133226
             ],
             "rank": 1,
             "top_score": 0.185553
@@ -2574,13 +2574,13 @@
               "syllabus.md",
               "exams/final_exam_fall_2000.pdf",
               "syllabus.md",
-              "exams/final_exam_spring_2007.pdf"
+              "assignments/homework_5.pdf"
             ],
             "scores": [
               0.185553,
-              0.151789,
-              0.134087,
-              0.080745
+              0.150967,
+              0.133226,
+              0.07994
             ],
             "rank": 1,
             "top_score": 0.185553
@@ -2603,13 +2603,13 @@
               "modules/09_lecture_9_mosfet_amplifier_large_signal_analysis.pdf"
             ],
             "scores": [
-              0.344893,
-              0.119834,
-              0.115618,
-              0.082816
+              0.335391,
+              0.118832,
+              0.092315,
+              0.081323
             ],
             "rank": 1,
-            "top_score": 0.344893
+            "top_score": 0.335391
           },
           "course": {
             "files": [
@@ -2619,13 +2619,13 @@
               "modules/09_lecture_9_mosfet_amplifier_large_signal_analysis.pdf"
             ],
             "scores": [
-              0.344893,
-              0.119834,
-              0.115618,
-              0.082816
+              0.335391,
+              0.118832,
+              0.092315,
+              0.081323
             ],
             "rank": 1,
-            "top_score": 0.344893
+            "top_score": 0.335391
           },
           "in_module": {
             "files": [
@@ -2635,13 +2635,13 @@
               "assignments/homework_2.pdf"
             ],
             "scores": [
-              0.344893,
-              0.119834,
-              0.115618,
-              0.078844
+              0.335391,
+              0.118832,
+              0.092315,
+              0.076812
             ],
             "rank": 1,
-            "top_score": 0.344893
+            "top_score": 0.335391
           }
         },
         {
@@ -2661,13 +2661,13 @@
               "modules/04_lecture_4_the_digital_abstraction.pdf"
             ],
             "scores": [
-              0.63539,
-              0.253293,
-              0.231292,
-              0.225997
+              0.637333,
+              0.253349,
+              0.232957,
+              0.208204
             ],
             "rank": 1,
-            "top_score": 0.63539
+            "top_score": 0.637333
           },
           "course": {
             "files": [
@@ -2677,13 +2677,13 @@
               "modules/04_lecture_4_the_digital_abstraction.pdf"
             ],
             "scores": [
-              0.63539,
-              0.253293,
-              0.231292,
-              0.225997
+              0.637333,
+              0.253349,
+              0.232957,
+              0.208204
             ],
             "rank": 1,
-            "top_score": 0.63539
+            "top_score": 0.637333
           },
           "in_module": {
             "files": [
@@ -2693,13 +2693,13 @@
               "exams/quiz_2_spring_2004.pdf"
             ],
             "scores": [
-              0.63539,
-              0.253293,
-              0.231292,
-              0.201254
+              0.637333,
+              0.253349,
+              0.232957,
+              0.200451
             ],
             "rank": 1,
-            "top_score": 0.63539
+            "top_score": 0.637333
           }
         },
         {
@@ -2715,33 +2715,33 @@
             "files": [
               "exams/quiz_2_spring_2004.pdf",
               "syllabus.md",
-              "modules/04_lecture_4_the_digital_abstraction.pdf",
-              "exams/quiz_1_spring_2004.pdf"
+              "exams/quiz_1_spring_2004.pdf",
+              "modules/04_lecture_4_the_digital_abstraction.pdf"
             ],
             "scores": [
-              0.223172,
+              0.220766,
               0.215032,
-              0.214013,
-              0.191397
+              0.191397,
+              0.18825
             ],
             "rank": 2,
-            "top_score": 0.223172
+            "top_score": 0.220766
           },
           "course": {
             "files": [
               "exams/quiz_2_spring_2004.pdf",
               "syllabus.md",
-              "modules/04_lecture_4_the_digital_abstraction.pdf",
-              "exams/quiz_1_spring_2004.pdf"
+              "exams/quiz_1_spring_2004.pdf",
+              "modules/04_lecture_4_the_digital_abstraction.pdf"
             ],
             "scores": [
-              0.223172,
+              0.220766,
               0.215032,
-              0.214013,
-              0.191397
+              0.191397,
+              0.18825
             ],
             "rank": 2,
-            "top_score": 0.223172
+            "top_score": 0.220766
           },
           "in_module": {
             "files": [
@@ -2751,13 +2751,13 @@
               "exams/quiz_2_spring_2004.pdf"
             ],
             "scores": [
-              0.223172,
+              0.220766,
               0.215032,
               0.191397,
-              0.176351
+              0.173315
             ],
             "rank": 2,
-            "top_score": 0.223172
+            "top_score": 0.220766
           }
         },
         {
@@ -2777,13 +2777,13 @@
               "calendar.md"
             ],
             "scores": [
-              0.233791,
-              0.222968,
-              0.211438,
-              0.174599
+              0.233339,
+              0.218809,
+              0.206693,
+              0.174413
             ],
             "rank": 1,
-            "top_score": 0.233791
+            "top_score": 0.233339
           },
           "course": {
             "files": [
@@ -2793,13 +2793,13 @@
               "exams/quiz_1_spring_2007.pdf"
             ],
             "scores": [
-              0.324318,
-              0.317452,
-              0.233791,
-              0.233165
+              0.318268,
+              0.317114,
+              0.233339,
+              0.232599
             ],
             "rank": 3,
-            "top_score": 0.324318
+            "top_score": 0.318268
           }
         },
         {
@@ -2819,13 +2819,13 @@
               "calendar.md"
             ],
             "scores": [
-              0.247648,
-              0.192711,
-              0.165296,
-              0.153134
+              0.238193,
+              0.192158,
+              0.162171,
+              0.1529
             ],
             "rank": 1,
-            "top_score": 0.247648
+            "top_score": 0.238193
           },
           "course": {
             "files": [
@@ -2835,13 +2835,13 @@
               "modules/03_lecture_3_superposition_th_venin_and_norton.pdf"
             ],
             "scores": [
-              0.278425,
-              0.247648,
-              0.240431,
-              0.192711
+              0.278,
+              0.238193,
+              0.235886,
+              0.192158
             ],
             "rank": 2,
-            "top_score": 0.278425
+            "top_score": 0.278
           }
         },
         {
@@ -2861,29 +2861,29 @@
               "assignments/homework_4.pdf"
             ],
             "scores": [
-              0.149126,
-              0.081507,
-              0.060221,
-              0.056408
+              0.146761,
+              0.081496,
+              0.058009,
+              0.056177
             ],
             "rank": 1,
-            "top_score": 0.149126
+            "top_score": 0.146761
           },
           "course": {
             "files": [
               "modules/02_lecture_2_basic_circuit_analysis_method.pdf",
-              "modules/03_lecture_3_superposition_th_venin_and_norton.pdf",
               "syllabus.md",
+              "modules/03_lecture_3_superposition_th_venin_and_norton.pdf",
               "modules/20_lecture_19_the_operational_amplifier_abstraction.pdf"
             ],
             "scores": [
-              0.251152,
-              0.149126,
-              0.148195,
-              0.142202
+              0.223749,
+              0.148174,
+              0.146761,
+              0.141927
             ],
-            "rank": 2,
-            "top_score": 0.251152
+            "rank": 3,
+            "top_score": 0.223749
           }
         },
         {
@@ -2903,13 +2903,13 @@
               "modules/03_lecture_3_superposition_th_venin_and_norton.pdf"
             ],
             "scores": [
-              0.157362,
-              0.14155,
-              0.14073,
-              0.108212
+              0.152865,
+              0.14113,
+              0.136756,
+              0.106053
             ],
             "rank": 1,
-            "top_score": 0.157362
+            "top_score": 0.152865
           },
           "course": {
             "files": [
@@ -2919,13 +2919,13 @@
               "modules/03_lecture_3_superposition_th_venin_and_norton.pdf"
             ],
             "scores": [
-              0.215828,
-              0.157362,
-              0.14155,
-              0.14073
+              0.203917,
+              0.152865,
+              0.14113,
+              0.136756
             ],
             "rank": 2,
-            "top_score": 0.215828
+            "top_score": 0.203917
           }
         },
         {
@@ -2945,29 +2945,29 @@
               "modules/04_lecture_4_the_digital_abstraction.pdf"
             ],
             "scores": [
-              0.146716,
-              0.139751,
-              0.102599,
-              0.09346
+              0.145636,
+              0.139266,
+              0.101574,
+              0.092264
             ],
             "rank": 1,
-            "top_score": 0.146716
+            "top_score": 0.145636
           },
           "course": {
             "files": [
               "modules/05_lecture_5_inside_the_digital_gate.pdf",
               "modules/05_lecture_5_inside_the_digital_gate.pdf",
               "modules/05_lecture_5_inside_the_digital_gate.pdf",
-              "modules/05_lecture_5_inside_the_digital_gate.pdf"
+              "modules/01_lecture_1_introduction_and_lumped_abstraction.pdf"
             ],
             "scores": [
-              0.385291,
-              0.344989,
-              0.235137,
-              0.20498
+              0.370694,
+              0.343864,
+              0.19571,
+              0.158966
             ],
             "rank": null,
-            "top_score": 0.385291
+            "top_score": 0.370694
           }
         },
         {
@@ -2987,13 +2987,13 @@
               "modules/04_lecture_4_the_digital_abstraction.pdf"
             ],
             "scores": [
-              0.47183,
-              0.393661,
-              0.281106,
-              0.249704
+              0.425758,
+              0.373294,
+              0.270952,
+              0.241912
             ],
             "rank": 1,
-            "top_score": 0.47183
+            "top_score": 0.425758
           },
           "course": {
             "files": [
@@ -3003,13 +3003,13 @@
               "modules/04_lecture_4_the_digital_abstraction.pdf"
             ],
             "scores": [
-              0.47183,
-              0.393661,
-              0.281106,
-              0.249704
+              0.425758,
+              0.373294,
+              0.270952,
+              0.241912
             ],
             "rank": 1,
-            "top_score": 0.47183
+            "top_score": 0.425758
           }
         },
         {
@@ -3029,29 +3029,29 @@
               "modules/09_lecture_9_mosfet_amplifier_large_signal_analysis.pdf"
             ],
             "scores": [
-              0.119749,
-              0.10694,
-              0.105449,
-              0.084027
+              0.11926,
+              0.105705,
+              0.10523,
+              0.083267
             ],
             "rank": 1,
-            "top_score": 0.119749
+            "top_score": 0.11926
           },
           "course": {
             "files": [
               "modules/05_lecture_5_inside_the_digital_gate.pdf",
               "modules/23_lecture_22_energy_and_power.pdf",
-              "modules/24_lecture_23_energy_cmos.pdf",
-              "modules/09_lecture_9_mosfet_amplifier_large_signal_analysis.pdf"
+              "modules/09_lecture_9_mosfet_amplifier_large_signal_analysis.pdf",
+              "modules/24_lecture_23_energy_cmos.pdf"
             ],
             "scores": [
-              0.263633,
-              0.136651,
-              0.121122,
-              0.119749
+              0.260361,
+              0.128077,
+              0.11926,
+              0.116101
             ],
-            "rank": 4,
-            "top_score": 0.263633
+            "rank": 3,
+            "top_score": 0.260361
           }
         },
         {
@@ -3071,13 +3071,13 @@
               "modules/09_lecture_9_mosfet_amplifier_large_signal_analysis.pdf"
             ],
             "scores": [
-              0.276629,
-              0.263454,
-              0.261227,
-              0.225307
+              0.269019,
+              0.25751,
+              0.257441,
+              0.221511
             ],
             "rank": 1,
-            "top_score": 0.276629
+            "top_score": 0.269019
           },
           "course": {
             "files": [
@@ -3087,13 +3087,13 @@
               "modules/09_lecture_9_mosfet_amplifier_large_signal_analysis.pdf"
             ],
             "scores": [
-              0.276629,
-              0.263454,
-              0.261227,
-              0.225307
+              0.269019,
+              0.25751,
+              0.257441,
+              0.221511
             ],
             "rank": 1,
-            "top_score": 0.276629
+            "top_score": 0.269019
           }
         },
         {
@@ -3113,29 +3113,29 @@
               "exams/quiz_2_spring_2007.pdf"
             ],
             "scores": [
-              0.170959,
-              0.159276,
-              0.131854,
-              0.074225
+              0.170594,
+              0.158771,
+              0.130135,
+              0.073249
             ],
             "rank": 1,
-            "top_score": 0.170959
+            "top_score": 0.170594
           },
           "course": {
             "files": [
               "modules/12_lecture_12_capacitors_and_first_order_systems.pdf",
               "modules/12_lecture_12_capacitors_and_first_order_systems.pdf",
               "modules/14_lecture_14_state_and_memory.pdf",
-              "modules/25_lecture_25_violating_the_abstraction_barrier.pdf"
+              "modules/12_lecture_12_capacitors_and_first_order_systems.pdf"
             ],
             "scores": [
-              0.170959,
-              0.159276,
-              0.14613,
-              0.133373
+              0.170594,
+              0.158771,
+              0.144856,
+              0.130135
             ],
             "rank": 1,
-            "top_score": 0.170959
+            "top_score": 0.170594
           }
         },
         {
@@ -3155,13 +3155,13 @@
               "exams/final_exam_spring_2007.pdf"
             ],
             "scores": [
-              0.252798,
-              0.123062,
-              0.112281,
-              0.103025
+              0.252069,
+              0.122587,
+              0.110664,
+              0.099735
             ],
             "rank": 1,
-            "top_score": 0.252798
+            "top_score": 0.252069
           },
           "course": {
             "files": [
@@ -3171,13 +3171,13 @@
               "syllabus.md"
             ],
             "scores": [
-              0.252798,
-              0.176014,
-              0.164412,
+              0.252069,
+              0.166545,
+              0.160516,
               0.15233
             ],
             "rank": 1,
-            "top_score": 0.252798
+            "top_score": 0.252069
           }
         },
         {
@@ -3197,13 +3197,13 @@
               "modules/16_lecture_15b_damped_second_order_systems.pdf"
             ],
             "scores": [
-              0.155278,
-              0.106361,
-              0.092064,
-              0.077405
+              0.150699,
+              0.103441,
+              0.087303,
+              0.07711
             ],
             "rank": 1,
-            "top_score": 0.155278
+            "top_score": 0.150699
           },
           "course": {
             "files": [
@@ -3213,13 +3213,13 @@
               "modules/16_lecture_15b_damped_second_order_systems.pdf"
             ],
             "scores": [
-              0.199206,
-              0.155278,
+              0.195873,
+              0.150699,
               0.11002,
-              0.106361
+              0.103441
             ],
             "rank": 2,
-            "top_score": 0.199206
+            "top_score": 0.195873
           }
         },
         {
@@ -3239,13 +3239,13 @@
               "modules/16_lecture_15b_damped_second_order_systems.pdf"
             ],
             "scores": [
-              0.5877,
-              0.228848,
-              0.140944,
-              0.135097
+              0.557738,
+              0.226807,
+              0.138025,
+              0.13376
             ],
             "rank": 1,
-            "top_score": 0.5877
+            "top_score": 0.557738
           },
           "course": {
             "files": [
@@ -3255,13 +3255,13 @@
               "modules/16_lecture_15b_damped_second_order_systems.pdf"
             ],
             "scores": [
-              0.5877,
-              0.228848,
-              0.140944,
-              0.135097
+              0.557738,
+              0.226807,
+              0.138025,
+              0.13376
             ],
             "rank": 1,
-            "top_score": 0.5877
+            "top_score": 0.557738
           }
         },
         {
@@ -3281,29 +3281,29 @@
               "calendar.md"
             ],
             "scores": [
-              0.293649,
-              0.187182,
-              0.168974,
-              0.161426
+              0.282859,
+              0.18705,
+              0.165524,
+              0.161245
             ],
             "rank": 1,
-            "top_score": 0.293649
+            "top_score": 0.282859
           },
           "course": {
             "files": [
               "modules/22_lecture_21_op_amps_positive_feedback.pdf",
-              "modules/20_lecture_19_the_operational_amplifier_abstraction.pdf",
               "calendar.md",
-              "modules/22_lecture_21_op_amps_positive_feedback.pdf"
+              "modules/22_lecture_21_op_amps_positive_feedback.pdf",
+              "modules/20_lecture_19_the_operational_amplifier_abstraction.pdf"
             ],
             "scores": [
-              0.445755,
-              0.293649,
-              0.293502,
-              0.289295
+              0.444434,
+              0.293173,
+              0.289295,
+              0.282859
             ],
-            "rank": 2,
-            "top_score": 0.445755
+            "rank": 4,
+            "top_score": 0.444434
           }
         },
         {
@@ -3323,29 +3323,29 @@
               "modules/20_lecture_19_the_operational_amplifier_abstraction.pdf"
             ],
             "scores": [
-              0.394202,
-              0.336995,
-              0.241018,
-              0.195651
+              0.392546,
+              0.32289,
+              0.230381,
+              0.18751
             ],
             "rank": 1,
-            "top_score": 0.394202
+            "top_score": 0.392546
           },
           "course": {
             "files": [
               "modules/21_lecture_20_operational_amplifier_circuits.pdf",
               "modules/20_lecture_19_the_operational_amplifier_abstraction.pdf",
               "modules/20_lecture_19_the_operational_amplifier_abstraction.pdf",
-              "modules/20_lecture_19_the_operational_amplifier_abstraction.pdf"
+              "modules/22_lecture_21_op_amps_positive_feedback.pdf"
             ],
             "scores": [
-              0.409076,
-              0.394202,
-              0.336995,
-              0.241018
+              0.407402,
+              0.392546,
+              0.32289,
+              0.240332
             ],
             "rank": 2,
-            "top_score": 0.409076
+            "top_score": 0.407402
           }
         },
         {
@@ -3365,13 +3365,13 @@
               "assignments/homework_11.pdf"
             ],
             "scores": [
-              0.396049,
-              0.34749,
-              0.215445,
-              0.191365
+              0.395851,
+              0.339648,
+              0.214204,
+              0.189189
             ],
             "rank": 1,
-            "top_score": 0.396049
+            "top_score": 0.395851
           },
           "course": {
             "files": [
@@ -3381,13 +3381,13 @@
               "assignments/homework_11.pdf"
             ],
             "scores": [
-              0.396049,
-              0.34749,
-              0.27835,
-              0.224073
+              0.395851,
+              0.339648,
+              0.275184,
+              0.22019
             ],
             "rank": 1,
-            "top_score": 0.396049
+            "top_score": 0.395851
           }
         },
         {
@@ -3407,13 +3407,13 @@
               "modules/19_lecture_18_filters.pdf"
             ],
             "scores": [
-              0.234811,
-              0.209318,
-              0.194646,
+              0.232989,
+              0.209214,
+              0.189893,
               0.129592
             ],
             "rank": 1,
-            "top_score": 0.234811
+            "top_score": 0.232989
           },
           "course": {
             "files": [
@@ -3423,13 +3423,13 @@
               "modules/14_lecture_14_state_and_memory.pdf"
             ],
             "scores": [
-              0.234811,
-              0.209318,
-              0.194646,
-              0.136814
+              0.232989,
+              0.209214,
+              0.189893,
+              0.136661
             ],
             "rank": 1,
-            "top_score": 0.234811
+            "top_score": 0.232989
           }
         }
       ]

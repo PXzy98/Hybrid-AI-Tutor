@@ -83,8 +83,12 @@ class RouteStep(BaseStep):
         ctx.target = score.target
         # Preserve original indices in diagnostics. Which passages the answer may use is decided separately
         # from the routing decision: relevant ones if the evidence models ran, otherwise unverified ones.
-        ctx.passages = select_passages(x, score.evidence, self.services.settings.routing)
-        if ctx.passages and evidence is not None and not score.evidence.checked:
+        ctx.passages = select_passages(x, score.evidence, self.services.settings.routing,
+                                       logistics=ctx.question_type == "logistics",
+                                       fresh=analysis.requires_fresh_evidence)
+        if ctx.passages and evidence is not None and (
+                not score.evidence.checked
+                or any(c.metadata.get("evidence_check") == "unverified" for c in ctx.passages)):
             ctx.warnings.append(UNVERIFIED_SOURCES_NOTE)
         await ctx.report(
             "decision",

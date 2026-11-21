@@ -111,7 +111,9 @@ class GenerateStep(BaseStep):
             ctx.cloud_call_done((result.prompt_tokens or 0) + (result.completion_tokens or 0))
             return result
         except LLMError as e:
-            log.warning("cloud model failed (%s), request=%s", type(e).__name__, ctx.request_id)
+            # LLMError messages never hold prompt text (llm/base.py): the reason is safe to log
+            log.warning("cloud model failed (%s: %s), request=%s", type(e).__name__, str(e)[:160],
+                        ctx.request_id)
             if not self.services.settings.llm.cloud.fallback_to_local:
                 raise
             return await self._fallback(ctx, safety_retry, CLOUD_FALLBACK_WARNING)
