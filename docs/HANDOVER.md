@@ -79,6 +79,7 @@ tasks for whoever takes over (V18, Z22b, V19, Z22c).
 | Backend French texts | merged (#124) | `app/api/v2/fr.yaml`, `localize.py` |
 | Z26, S15, S16, Z25 | merged (#110, #113, #111, #112) | |
 | Z27 security review | merged (#117) | [SECURITY_REVIEW.md](SECURITY_REVIEW.md) |
+| Z22b privacy rules (only redact more) | PR #139: prefixed credential names, Bearer, URL passwords, passwords in prose, private addresses before a full stop, `git@` remotes; E6 identical | `app/privacy/recognizers/engineering.py`, `eval/privacy-filter/results/z22b/` |
 
 ## 3. Decisions taken during the work (not obvious from the code)
 
