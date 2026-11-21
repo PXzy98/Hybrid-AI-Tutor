@@ -335,6 +335,22 @@ def test_insights_are_suppressed_for_small_groups_and_have_no_question_text(worl
     assert SECRET_QUESTION not in json.dumps(data)
 
 
+def test_insights_count_the_kcs_logged_with_questions(world):
+    """V22: the KC codes of consenting students' questions (request log) count as asked topics, one per
+    question; small groups stay hidden and no question text is returned."""
+    prof, url, services, course_id = world["prof"], world["url"], world["services"], world["course_id"]
+    with Session(services.engine) as db:
+        for i in range(5):
+            db.add(RequestLog(request_id=f"r{i}", session_id="s", student_id=f"p{i}", course_id=course_id,
+                              topic="circuits", sanitized_question=SECRET_QUESTION, kc_ids=["C.1"]))
+        db.add(RequestLog(request_id="r9", session_id="s", student_id="p9", course_id=course_id,
+                          topic="circuits", sanitized_question=SECRET_QUESTION, kc_ids=["C.2"]))
+        db.commit()
+    data = prof.get(f"{url}/insights").json()
+    assert data["kc_question_counts"] == [{"label": "C.1", "name": "Pull-up resistors", "count": 5}]
+    assert SECRET_QUESTION not in json.dumps(data)
+
+
 def test_insights_only_count_this_course(world):
     prof, url, services = world["prof"], world["url"], world["services"]
     other = prof.post(f"{V2}/courses", json=_pack_course(OTHER_PACK)).json()

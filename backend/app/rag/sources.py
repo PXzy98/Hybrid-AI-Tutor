@@ -53,3 +53,11 @@ def source_positions(passages: list[Chunk]) -> list[SourcePosition]:
             page=page, slide=slide, excerpt=seen[key] if seen[key] > 1 else None, kc_ids=tuple(chunk.kc_ids),
         ))
     return out
+
+
+def answer_sources(passages: list[Chunk]):
+    """One `Source` per numbered prompt passage; duplicate file/page citations are never collapsed."""
+    from app.core.schemas import Source
+
+    return [Source(title=pos.english_title(), source=pos.source, kc_ids=list(pos.kc_ids))
+            for pos in source_positions(passages)]

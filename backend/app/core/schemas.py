@@ -142,6 +142,7 @@ class LLMResult(BaseModel):
     completion_tokens: int | None = None
     latency_ms: float
     fell_back: bool = False
+    cut_off: bool = False  # the model stopped at max_tokens: the answer is incomplete
 
 
 class CheckResult(BaseModel):
@@ -154,6 +155,8 @@ class Turn(BaseModel):
     role: Literal["student", "tutor"]
     text: str  # sanitized text only
     created_at: datetime = Field(default_factory=_now)
+    sources: list["Source"] = []  # tutor turns: what the answer cited (V22)
+    target: Target | None = None  # tutor turns: the model that answered
 
 
 # -------------------------------------------------------------------------- learner
@@ -286,6 +289,9 @@ class Source(BaseModel):
     title: str
     source: str
     kc_ids: list[str] = []
+
+
+Turn.model_rebuild()
 
 
 class AskResponse(BaseModel):

@@ -23,6 +23,7 @@ LOCAL_ONLY_WARNING = "This course uses the local model only."
 CLOUD_LIMIT_NOTE = "Today's limit of cloud answers is reached: this answer comes from the local model."
 GENERALIZED_NOTE = ("For privacy, the cloud model received a general version of your question, without your "
                     "personal health details.")
+ANSWER_CUT_OFF_NOTE = "This answer reached the length limit and stops early; ask a follow-up for the rest."
 LOCAL_CAPABILITY_NOTE = ("This question may be beyond what the local model does well; "
                          "please check the answer against the sources below.")
 
@@ -47,6 +48,8 @@ class GenerateStep(BaseStep):
         result = await self.produce(ctx)
         ctx.llm = result
         ctx.answer = result.text
+        if result.cut_off and ANSWER_CUT_OFF_NOTE not in ctx.warnings:
+            ctx.warnings.append(ANSWER_CUT_OFF_NOTE)  # say so instead of ending mid-sentence or mid-table
         if ctx.generalized_question and result.backend == "cloud" and GENERALIZED_NOTE not in ctx.warnings:
             ctx.warnings.append(GENERALIZED_NOTE)  # tell the student what the cloud actually saw
         return ctx

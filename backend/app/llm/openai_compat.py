@@ -94,8 +94,8 @@ class OpenAICompatClient:
             raise LLMError(f"the {self._who} model's answer was cut off at max_tokens before any text"
                            if cut_off else f"the {self._who} model returned an empty answer")
         if cut_off:
-            log.warning("cloud answer cut off at max_tokens=%s (raise llm.cloud.max_tokens)",
-                        max_tokens or self.max_tokens)
+            log.warning("%s answer cut off at max_tokens=%s (raise llm.%s.max_tokens)", self._who,
+                        max_tokens or self.max_tokens, self.backend)
         usage = resp.usage
         return LLMResult(
             text=text,
@@ -104,6 +104,7 @@ class OpenAICompatClient:
             prompt_tokens=usage.prompt_tokens if usage else None,
             completion_tokens=usage.completion_tokens if usage else None,
             latency_ms=round((perf_counter() - t0) * 1000, 1),
+            cut_off=cut_off,
         )
 
     async def stream(self, messages: list[Message], *, json_schema: dict | None = None,

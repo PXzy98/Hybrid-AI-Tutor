@@ -28,12 +28,14 @@ class DatabaseSessionStore:
                 .order_by(col(SessionTurn.id).desc())
                 .limit(last)
             ).all()
-        return [Turn(role=r.role, text=r.text, created_at=r.created_at) for r in reversed(rows)]
+        return [Turn(role=r.role, text=r.text, created_at=r.created_at, sources=r.sources or [],
+                     target=r.target if r.target in ("local", "cloud") else None) for r in reversed(rows)]
 
     def append(self, session_id: str, student_id: str, turn: Turn) -> None:
         with Session(self.engine) as s:
             s.add(SessionTurn(session_id=session_id, student_id=student_id, course_id=self.course_id,
-                              role=turn.role, text=turn.text, created_at=turn.created_at))
+                              role=turn.role, text=turn.text, created_at=turn.created_at,
+                              sources=[x.model_dump() for x in turn.sources], target=turn.target))
             s.commit()
 
     def owner(self, session_id: str) -> str | None:
