@@ -84,6 +84,10 @@ On **Course content**:
 - **Check items**: multiple choice questions shown under answers and in the diagnostic (**Knowledge component**,
   **Item code**, **Question**, options, **Correct answer**, **Explanation**). A course without check items skips
   the diagnostic.
+- **Edit** (on each active KC and check item) changes the wording only: the name and definition of a KC, the
+  question, option texts and explanation of a check item. The code, the module, the correct answer and every
+  student's progress stay, so the quiz and class statistics keep counting the same item. Two active KCs of a
+  course cannot have the same name. To change what a KC or an item means, **Retire** it and add a new one.
 - Content you create counts as reviewed. AI-generated content is a draft until you accept it.
 - **API only**: misconceptions (`/courses/{course_id}/misconceptions`) and YAML import and export
   (`POST .../content/import`, `GET .../content/export`), used to seed a course or review it offline.

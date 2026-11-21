@@ -79,6 +79,7 @@ tasks for whoever takes over (V18, Z22b, V19, Z22c).
 | Backend French texts | merged (#124) | `app/api/v2/fr.yaml`, `localize.py` |
 | Z26, S15, S16, Z25 | merged (#110, #113, #111, #112) | |
 | Z27 security review | merged (#117) | [SECURITY_REVIEW.md](SECURITY_REVIEW.md) |
+| V18 edit the wording of KCs and check items | PR #138: the code stays, so learner records and statistics keep counting the item; another active KC's name is a 409; edits audited with field names only | `app/catalog/editor.py`, `frontend/src/pages/instructor/ContentEdit.tsx` |
 
 ## 3. Decisions taken during the work (not obvious from the code)
 
