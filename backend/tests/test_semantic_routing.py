@@ -443,3 +443,19 @@ def test_a_logistics_question_keeps_retrieved_passages_when_none_is_judged_relev
     r = assess_evidence(x, analysis(), RoutingConfig())
     assert [c.text for c in select_passages(x, r, RoutingConfig(), logistics=True)] == [row.text, notice.text]
     assert [c.text for c in select_passages(x, r, RoutingConfig())] == [row.text]  # announcements: logistics
+
+
+def test_the_logistics_fallback_keeps_the_freshness_check(monkeypatch):
+    """A question that needs current evidence: passages the evidence step rejected as not verified current
+    (and announcements without that check) never come back through the logistics fallback."""
+    monkeypatch.setattr("app.routing.evidence.pair_scores",
+                        lambda name, pairs, cfg: np.array([0.9] * len(pairs)))
+    stale = chunk(text="Calendar. Lecture 21. KEY DATES: Problem set 4 due")
+    notice = chunk(text="Course announcement: Problem set 4 is due with Lecture 22.",
+                   metadata={"origin": "announcement"})
+    x = input_for(question="When is problem set 4 due this week?", passages=[stale, notice])
+    a = analysis(requires_fresh_evidence=True)
+    r = assess_evidence(x, a, RoutingConfig())
+    assert r.checked and r.reason == "No source passed provenance/time checks."
+    assert select_passages(x, r, RoutingConfig(), logistics=True, fresh=True) == []
+    assert len(select_passages(x, r, RoutingConfig(), logistics=True, fresh=False)) == 2  # not a fresh one
