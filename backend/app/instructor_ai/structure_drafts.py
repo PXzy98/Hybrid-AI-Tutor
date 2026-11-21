@@ -67,7 +67,8 @@ class CheckItemDraft(_BaseItem):
     def unique_choices(cls, values: list[str]) -> list[str]:
         if any(not item.strip() for item in values):
             raise ValueError("Empty answer option")
-        if len({item.strip().casefold() for item in values}) != 4:
+        # Case matters ("AA" and "Aa" are different answers); spacing does not, as for quiz options.
+        if len({" ".join(item.split()) for item in values}) != 4:
             raise ValueError("Duplicate answer choices")
         return values
 
