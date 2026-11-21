@@ -109,10 +109,10 @@ class KindRouter:
         self.embedded.append(text)
         return np.array([float(len(text))])
 
-    def classify(self, vector, method):
+    def classify(self, vector, method, course_type=None):
         return SemanticAnalysis(method=method, cloud_probability=0.2, reliable=True)
 
-    def question_kind(self, vector):
+    def question_kind(self, vector, course_type=None):
         if self.fail:
             raise RuntimeError("head broken")
         return self.kind

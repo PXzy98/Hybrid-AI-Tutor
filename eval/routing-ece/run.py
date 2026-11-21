@@ -30,7 +30,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "backend"))
 
 from app.core.config import get_settings  # noqa: E402
-from app.routing.models import encode, load_weights, predict_heads  # noqa: E402
+from app.routing.models import encode, load_weights, predict_heads, type_dir  # noqa: E402
 from app.routing.train import fit_heads, portable_arrays, read_rows  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
@@ -40,6 +40,14 @@ from analysis_text import ANALYSIS  # noqa: E402
 DATA = ROOT / "data" / "routing"
 METHODS = ("lr", "svm")
 TYPES = ("concept", "application", "hard", "logistics", "current")
+
+
+def course_type_of(pack: str) -> str:
+    """The course type of a demo pack (its manifest), as a course of that pack would have."""
+    manifest = ROOT / "data" / "demo_courses" / pack / "manifest.json"
+    if manifest.is_file():
+        return json.loads(manifest.read_text(encoding="utf-8"))["course_type"]
+    return {"mit_6_002_circuits": "ece", "mit_res_6_007_signals": "ece"}.get(pack, "computer_science")
 
 
 def decide(values: dict, cfg) -> dict:
@@ -172,6 +180,9 @@ def write_report(res: dict, path: Path) -> None:
          "`SemanticRouter` (cloud when the question is outside the training support or cloud_probability >= "
          "0.52), *accuracy* compares it with the label (cloud iff `cloud_required`); the evidence step "
          "(course index plus cross-encoders) is not simulated.", ""]
+    if res.get("heads"):
+        L += ["Heads per course type (V19): " + ", ".join(
+            f"`{t}` {'its own' if h == 'own' else 'the shared heads'}" for t, h in res["heads"].items()) + ".", ""]
     for method in METHODS:
         m = res["shipped"][method]
         L += [f"## Shipped {method.upper()} router", ""]
@@ -236,9 +247,17 @@ def main() -> int:
     scored = [new_rows[i] for i in scored_idx]
     res = {"rows": len(new_rows), "uncertain": len(new_rows) - len(scored), "scored": len(scored),
            "uncertain_ids": [r["id"] for r in new_rows if r["uncertain"]], "shipped": {}}
+    # V19: every row is routed with the heads its course type would get (its own folder, else the shared ones)
+    types = [course_type_of(r["pack"]) for r in scored]
+    res["heads"] = {t: ("own" if type_dir(cfg, t) else "shared") for t in sorted(set(types))}
     for method in METHODS:
-        meta, arr = load_weights(cfg, method)
-        preds = predict(new_x[scored_idx], meta, arr, cfg)
+        preds = [None] * len(scored)
+        for t in sorted(set(types)):
+            meta, arr = load_weights(cfg, method, t)
+            rows_t = [i for i, rt in enumerate(types) if rt == t]
+            for i, pred in zip(rows_t, predict(new_x[[scored_idx[i] for i in rows_t]], meta, arr, cfg),
+                               strict=True):
+                preds[i] = pred
         res["shipped"][method] = {
             "all": score(scored, preds), "by_pack": grouped(scored, preds, lambda r: r["pack"]),
             "by_type": grouped(scored, preds, lambda r: r["type"]),

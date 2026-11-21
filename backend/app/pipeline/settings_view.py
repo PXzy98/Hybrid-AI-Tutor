@@ -28,3 +28,21 @@ def local_only(ctx: RequestContext) -> bool:
 
 def weak_evidence(ctx: RequestContext, services) -> bool:
     return ctx.settings.weak_evidence if ctx.settings else services.settings.learner.weak_evidence
+
+
+def course_type(ctx: RequestContext) -> str | None:
+    """The course type of the request (V19); None for contexts built without settings."""
+    return ctx.settings.course_type if ctx.settings else None
+
+
+def router_of(ctx: RequestContext, services) -> tuple[str, object]:
+    """The router name and router for this request's course type: `routing.by_course_type` when it names one
+    (V19), otherwise `routing.impl` and the shared router. Routing only proposes a target; the cloud gate in
+    the generate step still decides what may leave the machine."""
+    cfg = services.settings.routing
+    kind = course_type(ctx)
+    impl = cfg.by_course_type.get(kind) if kind else None
+    routers = getattr(services, "type_routers", None) or {}
+    if impl and impl != cfg.impl and kind in routers:
+        return impl, routers[kind]
+    return cfg.impl, services.router
