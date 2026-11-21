@@ -11,11 +11,12 @@ from contextvars import ContextVar
 from dataclasses import dataclass
 from threading import Lock
 
-from sqlmodel import Session, select
+from sqlmodel import Session, col, select
 
 from app.core.schemas import Chunk
-from app.storage.models import Course, Module
+from app.storage.models import Announcement, Course, Module
 
+ANNOUNCEMENTS_PER_QUESTION = 2  # announcements that share words with a logistics question, best first
 SCOPED = ("content", "learner", "retriever", "sessions")
 GENERAL_TOPIC = "general"  # a question about the course as a whole (no module chosen)
 
@@ -80,7 +81,37 @@ class CourseModuleRetriever:
                 chunks = []
         if not chunks and self.course_id == self.services.content.course_id and topic in self.modules:
             chunks = self.services.retriever.retrieve(query, topic, k, kc_ids, level)
+        if _question_kind.get() == "logistics":
+            chunks = self.announcements(query) + chunks
         return chunks
+
+    def announcements(self, query: str) -> list[Chunk]:
+        """The course announcements that share words with a logistics question ("when is the proposal
+        due?"), as course-level passages: instructors post dates and changes there that the files do not
+        have. Announcements are course text, scanned for student data when saved (V20)."""
+        from app.rag.query_text import analyze
+
+        asked = {w for w in analyze(query) if " " not in w}
+        engine = getattr(self.services, "engine", None)
+        if not asked or engine is None:
+            return []
+        try:
+            with Session(engine) as db:
+                rows = db.exec(select(Announcement).where(Announcement.course_id == self.course_id)
+                               .order_by(col(Announcement.created_at).desc()).limit(50)).all()
+        except Exception:  # noqa: BLE001 - a database problem must not stop the answer
+            return []
+        ranked = []
+        for row in rows:
+            shared = len(asked & {w for w in analyze(f"{row.title} {row.body}") if " " not in w})
+            if shared:
+                ranked.append((shared + (1 if row.pinned else 0), row))
+        ranked.sort(key=lambda item: -item[0])  # stable: newest first among equals
+        return [Chunk(text=f"Course announcement of {row.created_at.date().isoformat()}: {row.title}\n\n"
+                           f"{row.body}",
+                      source=f"Announcement: {row.title}", topic=f"course:{self.course_id}", score=1.0,
+                      metadata={"course_id": self.course_id, "module_id": None, "origin": "announcement"})
+                for _, row in ranked[:ANNOUNCEMENTS_PER_QUESTION]]
 
 
 class CourseScopes:

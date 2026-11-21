@@ -133,3 +133,23 @@ def test_other_people_cannot_use_the_announcement_endpoints(world):
     assert world.prof.delete(f"{url}/{elsewhere['id']}").status_code == 404
     assert [(a["id"], a["title"]) for a in rows("announcement")] == [
         (row["id"], WELCOME["title"]), (elsewhere["id"], WELCOME["title"])]
+
+
+def test_a_logistics_question_reads_the_matching_announcements(world):
+    """Announcements that share words with a logistics question reach the tutor as course-level passages,
+    pinned first among equals; nothing for a concept question; never another course's."""
+    from app.platform import course_scope
+
+    _post(world, title="Problem set 4 due date", body="Problem set 4 is due with Lecture 22 this time.")
+    _post(world, title="Office hours moved", body="Office hours are on Thursday this week.", pinned=True)
+    retriever = course_scope.CourseModuleRetriever(world.services, world.course, {})
+    found = retriever.announcements("When is problem set 4 due?")
+    assert [c.source for c in found] == ["Announcement: Problem set 4 due date"]
+    assert found[0].metadata == {"course_id": world.course, "module_id": None, "origin": "announcement"}
+    assert found[0].topic == f"course:{world.course}" and "Lecture 22" in found[0].text
+    with course_scope.question_kind("logistics"):
+        first = retriever.retrieve("When is problem set 4 due?", "general")[0]
+    assert first.source.startswith("Announcement")
+    assert retriever.retrieve("When is problem set 4 due?", "general") == []  # concept: files only
+    assert course_scope.CourseModuleRetriever(world.services, world.demo, {}).announcements(
+        "When is problem set 4 due?") == []

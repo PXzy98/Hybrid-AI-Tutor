@@ -51,3 +51,28 @@ S11 questions that were found in the top 4 before and are not now: `alg-16` (cou
 ## Cost
 
 Retrieval of 4 passages: median about 26 ms lexical and about 39 ms with the semantic step on the CS50x index (1393 passages; one shared CPU core while a test suite ran). The sentence encoder loads once per process (about 7 s). Embedding a course happens at index build time in the worker: 600 to 1500 passages took 35 to 90 s with MiniLM-L6 on CPU, stored next to `passages.json` as `embeddings.npy` (float16). Indexes built before S14 keep working lexically until their next rebuild; `rag.semantic_retrieval: false` turns the step off.
+
+## V22 (2026-11-21): single digits are words of the index
+
+"problem set 4" used to match problem set 1 or 2: the tokenizer dropped one-character words, so the number was
+lost (circ-28). Single digits are now tokens (`app/rag/query_text.py`). Changes against the S14 results above
+(`all` rows; everything else unchanged):
+
+| Set | Pack | Mode | hit@1 | hit@4 | MRR |
+|---|---|---|---|---|---|
+| S11 | mit_6_002_circuits | course | 0.82 -> 0.89 | 0.96 -> 1.00 | 0.88 -> 0.94 |
+| S11 | mit_6_002_circuits | scoped | 0.96 -> 1.00 | 0.96 -> 1.00 | 0.96 -> 1.00 |
+| S11 | mit_6_006_algorithms | course | = | 0.84 -> 0.92 | 0.71 -> 0.75 |
+| S11 | mit_6_006_algorithms | scoped | = | 0.96 -> 1.00 | 0.93 -> 0.95 |
+| S11 | mit_7_016_intro_biology | course | 0.96 -> 0.86 | = | 0.98 -> 0.93 |
+| S11 | mit_7_03_genetics | course | 0.73 -> 0.77 | 0.89 -> 0.92 | 0.80 -> 0.84 |
+| S11 | mit_7_03_genetics | scoped | 0.85 -> 0.88 | 0.96 -> 1.00 | 0.90 -> 0.94 |
+| S11 | mit_hst035_pathology | course | = | 0.96 -> 1.00 | 0.88 -> 0.89 |
+| S11 | mit_hst035_pathology | scoped | = | 0.96 -> 1.00 | 0.92 -> 0.93 |
+| S11 | mit_res_6_007_signals | course | 0.80 -> 0.76 | = | 0.87 -> 0.85 |
+| paraphrase | harvard_cs50x | course | 0.62 -> 0.59 | = | 0.68 -> 0.66 |
+| paraphrase | mit_6_002_circuits | course | 0.56 -> 0.59 | 0.88 -> 0.91 | 0.70 -> 0.72 |
+| paraphrase | mit_6_002_circuits | scoped | 0.84 -> 0.88 | 0.91 -> 0.94 | 0.87 -> 0.90 |
+
+The S14 losses on 6.006 and 7.03 are recovered; 7.016 course-wide loses three first places of 28 (hit@4
+unchanged), 6.007 and the CS50 paraphrases one each.

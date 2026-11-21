@@ -25,6 +25,17 @@ CALENDAR = """# Fictional Studies 101: calendar
 | 4 | Midterm Exam | |
 """
 
+PSETS = """# Fictional Studies 101: calendar
+
+| LEC # | TOPICS | KEY DATES |
+
+| 3 | Quartzzyme kinetics | Problem set 1 due |
+
+| 9 | Glimmerwave sampling | Problem set 2 due |
+
+| 21 | Moonlight assays | Problem set 4 due |
+"""
+
 MARKDOWN_TABLE = """## Grading
 
 | Component | Weight |
@@ -170,3 +181,12 @@ def test_calendar_rows_without_separator_still_use_the_first_row_as_header():
 def test_no_cell_is_dropped_when_a_row_is_longer_or_shorter_than_the_header():
     _, rows = split_tables("| A | B |\n|---|---|\n| 1 | two | three | four |\n| solo | |")
     assert [r for _, r in rows] == ["A 1. B: two | three | four", "A: solo"]
+
+
+def test_the_number_of_a_problem_set_counts(tmp_path):
+    """Single digits are words of the index (circ-28): "problem set 4" finds set 4, not set 1 or 2."""
+    _material(tmp_path, 1, "_course", "calendar.md", PSETS)
+    rag = IndexedCourseRetriever(tmp_path, scan=lambda _: True)
+    rag.rebuild(1)
+    top = rag.retrieve(1, None, "When is problem set 4 due?", 1, question_kind="logistics")[0]
+    assert "Problem set 4 due" in top.text
