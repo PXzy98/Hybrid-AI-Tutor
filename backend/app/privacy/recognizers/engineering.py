@@ -1,13 +1,16 @@
 """Credentials and infrastructure details a student pastes into a question (task Z11).
 
 - `secret_token` (base layer, every course): API keys and access tokens of common services, JSON web tokens,
-  private keys, and the value after "password:" / "token=" style assignments. A leaked credential is
-  dangerous in any subject. Entity `SECRET`.
+  private keys, and the value after "password:" / "token=" style assignments. Z22b adds: names with a prefix
+  or suffix (`AWS_SECRET_ACCESS_KEY=`, `API_TOKEN="..."`, `aws_secret_access_key='...'`, also as dict
+  entries), `Bearer <token>`, the password in URL user info (`scheme://user:PASSWORD@host`) and "the
+  password for X is V" in prose. A leaked credential is dangerous in any subject. Entity `SECRET`.
 - `internal_address` (ECE profile): private and link-local IPv4 host addresses (10/8, 172.16/12, 192.168/16,
   169.254/16), optionally with a port, and MAC addresses. A network written with a prefix length
   ("192.168.0.0/16") is a textbook example and is kept. Entity `INTERNAL_ADDRESS`.
 - `repo_url` (ECE profile): repository URLs on code hosts that name an account
-  (github.com/<account>/<repo>, gitlab, bitbucket, the university's GitHub). Entity `REPO_URL`.
+  (github.com/<account>/<repo>, gitlab, bitbucket, the university's GitHub), also SCP-style
+  (`git@github.com:<account>/<repo>.git`, Z22b). Entity `REPO_URL`.
 
 Fictional examples in the tests and in eval/privacy-filter/ece_cases.jsonl.
 """
@@ -46,6 +49,19 @@ _NOT_VALUES = {"expired", "invalid", "required", "missing", "rotation", "hashing
 # constant-like value ('password = "LAB_PASS_2026"', "password: LAB_PASS") or a bracketed value with digits
 # or symbols is a real credential.
 CONSTANT_NAME_RE = re.compile(r"(?:[A-Z]+_)+(?:KEY|TOKEN|SECRET)")
+# Z22b: a credential name with a prefix or suffix joined by "_" or "-" (AWS_SECRET_ACCESS_KEY, API_TOKEN,
+# db-password, aws_secret_access_key) followed by "=" or ":" (a dict entry or a Python argument too). These
+# names are wider than the plain ones above, so the value must look like a credential (see _credential_like).
+PREFIXED_SECRET_RE = re.compile(
+    r"(?<![A-Za-z0-9_-])((?:[A-Za-z0-9]+[_-])*(?:pass(?:word|wd|phrase)?|pwd|key|secret|token)(?:[_-][A-Za-z0-9]+)*)"
+    r"[\"']?\s*[:=]\s*[\"']?([^\s\"',;)}]{8,})", re.I)
+# "Authorization: Bearer <token>", "'Bearer <token>'"
+BEARER_RE = re.compile(r"\bBearer\s+([A-Za-z0-9._~+/=-]{16,})", re.I)
+# the password in URL user info: mqtt://user:PASSWORD@host
+URL_PASSWORD_RE = re.compile(r"\b[A-Za-z][A-Za-z0-9+.-]*://[^\s:/@]+:([^\s@/]+)@")
+# "my Wi-Fi password for the library is X", "the passcode to the lab is X"
+PROSE_PASSWORD_RE = re.compile(
+    r"\bpass(?:word|phrase|code)\s+(?:for|of|to)\s+(?:[\w'-]+\s+){1,4}?is\s+[\"']?([^\s\"',;]{6,})", re.I)
 _PLACEHOLDER_WORD = r"(?:your|example|placeholder|changeme|change[_-]me|replace[_-]?me|dummy|redacted)"
 PLACEHOLDER_VALUE_RE = re.compile(
     rf"(?i:(?:[a-z]+[_-])*{_PLACEHOLDER_WORD}(?:[_-][a-z]+)*)"  # YOUR_PASSWORD, example-token
@@ -54,11 +70,15 @@ PLACEHOLDER_VALUE_RE = re.compile(
 
 
 _O = r"(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)"  # one octet
+# Z22b: a full stop after the address ends the sentence ("... at 172.16.8.203."); only a digit, ".<digit>"
+# (a longer dotted number) or "/<digit>" (a network with a prefix length) after it rules it out
 PRIVATE_IPV4 = (rf"(?<![\d.])(?:10\.{_O}\.{_O}\.{_O}|172\.(?:1[6-9]|2\d|3[01])\.{_O}\.{_O}"
-                rf"|192\.168\.{_O}\.{_O}|169\.254\.{_O}\.{_O})(?::\d{{2,5}})?(?![\d.]|/\d)")
+                rf"|192\.168\.{_O}\.{_O}|169\.254\.{_O}\.{_O})(?::\d{{2,5}})?(?!\d|\.\d|/\d)")
 MAC = r"(?<![\w:-])(?:[0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}(?![\w:-])"
 REPO_URL = (r"(?:https?://)?(?:www\.)?(?:github\.com|gitlab\.com|bitbucket\.org|github\.uottawa\.ca"
             r"|gitlab\.uottawa\.ca)/[A-Za-z0-9](?:[A-Za-z0-9._-]{0,38})(?:/[A-Za-z0-9._-]+)*/?")
+# SCP-style remote, any host: git@github.com:account/repo.git (Z22b)
+SCP_REPO_URL = r"\bgit@[A-Za-z0-9.-]+\.[A-Za-z]{2,}:[A-Za-z0-9][A-Za-z0-9._-]*(?:/[A-Za-z0-9._-]+)+"
 
 
 @pii_recognizers.register("secret_token")
@@ -80,7 +100,26 @@ class SecretTokenRecognizer(PatternRecognizer):
             if PLACEHOLDER_VALUE_RE.fullmatch(bare) or (reference and CONSTANT_NAME_RE.fullmatch(bare)):
                 continue  # 'password = "YOUR_PASSWORD"', "token=API_KEY"
             results.append(self._result(m.start(1), m.end(1)))
+        found = {(r.start, r.end) for r in results}
+        for start, end in self._z22b_values(text):
+            if (start, end) not in found:
+                found.add((start, end))
+                results.append(self._result(start, end))
         return results
+
+    @staticmethod
+    def _z22b_values(text: str):
+        """Spans of the Z22b shapes: prefixed names, Bearer tokens, URL passwords, passwords in prose."""
+        for m in PREFIXED_SECRET_RE.finditer(text):
+            name, value = m.group(1), m.group(2)
+            if not re.search(r"[_-]", name):
+                continue  # a plain name: ASSIGNED_SECRET_RE above decides
+            if _credential_like(value, reference=text[m.start(2) - 1] == "="):
+                yield _trimmed(m, text, 2)
+        for regex in (BEARER_RE, URL_PASSWORD_RE, PROSE_PASSWORD_RE):
+            for m in regex.finditer(text):
+                if _credential_like(m.group(1), reference=False, short_ok=regex is URL_PASSWORD_RE):
+                    yield _trimmed(m, text, 1)
 
     def _result(self, start: int, end: int) -> RecognizerResult:
         explanation = self.build_regex_explanation(self.name, "assigned secret", ASSIGNED_SECRET_RE.pattern,
@@ -88,6 +127,29 @@ class SecretTokenRecognizer(PatternRecognizer):
         return RecognizerResult("SECRET", start, end, 0.85, analysis_explanation=explanation,
                                 recognition_metadata={RecognizerResult.RECOGNIZER_NAME_KEY: self.name,
                                                       RecognizerResult.RECOGNIZER_IDENTIFIER_KEY: self.id})
+
+
+def _trimmed(m: re.Match, text: str, group: int) -> tuple[int, int]:
+    """The span of the value without punctuation that ends the sentence ("...KEY=abc123." keeps the stop)."""
+    end = m.end(group)
+    while end > m.start(group) + 1 and text[end - 1] in ".,:)]`":
+        end -= 1
+    return m.start(group), end
+
+
+def _credential_like(value: str, *, reference: bool, short_ok: bool = False) -> bool:
+    """A value that looks like a credential, not a word, a placeholder or code: at least 8 characters (6 in
+    a URL's user info, where the shape says it is a password) with a digit or a symbol, or 20 characters or
+    more in mixed case; never a placeholder, a call or an index, or, right after "=", the name of a key
+    variable. "user_profile_settings" and "lambda" stay."""
+    bare = value.strip("`.,:)]")
+    if PLACEHOLDER_VALUE_RE.fullmatch(bare) or (reference and CONSTANT_NAME_RE.fullmatch(bare)):
+        return False
+    if re.search(r"[(\[]", bare):
+        return False  # a call or an index: os.environ["API_KEY"], get_secret()
+    if re.search(r"\d|[^\w]", bare):
+        return len(bare) >= (6 if short_ok else 8)
+    return len(bare) >= 20 and bare != bare.lower() and bare != bare.upper()
 
 
 @pii_recognizers.register("internal_address")
@@ -104,4 +166,5 @@ class RepoUrlRecognizer(PatternRecognizer):
     """Repository URLs that name an account on a code host (entity REPO_URL)."""
 
     def __init__(self) -> None:
-        super().__init__(supported_entity="REPO_URL", patterns=[Pattern("repository url", REPO_URL, 0.8)])
+        patterns = [Pattern("repository url", REPO_URL, 0.8), Pattern("scp-style remote", SCP_REPO_URL, 0.8)]
+        super().__init__(supported_entity="REPO_URL", patterns=patterns)
