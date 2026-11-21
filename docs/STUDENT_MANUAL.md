@@ -81,6 +81,12 @@ cloud model.
   term.
 - The tutor records numbers and labels about what you know (section 4), not words.
 
+## 3a. Announcements
+
+A new chat (the course home) shows the three latest announcements from your instructors, pinned ones first,
+with their date. **Announcements** in the sidebar lists all of them. They are read-only; you are not notified by
+e-mail, so look at the course home now and then.
+
 ## 4. My progress
 
 **My progress** shows what the tutor thinks you know, per topic (knowledge component), in bands:

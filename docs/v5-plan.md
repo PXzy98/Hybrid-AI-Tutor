@@ -36,6 +36,7 @@ section 10.
 | Z22 privacy test sets per course type | merged (#134): E6 unchanged; rule changes decided in section 10 |
 | V18 edit the wording of KCs and check items | PR #138: Edit dialogs on Course content; codes and learner records stay; duplicate active KC name 409; edits audited (field names only) |
 | S14 retrieval, T16, T17 | merged (#136, #135) |
+| V20 course announcements | approved by Z on 2026-11-21 (section 10); PR open: instructors write, pin, edit and delete; students see the latest on the course home and all under Announcements; privacy-scanned, audited without text |
 | V10 AWS deployment | on hold (AWS details) |
 
 ## 1. Dates
@@ -226,6 +227,12 @@ next agent takes them in this order. Each is one task, one branch and one PR (AG
 | — | W27: Z checks by hand that a person can join from Edge (the new-password field) | checked |
 | — | T16: the original report was not reproduced; Z gives the steps if it comes back | — |
 | — | Still to measure: V16 before/after (five drafts per kind), web search answers in the browser (V17), one full ask through the app (Z23), a fresh medical held-out set (Z22) | reports |
+
+### Decisions of 2026-11-21
+
+| ID | Decision and task | Done when |
+|---|---|---|
+| V20 | **Course announcements**, approved by Z. Instructors of a course write short plain text notices (title up to 200 characters, text up to 4000), pin, edit and delete them; every member reads them, pinned first, then newest first; students see the latest on the course home. Title and text pass the same privacy scan as an uploaded material (422 with the finding types); create, update and delete are audited with IDs and field names only. New table `announcement` (migration 0018), additive `/api/v2/courses/{course_id}/announcements` routes with access tests. Not in scope: e-mail notifications, unread markers, scheduled publishing | endpoints, access tests and the two views (en and fr) merged; OpenAPI and generated types committed. **State:** PR open |
 
 ### What a course type selects today, and V19
 

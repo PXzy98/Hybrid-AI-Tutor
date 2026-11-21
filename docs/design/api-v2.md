@@ -266,6 +266,32 @@ Behaviour:
 - API v1 keeps `POST /api/v1/survey` and `GET /api/v1/admin/survey-summary` (frozen); the v2 frontend does not
   use them.
 
+### 3.11 Announcements (task V20)
+
+Short plain text notices from the course's instructors to its members. Code: `backend/app/api/v2/announcements.py`,
+table `announcement` (migration 0018). Callers outside the course get 404 (anonymous: 401); a student of the
+course on a write endpoint gets 404 as well.
+
+| Method and path | Who | Purpose |
+|---|---|---|
+| `GET /courses/{course_id}/announcements` | I, S | every announcement of the course (`AnnouncementOut`): pinned first, then newest first |
+| `POST /courses/{course_id}/announcements` | I | create (`AnnouncementIn`: `title` 1 to 200 characters, `body` up to 4000, `pinned`); 201 `AnnouncementOut` |
+| `PATCH /courses/{course_id}/announcements/{announcement_id}` | I | change `title`, `body` or `pinned`; fields left out stay |
+| `DELETE /courses/{course_id}/announcements/{announcement_id}` | I | delete; 204 |
+
+Behaviour:
+- `AnnouncementOut`: `id`, `title`, `body`, `pinned`, `created_at`, `updated_at` (the last change of the title or
+  the body; a pin change does not count, so a new announcement has `updated_at == created_at`).
+- The title and body are stripped; a blank title is 422. Both are scanned with the course's privacy profile
+  (`scan_document`, as for materials and AI drafts) before anything is stored: 422 `the privacy scan found
+  student data: <types>`, never the text.
+- An archived course: `POST` and `PATCH` are 422 `the course is archived`; `GET` and `DELETE` still work for
+  instructors (students of an archived course see no course).
+- Audited `announcement.create`, `announcement.update` (with the changed field names) and
+  `announcement.delete`, with the announcement ID only.
+- Course content, not student data: kept at the end of term, removed with the course, not copied by
+  `POST /courses/{course_id}/copy`. No e-mail notifications, unread markers or scheduled publishing.
+
 ### 3.8 Operations (owner Z)
 
 | Method and path | Who | Purpose |

@@ -6,6 +6,7 @@ import { roleIn, useCourses, useMe } from "@/auth";
 import { ErrorNote, Loading } from "@/components/common";
 import PrivacyNotice from "@/components/PrivacyNotice";
 import { useI18n } from "@/i18n";
+import InstructorAnnouncements, { StudentAnnouncements } from "./Announcements";
 import AiAssistant from "./instructor/AiAssistant";
 import Content from "./instructor/Content";
 import EndOfTerm from "./instructor/EndOfTerm";
@@ -41,6 +42,7 @@ export default function CourseDashboard() {
 function sectionNode(course: Course, student: boolean, id: string): ReactNode {
   if (student) {
     switch (id) {
+      case "announcements": return <StudentAnnouncements course={course} />;
       case "progress": return <Progress course={course} />;
       case "start": return <Start course={course} />;
       case "quizzes": return <StudentQuizzes course={course} />;
@@ -52,6 +54,7 @@ function sectionNode(course: Course, student: boolean, id: string): ReactNode {
     case "overview": return <Overview course={course} />;
     case "students": return <Students course={course} />;
     case "content": return <Content course={course} />;
+    case "announcements": return <InstructorAnnouncements course={course} />;
     case "members": return <Members course={course} />;
     case "ai": return <AiAssistant course={course} />;
     case "materials": return <Materials course={course} />;

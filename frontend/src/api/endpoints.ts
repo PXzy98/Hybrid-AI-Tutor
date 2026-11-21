@@ -50,6 +50,9 @@ export type DraftBody = Schemas["DraftIn"];
 export type Job = Schemas["JobOut"];
 export type Survey = Schemas["SurveyOut"];
 export type SurveyAnswers = Schemas["SurveyAnswers"];
+export type Announcement = Schemas["AnnouncementOut"];
+export type AnnouncementBody = Schemas["AnnouncementIn"];
+export type AnnouncementPatch = Schemas["AnnouncementPatch"];
 export type Materials = Schemas["MaterialsOut"];
 export type Material = Schemas["MaterialOut"];
 export type AiDraft = Schemas["AiDraftOut"];
@@ -193,6 +196,13 @@ export const api = {
   setSurveyWindow: (id: number, opens_at: string, closes_at: string) =>
     request<Survey>("PUT", `${c(id)}/survey`, { opens_at, closes_at }),
   answerSurvey: (id: number, answers: SurveyAnswers) => request<Survey>("POST", `${c(id)}/survey/responses`, answers),
+
+  // V20: course announcements (every member reads them, pinned first; instructors write them)
+  announcements: (id: number) => request<Announcement[]>("GET", `${c(id)}/announcements`),
+  createAnnouncement: (id: number, input: AnnouncementBody) => request<Announcement>("POST", `${c(id)}/announcements`, input),
+  updateAnnouncement: (id: number, announcementId: number, changes: AnnouncementPatch) =>
+    request<Announcement>("PATCH", `${c(id)}/announcements/${announcementId}`, changes),
+  deleteAnnouncement: (id: number, announcementId: number) => request<void>("DELETE", `${c(id)}/announcements/${announcementId}`),
 
   // instructor AI (tiers 1 to 4) and class insights
   aiDrafts: (id: number, status?: AiDraftStatus) =>

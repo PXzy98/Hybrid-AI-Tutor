@@ -678,3 +678,20 @@ class CourseSurveySubmission(SQLModel, table=True):
     course_id: int = Field(sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=False,
                                             index=True))
     student_id: str = Field(index=True)
+
+
+class Announcement(SQLModel, table=True):
+    """A course announcement (V20): the instructors' plain text notice to the course's members. Course text,
+    not student data: scanned for student data before it is stored, and it stays at the end of term."""
+
+    __tablename__ = "announcement"
+
+    id: int | None = Field(default=None, primary_key=True)
+    course_id: int = Field(sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=False,
+                                            index=True))
+    author_id: int | None = None  # the account that wrote it
+    title: str
+    body: str = ""
+    pinned: bool = False
+    created_at: datetime = _ts(default_factory=utcnow)
+    updated_at: datetime = _ts(default_factory=utcnow)

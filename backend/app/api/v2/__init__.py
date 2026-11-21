@@ -10,6 +10,7 @@ from app.api.v2 import (
     admin,
     ai_drafts,
     ai_evaluations,
+    announcements,
     ask,
     auth,
     content,
@@ -38,3 +39,4 @@ api_router_v2.include_router(ask.router)
 api_router_v2.include_router(learner.router)
 api_router_v2.include_router(quizzes.router)
 api_router_v2.include_router(survey.router)
+api_router_v2.include_router(announcements.router)
