@@ -75,7 +75,7 @@ tasks for whoever takes over (V18, Z22b, V19, Z22c).
 | V8 closed loop | merged (#123): "Explain it another way" for the student; topics weak for the class (minimum group) hand a request to the AI assistant | `app/learner/weak_topics.py`, `frontend/src/pages/instructor/Overview.tsx` |
 | V9 accounts from term to term | merged (#118, #125): admin student list, deactivate, reset, delete with audit and scrub | `app/api/v2/admin.py`, `app/auth/purge.py` |
 | V15 a student's own answer instruction | merged (#121): scanned, `<` and `>` refused, only to the trusted local model, below the instructor's rules | `app/learner/facade.py`, `app/prompts/render.py`, migration 0017 |
-| V16 cloud drafts for public material | merged (#122): only through `DraftCloudRequest` and `CloudClient.complete_draft` (cloud gate), everything sent is scanned | `app/instructor_ai/draft_cloud.py`, `app/llm/cloud_guard.py` |
+| V16 cloud drafts for public material | merged (#122): only through `DraftCloudRequest` and `CloudClient.complete_draft` (cloud gate), everything sent is scanned. Before/after measured in `eval/v16-drafts/` (KC and quiz drafts better, the rest unchanged); open: cloud KC, check item and misconception drafts fail (the cloud call has no JSON schema), one-text local drafts stop at 1,024 tokens or fail on repeated citations | `app/instructor_ai/draft_cloud.py`, `app/llm/cloud_guard.py` |
 | Backend French texts | merged (#124) | `app/api/v2/fr.yaml`, `localize.py` |
 | Z26, S15, S16, Z25 | merged (#110, #113, #111, #112) | |
 | Z27 security review | merged (#117) | [SECURITY_REVIEW.md](SECURITY_REVIEW.md) |
