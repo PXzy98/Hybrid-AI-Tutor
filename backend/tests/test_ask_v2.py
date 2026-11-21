@@ -232,3 +232,43 @@ def test_a_course_rule_question_routed_to_the_cloud_carries_the_syllabus(make_cl
         assert not world.services.local_llm.calls or rule not in world.services.local_llm.sent_text()
         sent = transport.sent_text().lower()
         assert "alice" not in sent and str(world.students["alice"].student_id).lower() not in sent
+
+
+class _CutOffLLM(FakeLLMClient):
+    async def complete(self, messages, *, json_schema=None, max_tokens=None):
+        result = await super().complete(messages, json_schema=json_schema, max_tokens=max_tokens)
+        return result.model_copy(update={"cut_off": True})
+
+
+def test_a_reopened_conversation_keeps_sources_model_and_the_asked_kcs_follow_consent(world):
+    """V22: a stored tutor turn keeps what the live answer showed (sources, local or cloud); the request log
+    keeps the question's KC codes for the class insights only for a student who consented."""
+    world.consent("alice")
+    world.enrol("bob")
+    world.services.understand_llm = FakeLLMClient('{"k": ["C.1"], "t": "concept", "c": false, "m": []}',
+                                                  model="fake-understand")
+    alice, bob = _login(world.app, "alice"), _login(world.app, "bob")
+    asked = {"question": "What does Ohm's law say?", "module_id": world.module}
+    live = alice.post(f"{world.url}/ask", json=asked).json()
+    detail = alice.get(f"{world.url}/conversations/{live['conversation_id']}").json()
+    tutor = detail["turns"][1]
+    assert tutor["role"] == "tutor" and tutor["target"] == "local" == live["route_target"]
+    assert tutor["sources"] == live["sources"]
+    assert detail["turns"][0]["sources"] == [] and detail["turns"][0]["target"] is None
+    assert bob.post(f"{world.url}/ask", json=asked).status_code == 200  # no consent
+    kcs = {r["student_id"]: r["kc_ids"] for r in rows("request_log")}
+    assert kcs[world.students["alice"].student_id] == ["C.1"]
+    assert kcs[world.students["bob"].student_id] == []
+    world.services.learner.set_consent(world.students["alice"].student_id, False)  # withdrawn: codes go too
+    assert all(r["kc_ids"] == [] for r in rows("request_log"))
+
+
+def test_an_answer_cut_off_at_max_tokens_says_so(world):
+    world.services.local_llm = _CutOffLLM("A long answer that stops", model="fake-local")
+    alice = _login(world.app, "alice")
+    body = alice.post(f"{world.url}/ask", json={"question": "Explain Ohm's law in detail"}).json()
+    assert any("length limit" in w for w in body["warnings"])
+    fr = alice.post(f"{world.url}/ask", json={"question": "Explain Ohm's law", "language": "fr"}).json()
+    assert any("longueur maximale" in w for w in fr["warnings"])
+    stored = alice.get(f"{world.url}/conversations/{body['conversation_id']}").json()["turns"]
+    assert [t["cut_off"] for t in stored] == [False, True]  # a reopened answer still says it stops early

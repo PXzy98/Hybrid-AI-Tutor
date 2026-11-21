@@ -1,9 +1,11 @@
 from sqlmodel import Session
 
 from app.core.registry import steps
-from app.core.schemas import RequestContext, Turn
+from app.core.schemas import RequestContext, StoredTurn, Turn
 from app.pipeline.base import BaseStep
+from app.pipeline.steps.generate import ANSWER_CUT_OFF_NOTE
 from app.privacy.redact import redact_known
+from app.rag.sources import answer_sources
 from app.storage.models import RequestLog
 
 WITHHELD = "[withheld: not sanitized]"
@@ -37,9 +39,23 @@ class RecordStep(BaseStep):
                 timings=dict(ctx.timings_ms),
                 checks=[c.model_dump() for c in ctx.checks],
                 warnings=list(ctx.warnings),
+                kc_ids=self._asked_kcs(ctx),
             ))
             s.commit()
         self.services.sessions.append(req.session_id, req.student_id, Turn(role="student", text=question))
-        self.services.sessions.append(req.session_id, req.student_id, Turn(role="tutor", text=answer))
+        self.services.sessions.append(req.session_id, req.student_id, StoredTurn(
+            role="tutor", text=answer, sources=answer_sources(ctx.passages) if ctx.answer else [],
+            target=ctx.llm.backend if ctx.llm else None, cut_off=ANSWER_CUT_OFF_NOTE in ctx.warnings))
         ctx.clear_pii_mapping()  # nothing after this step needs the original values
         return ctx
+
+    def _asked_kcs(self, ctx: RequestContext) -> list[str]:
+        """The KC codes of the question (understand step) for the class insights; only with consent."""
+        kcs = ctx.understanding.kc_ids if ctx.understanding else []
+        if not kcs:
+            return []
+        try:
+            consented = self.services.learner.has_consent(ctx.request.student_id)
+        except Exception:  # noqa: BLE001 - unknown consent: record nothing
+            return []
+        return list(dict.fromkeys(kcs)) if consented else []

@@ -142,6 +142,7 @@ class LLMResult(BaseModel):
     completion_tokens: int | None = None
     latency_ms: float
     fell_back: bool = False
+    cut_off: bool = False  # the model stopped at max_tokens: the answer is incomplete
 
 
 class CheckResult(BaseModel):
@@ -154,6 +155,14 @@ class Turn(BaseModel):
     role: Literal["student", "tutor"]
     text: str  # sanitized text only
     created_at: datetime = Field(default_factory=_now)
+
+
+class StoredTurn(Turn):
+    """A turn as the conversation store keeps it (V22). API v1 still declares `Turn`, so its responses keep
+    their shape; API v2 conversations return these fields too. Student turns leave them empty."""
+    sources: list["Source"] = []  # what the answer cited
+    target: Target | None = None  # the model that answered
+    cut_off: bool = False  # the answer stopped at the model's max_tokens
 
 
 # -------------------------------------------------------------------------- learner
@@ -286,6 +295,9 @@ class Source(BaseModel):
     title: str
     source: str
     kc_ids: list[str] = []
+
+
+StoredTurn.model_rebuild()
 
 
 class AskResponse(BaseModel):

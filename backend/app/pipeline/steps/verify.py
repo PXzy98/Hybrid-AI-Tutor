@@ -5,7 +5,7 @@ from app.core.registry import checkers, import_submodules, steps
 from app.core.schemas import CheckResult, RequestContext
 from app.learner.misconceptions import append_corrections
 from app.pipeline.base import BaseStep
-from app.pipeline.steps.generate import GenerateStep
+from app.pipeline.steps.generate import GenerateStep, mark_cut_off
 from app.privacy.anonymizer import restore
 
 log = logging.getLogger("app.pipeline")
@@ -78,6 +78,7 @@ class VerifyStep(BaseStep):
             log.warning("medical safety check failed, regenerating once, request=%s", ctx.request_id)
             result = await self.generate.produce(ctx, safety_retry=True)
             ctx.llm, ctx.answer = result, restore(result.text, ctx.pii_mapping)
+            mark_cut_off(ctx, result.cut_off)
             append_corrections(ctx)  # as the restore step did for the first answer
             ctx.checks = self._run_all(ctx)
             if self._status(ctx.checks, "medical_safety") == "fail":
@@ -85,6 +86,7 @@ class VerifyStep(BaseStep):
                             ctx.request_id)
                 ctx.answer = SAFE_FALLBACK + (SAFE_FALLBACK_SOURCES if ctx.passages else "")
                 ctx.warnings.append(REPLACED_WARNING)
+                mark_cut_off(ctx, False)  # the safe replacement is complete
                 ctx.checks = [*ctx.checks, CheckResult(name="medical_safety", status="pass",
                                                        detail="safe fallback message")]
         if self._status(ctx.checks, "medical_safety") == "warn":

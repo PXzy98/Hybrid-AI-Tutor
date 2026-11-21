@@ -157,6 +157,7 @@ export const fr: Messages = {
   "chat.stop": "Arrêter la réponse",
   "chat.jump": "Aller au dernier message",
   "chat.sources": "Sources",
+  "chat.cutOff": "Cette réponse a atteint la longueur maximale et s’arrête avant la fin ; posez une question de suivi pour la suite.",
   "chat.suggestedNext": "Suggestion :",
   "chat.local": "Modèle local",
   "chat.localHint": "Cette réponse a été rédigée sur le serveur du cours. Rien n’en est sorti.",

@@ -30,7 +30,7 @@ export function TutorFrame({ route, children }: { route?: ReactNode; children: R
 }
 
 /** Local or cloud, on every live answer: text and icon, the hint in a tooltip that keyboard focus also opens. */
-function RouteLabel({ target }: { target: string }) {
+export function RouteLabel({ target }: { target: string }) {
   const { t } = useI18n();
   const local = target === "local";
   return (

@@ -6,7 +6,7 @@ hashes exist only in `account` (privacy invariant 6); every other table uses the
 import uuid
 from datetime import UTC, datetime
 
-from sqlalchemy import JSON, Column, DateTime, ForeignKey, UniqueConstraint
+from sqlalchemy import JSON, Boolean, Column, DateTime, ForeignKey, UniqueConstraint
 from sqlmodel import Field, SQLModel
 
 
@@ -86,6 +86,9 @@ class RequestLog(SQLModel, table=True):
     timings: dict = Field(default_factory=dict, sa_column=Column(JSON))
     checks: list = Field(default_factory=list, sa_column=Column(JSON))
     warnings: list = Field(default_factory=list, sa_column=Column(JSON))
+    # V22: codes of the course KCs the understand step found in the question, for the instructor's "most asked
+    # topics" (counts above the minimum group only); only for students who consented to learner data
+    kc_ids: list = Field(default_factory=list, sa_column=Column(JSON, nullable=False, server_default="[]"))
 
 
 class SessionTurn(SQLModel, table=True):
@@ -98,6 +101,11 @@ class SessionTurn(SQLModel, table=True):
     role: str
     text: str  # sanitized
     created_at: datetime = _ts(default_factory=utcnow)
+    # V22, tutor turns: the cited sources (title, file, KC codes) and the model that answered, so a reopened
+    # conversation shows them like a live answer
+    sources: list = Field(default_factory=list, sa_column=Column(JSON, nullable=False, server_default="[]"))
+    target: str | None = None
+    cut_off: bool = Field(default=False, sa_column=Column(Boolean, nullable=False, server_default="false"))
 
 
 # ---------------------------------------------------------------------- learner model (design §5, §9)

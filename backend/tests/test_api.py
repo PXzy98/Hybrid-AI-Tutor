@@ -57,6 +57,7 @@ def test_session_round_trip(student_client):
     assert ask(student_client, session_id=sid).json()["session_id"] == sid
     turns = student_client.get(f"/api/v1/sessions/{sid}").json()["turns"]
     assert [t["role"] for t in turns] == ["student", "tutor", "student", "tutor"]
+    assert {key for t in turns for key in t} == {"role", "text", "created_at"}  # v1 frozen: no V22 fields
     last = student_client.get(f"/api/v1/sessions/{sid}", params={"last": 1}).json()["turns"]
     assert [t["role"] for t in last] == ["tutor"]
     assert student_client.get("/api/v1/sessions/unknown").json()["turns"] == []

@@ -117,7 +117,7 @@ api:
 
 llm:
   # the deployment's vLLM (VLLM_BASE_URL, VLLM_KEY in .env); model = the name the server lists under /models
-  local: { model: "Qwen3.5-9B", temperature: 0.2, max_tokens: 1024, timeout_s: 60 }
+  local: { model: "Qwen3.5-9B", temperature: 0.2, max_tokens: 2048, timeout_s: 60 }   # 2048: 1024 cut long answers (V22)
   understand: { model: "Qwen3.5-9B", timeout_s: 5 }
   cloud: { timeout_s: 30, max_tokens: 2000, fallback_to_local: true, history_turns: 0 }   # reasoning tokens count
 

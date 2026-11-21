@@ -13,7 +13,7 @@ from app.auth.deps import Student
 from app.core.schemas import AskRequest, AskResponse, RequestContext, Source
 from app.pipeline.runner import PipelineError
 from app.privacy.profiles import privacy_profile
-from app.rag.sources import source_positions
+from app.rag.sources import answer_sources
 from app.routing.methods import METHOD_LABELS
 
 router = APIRouter()
@@ -92,8 +92,7 @@ def _prepare(body: AskBody, user, services) -> RequestContext:
 
 def _sources(ctx: RequestContext) -> list[Source]:
     """One source per numbered prompt passage; never collapse duplicate file/page citations."""
-    return [Source(title=pos.english_title(), source=pos.source, kc_ids=list(pos.kc_ids))
-            for pos in source_positions(ctx.passages)]
+    return answer_sources(ctx.passages)
 
 
 def _response(ctx: RequestContext) -> AskResponse:

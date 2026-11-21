@@ -16,7 +16,12 @@ from app.core.services import build_services
 from app.llm.cloud_guard import CloudClient
 from app.llm.fake import FakeLLMClient
 from app.pipeline.runner import build_runner
-from app.pipeline.steps.generate import GENERALIZED_NOTE, PRIVACY_BLOCK_WARNING, GenerateStep
+from app.pipeline.steps.generate import (
+    ANSWER_CUT_OFF_NOTE,
+    GENERALIZED_NOTE,
+    PRIVACY_BLOCK_WARNING,
+    GenerateStep,
+)
 from app.pipeline.steps.verify import REFERRAL, REPLACED_WARNING, SAFE_FALLBACK, VerifyStep
 from app.verify.checkers.grounding import GroundingChecker
 from app.verify.checkers.leaks import PiiLeakChecker, ProfileLeakChecker
@@ -130,6 +135,28 @@ async def test_unsafe_answer_is_regenerated_once(services):
     assert REPLACED_WARNING not in ctx.warnings
     assert "Your previous answer broke the safety rules" in services.local_llm.sent_text()  # fixed retry text
     assert {c.name: c.status for c in ctx.checks}["medical_safety"] == "pass"
+
+
+class _CutOff(FakeLLMClient):
+    async def complete(self, messages, *, json_schema=None, max_tokens=None):
+        result = await super().complete(messages, json_schema=json_schema, max_tokens=max_tokens)
+        return result.model_copy(update={"cut_off": True})
+
+
+async def test_the_cut_off_note_follows_the_answer_actually_returned(services):
+    """V22: a regenerated answer that stops at max_tokens gets the note; a complete one or the safe
+    replacement loses the note of the first answer."""
+    services.local_llm = _CutOff("Several readings are needed. Ask your doctor about your own readings.")
+    ctx = await VerifyStep(services).run(make_ctx("You have hypertension.", target="local"))
+    assert ctx.warnings.count(ANSWER_CUT_OFF_NOTE) == 1
+    services.local_llm = FakeLLMClient("Several readings are needed. Ask your doctor.")
+    first = make_ctx("You have hypertension.", target="local")
+    first.warnings.append(ANSWER_CUT_OFF_NOTE)  # the first answer had stopped early
+    assert ANSWER_CUT_OFF_NOTE not in (await VerifyStep(services).run(first)).warnings
+    services.local_llm = FakeLLMClient("Take 2 tablets of 50 mg every morning.")
+    unsafe = make_ctx("You can stop your pills.", target="local")
+    unsafe.warnings.append(ANSWER_CUT_OFF_NOTE)
+    assert ANSWER_CUT_OFF_NOTE not in (await VerifyStep(services).run(unsafe)).warnings  # safe replacement
 
 
 async def test_unsafe_twice_gives_the_safe_fallback(services):

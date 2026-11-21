@@ -3,7 +3,7 @@ from sqlalchemy import Engine
 from sqlmodel import Session, col, select
 
 from app.core.registry import session_stores
-from app.core.schemas import Turn
+from app.core.schemas import StoredTurn, Turn
 from app.storage.models import SessionTurn
 
 
@@ -18,7 +18,7 @@ class DatabaseSessionStore:
             return (SessionTurn.session_id == session_id,)
         return (SessionTurn.session_id == session_id, SessionTurn.course_id == self.course_id)
 
-    def history(self, session_id: str, last: int = 6) -> list[Turn]:
+    def history(self, session_id: str, last: int = 6) -> list[StoredTurn]:
         if last <= 0:
             return []
         with Session(self.engine) as s:
@@ -28,12 +28,16 @@ class DatabaseSessionStore:
                 .order_by(col(SessionTurn.id).desc())
                 .limit(last)
             ).all()
-        return [Turn(role=r.role, text=r.text, created_at=r.created_at) for r in reversed(rows)]
+        return [StoredTurn(role=r.role, text=r.text, created_at=r.created_at, sources=r.sources or [],
+                           target=r.target if r.target in ("local", "cloud") else None,
+                           cut_off=bool(r.cut_off)) for r in reversed(rows)]
 
     def append(self, session_id: str, student_id: str, turn: Turn) -> None:
         with Session(self.engine) as s:
             s.add(SessionTurn(session_id=session_id, student_id=student_id, course_id=self.course_id,
-                              role=turn.role, text=turn.text, created_at=turn.created_at))
+                              role=turn.role, text=turn.text, created_at=turn.created_at,
+                              sources=[x.model_dump() for x in getattr(turn, "sources", [])],
+                              target=getattr(turn, "target", None), cut_off=getattr(turn, "cut_off", False)))
             s.commit()
 
     def owner(self, session_id: str) -> str | None:

@@ -181,6 +181,20 @@ describe("chat", () => {
     expect(screen.getByText("Earlier question")).toBeInTheDocument();
   });
 
+  it("shows the sources and the model of a stored answer in a reopened conversation", async () => {
+    mockApi(studentRoutes({
+      "GET /courses/1/conversations/c-9": { conversation_id: "c-9", turns: [
+        { role: "student", text: "Earlier question" },
+        { role: "tutor", text: "Earlier answer", target: "cloud", cut_off: true,
+          sources: [{ title: "Lecture 3, page 2", source: "course/1/3/lecture_3.pdf", kc_ids: [] }] }] },
+    }));
+    renderApp("/courses/1/chat?c=c-9");
+    expect(await screen.findByText("Earlier answer")).toBeInTheDocument();
+    expect(screen.getByText("Cloud model")).toBeInTheDocument();
+    expect(screen.getByText(/Lecture 3, page 2/)).toBeInTheDocument();
+    expect(screen.getByText(/reached the length limit/)).toBeInTheDocument();
+  });
+
   it("shows a stream error as an alert", async () => {
     mockApi(studentRoutes({ "POST /courses/1/ask/stream": () => sse(["error", { detail: "The model is busy." }], ["done", {}]) }));
     renderApp("/courses/1/chat");

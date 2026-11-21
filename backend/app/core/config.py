@@ -217,7 +217,7 @@ class LocalLLMConfig(Section):
     model: str = "Qwen3.5-9B"  # the name the server lists under /models (vLLM --served-model-name)
     temperature: float = 0.2
     timeout_s: float = 60
-    max_tokens: int = Field(1024, ge=64)
+    max_tokens: int = Field(2048, ge=64)  # V22: 1024 cut long answers
 
 
 class UnderstandLLMConfig(Section):
