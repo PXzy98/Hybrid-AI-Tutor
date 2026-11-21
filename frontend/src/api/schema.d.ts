@@ -2301,6 +2301,48 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/courses/{course_id}/announcements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Announcements
+         * @description The course's announcements: pinned first, then newest first.
+         */
+        get: operations["announcements_list"];
+        put?: never;
+        /** Create Announcement */
+        post: operations["announcements_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/courses/{course_id}/announcements/{announcement_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Announcement */
+        delete: operations["announcements_delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Update Announcement
+         * @description Change the title, the body or the pin; fields left out stay as they are.
+         */
+        patch: operations["announcements_update"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2506,6 +2548,51 @@ export interface components {
              * @default false
              */
             confirm_cloud?: boolean;
+        };
+        /** AnnouncementIn */
+        AnnouncementIn: {
+            /** Title */
+            title: string;
+            /**
+             * Body
+             * @default
+             */
+            body?: string;
+            /**
+             * Pinned
+             * @default false
+             */
+            pinned?: boolean;
+        };
+        /** AnnouncementOut */
+        AnnouncementOut: {
+            /** Id */
+            id: number;
+            /** Title */
+            title: string;
+            /** Body */
+            body: string;
+            /** Pinned */
+            pinned: boolean;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** AnnouncementPatch */
+        AnnouncementPatch: {
+            /** Title */
+            title?: string | null;
+            /** Body */
+            body?: string | null;
+            /** Pinned */
+            pinned?: boolean | null;
         };
         /** ApplyStatusOut */
         ApplyStatusOut: {
@@ -10262,6 +10349,134 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+        };
+    };
+    announcements_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnnouncementOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    announcements_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnnouncementIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnnouncementOut"];
+                };
+            };
+            /** @description blank title, the course is archived, or the privacy scan found student data */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    announcements_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                announcement_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    announcements_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                announcement_id: number;
+                course_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnnouncementPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnnouncementOut"];
+                };
+            };
+            /** @description blank title, the course is archived, or the privacy scan found student data */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

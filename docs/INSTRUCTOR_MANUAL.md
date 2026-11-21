@@ -213,6 +213,22 @@ first (section 4).
   pages, published papers) and may go to the cloud model. Not offered in a local-only course. Student data is
   never part of a draft.
 
+## 10a. Announcements
+
+**Announcements** (under Course in the sidebar) holds short notices for everyone in the course: office hours, a
+review session, a moved deadline, exam information. **New announcement** opens a form with a **Title** (required,
+up to 200 characters), the **Text** (plain text, up to 4000 characters; line breaks are kept, nothing is
+formatted) and **Pin to the top**. **Edit** changes one, **Pin** / **Unpin** moves it to or from the top, and the
+bin button deletes it after a confirmation. The page says **Saved.** after each change.
+- Students see the three latest on the course home (a new chat), pinned ones first, with the date, and all of
+  them under **Announcements**. Only the course's instructors can write them.
+- The title and text are checked like an uploaded file: text with student data (a student number, an e-mail
+  address, a grade) is refused with the types found, and nothing is stored. The audit log records who created,
+  changed or deleted which announcement, never the text.
+- An archived course takes no new or changed announcements. Announcements stay at the end of term and are not
+  copied to next term's course.
+- There are no e-mail notifications, unread markers or scheduled announcements.
+
 ## 11. End-of-term survey
 
 **End-of-term survey**: set **Survey window** (opening and closing time, usually the last week of term) and

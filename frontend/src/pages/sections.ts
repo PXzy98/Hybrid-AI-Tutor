@@ -1,5 +1,5 @@
 import {
-  BookOpen, CalendarX, ChartNoAxesColumn, ClipboardList, FileStack, LayoutDashboard, ListChecks, MessageSquare, Settings,
+  BookOpen, CalendarX, ChartNoAxesColumn, ClipboardList, FileStack, LayoutDashboard, ListChecks, Megaphone, MessageSquare, Settings,
   SlidersHorizontal, Sparkles, UserPlus, Users, type LucideIcon,
 } from "lucide-react";
 
@@ -13,6 +13,7 @@ export type SectionGroup = { label?: MessageKey; sections: Section[] };
 export const STUDENT_SECTIONS: SectionGroup[] = [{
   sections: [
     { id: "chat", label: "tab.chat", icon: MessageSquare },
+    { id: "announcements", label: "tab.announcements", icon: Megaphone },
     { id: "progress", label: "tab.progress", icon: ChartNoAxesColumn },
     { id: "quizzes", label: "tab.quizzes", icon: ListChecks },
     { id: "start", label: "tab.start", icon: SlidersHorizontal },
@@ -32,6 +33,7 @@ export const INSTRUCTOR_SECTIONS: SectionGroup[] = [
     { id: "ai", label: "tab.ai", icon: Sparkles },
   ] },
   { label: "nav.group.course", sections: [
+    { id: "announcements", label: "tab.announcements", icon: Megaphone },
     { id: "members", label: "tab.members", icon: UserPlus },
     { id: "settings", label: "tab.settings", icon: Settings },
     { id: "survey", label: "tab.survey", icon: ClipboardList },

@@ -8,6 +8,7 @@ import type { RoutingTrace } from "@/components/RoutingProgress";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { useI18n } from "@/i18n";
+import { LatestAnnouncements } from "../../Announcements";
 import Composer, { CloudNotice } from "./Composer";
 import MessageList, { type Message } from "./MessageList";
 
@@ -167,6 +168,8 @@ function ChatPane({ course, initialConversation: initial, moduleId, onStarted, p
           {t("chat.notPersonalized")} <Link to={`/courses/${course.id}/start`} className="font-medium underline underline-offset-2">{t("chat.personalizeLink")}</Link>
         </Alert>
       )}
+      {/* the course home: a new conversation shows the latest announcements (V20) */}
+      {!initialConversation && messages.length === 0 && <LatestAnnouncements course={course} />}
       <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
         <span>{t("chat.scope")}</span>
         <Badge variant="secondary">{scopeLabel}</Badge>
