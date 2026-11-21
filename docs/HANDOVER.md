@@ -53,7 +53,7 @@ stand and where to look. Running the system: [OPERATIONS.md](OPERATIONS.md).
 | S11 retrieval evaluation | merged (#72): all eight packs | `eval/course-rag-packs/` |
 | T4 ECE and CS routing evaluation | merged (#75); retrained candidates not adopted | `eval/routing-ece/` |
 | T5 question type (concept / logistics) | merged (#80): own weight file, set by the route step; logistics questions search course-level files first | `app/routing/question_type.py`, `app/rag/course_retriever.py` |
-| S14 course retrieval: paraphrases and misspellings | PR open: stemming, typo correction, logistics synonyms, course-wide weight for homework and exams, semantic step (embeddings stored with the index; `rag.semantic_retrieval`; courses get them at their next rebuild) | `app/rag/course_retriever.py`, `app/rag/query_text.py`, `app/rag/encoder.py` |
+| S14 course retrieval: paraphrases and misspellings | merged (#136): stemming, typo correction, logistics synonyms, course-wide weight for homework and exams, semantic step (embeddings stored with the index; `rag.semantic_retrieval`; courses get them at their next rebuild) | `app/rag/course_retriever.py`, `app/rag/query_text.py`, `app/rag/encoder.py` |
 | T9 demo build | merged (#69): the demo courses from the packs through API v2 | `scripts/build_demo.py` |
 | F1 frontend on API v2 (carries T6, T7, T8) | merged (#71, #78; UI upgrade #81 to #85): student and instructor dashboards, admin, model connections, quizzes, survey, materials | `frontend/`, `docs/design/ui-upgrade.md` |
 | T11 accessibility and renaming, T12 manuals | merged (#74, #101, #73); the product is named PACT (Privacy-Aware Course Tutor); routing, frontend and web search handover notes still open | `docs/ACCESSIBILITY.md`, `docs/STUDENT_MANUAL.md`, `docs/INSTRUCTOR_MANUAL.md` |
@@ -62,7 +62,8 @@ stand and where to look. Running the system: [OPERATIONS.md](OPERATIONS.md).
 ### v5 (2026-11-20)
 
 The v5 tasks come from the meeting of 2026-11-17; [v5-plan.md](v5-plan.md) section 0 has the state of each
-one and section 9 the findings of the V17 browser test.
+one, section 9 the findings of the V17 browser test and section 10 the decisions of 2026-11-20 with the next
+tasks for whoever takes over (V18, Z22b, V19, Z22c).
 
 | Task | State | Where |
 |---|---|---|

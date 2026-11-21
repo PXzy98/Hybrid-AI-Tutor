@@ -7,29 +7,34 @@ view is taken; Prof. Ismaeel's ideas are added where they do not conflict.
 Until this plan is merged into [v4-implementation-guide.md](v4-implementation-guide.md), the guide's rules
 (section 2) still apply unchanged. Task IDs: `V1`... are new in v5; v4 IDs (`S14`, `Z26`, ...) are kept.
 
-## 0. Status on 2026-11-20
+## 0. Status on 2026-11-20 (evening)
+
+Every v5 PR up to #136 is merged. The decisions Z took on the open questions and the next steps are in
+section 10.
 
 | Task | State |
 |---|---|
 | Open v4 PRs #102 to #107 | merged |
 | V1 statistics-only instructor view | merged (#109) |
 | V2 class statistics | merged (#115); small groups, differences and single scores hidden (#126) |
-| V3 privacy notice | merged (#114); screenshots to Lavin not sent yet |
+| V3 privacy notice | merged (#114); French screenshots taken (25, outside the repository); Z sends them to Lavin |
 | Z26 instructor guidelines reach the model | merged (#110) |
-| S15 demo learner content, S16 CS course type, Z25 pack scan | merged (#113, #111, #112); S16 check with the vLLM open |
+| S15 demo learner content, S16 CS course type, Z25 pack scan | merged (#113, #111, #112); S16 checked with the vLLM |
 | Backend French texts | merged (#124) |
 | V4, V5, V6 free request, chosen sources, a file for one draft | merged (#119, review fixes in #120) |
-| V7 web pages as material and as a draft source | merged (#120); Wikipedia refuses the fetcher (V17 finding W1) |
+| V7 web pages as material and as a draft source | merged (#120); W1 (Wikipedia refused the fetcher) fixed in #129 |
 | V8 closed loop | merged (#123) |
 | V9 accounts from term to term | merged (#118, review fixes #125) |
 | V15 a student's own answer instruction | merged (#121) |
-| V16 cloud drafts for public material | merged (#122); the before/after comparison of five drafts per kind needs the vLLM |
+| V16 cloud drafts for public material | merged (#122); the before/after comparison of five drafts per kind is still open |
 | V11 to V14, T10 notes | merged (#116): `DOMAIN_NAMES.md`, `DEMO_VLLM.md`, `GPU_COST.md`, `design/extension-points.md`, `DEMO_SCRIPT.md` |
 | Z27 security review | merged (#117); H1, M1, L4 fixed; M2 to M4 fixed (#130); L1 to L3 fixed (#132) |
-| V17 browser test | admin and instructor parts done on the integration build (fictional data); student part and every flow that needs the local model still to run; findings in section 9 |
-| End of term to next term | done once in V17 (export, new course from the YAML export); gaps in W12 |
+| V17 browser test | done on the integration build with the lab vLLM (all roles, en and fr, light and dark, desktop and phone width); findings W1 to W27 in section 9, fixed in #129 and #133 except W17 (decided, section 10) and W27 (check by hand); web search answers not run |
+| End of term to next term | "Start next term's course" with materials (#133) |
 | Settings bug from the meeting | Z to describe it; an empty "Enabled course types" field that switched course creation off was fixed in #127 |
-| Routing test, Z23 capacity, V16 comparison, answer quality on ECE and CS | open: need the lab vLLM, which was unreachable on 2026-11-20 |
+| Routing test, Z23 capacity, answer quality on ECE and CS | done with the lab vLLM (#131): `eval/routing-ece/results/routing_test_2026-11-20.md`, OPERATIONS.md section 10, `eval/course-rag-packs/results/answer_quality.md` |
+| Z22 privacy test sets per course type | merged (#134): E6 unchanged; rule changes decided in section 10 |
+| S14 retrieval, T16, T17 | merged (#136, #135) |
 | V10 AWS deployment | on hold (AWS details) |
 
 ## 1. Dates
@@ -106,7 +111,7 @@ Until this plan is merged into [v4-implementation-guide.md](v4-implementation-gu
 | V13 | **Local model hosting cost**: options and costs (RunPod or another GPU in class hours only, 24/7, AWS GPU instance, own server), with the Z23 numbers; recommendation to Prof. Abbas | Z | report sent by 12/1 |
 | V14 | **Extension points for course-platform features** (assignments, grading, announcements, LTI, university login): a short design note in `docs/design/` on where they plug in (data model, API v2 routes, frontend nav, permissions), no implementation | Z | note reviewed |
 | Z27 | Security review of the whole system before going public (auth, CSRF, access, SSRF incl. V7, uploads, prompt injection incl. Z26, proxy, keys, logs, the public vLLM of V12) in `docs/SECURITY_REVIEW.md` | Z | report; high findings fixed before the deploy |
-| Z23 | vLLM capacity (tokens per second, 1 to 32 at a time), model limits set from it | Z | measured 2026-11-20: numbers and recommendation (`max_concurrent` 8, timeout 60) in OPERATIONS.md section 10; limits not yet changed in `config.yaml`; full-ask timing open |
+| Z23 | vLLM capacity (tokens per second, 1 to 32 at a time), model limits set from it | Z | measured 2026-11-20: numbers and recommendation (`max_concurrent` 8, timeout 60) in OPERATIONS.md section 10; limits not yet changed in `config.yaml` (one deployment setting, `limits.models.max_concurrent`, applied to each connection); full-ask timing open |
 | — | Alert receiver for monitoring (ask Prof. Abbas) | Z | set in `alertmanager.yml` |
 | T10 | Video on the v5 UI; Design Day live demo script on the production site; "Brightspace plus" story (teaching, research, industry training; learners include trainees and research groups, a bridge between academia, research and industry); one demo step uploads an open-access paper and drafts research topics from it | T, all | video submitted 11/25 |
 | — | Final report and Design Day material carry the same story and the value for future research | all | report 12/13 |
@@ -116,16 +121,18 @@ Until this plan is merged into [v4-implementation-guide.md](v4-implementation-gu
 
 ## 6. Remaining v4 items (in order, when time allows)
 
-- **Retrieval (S14)**: done (PR `feature/s14-retrieval-paraphrases`): stemming, typo correction, logistics
-  synonyms, a weight for homework and exam files in course-wide questions and a semantic step with the router's
-  encoder (`rag.semantic_retrieval`). Paraphrase set course-wide hit@4 0.48 -> 0.81, S11 course-wide hit@4
-  0.93 -> 0.95 (`eval/course-rag-packs/results/s14-comparison.md`). Left: "when is homework 4 due" (circ-28)
-  still misses (the calendar row names another homework's due date), very garbled questions, and the evidence
-  step (cross-encoder) can still drop a retrieved passage.
+- **Retrieval (S14)**: merged (#136): stemming, typo correction, logistics synonyms, a weight for homework and
+  exam files in course-wide questions and a semantic step with the router's encoder (`rag.semantic_retrieval`).
+  Paraphrase set course-wide hit@4 0.48 -> 0.81, S11 course-wide hit@4 0.93 -> 0.95
+  (`eval/course-rag-packs/results/s14-comparison.md`). Accepted by Z with small losses of one or two questions
+  (6.006 course-wide hit@4 0.88 -> 0.84, 7.03 scoped hit@1 0.92 -> 0.85, HST.151 course-wide hit@1
+  0.93 -> 0.89); those questions are the starting set for later tuning. Left: "when is homework 4 due"
+  (circ-28) still misses (the calendar row names another homework's due date), very garbled questions, and the
+  evidence step (cross-encoder) can still drop a retrieved passage.
 - **Routing (T15, T17)**: routing heads trained on medical questions only; course-rule questions routed to the
   cloud skip retrieval (T17 done: retrieval now also runs when the capability gate chooses the cloud, inside a
   course and for logistics questions).
-- **Privacy tests (Z22)**: held-out sets for ECE (41), computer science (30), `life_science` (30) and `general` (25) are in `eval/privacy-filter/` (`make_course_sets.py`, `course_sets.py`, scores in `results/z22/metrics.json`). E6 on main is unchanged since the last report (Z25 and S16 did not affect it). New sets, leak / over-redaction with the course's profile: ECE 24.0% / 6.2%, computer science 12.5% / 7.1%, life science 13.3% / 13.3% (0 of 13 within the profile's scope), general 6.7% / 10.0%. Misses: AWS secret key, quoted `tok_` values, passwords in URLs and prose, 172.16.x addresses, `git@` URLs; over-redaction: eponyms and thinker names (Hardy-Weinberg, Mealy, Kant). Still open: a fresh held-out medical set, and the rule changes for these misses.
+- **Privacy tests (Z22)**: held-out sets for ECE (41), computer science (30), `life_science` (30) and `general` (25) are in `eval/privacy-filter/` (`make_course_sets.py`, `course_sets.py`, scores in `results/z22/metrics.json`). E6 on main is unchanged since the last report (Z25 and S16 did not affect it). New sets, leak / over-redaction with the course's profile: ECE 24.0% / 6.2%, computer science 12.5% / 7.1%, life science 13.3% / 13.3% (0 of 13 within the profile's scope), general 6.7% / 10.0%. Misses: AWS secret key, quoted `tok_` values, passwords in URLs and prose, 172.16.x addresses, `git@` URLs; over-redaction: eponyms and thinker names (Hardy-Weinberg, Mealy, Kant). Merged (#134). Still open: a fresh held-out medical set, and the rule changes (decided in section 10: secret shapes, URL passwords, 172.16/12 and `git@` addresses first; the allow-list for course terms later).
 - **T16 (chat, done)**: after opening a past conversation there is no way back to a new, empty conversation
   (fixed: New chat also works while the first answer is still streaming).
   Note: three merged PRs reused IDs of the task list: #106 calls itself T16 (code splitting), #103 T15 (forms)
@@ -182,7 +189,7 @@ with the local model.
 | W14 | Phone width | Admin tables and Materials scroll sideways inside their card; the action buttons and the module column are off screen | minor |
 | W15 | Account menu, admin tables | Theme items read as actions while the check mark marks a state; "Disable"/"Enable" next to "Deactivate" in English | cosmetic |
 | W16 | AI assistant | Sub-title still says the local model reads the material when the cloud model is chosen; an opened draft is far below the list without scrolling to it; the source radios have no accessible name | cosmetic (radios: minor) |
-| W17 | Course content | Knowledge components and check items can only be retired, not edited (misconceptions can be) | to decide |
+| W17 | Course content | Knowledge components and check items can only be retired, not edited (misconceptions can be) | decided: edit the wording, keep the identity (section 10, V18) |
 | W18 | Module codes | "Thévenin" becomes `th_venin` in codes and file names | cosmetic |
 | W19 | KC and quiz drafts (vLLM) | One duplicate KC name rejects the whole KC draft; a quiz draft with the 9B model gave "no usable question"; some 503s under load | to check with the vLLM |
 | W20 | Chat answers | Formulas written with \( \) and \[ \] are shown as raw text ("(V_{th})") | minor |
@@ -195,9 +202,58 @@ with the local model.
 | W27 | Join page | Focusing the new-password field made the browser's password manager crash the browser during the automated test | to check by hand |
 
 State on 2026-11-20 (second run, with the lab vLLM reachable and the student part done): W1 to W11, W13 to W16
-and W18 to W26 are fixed in #129; W12 ("Start next term's course", with materials) is #133; W17 is to decide;
+and W18 to W26 are fixed in #129; W12 ("Start next term's course", with materials) is #133; W17 is decided (section 10, task V18);
 W27 is to check by hand. W19 retested with the vLLM: quiz drafts and custom drafts work (3 of 3 questions usable,
 a draft in under 30 s); the KC draft failed on accept as described and is fixed; no 503 was seen. Also checked:
 the end-of-term survey (a student answers once, averages appear at three answers), the student pages at phone
 width (no overflow), and a demo rebuild with the local model (new KCs for every module). Not run yet: web search
 answers.
+
+## 10. Decisions of 2026-11-20 and next steps (handover)
+
+Taken by Z after the V17 runs and the review of PRs #129 to #136. No code for these tasks is written yet; the
+next agent takes them in this order. Each is one task, one branch and one PR (AGENTS.md workflow).
+
+| ID | Decision and task | Done when |
+|---|---|---|
+| V18 | **W17: edit the wording of KCs and check items, keep their identity.** An instructor can change the name and description of a knowledge component and the text, options and hint of a check item; the ID, the module and the learner records stay, so mastery estimates and class statistics keep counting the same item. The editor says that a change of meaning needs "Retire" and a new item. Backend: additive `PATCH` routes under `/api/v2/courses/{course_id}/...`, instructor of the course only, with access tests (another course's instructor, a student, logged out); no learner data in logs. Frontend: an edit form on Content like the one for misconceptions, with a "Saved." note, en and fr | PATCH routes and access tests; an edit keeps `p_mastery` and the quiz statistics; OpenAPI and generated types committed |
+| Z22b | **Privacy rule changes, low-risk part first.** Recognizers for: an AWS secret key after `secret_access_key`; `TOKEN` / `KEY` / `SECRET` assignments with any prefix, also inside dicts, and `'Bearer ...'`; the password in URL user info (`scheme://user:PASSWORD@host`); "the password for X is V" in prose; the whole 172.16.0.0/12 range, with and without a port; SCP-style `git@host:account/repo.git`. These only redact more. Re-run E6 (rule 4) and the Z22 course sets | E6 leak not worse on any set and over-redaction not worse on the main set; Z22 misses EH005, CH001, EH014, EH018, CH009, GH008, EH012, EH010 found |
+| V19 | **A course type as one plug-in package, including routing** (below) | design note reviewed by Z, then the code |
+| Z22c | **After the video: an allow-list for course terms that look like names** (Smith chart, Hardy-Weinberg, Michaelis-Menten, Mendel, Krebs, Kant, Rawls, Django; "C" as a language). Risky: a student can be called Smith or Mendel, so only fixed phrases may pass, never a bare surname. Also a name after a role word ("my TA", "my partner"), and whether `life_science` and `general` get the lab address and repository recognizers | design agreed by Z before code; E6 and Z22 re-run |
+| — | French screenshots to Lavin: Z sends them (25 files in `notes/fr-screens-2026-11-20/`, outside the repository) | e-mail sent |
+| — | S14: accepted with the small losses listed in section 6 | done |
+| — | W27: Z checks by hand that a person can join from Edge (the new-password field) | checked |
+| — | T16: the original report was not reproduced; Z gives the steps if it comes back | — |
+| — | Still to measure: V16 before/after (five drafts per kind), web search answers in the browser (V17), one full ask through the app (Z23), a fresh medical held-out set (Z22) | reports |
+
+### What a course type selects today, and V19
+
+A course has one course type (`courses.course_type`). Today the type selects:
+
+- the **privacy profile** `backend/app/privacy/profiles/<type>.yaml` (`extends: base`): the PII recognizers
+  (`@pii_recognizers.register`), the health-detail policy, the checkers (`@checkers.register`), the medical
+  disclaimer, the consent note and the subject prompt (`app/prompts/subjects/<prompt>.md`). A new type is one
+  YAML file plus any new recognizer or checker module; unknown names stop the app when the profile loads;
+- the **web search** sites and engines (`websearch.allowlist`, `websearch.searxng_engines` in `config.yaml`).
+
+The type does **not** select the **router**. There is one router for the whole deployment (`routing.impl`,
+`@routers.register`) with one set of trained heads (`data/routing/models`, trained on medical questions, T15),
+and `RouteInput` has no course type. Retrieval and the evidence step are per course; the routing score is not.
+
+V19 makes a course type one package that another team can add without changing the core:
+
+1. `RouteInput` gets an optional `course_type` (additive); the pipeline fills it from the course settings.
+2. Routing heads per type in `data/routing/models/<type>/` when that folder exists, the current models
+   otherwise, so existing types do not change; optionally `routing.by_course_type: {<type>: <impl>}` to use
+   another registered router for one type.
+3. `routing/train.py` takes a question set and a type and writes that folder; the routing evaluation reports per
+   type.
+4. `docs/design/extension-points.md` gets a "new course type" checklist: profile YAML, recognizers, checkers,
+   subject prompt, web search sites, routing heads and their question set, a Z22-style held-out privacy set
+   and an E6 run, and the tests.
+
+Why: the router is the only per-question decision that ignores the subject, so heads trained on medical
+questions also decide for ECE and CS courses (the routing test of 2026-11-20 measured ECE only). A separate
+router class per type is rarely needed; trained heads per type behind the shared router are the useful part.
+Rules 2 and 4 stay: a type's router cannot send original text to the cloud (the cloud gate runs after routing),
+and a new privacy profile needs its own held-out set and an E6 run.
