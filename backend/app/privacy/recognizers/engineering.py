@@ -67,6 +67,8 @@ _NOT_CREDENTIAL_PREFIX = re.compile(
     r"|hash|dict|map|row|column|index|unique)[_-]", re.I)
 # a dotted code expression (request.path, "student.id"), not a credential
 CODE_EXPRESSION_RE = re.compile(r"[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)+")
+# a word in prose, also hyphenated ("case-sensitive", "write-protected"): not a password
+PROSE_WORD_RE = re.compile(r"[A-Za-z]+(?:[-'][A-Za-z]+)*")
 # "Authorization: Bearer <token>", "'Bearer <token>'"
 BEARER_RE = re.compile(r"\bBearer\s+([A-Za-z0-9._~+/=-]{16,})", re.I)
 # the password in URL user info: mqtt://user:PASSWORD@host
@@ -133,10 +135,16 @@ class SecretTokenRecognizer(PatternRecognizer):
                 continue  # token_limit=10000000, cache_key=request.path
             if _credential_like(value, reference=text[m.start(2) - 1] == "="):
                 yield _trimmed(m, text, 2)
-        for regex in (BEARER_RE, URL_PASSWORD_RE, PROSE_PASSWORD_RE):
+        for regex in (BEARER_RE, URL_PASSWORD_RE):
             for m in regex.finditer(text):
                 if _credential_like(m.group(1), reference=False, short_ok=regex is URL_PASSWORD_RE):
                     yield _trimmed(m, text, 1)
+        for m in PROSE_PASSWORD_RE.finditer(text):
+            value = m.group(1).rstrip(".,:?)]`")
+            if PROSE_WORD_RE.fullmatch(value):
+                continue  # "... is required?", "... is case-sensitive.": a description, not a password
+            if _credential_like(value, reference=False):
+                yield m.start(1), m.start(1) + len(value)
 
     def _result(self, start: int, end: int) -> RecognizerResult:
         explanation = self.build_regex_explanation(self.name, "assigned secret", ASSIGNED_SECRET_RE.pattern,
