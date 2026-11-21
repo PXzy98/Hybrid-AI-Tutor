@@ -157,15 +157,22 @@ def assess_evidence(x: RouteInput, analysis: SemanticAnalysis, cfg: RoutingConfi
         )
 
 
-def select_passages(x: RouteInput, evidence: EvidenceAssessment | None, cfg: RoutingConfig) -> list[Chunk]:
+def select_passages(x: RouteInput, evidence: EvidenceAssessment | None, cfg: RoutingConfig,
+                    *, logistics: bool = False) -> list[Chunk]:
     """The passages the answer may use. Separate from the routing decision (`accepted_indices`).
 
     - Evidence models ran: every passage judged relevant to the question. Answerability is a routing signal;
       a relevant passage that does not fully answer the question still teaches (the answer cites it).
-    - Evidence skipped, missing or failed: the retriever's own results (it has its own relevance gate) that
-      pass the provenance checks, tagged `evidence_check: unverified`, instead of no material at all.
+      For a logistics question the course's announcements found by retrieval are always kept.
+    - Evidence skipped, missing or failed, or a logistics question none of whose passages the relevance
+      model accepted (a calendar row or a "due" line scores low against "when is X due?"): the retriever's
+      own results (it has its own relevance gate and searched the course-level files first) that pass the
+      provenance checks, tagged `evidence_check: unverified`, instead of no material at all.
     """
-    if evidence is not None and evidence.checked:
-        return [x.passages[i] for i in evidence.relevant_indices]
+    if evidence is not None and evidence.checked and (evidence.relevant_indices or not logistics):
+        keep = set(evidence.relevant_indices)
+        if logistics:
+            keep |= {i for i, c in enumerate(x.passages) if c.metadata.get("origin") == "announcement"}
+        return [x.passages[i] for i in sorted(keep)]
     return [c.model_copy(update={"metadata": {**c.metadata, "evidence_check": "unverified"}})
             for c in x.passages if same_topic(c, x) and source_usable(c, False, cfg)]

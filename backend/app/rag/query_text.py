@@ -10,7 +10,8 @@ from difflib import SequenceMatcher
 
 from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
 
-_TOKEN = re.compile(r"(?u)\b\w\w+\b")
+# Words of two letters or more, and single digits: "problem set 4" must not match problem set 1 (circ-28).
+_TOKEN = re.compile(r"(?u)\b\w\w+\b|\b\d\b")
 
 # Words of course logistics that students phrase in many ways. A question that contains one word of a group
 # also searches for the others. Kept short and generic: they widen the search, they never remove words.

@@ -15,7 +15,7 @@ Course type `computer_science`; 1467 passages; index built whole course.
 
 Logistics questions asked from inside a module (the middle one): n=6, hit@1 0.67, hit@4 0.83, MRR 0.75.
 
-Top score (course-wide): answerable median 0.33, 10th percentile 0.25; 3 questions not in the material: mean 0.11, max 0.14; chance that an answerable question outscores an unanswerable one 1.00.
+Top score (course-wide): answerable median 0.33, 10th percentile 0.24; 3 questions not in the material: mean 0.11, max 0.14; chance that an answerable question outscores an unanswerable one 1.00.
 
 ## mit_6_002_circuits
 
@@ -23,14 +23,14 @@ Course type `ece`; 1217 passages; index built whole course.
 
 | Type | n | scoped hit@1 | scoped hit@4 | scoped MRR | course-wide hit@1 | course-wide hit@4 | course-wide MRR |
 |---|---|---|---|---|---|---|---|
-| concept | 15 | 1.00 | 1.00 | 1.00 | 0.87 | 1.00 | 0.92 |
-| application | 7 | 1.00 | 1.00 | 1.00 | 0.71 | 1.00 | 0.83 |
-| logistics | 6 | 0.83 | 0.83 | 0.83 | 0.83 | 0.83 | 0.83 |
-| all | 28 | 0.96 | 0.96 | 0.96 | 0.82 | 0.96 | 0.88 |
+| concept | 15 | 1.00 | 1.00 | 1.00 | 0.87 | 1.00 | 0.93 |
+| application | 7 | 1.00 | 1.00 | 1.00 | 0.86 | 1.00 | 0.91 |
+| logistics | 6 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| all | 28 | 1.00 | 1.00 | 1.00 | 0.89 | 1.00 | 0.94 |
 
-Logistics questions asked from inside a module (the middle one): n=6, hit@1 0.83, hit@4 0.83, MRR 0.83.
+Logistics questions asked from inside a module (the middle one): n=6, hit@1 1.00, hit@4 1.00, MRR 1.00.
 
-Top score (course-wide): answerable median 0.36, 10th percentile 0.24; 3 questions not in the material: mean 0.24, max 0.46; chance that an answerable question outscores an unanswerable one 0.76.
+Top score (course-wide): answerable median 0.35, 10th percentile 0.20; 3 questions not in the material: mean 0.24, max 0.46; chance that an answerable question outscores an unanswerable one 0.75.
 
 ## mit_6_006_algorithms
 
@@ -38,14 +38,14 @@ Course type `computer_science`; 639 passages; index built whole course.
 
 | Type | n | scoped hit@1 | scoped hit@4 | scoped MRR | course-wide hit@1 | course-wide hit@4 | course-wide MRR |
 |---|---|---|---|---|---|---|---|
-| concept | 14 | 1.00 | 1.00 | 1.00 | 0.57 | 0.86 | 0.69 |
+| concept | 14 | 1.00 | 1.00 | 1.00 | 0.57 | 0.93 | 0.72 |
 | application | 5 | 1.00 | 1.00 | 1.00 | 0.80 | 0.80 | 0.80 |
-| logistics | 6 | 0.67 | 0.83 | 0.71 | 0.67 | 0.83 | 0.71 |
-| all | 25 | 0.92 | 0.96 | 0.93 | 0.64 | 0.84 | 0.71 |
+| logistics | 6 | 0.67 | 1.00 | 0.79 | 0.67 | 1.00 | 0.79 |
+| all | 25 | 0.92 | 1.00 | 0.95 | 0.64 | 0.92 | 0.75 |
 
-Logistics questions asked from inside a module (the middle one): n=6, hit@1 0.67, hit@4 0.83, MRR 0.71.
+Logistics questions asked from inside a module (the middle one): n=6, hit@1 0.67, hit@4 1.00, MRR 0.79.
 
-Top score (course-wide): answerable median 0.28, 10th percentile 0.23; 3 questions not in the material: mean 0.14, max 0.22; chance that an answerable question outscores an unanswerable one 0.99.
+Top score (course-wide): answerable median 0.28, 10th percentile 0.22; 3 questions not in the material: mean 0.14, max 0.21; chance that an answerable question outscores an unanswerable one 0.99.
 
 ## mit_7_016_intro_biology
 
@@ -53,14 +53,14 @@ Course type `life_science`; 831 passages; index built whole course.
 
 | Type | n | scoped hit@1 | scoped hit@4 | scoped MRR | course-wide hit@1 | course-wide hit@4 | course-wide MRR |
 |---|---|---|---|---|---|---|---|
-| concept | 19 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| concept | 19 | 1.00 | 1.00 | 1.00 | 0.84 | 1.00 | 0.92 |
 | application | 3 | 1.00 | 1.00 | 1.00 | 0.67 | 1.00 | 0.83 |
 | logistics | 6 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
-| all | 28 | 1.00 | 1.00 | 1.00 | 0.96 | 1.00 | 0.98 |
+| all | 28 | 1.00 | 1.00 | 1.00 | 0.86 | 1.00 | 0.93 |
 
 Logistics questions asked from inside a module (the middle one): n=6, hit@1 1.00, hit@4 1.00, MRR 1.00.
 
-Top score (course-wide): answerable median 0.30, 10th percentile 0.23; 3 questions not in the material: mean 0.23, max 0.41; chance that an answerable question outscores an unanswerable one 0.74.
+Top score (course-wide): answerable median 0.29, 10th percentile 0.22; 3 questions not in the material: mean 0.22, max 0.38; chance that an answerable question outscores an unanswerable one 0.75.
 
 ## mit_7_03_genetics
 
@@ -70,12 +70,12 @@ Course type `life_science`; 795 passages; index built whole course.
 |---|---|---|---|---|---|---|---|
 | concept | 15 | 0.87 | 1.00 | 0.92 | 0.80 | 0.87 | 0.83 |
 | application | 5 | 1.00 | 1.00 | 1.00 | 0.60 | 1.00 | 0.77 |
-| logistics | 6 | 0.67 | 0.83 | 0.75 | 0.67 | 0.83 | 0.75 |
-| all | 26 | 0.85 | 0.96 | 0.90 | 0.73 | 0.89 | 0.80 |
+| logistics | 6 | 0.83 | 1.00 | 0.92 | 0.83 | 1.00 | 0.92 |
+| all | 26 | 0.89 | 1.00 | 0.94 | 0.77 | 0.92 | 0.84 |
 
-Logistics questions asked from inside a module (the middle one): n=6, hit@1 0.67, hit@4 0.83, MRR 0.75.
+Logistics questions asked from inside a module (the middle one): n=6, hit@1 0.83, hit@4 1.00, MRR 0.92.
 
-Top score (course-wide): answerable median 0.35, 10th percentile 0.21; 3 questions not in the material: mean 0.31, max 0.51; chance that an answerable question outscores an unanswerable one 0.64.
+Top score (course-wide): answerable median 0.35, 10th percentile 0.21; 3 questions not in the material: mean 0.30, max 0.48; chance that an answerable question outscores an unanswerable one 0.64.
 
 ## mit_hst035_pathology
 
@@ -85,12 +85,12 @@ Course type `medical_science`; 546 passages; index built whole course.
 |---|---|---|---|---|---|---|---|
 | concept | 18 | 1.00 | 1.00 | 1.00 | 0.89 | 1.00 | 0.93 |
 | application | 2 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
-| logistics | 6 | 0.50 | 0.83 | 0.67 | 0.50 | 0.83 | 0.67 |
-| all | 26 | 0.89 | 0.96 | 0.92 | 0.81 | 0.96 | 0.88 |
+| logistics | 6 | 0.50 | 1.00 | 0.71 | 0.50 | 1.00 | 0.71 |
+| all | 26 | 0.89 | 1.00 | 0.93 | 0.81 | 1.00 | 0.89 |
 
-Logistics questions asked from inside a module (the middle one): n=6, hit@1 0.50, hit@4 0.83, MRR 0.67.
+Logistics questions asked from inside a module (the middle one): n=6, hit@1 0.50, hit@4 1.00, MRR 0.71.
 
-Top score (course-wide): answerable median 0.37, 10th percentile 0.21; 3 questions not in the material: mean 0.20, max 0.32; chance that an answerable question outscores an unanswerable one 0.89.
+Top score (course-wide): answerable median 0.37, 10th percentile 0.20; 3 questions not in the material: mean 0.19, max 0.31; chance that an answerable question outscores an unanswerable one 0.89.
 
 ## mit_hst151_pharmacology
 
@@ -105,7 +105,7 @@ Course type `medical_science`; 958 passages; index built whole course.
 
 Logistics questions asked from inside a module (the middle one): n=6, hit@1 0.83, hit@4 1.00, MRR 0.89.
 
-Top score (course-wide): answerable median 0.28, 10th percentile 0.21; 3 questions not in the material: mean 0.14, max 0.19; chance that an answerable question outscores an unanswerable one 0.99.
+Top score (course-wide): answerable median 0.28, 10th percentile 0.21; 3 questions not in the material: mean 0.14, max 0.18; chance that an answerable question outscores an unanswerable one 1.00.
 
 ## mit_res_6_007_signals
 
@@ -114,39 +114,34 @@ Course type `ece`; 890 passages; index built whole course.
 | Type | n | scoped hit@1 | scoped hit@4 | scoped MRR | course-wide hit@1 | course-wide hit@4 | course-wide MRR |
 |---|---|---|---|---|---|---|---|
 | concept | 14 | 1.00 | 1.00 | 1.00 | 0.71 | 1.00 | 0.83 |
-| application | 5 | 1.00 | 1.00 | 1.00 | 0.80 | 0.80 | 0.80 |
+| application | 5 | 1.00 | 1.00 | 1.00 | 0.60 | 0.80 | 0.70 |
 | logistics | 6 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
-| all | 25 | 1.00 | 1.00 | 1.00 | 0.80 | 0.96 | 0.87 |
+| all | 25 | 1.00 | 1.00 | 1.00 | 0.76 | 0.96 | 0.85 |
 
 Logistics questions asked from inside a module (the middle one): n=6, hit@1 1.00, hit@4 1.00, MRR 1.00.
 
-Top score (course-wide): answerable median 0.34, 10th percentile 0.25; 3 questions not in the material: mean 0.21, max 0.42; chance that an answerable question outscores an unanswerable one 0.75.
+Top score (course-wide): answerable median 0.33, 10th percentile 0.25; 3 questions not in the material: mean 0.21, max 0.42; chance that an answerable question outscores an unanswerable one 0.75.
 
 ## All packs
 
 | Pack | scoped hit@1 | scoped hit@4 | scoped MRR | course-wide hit@1 | course-wide hit@4 | course-wide MRR | unanswerable max top score |
 |---|---|---|---|---|---|---|---|
 | harvard_cs50x | 0.93 | 0.96 | 0.95 | 0.82 | 0.96 | 0.88 | 0.14 |
-| mit_6_002_circuits | 0.96 | 0.96 | 0.96 | 0.82 | 0.96 | 0.88 | 0.46 |
-| mit_6_006_algorithms | 0.92 | 0.96 | 0.93 | 0.64 | 0.84 | 0.71 | 0.22 |
-| mit_7_016_intro_biology | 1.00 | 1.00 | 1.00 | 0.96 | 1.00 | 0.98 | 0.41 |
-| mit_7_03_genetics | 0.85 | 0.96 | 0.90 | 0.73 | 0.89 | 0.80 | 0.51 |
-| mit_hst035_pathology | 0.89 | 0.96 | 0.92 | 0.81 | 0.96 | 0.88 | 0.32 |
-| mit_hst151_pharmacology | 0.96 | 1.00 | 0.97 | 0.89 | 1.00 | 0.94 | 0.19 |
-| mit_res_6_007_signals | 1.00 | 1.00 | 1.00 | 0.80 | 0.96 | 0.87 | 0.42 |
+| mit_6_002_circuits | 1.00 | 1.00 | 1.00 | 0.89 | 1.00 | 0.94 | 0.46 |
+| mit_6_006_algorithms | 0.92 | 1.00 | 0.95 | 0.64 | 0.92 | 0.75 | 0.21 |
+| mit_7_016_intro_biology | 1.00 | 1.00 | 1.00 | 0.86 | 1.00 | 0.93 | 0.38 |
+| mit_7_03_genetics | 0.89 | 1.00 | 0.94 | 0.77 | 0.92 | 0.84 | 0.48 |
+| mit_hst035_pathology | 0.89 | 1.00 | 0.93 | 0.81 | 1.00 | 0.89 | 0.31 |
+| mit_hst151_pharmacology | 0.96 | 1.00 | 0.97 | 0.89 | 1.00 | 0.94 | 0.18 |
+| mit_res_6_007_signals | 1.00 | 1.00 | 1.00 | 0.76 | 0.96 | 0.85 | 0.42 |
 
 ## Misses (course-wide, no gold file in the top results)
 
 - `cs50-24` (logistics): gold `syllabus.md`; top result `assignments/pset_9.md` (score 0.24); scoped rank None
-- `circ-28` (logistics): gold `calendar.md`; top result `syllabus.md` (score 0.37); scoped rank None
 - `alg-07` (application): gold `modules/09_lecture_9_breadth_first_search.pdf`; top result `modules/11_lecture_11_weighted_shortest_paths.pdf` (score 0.20); scoped rank 1
-- `alg-16` (concept): gold `modules/06_lecture_6_binary_trees_part_1.pdf`; top result `modules/07_lecture_7_binary_trees_part_2_avl.pdf` (score 0.26); scoped rank 1
-- `alg-17` (concept): gold `modules/16_lecture_17_dynamic_programming_part_3.pdf`; top result `modules/17_lecture_18_pseudopolynomial.pdf` (score 0.27); scoped rank 1
-- `alg-24` (logistics): gold `calendar.md`; top result `assignments.md` (score 0.56); scoped rank None
+- `alg-17` (concept): gold `modules/16_lecture_17_dynamic_programming_part_3.pdf`; top result `modules/17_lecture_18_pseudopolynomial.pdf` (score 0.26); scoped rank 1
 - `gen-08` (concept): gold `modules/12_lecture_12_bacterial_genetics_transposition.pdf`; top result `modules/19_lecture_19_eukaryotic_genes_and_genomes_i.pdf` (score 0.14); scoped rank 3
-- `gen-20` (concept): gold `modules/01_lecture_1_physical_structure_of_the_gene.pdf`; top result `calendar.md` (score 0.53); scoped rank 2
-- `gen-26` (logistics): gold `calendar.md`; top result `syllabus.md` (score 0.57); scoped rank None
-- `path-25` (logistics): gold `assignments.md`; top result `syllabus.md` (score 0.32); scoped rank None
+- `gen-20` (concept): gold `modules/01_lecture_1_physical_structure_of_the_gene.pdf`; top result `calendar.md` (score 0.50); scoped rank 2
 - `sig-10` (application): gold `modules/17_lecture_17_interpolation.pdf`; top result `modules/16_lecture_16_sampling.pdf` (score 0.30); scoped rank 1
 
 ## Analysis

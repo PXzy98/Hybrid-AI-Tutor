@@ -418,3 +418,28 @@ def test_prepare_check_reports_every_missing_asset(monkeypatch, capsys):
     assert "qnli-electra-base" in err and "ms-marco" not in err
     monkeypatch.setattr(prepare, "pair_encoder", lambda *a: None)
     assert prepare.check() == 0  # the committed LR/SVM weights match the configured encoder
+
+
+def test_a_logistics_question_keeps_retrieved_passages_when_none_is_judged_relevant(monkeypatch):
+    """A calendar row ("Lecture 21. KEY DATES: Problem set 4 due") scores low against "when is problem set 4
+    due?": a logistics question then uses the retriever's results, unverified, instead of no material."""
+    monkeypatch.setattr("app.routing.evidence.pair_scores",
+                        lambda name, pairs, cfg: np.array([0.01] * len(pairs)))
+    row = chunk(text="Calendar. Lecture 21. KEY DATES: Problem set 4 due")
+    notice = chunk(text="Course announcement: Problem set 4 is due with Lecture 22.",
+                   metadata={"origin": "announcement"})
+    x = input_for(question="When is problem set 4 due?", passages=[row, notice])
+    r = assess_evidence(x, analysis(), RoutingConfig())
+    assert r.checked and r.relevant_indices == []
+    assert select_passages(x, r, RoutingConfig()) == []  # a concept question: unchanged
+    kept = select_passages(x, r, RoutingConfig(), logistics=True)
+    assert [c.text for c in kept] == [row.text, notice.text]
+    assert all(c.metadata["evidence_check"] == "unverified" for c in kept)
+
+    def calendar_relevant(name, pairs, cfg):
+        return np.array([0.9 if "Calendar" in t else 0.01 for _, t in pairs])
+
+    monkeypatch.setattr("app.routing.evidence.pair_scores", calendar_relevant)
+    r = assess_evidence(x, analysis(), RoutingConfig())
+    assert [c.text for c in select_passages(x, r, RoutingConfig(), logistics=True)] == [row.text, notice.text]
+    assert [c.text for c in select_passages(x, r, RoutingConfig())] == [row.text]  # announcements: logistics
