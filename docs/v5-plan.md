@@ -35,7 +35,7 @@ section 10.
 | Routing test, Z23 capacity, answer quality on ECE and CS | done with the lab vLLM (#131): `eval/routing-ece/results/routing_test_2026-11-20.md`, OPERATIONS.md section 10, `eval/course-rag-packs/results/answer_quality.md` |
 | Z22 privacy test sets per course type | merged (#134): E6 unchanged; rule changes decided in section 10 |
 | V18 edit the wording of KCs and check items | PR #138: Edit dialogs on Course content; codes and learner records stay; duplicate active KC name 409; edits audited (field names only) |
-| V21 quiz options that differ only in case | PR (this one): "AA", "Aa", "aa" are different options; only options equal after trimming and collapsing spaces are refused (quizzes and AI check item drafts) |
+| V21 quiz options that differ only in case | PR #142: "AA", "Aa", "aa" are different options; only options equal after trimming and collapsing spaces are refused (quizzes and AI check item drafts) |
 | S14 retrieval, T16, T17 | merged (#136, #135) |
 | V10 AWS deployment | on hold (AWS details) |
 
@@ -264,4 +264,4 @@ and a new privacy profile needs its own held-out set and an E6 run.
 
 | ID | Decision and task | Done when |
 |---|---|---|
-| V21 | **Quiz options that differ only in case are different answers** (found while building the demo database). A quiz question refused genetics options such as "AA", "Aa", "aa" or "genotype A/A" and "genotype A/a" with "options must differ" (422), because options were compared without case. Options now count as the same only when they are equal after trimming and collapsing runs of spaces, case-sensitive; the same rule applies to the options of AI-drafted check items. The frontend and the check item editor have no such check | "AA", "Aa", "aa" and "A/A", "A/a" accepted; "Yes" and " Yes ", "a  b" and "a b" still refused. **State:** PR (this one) |
+| V21 | **Quiz options that differ only in case are different answers** (found while building the demo database). A quiz question refused genetics options such as "AA", "Aa", "aa" or "genotype A/A" and "genotype A/a" with "options must differ" (422), because options were compared without case. Options now count as the same only when they are equal after trimming and collapsing runs of spaces, case-sensitive; the same rule applies to the options of AI-drafted check items. The frontend and the check item editor have no such check | "AA", "Aa", "aa" and "A/A", "A/a" accepted; "Yes" and " Yes ", "a  b" and "a b" still refused. **State:** PR #142 |
