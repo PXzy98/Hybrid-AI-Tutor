@@ -210,3 +210,12 @@ describe("content editors (B11, B25)", () => {
     expect(within(dialog).getByLabelText("Name")).toHaveAttribute("aria-required", "true");
   });
 });
+
+describe("quiz saved note across time zones (retest B13)", () => {
+  it("treats the same instant in UTC and in the database's zone as the same save", async () => {
+    const { sameTime } = await import("@/pages/instructor/Quizzes");
+    expect(sameTime("2026-11-21T22:13:17.389800Z", "2026-11-21T17:13:17.389800-05:00")).toBe(true);
+    expect(sameTime("2026-11-21T22:13:17.389800", "2026-11-21T22:13:17.389800+00:00")).toBe(true);
+    expect(sameTime("2026-11-21T22:13:17Z", "2026-11-21T22:13:18Z")).toBe(false);
+  });
+});

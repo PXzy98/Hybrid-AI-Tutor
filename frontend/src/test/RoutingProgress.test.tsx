@@ -55,3 +55,12 @@ describe("routing step details (V22 B19)", () => {
     expect(screen.getByText("Found 4 passages in the course material.")).toBeInTheDocument();
   });
 });
+
+describe("one passage (retest N5)", () => {
+  it("says 1 passage, not 1 passages", () => {
+    const one = (stage: string, detail: string): Progress => ({ stage, status: "completed", detail, duration_ms: 3, elapsed_ms: 10 });
+    render(<I18nProvider lang="fr"><RoutingProgress trace={trace([one("retrieval", "Retrieved 1 passages."), one("web_search", "Added 1 web passages.")])} /></I18nProvider>);
+    expect(screen.getByText("1 passage trouvé dans le matériel du cours.")).toBeInTheDocument();
+    expect(screen.getByText("1 passage du web ajouté.")).toBeInTheDocument();
+  });
+});

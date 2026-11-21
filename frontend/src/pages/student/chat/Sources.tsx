@@ -17,7 +17,7 @@ export default function Sources({ sources }: { sources: NonNullable<AskResponse[
             <span className="min-w-0">
               <span className="sr-only">[{i + 1}] </span>
               <span className="line-clamp-2 font-medium">{s.title}</span>
-              <span className="block truncate text-muted-foreground">{s.source}</span>
+              {s.source !== s.title && <span className="block truncate text-muted-foreground">{s.source}</span>}
             </span>
           </li>
         ))}

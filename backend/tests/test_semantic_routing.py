@@ -459,3 +459,16 @@ def test_the_logistics_fallback_keeps_the_freshness_check(monkeypatch):
     assert r.checked and r.reason == "No source passed provenance/time checks."
     assert select_passages(x, r, RoutingConfig(), logistics=True, fresh=True) == []
     assert len(select_passages(x, r, RoutingConfig(), logistics=True, fresh=False)) == 2  # not a fresh one
+
+
+def test_a_question_about_the_chosen_module_keeps_its_retrieved_passages(monkeypatch):
+    """Retest N2: "summarize the key ideas of this module" shares no words with any passage, so the relevance
+    model accepts none; with a module chosen the retrieved module passages are used, unverified."""
+    monkeypatch.setattr("app.routing.evidence.pair_scores",
+                        lambda name, pairs, cfg: np.array([0.01] * len(pairs)))
+    x = input_for(question="Summarize the key ideas of this module", passages=[chunk()])
+    r = assess_evidence(x, analysis(), RoutingConfig())
+    assert r.checked and r.relevant_indices == []
+    assert select_passages(x, r, RoutingConfig()) == []  # whole course, concept: unchanged
+    kept = select_passages(x, r, RoutingConfig(), module=True)
+    assert [c.text for c in kept] == [chunk().text] and kept[0].metadata["evidence_check"] == "unverified"
