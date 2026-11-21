@@ -18,6 +18,9 @@ import type { MessageKey } from "@/i18n/en";
 
 const BANDS = ["basic", "intermediate", "advanced", "mastered"];
 
+/** A count of students: a dash for nobody (or a band the API does not list), "hidden" for a group too small to show. */
+const countCell = (n: number | null | undefined, listed: boolean, hidden: string) => (!listed || n === 0 ? "—" : n ?? hidden);
+
 /** Class overview: aggregates per module. Small groups come back suppressed from the API and are shown as such. */
 export default function Overview({ course }: { course: Course }) {
   const { t } = useI18n();
@@ -67,7 +70,7 @@ export default function Overview({ course }: { course: Course }) {
                   {data.kcs?.map((k) => (
                     <TableRow key={k.kc_id}>
                       <TableCell className="font-medium">{k.name}</TableCell>
-                      {BANDS.map((b) => <TableCell key={b} className="tabular-nums">{b in k.counts ? (k.counts[b] ?? t("overview.hidden")) : "—"}</TableCell>)}
+                      {BANDS.map((b) => <TableCell key={b} className="tabular-nums">{countCell(k.counts[b], b in k.counts, t("overview.hidden"))}</TableCell>)}
                       <TableCell className="hidden md:table-cell"><BandBar counts={k.counts} bands={BANDS} /></TableCell>
                     </TableRow>
                   ))}
@@ -77,7 +80,7 @@ export default function Overview({ course }: { course: Course }) {
             </CardContent>
           </Card>
           <Card>
-            <CardHeader><CardTitle>{t("overview.misconceptions")}</CardTitle></CardHeader>
+            <CardHeader><CardTitle>{t("overview.misconceptions")}</CardTitle><CardDescription>{t("overview.misconceptionsHint")}</CardDescription></CardHeader>
             <CardContent>
               <ul className="space-y-1.5 text-sm">
                 {data.misconceptions?.map((m) => (

@@ -432,3 +432,13 @@ describe("SSE client", () => {
     expect(seen).toEqual(["stale", "fresh"]);
   });
 });
+
+describe("suggested questions (V22 B2)", () => {
+  it("puts the English question in the box in the French interface", async () => {
+    mockApi(studentRoutes());
+    renderApp("/courses/1/chat", "fr");
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: "Que devrais-je étudier en premier ?" }));
+    expect(screen.getByRole("textbox", { name: /question/i })).toHaveValue("What should I study first?");
+  });
+});

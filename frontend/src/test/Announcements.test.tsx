@@ -80,7 +80,7 @@ describe("announcements for instructors (V20)", () => {
     expect(within(dialog).getByLabelText("Title")).toHaveValue("Midterm review session");
     await user.type(within(dialog).getByLabelText("Text"), " Student 300000000 asked.");
     await user.click(within(dialog).getByRole("button", { name: "Save" }));
-    expect(await within(dialog).findByRole("alert")).toHaveTextContent("The privacy scan found student data: STUDENT_ID");
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent("The privacy scan found student data (STUDENT_ID). Remove it and save again.");
     expect(screen.queryByText("Saved.")).not.toBeInTheDocument();
   });
 

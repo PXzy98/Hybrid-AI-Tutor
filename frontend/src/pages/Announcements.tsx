@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Megaphone, Pencil, Pin, PinOff, Plus, Trash2 } from "lucide-react";
-import { useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 
 import { api, type Announcement, type Course } from "@/api/endpoints";
-import { EmptyState, ErrorNote, Loading, PageHeader, StatusText } from "@/components/common";
+import { CharCount, EmptyState, ErrorNote, Loading, PageHeader, REQUIRED_LABEL, SaveHint, StatusText } from "@/components/common";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -21,14 +21,15 @@ const useAnnouncements = (course: Course) =>
   useQuery({ queryKey: ["announcements", course.id], queryFn: () => api.announcements(course.id) });
 
 /** One announcement: title, date, pinned mark and the plain text body (line breaks kept, nothing rendered as
- *  Markdown or HTML). `actions` are the instructor's buttons. */
-function AnnouncementCard({ item, actions, level = 3 }: { item: Announcement; actions?: ReactNode; level?: 3 | 4 }) {
+ *  Markdown or HTML). `actions` are the instructor's buttons; `compact` clamps the body to two lines (the full
+ *  text stays in the page for screen readers and is on the Announcements page). */
+function AnnouncementCard({ item, actions, level = 3, compact = false }: { item: Announcement; actions?: ReactNode; level?: 3 | 4; compact?: boolean }) {
   const { t } = useI18n();
   const fmt = useFormat();
   const Heading = level === 3 ? "h3" : "h4";
   const edited = item.updated_at !== item.created_at;
   return (
-    <article className="space-y-2 rounded-xl border bg-card p-4">
+    <article className={`rounded-xl border bg-card ${compact ? "space-y-1 px-3 py-2" : "space-y-2 p-4"}`}>
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0 space-y-1">
           <Heading className="flex flex-wrap items-center gap-2 text-sm font-semibold break-words">
@@ -42,7 +43,7 @@ function AnnouncementCard({ item, actions, level = 3 }: { item: Announcement; ac
         </div>
         {actions && <div className="flex flex-wrap gap-1">{actions}</div>}
       </div>
-      {item.body && <p className="text-sm whitespace-pre-wrap break-words">{item.body}</p>}
+      {item.body && <p className={`text-sm whitespace-pre-wrap break-words ${compact ? "line-clamp-2" : ""}`}>{item.body}</p>}
     </article>
   );
 }
@@ -60,15 +61,15 @@ export function LatestAnnouncements({ course }: { course: Course }) {
         <h3 id="home-announcements" className="flex items-center gap-2 text-sm font-semibold">
           <Megaphone aria-hidden className="size-4 text-muted-foreground" />{t("ann.title")}
         </h3>
-        {list.data.length > HOME_COUNT && (
+        {shown.length > 0 && (
           <Link to={`/courses/${course.id}/announcements`} className="text-sm font-medium underline underline-offset-2">
-            {t("ann.seeAll", { n: list.data.length })}
+            {list.data.length > HOME_COUNT ? t("ann.seeAll", { n: list.data.length }) : t("ann.readMore")}
           </Link>
         )}
       </div>
       {shown.length === 0
         ? <p className="text-sm text-muted-foreground">{t("ann.noneStudent")}</p>
-        : <ul className="space-y-2">{shown.map((a) => <li key={a.id}><AnnouncementCard item={a} level={4} /></li>)}</ul>}
+        : <ul className="space-y-2">{shown.map((a) => <li key={a.id}><AnnouncementCard item={a} level={4} compact /></li>)}</ul>}
     </section>
   );
 }
@@ -98,11 +99,18 @@ export default function InstructorAnnouncements({ course }: { course: Course }) 
   const [pendingDelete, setPendingDelete] = useState<Announcement | null>(null);
   const newButton = useRef<HTMLButtonElement>(null);
   const deleted = useRef(false);
+  const refocus = useRef<number | null>(null);
   const refresh = () => qc.invalidateQueries({ queryKey: ["announcements", course.id] });
   const pin = useMutation({
     mutationFn: (a: Announcement) => api.updateAnnouncement(course.id, a.id, { pinned: !a.pinned }),
-    onSuccess: async () => { await refresh(); setSaved(true); },
+    onSuccess: async (_, a) => { refocus.current = a.id; await refresh(); setSaved(true); },
   });
+  // the pinned item moves in the list: its pin button keeps the focus (the old node is gone)
+  useEffect(() => {
+    if (refocus.current === null || pin.isPending) return;
+    document.getElementById(`ann-pin-${refocus.current}`)?.focus();
+    refocus.current = null;
+  }, [list.data, pin.isPending]);
   const remove = useMutation({
     mutationFn: (a: Announcement) => api.deleteAnnouncement(course.id, a.id),
     onSuccess: async () => { deleted.current = true; setPendingDelete(null); await refresh(); },
@@ -123,7 +131,7 @@ export default function InstructorAnnouncements({ course }: { course: Course }) 
           {list.data.map((a) => (
             <li key={a.id}>
               <AnnouncementCard item={a} actions={<>
-                <Button type="button" size="sm" variant="ghost" aria-pressed={a.pinned} loading={pin.isPending && pin.variables?.id === a.id}
+                <Button type="button" size="sm" variant="ghost" id={`ann-pin-${a.id}`} aria-pressed={a.pinned} loading={pin.isPending && pin.variables?.id === a.id}
                         aria-label={t(a.pinned ? "ann.unpinFor" : "ann.pinFor", { name: a.title })}
                         onClick={() => { setSaved(false); pin.mutate(a); }}>
                   {a.pinned ? <PinOff aria-hidden /> : <Pin aria-hidden />}{t(a.pinned ? "ann.unpin" : "ann.pin")}
@@ -193,16 +201,21 @@ function AnnouncementDialog({ course, item, trigger, onSaved }: { course: Course
             <DialogTitle>{t(item ? "ann.editTitle" : "ann.newTitle")}</DialogTitle>
             <DialogDescription>{t("ann.formHint")}</DialogDescription>
           </DialogHeader>
-          <div className="grid gap-1.5"><Label htmlFor={`${p}-title`}>{t("ann.fieldTitle")}</Label>
-            <Input id={`${p}-title`} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required maxLength={200} /></div>
+          <div className="grid gap-1.5"><Label htmlFor={`${p}-title`} className={REQUIRED_LABEL}>{t("ann.fieldTitle")}</Label>
+            <Input id={`${p}-title`} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required aria-required maxLength={200} />
+            <CharCount value={form.title} max={200} /></div>
           <div className="grid gap-1.5"><Label htmlFor={`${p}-body`}>{t("ann.fieldBody")}</Label>
-            <Textarea id={`${p}-body`} value={form.body} rows={6} onChange={(e) => setForm({ ...form, body: e.target.value })} maxLength={4000} /></div>
+            <Textarea id={`${p}-body`} value={form.body} rows={6} onChange={(e) => setForm({ ...form, body: e.target.value })} maxLength={4000} />
+            <CharCount value={form.body} max={4000} /></div>
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" className="accent-primary" checked={form.pinned} onChange={(e) => setForm({ ...form, pinned: e.target.checked })} />
             {t("ann.fieldPinned")}
           </label>
           <ErrorNote error={save.error} />
-          <DialogFooter><Button loading={save.isPending} type="submit" disabled={save.isPending || !form.title.trim()}>{save.isPending ? t("settings.saving") : t("settings.save")}</Button></DialogFooter>
+          <DialogFooter className="items-center">
+            {!form.title.trim() && <SaveHint id={`${p}-hint`}>{t("ann.fillTitle")}</SaveHint>}
+            <Button loading={save.isPending} type="submit" aria-describedby={form.title.trim() ? undefined : `${p}-hint`} disabled={save.isPending || !form.title.trim()}>{save.isPending ? t("settings.saving") : t("settings.save")}</Button>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
