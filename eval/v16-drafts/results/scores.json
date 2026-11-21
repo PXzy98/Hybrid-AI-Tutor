@@ -1,0 +1,482 @@
+{
+ "after|cs50_w2|check_items": {
+  "edit": 3,
+  "note": "failed: answer cut off at 4,096 tokens (invalid JSON)"
+ },
+ "after|cs50_w2|faq": {
+  "wrong": 1,
+  "fit": 2,
+  "edit": 2,
+  "note": "5 FAQs, the last cut off mid-sentence; NUL written as '0'"
+ },
+ "after|cs50_w2|kcs": {
+  "edit": 3,
+  "note": "failed: every drafted KC was an existing one, so #129's filter left nothing"
+ },
+ "after|cs50_w2|misconceptions": {
+  "wrong": 1,
+  "fit": 2,
+  "edit": 1,
+  "note": "3 items, one per KC; NUL written as '0'"
+ },
+ "after|cs50_w2|project_ideas": {
+  "edit": 3,
+  "note": "failed: repeated passage citations"
+ },
+ "after|cs50_w2|quiz": {
+  "wrong": 0,
+  "fit": 2,
+  "edit": 0,
+  "note": "5 correct; one explanation says 'The text states'"
+ },
+ "after|cs50_w2|sample_proposal": {
+  "edit": 3,
+  "note": "failed: answer cut off at 1,024 tokens"
+ },
+ "after|cs50_w4|check_items": {
+  "wrong": 0,
+  "fit": 2,
+  "edit": 1,
+  "note": "5 correct items; Q5 asks what the week summary listed (trivia about the notes); Q4 explanation muddles leaks and out-of-bounds writes"
+ },
+ "after|cs50_w4|faq": {
+  "wrong": 0,
+  "fit": 1,
+  "edit": 3,
+  "note": "one paragraph on hexadecimal, not FAQs"
+ },
+ "after|cs50_w4|kcs": {
+  "wrong": 0,
+  "fit": 2,
+  "dup": 2,
+  "edit": 1,
+  "note": "'Pointer Fundamentals' and 'Dynamic Memory Management' rename existing KCs; 'Memory Addressing' and 'Memory Leak Detection' are new"
+ },
+ "after|cs50_w4|misconceptions": {
+  "wrong": 2,
+  "fit": 2,
+  "edit": 2,
+  "note": "5 items; item 2 says hexadecimal is for addresses rather than values; item 4's belief is self-contradictory (x[3] 'within' size 3)"
+ },
+ "after|cs50_w4|project_ideas": {
+  "wrong": 0,
+  "fit": 1,
+  "edit": 3,
+  "note": "a lesson summary, no project ideas"
+ },
+ "after|cs50_w4|quiz": {
+  "wrong": 1,
+  "fit": 2,
+  "edit": 1,
+  "note": "Q3 'all hexadecimal numbers ... 0x' marked True though the notes say 'often'; 'the text' in explanations"
+ },
+ "after|cs50_w4|sample_proposal": {
+  "edit": 3,
+  "note": "failed: degenerate citation list until cut off at 1,024 tokens"
+ },
+ "after|e6002_l2|check_items": {
+  "wrong": 1,
+  "fit": 2,
+  "edit": 1,
+  "note": "Q3 ('NOT a step of the basic method') has two right options: 'write KCL for all but the ground node' is not a basic-method step either; KC tags of Q2 are a stretch"
+ },
+ "after|e6002_l2|faq": {
+  "wrong": 0,
+  "fit": 2,
+  "edit": 1,
+  "note": "5 correct FAQs; 'The text notes' once"
+ },
+ "after|e6002_l2|kcs": {
+  "wrong": 0,
+  "fit": 2,
+  "dup": 0,
+  "edit": 1,
+  "note": "3 new KCs (node analysis, associated variables, lumped abstraction); the lumped abstraction definition is vague"
+ },
+ "after|e6002_l2|misconceptions": {
+  "wrong": 0,
+  "fit": 2,
+  "edit": 1,
+  "note": "3 items; item 1 mixes in the power sign convention"
+ },
+ "after|e6002_l2|project_ideas": {
+  "wrong": 0,
+  "fit": 2,
+  "edit": 1,
+  "note": "one project (node analysis), good"
+ },
+ "after|e6002_l2|quiz": {
+  "wrong": 1,
+  "fit": 2,
+  "edit": 1,
+  "note": "Q5 keyed False but its explanation says the rules can solve the circuit; 'the text' in explanations"
+ },
+ "after|e6002_l2|sample_proposal": {
+  "wrong": 0,
+  "fit": 1,
+  "edit": 2,
+  "note": "a lecture guide, not a proposal; correct"
+ },
+ "after|hst151_l1|check_items": {
+  "wrong": 0,
+  "fit": 2,
+  "edit": 1,
+  "note": "7 correct items; Q4's right option ('regardless of dosage') needs rewording"
+ },
+ "after|hst151_l1|faq": {
+  "wrong": 0,
+  "fit": 2,
+  "edit": 1,
+  "note": "7 correct FAQs; [n] passage markers in the text"
+ },
+ "after|hst151_l1|kcs": {
+  "wrong": 0,
+  "fit": 2,
+  "dup": 0,
+  "edit": 1,
+  "note": "2 new KCs (potency/efficacy/affinity/selectivity, distribution); clumsy long name"
+ },
+ "after|hst151_l1|misconceptions": {
+  "wrong": 0,
+  "fit": 2,
+  "edit": 1,
+  "note": "3 correct items; item 3's KC link (agonists) is off"
+ },
+ "after|hst151_l1|project_ideas": {
+  "wrong": 0,
+  "fit": 1,
+  "edit": 3,
+  "note": "a lecture overview, no project ideas"
+ },
+ "after|hst151_l1|quiz": {
+  "wrong": 0,
+  "fit": 2,
+  "edit": 1,
+  "note": "5 correct; 'the text'/'the passage' in explanations"
+ },
+ "after|hst151_l1|sample_proposal": {
+  "wrong": 0,
+  "fit": 1,
+  "edit": 2,
+  "note": "a lecture guide, not a proposal; correct"
+ },
+ "after|hst151_l2|check_items": {
+  "wrong": 0,
+  "fit": 2,
+  "edit": 0,
+  "note": "5 correct items"
+ },
+ "after|hst151_l2|faq": {
+  "wrong": 0,
+  "fit": 2,
+  "edit": 0,
+  "note": "6 correct, detailed FAQs"
+ },
+ "after|hst151_l2|kcs": {
+  "wrong": 0,
+  "fit": 2,
+  "dup": 2,
+  "edit": 1,
+  "note": "'Total Clearance' and 'Apparent Volume of Distribution' rename existing KCs; steady state, bioavailability and AUC are new and correct"
+ },
+ "after|hst151_l2|misconceptions": {
+  "wrong": 0,
+  "fit": 2,
+  "edit": 1,
+  "note": "8 correct items, KC links right; item 1 is vague"
+ },
+ "after|hst151_l2|project_ideas": {
+  "wrong": 0,
+  "fit": 2,
+  "edit": 1,
+  "note": "one analysis project, on topic"
+ },
+ "after|hst151_l2|quiz": {
+  "wrong": 1,
+  "fit": 2,
+  "edit": 1,
+  "note": "Q4's right option leaves out the division by the time interval; 'Passage n' in explanations, 'the text' in a stem"
+ },
+ "after|hst151_l2|sample_proposal": {
+  "wrong": 0,
+  "fit": 1,
+  "edit": 2,
+  "note": "a module summary, not a proposal; correct"
+ },
+ "before|cs50_w2|check_items": {
+  "edit": 3,
+  "note": "failed: answer cut off at 4,096 tokens (invalid JSON)"
+ },
+ "before|cs50_w2|faq": {
+  "edit": 3,
+  "note": "failed: repeated passage citations"
+ },
+ "before|cs50_w2|kcs": {
+  "wrong": 1,
+  "fit": 2,
+  "dup": 3,
+  "edit": 3,
+  "note": "all 3 items are the existing KCs (same names); NUL written as '0' instead of \\0"
+ },
+ "before|cs50_w2|misconceptions": {
+  "wrong": 1,
+  "fit": 2,
+  "edit": 1,
+  "note": "3 items, one per KC; NUL written as '0'"
+ },
+ "before|cs50_w2|project_ideas": {
+  "wrong": 1,
+  "fit": 2,
+  "edit": 1,
+  "note": "one project, concrete deliverables; NUL written as '0'"
+ },
+ "before|cs50_w2|quiz": {
+  "wrong": 0,
+  "fit": 2,
+  "edit": 1,
+  "note": "5 correct; stem 'According to the text', explanations cite 'Passage n'"
+ },
+ "before|cs50_w2|sample_proposal": {
+  "wrong": 1,
+  "fit": 1,
+  "edit": 2,
+  "note": "a lesson guide, not a proposal; NUL written as '0'"
+ },
+ "before|cs50_w4|check_items": {
+  "wrong": 0,
+  "fit": 2,
+  "edit": 1,
+  "note": "5 correct items; explanation of Q2 wrongly says %i would print the value at the address"
+ },
+ "before|cs50_w4|faq": {
+  "wrong": 0,
+  "fit": 0,
+  "edit": 3,
+  "note": "valid but only a heading"
+ },
+ "before|cs50_w4|kcs": {
+  "wrong": 0,
+  "fit": 2,
+  "dup": 3,
+  "edit": 3,
+  "note": "all 3 items are the existing KCs"
+ },
+ "before|cs50_w4|misconceptions": {
+  "wrong": 1,
+  "fit": 2,
+  "edit": 2,
+  "note": "4 items; KC links wrong on all 4; item 3 says malloc'd memory stays reserved after the program ends"
+ },
+ "before|cs50_w4|project_ideas": {
+  "wrong": 0,
+  "fit": 0,
+  "edit": 3,
+  "note": "valid but only a heading (body is one line)"
+ },
+ "before|cs50_w4|quiz": {
+  "wrong": 1,
+  "fit": 2,
+  "edit": 1,
+  "note": "Q2 'all hexadecimal numbers ... 0x' marked True though the notes say 'often'; 'the text' in stems; Q5 without KC"
+ },
+ "before|cs50_w4|sample_proposal": {
+  "wrong": 0,
+  "fit": 1,
+  "edit": 2,
+  "note": "a lesson guide, not a proposal; correct"
+ },
+ "before|e6002_l2|check_items": {
+  "wrong": 0,
+  "fit": 2,
+  "edit": 1,
+  "note": "4 correct items; KC tag of Q2 (associated variables) is a stretch"
+ },
+ "before|e6002_l2|faq": {
+  "wrong": 1,
+  "fit": 2,
+  "edit": 1,
+  "note": "6 FAQs; gives the node analysis steps as the basic KVL/KCL method's"
+ },
+ "before|e6002_l2|kcs": {
+  "wrong": 0,
+  "fit": 2,
+  "dup": 3,
+  "edit": 3,
+  "note": "all 3 items are the existing KCs"
+ },
+ "before|e6002_l2|misconceptions": {
+  "wrong": 1,
+  "fit": 2,
+  "edit": 2,
+  "note": "3 items; KC links wrong; item 3 is named 'Series and parallel resistors' but is about Method 1"
+ },
+ "before|e6002_l2|project_ideas": {
+  "wrong": 0,
+  "fit": 2,
+  "edit": 1,
+  "note": "one project (node analysis), good"
+ },
+ "before|e6002_l2|quiz": {
+  "wrong": 2,
+  "fit": 2,
+  "edit": 2,
+  "note": "Q3 keyed answer wrong (next step is to solve, not combine elements); Q4 has two right options (R1R2/(R1+R2) is also correct); 'Passage n' everywhere"
+ },
+ "before|e6002_l2|sample_proposal": {
+  "wrong": 0,
+  "fit": 1,
+  "edit": 2,
+  "note": "a lecture guide, not a proposal; correct"
+ },
+ "before|hst151_l1|check_items": {
+  "wrong": 0,
+  "fit": 2,
+  "edit": 0,
+  "note": "4 correct, well-built items"
+ },
+ "before|hst151_l1|faq": {
+  "wrong": 0,
+  "fit": 2,
+  "edit": 0,
+  "note": "6 correct FAQs"
+ },
+ "before|hst151_l1|kcs": {
+  "wrong": 0,
+  "fit": 2,
+  "dup": 3,
+  "edit": 3,
+  "note": "all 3 items are the existing KCs (richer definitions, but nothing new to add)"
+ },
+ "before|hst151_l1|misconceptions": {
+  "wrong": 0,
+  "fit": 2,
+  "edit": 1,
+  "note": "4 correct items; items 2 and 4 are the same potency idea"
+ },
+ "before|hst151_l1|project_ideas": {
+  "wrong": 0,
+  "fit": 2,
+  "edit": 1,
+  "note": "one project, generic but on topic"
+ },
+ "before|hst151_l1|quiz": {
+  "wrong": 0,
+  "fit": 2,
+  "edit": 1,
+  "note": "5 correct; 'According to the text' in a stem"
+ },
+ "before|hst151_l1|sample_proposal": {
+  "wrong": 0,
+  "fit": 1,
+  "edit": 2,
+  "note": "a lecture guide, not a proposal; correct"
+ },
+ "before|hst151_l2|check_items": {
+  "wrong": 1,
+  "fit": 2,
+  "edit": 2,
+  "note": "8 items; every explanation cites 'Evidence n' (students do not see the passages); Q5's right option leaves out the division by the time interval"
+ },
+ "before|hst151_l2|faq": {
+  "edit": 3,
+  "note": "failed: repeated passage citations"
+ },
+ "before|hst151_l2|kcs": {
+  "wrong": 0,
+  "fit": 2,
+  "dup": 3,
+  "edit": 3,
+  "note": "all 3 items are the existing KCs"
+ },
+ "before|hst151_l2|misconceptions": {
+  "wrong": 1,
+  "fit": 2,
+  "edit": 2,
+  "note": "5 items; 4 KC links wrong; item 2's 'belief' is a remark about the calculation, not a misconception"
+ },
+ "before|hst151_l2|project_ideas": {
+  "wrong": 0,
+  "fit": 2,
+  "edit": 1,
+  "note": "one analysis project, on topic"
+ },
+ "before|hst151_l2|quiz": {
+  "wrong": 0,
+  "fit": 2,
+  "edit": 1,
+  "note": "5 correct; 'According to the text' stem, 'Passage n'"
+ },
+ "before|hst151_l2|sample_proposal": {
+  "wrong": 0,
+  "fit": 1,
+  "edit": 2,
+  "note": "a module summary, not a proposal; correct"
+ },
+ "cloud:cloud|fictional_tidewater|check_items": {
+  "edit": 3,
+  "note": "failed: own field names (id, status, prompt, options as objects)"
+ },
+ "cloud:cloud|fictional_tidewater|faq": {
+  "wrong": 0,
+  "fit": 2,
+  "edit": 0,
+  "note": "9 FAQs covering the whole module"
+ },
+ "cloud:cloud|fictional_tidewater|kcs": {
+  "edit": 3,
+  "note": "failed: the answer used its own field names (description, prerequisites, evidence)"
+ },
+ "cloud:cloud|fictional_tidewater|misconceptions": {
+  "edit": 3,
+  "note": "failed: own field names (id, kc, misconception)"
+ },
+ "cloud:cloud|fictional_tidewater|project_ideas": {
+  "wrong": 0,
+  "fit": 2,
+  "edit": 0,
+  "note": "directions, five topics, difficulty, KCs, deliverables, all from the material"
+ },
+ "cloud:cloud|fictional_tidewater|sample_proposal": {
+  "wrong": 0,
+  "fit": 2,
+  "edit": 0,
+  "note": "a fictional sample proposal, marked as such"
+ },
+ "cloud:local|fictional_tidewater|check_items": {
+  "wrong": 0,
+  "fit": 2,
+  "edit": 1,
+  "note": "4 correct items; KC links are a stretch (only two KCs exist)"
+ },
+ "cloud:local|fictional_tidewater|faq": {
+  "wrong": 0,
+  "fit": 2,
+  "edit": 2,
+  "note": "a single question (135 tokens)"
+ },
+ "cloud:local|fictional_tidewater|kcs": {
+  "wrong": 0,
+  "fit": 2,
+  "dup": 0,
+  "edit": 0,
+  "note": "5 new, correct KCs"
+ },
+ "cloud:local|fictional_tidewater|misconceptions": {
+  "wrong": 0,
+  "fit": 2,
+  "edit": 1,
+  "note": "2 correct items; KC links swapped"
+ },
+ "cloud:local|fictional_tidewater|project_ideas": {
+  "wrong": 0,
+  "fit": 2,
+  "edit": 1,
+  "note": "one paragraph restating the lab"
+ },
+ "cloud:local|fictional_tidewater|sample_proposal": {
+  "wrong": 0,
+  "fit": 1,
+  "edit": 2,
+  "note": "instructor notes, not a proposal"
+ }
+}

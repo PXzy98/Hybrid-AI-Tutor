@@ -26,7 +26,7 @@ section 10.
 | V8 closed loop | merged (#123) |
 | V9 accounts from term to term | merged (#118, review fixes #125) |
 | V15 a student's own answer instruction | merged (#121) |
-| V16 cloud drafts for public material | merged (#122); the before/after comparison of five drafts per kind is still open |
+| V16 cloud drafts for public material | merged (#122). Before/after measured (`eval/v16-drafts/results/report.md`, 70 drafts on the lab vLLM): KC drafts no longer only repeat the course's KCs (edit effort 3.0 to 1.4; one draft of five fails when every item repeats), quiz stems about "the text" 8 to 2 of 25; the other five kinds send the same request (no change); usable drafts 15 to 22 of 35. Cloud: better one-text drafts, but KC, check item and misconception drafts fail (3 of 3: no schema, own field names) |
 | V11 to V14, T10 notes | merged (#116): `DOMAIN_NAMES.md`, `DEMO_VLLM.md`, `GPU_COST.md`, `design/extension-points.md`, `DEMO_SCRIPT.md` |
 | Z27 security review | merged (#117); H1, M1, L4 fixed; M2 to M4 fixed (#130); L1 to L3 fixed (#132) |
 | V17 browser test | done on the integration build with the lab vLLM (all roles, en and fr, light and dark, desktop and phone width); findings W1 to W27 in section 9, fixed in #129 and #133 except W17 (decided, section 10) and W27 (check by hand); web search answers not run |
@@ -101,7 +101,7 @@ section 10.
 | V7 | **Draft from a URL / websites as sources**: a tab to give a URL; the page is fetched through the single outbound helper (https only, no private or local addresses, size and time limits), stored as a material with its address, and can be re-fetched | T (backend with Z for the outbound rules) | SSRF tests (localhost, 10.x, 169.254.x, redirects) refused; page text indexed |
 | V8 | **Closed loop for the student**: after a quiz, weak topics on My progress get "explain it another way" (tutor answer in another style, with outside sources through web search when allowed); nothing is shown to the instructor except class statistics. Instructor side: topics weak for the class (aggregate, above the minimum group) suggest a draft of extra material, which the instructor reviews | S (UI T) | a weak KC after a quiz shows the action; works without instructor visibility |
 | V15 | **Student's own answer instructions**: where the instructor set no rule, a student may also write how answers should be presented (free text, short, next to the answer-style choices); stored as a preference, scanned like question text, never shown to the instructor; ignored where it conflicts with the instructor's rules (Z26) | S (UI T) | test: a student instruction cannot override an instructor guideline |
-| V16 | **Draft quality on the 9B model** (Z called it "not good enough" in the meeting): better prompts and passages for the instructor AI; for public material the instructor may choose the cloud model after the cloud notice (guide 4.9) | S | five drafts per kind compared before and after |
+| V16 | **Draft quality on the 9B model** (Z called it "not good enough" in the meeting): better prompts and passages for the instructor AI; for public material the instructor may choose the cloud model after the cloud notice (guide 4.9) | S | five drafts per kind compared before and after: done, `eval/v16-drafts/results/report.md` |
 | V17 | **AI-driven browser test of every feature**: an agent operates a real browser and goes through each role's flows end to end (admin: accounts, model connections, settings; instructor: course and modules, materials, guidelines, AI drafts incl. upload and URL, quizzes, survey, statistics, end of term and import; student: invitation sign-up, privacy notice, chat on the local and cloud paths, web search, quizzes, My progress, "explain it another way", survey), in en and fr, light and dark, desktop and phone. Run on the dev server before the video (by 11/24) and again on the production site after V10. Only demo course packs and fictional accounts; generated test passwords stay in the git-ignored `var/`. Findings go into the task list | Z (agent) | report with screenshots per flow; every failure has a task |
 | V9 | **Account management**: check what the admin and instructor can do each term (CSV import, invitations, reset a password, deactivate, remove from course) and add what is missing | Z | manual section; access tests |
 
@@ -228,7 +228,7 @@ next agent takes them in this order. Each is one task, one branch and one PR (AG
 | — | S14: accepted with the small losses listed in section 6 | done |
 | — | W27: Z checks by hand that a person can join from Edge (the new-password field) | checked |
 | — | T16: the original report was not reproduced; Z gives the steps if it comes back | — |
-| — | Still to measure: V16 before/after (five drafts per kind), web search answers in the browser (V17), one full ask through the app (Z23), a fresh medical held-out set (Z22) | reports |
+| — | Still to measure: web search answers in the browser (V17), one full ask through the app (Z23), a fresh medical held-out set (Z22) | reports |
 
 ### What a course type selects today, and V19
 

@@ -5,7 +5,7 @@ dependencies, "done when"); Jira project G1 tracks the same tasks. This page is 
 The state of each area and the decisions taken are in [docs/HANDOVER.md](docs/HANDOVER.md).
 
 v5 (from the meeting of 2026-11-17): tasks, their state on 2026-11-20 and the findings of the V17 browser
-test (W1 to W27) are in [docs/v5-plan.md](docs/v5-plan.md), sections 0 and 9; the decisions of 2026-11-20 and the next tasks (V18, Z22b, V19, Z22c) in section 10. V18 (edit the wording of KCs and check items): PR #138. V19 (a course type as one package, including routing): merged (#140, #141). V21 (quiz options that differ only in case, decided 2026-11-21): fixed, see section 10. The table below keeps the v4 items.
+test (W1 to W27) are in [docs/v5-plan.md](docs/v5-plan.md), sections 0 and 9; the decisions of 2026-11-20 and the next tasks (V18, Z22b, V19, Z22c) in section 10. V18 (edit the wording of KCs and check items): PR #138. V19 (a course type as one package, including routing): merged (#140, #141). V21 (quiz options that differ only in case, decided 2026-11-21): fixed, see section 10. V16 draft quality before and after: measured in `eval/v16-drafts/results/report.md`; its follow-ups (cloud structure drafts need the JSON schema, larger output limit for one-text drafts) are not tasks yet. The table below keeps the v4 items.
 
 ## Deadlines (syllabus)
 

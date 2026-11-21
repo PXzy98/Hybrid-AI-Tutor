@@ -1,0 +1,1275 @@
+{
+ "license": "Passages are from MIT OpenCourseWare and Harvard CS50x, CC BY-NC-SA 4.0 (see data/demo_courses/<pack>/README.md).",
+ "cases": [
+  {
+   "id": "cs50_w2",
+   "pack": "harvard_cs50x",
+   "course_type": "computer_science",
+   "module_order": 3,
+   "module_title": "Week 2: Arrays",
+   "existing_kcs": [
+    {
+     "name": "Compilation steps",
+     "definition": "Turning C source into machine code: preprocessing, compiling, assembling and linking."
+    },
+    {
+     "name": "Arrays",
+     "definition": "A sequence of values of the same type stored back to back in memory, accessed by index."
+    },
+    {
+     "name": "Strings as character arrays",
+     "definition": "A C string is an array of chars ended by the NUL character \\0."
+    }
+   ],
+   "refused_files": [],
+   "passages": {
+    "kcs": [
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Strings\nNotice that ASCII codes are printed by replacing `%c` with `%i`.\nConsidering the following image, you can see how a string is an array of characters that begins with the first character and ends with a special character called a `NUL character` (note: NUL with one L is the ‘\\0’ character, different from NULL with two L’s):\nImagining this in decimal, your array would look like the following:\nWe can imagine the above as follows:\n```\n// Prints string\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring s = \"HI!\";\nprintf(\"%s\\n\", s);\n}\n```\nNotice that all characters are represented within a `string`.\nTo further understand how a `string` works, revise your code as follows:\n```\n// Treats string as array"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Summing Up\nIn this lesson, you learned more details about compiling and how data is stored within a computer. Specifically, you learned…\n- Generally, how a compiler works.\n- How to debug your code using four methods.\n- How to utilize arrays within your code.\n- How arrays store data in back-to-back portions of memory.\n- How strings are simply arrays of characters.\n- How to interact with arrays in your code.\n- How command-line arguments can be passed to your programs.\nSee you next time!"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Compiling\n- Recall that last week, you learned about a *compiler*, a specialized computer program that converts *source code* into *machine code* that can be understood by a computer.\nWe convert *source code* into machine code using a very special piece of software called a *compiler*. Today, we will be introducing you to a compiler that will allow you to convert source code in the programming language *C* into machine code.\n```\nflowchart LR\nin[\"source code\"] --> BOX[\" compiler \"]\nBOX --> out[\"machine code\"]\n```\nFor example, you might have a computer program that looks like this:\n```\n#include <stdio.h>\nint main(void)\n{\nprintf(\"hello, world\\n\");\n}\n```"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Strings\n- A `string` is simply an array of values of type `char`: an array of characters.\nTo explore `char` and `string`, type `code hi.c` in the terminal window and write code as follows:\n```\n// Prints chars\n#include <stdio.h>\nint main(void)\n{\nchar c1 = 'H';\nchar c2 = 'I';\nchar c3 = '!';\nprintf(\"%c%c%c\\n\", c1, c2, c3);\n}\n```\nNotice that this will output a string of characters.\nSimilarly, make the following modification to your code:\n```\n// Prints chars' ASCII codes\n#include <stdio.h>\nint main(void)\n{\nchar c1 = 'H';\nchar c2 = 'I';\nchar c3 = '!';\nprintf(\"%i %i %i\\n\", c1, c2, c3);\n}\n```\nNotice that ASCII codes are printed by replacing `%c` with `%i`."
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Lecture 2\n- Welcome!\n- Reading Levels\n- Debugging\n- Compiling\n- Arrays\n- Strings\n- String Length\n- Command-Line Arguments\n- Exit Status\n- Summing Up"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Arrays\nYou can imagine how these variables are stored in memory:\n*Arrays* are a sequence of values that are stored back-to-back in memory.\n`int scores[3]` is a way of telling the compiler to provide you three back-to-back places in memory of size `int` to store three `scores`. Considering our program, you can revise your code as follows:\n```\n// Averages three (hardcoded) numbers using an array\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\n// Scores\nint scores[3];\nscores[0] = 72;\nscores[1] = 73;\nscores[2] = 33;\n// Print average\nprintf(\"Average: %f\\n\", (scores[0] + scores[1] + scores[2]) / 3.0);\n}\n```"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Strings\nstring s = \"HI!\";\nstring t = \"BYE!\";\nprintf(\"%s\\n\", s);\nprintf(\"%s\\n\", t);\n}\n```\nNotice that two strings are declared and used in this example.\nYou can visualize this as follows:\nWe can further improve this code. Modify your code as follows:\n```\n// Array of strings\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring words[2];\nwords[0] = \"HI!\";\nwords[1] = \"BYE!\";\nprintf(\"%s\\n\", words[0]);\nprintf(\"%s\\n\", words[1]);\n}\n```\nNotice that both strings are stored within a single array of type `string`.\nWe can consolidate our two strings into an array of strings.\n```\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring words[2];\nwords[0] = \"HI!\";\nwords[1] = \"BYE!\";"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Strings\n// Treats string as array\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring s = \"HI!\";\nprintf(\"%c%c%c\\n\", s[0], s[1], s[2]);\n}\n```\nNotice how the `printf` statement presents three values from our array called `s`.\nAs before, we can replace `%c` with `%i` as follows:\n```\n// Prints string's ASCII codes, including NUL\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring s = \"HI!\";\nprintf(\"%i %i %i %i\\n\", s[0], s[1], s[2], s[3]);\n}\n```\nNotice that this prints the string’s ASCII codes, including NUL.\nLet’s imagine we want to say both `HI!` and `BYE!`. Modify your code as follows:\n```\n// Multiple strings\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring s = \"HI!\";"
+     }
+    ],
+    "check_items": [
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Strings\nNotice that ASCII codes are printed by replacing `%c` with `%i`.\nConsidering the following image, you can see how a string is an array of characters that begins with the first character and ends with a special character called a `NUL character` (note: NUL with one L is the ‘\\0’ character, different from NULL with two L’s):\nImagining this in decimal, your array would look like the following:\nWe can imagine the above as follows:\n```\n// Prints string\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring s = \"HI!\";\nprintf(\"%s\\n\", s);\n}\n```\nNotice that all characters are represented within a `string`.\nTo further understand how a `string` works, revise your code as follows:\n```\n// Treats string as array"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Summing Up\nIn this lesson, you learned more details about compiling and how data is stored within a computer. Specifically, you learned…\n- Generally, how a compiler works.\n- How to debug your code using four methods.\n- How to utilize arrays within your code.\n- How arrays store data in back-to-back portions of memory.\n- How strings are simply arrays of characters.\n- How to interact with arrays in your code.\n- How command-line arguments can be passed to your programs.\nSee you next time!"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Compiling\n- Recall that last week, you learned about a *compiler*, a specialized computer program that converts *source code* into *machine code* that can be understood by a computer.\nWe convert *source code* into machine code using a very special piece of software called a *compiler*. Today, we will be introducing you to a compiler that will allow you to convert source code in the programming language *C* into machine code.\n```\nflowchart LR\nin[\"source code\"] --> BOX[\" compiler \"]\nBOX --> out[\"machine code\"]\n```\nFor example, you might have a computer program that looks like this:\n```\n#include <stdio.h>\nint main(void)\n{\nprintf(\"hello, world\\n\");\n}\n```"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Strings\n- A `string` is simply an array of values of type `char`: an array of characters.\nTo explore `char` and `string`, type `code hi.c` in the terminal window and write code as follows:\n```\n// Prints chars\n#include <stdio.h>\nint main(void)\n{\nchar c1 = 'H';\nchar c2 = 'I';\nchar c3 = '!';\nprintf(\"%c%c%c\\n\", c1, c2, c3);\n}\n```\nNotice that this will output a string of characters.\nSimilarly, make the following modification to your code:\n```\n// Prints chars' ASCII codes\n#include <stdio.h>\nint main(void)\n{\nchar c1 = 'H';\nchar c2 = 'I';\nchar c3 = '!';\nprintf(\"%i %i %i\\n\", c1, c2, c3);\n}\n```\nNotice that ASCII codes are printed by replacing `%c` with `%i`."
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Lecture 2\n- Welcome!\n- Reading Levels\n- Debugging\n- Compiling\n- Arrays\n- Strings\n- String Length\n- Command-Line Arguments\n- Exit Status\n- Summing Up"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Arrays\nYou can imagine how these variables are stored in memory:\n*Arrays* are a sequence of values that are stored back-to-back in memory.\n`int scores[3]` is a way of telling the compiler to provide you three back-to-back places in memory of size `int` to store three `scores`. Considering our program, you can revise your code as follows:\n```\n// Averages three (hardcoded) numbers using an array\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\n// Scores\nint scores[3];\nscores[0] = 72;\nscores[1] = 73;\nscores[2] = 33;\n// Print average\nprintf(\"Average: %f\\n\", (scores[0] + scores[1] + scores[2]) / 3.0);\n}\n```"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Strings\nstring s = \"HI!\";\nstring t = \"BYE!\";\nprintf(\"%s\\n\", s);\nprintf(\"%s\\n\", t);\n}\n```\nNotice that two strings are declared and used in this example.\nYou can visualize this as follows:\nWe can further improve this code. Modify your code as follows:\n```\n// Array of strings\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring words[2];\nwords[0] = \"HI!\";\nwords[1] = \"BYE!\";\nprintf(\"%s\\n\", words[0]);\nprintf(\"%s\\n\", words[1]);\n}\n```\nNotice that both strings are stored within a single array of type `string`.\nWe can consolidate our two strings into an array of strings.\n```\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring words[2];\nwords[0] = \"HI!\";\nwords[1] = \"BYE!\";"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Strings\n// Treats string as array\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring s = \"HI!\";\nprintf(\"%c%c%c\\n\", s[0], s[1], s[2]);\n}\n```\nNotice how the `printf` statement presents three values from our array called `s`.\nAs before, we can replace `%c` with `%i` as follows:\n```\n// Prints string's ASCII codes, including NUL\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring s = \"HI!\";\nprintf(\"%i %i %i %i\\n\", s[0], s[1], s[2], s[3]);\n}\n```\nNotice that this prints the string’s ASCII codes, including NUL.\nLet’s imagine we want to say both `HI!` and `BYE!`. Modify your code as follows:\n```\n// Multiple strings\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring s = \"HI!\";"
+     }
+    ],
+    "misconceptions": [
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Strings\nNotice that ASCII codes are printed by replacing `%c` with `%i`.\nConsidering the following image, you can see how a string is an array of characters that begins with the first character and ends with a special character called a `NUL character` (note: NUL with one L is the ‘\\0’ character, different from NULL with two L’s):\nImagining this in decimal, your array would look like the following:\nWe can imagine the above as follows:\n```\n// Prints string\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring s = \"HI!\";\nprintf(\"%s\\n\", s);\n}\n```\nNotice that all characters are represented within a `string`.\nTo further understand how a `string` works, revise your code as follows:\n```\n// Treats string as array"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Summing Up\nIn this lesson, you learned more details about compiling and how data is stored within a computer. Specifically, you learned…\n- Generally, how a compiler works.\n- How to debug your code using four methods.\n- How to utilize arrays within your code.\n- How arrays store data in back-to-back portions of memory.\n- How strings are simply arrays of characters.\n- How to interact with arrays in your code.\n- How command-line arguments can be passed to your programs.\nSee you next time!"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Compiling\n- Recall that last week, you learned about a *compiler*, a specialized computer program that converts *source code* into *machine code* that can be understood by a computer.\nWe convert *source code* into machine code using a very special piece of software called a *compiler*. Today, we will be introducing you to a compiler that will allow you to convert source code in the programming language *C* into machine code.\n```\nflowchart LR\nin[\"source code\"] --> BOX[\" compiler \"]\nBOX --> out[\"machine code\"]\n```\nFor example, you might have a computer program that looks like this:\n```\n#include <stdio.h>\nint main(void)\n{\nprintf(\"hello, world\\n\");\n}\n```"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Strings\n- A `string` is simply an array of values of type `char`: an array of characters.\nTo explore `char` and `string`, type `code hi.c` in the terminal window and write code as follows:\n```\n// Prints chars\n#include <stdio.h>\nint main(void)\n{\nchar c1 = 'H';\nchar c2 = 'I';\nchar c3 = '!';\nprintf(\"%c%c%c\\n\", c1, c2, c3);\n}\n```\nNotice that this will output a string of characters.\nSimilarly, make the following modification to your code:\n```\n// Prints chars' ASCII codes\n#include <stdio.h>\nint main(void)\n{\nchar c1 = 'H';\nchar c2 = 'I';\nchar c3 = '!';\nprintf(\"%i %i %i\\n\", c1, c2, c3);\n}\n```\nNotice that ASCII codes are printed by replacing `%c` with `%i`."
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Lecture 2\n- Welcome!\n- Reading Levels\n- Debugging\n- Compiling\n- Arrays\n- Strings\n- String Length\n- Command-Line Arguments\n- Exit Status\n- Summing Up"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Arrays\nYou can imagine how these variables are stored in memory:\n*Arrays* are a sequence of values that are stored back-to-back in memory.\n`int scores[3]` is a way of telling the compiler to provide you three back-to-back places in memory of size `int` to store three `scores`. Considering our program, you can revise your code as follows:\n```\n// Averages three (hardcoded) numbers using an array\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\n// Scores\nint scores[3];\nscores[0] = 72;\nscores[1] = 73;\nscores[2] = 33;\n// Print average\nprintf(\"Average: %f\\n\", (scores[0] + scores[1] + scores[2]) / 3.0);\n}\n```"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Strings\nstring s = \"HI!\";\nstring t = \"BYE!\";\nprintf(\"%s\\n\", s);\nprintf(\"%s\\n\", t);\n}\n```\nNotice that two strings are declared and used in this example.\nYou can visualize this as follows:\nWe can further improve this code. Modify your code as follows:\n```\n// Array of strings\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring words[2];\nwords[0] = \"HI!\";\nwords[1] = \"BYE!\";\nprintf(\"%s\\n\", words[0]);\nprintf(\"%s\\n\", words[1]);\n}\n```\nNotice that both strings are stored within a single array of type `string`.\nWe can consolidate our two strings into an array of strings.\n```\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring words[2];\nwords[0] = \"HI!\";\nwords[1] = \"BYE!\";"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Strings\n// Treats string as array\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring s = \"HI!\";\nprintf(\"%c%c%c\\n\", s[0], s[1], s[2]);\n}\n```\nNotice how the `printf` statement presents three values from our array called `s`.\nAs before, we can replace `%c` with `%i` as follows:\n```\n// Prints string's ASCII codes, including NUL\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring s = \"HI!\";\nprintf(\"%i %i %i %i\\n\", s[0], s[1], s[2], s[3]);\n}\n```\nNotice that this prints the string’s ASCII codes, including NUL.\nLet’s imagine we want to say both `HI!` and `BYE!`. Modify your code as follows:\n```\n// Multiple strings\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring s = \"HI!\";"
+     }
+    ],
+    "project_ideas": [
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Strings\nNotice that ASCII codes are printed by replacing `%c` with `%i`.\nConsidering the following image, you can see how a string is an array of characters that begins with the first character and ends with a special character called a `NUL character` (note: NUL with one L is the ‘\\0’ character, different from NULL with two L’s):\nImagining this in decimal, your array would look like the following:\nWe can imagine the above as follows:\n```\n// Prints string\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring s = \"HI!\";\nprintf(\"%s\\n\", s);\n}\n```\nNotice that all characters are represented within a `string`.\nTo further understand how a `string` works, revise your code as follows:\n```\n// Treats string as array"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Summing Up\nIn this lesson, you learned more details about compiling and how data is stored within a computer. Specifically, you learned…\n- Generally, how a compiler works.\n- How to debug your code using four methods.\n- How to utilize arrays within your code.\n- How arrays store data in back-to-back portions of memory.\n- How strings are simply arrays of characters.\n- How to interact with arrays in your code.\n- How command-line arguments can be passed to your programs.\nSee you next time!"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Compiling\n- Recall that last week, you learned about a *compiler*, a specialized computer program that converts *source code* into *machine code* that can be understood by a computer.\nWe convert *source code* into machine code using a very special piece of software called a *compiler*. Today, we will be introducing you to a compiler that will allow you to convert source code in the programming language *C* into machine code.\n```\nflowchart LR\nin[\"source code\"] --> BOX[\" compiler \"]\nBOX --> out[\"machine code\"]\n```\nFor example, you might have a computer program that looks like this:\n```\n#include <stdio.h>\nint main(void)\n{\nprintf(\"hello, world\\n\");\n}\n```"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Lecture 2\n- Welcome!\n- Reading Levels\n- Debugging\n- Compiling\n- Arrays\n- Strings\n- String Length\n- Command-Line Arguments\n- Exit Status\n- Summing Up"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Strings\n- A `string` is simply an array of values of type `char`: an array of characters.\nTo explore `char` and `string`, type `code hi.c` in the terminal window and write code as follows:\n```\n// Prints chars\n#include <stdio.h>\nint main(void)\n{\nchar c1 = 'H';\nchar c2 = 'I';\nchar c3 = '!';\nprintf(\"%c%c%c\\n\", c1, c2, c3);\n}\n```\nNotice that this will output a string of characters.\nSimilarly, make the following modification to your code:\n```\n// Prints chars' ASCII codes\n#include <stdio.h>\nint main(void)\n{\nchar c1 = 'H';\nchar c2 = 'I';\nchar c3 = '!';\nprintf(\"%i %i %i\\n\", c1, c2, c3);\n}\n```\nNotice that ASCII codes are printed by replacing `%c` with `%i`."
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Arrays\nYou can imagine how these variables are stored in memory:\n*Arrays* are a sequence of values that are stored back-to-back in memory.\n`int scores[3]` is a way of telling the compiler to provide you three back-to-back places in memory of size `int` to store three `scores`. Considering our program, you can revise your code as follows:\n```\n// Averages three (hardcoded) numbers using an array\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\n// Scores\nint scores[3];\nscores[0] = 72;\nscores[1] = 73;\nscores[2] = 33;\n// Print average\nprintf(\"Average: %f\\n\", (scores[0] + scores[1] + scores[2]) / 3.0);\n}\n```"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Strings\nstring s = \"HI!\";\nstring t = \"BYE!\";\nprintf(\"%s\\n\", s);\nprintf(\"%s\\n\", t);\n}\n```\nNotice that two strings are declared and used in this example.\nYou can visualize this as follows:\nWe can further improve this code. Modify your code as follows:\n```\n// Array of strings\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring words[2];\nwords[0] = \"HI!\";\nwords[1] = \"BYE!\";\nprintf(\"%s\\n\", words[0]);\nprintf(\"%s\\n\", words[1]);\n}\n```\nNotice that both strings are stored within a single array of type `string`.\nWe can consolidate our two strings into an array of strings.\n```\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring words[2];\nwords[0] = \"HI!\";\nwords[1] = \"BYE!\";"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Strings\n// Treats string as array\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring s = \"HI!\";\nprintf(\"%c%c%c\\n\", s[0], s[1], s[2]);\n}\n```\nNotice how the `printf` statement presents three values from our array called `s`.\nAs before, we can replace `%c` with `%i` as follows:\n```\n// Prints string's ASCII codes, including NUL\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring s = \"HI!\";\nprintf(\"%i %i %i %i\\n\", s[0], s[1], s[2], s[3]);\n}\n```\nNotice that this prints the string’s ASCII codes, including NUL.\nLet’s imagine we want to say both `HI!` and `BYE!`. Modify your code as follows:\n```\n// Multiple strings\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring s = \"HI!\";"
+     }
+    ],
+    "sample_proposal": [
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Strings\nNotice that ASCII codes are printed by replacing `%c` with `%i`.\nConsidering the following image, you can see how a string is an array of characters that begins with the first character and ends with a special character called a `NUL character` (note: NUL with one L is the ‘\\0’ character, different from NULL with two L’s):\nImagining this in decimal, your array would look like the following:\nWe can imagine the above as follows:\n```\n// Prints string\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring s = \"HI!\";\nprintf(\"%s\\n\", s);\n}\n```\nNotice that all characters are represented within a `string`.\nTo further understand how a `string` works, revise your code as follows:\n```\n// Treats string as array"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Summing Up\nIn this lesson, you learned more details about compiling and how data is stored within a computer. Specifically, you learned…\n- Generally, how a compiler works.\n- How to debug your code using four methods.\n- How to utilize arrays within your code.\n- How arrays store data in back-to-back portions of memory.\n- How strings are simply arrays of characters.\n- How to interact with arrays in your code.\n- How command-line arguments can be passed to your programs.\nSee you next time!"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Strings\n- A `string` is simply an array of values of type `char`: an array of characters.\nTo explore `char` and `string`, type `code hi.c` in the terminal window and write code as follows:\n```\n// Prints chars\n#include <stdio.h>\nint main(void)\n{\nchar c1 = 'H';\nchar c2 = 'I';\nchar c3 = '!';\nprintf(\"%c%c%c\\n\", c1, c2, c3);\n}\n```\nNotice that this will output a string of characters.\nSimilarly, make the following modification to your code:\n```\n// Prints chars' ASCII codes\n#include <stdio.h>\nint main(void)\n{\nchar c1 = 'H';\nchar c2 = 'I';\nchar c3 = '!';\nprintf(\"%i %i %i\\n\", c1, c2, c3);\n}\n```\nNotice that ASCII codes are printed by replacing `%c` with `%i`."
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Compiling\n- Recall that last week, you learned about a *compiler*, a specialized computer program that converts *source code* into *machine code* that can be understood by a computer.\nWe convert *source code* into machine code using a very special piece of software called a *compiler*. Today, we will be introducing you to a compiler that will allow you to convert source code in the programming language *C* into machine code.\n```\nflowchart LR\nin[\"source code\"] --> BOX[\" compiler \"]\nBOX --> out[\"machine code\"]\n```\nFor example, you might have a computer program that looks like this:\n```\n#include <stdio.h>\nint main(void)\n{\nprintf(\"hello, world\\n\");\n}\n```"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Lecture 2\n- Welcome!\n- Reading Levels\n- Debugging\n- Compiling\n- Arrays\n- Strings\n- String Length\n- Command-Line Arguments\n- Exit Status\n- Summing Up"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Arrays\nYou can imagine how these variables are stored in memory:\n*Arrays* are a sequence of values that are stored back-to-back in memory.\n`int scores[3]` is a way of telling the compiler to provide you three back-to-back places in memory of size `int` to store three `scores`. Considering our program, you can revise your code as follows:\n```\n// Averages three (hardcoded) numbers using an array\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\n// Scores\nint scores[3];\nscores[0] = 72;\nscores[1] = 73;\nscores[2] = 33;\n// Print average\nprintf(\"Average: %f\\n\", (scores[0] + scores[1] + scores[2]) / 3.0);\n}\n```"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Strings\nstring s = \"HI!\";\nstring t = \"BYE!\";\nprintf(\"%s\\n\", s);\nprintf(\"%s\\n\", t);\n}\n```\nNotice that two strings are declared and used in this example.\nYou can visualize this as follows:\nWe can further improve this code. Modify your code as follows:\n```\n// Array of strings\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring words[2];\nwords[0] = \"HI!\";\nwords[1] = \"BYE!\";\nprintf(\"%s\\n\", words[0]);\nprintf(\"%s\\n\", words[1]);\n}\n```\nNotice that both strings are stored within a single array of type `string`.\nWe can consolidate our two strings into an array of strings.\n```\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring words[2];\nwords[0] = \"HI!\";\nwords[1] = \"BYE!\";"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Strings\n// Treats string as array\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring s = \"HI!\";\nprintf(\"%c%c%c\\n\", s[0], s[1], s[2]);\n}\n```\nNotice how the `printf` statement presents three values from our array called `s`.\nAs before, we can replace `%c` with `%i` as follows:\n```\n// Prints string's ASCII codes, including NUL\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring s = \"HI!\";\nprintf(\"%i %i %i %i\\n\", s[0], s[1], s[2], s[3]);\n}\n```\nNotice that this prints the string’s ASCII codes, including NUL.\nLet’s imagine we want to say both `HI!` and `BYE!`. Modify your code as follows:\n```\n// Multiple strings\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring s = \"HI!\";"
+     }
+    ],
+    "faq": [
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Strings\nNotice that ASCII codes are printed by replacing `%c` with `%i`.\nConsidering the following image, you can see how a string is an array of characters that begins with the first character and ends with a special character called a `NUL character` (note: NUL with one L is the ‘\\0’ character, different from NULL with two L’s):\nImagining this in decimal, your array would look like the following:\nWe can imagine the above as follows:\n```\n// Prints string\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring s = \"HI!\";\nprintf(\"%s\\n\", s);\n}\n```\nNotice that all characters are represented within a `string`.\nTo further understand how a `string` works, revise your code as follows:\n```\n// Treats string as array"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Summing Up\nIn this lesson, you learned more details about compiling and how data is stored within a computer. Specifically, you learned…\n- Generally, how a compiler works.\n- How to debug your code using four methods.\n- How to utilize arrays within your code.\n- How arrays store data in back-to-back portions of memory.\n- How strings are simply arrays of characters.\n- How to interact with arrays in your code.\n- How command-line arguments can be passed to your programs.\nSee you next time!"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Arrays\nYou can imagine how these variables are stored in memory:\n*Arrays* are a sequence of values that are stored back-to-back in memory.\n`int scores[3]` is a way of telling the compiler to provide you three back-to-back places in memory of size `int` to store three `scores`. Considering our program, you can revise your code as follows:\n```\n// Averages three (hardcoded) numbers using an array\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\n// Scores\nint scores[3];\nscores[0] = 72;\nscores[1] = 73;\nscores[2] = 33;\n// Print average\nprintf(\"Average: %f\\n\", (scores[0] + scores[1] + scores[2]) / 3.0);\n}\n```"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Lecture 2\n- Welcome!\n- Reading Levels\n- Debugging\n- Compiling\n- Arrays\n- Strings\n- String Length\n- Command-Line Arguments\n- Exit Status\n- Summing Up"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Compiling\n- Recall that last week, you learned about a *compiler*, a specialized computer program that converts *source code* into *machine code* that can be understood by a computer.\nWe convert *source code* into machine code using a very special piece of software called a *compiler*. Today, we will be introducing you to a compiler that will allow you to convert source code in the programming language *C* into machine code.\n```\nflowchart LR\nin[\"source code\"] --> BOX[\" compiler \"]\nBOX --> out[\"machine code\"]\n```\nFor example, you might have a computer program that looks like this:\n```\n#include <stdio.h>\nint main(void)\n{\nprintf(\"hello, world\\n\");\n}\n```"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Strings\n- A `string` is simply an array of values of type `char`: an array of characters.\nTo explore `char` and `string`, type `code hi.c` in the terminal window and write code as follows:\n```\n// Prints chars\n#include <stdio.h>\nint main(void)\n{\nchar c1 = 'H';\nchar c2 = 'I';\nchar c3 = '!';\nprintf(\"%c%c%c\\n\", c1, c2, c3);\n}\n```\nNotice that this will output a string of characters.\nSimilarly, make the following modification to your code:\n```\n// Prints chars' ASCII codes\n#include <stdio.h>\nint main(void)\n{\nchar c1 = 'H';\nchar c2 = 'I';\nchar c3 = '!';\nprintf(\"%i %i %i\\n\", c1, c2, c3);\n}\n```\nNotice that ASCII codes are printed by replacing `%c` with `%i`."
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Strings\nstring s = \"HI!\";\nstring t = \"BYE!\";\nprintf(\"%s\\n\", s);\nprintf(\"%s\\n\", t);\n}\n```\nNotice that two strings are declared and used in this example.\nYou can visualize this as follows:\nWe can further improve this code. Modify your code as follows:\n```\n// Array of strings\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring words[2];\nwords[0] = \"HI!\";\nwords[1] = \"BYE!\";\nprintf(\"%s\\n\", words[0]);\nprintf(\"%s\\n\", words[1]);\n}\n```\nNotice that both strings are stored within a single array of type `string`.\nWe can consolidate our two strings into an array of strings.\n```\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring words[2];\nwords[0] = \"HI!\";\nwords[1] = \"BYE!\";"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Strings\n// Treats string as array\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring s = \"HI!\";\nprintf(\"%c%c%c\\n\", s[0], s[1], s[2]);\n}\n```\nNotice how the `printf` statement presents three values from our array called `s`.\nAs before, we can replace `%c` with `%i` as follows:\n```\n// Prints string's ASCII codes, including NUL\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring s = \"HI!\";\nprintf(\"%i %i %i %i\\n\", s[0], s[1], s[2], s[3]);\n}\n```\nNotice that this prints the string’s ASCII codes, including NUL.\nLet’s imagine we want to say both `HI!` and `BYE!`. Modify your code as follows:\n```\n// Multiple strings\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring s = \"HI!\";"
+     }
+    ],
+    "quiz": [
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Strings\nNotice that ASCII codes are printed by replacing `%c` with `%i`.\nConsidering the following image, you can see how a string is an array of characters that begins with the first character and ends with a special character called a `NUL character` (note: NUL with one L is the ‘\\0’ character, different from NULL with two L’s):\nImagining this in decimal, your array would look like the following:\nWe can imagine the above as follows:\n```\n// Prints string\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\nstring s = \"HI!\";\nprintf(\"%s\\n\", s);\n}\n```\nNotice that all characters are represented within a `string`.\nTo further understand how a `string` works, revise your code as follows:\n```\n// Treats string as array"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Summing Up\nIn this lesson, you learned more details about compiling and how data is stored within a computer. Specifically, you learned…\n- Generally, how a compiler works.\n- How to debug your code using four methods.\n- How to utilize arrays within your code.\n- How arrays store data in back-to-back portions of memory.\n- How strings are simply arrays of characters.\n- How to interact with arrays in your code.\n- How command-line arguments can be passed to your programs.\nSee you next time!"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Compiling\n- Recall that last week, you learned about a *compiler*, a specialized computer program that converts *source code* into *machine code* that can be understood by a computer.\nWe convert *source code* into machine code using a very special piece of software called a *compiler*. Today, we will be introducing you to a compiler that will allow you to convert source code in the programming language *C* into machine code.\n```\nflowchart LR\nin[\"source code\"] --> BOX[\" compiler \"]\nBOX --> out[\"machine code\"]\n```\nFor example, you might have a computer program that looks like this:\n```\n#include <stdio.h>\nint main(void)\n{\nprintf(\"hello, world\\n\");\n}\n```"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Strings\n- A `string` is simply an array of values of type `char`: an array of characters.\nTo explore `char` and `string`, type `code hi.c` in the terminal window and write code as follows:\n```\n// Prints chars\n#include <stdio.h>\nint main(void)\n{\nchar c1 = 'H';\nchar c2 = 'I';\nchar c3 = '!';\nprintf(\"%c%c%c\\n\", c1, c2, c3);\n}\n```\nNotice that this will output a string of characters.\nSimilarly, make the following modification to your code:\n```\n// Prints chars' ASCII codes\n#include <stdio.h>\nint main(void)\n{\nchar c1 = 'H';\nchar c2 = 'I';\nchar c3 = '!';\nprintf(\"%i %i %i\\n\", c1, c2, c3);\n}\n```\nNotice that ASCII codes are printed by replacing `%c` with `%i`."
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Lecture 2\n- Welcome!\n- Reading Levels\n- Debugging\n- Compiling\n- Arrays\n- Strings\n- String Length\n- Command-Line Arguments\n- Exit Status\n- Summing Up"
+     },
+     {
+      "source": "course/1/3/03_week_2_arrays.md",
+      "text": "Arrays\nYou can imagine how these variables are stored in memory:\n*Arrays* are a sequence of values that are stored back-to-back in memory.\n`int scores[3]` is a way of telling the compiler to provide you three back-to-back places in memory of size `int` to store three `scores`. Considering our program, you can revise your code as follows:\n```\n// Averages three (hardcoded) numbers using an array\n#include <cs50.h>\n#include <stdio.h>\nint main(void)\n{\n// Scores\nint scores[3];\nscores[0] = 72;\nscores[1] = 73;\nscores[2] = 33;\n// Print average\nprintf(\"Average: %f\\n\", (scores[0] + scores[1] + scores[2]) / 3.0);\n}\n```"
+     }
+    ]
+   }
+  },
+  {
+   "id": "cs50_w4",
+   "pack": "harvard_cs50x",
+   "course_type": "computer_science",
+   "module_order": 5,
+   "module_title": "Week 4: Memory",
+   "existing_kcs": [
+    {
+     "name": "Pointers",
+     "definition": "A variable that stores the memory address of another value."
+    },
+    {
+     "name": "Dynamic memory allocation",
+     "definition": "Requesting memory at run time with malloc and returning it with free."
+    },
+    {
+     "name": "Hexadecimal notation",
+     "definition": "Base-16 numbers, written with the prefix 0x, used to show memory addresses."
+    }
+   ],
+   "refused_files": [],
+   "passages": {
+    "kcs": [
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Pointers\nNotice the `%p`, which allows us to view the address of a location in memory. `&n` can be literally translated as “the address of `n`.” Executing this code will return an address of memory beginning with `0x`. You can download this code here.\n- A *pointer* is a variable that stores the address of something. Most succinctly, a pointer is an address in your computer’s memory.\nConsider the following code:\n```\nint n = 50;\nint *p = &n;\n```\nNotice that `p` is a pointer that contains the address of an integer `n`.\nModify your code as follows:\n```\n// Stores and prints an integer's address\n#include <stdio.h>\nint main(void)\n{\nint n = 50;\nint *p = &n;\nprintf(\"%p\\n\", p);\n}\n```"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Memory\nIn weeks past, you may recall our artist rendering of concurrent blocks of memory. Applying hexadecimal numbering to each of these blocks of memory, you can visualize these as follows:\nYou can imagine how there may be confusion regarding whether the `10` block above may represent a location in memory or the value `10`. Accordingly, by convention, all hexadecimal numbers are often represented with the `0x` prefix as follows:\nIn your terminal window, type `code addresses.c` and write your code as follows:\n```\n// Prints an integer\n#include <stdio.h>\nint main(void)\n{\nint n = 50;\nprintf(\"%i\\n\", n);\n}\n```\nNotice how `n` is stored in memory with the value `50`.\nYou can visualize how this program stores this value as follows:"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Pointers\nThe C language has two powerful operators that relate to memory:\n```\n& Provides the address of something stored in memory.\n* Instructs the compiler to go to a location in memory.\n```\nWe can leverage this knowledge by modifying our code as follows:\n```\n// Prints an integer's address\n#include <stdio.h>\nint main(void)\n{\nint n = 50;\nprintf(\"%p\\n\", &n);\n}\n```\nNotice the `%p`, which allows us to view the address of a location in memory. `&n` can be literally translated as “the address of `n`.” Executing this code will return an address of memory beginning with `0x`. You can download this code here."
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Summing Up\nIn this lesson, you learned about pointers that provide you with the ability to access and manipulate data at specific memory locations. Specifically, we delved into…\n- Pixel art\n- Hexadecimal\n- Memory\n- Pointers\n- Strings\n- Pointer Arithmetic\n- String Comparison\n- Copying\n- malloc and Valgrind\n- Garbage values\n- Swapping\n- Overflow\n- `scanf`\n- File I/O\nSee you next time!"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Pointers\n```\nNotice that this code has the same effect as our previous code. We have simply leveraged our new knowledge of the `&` and `*` operators. You can download this code here.\nTo illustrate the use of the `*` operator, consider the following:\n```\n// Stores and prints an integer's address\n#include <stdio.h>\nint main(void)\n{\nint n = 50;\nint *p = &n;\nprintf(\"%p\\n\", p);\n}\n```\nNotice that the `printf` line prints the integer’s address. `int *p` creates a pointer whose job is to store the memory address of an integer. You can download this code here.\nYou can visualize our code as follows:"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Lecture 4\n- Welcome!\n- Pixel Art\n- Hexadecimal\n- Memory\n- Pointers\n- Strings\n- Pointer Arithmetic\n- String Comparison\n- Copying and malloc\n- Valgrind\n- Garbage Values\n- Pointer Fun with Binky\n- Swapping\n- Overflow\n- `scanf`\n- File I/O\n- Summing Up"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Valgrind\n*Valgrind* is a tool that can check to see if there are memory-related issues with your programs wherein you utilized `malloc`. Specifically, it checks to see if you `free` all the memory you allocated.\nConsider the following code for `memory.c`:\n```\n// Demonstrates memory errors via valgrind\n#include <stdio.h>\n#include <stdlib.h>\nint main(void)\n{\nint *x = malloc(3 * sizeof(int));\nx[1] = 72;\nx[2] = 73;\nx[3] = 33;\n}\n```\nNotice that running this program does not cause any errors. While `malloc` is used to allocate enough memory for an array, the code fails to `free` that allocated memory. You can download this code here."
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Valgrind\nNotice that running this program does not cause any errors. While `malloc` is used to allocate enough memory for an array, the code fails to `free` that allocated memory. You can download this code here.\n- If you type `make memory` followed by `valgrind ./memory`, you will get a report from valgrind that will report where memory has been lost as a result of your program. One error that valgrind reveals is that we attempted to assign the value of `33` at `x` of `3`, where we only allocated an array of size `3` (`x[0]`, `x[1]`, and `x[2]`). Another error is that we never freed `x`.\nYou can modify your code to free the memory of `x` as follows:\n```\n// Demonstrates memory errors via valgrind\n#include <stdio.h>"
+     }
+    ],
+    "check_items": [
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Pointers\nNotice the `%p`, which allows us to view the address of a location in memory. `&n` can be literally translated as “the address of `n`.” Executing this code will return an address of memory beginning with `0x`. You can download this code here.\n- A *pointer* is a variable that stores the address of something. Most succinctly, a pointer is an address in your computer’s memory.\nConsider the following code:\n```\nint n = 50;\nint *p = &n;\n```\nNotice that `p` is a pointer that contains the address of an integer `n`.\nModify your code as follows:\n```\n// Stores and prints an integer's address\n#include <stdio.h>\nint main(void)\n{\nint n = 50;\nint *p = &n;\nprintf(\"%p\\n\", p);\n}\n```"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Memory\nIn weeks past, you may recall our artist rendering of concurrent blocks of memory. Applying hexadecimal numbering to each of these blocks of memory, you can visualize these as follows:\nYou can imagine how there may be confusion regarding whether the `10` block above may represent a location in memory or the value `10`. Accordingly, by convention, all hexadecimal numbers are often represented with the `0x` prefix as follows:\nIn your terminal window, type `code addresses.c` and write your code as follows:\n```\n// Prints an integer\n#include <stdio.h>\nint main(void)\n{\nint n = 50;\nprintf(\"%i\\n\", n);\n}\n```\nNotice how `n` is stored in memory with the value `50`.\nYou can visualize how this program stores this value as follows:"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Pointers\nThe C language has two powerful operators that relate to memory:\n```\n& Provides the address of something stored in memory.\n* Instructs the compiler to go to a location in memory.\n```\nWe can leverage this knowledge by modifying our code as follows:\n```\n// Prints an integer's address\n#include <stdio.h>\nint main(void)\n{\nint n = 50;\nprintf(\"%p\\n\", &n);\n}\n```\nNotice the `%p`, which allows us to view the address of a location in memory. `&n` can be literally translated as “the address of `n`.” Executing this code will return an address of memory beginning with `0x`. You can download this code here."
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Summing Up\nIn this lesson, you learned about pointers that provide you with the ability to access and manipulate data at specific memory locations. Specifically, we delved into…\n- Pixel art\n- Hexadecimal\n- Memory\n- Pointers\n- Strings\n- Pointer Arithmetic\n- String Comparison\n- Copying\n- malloc and Valgrind\n- Garbage values\n- Swapping\n- Overflow\n- `scanf`\n- File I/O\nSee you next time!"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Pointers\n```\nNotice that this code has the same effect as our previous code. We have simply leveraged our new knowledge of the `&` and `*` operators. You can download this code here.\nTo illustrate the use of the `*` operator, consider the following:\n```\n// Stores and prints an integer's address\n#include <stdio.h>\nint main(void)\n{\nint n = 50;\nint *p = &n;\nprintf(\"%p\\n\", p);\n}\n```\nNotice that the `printf` line prints the integer’s address. `int *p` creates a pointer whose job is to store the memory address of an integer. You can download this code here.\nYou can visualize our code as follows:"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Lecture 4\n- Welcome!\n- Pixel Art\n- Hexadecimal\n- Memory\n- Pointers\n- Strings\n- Pointer Arithmetic\n- String Comparison\n- Copying and malloc\n- Valgrind\n- Garbage Values\n- Pointer Fun with Binky\n- Swapping\n- Overflow\n- `scanf`\n- File I/O\n- Summing Up"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Valgrind\n*Valgrind* is a tool that can check to see if there are memory-related issues with your programs wherein you utilized `malloc`. Specifically, it checks to see if you `free` all the memory you allocated.\nConsider the following code for `memory.c`:\n```\n// Demonstrates memory errors via valgrind\n#include <stdio.h>\n#include <stdlib.h>\nint main(void)\n{\nint *x = malloc(3 * sizeof(int));\nx[1] = 72;\nx[2] = 73;\nx[3] = 33;\n}\n```\nNotice that running this program does not cause any errors. While `malloc` is used to allocate enough memory for an array, the code fails to `free` that allocated memory. You can download this code here."
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Valgrind\nNotice that running this program does not cause any errors. While `malloc` is used to allocate enough memory for an array, the code fails to `free` that allocated memory. You can download this code here.\n- If you type `make memory` followed by `valgrind ./memory`, you will get a report from valgrind that will report where memory has been lost as a result of your program. One error that valgrind reveals is that we attempted to assign the value of `33` at `x` of `3`, where we only allocated an array of size `3` (`x[0]`, `x[1]`, and `x[2]`). Another error is that we never freed `x`.\nYou can modify your code to free the memory of `x` as follows:\n```\n// Demonstrates memory errors via valgrind\n#include <stdio.h>"
+     }
+    ],
+    "misconceptions": [
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Pointers\nNotice the `%p`, which allows us to view the address of a location in memory. `&n` can be literally translated as “the address of `n`.” Executing this code will return an address of memory beginning with `0x`. You can download this code here.\n- A *pointer* is a variable that stores the address of something. Most succinctly, a pointer is an address in your computer’s memory.\nConsider the following code:\n```\nint n = 50;\nint *p = &n;\n```\nNotice that `p` is a pointer that contains the address of an integer `n`.\nModify your code as follows:\n```\n// Stores and prints an integer's address\n#include <stdio.h>\nint main(void)\n{\nint n = 50;\nint *p = &n;\nprintf(\"%p\\n\", p);\n}\n```"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Memory\nIn weeks past, you may recall our artist rendering of concurrent blocks of memory. Applying hexadecimal numbering to each of these blocks of memory, you can visualize these as follows:\nYou can imagine how there may be confusion regarding whether the `10` block above may represent a location in memory or the value `10`. Accordingly, by convention, all hexadecimal numbers are often represented with the `0x` prefix as follows:\nIn your terminal window, type `code addresses.c` and write your code as follows:\n```\n// Prints an integer\n#include <stdio.h>\nint main(void)\n{\nint n = 50;\nprintf(\"%i\\n\", n);\n}\n```\nNotice how `n` is stored in memory with the value `50`.\nYou can visualize how this program stores this value as follows:"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Pointers\nThe C language has two powerful operators that relate to memory:\n```\n& Provides the address of something stored in memory.\n* Instructs the compiler to go to a location in memory.\n```\nWe can leverage this knowledge by modifying our code as follows:\n```\n// Prints an integer's address\n#include <stdio.h>\nint main(void)\n{\nint n = 50;\nprintf(\"%p\\n\", &n);\n}\n```\nNotice the `%p`, which allows us to view the address of a location in memory. `&n` can be literally translated as “the address of `n`.” Executing this code will return an address of memory beginning with `0x`. You can download this code here."
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Summing Up\nIn this lesson, you learned about pointers that provide you with the ability to access and manipulate data at specific memory locations. Specifically, we delved into…\n- Pixel art\n- Hexadecimal\n- Memory\n- Pointers\n- Strings\n- Pointer Arithmetic\n- String Comparison\n- Copying\n- malloc and Valgrind\n- Garbage values\n- Swapping\n- Overflow\n- `scanf`\n- File I/O\nSee you next time!"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Pointers\n```\nNotice that this code has the same effect as our previous code. We have simply leveraged our new knowledge of the `&` and `*` operators. You can download this code here.\nTo illustrate the use of the `*` operator, consider the following:\n```\n// Stores and prints an integer's address\n#include <stdio.h>\nint main(void)\n{\nint n = 50;\nint *p = &n;\nprintf(\"%p\\n\", p);\n}\n```\nNotice that the `printf` line prints the integer’s address. `int *p` creates a pointer whose job is to store the memory address of an integer. You can download this code here.\nYou can visualize our code as follows:"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Lecture 4\n- Welcome!\n- Pixel Art\n- Hexadecimal\n- Memory\n- Pointers\n- Strings\n- Pointer Arithmetic\n- String Comparison\n- Copying and malloc\n- Valgrind\n- Garbage Values\n- Pointer Fun with Binky\n- Swapping\n- Overflow\n- `scanf`\n- File I/O\n- Summing Up"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Valgrind\n*Valgrind* is a tool that can check to see if there are memory-related issues with your programs wherein you utilized `malloc`. Specifically, it checks to see if you `free` all the memory you allocated.\nConsider the following code for `memory.c`:\n```\n// Demonstrates memory errors via valgrind\n#include <stdio.h>\n#include <stdlib.h>\nint main(void)\n{\nint *x = malloc(3 * sizeof(int));\nx[1] = 72;\nx[2] = 73;\nx[3] = 33;\n}\n```\nNotice that running this program does not cause any errors. While `malloc` is used to allocate enough memory for an array, the code fails to `free` that allocated memory. You can download this code here."
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Valgrind\nNotice that running this program does not cause any errors. While `malloc` is used to allocate enough memory for an array, the code fails to `free` that allocated memory. You can download this code here.\n- If you type `make memory` followed by `valgrind ./memory`, you will get a report from valgrind that will report where memory has been lost as a result of your program. One error that valgrind reveals is that we attempted to assign the value of `33` at `x` of `3`, where we only allocated an array of size `3` (`x[0]`, `x[1]`, and `x[2]`). Another error is that we never freed `x`.\nYou can modify your code to free the memory of `x` as follows:\n```\n// Demonstrates memory errors via valgrind\n#include <stdio.h>"
+     }
+    ],
+    "project_ideas": [
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Pointers\nNotice the `%p`, which allows us to view the address of a location in memory. `&n` can be literally translated as “the address of `n`.” Executing this code will return an address of memory beginning with `0x`. You can download this code here.\n- A *pointer* is a variable that stores the address of something. Most succinctly, a pointer is an address in your computer’s memory.\nConsider the following code:\n```\nint n = 50;\nint *p = &n;\n```\nNotice that `p` is a pointer that contains the address of an integer `n`.\nModify your code as follows:\n```\n// Stores and prints an integer's address\n#include <stdio.h>\nint main(void)\n{\nint n = 50;\nint *p = &n;\nprintf(\"%p\\n\", p);\n}\n```"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Memory\nIn weeks past, you may recall our artist rendering of concurrent blocks of memory. Applying hexadecimal numbering to each of these blocks of memory, you can visualize these as follows:\nYou can imagine how there may be confusion regarding whether the `10` block above may represent a location in memory or the value `10`. Accordingly, by convention, all hexadecimal numbers are often represented with the `0x` prefix as follows:\nIn your terminal window, type `code addresses.c` and write your code as follows:\n```\n// Prints an integer\n#include <stdio.h>\nint main(void)\n{\nint n = 50;\nprintf(\"%i\\n\", n);\n}\n```\nNotice how `n` is stored in memory with the value `50`.\nYou can visualize how this program stores this value as follows:"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Pointers\nThe C language has two powerful operators that relate to memory:\n```\n& Provides the address of something stored in memory.\n* Instructs the compiler to go to a location in memory.\n```\nWe can leverage this knowledge by modifying our code as follows:\n```\n// Prints an integer's address\n#include <stdio.h>\nint main(void)\n{\nint n = 50;\nprintf(\"%p\\n\", &n);\n}\n```\nNotice the `%p`, which allows us to view the address of a location in memory. `&n` can be literally translated as “the address of `n`.” Executing this code will return an address of memory beginning with `0x`. You can download this code here."
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Pointers\n```\nNotice that this code has the same effect as our previous code. We have simply leveraged our new knowledge of the `&` and `*` operators. You can download this code here.\nTo illustrate the use of the `*` operator, consider the following:\n```\n// Stores and prints an integer's address\n#include <stdio.h>\nint main(void)\n{\nint n = 50;\nint *p = &n;\nprintf(\"%p\\n\", p);\n}\n```\nNotice that the `printf` line prints the integer’s address. `int *p` creates a pointer whose job is to store the memory address of an integer. You can download this code here.\nYou can visualize our code as follows:"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Summing Up\nIn this lesson, you learned about pointers that provide you with the ability to access and manipulate data at specific memory locations. Specifically, we delved into…\n- Pixel art\n- Hexadecimal\n- Memory\n- Pointers\n- Strings\n- Pointer Arithmetic\n- String Comparison\n- Copying\n- malloc and Valgrind\n- Garbage values\n- Swapping\n- Overflow\n- `scanf`\n- File I/O\nSee you next time!"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Valgrind\nNotice that running this program does not cause any errors. While `malloc` is used to allocate enough memory for an array, the code fails to `free` that allocated memory. You can download this code here.\n- If you type `make memory` followed by `valgrind ./memory`, you will get a report from valgrind that will report where memory has been lost as a result of your program. One error that valgrind reveals is that we attempted to assign the value of `33` at `x` of `3`, where we only allocated an array of size `3` (`x[0]`, `x[1]`, and `x[2]`). Another error is that we never freed `x`.\nYou can modify your code to free the memory of `x` as follows:\n```\n// Demonstrates memory errors via valgrind\n#include <stdio.h>"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Lecture 4\n- Welcome!\n- Pixel Art\n- Hexadecimal\n- Memory\n- Pointers\n- Strings\n- Pointer Arithmetic\n- String Comparison\n- Copying and malloc\n- Valgrind\n- Garbage Values\n- Pointer Fun with Binky\n- Swapping\n- Overflow\n- `scanf`\n- File I/O\n- Summing Up"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Valgrind\n*Valgrind* is a tool that can check to see if there are memory-related issues with your programs wherein you utilized `malloc`. Specifically, it checks to see if you `free` all the memory you allocated.\nConsider the following code for `memory.c`:\n```\n// Demonstrates memory errors via valgrind\n#include <stdio.h>\n#include <stdlib.h>\nint main(void)\n{\nint *x = malloc(3 * sizeof(int));\nx[1] = 72;\nx[2] = 73;\nx[3] = 33;\n}\n```\nNotice that running this program does not cause any errors. While `malloc` is used to allocate enough memory for an array, the code fails to `free` that allocated memory. You can download this code here."
+     }
+    ],
+    "sample_proposal": [
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Pointers\nNotice the `%p`, which allows us to view the address of a location in memory. `&n` can be literally translated as “the address of `n`.” Executing this code will return an address of memory beginning with `0x`. You can download this code here.\n- A *pointer* is a variable that stores the address of something. Most succinctly, a pointer is an address in your computer’s memory.\nConsider the following code:\n```\nint n = 50;\nint *p = &n;\n```\nNotice that `p` is a pointer that contains the address of an integer `n`.\nModify your code as follows:\n```\n// Stores and prints an integer's address\n#include <stdio.h>\nint main(void)\n{\nint n = 50;\nint *p = &n;\nprintf(\"%p\\n\", p);\n}\n```"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Memory\nIn weeks past, you may recall our artist rendering of concurrent blocks of memory. Applying hexadecimal numbering to each of these blocks of memory, you can visualize these as follows:\nYou can imagine how there may be confusion regarding whether the `10` block above may represent a location in memory or the value `10`. Accordingly, by convention, all hexadecimal numbers are often represented with the `0x` prefix as follows:\nIn your terminal window, type `code addresses.c` and write your code as follows:\n```\n// Prints an integer\n#include <stdio.h>\nint main(void)\n{\nint n = 50;\nprintf(\"%i\\n\", n);\n}\n```\nNotice how `n` is stored in memory with the value `50`.\nYou can visualize how this program stores this value as follows:"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Pointers\nThe C language has two powerful operators that relate to memory:\n```\n& Provides the address of something stored in memory.\n* Instructs the compiler to go to a location in memory.\n```\nWe can leverage this knowledge by modifying our code as follows:\n```\n// Prints an integer's address\n#include <stdio.h>\nint main(void)\n{\nint n = 50;\nprintf(\"%p\\n\", &n);\n}\n```\nNotice the `%p`, which allows us to view the address of a location in memory. `&n` can be literally translated as “the address of `n`.” Executing this code will return an address of memory beginning with `0x`. You can download this code here."
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Pointers\n```\nNotice that this code has the same effect as our previous code. We have simply leveraged our new knowledge of the `&` and `*` operators. You can download this code here.\nTo illustrate the use of the `*` operator, consider the following:\n```\n// Stores and prints an integer's address\n#include <stdio.h>\nint main(void)\n{\nint n = 50;\nint *p = &n;\nprintf(\"%p\\n\", p);\n}\n```\nNotice that the `printf` line prints the integer’s address. `int *p` creates a pointer whose job is to store the memory address of an integer. You can download this code here.\nYou can visualize our code as follows:"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Summing Up\nIn this lesson, you learned about pointers that provide you with the ability to access and manipulate data at specific memory locations. Specifically, we delved into…\n- Pixel art\n- Hexadecimal\n- Memory\n- Pointers\n- Strings\n- Pointer Arithmetic\n- String Comparison\n- Copying\n- malloc and Valgrind\n- Garbage values\n- Swapping\n- Overflow\n- `scanf`\n- File I/O\nSee you next time!"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Lecture 4\n- Welcome!\n- Pixel Art\n- Hexadecimal\n- Memory\n- Pointers\n- Strings\n- Pointer Arithmetic\n- String Comparison\n- Copying and malloc\n- Valgrind\n- Garbage Values\n- Pointer Fun with Binky\n- Swapping\n- Overflow\n- `scanf`\n- File I/O\n- Summing Up"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Valgrind\nNotice that running this program does not cause any errors. While `malloc` is used to allocate enough memory for an array, the code fails to `free` that allocated memory. You can download this code here.\n- If you type `make memory` followed by `valgrind ./memory`, you will get a report from valgrind that will report where memory has been lost as a result of your program. One error that valgrind reveals is that we attempted to assign the value of `33` at `x` of `3`, where we only allocated an array of size `3` (`x[0]`, `x[1]`, and `x[2]`). Another error is that we never freed `x`.\nYou can modify your code to free the memory of `x` as follows:\n```\n// Demonstrates memory errors via valgrind\n#include <stdio.h>"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Valgrind\n*Valgrind* is a tool that can check to see if there are memory-related issues with your programs wherein you utilized `malloc`. Specifically, it checks to see if you `free` all the memory you allocated.\nConsider the following code for `memory.c`:\n```\n// Demonstrates memory errors via valgrind\n#include <stdio.h>\n#include <stdlib.h>\nint main(void)\n{\nint *x = malloc(3 * sizeof(int));\nx[1] = 72;\nx[2] = 73;\nx[3] = 33;\n}\n```\nNotice that running this program does not cause any errors. While `malloc` is used to allocate enough memory for an array, the code fails to `free` that allocated memory. You can download this code here."
+     }
+    ],
+    "faq": [
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Memory\nIn weeks past, you may recall our artist rendering of concurrent blocks of memory. Applying hexadecimal numbering to each of these blocks of memory, you can visualize these as follows:\nYou can imagine how there may be confusion regarding whether the `10` block above may represent a location in memory or the value `10`. Accordingly, by convention, all hexadecimal numbers are often represented with the `0x` prefix as follows:\nIn your terminal window, type `code addresses.c` and write your code as follows:\n```\n// Prints an integer\n#include <stdio.h>\nint main(void)\n{\nint n = 50;\nprintf(\"%i\\n\", n);\n}\n```\nNotice how `n` is stored in memory with the value `50`.\nYou can visualize how this program stores this value as follows:"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Pointers\nNotice the `%p`, which allows us to view the address of a location in memory. `&n` can be literally translated as “the address of `n`.” Executing this code will return an address of memory beginning with `0x`. You can download this code here.\n- A *pointer* is a variable that stores the address of something. Most succinctly, a pointer is an address in your computer’s memory.\nConsider the following code:\n```\nint n = 50;\nint *p = &n;\n```\nNotice that `p` is a pointer that contains the address of an integer `n`.\nModify your code as follows:\n```\n// Stores and prints an integer's address\n#include <stdio.h>\nint main(void)\n{\nint n = 50;\nint *p = &n;\nprintf(\"%p\\n\", p);\n}\n```"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Pointers\nThe C language has two powerful operators that relate to memory:\n```\n& Provides the address of something stored in memory.\n* Instructs the compiler to go to a location in memory.\n```\nWe can leverage this knowledge by modifying our code as follows:\n```\n// Prints an integer's address\n#include <stdio.h>\nint main(void)\n{\nint n = 50;\nprintf(\"%p\\n\", &n);\n}\n```\nNotice the `%p`, which allows us to view the address of a location in memory. `&n` can be literally translated as “the address of `n`.” Executing this code will return an address of memory beginning with `0x`. You can download this code here."
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Pointers\n```\nNotice that this code has the same effect as our previous code. We have simply leveraged our new knowledge of the `&` and `*` operators. You can download this code here.\nTo illustrate the use of the `*` operator, consider the following:\n```\n// Stores and prints an integer's address\n#include <stdio.h>\nint main(void)\n{\nint n = 50;\nint *p = &n;\nprintf(\"%p\\n\", p);\n}\n```\nNotice that the `printf` line prints the integer’s address. `int *p` creates a pointer whose job is to store the memory address of an integer. You can download this code here.\nYou can visualize our code as follows:"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Summing Up\nIn this lesson, you learned about pointers that provide you with the ability to access and manipulate data at specific memory locations. Specifically, we delved into…\n- Pixel art\n- Hexadecimal\n- Memory\n- Pointers\n- Strings\n- Pointer Arithmetic\n- String Comparison\n- Copying\n- malloc and Valgrind\n- Garbage values\n- Swapping\n- Overflow\n- `scanf`\n- File I/O\nSee you next time!"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Lecture 4\n- Welcome!\n- Pixel Art\n- Hexadecimal\n- Memory\n- Pointers\n- Strings\n- Pointer Arithmetic\n- String Comparison\n- Copying and malloc\n- Valgrind\n- Garbage Values\n- Pointer Fun with Binky\n- Swapping\n- Overflow\n- `scanf`\n- File I/O\n- Summing Up"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Valgrind\n*Valgrind* is a tool that can check to see if there are memory-related issues with your programs wherein you utilized `malloc`. Specifically, it checks to see if you `free` all the memory you allocated.\nConsider the following code for `memory.c`:\n```\n// Demonstrates memory errors via valgrind\n#include <stdio.h>\n#include <stdlib.h>\nint main(void)\n{\nint *x = malloc(3 * sizeof(int));\nx[1] = 72;\nx[2] = 73;\nx[3] = 33;\n}\n```\nNotice that running this program does not cause any errors. While `malloc` is used to allocate enough memory for an array, the code fails to `free` that allocated memory. You can download this code here."
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Valgrind\nNotice that running this program does not cause any errors. While `malloc` is used to allocate enough memory for an array, the code fails to `free` that allocated memory. You can download this code here.\n- If you type `make memory` followed by `valgrind ./memory`, you will get a report from valgrind that will report where memory has been lost as a result of your program. One error that valgrind reveals is that we attempted to assign the value of `33` at `x` of `3`, where we only allocated an array of size `3` (`x[0]`, `x[1]`, and `x[2]`). Another error is that we never freed `x`.\nYou can modify your code to free the memory of `x` as follows:\n```\n// Demonstrates memory errors via valgrind\n#include <stdio.h>"
+     }
+    ],
+    "quiz": [
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Pointers\nNotice the `%p`, which allows us to view the address of a location in memory. `&n` can be literally translated as “the address of `n`.” Executing this code will return an address of memory beginning with `0x`. You can download this code here.\n- A *pointer* is a variable that stores the address of something. Most succinctly, a pointer is an address in your computer’s memory.\nConsider the following code:\n```\nint n = 50;\nint *p = &n;\n```\nNotice that `p` is a pointer that contains the address of an integer `n`.\nModify your code as follows:\n```\n// Stores and prints an integer's address\n#include <stdio.h>\nint main(void)\n{\nint n = 50;\nint *p = &n;\nprintf(\"%p\\n\", p);\n}\n```"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Memory\nIn weeks past, you may recall our artist rendering of concurrent blocks of memory. Applying hexadecimal numbering to each of these blocks of memory, you can visualize these as follows:\nYou can imagine how there may be confusion regarding whether the `10` block above may represent a location in memory or the value `10`. Accordingly, by convention, all hexadecimal numbers are often represented with the `0x` prefix as follows:\nIn your terminal window, type `code addresses.c` and write your code as follows:\n```\n// Prints an integer\n#include <stdio.h>\nint main(void)\n{\nint n = 50;\nprintf(\"%i\\n\", n);\n}\n```\nNotice how `n` is stored in memory with the value `50`.\nYou can visualize how this program stores this value as follows:"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Pointers\nThe C language has two powerful operators that relate to memory:\n```\n& Provides the address of something stored in memory.\n* Instructs the compiler to go to a location in memory.\n```\nWe can leverage this knowledge by modifying our code as follows:\n```\n// Prints an integer's address\n#include <stdio.h>\nint main(void)\n{\nint n = 50;\nprintf(\"%p\\n\", &n);\n}\n```\nNotice the `%p`, which allows us to view the address of a location in memory. `&n` can be literally translated as “the address of `n`.” Executing this code will return an address of memory beginning with `0x`. You can download this code here."
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Summing Up\nIn this lesson, you learned about pointers that provide you with the ability to access and manipulate data at specific memory locations. Specifically, we delved into…\n- Pixel art\n- Hexadecimal\n- Memory\n- Pointers\n- Strings\n- Pointer Arithmetic\n- String Comparison\n- Copying\n- malloc and Valgrind\n- Garbage values\n- Swapping\n- Overflow\n- `scanf`\n- File I/O\nSee you next time!"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Pointers\n```\nNotice that this code has the same effect as our previous code. We have simply leveraged our new knowledge of the `&` and `*` operators. You can download this code here.\nTo illustrate the use of the `*` operator, consider the following:\n```\n// Stores and prints an integer's address\n#include <stdio.h>\nint main(void)\n{\nint n = 50;\nint *p = &n;\nprintf(\"%p\\n\", p);\n}\n```\nNotice that the `printf` line prints the integer’s address. `int *p` creates a pointer whose job is to store the memory address of an integer. You can download this code here.\nYou can visualize our code as follows:"
+     },
+     {
+      "source": "course/1/5/05_week_4_memory.md",
+      "text": "Lecture 4\n- Welcome!\n- Pixel Art\n- Hexadecimal\n- Memory\n- Pointers\n- Strings\n- Pointer Arithmetic\n- String Comparison\n- Copying and malloc\n- Valgrind\n- Garbage Values\n- Pointer Fun with Binky\n- Swapping\n- Overflow\n- `scanf`\n- File I/O\n- Summing Up"
+     }
+    ]
+   }
+  },
+  {
+   "id": "e6002_l2",
+   "pack": "mit_6_002_circuits",
+   "course_type": "ece",
+   "module_order": 2,
+   "module_title": "Lecture 2: Basic circuit analysis method",
+   "existing_kcs": [
+    {
+     "name": "Kirchhoff's voltage law",
+     "definition": "The sum of the voltages around any closed loop of a circuit is zero."
+    },
+    {
+     "name": "Kirchhoff's current law",
+     "definition": "The sum of the currents flowing into any node of a circuit is zero."
+    },
+    {
+     "name": "Series and parallel resistors",
+     "definition": "Resistances in series add; conductances in parallel add."
+    }
+   ],
+   "refused_files": [],
+   "passages": {
+    "kcs": [
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 CIRCUITS ANDELECTRONICS\nBasic Circuit Analysis Method\n(KVL and KCL method)"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nMethod 1: Basic KVL, KCL method of\nCircuit analysis\nFor R,\nFor voltage source,\nFor current source,\nElement Relationships\nIRV =\n0VV =\n0II ="
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\n1.\n2.\n3.\n4.\n5.\nSelect reference node ( ground)\nfrom which voltages are measured.\nLabel voltages of remaining nodes\nwith respect to ground.\nThese are the primary unknowns.\nWrite KCL for all but the ground\nnode, substituting device laws and\nKVL.\nSolve for node voltages.\nBack solve for branch voltages and\ncurrents (i.e., the secondary unknowns)\nParticular application of KVL, KCL method\nMethod 3—Node analysis"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nMethod 1: Basic KVL, KCL method of\nCircuit analysis\nGoal: Find all element v’s and i’s\nwrite element v-i relationships\n(from lumped circuit abstraction)\nwrite KCL for all nodes\nwrite KVL for all loops\n1.\n2.\n3.\nlots of unknowns\nlots of equations\nlots of fun\nsolve"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nOther Analysis Methods\nMethod 2— Apply element combination rules\nB\nC\nD\n⇔\nNRRR +++ \"2 1\n⇔1G 2G NG NGGG ++ \"2 1\ni\ni\nRG 1=\n⇔+ – + – + –\n1V 2V 2 1VV +\n⇔\nJ\nJ\n1I 2I 2 1II +\nJ\nA\n1R 2R 3R NR…\nSurprisingly, these rules (along with superposition, which\nyou will learn about later) can solve the circuit on page 8"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nOther Analysis Methods\nMethod 2— Apply element combination rules\nV\nI\n3 2\n3 2\nR R\nRR\n+\nV\nI\n3 2\n3 2\n1\nR R\nRRR R ++ =\n+–\nV\n?=I\n1R\n3R2R\n+–\n+– R\nExample\n1R\nR\nVI ="
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nAssociated variables discipline\nν\ni\n+\n-\nElement e\nThen power consumed\nby element e\niν= is positive\nCurrent is taken to be positive going\ninto the positive voltage terminal"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nKVL:\n0\nloop\nKCL:\nnode\n=∑j jν\n0=∑j ji\nReviewReview\nMaxwell’s equations simplify to\nalgebraic KVL and KCL under LMD!"
+     }
+    ],
+    "check_items": [
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 CIRCUITS ANDELECTRONICS\nBasic Circuit Analysis Method\n(KVL and KCL method)"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nMethod 1: Basic KVL, KCL method of\nCircuit analysis\nFor R,\nFor voltage source,\nFor current source,\nElement Relationships\nIRV =\n0VV =\n0II ="
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\n1.\n2.\n3.\n4.\n5.\nSelect reference node ( ground)\nfrom which voltages are measured.\nLabel voltages of remaining nodes\nwith respect to ground.\nThese are the primary unknowns.\nWrite KCL for all but the ground\nnode, substituting device laws and\nKVL.\nSolve for node voltages.\nBack solve for branch voltages and\ncurrents (i.e., the secondary unknowns)\nParticular application of KVL, KCL method\nMethod 3—Node analysis"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nMethod 1: Basic KVL, KCL method of\nCircuit analysis\nGoal: Find all element v’s and i’s\nwrite element v-i relationships\n(from lumped circuit abstraction)\nwrite KCL for all nodes\nwrite KVL for all loops\n1.\n2.\n3.\nlots of unknowns\nlots of equations\nlots of fun\nsolve"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nOther Analysis Methods\nMethod 2— Apply element combination rules\nB\nC\nD\n⇔\nNRRR +++ \"2 1\n⇔1G 2G NG NGGG ++ \"2 1\ni\ni\nRG 1=\n⇔+ – + – + –\n1V 2V 2 1VV +\n⇔\nJ\nJ\n1I 2I 2 1II +\nJ\nA\n1R 2R 3R NR…\nSurprisingly, these rules (along with superposition, which\nyou will learn about later) can solve the circuit on page 8"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nOther Analysis Methods\nMethod 2— Apply element combination rules\nV\nI\n3 2\n3 2\nR R\nRR\n+\nV\nI\n3 2\n3 2\n1\nR R\nRRR R ++ =\n+–\nV\n?=I\n1R\n3R2R\n+–\n+– R\nExample\n1R\nR\nVI ="
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nAssociated variables discipline\nν\ni\n+\n-\nElement e\nThen power consumed\nby element e\niν= is positive\nCurrent is taken to be positive going\ninto the positive voltage terminal"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nKVL:\n0\nloop\nKCL:\nnode\n=∑j jν\n0=∑j ji\nReviewReview\nMaxwell’s equations simplify to\nalgebraic KVL and KCL under LMD!"
+     }
+    ],
+    "misconceptions": [
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 CIRCUITS ANDELECTRONICS\nBasic Circuit Analysis Method\n(KVL and KCL method)"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nMethod 1: Basic KVL, KCL method of\nCircuit analysis\nFor R,\nFor voltage source,\nFor current source,\nElement Relationships\nIRV =\n0VV =\n0II ="
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\n1.\n2.\n3.\n4.\n5.\nSelect reference node ( ground)\nfrom which voltages are measured.\nLabel voltages of remaining nodes\nwith respect to ground.\nThese are the primary unknowns.\nWrite KCL for all but the ground\nnode, substituting device laws and\nKVL.\nSolve for node voltages.\nBack solve for branch voltages and\ncurrents (i.e., the secondary unknowns)\nParticular application of KVL, KCL method\nMethod 3—Node analysis"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nMethod 1: Basic KVL, KCL method of\nCircuit analysis\nGoal: Find all element v’s and i’s\nwrite element v-i relationships\n(from lumped circuit abstraction)\nwrite KCL for all nodes\nwrite KVL for all loops\n1.\n2.\n3.\nlots of unknowns\nlots of equations\nlots of fun\nsolve"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nOther Analysis Methods\nMethod 2— Apply element combination rules\nB\nC\nD\n⇔\nNRRR +++ \"2 1\n⇔1G 2G NG NGGG ++ \"2 1\ni\ni\nRG 1=\n⇔+ – + – + –\n1V 2V 2 1VV +\n⇔\nJ\nJ\n1I 2I 2 1II +\nJ\nA\n1R 2R 3R NR…\nSurprisingly, these rules (along with superposition, which\nyou will learn about later) can solve the circuit on page 8"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nOther Analysis Methods\nMethod 2— Apply element combination rules\nV\nI\n3 2\n3 2\nR R\nRR\n+\nV\nI\n3 2\n3 2\n1\nR R\nRRR R ++ =\n+–\nV\n?=I\n1R\n3R2R\n+–\n+– R\nExample\n1R\nR\nVI ="
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nAssociated variables discipline\nν\ni\n+\n-\nElement e\nThen power consumed\nby element e\niν= is positive\nCurrent is taken to be positive going\ninto the positive voltage terminal"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nKVL:\n0\nloop\nKCL:\nnode\n=∑j jν\n0=∑j ji\nReviewReview\nMaxwell’s equations simplify to\nalgebraic KVL and KCL under LMD!"
+     }
+    ],
+    "project_ideas": [
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 CIRCUITS ANDELECTRONICS\nBasic Circuit Analysis Method\n(KVL and KCL method)"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nMethod 1: Basic KVL, KCL method of\nCircuit analysis\nFor R,\nFor voltage source,\nFor current source,\nElement Relationships\nIRV =\n0VV =\n0II ="
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\n1.\n2.\n3.\n4.\n5.\nSelect reference node ( ground)\nfrom which voltages are measured.\nLabel voltages of remaining nodes\nwith respect to ground.\nThese are the primary unknowns.\nWrite KCL for all but the ground\nnode, substituting device laws and\nKVL.\nSolve for node voltages.\nBack solve for branch voltages and\ncurrents (i.e., the secondary unknowns)\nParticular application of KVL, KCL method\nMethod 3—Node analysis"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nMethod 1: Basic KVL, KCL method of\nCircuit analysis\nGoal: Find all element v’s and i’s\nwrite element v-i relationships\n(from lumped circuit abstraction)\nwrite KCL for all nodes\nwrite KVL for all loops\n1.\n2.\n3.\nlots of unknowns\nlots of equations\nlots of fun\nsolve"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nOther Analysis Methods\nMethod 2— Apply element combination rules\nB\nC\nD\n⇔\nNRRR +++ \"2 1\n⇔1G 2G NG NGGG ++ \"2 1\ni\ni\nRG 1=\n⇔+ – + – + –\n1V 2V 2 1VV +\n⇔\nJ\nJ\n1I 2I 2 1II +\nJ\nA\n1R 2R 3R NR…\nSurprisingly, these rules (along with superposition, which\nyou will learn about later) can solve the circuit on page 8"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nAssociated variables discipline\nν\ni\n+\n-\nElement e\nThen power consumed\nby element e\niν= is positive\nCurrent is taken to be positive going\ninto the positive voltage terminal"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nOther Analysis Methods\nMethod 2— Apply element combination rules\nV\nI\n3 2\n3 2\nR R\nRR\n+\nV\nI\n3 2\n3 2\n1\nR R\nRRR R ++ =\n+–\nV\n?=I\n1R\n3R2R\n+–\n+– R\nExample\n1R\nR\nVI ="
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nKVL:\n0\nloop\nKCL:\nnode\n=∑j jν\n0=∑j ji\nReviewReview\nMaxwell’s equations simplify to\nalgebraic KVL and KCL under LMD!"
+     }
+    ],
+    "sample_proposal": [
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 CIRCUITS ANDELECTRONICS\nBasic Circuit Analysis Method\n(KVL and KCL method)"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nMethod 1: Basic KVL, KCL method of\nCircuit analysis\nFor R,\nFor voltage source,\nFor current source,\nElement Relationships\nIRV =\n0VV =\n0II ="
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nMethod 1: Basic KVL, KCL method of\nCircuit analysis\nGoal: Find all element v’s and i’s\nwrite element v-i relationships\n(from lumped circuit abstraction)\nwrite KCL for all nodes\nwrite KVL for all loops\n1.\n2.\n3.\nlots of unknowns\nlots of equations\nlots of fun\nsolve"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\n1.\n2.\n3.\n4.\n5.\nSelect reference node ( ground)\nfrom which voltages are measured.\nLabel voltages of remaining nodes\nwith respect to ground.\nThese are the primary unknowns.\nWrite KCL for all but the ground\nnode, substituting device laws and\nKVL.\nSolve for node voltages.\nBack solve for branch voltages and\ncurrents (i.e., the secondary unknowns)\nParticular application of KVL, KCL method\nMethod 3—Node analysis"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nOther Analysis Methods\nMethod 2— Apply element combination rules\nB\nC\nD\n⇔\nNRRR +++ \"2 1\n⇔1G 2G NG NGGG ++ \"2 1\ni\ni\nRG 1=\n⇔+ – + – + –\n1V 2V 2 1VV +\n⇔\nJ\nJ\n1I 2I 2 1II +\nJ\nA\n1R 2R 3R NR…\nSurprisingly, these rules (along with superposition, which\nyou will learn about later) can solve the circuit on page 8"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nOther Analysis Methods\nMethod 2— Apply element combination rules\nV\nI\n3 2\n3 2\nR R\nRR\n+\nV\nI\n3 2\n3 2\n1\nR R\nRRR R ++ =\n+–\nV\n?=I\n1R\n3R2R\n+–\n+– R\nExample\n1R\nR\nVI ="
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nAssociated variables discipline\nν\ni\n+\n-\nElement e\nThen power consumed\nby element e\niν= is positive\nCurrent is taken to be positive going\ninto the positive voltage terminal"
+     },
+     {
+      "source": "course/1/_course/quiz_1_spring_2007.pdf",
+      "text": "Overview\nProblem 25: 4 points\n{Head Scratcher}\nCalculate the equivalent resistance Req seen between the nodes A and B in the circuit shown\nabove. Assume that all of the resistors have a value of 1 Ω, and that 1 amp ﬂows into node A and\nout of node B. (Note: this problem can be solved without writing any node equations.)\nReq = 1/6 Ω 1/3 Ω 1/2 Ω 5/6 Ω 1 Ω\n26\nCite as: Anant Agarwal and Jeffrey Lang, course materials for 6.002 Circuits and Electronics, Spring 2007.\nMIT OpenCourseWare (http://ocw.mit.edu/), Massachusetts Institute of Technology. Downloaded on [DD Month YYYY]."
+     }
+    ],
+    "faq": [
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 CIRCUITS ANDELECTRONICS\nBasic Circuit Analysis Method\n(KVL and KCL method)"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nMethod 1: Basic KVL, KCL method of\nCircuit analysis\nFor R,\nFor voltage source,\nFor current source,\nElement Relationships\nIRV =\n0VV =\n0II ="
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\n1.\n2.\n3.\n4.\n5.\nSelect reference node ( ground)\nfrom which voltages are measured.\nLabel voltages of remaining nodes\nwith respect to ground.\nThese are the primary unknowns.\nWrite KCL for all but the ground\nnode, substituting device laws and\nKVL.\nSolve for node voltages.\nBack solve for branch voltages and\ncurrents (i.e., the secondary unknowns)\nParticular application of KVL, KCL method\nMethod 3—Node analysis"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nMethod 1: Basic KVL, KCL method of\nCircuit analysis\nGoal: Find all element v’s and i’s\nwrite element v-i relationships\n(from lumped circuit abstraction)\nwrite KCL for all nodes\nwrite KVL for all loops\n1.\n2.\n3.\nlots of unknowns\nlots of equations\nlots of fun\nsolve"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nOther Analysis Methods\nMethod 2— Apply element combination rules\nB\nC\nD\n⇔\nNRRR +++ \"2 1\n⇔1G 2G NG NGGG ++ \"2 1\ni\ni\nRG 1=\n⇔+ – + – + –\n1V 2V 2 1VV +\n⇔\nJ\nJ\n1I 2I 2 1II +\nJ\nA\n1R 2R 3R NR…\nSurprisingly, these rules (along with superposition, which\nyou will learn about later) can solve the circuit on page 8"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nOther Analysis Methods\nMethod 2— Apply element combination rules\nV\nI\n3 2\n3 2\nR R\nRR\n+\nV\nI\n3 2\n3 2\n1\nR R\nRRR R ++ =\n+–\nV\n?=I\n1R\n3R2R\n+–\n+– R\nExample\n1R\nR\nVI ="
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nAssociated variables discipline\nν\ni\n+\n-\nElement e\nThen power consumed\nby element e\niν= is positive\nCurrent is taken to be positive going\ninto the positive voltage terminal"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nKVL:\n0\nloop\nKCL:\nnode\n=∑j jν\n0=∑j ji\nReviewReview\nMaxwell’s equations simplify to\nalgebraic KVL and KCL under LMD!"
+     }
+    ],
+    "quiz": [
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 CIRCUITS ANDELECTRONICS\nBasic Circuit Analysis Method\n(KVL and KCL method)"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nMethod 1: Basic KVL, KCL method of\nCircuit analysis\nFor R,\nFor voltage source,\nFor current source,\nElement Relationships\nIRV =\n0VV =\n0II ="
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\n1.\n2.\n3.\n4.\n5.\nSelect reference node ( ground)\nfrom which voltages are measured.\nLabel voltages of remaining nodes\nwith respect to ground.\nThese are the primary unknowns.\nWrite KCL for all but the ground\nnode, substituting device laws and\nKVL.\nSolve for node voltages.\nBack solve for branch voltages and\ncurrents (i.e., the secondary unknowns)\nParticular application of KVL, KCL method\nMethod 3—Node analysis"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nMethod 1: Basic KVL, KCL method of\nCircuit analysis\nGoal: Find all element v’s and i’s\nwrite element v-i relationships\n(from lumped circuit abstraction)\nwrite KCL for all nodes\nwrite KVL for all loops\n1.\n2.\n3.\nlots of unknowns\nlots of equations\nlots of fun\nsolve"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nOther Analysis Methods\nMethod 2— Apply element combination rules\nB\nC\nD\n⇔\nNRRR +++ \"2 1\n⇔1G 2G NG NGGG ++ \"2 1\ni\ni\nRG 1=\n⇔+ – + – + –\n1V 2V 2 1VV +\n⇔\nJ\nJ\n1I 2I 2 1II +\nJ\nA\n1R 2R 3R NR…\nSurprisingly, these rules (along with superposition, which\nyou will learn about later) can solve the circuit on page 8"
+     },
+     {
+      "source": "course/1/2/02_lecture_2_basic_circuit_analysis_method.pdf",
+      "text": "6.002 Fall 2000 Lecture 2\nOther Analysis Methods\nMethod 2— Apply element combination rules\nV\nI\n3 2\n3 2\nR R\nRR\n+\nV\nI\n3 2\n3 2\n1\nR R\nRRR R ++ =\n+–\nV\n?=I\n1R\n3R2R\n+–\n+– R\nExample\n1R\nR\nVI ="
+     }
+    ]
+   }
+  },
+  {
+   "id": "hst151_l1",
+   "pack": "mit_hst151_pharmacology",
+   "course_type": "medical_science",
+   "module_order": 1,
+   "module_title": "Introduction: receptors and dose-response",
+   "existing_kcs": [
+    {
+     "name": "Drug-receptor binding",
+     "definition": "A drug binds reversibly to its receptor; occupancy follows the law of mass action with dissociation constant Kd."
+    },
+    {
+     "name": "Dose-response curve",
+     "definition": "The graded response to a drug plotted against the log of its concentration; EC50 is the concentration giving half the maximal effect."
+    },
+    {
+     "name": "Agonists and antagonists",
+     "definition": "An agonist binds and activates a receptor; an antagonist binds without activating it and blocks the agonist."
+    }
+   ],
+   "refused_files": [],
+   "passages": {
+    "kcs": [
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nCarl Rosow, M.D., Ph.D. 5 HST-151\nLet us finish with some important definitions. These are concepts which we will return\nto repeatedly throughout the course.\nAgonist is a drug which binds to its \"receptor\" and produces its characteristic effect. A\ndrug may be a full agonist or partial agonist, depending on the maximal effect it\nproduces. An antagonist binds to the receptor without causing an effect, thereby\npreventing an active substance from gaining access. Antagonists, like enzyme inhibitors,\nmay be competitive, non-competitive or irreversible.\nDose-Response. The sine qua non of drug effect. Simply put, as the dose of drug\nincreases, the response should increase. [What if the response increases, then decreases"
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nincreases, the response should increase. [What if the response increases, then decreases\nas the dose is raised?] The curve generated is usually sigmoidal when effect is plotted\nagainst log dose (Dr. Strichartz will discuss the theoretical basis for this). Effect may be\nmeasured as a graded variable (change in blood pressure, force of contraction) or as a\nquantal variable (number dead/alive). The slope of the curve is characteristic of the\nparticular drug-receptor interaction. When two drugs act by the same receptor\nmechanism, we expect to see two parallel log-dose response curves.\nED50. The median effective dose, or the dose which produces a response in 50% of"
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nB. Relative potency specifically applies to the comparison of drugs which act by the\nsame mechanism, and therefore have parallel dose-response curves.\nEfficacy. Also called Maximal Efficacy or Intrinsic Activity. This is the maximum\neffect of which the drug is capable. A potent drug may have a low efficacy, and a highly\nefficacious drug may have a low potency. For the clinician, efficacy is much more\nimportant than potency (within limits). Who cares if the pill contains 5 or 10 mg of\ndrug?\nAffinity. This refers to the strength of binding between drug and receptor. It is\nquantified by the dissociation constant kD (covered in the next lecture)."
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nquantified by the dissociation constant kD (covered in the next lecture).\nSelectivity. This refers to the separation between desired and undesired effects of a drug.\nIn the ideal case, a drug is completely specific, and an effective dose does not elicit any\nundesired effect. Penicillin is an example of a highly selective drug, since it works\nspecifically by inhibiting cell wall synthesis, and (other than allergic responses) it has\nvery little effect on human cells at normal doses. Unfortunately, many therapeutic agents,\nlike digoxin and theophylline, produce dose-related side effects near their therapeutic\ndose range. For some drugs like cancer chemotherapeutic agents, their selectivity is their"
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nED50. The median effective dose, or the dose which produces a response in 50% of\nsubjects. If the response is death (lethality) we call it the LD 50. The EC 50 refers to\nconcentration rather than dose. Similar abbreviations are used for other response levels:\nED99, LD1, etc.\nPotency. A terribly misused word – the lay public uses it to mean “effectiveness.” The\npotency of a drug refers to the dose (actually the molar concentration) required to\nproduce a specific intensity of effect. [We usually specify the ED 50, why?] If the ED 50\nof drug A and B are 5 and 10 mg, respectively, the Relative Potency of A is twice that of\nB. Relative potency specifically applies to the comparison of drugs which act by the"
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "4. The unbound drug may then follow its concentration gradient and distribute into\nperipheral tissues. In some cases, the tissue contains the target site and in others the\ntissue is not affected by the drug. Sites of non-specific binding act as further\nreservoirs for the drug. This total volume of distribution determines the equilibrium\nconcentration of drug after a specified dose."
+     },
+     {
+      "source": "course/1/_course/calendar.md",
+      "text": "MIT HST.151 Principles of Pharmacology (Spring 2005): calendar\nLecture 1. TOPICS: Introduction Receptors / Dose-Response. INSTRUCTORS: Dr. Carl Rosow Prof. Gary Strichartz"
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Lecture 1 - Principles of Pharmacology: Introduction\nway that it gets to its site of action. In most cases the site of action is a macromolecular\n\"receptor\" located in the target tissue. Most drug effects are temporary, because the body\nhas systems for drug detoxification and elimination. We will consider these issues\nbroadly for now and go into more depth in individual lectures. As you read, refer to the\nfigure below:\nic\ni\nGI\ni Bound Drug Unbound Drug\nMetabolites\nBLOOD\nBiotransformation Enterohepat\nCycle\nExcret on\nTract\nMuscle\nLung\nSkin\nBound Unbound Bound Unbound\nDRUG RECEPTORS TISSUE RESERVOIRS\nExcretion\nEffect?\nEffect\nAbsorpt on"
+     }
+    ],
+    "check_items": [
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nCarl Rosow, M.D., Ph.D. 5 HST-151\nLet us finish with some important definitions. These are concepts which we will return\nto repeatedly throughout the course.\nAgonist is a drug which binds to its \"receptor\" and produces its characteristic effect. A\ndrug may be a full agonist or partial agonist, depending on the maximal effect it\nproduces. An antagonist binds to the receptor without causing an effect, thereby\npreventing an active substance from gaining access. Antagonists, like enzyme inhibitors,\nmay be competitive, non-competitive or irreversible.\nDose-Response. The sine qua non of drug effect. Simply put, as the dose of drug\nincreases, the response should increase. [What if the response increases, then decreases"
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nincreases, the response should increase. [What if the response increases, then decreases\nas the dose is raised?] The curve generated is usually sigmoidal when effect is plotted\nagainst log dose (Dr. Strichartz will discuss the theoretical basis for this). Effect may be\nmeasured as a graded variable (change in blood pressure, force of contraction) or as a\nquantal variable (number dead/alive). The slope of the curve is characteristic of the\nparticular drug-receptor interaction. When two drugs act by the same receptor\nmechanism, we expect to see two parallel log-dose response curves.\nED50. The median effective dose, or the dose which produces a response in 50% of"
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nB. Relative potency specifically applies to the comparison of drugs which act by the\nsame mechanism, and therefore have parallel dose-response curves.\nEfficacy. Also called Maximal Efficacy or Intrinsic Activity. This is the maximum\neffect of which the drug is capable. A potent drug may have a low efficacy, and a highly\nefficacious drug may have a low potency. For the clinician, efficacy is much more\nimportant than potency (within limits). Who cares if the pill contains 5 or 10 mg of\ndrug?\nAffinity. This refers to the strength of binding between drug and receptor. It is\nquantified by the dissociation constant kD (covered in the next lecture)."
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nquantified by the dissociation constant kD (covered in the next lecture).\nSelectivity. This refers to the separation between desired and undesired effects of a drug.\nIn the ideal case, a drug is completely specific, and an effective dose does not elicit any\nundesired effect. Penicillin is an example of a highly selective drug, since it works\nspecifically by inhibiting cell wall synthesis, and (other than allergic responses) it has\nvery little effect on human cells at normal doses. Unfortunately, many therapeutic agents,\nlike digoxin and theophylline, produce dose-related side effects near their therapeutic\ndose range. For some drugs like cancer chemotherapeutic agents, their selectivity is their"
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nED50. The median effective dose, or the dose which produces a response in 50% of\nsubjects. If the response is death (lethality) we call it the LD 50. The EC 50 refers to\nconcentration rather than dose. Similar abbreviations are used for other response levels:\nED99, LD1, etc.\nPotency. A terribly misused word – the lay public uses it to mean “effectiveness.” The\npotency of a drug refers to the dose (actually the molar concentration) required to\nproduce a specific intensity of effect. [We usually specify the ED 50, why?] If the ED 50\nof drug A and B are 5 and 10 mg, respectively, the Relative Potency of A is twice that of\nB. Relative potency specifically applies to the comparison of drugs which act by the"
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "4. The unbound drug may then follow its concentration gradient and distribute into\nperipheral tissues. In some cases, the tissue contains the target site and in others the\ntissue is not affected by the drug. Sites of non-specific binding act as further\nreservoirs for the drug. This total volume of distribution determines the equilibrium\nconcentration of drug after a specified dose."
+     },
+     {
+      "source": "course/1/_course/calendar.md",
+      "text": "MIT HST.151 Principles of Pharmacology (Spring 2005): calendar\nLecture 1. TOPICS: Introduction Receptors / Dose-Response. INSTRUCTORS: Dr. Carl Rosow Prof. Gary Strichartz"
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Lecture 1 - Principles of Pharmacology: Introduction\nway that it gets to its site of action. In most cases the site of action is a macromolecular\n\"receptor\" located in the target tissue. Most drug effects are temporary, because the body\nhas systems for drug detoxification and elimination. We will consider these issues\nbroadly for now and go into more depth in individual lectures. As you read, refer to the\nfigure below:\nic\ni\nGI\ni Bound Drug Unbound Drug\nMetabolites\nBLOOD\nBiotransformation Enterohepat\nCycle\nExcret on\nTract\nMuscle\nLung\nSkin\nBound Unbound Bound Unbound\nDRUG RECEPTORS TISSUE RESERVOIRS\nExcretion\nEffect?\nEffect\nAbsorpt on"
+     }
+    ],
+    "misconceptions": [
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nCarl Rosow, M.D., Ph.D. 5 HST-151\nLet us finish with some important definitions. These are concepts which we will return\nto repeatedly throughout the course.\nAgonist is a drug which binds to its \"receptor\" and produces its characteristic effect. A\ndrug may be a full agonist or partial agonist, depending on the maximal effect it\nproduces. An antagonist binds to the receptor without causing an effect, thereby\npreventing an active substance from gaining access. Antagonists, like enzyme inhibitors,\nmay be competitive, non-competitive or irreversible.\nDose-Response. The sine qua non of drug effect. Simply put, as the dose of drug\nincreases, the response should increase. [What if the response increases, then decreases"
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nincreases, the response should increase. [What if the response increases, then decreases\nas the dose is raised?] The curve generated is usually sigmoidal when effect is plotted\nagainst log dose (Dr. Strichartz will discuss the theoretical basis for this). Effect may be\nmeasured as a graded variable (change in blood pressure, force of contraction) or as a\nquantal variable (number dead/alive). The slope of the curve is characteristic of the\nparticular drug-receptor interaction. When two drugs act by the same receptor\nmechanism, we expect to see two parallel log-dose response curves.\nED50. The median effective dose, or the dose which produces a response in 50% of"
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nB. Relative potency specifically applies to the comparison of drugs which act by the\nsame mechanism, and therefore have parallel dose-response curves.\nEfficacy. Also called Maximal Efficacy or Intrinsic Activity. This is the maximum\neffect of which the drug is capable. A potent drug may have a low efficacy, and a highly\nefficacious drug may have a low potency. For the clinician, efficacy is much more\nimportant than potency (within limits). Who cares if the pill contains 5 or 10 mg of\ndrug?\nAffinity. This refers to the strength of binding between drug and receptor. It is\nquantified by the dissociation constant kD (covered in the next lecture)."
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nquantified by the dissociation constant kD (covered in the next lecture).\nSelectivity. This refers to the separation between desired and undesired effects of a drug.\nIn the ideal case, a drug is completely specific, and an effective dose does not elicit any\nundesired effect. Penicillin is an example of a highly selective drug, since it works\nspecifically by inhibiting cell wall synthesis, and (other than allergic responses) it has\nvery little effect on human cells at normal doses. Unfortunately, many therapeutic agents,\nlike digoxin and theophylline, produce dose-related side effects near their therapeutic\ndose range. For some drugs like cancer chemotherapeutic agents, their selectivity is their"
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nED50. The median effective dose, or the dose which produces a response in 50% of\nsubjects. If the response is death (lethality) we call it the LD 50. The EC 50 refers to\nconcentration rather than dose. Similar abbreviations are used for other response levels:\nED99, LD1, etc.\nPotency. A terribly misused word – the lay public uses it to mean “effectiveness.” The\npotency of a drug refers to the dose (actually the molar concentration) required to\nproduce a specific intensity of effect. [We usually specify the ED 50, why?] If the ED 50\nof drug A and B are 5 and 10 mg, respectively, the Relative Potency of A is twice that of\nB. Relative potency specifically applies to the comparison of drugs which act by the"
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "4. The unbound drug may then follow its concentration gradient and distribute into\nperipheral tissues. In some cases, the tissue contains the target site and in others the\ntissue is not affected by the drug. Sites of non-specific binding act as further\nreservoirs for the drug. This total volume of distribution determines the equilibrium\nconcentration of drug after a specified dose."
+     },
+     {
+      "source": "course/1/_course/calendar.md",
+      "text": "MIT HST.151 Principles of Pharmacology (Spring 2005): calendar\nLecture 1. TOPICS: Introduction Receptors / Dose-Response. INSTRUCTORS: Dr. Carl Rosow Prof. Gary Strichartz"
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Lecture 1 - Principles of Pharmacology: Introduction\nway that it gets to its site of action. In most cases the site of action is a macromolecular\n\"receptor\" located in the target tissue. Most drug effects are temporary, because the body\nhas systems for drug detoxification and elimination. We will consider these issues\nbroadly for now and go into more depth in individual lectures. As you read, refer to the\nfigure below:\nic\ni\nGI\ni Bound Drug Unbound Drug\nMetabolites\nBLOOD\nBiotransformation Enterohepat\nCycle\nExcret on\nTract\nMuscle\nLung\nSkin\nBound Unbound Bound Unbound\nDRUG RECEPTORS TISSUE RESERVOIRS\nExcretion\nEffect?\nEffect\nAbsorpt on"
+     }
+    ],
+    "project_ideas": [
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nCarl Rosow, M.D., Ph.D. 5 HST-151\nLet us finish with some important definitions. These are concepts which we will return\nto repeatedly throughout the course.\nAgonist is a drug which binds to its \"receptor\" and produces its characteristic effect. A\ndrug may be a full agonist or partial agonist, depending on the maximal effect it\nproduces. An antagonist binds to the receptor without causing an effect, thereby\npreventing an active substance from gaining access. Antagonists, like enzyme inhibitors,\nmay be competitive, non-competitive or irreversible.\nDose-Response. The sine qua non of drug effect. Simply put, as the dose of drug\nincreases, the response should increase. [What if the response increases, then decreases"
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nincreases, the response should increase. [What if the response increases, then decreases\nas the dose is raised?] The curve generated is usually sigmoidal when effect is plotted\nagainst log dose (Dr. Strichartz will discuss the theoretical basis for this). Effect may be\nmeasured as a graded variable (change in blood pressure, force of contraction) or as a\nquantal variable (number dead/alive). The slope of the curve is characteristic of the\nparticular drug-receptor interaction. When two drugs act by the same receptor\nmechanism, we expect to see two parallel log-dose response curves.\nED50. The median effective dose, or the dose which produces a response in 50% of"
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nB. Relative potency specifically applies to the comparison of drugs which act by the\nsame mechanism, and therefore have parallel dose-response curves.\nEfficacy. Also called Maximal Efficacy or Intrinsic Activity. This is the maximum\neffect of which the drug is capable. A potent drug may have a low efficacy, and a highly\nefficacious drug may have a low potency. For the clinician, efficacy is much more\nimportant than potency (within limits). Who cares if the pill contains 5 or 10 mg of\ndrug?\nAffinity. This refers to the strength of binding between drug and receptor. It is\nquantified by the dissociation constant kD (covered in the next lecture)."
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nquantified by the dissociation constant kD (covered in the next lecture).\nSelectivity. This refers to the separation between desired and undesired effects of a drug.\nIn the ideal case, a drug is completely specific, and an effective dose does not elicit any\nundesired effect. Penicillin is an example of a highly selective drug, since it works\nspecifically by inhibiting cell wall synthesis, and (other than allergic responses) it has\nvery little effect on human cells at normal doses. Unfortunately, many therapeutic agents,\nlike digoxin and theophylline, produce dose-related side effects near their therapeutic\ndose range. For some drugs like cancer chemotherapeutic agents, their selectivity is their"
+     },
+     {
+      "source": "course/1/_course/calendar.md",
+      "text": "MIT HST.151 Principles of Pharmacology (Spring 2005): calendar\nLecture 1. TOPICS: Introduction Receptors / Dose-Response. INSTRUCTORS: Dr. Carl Rosow Prof. Gary Strichartz"
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "4. The unbound drug may then follow its concentration gradient and distribute into\nperipheral tissues. In some cases, the tissue contains the target site and in others the\ntissue is not affected by the drug. Sites of non-specific binding act as further\nreservoirs for the drug. This total volume of distribution determines the equilibrium\nconcentration of drug after a specified dose."
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nED50. The median effective dose, or the dose which produces a response in 50% of\nsubjects. If the response is death (lethality) we call it the LD 50. The EC 50 refers to\nconcentration rather than dose. Similar abbreviations are used for other response levels:\nED99, LD1, etc.\nPotency. A terribly misused word – the lay public uses it to mean “effectiveness.” The\npotency of a drug refers to the dose (actually the molar concentration) required to\nproduce a specific intensity of effect. [We usually specify the ED 50, why?] If the ED 50\nof drug A and B are 5 and 10 mg, respectively, the Relative Potency of A is twice that of\nB. Relative potency specifically applies to the comparison of drugs which act by the"
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Lecture 1 - Principles of Pharmacology: Introduction\nway that it gets to its site of action. In most cases the site of action is a macromolecular\n\"receptor\" located in the target tissue. Most drug effects are temporary, because the body\nhas systems for drug detoxification and elimination. We will consider these issues\nbroadly for now and go into more depth in individual lectures. As you read, refer to the\nfigure below:\nic\ni\nGI\ni Bound Drug Unbound Drug\nMetabolites\nBLOOD\nBiotransformation Enterohepat\nCycle\nExcret on\nTract\nMuscle\nLung\nSkin\nBound Unbound Bound Unbound\nDRUG RECEPTORS TISSUE RESERVOIRS\nExcretion\nEffect?\nEffect\nAbsorpt on"
+     }
+    ],
+    "sample_proposal": [
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nCarl Rosow, M.D., Ph.D. 5 HST-151\nLet us finish with some important definitions. These are concepts which we will return\nto repeatedly throughout the course.\nAgonist is a drug which binds to its \"receptor\" and produces its characteristic effect. A\ndrug may be a full agonist or partial agonist, depending on the maximal effect it\nproduces. An antagonist binds to the receptor without causing an effect, thereby\npreventing an active substance from gaining access. Antagonists, like enzyme inhibitors,\nmay be competitive, non-competitive or irreversible.\nDose-Response. The sine qua non of drug effect. Simply put, as the dose of drug\nincreases, the response should increase. [What if the response increases, then decreases"
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nincreases, the response should increase. [What if the response increases, then decreases\nas the dose is raised?] The curve generated is usually sigmoidal when effect is plotted\nagainst log dose (Dr. Strichartz will discuss the theoretical basis for this). Effect may be\nmeasured as a graded variable (change in blood pressure, force of contraction) or as a\nquantal variable (number dead/alive). The slope of the curve is characteristic of the\nparticular drug-receptor interaction. When two drugs act by the same receptor\nmechanism, we expect to see two parallel log-dose response curves.\nED50. The median effective dose, or the dose which produces a response in 50% of"
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nB. Relative potency specifically applies to the comparison of drugs which act by the\nsame mechanism, and therefore have parallel dose-response curves.\nEfficacy. Also called Maximal Efficacy or Intrinsic Activity. This is the maximum\neffect of which the drug is capable. A potent drug may have a low efficacy, and a highly\nefficacious drug may have a low potency. For the clinician, efficacy is much more\nimportant than potency (within limits). Who cares if the pill contains 5 or 10 mg of\ndrug?\nAffinity. This refers to the strength of binding between drug and receptor. It is\nquantified by the dissociation constant kD (covered in the next lecture)."
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nquantified by the dissociation constant kD (covered in the next lecture).\nSelectivity. This refers to the separation between desired and undesired effects of a drug.\nIn the ideal case, a drug is completely specific, and an effective dose does not elicit any\nundesired effect. Penicillin is an example of a highly selective drug, since it works\nspecifically by inhibiting cell wall synthesis, and (other than allergic responses) it has\nvery little effect on human cells at normal doses. Unfortunately, many therapeutic agents,\nlike digoxin and theophylline, produce dose-related side effects near their therapeutic\ndose range. For some drugs like cancer chemotherapeutic agents, their selectivity is their"
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nED50. The median effective dose, or the dose which produces a response in 50% of\nsubjects. If the response is death (lethality) we call it the LD 50. The EC 50 refers to\nconcentration rather than dose. Similar abbreviations are used for other response levels:\nED99, LD1, etc.\nPotency. A terribly misused word – the lay public uses it to mean “effectiveness.” The\npotency of a drug refers to the dose (actually the molar concentration) required to\nproduce a specific intensity of effect. [We usually specify the ED 50, why?] If the ED 50\nof drug A and B are 5 and 10 mg, respectively, the Relative Potency of A is twice that of\nB. Relative potency specifically applies to the comparison of drugs which act by the"
+     },
+     {
+      "source": "course/1/_course/calendar.md",
+      "text": "MIT HST.151 Principles of Pharmacology (Spring 2005): calendar\nLecture 1. TOPICS: Introduction Receptors / Dose-Response. INSTRUCTORS: Dr. Carl Rosow Prof. Gary Strichartz"
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "4. The unbound drug may then follow its concentration gradient and distribute into\nperipheral tissues. In some cases, the tissue contains the target site and in others the\ntissue is not affected by the drug. Sites of non-specific binding act as further\nreservoirs for the drug. This total volume of distribution determines the equilibrium\nconcentration of drug after a specified dose."
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Lecture 1 - Principles of Pharmacology: Introduction\nway that it gets to its site of action. In most cases the site of action is a macromolecular\n\"receptor\" located in the target tissue. Most drug effects are temporary, because the body\nhas systems for drug detoxification and elimination. We will consider these issues\nbroadly for now and go into more depth in individual lectures. As you read, refer to the\nfigure below:\nic\ni\nGI\ni Bound Drug Unbound Drug\nMetabolites\nBLOOD\nBiotransformation Enterohepat\nCycle\nExcret on\nTract\nMuscle\nLung\nSkin\nBound Unbound Bound Unbound\nDRUG RECEPTORS TISSUE RESERVOIRS\nExcretion\nEffect?\nEffect\nAbsorpt on"
+     }
+    ],
+    "faq": [
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nCarl Rosow, M.D., Ph.D. 5 HST-151\nLet us finish with some important definitions. These are concepts which we will return\nto repeatedly throughout the course.\nAgonist is a drug which binds to its \"receptor\" and produces its characteristic effect. A\ndrug may be a full agonist or partial agonist, depending on the maximal effect it\nproduces. An antagonist binds to the receptor without causing an effect, thereby\npreventing an active substance from gaining access. Antagonists, like enzyme inhibitors,\nmay be competitive, non-competitive or irreversible.\nDose-Response. The sine qua non of drug effect. Simply put, as the dose of drug\nincreases, the response should increase. [What if the response increases, then decreases"
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nincreases, the response should increase. [What if the response increases, then decreases\nas the dose is raised?] The curve generated is usually sigmoidal when effect is plotted\nagainst log dose (Dr. Strichartz will discuss the theoretical basis for this). Effect may be\nmeasured as a graded variable (change in blood pressure, force of contraction) or as a\nquantal variable (number dead/alive). The slope of the curve is characteristic of the\nparticular drug-receptor interaction. When two drugs act by the same receptor\nmechanism, we expect to see two parallel log-dose response curves.\nED50. The median effective dose, or the dose which produces a response in 50% of"
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nB. Relative potency specifically applies to the comparison of drugs which act by the\nsame mechanism, and therefore have parallel dose-response curves.\nEfficacy. Also called Maximal Efficacy or Intrinsic Activity. This is the maximum\neffect of which the drug is capable. A potent drug may have a low efficacy, and a highly\nefficacious drug may have a low potency. For the clinician, efficacy is much more\nimportant than potency (within limits). Who cares if the pill contains 5 or 10 mg of\ndrug?\nAffinity. This refers to the strength of binding between drug and receptor. It is\nquantified by the dissociation constant kD (covered in the next lecture)."
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nquantified by the dissociation constant kD (covered in the next lecture).\nSelectivity. This refers to the separation between desired and undesired effects of a drug.\nIn the ideal case, a drug is completely specific, and an effective dose does not elicit any\nundesired effect. Penicillin is an example of a highly selective drug, since it works\nspecifically by inhibiting cell wall synthesis, and (other than allergic responses) it has\nvery little effect on human cells at normal doses. Unfortunately, many therapeutic agents,\nlike digoxin and theophylline, produce dose-related side effects near their therapeutic\ndose range. For some drugs like cancer chemotherapeutic agents, their selectivity is their"
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nED50. The median effective dose, or the dose which produces a response in 50% of\nsubjects. If the response is death (lethality) we call it the LD 50. The EC 50 refers to\nconcentration rather than dose. Similar abbreviations are used for other response levels:\nED99, LD1, etc.\nPotency. A terribly misused word – the lay public uses it to mean “effectiveness.” The\npotency of a drug refers to the dose (actually the molar concentration) required to\nproduce a specific intensity of effect. [We usually specify the ED 50, why?] If the ED 50\nof drug A and B are 5 and 10 mg, respectively, the Relative Potency of A is twice that of\nB. Relative potency specifically applies to the comparison of drugs which act by the"
+     },
+     {
+      "source": "course/1/_course/calendar.md",
+      "text": "MIT HST.151 Principles of Pharmacology (Spring 2005): calendar\nLecture 1. TOPICS: Introduction Receptors / Dose-Response. INSTRUCTORS: Dr. Carl Rosow Prof. Gary Strichartz"
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "4. The unbound drug may then follow its concentration gradient and distribute into\nperipheral tissues. In some cases, the tissue contains the target site and in others the\ntissue is not affected by the drug. Sites of non-specific binding act as further\nreservoirs for the drug. This total volume of distribution determines the equilibrium\nconcentration of drug after a specified dose."
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Lecture 1 - Principles of Pharmacology: Introduction\nway that it gets to its site of action. In most cases the site of action is a macromolecular\n\"receptor\" located in the target tissue. Most drug effects are temporary, because the body\nhas systems for drug detoxification and elimination. We will consider these issues\nbroadly for now and go into more depth in individual lectures. As you read, refer to the\nfigure below:\nic\ni\nGI\ni Bound Drug Unbound Drug\nMetabolites\nBLOOD\nBiotransformation Enterohepat\nCycle\nExcret on\nTract\nMuscle\nLung\nSkin\nBound Unbound Bound Unbound\nDRUG RECEPTORS TISSUE RESERVOIRS\nExcretion\nEffect?\nEffect\nAbsorpt on"
+     }
+    ],
+    "quiz": [
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nCarl Rosow, M.D., Ph.D. 5 HST-151\nLet us finish with some important definitions. These are concepts which we will return\nto repeatedly throughout the course.\nAgonist is a drug which binds to its \"receptor\" and produces its characteristic effect. A\ndrug may be a full agonist or partial agonist, depending on the maximal effect it\nproduces. An antagonist binds to the receptor without causing an effect, thereby\npreventing an active substance from gaining access. Antagonists, like enzyme inhibitors,\nmay be competitive, non-competitive or irreversible.\nDose-Response. The sine qua non of drug effect. Simply put, as the dose of drug\nincreases, the response should increase. [What if the response increases, then decreases"
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nincreases, the response should increase. [What if the response increases, then decreases\nas the dose is raised?] The curve generated is usually sigmoidal when effect is plotted\nagainst log dose (Dr. Strichartz will discuss the theoretical basis for this). Effect may be\nmeasured as a graded variable (change in blood pressure, force of contraction) or as a\nquantal variable (number dead/alive). The slope of the curve is characteristic of the\nparticular drug-receptor interaction. When two drugs act by the same receptor\nmechanism, we expect to see two parallel log-dose response curves.\nED50. The median effective dose, or the dose which produces a response in 50% of"
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nB. Relative potency specifically applies to the comparison of drugs which act by the\nsame mechanism, and therefore have parallel dose-response curves.\nEfficacy. Also called Maximal Efficacy or Intrinsic Activity. This is the maximum\neffect of which the drug is capable. A potent drug may have a low efficacy, and a highly\nefficacious drug may have a low potency. For the clinician, efficacy is much more\nimportant than potency (within limits). Who cares if the pill contains 5 or 10 mg of\ndrug?\nAffinity. This refers to the strength of binding between drug and receptor. It is\nquantified by the dissociation constant kD (covered in the next lecture)."
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nquantified by the dissociation constant kD (covered in the next lecture).\nSelectivity. This refers to the separation between desired and undesired effects of a drug.\nIn the ideal case, a drug is completely specific, and an effective dose does not elicit any\nundesired effect. Penicillin is an example of a highly selective drug, since it works\nspecifically by inhibiting cell wall synthesis, and (other than allergic responses) it has\nvery little effect on human cells at normal doses. Unfortunately, many therapeutic agents,\nlike digoxin and theophylline, produce dose-related side effects near their therapeutic\ndose range. For some drugs like cancer chemotherapeutic agents, their selectivity is their"
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "Overview\nED50. The median effective dose, or the dose which produces a response in 50% of\nsubjects. If the response is death (lethality) we call it the LD 50. The EC 50 refers to\nconcentration rather than dose. Similar abbreviations are used for other response levels:\nED99, LD1, etc.\nPotency. A terribly misused word – the lay public uses it to mean “effectiveness.” The\npotency of a drug refers to the dose (actually the molar concentration) required to\nproduce a specific intensity of effect. [We usually specify the ED 50, why?] If the ED 50\nof drug A and B are 5 and 10 mg, respectively, the Relative Potency of A is twice that of\nB. Relative potency specifically applies to the comparison of drugs which act by the"
+     },
+     {
+      "source": "course/1/1/01_introduction_receptors_and_dose_response.pdf",
+      "text": "4. The unbound drug may then follow its concentration gradient and distribute into\nperipheral tissues. In some cases, the tissue contains the target site and in others the\ntissue is not affected by the drug. Sites of non-specific binding act as further\nreservoirs for the drug. This total volume of distribution determines the equilibrium\nconcentration of drug after a specified dose."
+     }
+    ]
+   }
+  },
+  {
+   "id": "hst151_l2",
+   "pack": "mit_hst151_pharmacology",
+   "course_type": "medical_science",
+   "module_order": 2,
+   "module_title": "Pharmacokinetics I and II",
+   "existing_kcs": [
+    {
+     "name": "Volume of distribution",
+     "definition": "The apparent volume a drug dose would occupy at the plasma concentration."
+    },
+    {
+     "name": "Clearance",
+     "definition": "The volume of plasma cleared of the drug per unit time."
+    },
+    {
+     "name": "Elimination half-life",
+     "definition": "The time for the plasma concentration to fall by half; t1/2 = 0.693 Vd/CL."
+    }
+   ],
+   "refused_files": [],
+   "passages": {
+    "kcs": [
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "1. Volume of plasma completely cleared of drug per unit time by all routes and\nmechanisms."
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "2. Explain how dose, bioavailability, rate of absorption, apparent volume of\ndistribution, total clearance, and elimination half-life affect the plasma\nconcentrations of a drug after administration of a single dose."
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "1) First -order elimination: drug assumed to rapidly equilibrate into volume of\ndistribution; plasma concentrations decline according to first-order kinetics;\nelimination rate from plasma is proportional to plasma concentration, fraction\neliminated per unit time is elimination rate constant (kel).\ndC p k el Cp = −\ndt\nC = C e − elk t p 0\nPlasma Concentrationasma Co trati\n(µg/ml)\nHoursours\nFigure 1\nDetermination of elimination rate constant and elimination half-life:\nlnC p = lnC 0 − k el t\nPlot of ln Cp vs. t is a straight line with slope of -kel. Plasma half-life (t1/2 =\n.693/kel) is constant and independent of dose."
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "1) Determination of renal clearance (ClR), the volume of plasma completely\ncleared of drug per unit time (ml/min).\nexcretion rate in urineCl R = plasma concentrat ion\nMeasure the amount of drug excreted in the urine during a time interval t1 to t2.\nFind the plasma concentration of the drug at the midpoint of the time interval, (t1\n+ t2)/2, by interpolating on the ln Cp vs. t plot.\namount excreted from t1 to t2   (t 2 − t1 )  Cl R =\nCp at (t 1 + t2 ) 2"
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "4. The plasma half-life of a drug (the time to reduce the concentration by one-\nhalf) is directly proportional to Vd, and inversely proportional to total clearance\n(ClT); for a given ClT, the higher the Vd, the longer the t1/2:"
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "Overview\nHST-151 12\ninfusion (T). The output rate in the case of first-order elimination is the total\namount of drug in the body (Css Vd) times the elimination rate constant (kel).\nDR = Css • Vd • k el\nTherefore, the plasma concentration at steady-state can be predicted as follows:\nDRCss = Vd k el\nRemember that total clearance equals the elimination rate constant (kel) times the volume\nof distribution. Therefore, the plasma concentration at steady-state (Css) is directly\nproportional to the input rate (DR) of the drug and inversely proportional to its total\nplasma clearance (ClT).\nDRCss = Cl T"
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "Overview\n \nHST-151 9\nDetermination of apparent volume of distribution:\nExtrapolation to time zero of the line of best fit for ln Cp vs t data; antilog of\ndrug concentration at time 0 designated as C0. Then,\nTotal DoseVd (in mls or liters) = C0\nTo express Vd as per cent of body weight, assume that 1 liter is equivalent to\n1 kg; divide the Vd in liters by body weight, and then multiply by 100.\nSimilarly, if relative dose administered is known (i.e., the dose per kg or other\nunit of body weight) but not the total dose,\nRelative DoseVd = C0\nDetermination of total clearance:\nAccording to definitions above, total clearance is the mass of drug\n(Cp Vd) eliminated per unit time divided by the plasma concentration;\ntherefore,\n "
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "Overview\nHo rs\nPl entr n\n(\nHST-151 11\nb. Peak plasma concentration is dependent on absorption and elimination\nhalf-lives, volume of distribution, dose (D), and fraction of dose absorbed (F)\nc. Area under plasma concentration vs. time curve (AUC) is dependent on\ndose (D), fraction of dose absorbed (F) and total clearance ClT\nF • DAUC = Cl T\nFraction of dose absorbed into systemic circulation (F ) is the bioavailability of\nthe drug product; determined experimentally by measuring AUC of dosage form\nof drug given by one route and comparing it to AUC of same dose of drug under\nconditions of complete absorption, i.e. given i.v.\nC. Effect of infusions or multiple dosing on time-course of plasma concentrations"
+     }
+    ],
+    "check_items": [
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "1. Volume of plasma completely cleared of drug per unit time by all routes and\nmechanisms."
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "2. Explain how dose, bioavailability, rate of absorption, apparent volume of\ndistribution, total clearance, and elimination half-life affect the plasma\nconcentrations of a drug after administration of a single dose."
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "1) First -order elimination: drug assumed to rapidly equilibrate into volume of\ndistribution; plasma concentrations decline according to first-order kinetics;\nelimination rate from plasma is proportional to plasma concentration, fraction\neliminated per unit time is elimination rate constant (kel).\ndC p k el Cp = −\ndt\nC = C e − elk t p 0\nPlasma Concentrationasma Co trati\n(µg/ml)\nHoursours\nFigure 1\nDetermination of elimination rate constant and elimination half-life:\nlnC p = lnC 0 − k el t\nPlot of ln Cp vs. t is a straight line with slope of -kel. Plasma half-life (t1/2 =\n.693/kel) is constant and independent of dose."
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "1) Determination of renal clearance (ClR), the volume of plasma completely\ncleared of drug per unit time (ml/min).\nexcretion rate in urineCl R = plasma concentrat ion\nMeasure the amount of drug excreted in the urine during a time interval t1 to t2.\nFind the plasma concentration of the drug at the midpoint of the time interval, (t1\n+ t2)/2, by interpolating on the ln Cp vs. t plot.\namount excreted from t1 to t2   (t 2 − t1 )  Cl R =\nCp at (t 1 + t2 ) 2"
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "4. The plasma half-life of a drug (the time to reduce the concentration by one-\nhalf) is directly proportional to Vd, and inversely proportional to total clearance\n(ClT); for a given ClT, the higher the Vd, the longer the t1/2:"
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "Overview\nHST-151 12\ninfusion (T). The output rate in the case of first-order elimination is the total\namount of drug in the body (Css Vd) times the elimination rate constant (kel).\nDR = Css • Vd • k el\nTherefore, the plasma concentration at steady-state can be predicted as follows:\nDRCss = Vd k el\nRemember that total clearance equals the elimination rate constant (kel) times the volume\nof distribution. Therefore, the plasma concentration at steady-state (Css) is directly\nproportional to the input rate (DR) of the drug and inversely proportional to its total\nplasma clearance (ClT).\nDRCss = Cl T"
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "Overview\n \nHST-151 9\nDetermination of apparent volume of distribution:\nExtrapolation to time zero of the line of best fit for ln Cp vs t data; antilog of\ndrug concentration at time 0 designated as C0. Then,\nTotal DoseVd (in mls or liters) = C0\nTo express Vd as per cent of body weight, assume that 1 liter is equivalent to\n1 kg; divide the Vd in liters by body weight, and then multiply by 100.\nSimilarly, if relative dose administered is known (i.e., the dose per kg or other\nunit of body weight) but not the total dose,\nRelative DoseVd = C0\nDetermination of total clearance:\nAccording to definitions above, total clearance is the mass of drug\n(Cp Vd) eliminated per unit time divided by the plasma concentration;\ntherefore,\n "
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "Overview\nHo rs\nPl entr n\n(\nHST-151 11\nb. Peak plasma concentration is dependent on absorption and elimination\nhalf-lives, volume of distribution, dose (D), and fraction of dose absorbed (F)\nc. Area under plasma concentration vs. time curve (AUC) is dependent on\ndose (D), fraction of dose absorbed (F) and total clearance ClT\nF • DAUC = Cl T\nFraction of dose absorbed into systemic circulation (F ) is the bioavailability of\nthe drug product; determined experimentally by measuring AUC of dosage form\nof drug given by one route and comparing it to AUC of same dose of drug under\nconditions of complete absorption, i.e. given i.v.\nC. Effect of infusions or multiple dosing on time-course of plasma concentrations"
+     }
+    ],
+    "misconceptions": [
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "1. Volume of plasma completely cleared of drug per unit time by all routes and\nmechanisms."
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "2. Explain how dose, bioavailability, rate of absorption, apparent volume of\ndistribution, total clearance, and elimination half-life affect the plasma\nconcentrations of a drug after administration of a single dose."
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "1) First -order elimination: drug assumed to rapidly equilibrate into volume of\ndistribution; plasma concentrations decline according to first-order kinetics;\nelimination rate from plasma is proportional to plasma concentration, fraction\neliminated per unit time is elimination rate constant (kel).\ndC p k el Cp = −\ndt\nC = C e − elk t p 0\nPlasma Concentrationasma Co trati\n(µg/ml)\nHoursours\nFigure 1\nDetermination of elimination rate constant and elimination half-life:\nlnC p = lnC 0 − k el t\nPlot of ln Cp vs. t is a straight line with slope of -kel. Plasma half-life (t1/2 =\n.693/kel) is constant and independent of dose."
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "1) Determination of renal clearance (ClR), the volume of plasma completely\ncleared of drug per unit time (ml/min).\nexcretion rate in urineCl R = plasma concentrat ion\nMeasure the amount of drug excreted in the urine during a time interval t1 to t2.\nFind the plasma concentration of the drug at the midpoint of the time interval, (t1\n+ t2)/2, by interpolating on the ln Cp vs. t plot.\namount excreted from t1 to t2   (t 2 − t1 )  Cl R =\nCp at (t 1 + t2 ) 2"
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "4. The plasma half-life of a drug (the time to reduce the concentration by one-\nhalf) is directly proportional to Vd, and inversely proportional to total clearance\n(ClT); for a given ClT, the higher the Vd, the longer the t1/2:"
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "Overview\nHST-151 12\ninfusion (T). The output rate in the case of first-order elimination is the total\namount of drug in the body (Css Vd) times the elimination rate constant (kel).\nDR = Css • Vd • k el\nTherefore, the plasma concentration at steady-state can be predicted as follows:\nDRCss = Vd k el\nRemember that total clearance equals the elimination rate constant (kel) times the volume\nof distribution. Therefore, the plasma concentration at steady-state (Css) is directly\nproportional to the input rate (DR) of the drug and inversely proportional to its total\nplasma clearance (ClT).\nDRCss = Cl T"
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "Overview\n \nHST-151 9\nDetermination of apparent volume of distribution:\nExtrapolation to time zero of the line of best fit for ln Cp vs t data; antilog of\ndrug concentration at time 0 designated as C0. Then,\nTotal DoseVd (in mls or liters) = C0\nTo express Vd as per cent of body weight, assume that 1 liter is equivalent to\n1 kg; divide the Vd in liters by body weight, and then multiply by 100.\nSimilarly, if relative dose administered is known (i.e., the dose per kg or other\nunit of body weight) but not the total dose,\nRelative DoseVd = C0\nDetermination of total clearance:\nAccording to definitions above, total clearance is the mass of drug\n(Cp Vd) eliminated per unit time divided by the plasma concentration;\ntherefore,\n "
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "Overview\nHo rs\nPl entr n\n(\nHST-151 11\nb. Peak plasma concentration is dependent on absorption and elimination\nhalf-lives, volume of distribution, dose (D), and fraction of dose absorbed (F)\nc. Area under plasma concentration vs. time curve (AUC) is dependent on\ndose (D), fraction of dose absorbed (F) and total clearance ClT\nF • DAUC = Cl T\nFraction of dose absorbed into systemic circulation (F ) is the bioavailability of\nthe drug product; determined experimentally by measuring AUC of dosage form\nof drug given by one route and comparing it to AUC of same dose of drug under\nconditions of complete absorption, i.e. given i.v.\nC. Effect of infusions or multiple dosing on time-course of plasma concentrations"
+     }
+    ],
+    "project_ideas": [
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "1. Volume of plasma completely cleared of drug per unit time by all routes and\nmechanisms."
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "2. Explain how dose, bioavailability, rate of absorption, apparent volume of\ndistribution, total clearance, and elimination half-life affect the plasma\nconcentrations of a drug after administration of a single dose."
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "1) First -order elimination: drug assumed to rapidly equilibrate into volume of\ndistribution; plasma concentrations decline according to first-order kinetics;\nelimination rate from plasma is proportional to plasma concentration, fraction\neliminated per unit time is elimination rate constant (kel).\ndC p k el Cp = −\ndt\nC = C e − elk t p 0\nPlasma Concentrationasma Co trati\n(µg/ml)\nHoursours\nFigure 1\nDetermination of elimination rate constant and elimination half-life:\nlnC p = lnC 0 − k el t\nPlot of ln Cp vs. t is a straight line with slope of -kel. Plasma half-life (t1/2 =\n.693/kel) is constant and independent of dose."
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "1) Determination of renal clearance (ClR), the volume of plasma completely\ncleared of drug per unit time (ml/min).\nexcretion rate in urineCl R = plasma concentrat ion\nMeasure the amount of drug excreted in the urine during a time interval t1 to t2.\nFind the plasma concentration of the drug at the midpoint of the time interval, (t1\n+ t2)/2, by interpolating on the ln Cp vs. t plot.\namount excreted from t1 to t2   (t 2 − t1 )  Cl R =\nCp at (t 1 + t2 ) 2"
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "4. The plasma half-life of a drug (the time to reduce the concentration by one-\nhalf) is directly proportional to Vd, and inversely proportional to total clearance\n(ClT); for a given ClT, the higher the Vd, the longer the t1/2:"
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "Overview\nHST-151 12\ninfusion (T). The output rate in the case of first-order elimination is the total\namount of drug in the body (Css Vd) times the elimination rate constant (kel).\nDR = Css • Vd • k el\nTherefore, the plasma concentration at steady-state can be predicted as follows:\nDRCss = Vd k el\nRemember that total clearance equals the elimination rate constant (kel) times the volume\nof distribution. Therefore, the plasma concentration at steady-state (Css) is directly\nproportional to the input rate (DR) of the drug and inversely proportional to its total\nplasma clearance (ClT).\nDRCss = Cl T"
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "Overview\n \nHST-151 9\nDetermination of apparent volume of distribution:\nExtrapolation to time zero of the line of best fit for ln Cp vs t data; antilog of\ndrug concentration at time 0 designated as C0. Then,\nTotal DoseVd (in mls or liters) = C0\nTo express Vd as per cent of body weight, assume that 1 liter is equivalent to\n1 kg; divide the Vd in liters by body weight, and then multiply by 100.\nSimilarly, if relative dose administered is known (i.e., the dose per kg or other\nunit of body weight) but not the total dose,\nRelative DoseVd = C0\nDetermination of total clearance:\nAccording to definitions above, total clearance is the mass of drug\n(Cp Vd) eliminated per unit time divided by the plasma concentration;\ntherefore,\n "
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "Overview\nHo rs\nPl entr n\n(\nHST-151 11\nb. Peak plasma concentration is dependent on absorption and elimination\nhalf-lives, volume of distribution, dose (D), and fraction of dose absorbed (F)\nc. Area under plasma concentration vs. time curve (AUC) is dependent on\ndose (D), fraction of dose absorbed (F) and total clearance ClT\nF • DAUC = Cl T\nFraction of dose absorbed into systemic circulation (F ) is the bioavailability of\nthe drug product; determined experimentally by measuring AUC of dosage form\nof drug given by one route and comparing it to AUC of same dose of drug under\nconditions of complete absorption, i.e. given i.v.\nC. Effect of infusions or multiple dosing on time-course of plasma concentrations"
+     }
+    ],
+    "sample_proposal": [
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "1. Volume of plasma completely cleared of drug per unit time by all routes and\nmechanisms."
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "2. Explain how dose, bioavailability, rate of absorption, apparent volume of\ndistribution, total clearance, and elimination half-life affect the plasma\nconcentrations of a drug after administration of a single dose."
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "1) First -order elimination: drug assumed to rapidly equilibrate into volume of\ndistribution; plasma concentrations decline according to first-order kinetics;\nelimination rate from plasma is proportional to plasma concentration, fraction\neliminated per unit time is elimination rate constant (kel).\ndC p k el Cp = −\ndt\nC = C e − elk t p 0\nPlasma Concentrationasma Co trati\n(µg/ml)\nHoursours\nFigure 1\nDetermination of elimination rate constant and elimination half-life:\nlnC p = lnC 0 − k el t\nPlot of ln Cp vs. t is a straight line with slope of -kel. Plasma half-life (t1/2 =\n.693/kel) is constant and independent of dose."
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "1) Determination of renal clearance (ClR), the volume of plasma completely\ncleared of drug per unit time (ml/min).\nexcretion rate in urineCl R = plasma concentrat ion\nMeasure the amount of drug excreted in the urine during a time interval t1 to t2.\nFind the plasma concentration of the drug at the midpoint of the time interval, (t1\n+ t2)/2, by interpolating on the ln Cp vs. t plot.\namount excreted from t1 to t2   (t 2 − t1 )  Cl R =\nCp at (t 1 + t2 ) 2"
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "4. The plasma half-life of a drug (the time to reduce the concentration by one-\nhalf) is directly proportional to Vd, and inversely proportional to total clearance\n(ClT); for a given ClT, the higher the Vd, the longer the t1/2:"
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "Overview\nHST-151 12\ninfusion (T). The output rate in the case of first-order elimination is the total\namount of drug in the body (Css Vd) times the elimination rate constant (kel).\nDR = Css • Vd • k el\nTherefore, the plasma concentration at steady-state can be predicted as follows:\nDRCss = Vd k el\nRemember that total clearance equals the elimination rate constant (kel) times the volume\nof distribution. Therefore, the plasma concentration at steady-state (Css) is directly\nproportional to the input rate (DR) of the drug and inversely proportional to its total\nplasma clearance (ClT).\nDRCss = Cl T"
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "Overview\n \nHST-151 9\nDetermination of apparent volume of distribution:\nExtrapolation to time zero of the line of best fit for ln Cp vs t data; antilog of\ndrug concentration at time 0 designated as C0. Then,\nTotal DoseVd (in mls or liters) = C0\nTo express Vd as per cent of body weight, assume that 1 liter is equivalent to\n1 kg; divide the Vd in liters by body weight, and then multiply by 100.\nSimilarly, if relative dose administered is known (i.e., the dose per kg or other\nunit of body weight) but not the total dose,\nRelative DoseVd = C0\nDetermination of total clearance:\nAccording to definitions above, total clearance is the mass of drug\n(Cp Vd) eliminated per unit time divided by the plasma concentration;\ntherefore,\n "
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "Overview\nHo rs\nPl entr n\n(\nHST-151 11\nb. Peak plasma concentration is dependent on absorption and elimination\nhalf-lives, volume of distribution, dose (D), and fraction of dose absorbed (F)\nc. Area under plasma concentration vs. time curve (AUC) is dependent on\ndose (D), fraction of dose absorbed (F) and total clearance ClT\nF • DAUC = Cl T\nFraction of dose absorbed into systemic circulation (F ) is the bioavailability of\nthe drug product; determined experimentally by measuring AUC of dosage form\nof drug given by one route and comparing it to AUC of same dose of drug under\nconditions of complete absorption, i.e. given i.v.\nC. Effect of infusions or multiple dosing on time-course of plasma concentrations"
+     }
+    ],
+    "faq": [
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "1. Volume of plasma completely cleared of drug per unit time by all routes and\nmechanisms."
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "2. Explain how dose, bioavailability, rate of absorption, apparent volume of\ndistribution, total clearance, and elimination half-life affect the plasma\nconcentrations of a drug after administration of a single dose."
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "1) First -order elimination: drug assumed to rapidly equilibrate into volume of\ndistribution; plasma concentrations decline according to first-order kinetics;\nelimination rate from plasma is proportional to plasma concentration, fraction\neliminated per unit time is elimination rate constant (kel).\ndC p k el Cp = −\ndt\nC = C e − elk t p 0\nPlasma Concentrationasma Co trati\n(µg/ml)\nHoursours\nFigure 1\nDetermination of elimination rate constant and elimination half-life:\nlnC p = lnC 0 − k el t\nPlot of ln Cp vs. t is a straight line with slope of -kel. Plasma half-life (t1/2 =\n.693/kel) is constant and independent of dose."
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "1) Determination of renal clearance (ClR), the volume of plasma completely\ncleared of drug per unit time (ml/min).\nexcretion rate in urineCl R = plasma concentrat ion\nMeasure the amount of drug excreted in the urine during a time interval t1 to t2.\nFind the plasma concentration of the drug at the midpoint of the time interval, (t1\n+ t2)/2, by interpolating on the ln Cp vs. t plot.\namount excreted from t1 to t2   (t 2 − t1 )  Cl R =\nCp at (t 1 + t2 ) 2"
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "Overview\n \nHST-151 9\nDetermination of apparent volume of distribution:\nExtrapolation to time zero of the line of best fit for ln Cp vs t data; antilog of\ndrug concentration at time 0 designated as C0. Then,\nTotal DoseVd (in mls or liters) = C0\nTo express Vd as per cent of body weight, assume that 1 liter is equivalent to\n1 kg; divide the Vd in liters by body weight, and then multiply by 100.\nSimilarly, if relative dose administered is known (i.e., the dose per kg or other\nunit of body weight) but not the total dose,\nRelative DoseVd = C0\nDetermination of total clearance:\nAccording to definitions above, total clearance is the mass of drug\n(Cp Vd) eliminated per unit time divided by the plasma concentration;\ntherefore,\n "
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "4. The plasma half-life of a drug (the time to reduce the concentration by one-\nhalf) is directly proportional to Vd, and inversely proportional to total clearance\n(ClT); for a given ClT, the higher the Vd, the longer the t1/2:"
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "Overview\nHST-151 12\ninfusion (T). The output rate in the case of first-order elimination is the total\namount of drug in the body (Css Vd) times the elimination rate constant (kel).\nDR = Css • Vd • k el\nTherefore, the plasma concentration at steady-state can be predicted as follows:\nDRCss = Vd k el\nRemember that total clearance equals the elimination rate constant (kel) times the volume\nof distribution. Therefore, the plasma concentration at steady-state (Css) is directly\nproportional to the input rate (DR) of the drug and inversely proportional to its total\nplasma clearance (ClT).\nDRCss = Cl T"
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "Overview\nHo rs\nPl entr n\n(\nHST-151 11\nb. Peak plasma concentration is dependent on absorption and elimination\nhalf-lives, volume of distribution, dose (D), and fraction of dose absorbed (F)\nc. Area under plasma concentration vs. time curve (AUC) is dependent on\ndose (D), fraction of dose absorbed (F) and total clearance ClT\nF • DAUC = Cl T\nFraction of dose absorbed into systemic circulation (F ) is the bioavailability of\nthe drug product; determined experimentally by measuring AUC of dosage form\nof drug given by one route and comparing it to AUC of same dose of drug under\nconditions of complete absorption, i.e. given i.v.\nC. Effect of infusions or multiple dosing on time-course of plasma concentrations"
+     }
+    ],
+    "quiz": [
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "1. Volume of plasma completely cleared of drug per unit time by all routes and\nmechanisms."
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "2. Explain how dose, bioavailability, rate of absorption, apparent volume of\ndistribution, total clearance, and elimination half-life affect the plasma\nconcentrations of a drug after administration of a single dose."
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "1) First -order elimination: drug assumed to rapidly equilibrate into volume of\ndistribution; plasma concentrations decline according to first-order kinetics;\nelimination rate from plasma is proportional to plasma concentration, fraction\neliminated per unit time is elimination rate constant (kel).\ndC p k el Cp = −\ndt\nC = C e − elk t p 0\nPlasma Concentrationasma Co trati\n(µg/ml)\nHoursours\nFigure 1\nDetermination of elimination rate constant and elimination half-life:\nlnC p = lnC 0 − k el t\nPlot of ln Cp vs. t is a straight line with slope of -kel. Plasma half-life (t1/2 =\n.693/kel) is constant and independent of dose."
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "1) Determination of renal clearance (ClR), the volume of plasma completely\ncleared of drug per unit time (ml/min).\nexcretion rate in urineCl R = plasma concentrat ion\nMeasure the amount of drug excreted in the urine during a time interval t1 to t2.\nFind the plasma concentration of the drug at the midpoint of the time interval, (t1\n+ t2)/2, by interpolating on the ln Cp vs. t plot.\namount excreted from t1 to t2   (t 2 − t1 )  Cl R =\nCp at (t 1 + t2 ) 2"
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "4. The plasma half-life of a drug (the time to reduce the concentration by one-\nhalf) is directly proportional to Vd, and inversely proportional to total clearance\n(ClT); for a given ClT, the higher the Vd, the longer the t1/2:"
+     },
+     {
+      "source": "course/1/2/02_pharmacokinetics_i_and_ii.pdf",
+      "text": "Overview\nHST-151 12\ninfusion (T). The output rate in the case of first-order elimination is the total\namount of drug in the body (Css Vd) times the elimination rate constant (kel).\nDR = Css • Vd • k el\nTherefore, the plasma concentration at steady-state can be predicted as follows:\nDRCss = Vd k el\nRemember that total clearance equals the elimination rate constant (kel) times the volume\nof distribution. Therefore, the plasma concentration at steady-state (Css) is directly\nproportional to the input rate (DR) of the drug and inversely proportional to its total\nplasma clearance (ClT).\nDRCss = Cl T"
+     }
+    ]
+   }
+  }
+ ]
+}
