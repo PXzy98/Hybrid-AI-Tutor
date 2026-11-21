@@ -259,6 +259,8 @@ def test_a_reopened_conversation_keeps_sources_model_and_the_asked_kcs_follow_co
     kcs = {r["student_id"]: r["kc_ids"] for r in rows("request_log")}
     assert kcs[world.students["alice"].student_id] == ["C.1"]
     assert kcs[world.students["bob"].student_id] == []
+    world.services.learner.set_consent(world.students["alice"].student_id, False)  # withdrawn: codes go too
+    assert all(r["kc_ids"] == [] for r in rows("request_log"))
 
 
 def test_an_answer_cut_off_at_max_tokens_says_so(world):

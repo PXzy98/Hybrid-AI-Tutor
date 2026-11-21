@@ -19,22 +19,25 @@ def course_insights(engine, course_id: int, min_group: int, limit: int = 20) -> 
     """The suppressed aggregate and the number of distinct learners behind it."""
     group = max(MIN_GROUP, min_group)
     with Session(engine) as db:
-        asked = db.exec(select(EvidenceLog.student_id, EvidenceLog.kc_id)
+        asked = db.exec(select(EvidenceLog.student_id, EvidenceLog.kc_id, EvidenceLog.created_at)
                         .where(EvidenceLog.course_id == course_id, EvidenceLog.source == "understand")
                         .order_by(col(EvidenceLog.id).desc()).limit(MAX_EVENTS)).all()
-        logged = db.exec(select(RequestLog.request_id, RequestLog.student_id, RequestLog.kc_ids)
+        logged = db.exec(select(RequestLog.created_at, RequestLog.student_id, RequestLog.kc_ids)
                          .where(RequestLog.course_id == course_id, RequestLog.student_id != "deleted")
                          .order_by(col(RequestLog.id).desc()).limit(MAX_EVENTS)).all()
         shown = db.exec(select(EvidenceLog.student_id, EvidenceLog.kc_id, EvidenceLog.misconception_id)
                         .where(EvidenceLog.course_id == course_id,
                                col(EvidenceLog.misconception_id).is_not(None))
                         .order_by(col(EvidenceLog.id).desc()).limit(MAX_EVENTS)).all()
-    # one event per question and KC; a weak signal of the same question would count it twice, so the request
-    # log is used where it has KC codes and the weak signals only for questions recorded before V22
-    events = [InsightEvent(course_id, student, kc) for _, student, kcs in logged for kc in (kcs or [])
+    # One event per question and KC. Since V22 the request log holds the KC codes; a weak signal of the same
+    # question would count it twice, so weak signals count only before the first question with logged codes.
+    with_codes = [(at, student, kcs) for at, student, kcs in logged if kcs]
+    since = min((at for at, _, _ in with_codes), default=None)
+    events = [InsightEvent(course_id, student, kc) for _, student, kcs in with_codes for kc in kcs
               if isinstance(kc, str) and _LABEL.fullmatch(kc)]
-    if not events:
-        events = [InsightEvent(course_id, student, kc) for student, kc in asked if _LABEL.fullmatch(kc)]
+    events += [InsightEvent(course_id, student, kc) for student, kc, at in asked
+               if _LABEL.fullmatch(kc) and (since is None or at < since)]
+    events = events[:MAX_EVENTS]  # newest first; a question may carry several KCs
     questions = aggregate_class_insights(course_id=course_id, min_group=group, limit=limit, events=events)
     misconceptions = aggregate_class_insights(
         course_id=course_id, min_group=group, limit=limit,

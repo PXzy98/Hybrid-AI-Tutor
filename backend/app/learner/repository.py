@@ -5,7 +5,7 @@ the pseudonymous student_id and the course (course-structure.md 4.1). Preference
 """
 from datetime import datetime
 
-from sqlalchemy import Engine, delete
+from sqlalchemy import Engine, delete, update
 from sqlmodel import Session, col, select
 
 from app.core.schemas import Evidence, KcState, Preferences
@@ -16,6 +16,7 @@ from app.storage.models import (
     LearnerMisconception,
     LearnerPreference,
     LearnerTopicLevel,
+    RequestLog,
     utcnow,
 )
 
@@ -196,4 +197,6 @@ class LearnerRepository:
         with self._db() as db:
             for table in (*COURSE_TABLES, LearnerPreference):
                 db.exec(delete(table).where(table.student_id == student_id))
+            # the KC codes kept with the student's questions for the class insights (V22) need consent too
+            db.exec(update(RequestLog).where(RequestLog.student_id == student_id).values(kc_ids=[]))
             db.commit()
