@@ -181,7 +181,7 @@ export const fr: Messages = {
   "routing.selected": "Choisi : {target}",
   "routing.cloudNeed": " · Besoin estimé du modèle infonuagique : {p} %",
   "routing.evidence": "Preuves : {status} · Couverture du soutien : {p} %",
-  "routing.detail.embedding.completed": "La question a été encodée sur cet appareil.",
+  "routing.detail.embedding.completed": "La question a été encodée sur le serveur du cours, pas dans le nuage.",
   "routing.detail.embedding.failed": "La question n'a pas pu être encodée ; le modèle infonuagique est utilisé.",
   "routing.detail.classification.completed": "La question a été analysée.",
   "routing.detail.classification.skipped": "La question n'a pas été analysée.",

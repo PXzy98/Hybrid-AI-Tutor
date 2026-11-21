@@ -16,8 +16,6 @@ import { useFormat } from "@/lib/format";
 
 /** How many announcements the student's course home shows; the rest are on the Announcements page. */
 export const HOME_COUNT = 3;
-// a body longer than this may be cut off on the course home, so the link to the full text is offered
-const LONG_BODY = 120;
 
 const useAnnouncements = (course: Course) =>
   useQuery({ queryKey: ["announcements", course.id], queryFn: () => api.announcements(course.id) });
@@ -63,7 +61,7 @@ export function LatestAnnouncements({ course }: { course: Course }) {
         <h3 id="home-announcements" className="flex items-center gap-2 text-sm font-semibold">
           <Megaphone aria-hidden className="size-4 text-muted-foreground" />{t("ann.title")}
         </h3>
-        {(list.data.length > HOME_COUNT || shown.some((a) => a.body.length > LONG_BODY)) && (
+        {shown.length > 0 && (
           <Link to={`/courses/${course.id}/announcements`} className="text-sm font-medium underline underline-offset-2">
             {list.data.length > HOME_COUNT ? t("ann.seeAll", { n: list.data.length }) : t("ann.readMore")}
           </Link>

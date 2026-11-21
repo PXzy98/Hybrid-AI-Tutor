@@ -181,7 +181,7 @@ export const en = {
   "routing.selected": "Selected: {target}",
   "routing.cloudNeed": " · Estimated Cloud need: {p}%",
   "routing.evidence": "Evidence: {status} · Support coverage: {p}%",
-  "routing.detail.embedding.completed": "The question was encoded on this device.",
+  "routing.detail.embedding.completed": "The question was encoded on the course server, not in the cloud.",
   "routing.detail.embedding.failed": "The question could not be encoded; the cloud model is used.",
   "routing.detail.classification.completed": "The question was analysed.",
   "routing.detail.classification.skipped": "The question was not analysed.",
