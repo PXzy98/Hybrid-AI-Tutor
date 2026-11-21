@@ -7,9 +7,9 @@ the verify step runs its checkers (task Z16).
 
 | File | Contents |
 |---|---|
-| `base.yaml` | the layer of every course: student IDs, grades, names in context, Chinese and French names and grades, phone numbers, contacts, addresses, postal codes, dates of birth, ID and health-card numbers, credentials (`secret_token`: API keys, tokens, private keys, assigned passwords; Z11), and the light personal-health detector (`health_detail`); policy `local_only` |
+| `base.yaml` | the layer of every course: student IDs, grades, names in context, Chinese and French names and grades, phone numbers, contacts, addresses, postal codes, dates of birth, ID and health-card numbers, credentials (`secret_token`: API keys, tokens, private keys, assigned passwords; Z11; since Z22b also prefixed names such as `AWS_SECRET_ACCESS_KEY=`, `Bearer` tokens, URL passwords and "the password for X is V"), and the light personal-health detector (`health_detail`); policy `local_only` |
 | `medical_science.yaml` | base + `health_context`, `health_extra`, `fr_health`; policy `generalize`; checker `medical_safety`; "not medical advice" notice; subject prompt `health` (the v3 behaviour) |
-| `ece.yaml` | subject prompt `engineering`; base + `internal_address` (private IPv4 host addresses with a port, MAC addresses; a network like `10.0.0.0/8` is kept) and `repo_url` (code-host URLs that name an account); test set `eval/privacy-filter/ece_cases.jsonl`, results `eval/privacy-filter/results/ece/` (Z11) |
+| `ece.yaml` | subject prompt `engineering`; base + `internal_address` (private IPv4 host addresses with a port, MAC addresses; a network like `10.0.0.0/8` is kept) and `repo_url` (code-host URLs that name an account, also `git@host:account/repo`; Z22b); test set `eval/privacy-filter/ece_cases.jsonl`, results `eval/privacy-filter/results/ece/` (Z11) |
 | `life_science.yaml`, `general.yaml` | the base layer; subject prompt `general` |
 
 Format:

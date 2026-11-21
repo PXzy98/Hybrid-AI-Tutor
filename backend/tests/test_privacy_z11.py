@@ -127,6 +127,72 @@ def test_credentials_with_quoted_names_are_found(text, value):
     assert value in _found("general", text).get("SECRET", [])
 
 
+# Z22b: shapes the Z22 held-out sets missed (fictional values made for the tests)
+@pytest.mark.parametrize(("profile", "text", "kind", "value"), [
+    ("general", "AWS_SECRET_ACCESS_KEY=wJalrFAKEnotreal/K7MDENG/bPxRfiCYTESTKEY.", "SECRET",
+     "wJalrFAKEnotreal/K7MDENG/bPxRfiCYTESTKEY"),
+    ("general", "boto3.client('s3', aws_secret_access_key='fakeSecret+0000notreal/TESTTEST')", "SECRET",
+     "fakeSecret+0000notreal/TESTTEST"),
+    ("general", "Aws_Secret_Access_Key: fakeSecret+1111notreal", "SECRET", "fakeSecret+1111notreal"),
+    ("general", 'export API_TOKEN="tok_FAKE_0a1b2c3d4e5f_notreal" in .bashrc', "SECRET",
+     "tok_FAKE_0a1b2c3d4e5f_notreal"),
+    ("general", "cfg = {'STRIPE_SECRET': 'fake_live_0000notreal'}", "SECRET", "fake_live_0000notreal"),
+    ("general", "DB_PASSWORD=Fake!Pass2026", "SECRET", "Fake!Pass2026"),
+    ("general", "headers = {'Authorization': 'Bearer FAKEtoken0123456789notreal'}", "SECRET",
+     "FAKEtoken0123456789notreal"),
+    ("general", "curl -H 'Authorization: bearer fake.TOKEN-0123456789' gives 401", "SECRET",
+     "fake.TOKEN-0123456789"),
+    ("general", "My broker is mqtt://sensor_user:Rt7Fake!Pass@broker.example.test:1883", "SECRET",
+     "Rt7Fake!Pass"),
+    ("general", "postgres://app:Fake2026x@db.example.test/app fails", "SECRET", "Fake2026x"),
+    ("general", "My Wi-Fi password for the library is Campus!Fake2026 -- is that OK?", "SECRET",
+     "Campus!Fake2026"),
+    ("general", "The passcode to the lab door is 4471-FAKE.", "SECRET", "4471-FAKE"),
+    ("computer_science", "Is DB_PASSWORD=$ecr3tFake9 safe in my notes?", "SECRET", "$ecr3tFake9"),
+    ("ece", "I pasted this by accident: AWS_SECRET_ACCESS_KEY=wJalrFAKE/K7MDENG/bPxRfiCYFAKEKEY. Oops",
+     "SECRET", "wJalrFAKE/K7MDENG/bPxRfiCYFAKEKEY"),
+    ("ece", "The scope is on the lab VLAN at 172.16.8.203.", "INTERNAL_ADDRESS", "172.16.8.203"),
+    ("ece", "and the gateway is 172.31.255.1:8443, right?", "INTERNAL_ADDRESS", "172.31.255.1:8443"),
+    ("ece", "My Pi is at 192.168.4.20.", "INTERNAL_ADDRESS", "192.168.4.20"),
+    ("computer_science", "git remote says git@github.com:jtremblay42/stm32-uart.git", "REPO_URL",
+     "git@github.com:jtremblay42/stm32-uart.git"),
+    ("computer_science", "push to git@gitlab.example.test:team-7/lab3 is denied", "REPO_URL",
+     "git@gitlab.example.test:team-7/lab3"),
+])
+def test_z22b_credentials_addresses_and_remotes_are_found(profile, text, kind, value):
+    assert value in _found(profile, text).get(kind, [])
+
+
+@pytest.mark.parametrize(("profile", "text"), [
+    ("computer_science", "Why is primary_key=True needed on the id field?"),
+    ("computer_science", "What does max_tokens=4096 do in the API call?"),
+    ("computer_science", "The cache_key: user_profile_settings is built from the id."),
+    ("computer_science", "Use sort_key = lambda x: x[1] to sort by the second field."),
+    ("computer_science", "Set API_KEY=YOUR_API_KEY_HERE in the .env file."),
+    ("computer_science", "The bearer token scheme sends the token in the Authorization header."),
+    ("computer_science", "Read it with token_count = len(tokens) first."),
+    ("computer_science", "Why does cache_key=request.path miss the query string?"),
+    ("computer_science", 'Is primary_key="student.id" valid in this ORM?'),
+    ("computer_science", "Is token_count=10000000 too large for one batch?"),
+    ("computer_science", "Set sort_key: by_lastname_2026 for the export."),
+    ("computer_science", "The partition_key = region-2026-q4 spreads the rows."),
+    ("computer_science", "We use max_token = 8192 and page_token = abc123def456 here."),
+    ("computer_science", "In CI we set AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY from the vault."),
+    ("computer_science", "The compose file has DB_PASSWORD=${DB_PASSWORD} and API_TOKEN=\"$API_TOKEN\"."),
+    ("computer_science", "On Windows: set DB_PASSWORD=%DB_PASSWORD% before running."),
+    ("general", "The password for the quiz is given in class, right?"),
+    ("general", "Why must a password for a website be long?"),
+    ("general", "Do you know whether the password for the router is required?"),
+    ("general", "The password for the router is case-sensitive."),
+    ("general", "The password for the lab account is write-protected, isn't it?"),
+    ("ece", "Is 172.16.0.0/12 a private range, and what about 172.32.1.1?"),
+    ("ece", "Why is 8.8.8.8 used as a DNS server?"),
+    ("ece", "Version 3.172.16.4 of the driver is out."),
+])
+def test_z22b_course_text_without_secrets_is_kept(profile, text):
+    assert _found(profile, text) == {}
+
+
 def test_a_value_on_an_exact_piece_boundary_is_found_once():
     from app.privacy.profiles import SCAN_CHUNK_CHARS
 
@@ -136,3 +202,15 @@ def test_a_value_on_an_exact_piece_boundary_is_found_once():
     overlap = " " * (SCAN_CHUNK_CHARS - 2000) + "student 300418277 " + " " * 30_000  # inside the overlap
     assert dict((f.type, f.count) for f in scan_document(overlap, privacy_profile("general")).findings) \
         .get("STUDENT_ID") == 1
+
+
+def test_z22b_long_names_without_an_assignment_are_scanned_in_linear_time():
+    """A 20,000-character name made of credential words and no "=" (one scan window) must not backtrack."""
+    import time
+
+    from app.privacy.recognizers.engineering import SecretTokenRecognizer
+
+    for text in ("token_" * 3333 + "x", "API_SECRET-" * 1800, "a_" * 10000, "a." * 10000, "a+b-" * 5000):
+        start = time.perf_counter()
+        assert list(SecretTokenRecognizer._z22b_values(text)) == []
+        assert time.perf_counter() - start < 0.5
