@@ -38,7 +38,7 @@ function DialogContent({ className, children, onOpenAutoFocus, onCloseAutoFocus,
       <DialogPrimitive.Overlay className="animate-in-fade fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px]" />
       <DialogPrimitive.Content data-slot="dialog-content"
         {...focus}
-        className={cn("fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl border bg-popover p-6 text-popover-foreground shadow-float sm:max-w-lg", className)}
+        className={cn("fixed top-1/2 left-1/2 z-50 grid w-full max-h-[calc(100dvh-2rem)] max-w-[calc(100%-2rem)] -translate-x-1/2 overflow-y-auto -translate-y-1/2 gap-4 rounded-xl border bg-popover p-6 text-popover-foreground shadow-float sm:max-w-lg", className)}
         {...props}>
         {children}
         <DialogPrimitive.Close aria-label={t("dialog.close")}
