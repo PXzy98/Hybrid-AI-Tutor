@@ -28,6 +28,15 @@ LOCAL_CAPABILITY_NOTE = ("This question may be beyond what the local model does 
                          "please check the answer against the sources below.")
 
 
+def mark_cut_off(ctx: RequestContext, cut_off: bool) -> None:
+    """The note that the answer stops at the length limit, for the answer actually returned: the verify step
+    calls it again after a regenerated answer or the safe replacement."""
+    if ANSWER_CUT_OFF_NOTE in ctx.warnings:
+        ctx.warnings.remove(ANSWER_CUT_OFF_NOTE)
+    if cut_off:
+        ctx.warnings.append(ANSWER_CUT_OFF_NOTE)  # say so instead of ending mid-sentence or mid-table
+
+
 @steps.register("generate")
 class GenerateStep(BaseStep):
     """Local route: full context to the local model. Cloud route: only a CloudRequest, built by the guard.
@@ -48,8 +57,7 @@ class GenerateStep(BaseStep):
         result = await self.produce(ctx)
         ctx.llm = result
         ctx.answer = result.text
-        if result.cut_off and ANSWER_CUT_OFF_NOTE not in ctx.warnings:
-            ctx.warnings.append(ANSWER_CUT_OFF_NOTE)  # say so instead of ending mid-sentence or mid-table
+        mark_cut_off(ctx, result.cut_off)
         if ctx.generalized_question and result.backend == "cloud" and GENERALIZED_NOTE not in ctx.warnings:
             ctx.warnings.append(GENERALIZED_NOTE)  # tell the student what the cloud actually saw
         return ctx

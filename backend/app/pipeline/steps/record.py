@@ -3,6 +3,7 @@ from sqlmodel import Session
 from app.core.registry import steps
 from app.core.schemas import RequestContext, StoredTurn, Turn
 from app.pipeline.base import BaseStep
+from app.pipeline.steps.generate import ANSWER_CUT_OFF_NOTE
 from app.privacy.redact import redact_known
 from app.rag.sources import answer_sources
 from app.storage.models import RequestLog
@@ -44,7 +45,7 @@ class RecordStep(BaseStep):
         self.services.sessions.append(req.session_id, req.student_id, Turn(role="student", text=question))
         self.services.sessions.append(req.session_id, req.student_id, StoredTurn(
             role="tutor", text=answer, sources=answer_sources(ctx.passages) if ctx.answer else [],
-            target=ctx.llm.backend if ctx.llm else None, cut_off=bool(ctx.llm and ctx.llm.cut_off)))
+            target=ctx.llm.backend if ctx.llm else None, cut_off=ANSWER_CUT_OFF_NOTE in ctx.warnings))
         ctx.clear_pii_mapping()  # nothing after this step needs the original values
         return ctx
 
