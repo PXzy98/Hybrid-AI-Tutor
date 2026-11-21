@@ -148,6 +148,7 @@ def test_credentials_with_quoted_names_are_found(text, value):
     ("general", "My Wi-Fi password for the library is Campus!Fake2026 -- is that OK?", "SECRET",
      "Campus!Fake2026"),
     ("general", "The passcode to the lab door is 4471-FAKE.", "SECRET", "4471-FAKE"),
+    ("computer_science", "Is DB_PASSWORD=$ecr3tFake9 safe in my notes?", "SECRET", "$ecr3tFake9"),
     ("ece", "I pasted this by accident: AWS_SECRET_ACCESS_KEY=wJalrFAKE/K7MDENG/bPxRfiCYFAKEKEY. Oops",
      "SECRET", "wJalrFAKE/K7MDENG/bPxRfiCYFAKEKEY"),
     ("ece", "The scope is on the lab VLAN at 172.16.8.203.", "INTERNAL_ADDRESS", "172.16.8.203"),
@@ -176,6 +177,9 @@ def test_z22b_credentials_addresses_and_remotes_are_found(profile, text, kind, v
     ("computer_science", "Set sort_key: by_lastname_2026 for the export."),
     ("computer_science", "The partition_key = region-2026-q4 spreads the rows."),
     ("computer_science", "We use max_token = 8192 and page_token = abc123def456 here."),
+    ("computer_science", "In CI we set AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY from the vault."),
+    ("computer_science", "The compose file has DB_PASSWORD=${DB_PASSWORD} and API_TOKEN=\"$API_TOKEN\"."),
+    ("computer_science", "On Windows: set DB_PASSWORD=%DB_PASSWORD% before running."),
     ("general", "The password for the quiz is given in class, right?"),
     ("general", "Why must a password for a website be long?"),
     ("general", "Do you know whether the password for the router is required?"),
@@ -206,7 +210,7 @@ def test_z22b_long_names_without_an_assignment_are_scanned_in_linear_time():
 
     from app.privacy.recognizers.engineering import SecretTokenRecognizer
 
-    for text in ("token_" * 3333 + "x", "API_SECRET-" * 1800, "a_" * 10000):
+    for text in ("token_" * 3333 + "x", "API_SECRET-" * 1800, "a_" * 10000, "a." * 10000, "a+b-" * 5000):
         start = time.perf_counter()
         assert list(SecretTokenRecognizer._z22b_values(text)) == []
         assert time.perf_counter() - start < 0.5

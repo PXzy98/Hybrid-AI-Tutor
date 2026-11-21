@@ -75,8 +75,12 @@ CODE_EXPRESSION_RE = re.compile(r"[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)+")
 PROSE_WORD_RE = re.compile(r"[A-Za-z]+(?:[-'][A-Za-z]+)*")
 # "Authorization: Bearer <token>", "'Bearer <token>'"
 BEARER_RE = re.compile(r"\bBearer\s+([A-Za-z0-9._~+/=-]{16,})", re.I)
-# the password in URL user info: mqtt://user:PASSWORD@host
-URL_PASSWORD_RE = re.compile(r"\b[A-Za-z][A-Za-z0-9+.-]*://[^\s:/@]+:([^\s@/]+)@")
+# the password in URL user info: mqtt://user:PASSWORD@host. The scheme starts only where a run of scheme
+# characters starts and is read once (atomic), so text like "a.a.a..." costs linear time
+URL_PASSWORD_RE = re.compile(r"(?<![A-Za-z0-9+.-])(?>[A-Za-z][A-Za-z0-9+.-]*)://[^\s:/@]+:([^\s@/]+)@")
+# a reference to an environment or configuration variable, not a value: $NAME (upper case, so a password
+# such as "$ecr3t..." still counts), ${name}, %NAME%
+ENV_REFERENCE_RE = re.compile(r"\$[A-Z_][A-Z0-9_]*|\$\{[A-Za-z_][A-Za-z0-9_]*\}?|%[A-Za-z_][A-Za-z0-9_]*%")
 # "my Wi-Fi password for the library is X", "the passcode to the lab is X"
 PROSE_PASSWORD_RE = re.compile(
     r"\bpass(?:word|phrase|code)\s+(?:for|of|to)\s+(?:[\w'-]+\s+){1,4}?is\s+[\"']?([^\s\"',;]{6,})", re.I)
@@ -181,6 +185,8 @@ def _credential_like(value: str, *, reference: bool, short_ok: bool = False) -> 
     bare = value.strip("`.,:)]")
     if PLACEHOLDER_VALUE_RE.fullmatch(bare) or (reference and CONSTANT_NAME_RE.fullmatch(bare)):
         return False
+    if ENV_REFERENCE_RE.fullmatch(bare.strip("\"'")):
+        return False  # KEY=$AWS_SECRET_ACCESS_KEY, DB_PASSWORD=${DB_PASSWORD}: the shell fills it in
     if re.search(r"[(\[]", bare):
         return False  # a call or an index: os.environ["API_KEY"], get_secret()
     if re.search(r"\d|[^\w]", bare):
