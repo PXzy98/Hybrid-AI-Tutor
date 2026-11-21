@@ -55,6 +55,18 @@ CONSTANT_NAME_RE = re.compile(r"(?:[A-Z]+_)+(?:KEY|TOKEN|SECRET)")
 PREFIXED_SECRET_RE = re.compile(
     r"(?<![A-Za-z0-9_-])((?:[A-Za-z0-9]+[_-])*(?:pass(?:word|wd|phrase)?|pwd|key|secret|token)(?:[_-][A-Za-z0-9]+)*)"
     r"[\"']?\s*[:=]\s*[\"']?([^\s\"',;)}]{8,})", re.I)
+# A prefixed name is a credential name when its last part is one (AWS_SECRET_ACCESS_KEY, API_TOKEN,
+# db_password; not token_count, cache_key_prefix), and a name ending in "key" also needs a credential word
+# before it (api_key, secret_access_key; not cache_key, primary_key, sort_key).
+_CREDENTIAL_LAST = re.compile(r"(?:pass(?:word|wd|phrase)?|pwd|secret|token|key)$", re.I)
+_KEY_QUALIFIER = re.compile(
+    r"(?:^|[_-])(?:api|secret|access|private|auth|client|signing|master|encryption|app|service|account"
+    r"|session|webhook|license|stripe|aws|ssh|gpg|pgp)(?:[_-]|$)", re.I)
+_NOT_CREDENTIAL_PREFIX = re.compile(
+    r"(?:^|[_-])(?:max|min|num|n|count|total|page|next|prev|sort|cache|primary|foreign|partition|lookup"
+    r"|hash|dict|map|row|column|index|unique)[_-]", re.I)
+# a dotted code expression (request.path, "student.id"), not a credential
+CODE_EXPRESSION_RE = re.compile(r"[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)+")
 # "Authorization: Bearer <token>", "'Bearer <token>'"
 BEARER_RE = re.compile(r"\bBearer\s+([A-Za-z0-9._~+/=-]{16,})", re.I)
 # the password in URL user info: mqtt://user:PASSWORD@host
@@ -114,6 +126,11 @@ class SecretTokenRecognizer(PatternRecognizer):
             name, value = m.group(1), m.group(2)
             if not re.search(r"[_-]", name):
                 continue  # a plain name: ASSIGNED_SECRET_RE above decides
+            if not _credential_name(name):
+                continue  # token_count, cache_key, primary_key: not credentials
+            bare = value.strip("`.,:)]\"'")
+            if bare.isdigit() or CODE_EXPRESSION_RE.fullmatch(bare):
+                continue  # token_limit=10000000, cache_key=request.path
             if _credential_like(value, reference=text[m.start(2) - 1] == "="):
                 yield _trimmed(m, text, 2)
         for regex in (BEARER_RE, URL_PASSWORD_RE, PROSE_PASSWORD_RE):
@@ -127,6 +144,13 @@ class SecretTokenRecognizer(PatternRecognizer):
         return RecognizerResult("SECRET", start, end, 0.85, analysis_explanation=explanation,
                                 recognition_metadata={RecognizerResult.RECOGNIZER_NAME_KEY: self.name,
                                                       RecognizerResult.RECOGNIZER_IDENTIFIER_KEY: self.id})
+
+
+def _credential_name(name: str) -> bool:
+    """A prefixed or suffixed name that names a credential (see _CREDENTIAL_LAST)."""
+    if not _CREDENTIAL_LAST.search(name) or _NOT_CREDENTIAL_PREFIX.search(name):
+        return False
+    return not name.lower().endswith("key") or bool(_KEY_QUALIFIER.search(name[:-3]))
 
 
 def _trimmed(m: re.Match, text: str, group: int) -> tuple[int, int]:

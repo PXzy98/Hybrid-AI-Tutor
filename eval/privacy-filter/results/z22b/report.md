@@ -63,5 +63,5 @@ get those recognizers), and the over-redaction of course terms that look like na
 `tests/test_privacy_z11.py::test_z22b_course_text_without_secrets_is_kept`: `primary_key=True`,
 `max_tokens=4096`, `cache_key: user_profile_settings`, `sort_key = lambda ...`, `API_KEY=YOUR_API_KEY_HERE`,
 "the bearer token scheme", `token_count = len(tokens)`, "the password for the quiz is given in class",
-`172.16.0.0/12` and the public 172.32.1.1, 8.8.8.8, a version number 3.172.16.4. Behaviour that is not new and
+`172.16.0.0/12` and the public 172.32.1.1, 8.8.8.8, a version number 3.172.16.4; after the review of the PR also `cache_key=request.path`, `primary_key="student.id"`, `token_count=10000000`, `sort_key: ...`, `partition_key = ...`, `max_token`, `page_token`. A prefixed name counts only when its last part is a credential word, and a name ending in `key` also needs a credential word before it (`api`, `secret`, `access`, ...); dotted code expressions and plain numbers are not values. The E6 and Z22 numbers above are the same after this change. Behaviour that is not new and
 not changed here: a dotted version that is also a private address (10.2.1.4) is still redacted.
