@@ -58,6 +58,8 @@ class RoutingConfig(Section):
     answerability_threshold: float = Field(0.8, ge=0, le=1)
     current_source_max_age_days: int = Field(30, ge=1)
     max_evidence_windows: int = Field(32, ge=1, le=128)
+    # V19: another router (a `@routers.register` name) for the courses of one type; empty: `impl` for all
+    by_course_type: dict[str, str] = {}
 
     @model_validator(mode="after")
     def _methods(self):

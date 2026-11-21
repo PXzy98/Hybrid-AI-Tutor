@@ -6,7 +6,7 @@ from time import perf_counter
 from app.core.registry import steps
 from app.core.schemas import RequestContext, RouteInput, SemanticAnalysis
 from app.pipeline.base import BaseStep
-from app.pipeline.settings_view import default_routing_method
+from app.pipeline.settings_view import course_type, default_routing_method, router_of
 
 
 def route_input(ctx: RequestContext) -> RouteInput:
@@ -21,6 +21,7 @@ def route_input(ctx: RequestContext) -> RouteInput:
         conversation_context="\n".join(t.text for t in ctx.history[-4:] if t.role == "student"),
         level=ctx.learner.focus_level if ctx.learner and ctx.learner.personalized else None,
         kc_ids=ctx.understanding.kc_ids if ctx.understanding else [],
+        course_type=course_type(ctx),
     )
 
 
@@ -34,7 +35,7 @@ def question_kind_of(router, ctx: RequestContext, vector) -> str:
         x = route_input(ctx)
         if x.conversation_context:  # `vector` also holds the earlier questions: embed this one by itself
             vector = router.embed(x.sanitized_question)
-        return kind(vector)
+        return kind(vector, course_type=x.course_type)
     except Exception:  # noqa: BLE001 - a failing head must not stop the request
         return "concept"
 
@@ -45,9 +46,9 @@ class AnalyzeRouteStep(BaseStep):
     on_error = "stop"
 
     async def run(self, ctx):
-        if self.services.settings.routing.impl != "semantic":
+        impl, router = router_of(ctx, self.services)
+        if impl != "semantic":
             return ctx
-        router = self.services.router
         method = ctx.request.routing_method or default_routing_method(ctx, self.services)
         t0 = perf_counter()
         await ctx.report("embedding", "running", "Encoding the question locally.")
@@ -70,7 +71,7 @@ class AnalyzeRouteStep(BaseStep):
             "classification", "running", f"Applying {method.upper()} capability and evidence heads."
         )
         try:
-            ctx.semantic_analysis = await asyncio.to_thread(router.classify, vector, method)
+            ctx.semantic_analysis = await asyncio.to_thread(router.classify, vector, method, course_type(ctx))
             a = ctx.semantic_analysis
             await ctx.report(
                 "classification",

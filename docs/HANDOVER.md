@@ -79,6 +79,7 @@ tasks for whoever takes over (V18, Z22b, V19, Z22c).
 | Backend French texts | merged (#124) | `app/api/v2/fr.yaml`, `localize.py` |
 | Z26, S15, S16, Z25 | merged (#110, #113, #111, #112) | |
 | Z27 security review | merged (#117) | [SECURITY_REVIEW.md](SECURITY_REVIEW.md) |
+| V19 a course type as one package (routing) | V19 PR: `RouteInput.course_type`, heads per type with fallback, `routing.by_course_type`, `train.py --course-type`; checklist in design/extension-points.md | `app/routing/models.py`, `app/pipeline/settings_view.py` (`router_of`) |
 | V18 edit the wording of KCs and check items | PR #138: the code stays, so learner records and statistics keep counting the item; another active KC's name is a 409; edits audited with field names only | `app/catalog/editor.py`, `frontend/src/pages/instructor/ContentEdit.tsx` |
 | Z22b privacy rules (only redact more) | PR #139: prefixed credential names, Bearer, URL passwords, passwords in prose, private addresses before a full stop, `git@` remotes; E6 identical | `app/privacy/recognizers/engineering.py`, `eval/privacy-filter/results/z22b/` |
 | V20 course announcements | PR open (approved by Z on 2026-11-21): plain text, pinned first, latest three on the student's course home; privacy-scanned before storing, audited without text, no writes in an archived course; no e-mail or unread markers | `app/api/v2/announcements.py`, migration 0018, `frontend/src/pages/Announcements.tsx` |
