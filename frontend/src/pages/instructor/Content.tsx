@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/i18n";
-import { ItemEditDialog, KcEditDialog } from "./ContentEdit";
+import { ItemEditDialog, KcEditDialog, itemLabel } from "./ContentEdit";
 import ContentTransfer from "./ContentTransfer";
 import Misconceptions from "./Misconceptions";
 
@@ -225,7 +225,7 @@ function ItemsCard({ course }: { course: Course }) {
               {it.status !== "retired" && (
                 <span className="flex shrink-0 gap-1">
                   <ItemEditDialog course={course} item={it} onSaved={() => setSaved(true)} />
-                  <Button type="button" size="sm" variant="outline" aria-label={t("content.retireFor", { name: it.code })} onClick={() => { setSaved(false); retire.mutate(it.id); }}>{t("content.retire")}</Button>
+                  <Button type="button" size="sm" variant="outline" aria-label={t("content.retireFor", { name: itemLabel(it) })} onClick={() => { setSaved(false); retire.mutate(it.id); }}>{t("content.retire")}</Button>
                 </span>
               )}
             </li>

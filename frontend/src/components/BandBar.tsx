@@ -14,7 +14,7 @@ const SEGMENT: Record<string, string> = {
 export default function BandBar({ counts, bands }: { counts: Record<string, number | null | undefined>; bands: string[] }) {
   const { t } = useI18n();
   const known = bands.filter((b) => b in counts);
-  if (known.some((b) => counts[b] === null)) return <span className="text-xs text-muted-foreground">{t("overview.hidden")}</span>;
+  if (known.some((b) => counts[b] === null)) return null;  // the table cells already say "hidden"
   const total = known.reduce((sum, b) => sum + (counts[b] ?? 0), 0);
   if (!total) return null;
   const label = known.map((b) => `${t(`band.${b}` as MessageKey)} ${counts[b] ?? 0}`).join(", ");

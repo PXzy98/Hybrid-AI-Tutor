@@ -39,6 +39,7 @@ describe("start next term's course", () => {
     await screen.findByText(/Students and their data are not copied/);
     const user = userEvent.setup();
     await user.type(field("nt-code"), "ECE 1000");
+    await user.type(field("nt-term"), "Winter");
     await user.click(screen.getByRole("button", { name: "Create the new course" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Choose another code.");
   });

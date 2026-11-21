@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, type FormEvent, type ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { ApiError } from "@/api/client";
 import { api, type Course, type CourseSettings, type CourseValues } from "@/api/endpoints";
-import { ErrorNote, Loading, StatusText } from "@/components/common";
+import { ErrorNote, Loading, REQUIRED_LABEL, SaveHint, StatusText } from "@/components/common";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,6 +19,11 @@ import { useI18n } from "@/i18n";
 export default function Settings({ course }: { course: Course }) {
   const settings = useQuery({ queryKey: ["settings", course.id], queryFn: () => api.courseSettings(course.id) });
   const [savedVersion, setSavedVersion] = useState<number | null>(null);  // survives the remount after a save
+  const { hash } = useLocation();
+  // the link from End of term: scroll to the next-term form once the page is there
+  useEffect(() => {
+    if (hash === "#next-term") document.getElementById("next-term")?.scrollIntoView({ block: "start" });
+  }, [hash, settings.isLoading]);
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <CourseInfo course={course} />
@@ -49,18 +54,22 @@ function NextTermCourse({ course }: { course: Course }) {
   });
   const set = (k: keyof typeof form) => (e: { target: { value: string } }) => setForm({ ...form, [k]: e.target.value });
   const taken = copy.error instanceof ApiError && copy.error.status === 409;
+  const missing = !form.code.trim() || !form.title.trim() || !form.term_label.trim();
   return (
-    <Card>
+    <Card id="next-term" className="scroll-mt-4">
       <CardHeader><CardTitle>{t("nextTerm.title")}</CardTitle><CardDescription>{t("nextTerm.hint")}</CardDescription></CardHeader>
       <CardContent>
         <form className="grid gap-4 sm:grid-cols-3" onSubmit={(e) => { e.preventDefault(); copy.mutate(); }}>
-          <div className="grid gap-1.5"><Label htmlFor="nt-code">{t("course.code")}</Label><Input id="nt-code" autoCapitalize="off" autoCorrect="off" spellCheck={false} value={form.code} onChange={set("code")} required /></div>
-          <div className="grid gap-1.5"><Label htmlFor="nt-title">{t("course.title")}</Label><Input id="nt-title" value={form.title} onChange={set("title")} required /></div>
-          <div className="grid gap-1.5"><Label htmlFor="nt-term">{t("course.term")}</Label><Input id="nt-term" value={form.term_label} onChange={set("term_label")} /></div>
+          <div className="grid gap-1.5"><Label htmlFor="nt-code" className={REQUIRED_LABEL}>{t("course.code")}</Label><Input id="nt-code" autoCapitalize="off" autoCorrect="off" spellCheck={false} value={form.code} onChange={set("code")} required aria-required /></div>
+          <div className="grid gap-1.5"><Label htmlFor="nt-title" className={REQUIRED_LABEL}>{t("course.title")}</Label><Input id="nt-title" value={form.title} onChange={set("title")} required aria-required /></div>
+          <div className="grid gap-1.5"><Label htmlFor="nt-term" className={REQUIRED_LABEL}>{t("course.term")}</Label><Input id="nt-term" value={form.term_label} onChange={set("term_label")} required aria-required /></div>
           <div className="sm:col-span-3 space-y-2">
             {taken && <Alert variant="warning" role="alert" icon>{t("nextTerm.taken")}</Alert>}
             <ErrorNote error={taken ? null : copy.error} />
-            <Button type="submit" loading={copy.isPending}>{t("nextTerm.button")}</Button>
+            <div className="flex flex-wrap items-center gap-3">
+              <Button type="submit" loading={copy.isPending} disabled={missing || copy.isPending} aria-describedby={missing ? "nt-hint" : undefined}>{t("nextTerm.button")}</Button>
+              {missing && <SaveHint id="nt-hint">{t("nextTerm.needed")}</SaveHint>}
+            </div>
           </div>
         </form>
       </CardContent>
