@@ -37,6 +37,7 @@ section 10.
 | V18 edit the wording of KCs and check items | PR #138: Edit dialogs on Course content; codes and learner records stay; duplicate active KC name 409; edits audited (field names only) |
 | Z22b low-risk privacy rule changes | PR #139: E6 identical on every set; Z22 leak ECE 24.0% -> 4.0%, CS 12.5% -> 0.0%, general 6.7% -> 0.0%, over-redaction unchanged; the eight misses found (`eval/privacy-filter/results/z22b/report.md`) |
 | V19 a course type as one package, including routing | merged (#140 design, #141 code): heads per type under `data/routing/models/<type>/` with fallback to the shared heads, `routing.by_course_type`, `train.py --course-type`, routing evaluation per type; no type has its own heads yet, so routing is unchanged |
+| V21 quiz options that differ only in case | PR #142: "AA", "Aa", "aa" are different options; only options equal after trimming and collapsing spaces are refused (quizzes and AI check item drafts) |
 | S14 retrieval, T16, T17 | merged (#136, #135) |
 | V10 AWS deployment | on hold (AWS details) |
 
@@ -260,3 +261,9 @@ questions also decide for ECE and CS courses (the routing test of 2026-11-20 mea
 router class per type is rarely needed; trained heads per type behind the shared router are the useful part.
 Rules 2 and 4 stay: a type's router cannot send original text to the cloud (the cloud gate runs after routing),
 and a new privacy profile needs its own held-out set and an E6 run.
+
+### Decisions of 2026-11-21
+
+| ID | Decision and task | Done when |
+|---|---|---|
+| V21 | **Quiz options that differ only in case are different answers** (found while building the demo database). A quiz question refused genetics options such as "AA", "Aa", "aa" or "genotype A/A" and "genotype A/a" with "options must differ" (422), because options were compared without case. Options now count as the same only when they are equal after trimming and collapsing runs of spaces, case-sensitive; the same rule applies to the options of AI-drafted check items. The frontend and the check item editor have no such check | "AA", "Aa", "aa" and "A/A", "A/a" accepted; "Yes" and " Yes ", "a  b" and "a b" still refused. **State:** PR #142 |
