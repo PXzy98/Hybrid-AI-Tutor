@@ -37,6 +37,7 @@ section 10.
 | V18 edit the wording of KCs and check items | PR #138: Edit dialogs on Course content; codes and learner records stay; duplicate active KC name 409; edits audited (field names only) |
 | Z22b low-risk privacy rule changes | PR #139: E6 identical on every set; Z22 leak ECE 24.0% -> 4.0%, CS 12.5% -> 0.0%, general 6.7% -> 0.0%, over-redaction unchanged; the eight misses found (`eval/privacy-filter/results/z22b/report.md`) |
 | V19 a course type as one package, including routing | merged (#140 design, #141 code): heads per type under `data/routing/models/<type>/` with fallback to the shared heads, `routing.by_course_type`, `train.py --course-type`, routing evaluation per type; no type has its own heads yet, so routing is unchanged |
+| V21 quiz options that differ only in case | PR #142: "AA", "Aa", "aa" are different options; only options equal after trimming and collapsing spaces are refused (quizzes and AI check item drafts) |
 | S14 retrieval, T16, T17 | merged (#136, #135) |
 | V20 course announcements | approved by Z on 2026-11-21 (section 10); PR open: instructors write, pin, edit and delete; students see the latest on the course home and all under Announcements; privacy-scanned, audited without text |
 | V10 AWS deployment | on hold (AWS details) |
@@ -235,6 +236,7 @@ next agent takes them in this order. Each is one task, one branch and one PR (AG
 | ID | Decision and task | Done when |
 |---|---|---|
 | V20 | **Course announcements**, approved by Z. Instructors of a course write short plain text notices (title up to 200 characters, text up to 4000), pin, edit and delete them; every member reads them, pinned first, then newest first; students see the latest on the course home. Title and text pass the same privacy scan as an uploaded material (422 with the finding types); create, update and delete are audited with IDs and field names only. New table `announcement` (migration 0018), additive `/api/v2/courses/{course_id}/announcements` routes with access tests. Not in scope: e-mail notifications, unread markers, scheduled publishing | endpoints, access tests and the two views (en and fr) merged; OpenAPI and generated types committed. **State:** PR open |
+| V21 | **Quiz options that differ only in case are different answers** (found while building the demo database). A quiz question refused genetics options such as "AA", "Aa", "aa" or "genotype A/A" and "genotype A/a" with "options must differ" (422), because options were compared without case. Options now count as the same only when they are equal after trimming and collapsing runs of spaces, case-sensitive; the same rule applies to the options of AI-drafted check items. The frontend and the check item editor have no such check | "AA", "Aa", "aa" and "A/A", "A/a" accepted; "Yes" and " Yes ", "a  b" and "a b" still refused. **State:** PR #142 |
 
 ### What a course type selects today, and V19
 
