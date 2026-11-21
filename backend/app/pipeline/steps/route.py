@@ -4,7 +4,13 @@ from time import perf_counter
 from app.core.registry import steps
 from app.core.schemas import RequestContext, RouteInput
 from app.pipeline.base import BaseStep
-from app.pipeline.settings_view import health_detail_policy, local_only, routing_threshold
+from app.pipeline.settings_view import (
+    course_type,
+    health_detail_policy,
+    local_only,
+    router_of,
+    routing_threshold,
+)
 from app.pipeline.steps.analyze_route import route_input
 from app.routing.evidence import assess_evidence, select_passages
 
@@ -25,8 +31,9 @@ class RouteStep(BaseStep):
         return ctx
 
     async def _decide(self, ctx: RequestContext) -> RequestContext:
-        if self.services.settings.routing.impl == "semantic":
-            return await self._semantic(ctx)
+        impl, router = router_of(ctx, self.services)
+        if impl == "semantic":
+            return await self._semantic(ctx, router)
         ctx.target = "local"  # safe default if anything below fails
         if ctx.pii is None:
             raise RuntimeError("route needs the privacy filter result")
@@ -40,8 +47,9 @@ class RouteStep(BaseStep):
             passage_count=len(ctx.passages),
             level=learner.focus_level if learner else None,
             kc_ids=ctx.understanding.kc_ids if ctx.understanding else [],
+            course_type=course_type(ctx),
         )
-        score = await asyncio.to_thread(self.services.router.route_score, x)
+        score = await asyncio.to_thread(router.route_score, x)
         if score.score >= threshold:
             generalize = health_detail_policy(ctx, self.services) == "generalize"
             if cfg.force_local_if_not_cloud_safe and not ctx.pii.cloud_safe and not generalize:
@@ -51,11 +59,10 @@ class RouteStep(BaseStep):
         ctx.route = score
         return ctx
 
-    async def _semantic(self, ctx):
+    async def _semantic(self, ctx, router):
         # No pii/cloud_safe condition here: the privacy rules (personal health, leak guard) apply at the cloud
         # gate in the generate step, for every router.
         ctx.target = "cloud"  # failures must never silently admit a question to Local
-        router = self.services.router
         x = route_input(ctx)
         analysis = ctx.semantic_analysis or await asyncio.to_thread(router.analyze, x)
         threshold = routing_threshold(ctx, self.services)

@@ -19,7 +19,7 @@ def configure_classifier(monkeypatch, *, cloud_probability=0.1):
     monkeypatch.setattr(SemanticRouter, "embed", lambda self, text: np.zeros(3))
     monkeypatch.setattr(
         SemanticRouter, "classify",
-        lambda self, vector, method: SemanticAnalysis(
+        lambda self, vector, method, course_type=None: SemanticAnalysis(
             method=method, reliable=True, cloud_probability=cloud_probability,
             requires_evidence=True, nearest_similarity=0.9,
         ),

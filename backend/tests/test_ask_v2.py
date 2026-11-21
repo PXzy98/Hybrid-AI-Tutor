@@ -206,9 +206,11 @@ def test_a_course_rule_question_routed_to_the_cloud_carries_the_syllabus(make_cl
     from app.routing.semantic import SemanticRouter
 
     monkeypatch.setattr(SemanticRouter, "embed", lambda self, text: np.zeros(3))
-    monkeypatch.setattr(SemanticRouter, "classify", lambda self, vector, method: SemanticAnalysis(
-        method=method, reliable=True, cloud_probability=0.99, requires_evidence=True, nearest_similarity=0.9))
-    monkeypatch.setattr(SemanticRouter, "question_kind", lambda self, vector: "logistics", raising=False)
+    monkeypatch.setattr(SemanticRouter, "classify", lambda self, vector, method, course_type=None:
+                        SemanticAnalysis(method=method, reliable=True, cloud_probability=0.99,
+                                         requires_evidence=True, nearest_similarity=0.9))
+    monkeypatch.setattr(SemanticRouter, "question_kind", lambda self, vector, course_type=None: "logistics",
+                        raising=False)
     pipeline = ["privacy_filter", "understand", "learner_context", "analyze_route", "retrieve", "route",
                 "generate", "restore", "verify", "attach_check", "record"]
     rule = "Fictional syllabus: AI assistants may be used for the problem sets if the use is cited."

@@ -73,6 +73,8 @@ class RouteInput(BaseModel):
     method: Literal["lr", "svm"] | None = None
     retrieval_status: str = "unknown"
     conversation_context: str = ""
+    # the course type (a privacy profile name, V19): selects its own routing heads when it has them
+    course_type: str | None = None
 
     @property
     def contextual_question(self) -> str:

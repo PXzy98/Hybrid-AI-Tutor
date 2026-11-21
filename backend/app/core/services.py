@@ -1,5 +1,5 @@
 """Long-lived services shared by pipeline steps and API routes, built once at startup."""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from sqlalchemy import Engine
 
@@ -17,7 +17,7 @@ from app.platform.components import ComponentManager, Components
 from app.platform.courses import CourseService
 from app.platform.settings import SettingsService, configure, migrate_v1_history
 from app.rag import Retriever, load_retriever
-from app.routing import RouteScorer, load_router
+from app.routing import RouteScorer, load_router, load_type_routers
 from app.sessions import SessionStore, load_session_store
 from app.storage.db import init_db, make_engine
 
@@ -42,6 +42,8 @@ class Services:
     usage: object | None = None  # the usage meter (task Z10; app.platform.usage)
     course_retriever: object | None = None  # per-course index (S4; app.rag.course_retriever), read-only here
     course_scopes: object | None = None  # content, learner model and retriever per course (API v2 ask)
+    # V19: the router of a course type named in routing.by_course_type (one instance per router name)
+    type_routers: dict[str, RouteScorer] = field(default_factory=dict)
 
     # the current component set; one reference, swapped as a whole
     @property
@@ -118,6 +120,7 @@ def build_services(settings: Settings | None = None) -> Services:
     services = Services(
         engine=engine,
         router=load_router(settings.routing.impl),
+        type_routers=load_type_routers(settings.routing.by_course_type, settings.routing.impl),
         retriever=load_retriever(settings.rag.impl),
         sessions=load_session_store(settings.sessions.store, engine),
         accounts=AccountService(engine, settings),
