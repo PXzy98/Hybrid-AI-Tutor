@@ -43,14 +43,18 @@ describe("date formatting", () => {
   it("follows the interface language", () => {
     expect(formatDate(when, "en")).toBe(new Date(when).toLocaleDateString("en-CA"));
     expect(formatDate(when, "fr")).toBe(new Date(when).toLocaleDateString("fr-CA"));
-    expect(formatDateTime(when, "en")).toBe(new Date(when).toLocaleString("en-CA"));
-    expect(formatDateTime(when, "fr")).toBe(new Date(when).toLocaleString("fr-CA"));
+    expect(formatDateTime(when, "en")).toBe(new Date(when).toLocaleString("en-CA", { dateStyle: "short", timeStyle: "short" }));
+    expect(formatDateTime(when, "fr")).toBe(new Date(when).toLocaleString("fr-CA", { dateStyle: "short", timeStyle: "short" }));
   });
 
   it("shows a date-only day as that day in every time zone", () => {
     // a weekly bucket starts on Monday 2026-11-16; west of UTC, local formatting would show Sunday the 15th
     expect(formatDay("2026-11-16", "en")).toBe("2026-11-16");
     expect(formatDay("2026-11-16", "fr")).toBe(new Date(Date.UTC(2026, 10, 16)).toLocaleDateString("fr-CA", { timeZone: "UTC" }));
+  });
+
+  it("shows hours and minutes but no seconds (V22 B22)", () => {
+    for (const lang of ["en", "fr"] as const) expect(formatDateTime("2026-10-16T09:00:00Z", lang)).not.toMatch(/:00:00|\d min \d+ s/);
   });
 
   it("writes the time of day differently in the two languages", () => {

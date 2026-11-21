@@ -66,7 +66,7 @@ export default function AppShell({ me }: { me: Me }) {
   const sidebarProps = { me, current, student, tab };
 
   return (
-    <div className="flex h-dvh overflow-hidden">
+    <div className="flex h-dvh overflow-clip">
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground">{t("nav.skip")}</a>
       {showSidebar && !collapsed && (
         <aside aria-label={t("nav.sidebar")} className="hidden w-66 shrink-0 border-r bg-sidebar md:block">
@@ -105,7 +105,9 @@ export default function AppShell({ me }: { me: Me }) {
           )}
           {!showSidebar && <div className="ml-auto"><UserMenu me={me} compact /></div>}
         </header>
-        <main id="main" tabIndex={-1} className="min-h-0 flex-1 overflow-y-auto outline-hidden">
+        {/* relative: the containing block of the absolutely positioned sr-only elements inside the page; without it
+            they sit against the viewport, outside this scroll container, and make the document itself scroll */}
+        <main id="main" tabIndex={-1} className="relative min-h-0 flex-1 overflow-y-auto outline-hidden">
           <div className="mx-auto w-full max-w-6xl min-w-0 px-4 py-6 [overflow-wrap:anywhere] sm:px-6">
             <ErrorBoundary><Outlet /></ErrorBoundary>
           </div>

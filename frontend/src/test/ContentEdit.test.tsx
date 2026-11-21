@@ -40,7 +40,7 @@ describe("editing the wording of content (V18)", () => {
     const calls = mockApi(contentRoutes({ "PATCH /courses/1/check-items/8": { ...ITEM, stem: "Which unit measures resistance?" } }));
     renderApp("/courses/1/content");
     const user = userEvent.setup();
-    await user.click(await screen.findByRole("button", { name: "Edit K1-q1" }));
+    await user.click(await screen.findByRole("button", { name: "Edit K1-q1: What is resistance measured in?" }));
     const dialog = await screen.findByRole("dialog");
     expect(within(dialog).getByLabelText("Option B (correct answer)")).toHaveValue("Ohms");
     const stem = within(dialog).getByLabelText("Question");
@@ -64,7 +64,7 @@ describe("editing the wording of content (V18)", () => {
     }));
     renderApp("/courses/1/content");
     const user = userEvent.setup();
-    await user.click(await screen.findByRole("button", { name: "Edit K1-q1" }));
+    await user.click(await screen.findByRole("button", { name: "Edit K1-q1: What is resistance measured in?" }));
     let dialog = await screen.findByRole("dialog");
     await user.clear(within(dialog).getByLabelText("Option A"));
     expect(within(dialog).getByRole("button", { name: "Save" })).toBeDisabled();
@@ -83,7 +83,7 @@ describe("editing the wording of content (V18)", () => {
     mockApi(contentRoutes());
     renderApp("/courses/1/content", "fr");
     const user = userEvent.setup();
-    await user.click(await screen.findByRole("button", { name: "Modifier K1-q1" }));
+    await user.click(await screen.findByRole("button", { name: "Modifier K1-q1: What is resistance measured in?" }));
     const dialog = await screen.findByRole("dialog");
     expect(within(dialog).getByLabelText("Option B (bonne réponse)")).toHaveValue("Ohms");
     expect(dialog).toHaveTextContent("Pour en changer le sens, retirez-la et ajoutez-en une nouvelle.");

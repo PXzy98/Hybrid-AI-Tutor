@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 
 import type { RoutingProgress as Progress } from "@/api/askStream";
 import type { Schemas } from "@/api/client";
-import { useI18n } from "@/i18n";
-import type { MessageKey } from "@/i18n/en";
+import { useI18n, type T } from "@/i18n";
+import { en, type MessageKey } from "@/i18n/en";
 
 export type RoutingTrace = {
   id: string; method: string; visible: boolean; events: Progress[]; running: boolean;
@@ -23,10 +23,28 @@ export function latestEvents(events: Progress[]): Progress[] {
   return [...byStage.values()];
 }
 
+const EVIDENCE_STATUSES = ["sufficient", "insufficient", "uncertain", "unavailable", "not_required", "empty"];
+
+/** A plain-language line for a step. The backend sends English technical details; they are replaced by a
+ *  translated sentence for the steps known here (a number is read from the detail). Anything else is shown as
+ *  sent in English and hidden in another language, so a student never reads technical English in the French
+ *  interface. */
+function stepDetail(stage: string, status: string, detail: string, lang: string, t: T): string | null {
+  const count = /(\d+)/.exec(detail)?.[1];
+  const sentence = (key: string, vars?: Record<string, string | number>) => t(`routing.detail.${key}` as MessageKey, vars);
+  let key: string | null = null;
+  if (stage === "decision" && status === "completed") key = /^LOCAL/i.test(detail) ? "decision.completedLocal" : /^CLOUD/i.test(detail) ? "decision.completedCloud" : null;
+  else if (status !== "running" && status !== "pending") key = `${stage}.${status}`;
+  if (key && `routing.detail.${key}` in en && (count || !/\{n\}/.test(en[`routing.detail.${key}` as MessageKey]))) {
+    return sentence(key, { n: count ?? 0 });
+  }
+  return lang === "en" ? detail : null;
+}
+
 /** The routing steps of one answer. Shown inside a collapsed panel; the content never includes question text. */
 export default function RoutingProgress({ trace }: { trace: RoutingTrace }) {
   const [now, setNow] = useState(Date.now());
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   useEffect(() => {
     if (!trace.running) return;
     const timer = window.setInterval(() => setNow(Date.now()), 200);
@@ -58,7 +76,7 @@ export default function RoutingProgress({ trace }: { trace: RoutingTrace }) {
                 </span>
                 <span className="tabular-nums text-muted-foreground">{duration == null ? "—" : `${(duration / 1000).toFixed(3)} s`}</span>
               </div>
-              {e?.detail && <p className="mt-0.5 text-muted-foreground">{e.detail}</p>}
+              {e?.detail && stepDetail(id, state, e.detail, lang, t) && <p className="mt-0.5 text-muted-foreground">{stepDetail(id, state, e.detail, lang, t)}</p>}
             </li>
           );
         })}
@@ -67,7 +85,7 @@ export default function RoutingProgress({ trace }: { trace: RoutingTrace }) {
         <div className="mt-3 border-t pt-2 text-xs">
           <strong>{t("routing.selected", { target: trace.details.target?.toUpperCase() ?? "" })}</strong>
           {trace.details.analysis && <span>{t("routing.cloudNeed", { p: ((trace.details.analysis.cloud_probability ?? 0) * 100).toFixed(1) })}</span>}
-          {trace.details.evidence && <p>{t("routing.evidence", { status: trace.details.evidence.status, p: ((trace.details.evidence.coverage ?? 0) * 100).toFixed(0) })}</p>}
+          {trace.details.evidence && <p>{t("routing.evidence", { status: EVIDENCE_STATUSES.includes(trace.details.evidence.status) ? t(`routing.evidenceStatus.${trace.details.evidence.status}` as MessageKey) : trace.details.evidence.status, p: ((trace.details.evidence.coverage ?? 0) * 100).toFixed(0) })}</p>}
           {trace.details.analysis?.label_origin === "prototype_policy" && <p className="mt-1 text-warning">{t("routing.prototype")}</p>}
         </div>
       )}
