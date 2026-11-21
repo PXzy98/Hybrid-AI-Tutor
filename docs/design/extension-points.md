@@ -3,7 +3,8 @@
 Prof. Abbas sees PACT growing into "Brightspace plus": the course platform plus AI for teaching, research and
 industry training. This term builds none of the platform features below (decision of 2026-11-17); this note
 shows the next team where each one plugs in, so it can be added without changing what exists. Read with
-[course-structure.md](course-structure.md) (data, roles, settings) and [api-v2.md](api-v2.md) (HTTP API).
+[course-structure.md](course-structure.md) (data, roles, settings) and [api-v2.md](api-v2.md) (HTTP API). The
+last section (V19) is about a different kind of extension: a new course type.
 
 ## The four places every feature touches
 
@@ -55,6 +56,76 @@ Background work (long jobs such as grading a batch or importing a gradebook) use
   login (`AccountService`), then by the subject. The password login stays for accounts without it.
 - The session, CSRF and role checks do not change: only `POST /auth/login` gains a sibling
   `GET /auth/oidc/callback`.
+
+## A new course type as one package (task V19)
+
+**Status: design for review by Z; no code yet.** A course has one course type (`courses.course_type`). A new
+type should be a set of files another team adds, without changes to the core.
+
+### What a type selects today
+
+| Part | Where | Selected by the type? |
+|---|---|---|
+| Privacy profile: PII recognizers, health-detail policy, checkers, medical disclaimer, consent note, subject prompt | `backend/app/privacy/profiles/<type>.yaml` (`extends: base`), recognizers `@pii_recognizers.register`, checkers `@checkers.register`, prompt `app/prompts/subjects/<prompt>.md` | yes; an unknown name stops the app when the profile loads |
+| Web search sites and engines | `websearch.allowlist`, `websearch.searxng_engines` in `config.yaml` | yes |
+| Retrieval and the evidence step | the course's own index | per course |
+| Router (cloud need, evidence need, freshness heads; logistics or concept) | one `routing.impl` per deployment (`@routers.register`), heads in `data/routing/models/` trained on medical questions (T15) | **no**: `RouteInput` has no course type |
+
+So heads trained on medical questions also decide for ECE and CS courses; the routing test of 2026-11-20
+(`eval/routing-ece/`) measured ECE questions with them.
+
+### Plan
+
+1. **`RouteInput.course_type: str | None = None`** (additive). `route_input()` in
+   `app/pipeline/steps/analyze_route.py` fills it from `ctx.settings.course_type`; the non-semantic call in
+   `route.py` too. A router that ignores it behaves as now.
+2. **Heads per type.** `weights_path(cfg, method, course_type)` (`app/routing/models.py`) returns
+   `<model_dir>/<type>/semantic_<method>.npz` when that file exists, otherwise the current
+   `<model_dir>/semantic_<method>.npz`; `question_type.weights_path` the same for `question_type.npz`. A type
+   name is checked against the profile names (`[a-z_]+`, one of `profile_names()`) before it becomes a path.
+   `SemanticRouter.classify(vector, method, course_type=None)` passes it on; `AnalyzeRouteStep` hands it over.
+   Existing types have no folder, so they route exactly as today.
+3. **Another router for one type** (optional): `routing.by_course_type: {<type>: <impl>}` in `config.yaml`,
+   empty by default. `Services` loads each named router once; `RouteStep` and `AnalyzeRouteStep` use the
+   type's router when there is one, `routing.impl` otherwise. Rarely needed: trained heads behind the shared
+   semantic router are the useful part.
+4. **Training per type.** `python -m app.routing.train --data <questions.jsonl> --course-type <type>` writes
+   `data/routing/models/<type>/` (the same format, `metadata.course_type` added); without `--course-type` it
+   writes the shared heads as now. The question set uses the labels of `data/routing/seed.jsonl`
+   (`cloud_required`, `requires_evidence`, `requires_fresh_evidence`, `label_origin`).
+5. **Evaluation per type.** `eval/routing-ece/run.py` (and the main routing evaluation) report each type
+   with the heads it would get: its own when the folder exists, the shared ones otherwise, side by side.
+6. **The cloud gate still decides last.** Routing only proposes local or cloud. Every cloud request still goes
+   through `CloudRequest` and the cloud gate in the generate step (personal health, leak guard, `local_only`
+   courses), whatever router or heads a type uses; a type's heads cannot send original text to the cloud
+   (rule 2).
+
+Tests for the code (second PR): a type without its own folder routes exactly as now (same scores as the shared
+heads); a type with a folder uses its heads; an unknown or path-like type falls back to the shared heads;
+`routing.by_course_type` picks the named router; a question a type's heads send to the cloud still meets the
+cloud gate (personal health detail stays local, `local_only` course stays local). If there is time: ECE heads
+trained from `data/routing/ece_cs_questions.jsonl` with the seed rows, before and after on the held-out share
+(`eval/routing-ece/`).
+
+### Checklist: adding a course type
+
+1. **Privacy profile** `backend/app/privacy/profiles/<type>.yaml` with `extends: base`: recognizers, checkers,
+   `health_detail_policy`, `medical_disclaimer`, `consent_note`, `prompt`. Only add to the base rules.
+2. **New recognizers or checkers** in `app/privacy/recognizers/` or `app/verify/checkers/`, registered by name, with
+   unit tests on fictional text (positives and course text that must stay).
+3. **Subject prompt** `backend/app/prompts/subjects/<prompt>.md`.
+4. **Web search** sites in `websearch.allowlist.<type>` and engines in `websearch.searxng_engines.<type>`
+   (`config.yaml`); without them the type gets the default list.
+5. **Routing heads** (optional): a labelled question set for the subject, `train.py --course-type <type>`,
+   the evaluation per type, and the folder `data/routing/models/<type>/` committed with its
+   `training_report.json`. Without them the shared heads decide.
+6. **Privacy evaluation**: a held-out set written blind from the profile YAML (as
+   `eval/privacy-filter/make_course_sets.py`), scored with `course_sets.py`, and a full E6 run (rule 4) in
+   the PR.
+7. **Enable** the type in the admin settings (`enabled_course_types`); a demo course pack and its manifest
+   if one exists.
+8. **Tests**: the profile loads; a course of the type gets its prompt, consent note and recognizers; access
+   and routing tests as above.
 
 ## What must stay true
 - Privacy rules (guide section 2): no question text stored or logged; original text and learner profiles only
