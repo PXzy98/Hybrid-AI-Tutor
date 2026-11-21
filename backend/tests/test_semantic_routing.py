@@ -176,7 +176,7 @@ def semantic_api(make_client, monkeypatch, extra=None):
 
     monkeypatch.setattr(SemanticRouter, "embed", lambda self, question: np.zeros(3))
 
-    def classify(self, vector, method):
+    def classify(self, vector, method, course_type=None):
         return SemanticAnalysis(
             method=method,
             cloud_probability=0.1,
@@ -268,7 +268,7 @@ def test_cloud_unavailable_answers_locally_and_says_why(make_client, monkeypatch
         monkeypatch.setattr(
             SemanticRouter,
             "classify",
-            lambda self, vector, method: SemanticAnalysis(
+            lambda self, vector, method, course_type=None: SemanticAnalysis(
                 method=method, reliable=True, cloud_probability=0.99
             ),
         )
@@ -289,7 +289,8 @@ def test_rag_adapter_filters_evidence_before_prompt_and_sources(make_client, mon
 
     cm, api = semantic_api(make_client, monkeypatch)
     try:
-        monkeypatch.setattr(SemanticRouter, "classify", lambda self, vector, method: analysis())
+        monkeypatch.setattr(SemanticRouter, "classify",
+                            lambda self, vector, method, course_type=None: analysis())
         monkeypatch.setattr(
             "app.routing.evidence.pair_scores",
             lambda name, pairs, cfg: np.array([0.99 if "VALID" in text else 0.01 for _, text in pairs]),
