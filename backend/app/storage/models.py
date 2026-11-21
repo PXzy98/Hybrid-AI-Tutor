@@ -6,7 +6,7 @@ hashes exist only in `account` (privacy invariant 6); every other table uses the
 import uuid
 from datetime import UTC, datetime
 
-from sqlalchemy import JSON, Column, DateTime, ForeignKey, UniqueConstraint
+from sqlalchemy import JSON, Boolean, Column, DateTime, ForeignKey, UniqueConstraint
 from sqlmodel import Field, SQLModel
 
 
@@ -105,6 +105,7 @@ class SessionTurn(SQLModel, table=True):
     # conversation shows them like a live answer
     sources: list = Field(default_factory=list, sa_column=Column(JSON, nullable=False, server_default="[]"))
     target: str | None = None
+    cut_off: bool = Field(default=False, sa_column=Column(Boolean, nullable=False, server_default="false"))
 
 
 # ---------------------------------------------------------------------- learner model (design §5, §9)

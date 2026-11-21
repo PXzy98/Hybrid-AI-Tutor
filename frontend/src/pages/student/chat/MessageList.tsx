@@ -5,6 +5,7 @@ import type { AskResponse } from "@/api/endpoints";
 import { ErrorNote, Loading } from "@/components/common";
 import Markdown from "@/components/LazyMarkdown";
 import type { RoutingTrace } from "@/components/RoutingProgress";
+import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n";
 import EmptyChat from "./EmptyChat";
@@ -15,7 +16,7 @@ import TutorMessage, { answerBody, CopyAnswer, RouteLabel, TutorFrame } from "./
 export type Message =
   | { role: "student"; text: string }
   | { role: "tutor"; reply: AskResponse }
-  | { role: "history"; text: string; sources?: AskResponse["sources"]; target?: string | null }
+  | { role: "history"; text: string; sources?: AskResponse["sources"]; target?: string | null; cutOff?: boolean }
   | { role: "error"; error: unknown; question?: string }
   | { role: "routing"; trace: RoutingTrace };
 
@@ -110,6 +111,7 @@ export default function MessageList({ courseId, messages, partial, pending, load
           ) : m.role === "history" ? (
             <TutorFrame key={i} route={m.target ? <RouteLabel target={m.target} /> : undefined}>
               <div className={answerBody}><Markdown>{m.text}</Markdown></div>
+              {m.cutOff && <Alert variant="warning" icon>{t("chat.cutOff")}</Alert>}
               {!!m.sources?.length && <Sources sources={m.sources} />}
               <CopyAnswer text={m.text} />
             </TutorFrame>

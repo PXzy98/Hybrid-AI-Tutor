@@ -91,7 +91,7 @@ function ChatPane({ course, initialConversation: initial, moduleId, onStarted, p
     // stored answers keep their sources and model since V22; older ones have neither
     const past: Message[] = history.data.turns.map((x) => x.role === "student"
       ? { role: "student", text: x.text }
-      : { role: "history", text: x.text, sources: x.sources, target: x.target });
+      : { role: "history", text: x.text, sources: x.sources, target: x.target, cutOff: x.cut_off });
     setMessages((live) => [...past, ...live]);
   }, [history.data]);
   const scope = modules.data?.find((m) => m.id === moduleId);

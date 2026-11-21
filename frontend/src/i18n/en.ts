@@ -157,6 +157,7 @@ export const en = {
   "chat.stop": "Stop the answer",
   "chat.jump": "Jump to the latest message",
   "chat.sources": "Sources",
+  "chat.cutOff": "This answer reached the length limit and stops early; ask a follow-up for the rest.",
   "chat.suggestedNext": "Suggested next:",
   "chat.local": "Local model",
   "chat.localHint": "This answer was written on the course's own server. Nothing left it.",

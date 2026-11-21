@@ -1,7 +1,7 @@
 from sqlmodel import Session
 
 from app.core.registry import steps
-from app.core.schemas import RequestContext, Turn
+from app.core.schemas import RequestContext, StoredTurn, Turn
 from app.pipeline.base import BaseStep
 from app.privacy.redact import redact_known
 from app.rag.sources import answer_sources
@@ -42,9 +42,9 @@ class RecordStep(BaseStep):
             ))
             s.commit()
         self.services.sessions.append(req.session_id, req.student_id, Turn(role="student", text=question))
-        self.services.sessions.append(req.session_id, req.student_id, Turn(
+        self.services.sessions.append(req.session_id, req.student_id, StoredTurn(
             role="tutor", text=answer, sources=answer_sources(ctx.passages) if ctx.answer else [],
-            target=ctx.llm.backend if ctx.llm else None))
+            target=ctx.llm.backend if ctx.llm else None, cut_off=bool(ctx.llm and ctx.llm.cut_off)))
         ctx.clear_pii_mapping()  # nothing after this step needs the original values
         return ctx
 

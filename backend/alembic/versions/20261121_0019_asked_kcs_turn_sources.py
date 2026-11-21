@@ -19,9 +19,11 @@ def upgrade() -> None:
     op.add_column('request_log', sa.Column('kc_ids', sa.JSON(), nullable=False, server_default='[]'))
     op.add_column('session_turn', sa.Column('sources', sa.JSON(), nullable=False, server_default='[]'))
     op.add_column('session_turn', sa.Column('target', sa.String(), nullable=True))
+    op.add_column('session_turn', sa.Column('cut_off', sa.Boolean(), nullable=False, server_default='false'))
 
 
 def downgrade() -> None:
+    op.drop_column('session_turn', 'cut_off')
     op.drop_column('session_turn', 'target')
     op.drop_column('session_turn', 'sources')
     op.drop_column('request_log', 'kc_ids')

@@ -270,3 +270,5 @@ def test_an_answer_cut_off_at_max_tokens_says_so(world):
     assert any("length limit" in w for w in body["warnings"])
     fr = alice.post(f"{world.url}/ask", json={"question": "Explain Ohm's law", "language": "fr"}).json()
     assert any("longueur maximale" in w for w in fr["warnings"])
+    stored = alice.get(f"{world.url}/conversations/{body['conversation_id']}").json()["turns"]
+    assert [t["cut_off"] for t in stored] == [False, True]  # a reopened answer still says it stops early

@@ -21,7 +21,7 @@ from app.api.v1.ask import _error, _response
 from app.api.v2 import localize
 from app.api.v2.errors import ApiError, ErrorCode
 from app.catalog import CatalogError
-from app.core.schemas import AskRequest, AskResponse, RequestContext, Turn
+from app.core.schemas import AskRequest, AskResponse, RequestContext, StoredTurn
 from app.learner.content import ContentError
 from app.pipeline.runner import PipelineError
 from app.pipeline.steps.generate import CLOUD_LIMIT_NOTE
@@ -62,7 +62,7 @@ class ConversationOut(BaseModel):
 
 class ConversationDetailOut(BaseModel):
     conversation_id: str
-    turns: list[Turn]
+    turns: list[StoredTurn]
 
 
 def _services(request: Request):

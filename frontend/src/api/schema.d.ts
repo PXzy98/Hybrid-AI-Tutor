@@ -3020,7 +3020,7 @@ export interface components {
             /** Conversation Id */
             conversation_id: string;
             /** Turns */
-            turns: components["schemas"]["Turn"][];
+            turns: components["schemas"]["StoredTurn"][];
         };
         /** ConversationOut */
         ConversationOut: {
@@ -4972,6 +4972,37 @@ export interface components {
             /** Display Name */
             display_name?: string | null;
         };
+        /**
+         * StoredTurn
+         * @description A turn as the conversation store keeps it (V22). API v1 still declares `Turn`, so its responses keep
+         *     their shape; API v2 conversations return these fields too. Student turns leave them empty.
+         */
+        StoredTurn: {
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "student" | "tutor";
+            /** Text */
+            text: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at?: string;
+            /**
+             * Sources
+             * @default []
+             */
+            sources?: components["schemas"]["Source"][];
+            /** Target */
+            target?: ("local" | "cloud") | null;
+            /**
+             * Cut Off
+             * @default false
+             */
+            cut_off?: boolean;
+        };
         /** StudentAccountOut */
         StudentAccountOut: {
             /** Id */
@@ -5268,13 +5299,6 @@ export interface components {
              * Format: date-time
              */
             created_at?: string;
-            /**
-             * Sources
-             * @default []
-             */
-            sources?: components["schemas"]["Source"][];
-            /** Target */
-            target?: ("local" | "cloud") | null;
         };
         /** UpdateStudentBody */
         UpdateStudentBody: {

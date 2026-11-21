@@ -155,8 +155,14 @@ class Turn(BaseModel):
     role: Literal["student", "tutor"]
     text: str  # sanitized text only
     created_at: datetime = Field(default_factory=_now)
-    sources: list["Source"] = []  # tutor turns: what the answer cited (V22)
-    target: Target | None = None  # tutor turns: the model that answered
+
+
+class StoredTurn(Turn):
+    """A turn as the conversation store keeps it (V22). API v1 still declares `Turn`, so its responses keep
+    their shape; API v2 conversations return these fields too. Student turns leave them empty."""
+    sources: list["Source"] = []  # what the answer cited
+    target: Target | None = None  # the model that answered
+    cut_off: bool = False  # the answer stopped at the model's max_tokens
 
 
 # -------------------------------------------------------------------------- learner
@@ -291,7 +297,7 @@ class Source(BaseModel):
     kc_ids: list[str] = []
 
 
-Turn.model_rebuild()
+StoredTurn.model_rebuild()
 
 
 class AskResponse(BaseModel):

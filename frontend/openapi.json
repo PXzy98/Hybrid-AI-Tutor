@@ -8854,7 +8854,7 @@
           },
           "turns": {
             "items": {
-              "$ref": "#/components/schemas/Turn"
+              "$ref": "#/components/schemas/StoredTurn"
             },
             "type": "array",
             "title": "Turns"
@@ -14334,6 +14334,62 @@
         "type": "object",
         "title": "StaffPatch"
       },
+      "StoredTurn": {
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "student",
+              "tutor"
+            ],
+            "title": "Role"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/Source"
+            },
+            "type": "array",
+            "title": "Sources",
+            "default": []
+          },
+          "target": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "local",
+                  "cloud"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target"
+          },
+          "cut_off": {
+            "type": "boolean",
+            "title": "Cut Off",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "role",
+          "text"
+        ],
+        "title": "StoredTurn",
+        "description": "A turn as the conversation store keeps it (V22). API v1 still declares `Turn`, so its responses keep\ntheir shape; API v2 conversations return these fields too. Student turns leave them empty."
+      },
       "StudentAccountOut": {
         "properties": {
           "id": {
@@ -15259,29 +15315,6 @@
             "type": "string",
             "format": "date-time",
             "title": "Created At"
-          },
-          "sources": {
-            "items": {
-              "$ref": "#/components/schemas/Source"
-            },
-            "type": "array",
-            "title": "Sources",
-            "default": []
-          },
-          "target": {
-            "anyOf": [
-              {
-                "type": "string",
-                "enum": [
-                  "local",
-                  "cloud"
-                ]
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Target"
           }
         },
         "type": "object",
