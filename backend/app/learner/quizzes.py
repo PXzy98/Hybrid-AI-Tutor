@@ -58,7 +58,8 @@ class QuizQuestion(BaseModel):
         options = [o.strip() for o in self.options]
         if not 2 <= len(options) <= 6 or any(not o or len(o) > 300 for o in options):
             raise ValueError("a multiple choice question has 2 to 6 options of at most 300 characters")
-        if len({o.casefold() for o in options}) != len(options):
+        # Case matters (genotypes "AA", "Aa", "aa" are different answers); spacing does not.
+        if len({" ".join(o.split()) for o in options}) != len(options):
             raise ValueError("options must differ")
         if self.answer >= len(options):
             raise ValueError("the answer must be one of the options")

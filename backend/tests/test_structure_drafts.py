@@ -84,6 +84,24 @@ async def test_duplicate_choice_rejected():
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("options", [["Same", " Same ", "Other", "Unique"], ["a  b", "a b", "c", "d"]])
+async def test_choices_differing_only_in_spacing_are_rejected(options):
+    item = _item("check_items") | {"options": options}
+    with pytest.raises(DraftError, match="invalid"):
+        await generate_structure_draft(course_id=101, kind="check_items",
+                                       passages=[_chunk()], gateway=FakeGateway([item]),
+                                       settings=None)
+
+
+@pytest.mark.asyncio
+async def test_choices_differing_only_in_case_are_different_answers():
+    item = _item("check_items") | {"options": ["AA", "Aa", "aa", "A/a"]}
+    result = await generate_structure_draft(course_id=101, kind="check_items",
+                                            passages=[_chunk()], gateway=FakeGateway([item]),
+                                            settings=None)
+    assert sorted(result.items[0].options) == sorted(["AA", "Aa", "aa", "A/a"])
+
+@pytest.mark.asyncio
 async def test_generated_item_never_contains_publication_state():
     result = await generate_structure_draft(
         course_id=101, kind="misconceptions", passages=[_chunk()],

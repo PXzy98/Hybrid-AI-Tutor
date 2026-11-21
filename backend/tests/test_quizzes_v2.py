@@ -6,6 +6,7 @@ from datetime import timedelta
 import pytest
 
 from app.core.schemas import Chunk
+from app.learner.quizzes import QuizQuestion
 from app.llm.fake import FakeLLMClient
 from app.llm.gateway import FakeGateway
 from app.platform import jobs
@@ -99,6 +100,28 @@ def test_windows_assignments_and_validation(world):
     r = world.prof.patch(f"{world.url}/quizzes/{empty['id']}", json={"status": "published"})
     assert r.status_code == 409
     assert world.prof.delete(f"{world.url}/quizzes/{empty['id']}").status_code == 204
+
+
+@pytest.mark.parametrize("options", [["AA", "Aa", "aa"], ["genotype A/A", "genotype A/a"]])
+def test_options_that_differ_only_in_case_are_different_answers(options):
+    question = QuizQuestion(**{**MCQ, "options": options})
+    assert question.options == options
+
+
+@pytest.mark.parametrize("options", [["Yes", " Yes ", "No"], ["a  b", "a b", "c"]])
+def test_options_that_differ_only_in_spacing_are_refused(options):
+    with pytest.raises(ValueError, match="options must differ"):
+        QuizQuestion(**{**MCQ, "options": options})
+
+
+def test_a_quiz_with_genotype_options_is_saved(world):
+    genetics = {**MCQ, "options": ["AA", "Aa", "aa"], "answer": 1}
+    r = world.prof.post(f"{world.url}/quizzes", json={"title": "Genotypes", "questions": [genetics]})
+    assert r.status_code == 201, r.text
+    assert r.json()["questions"][0]["options"] == ["AA", "Aa", "aa"]
+    same = {**MCQ, "options": ["Yes", " Yes ", "No"]}
+    r = world.prof.post(f"{world.url}/quizzes", json={"title": "x", "questions": [same]})
+    assert r.status_code == 422
 
 
 def test_ai_drafts_come_from_the_local_model_and_need_review(world):
