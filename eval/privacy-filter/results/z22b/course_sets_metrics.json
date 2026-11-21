@@ -1,0 +1,844 @@
+{
+  "ece_holdout.jsonl|general": {
+    "positive": 25,
+    "negative": 16,
+    "leak_rate": 0.44,
+    "over_redaction": 0.0625,
+    "keep_terms_lost": 2,
+    "recall_by_type": {
+      "EMAIL_ADDRESS": 1.0,
+      "INTERNAL_ADDRESS": 0.0,
+      "PERSON": 0.8333333333333334,
+      "PHONE_NUMBER": 1.0,
+      "REPO_URL": 0.0,
+      "SECRET": 1.0,
+      "STUDENT_ID": 1.0
+    },
+    "misses": [
+      "EH002 PERSON",
+      "EH003 INTERNAL_ADDRESS",
+      "EH004 REPO_URL",
+      "EH007 INTERNAL_ADDRESS",
+      "EH010 REPO_URL",
+      "EH012 INTERNAL_ADDRESS",
+      "EH016 REPO_URL",
+      "EH017 INTERNAL_ADDRESS",
+      "EH018 INTERNAL_ADDRESS",
+      "EH022 INTERNAL_ADDRESS",
+      "EH023 REPO_URL"
+    ],
+    "false_findings": [
+      "EH013 keep \"Smith chart\"",
+      "EH033 keep \"Mealy\"",
+      "EH033 PERSON"
+    ],
+    "by_id": {
+      "EH001": [
+        "PERSON",
+        "STUDENT_ID"
+      ],
+      "EH002": [
+        "EMAIL_ADDRESS"
+      ],
+      "EH003": [],
+      "EH004": [],
+      "EH005": [
+        "SECRET"
+      ],
+      "EH006": [
+        "PHONE_NUMBER"
+      ],
+      "EH007": [],
+      "EH008": [
+        "STUDENT_ID"
+      ],
+      "EH009": [
+        "SECRET"
+      ],
+      "EH010": [
+        "EMAIL_ADDRESS"
+      ],
+      "EH011": [
+        "PERSON"
+      ],
+      "EH012": [],
+      "EH013": [
+        "EMAIL_ADDRESS",
+        "PERSON"
+      ],
+      "EH014": [
+        "SECRET"
+      ],
+      "EH015": [
+        "PERSON",
+        "STUDENT_ID"
+      ],
+      "EH016": [],
+      "EH017": [],
+      "EH018": [
+        "SECRET"
+      ],
+      "EH019": [
+        "PERSON",
+        "PHONE_NUMBER"
+      ],
+      "EH020": [
+        "SECRET"
+      ],
+      "EH021": [
+        "PERSON",
+        "EMAIL_ADDRESS"
+      ],
+      "EH022": [],
+      "EH023": [
+        "PERSON"
+      ],
+      "EH024": [
+        "SECRET"
+      ],
+      "EH025": [
+        "STUDENT_ID"
+      ],
+      "EH026": [],
+      "EH027": [],
+      "EH028": [],
+      "EH029": [],
+      "EH030": [],
+      "EH031": [],
+      "EH032": [],
+      "EH033": [
+        "PERSON"
+      ],
+      "EH034": [],
+      "EH035": [],
+      "EH036": [],
+      "EH037": [],
+      "EH038": [],
+      "EH039": [],
+      "EH040": [],
+      "EH041": []
+    },
+    "set": "ece_holdout.jsonl",
+    "label": "ECE"
+  },
+  "ece_holdout.jsonl|ece": {
+    "positive": 25,
+    "negative": 16,
+    "leak_rate": 0.04,
+    "over_redaction": 0.0625,
+    "keep_terms_lost": 2,
+    "recall_by_type": {
+      "EMAIL_ADDRESS": 1.0,
+      "INTERNAL_ADDRESS": 1.0,
+      "PERSON": 0.8333333333333334,
+      "PHONE_NUMBER": 1.0,
+      "REPO_URL": 1.0,
+      "SECRET": 1.0,
+      "STUDENT_ID": 1.0
+    },
+    "misses": [
+      "EH002 PERSON"
+    ],
+    "false_findings": [
+      "EH013 keep \"Smith chart\"",
+      "EH033 keep \"Mealy\"",
+      "EH033 PERSON"
+    ],
+    "by_id": {
+      "EH001": [
+        "PERSON",
+        "STUDENT_ID"
+      ],
+      "EH002": [
+        "EMAIL_ADDRESS"
+      ],
+      "EH003": [
+        "INTERNAL_ADDRESS"
+      ],
+      "EH004": [
+        "REPO_URL"
+      ],
+      "EH005": [
+        "SECRET"
+      ],
+      "EH006": [
+        "PHONE_NUMBER"
+      ],
+      "EH007": [
+        "INTERNAL_ADDRESS"
+      ],
+      "EH008": [
+        "STUDENT_ID"
+      ],
+      "EH009": [
+        "SECRET"
+      ],
+      "EH010": [
+        "REPO_URL"
+      ],
+      "EH011": [
+        "PERSON"
+      ],
+      "EH012": [
+        "INTERNAL_ADDRESS"
+      ],
+      "EH013": [
+        "EMAIL_ADDRESS",
+        "PERSON"
+      ],
+      "EH014": [
+        "SECRET"
+      ],
+      "EH015": [
+        "PERSON",
+        "STUDENT_ID"
+      ],
+      "EH016": [
+        "REPO_URL"
+      ],
+      "EH017": [
+        "INTERNAL_ADDRESS"
+      ],
+      "EH018": [
+        "SECRET",
+        "INTERNAL_ADDRESS"
+      ],
+      "EH019": [
+        "PERSON",
+        "PHONE_NUMBER"
+      ],
+      "EH020": [
+        "SECRET"
+      ],
+      "EH021": [
+        "PERSON",
+        "EMAIL_ADDRESS"
+      ],
+      "EH022": [
+        "INTERNAL_ADDRESS"
+      ],
+      "EH023": [
+        "PERSON",
+        "REPO_URL"
+      ],
+      "EH024": [
+        "SECRET"
+      ],
+      "EH025": [
+        "STUDENT_ID"
+      ],
+      "EH026": [],
+      "EH027": [],
+      "EH028": [],
+      "EH029": [],
+      "EH030": [],
+      "EH031": [],
+      "EH032": [],
+      "EH033": [
+        "PERSON"
+      ],
+      "EH034": [],
+      "EH035": [],
+      "EH036": [],
+      "EH037": [],
+      "EH038": [],
+      "EH039": [],
+      "EH040": [],
+      "EH041": []
+    },
+    "set": "ece_holdout.jsonl",
+    "label": "ECE"
+  },
+  "cs_holdout.jsonl|general": {
+    "positive": 16,
+    "negative": 14,
+    "leak_rate": 0.3125,
+    "over_redaction": 0.07142857142857142,
+    "keep_terms_lost": 1,
+    "recall_by_type": {
+      "EMAIL_ADDRESS": 1.0,
+      "INTERNAL_ADDRESS": 0.0,
+      "PERSON": 1.0,
+      "PHONE_NUMBER": 1.0,
+      "REPO_URL": 0.0,
+      "SECRET": 1.0,
+      "STUDENT_ID": 1.0
+    },
+    "misses": [
+      "CH002 INTERNAL_ADDRESS",
+      "CH004 REPO_URL",
+      "CH008 INTERNAL_ADDRESS",
+      "CH011 REPO_URL",
+      "CH015 INTERNAL_ADDRESS"
+    ],
+    "false_findings": [
+      "CH006 keep \"Django\"",
+      "CH018 GRADE"
+    ],
+    "by_id": {
+      "CH001": [
+        "SECRET",
+        "SECRET"
+      ],
+      "CH002": [
+        "SECRET"
+      ],
+      "CH003": [
+        "PERSON",
+        "STUDENT_ID"
+      ],
+      "CH004": [],
+      "CH005": [
+        "SECRET"
+      ],
+      "CH006": [
+        "EMAIL_ADDRESS",
+        "PERSON"
+      ],
+      "CH007": [
+        "PERSON",
+        "EMAIL_ADDRESS"
+      ],
+      "CH008": [],
+      "CH009": [
+        "SECRET"
+      ],
+      "CH010": [
+        "STUDENT_ID"
+      ],
+      "CH011": [],
+      "CH012": [
+        "SECRET"
+      ],
+      "CH013": [
+        "PERSON",
+        "PHONE_NUMBER"
+      ],
+      "CH014": [
+        "EMAIL_ADDRESS"
+      ],
+      "CH015": [],
+      "CH016": [
+        "SECRET"
+      ],
+      "CH017": [],
+      "CH018": [
+        "GRADE"
+      ],
+      "CH019": [],
+      "CH020": [],
+      "CH021": [],
+      "CH022": [],
+      "CH023": [],
+      "CH024": [],
+      "CH025": [],
+      "CH026": [],
+      "CH027": [],
+      "CH028": [],
+      "CH029": [],
+      "CH030": []
+    },
+    "set": "cs_holdout.jsonl",
+    "label": "computer science"
+  },
+  "cs_holdout.jsonl|computer_science": {
+    "positive": 16,
+    "negative": 14,
+    "leak_rate": 0.0,
+    "over_redaction": 0.07142857142857142,
+    "keep_terms_lost": 1,
+    "recall_by_type": {
+      "EMAIL_ADDRESS": 1.0,
+      "INTERNAL_ADDRESS": 1.0,
+      "PERSON": 1.0,
+      "PHONE_NUMBER": 1.0,
+      "REPO_URL": 1.0,
+      "SECRET": 1.0,
+      "STUDENT_ID": 1.0
+    },
+    "misses": [],
+    "false_findings": [
+      "CH006 keep \"Django\"",
+      "CH018 GRADE"
+    ],
+    "by_id": {
+      "CH001": [
+        "SECRET",
+        "SECRET"
+      ],
+      "CH002": [
+        "INTERNAL_ADDRESS",
+        "SECRET"
+      ],
+      "CH003": [
+        "PERSON",
+        "STUDENT_ID"
+      ],
+      "CH004": [
+        "REPO_URL"
+      ],
+      "CH005": [
+        "SECRET"
+      ],
+      "CH006": [
+        "EMAIL_ADDRESS",
+        "PERSON"
+      ],
+      "CH007": [
+        "PERSON",
+        "EMAIL_ADDRESS"
+      ],
+      "CH008": [
+        "INTERNAL_ADDRESS"
+      ],
+      "CH009": [
+        "SECRET"
+      ],
+      "CH010": [
+        "STUDENT_ID"
+      ],
+      "CH011": [
+        "REPO_URL"
+      ],
+      "CH012": [
+        "SECRET"
+      ],
+      "CH013": [
+        "PERSON",
+        "PHONE_NUMBER"
+      ],
+      "CH014": [
+        "EMAIL_ADDRESS"
+      ],
+      "CH015": [
+        "INTERNAL_ADDRESS"
+      ],
+      "CH016": [
+        "SECRET"
+      ],
+      "CH017": [],
+      "CH018": [
+        "GRADE"
+      ],
+      "CH019": [],
+      "CH020": [],
+      "CH021": [],
+      "CH022": [],
+      "CH023": [],
+      "CH024": [],
+      "CH025": [],
+      "CH026": [],
+      "CH027": [],
+      "CH028": [],
+      "CH029": [],
+      "CH030": []
+    },
+    "set": "cs_holdout.jsonl",
+    "label": "computer science"
+  },
+  "life_holdout.jsonl|general": {
+    "positive": 15,
+    "negative": 15,
+    "leak_rate": 0.13333333333333333,
+    "over_redaction": 0.13333333333333333,
+    "keep_terms_lost": 5,
+    "recall_by_type": {
+      "EMAIL_ADDRESS": 1.0,
+      "INTERNAL_ADDRESS": 0.0,
+      "PERSON": 1.0,
+      "PHONE_NUMBER": 1.0,
+      "REPO_URL": 0.0,
+      "SECRET": 1.0,
+      "STUDENT_ID": 1.0
+    },
+    "misses": [
+      "LH010 INTERNAL_ADDRESS",
+      "LH014 REPO_URL"
+    ],
+    "false_findings": [
+      "LH001 keep \"Hardy-Weinberg\"",
+      "LH005 keep \"Michaelis-Menten\"",
+      "LH015 keep \"Mendel\"",
+      "LH025 keep \"Linnaeus\"",
+      "LH025 PERSON",
+      "LH028 keep \"Krebs\"",
+      "LH028 PERSON"
+    ],
+    "by_id": {
+      "LH001": [
+        "PERSON",
+        "STUDENT_ID",
+        "PERSON"
+      ],
+      "LH002": [
+        "PERSON"
+      ],
+      "LH003": [
+        "PERSON",
+        "EMAIL_ADDRESS"
+      ],
+      "LH004": [
+        "STUDENT_ID"
+      ],
+      "LH005": [
+        "PERSON",
+        "PERSON",
+        "PHONE_NUMBER"
+      ],
+      "LH006": [
+        "PERSON"
+      ],
+      "LH007": [
+        "PERSON",
+        "STUDENT_ID"
+      ],
+      "LH008": [
+        "EMAIL_ADDRESS"
+      ],
+      "LH009": [
+        "PERSON",
+        "PHONE_NUMBER"
+      ],
+      "LH010": [],
+      "LH011": [
+        "PERSON",
+        "PERSON"
+      ],
+      "LH012": [
+        "SECRET"
+      ],
+      "LH013": [
+        "PERSON",
+        "STUDENT_ID"
+      ],
+      "LH014": [],
+      "LH015": [
+        "PERSON",
+        "PERSON",
+        "EMAIL_ADDRESS"
+      ],
+      "LH016": [],
+      "LH017": [],
+      "LH018": [],
+      "LH019": [],
+      "LH020": [],
+      "LH021": [],
+      "LH022": [],
+      "LH023": [],
+      "LH024": [],
+      "LH025": [
+        "PERSON"
+      ],
+      "LH026": [],
+      "LH027": [],
+      "LH028": [
+        "PERSON"
+      ],
+      "LH029": [],
+      "LH030": []
+    },
+    "set": "life_holdout.jsonl",
+    "label": "life science"
+  },
+  "life_holdout.jsonl|life_science": {
+    "positive": 15,
+    "negative": 15,
+    "leak_rate": 0.13333333333333333,
+    "over_redaction": 0.13333333333333333,
+    "keep_terms_lost": 5,
+    "recall_by_type": {
+      "EMAIL_ADDRESS": 1.0,
+      "INTERNAL_ADDRESS": 0.0,
+      "PERSON": 1.0,
+      "PHONE_NUMBER": 1.0,
+      "REPO_URL": 0.0,
+      "SECRET": 1.0,
+      "STUDENT_ID": 1.0
+    },
+    "misses": [
+      "LH010 INTERNAL_ADDRESS",
+      "LH014 REPO_URL"
+    ],
+    "false_findings": [
+      "LH001 keep \"Hardy-Weinberg\"",
+      "LH005 keep \"Michaelis-Menten\"",
+      "LH015 keep \"Mendel\"",
+      "LH025 keep \"Linnaeus\"",
+      "LH025 PERSON",
+      "LH028 keep \"Krebs\"",
+      "LH028 PERSON"
+    ],
+    "by_id": {
+      "LH001": [
+        "PERSON",
+        "STUDENT_ID",
+        "PERSON"
+      ],
+      "LH002": [
+        "PERSON"
+      ],
+      "LH003": [
+        "PERSON",
+        "EMAIL_ADDRESS"
+      ],
+      "LH004": [
+        "STUDENT_ID"
+      ],
+      "LH005": [
+        "PERSON",
+        "PERSON",
+        "PHONE_NUMBER"
+      ],
+      "LH006": [
+        "PERSON"
+      ],
+      "LH007": [
+        "PERSON",
+        "STUDENT_ID"
+      ],
+      "LH008": [
+        "EMAIL_ADDRESS"
+      ],
+      "LH009": [
+        "PERSON",
+        "PHONE_NUMBER"
+      ],
+      "LH010": [],
+      "LH011": [
+        "PERSON",
+        "PERSON"
+      ],
+      "LH012": [
+        "SECRET"
+      ],
+      "LH013": [
+        "PERSON",
+        "STUDENT_ID"
+      ],
+      "LH014": [],
+      "LH015": [
+        "PERSON",
+        "PERSON",
+        "EMAIL_ADDRESS"
+      ],
+      "LH016": [],
+      "LH017": [],
+      "LH018": [],
+      "LH019": [],
+      "LH020": [],
+      "LH021": [],
+      "LH022": [],
+      "LH023": [],
+      "LH024": [],
+      "LH025": [
+        "PERSON"
+      ],
+      "LH026": [],
+      "LH027": [],
+      "LH028": [
+        "PERSON"
+      ],
+      "LH029": [],
+      "LH030": []
+    },
+    "set": "life_holdout.jsonl",
+    "label": "life science"
+  },
+  "life_holdout.jsonl|medical_science": {
+    "positive": 15,
+    "negative": 15,
+    "leak_rate": 0.13333333333333333,
+    "over_redaction": 0.13333333333333333,
+    "keep_terms_lost": 5,
+    "recall_by_type": {
+      "EMAIL_ADDRESS": 1.0,
+      "INTERNAL_ADDRESS": 0.0,
+      "PERSON": 1.0,
+      "PHONE_NUMBER": 1.0,
+      "REPO_URL": 0.0,
+      "SECRET": 1.0,
+      "STUDENT_ID": 1.0
+    },
+    "misses": [
+      "LH010 INTERNAL_ADDRESS",
+      "LH014 REPO_URL"
+    ],
+    "false_findings": [
+      "LH001 keep \"Hardy-Weinberg\"",
+      "LH005 keep \"Michaelis-Menten\"",
+      "LH015 keep \"Mendel\"",
+      "LH025 keep \"Linnaeus\"",
+      "LH025 PERSON",
+      "LH028 keep \"Krebs\"",
+      "LH028 PERSON"
+    ],
+    "by_id": {
+      "LH001": [
+        "PERSON",
+        "STUDENT_ID",
+        "PERSON"
+      ],
+      "LH002": [
+        "PERSON"
+      ],
+      "LH003": [
+        "PERSON",
+        "EMAIL_ADDRESS"
+      ],
+      "LH004": [
+        "STUDENT_ID"
+      ],
+      "LH005": [
+        "PERSON",
+        "PERSON",
+        "PHONE_NUMBER"
+      ],
+      "LH006": [
+        "PERSON"
+      ],
+      "LH007": [
+        "PERSON",
+        "STUDENT_ID"
+      ],
+      "LH008": [
+        "EMAIL_ADDRESS"
+      ],
+      "LH009": [
+        "PERSON",
+        "PHONE_NUMBER"
+      ],
+      "LH010": [],
+      "LH011": [
+        "PERSON",
+        "PERSON"
+      ],
+      "LH012": [
+        "SECRET"
+      ],
+      "LH013": [
+        "PERSON",
+        "STUDENT_ID"
+      ],
+      "LH014": [],
+      "LH015": [
+        "PERSON",
+        "PERSON",
+        "EMAIL_ADDRESS"
+      ],
+      "LH016": [],
+      "LH017": [],
+      "LH018": [],
+      "LH019": [],
+      "LH020": [],
+      "LH021": [],
+      "LH022": [],
+      "LH023": [],
+      "LH024": [],
+      "LH025": [
+        "PERSON"
+      ],
+      "LH026": [],
+      "LH027": [],
+      "LH028": [
+        "PERSON"
+      ],
+      "LH029": [],
+      "LH030": []
+    },
+    "set": "life_holdout.jsonl",
+    "label": "life science"
+  },
+  "general_holdout.jsonl|general": {
+    "positive": 15,
+    "negative": 10,
+    "leak_rate": 0.0,
+    "over_redaction": 0.1,
+    "keep_terms_lost": 1,
+    "recall_by_type": {
+      "ADDRESS": 1.0,
+      "DATE_OF_BIRTH": 1.0,
+      "EMAIL_ADDRESS": 1.0,
+      "GRADE": 1.0,
+      "HEALTH_CARD": 1.0,
+      "PERSON": 1.0,
+      "PHONE_NUMBER": 1.0,
+      "POSTAL_CODE": 1.0,
+      "SECRET": 1.0,
+      "STUDENT_ID": 1.0
+    },
+    "misses": [],
+    "false_findings": [
+      "GH014 keep \"Rawls\"",
+      "GH022 PERSON"
+    ],
+    "by_id": {
+      "GH001": [
+        "PERSON",
+        "STUDENT_ID"
+      ],
+      "GH002": [
+        "EMAIL_ADDRESS"
+      ],
+      "GH003": [
+        "PHONE_NUMBER"
+      ],
+      "GH004": [
+        "ADDRESS",
+        "POSTAL_CODE"
+      ],
+      "GH005": [
+        "PERSON",
+        "GRADE"
+      ],
+      "GH006": [
+        "HEALTH_DETAIL"
+      ],
+      "GH007": [
+        "PERSON",
+        "STUDENT_ID"
+      ],
+      "GH008": [
+        "SECRET"
+      ],
+      "GH009": [
+        "PHONE_NUMBER",
+        "PERSON"
+      ],
+      "GH010": [
+        "PERSON"
+      ],
+      "GH011": [
+        "STUDENT_ID",
+        "GRADE"
+      ],
+      "GH012": [
+        "EMAIL_ADDRESS"
+      ],
+      "GH013": [
+        "HEALTH_CARD"
+      ],
+      "GH014": [
+        "PERSON",
+        "PERSON"
+      ],
+      "GH015": [
+        "ADDRESS",
+        "POSTAL_CODE"
+      ],
+      "GH016": [],
+      "GH017": [],
+      "GH018": [],
+      "GH019": [],
+      "GH020": [],
+      "GH021": [],
+      "GH022": [
+        "PERSON"
+      ],
+      "GH023": [],
+      "GH024": [],
+      "GH025": []
+    },
+    "set": "general_holdout.jsonl",
+    "label": "general"
+  }
+}
