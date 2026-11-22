@@ -310,6 +310,9 @@ Highlights:
 
 ### 4.8 Visibility modes (chosen per course by the instructor)
 
+The plan to make mode B usable by the student's choice (opt-in, refusing safe, no differencing) is
+[design/individual-view.md](design/individual-view.md) (task V23, not yet built).
+
 **v5 (V1, decision of 2026-11-17): instructors see class statistics only.** `learner.instructor_individual_view`
 is `false` (the default): every course runs in mode A, mode B cannot be chosen (HTTP 422), a course stored in
 mode B reads as mode A, and the UI shows no Students page, learning plan, per-student quiz results or sharing
