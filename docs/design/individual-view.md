@@ -38,43 +38,44 @@ Class statistics count every student; individual views show the students who sha
 quiz and 5 of them share, the class average minus the 5 visible scores is the sixth student's score. The same
 holds for band counts per KC, misconception counts, weak topics (V8) and the usage statistics (V2).
 
-Rule: **a class number is shown only when the students whose data was never disclosed are themselves at least
-the minimum group** (`learner.class_summary_min_group`, 5) in that number, or when nothing was disclosed.
-Otherwise the number is hidden ("hidden: too few students who do not share"). Concretely, for each aggregate the
-code computes the contributing students, splits them into disclosed and not disclosed, and suppresses when
-`0 < not_disclosed < min_group`. Counts of students (enrolled, active) are not affected; per-week and per-module
-question counts are, because a disclosed student's activity is visible.
+Rule: **a class number is shown only when its undisclosed contributions come from at least the minimum group of
+students** (`learner.class_summary_min_group`, 5), or when none of its contributions was disclosed. Otherwise the
+number is hidden ("hidden: too few students who do not share"). Concretely, for each aggregate the code lists
+its contributions (one per student and datum: a quiz attempt, a KC band, a misconception, a week's questions),
+splits them into disclosed and undisclosed, and suppresses when `0 < students with an undisclosed contribution <
+min_group`. Counts of students (enrolled, active) are not affected.
 
-**Disclosed, not "sharing now".** A student counts as disclosed for the rest of the term once an instructor of
-the course has seen any of their individual data (overview, learning plan, quiz result), whether or not they
-still share and whatever mode the course is in now. Hiding the individual views does not take back what was
-seen: after reading five students' bands in a course of six, switching the course back to mode A (or the
-administrator switching individual views off) would otherwise let the instructor read the class band counts and
-compute the sixth student's band. So the rule applies in mode A too, for the whole term, as soon as one
-individual view of the course was opened.
+**Disclosed means shown, datum by datum.** A contribution counts as disclosed for the rest of the term once an
+instructor of the course has seen that datum in an individual view, whether or not the student still shares and
+whatever mode the course is in now. Opening a student's overview does not disclose the student's other data: a
+quiz attempt from before the student agreed (`visible_since`) is not shown and stays undisclosed, so a quiz
+average that includes it is still checked. Hiding the individual views does not take back what was seen: after
+reading five students' bands in a course of six, switching back to mode A (or the administrator switching
+individual views off) would otherwise let the instructor read the class band counts and compute the sixth. So
+the rule applies in mode A too, for the whole term.
 
 **Both orders.** Hiding later class numbers is not enough: an instructor can first note a class number while
-nothing is disclosed (the average of a quiz six students took), then open five of those students' results and
-compute the sixth. So the rule is symmetric:
+nothing is disclosed (the average of a quiz six students took), then open those students' results and compute
+the last one. So the rule is symmetric:
 
 - every class number shown to an instructor is recorded in a **release log**: which number (kind and key, for
-  example `quiz_average:quiz 12` or `band_counts:KC C.3`) and the pseudonymous IDs of the students it was
-  computed from; no values, no text;
-- before an individual view shows a datum of a student (a quiz score, a KC band, a misconception), the code
-  checks every released number that the datum went into: if showing it would leave `0 < not_disclosed <
-  min_group` contributors of that number undisclosed, that datum is hidden in the individual view ("hidden: part
-  of a class number already shown"), while the rest of the overview is shown;
-- and, as above, a class number is not released when its undisclosed contributors are fewer than the minimum
-  group.
+  example `quiz_average:quiz 12` or `band_counts:KC C.3`) and the contributions it was computed from
+  (pseudonymous student ID and datum key); no values, no text;
+- before an individual view shows a datum, the code checks every released number that the datum went into: if
+  showing it would leave `0 < students with an undisclosed contribution < min_group` in that number, the datum is
+  hidden in the individual view ("hidden: part of a class number already shown"), while the rest of the overview
+  is shown;
+- and, as above, a class number is not released when it would break the same condition.
 
 In practice a course that wants individual views should switch to mode B at the start of term, before class
 numbers are read; the manual says so.
 
-The record of who was disclosed is the audit log of individual views (see Audit above), not the acknowledgement
+The record of what was disclosed is the audit log of individual views (see Audit above), not the acknowledgement
 columns: `visibility_ack_at` and `visible_since` are cleared when a student stops sharing and, since #151, for
-every course while individual views are switched off, so they cannot say what was already seen. The audit
-entries name the course and the student's pseudonymous ID only; they stay until the end of term, when the course's
-student data is removed and the next term starts with nothing disclosed.
+every course while individual views are switched off, so they cannot say what was already seen. Each audit entry
+names the course, the student's pseudonymous ID and the keys of the data shown (quiz, KC, misconception, week);
+no values. The entries stay until the end of term, when the course's student data is removed and the next term
+starts with nothing disclosed.
 
 This makes the class statistics poorer when almost everybody shares. That is the price of letting the others
 refuse safely, and the instructor manual says so.
@@ -112,10 +113,14 @@ refuse safely, and the instructor manual says so.
   back to mode A; the class band counts, quiz averages, weak topics and usage numbers stay hidden for the rest of
   the term. The same after the administrator switches individual views off (acknowledgements cleared, #151) and
   on again. A course where no individual view was ever opened behaves as in mode A.
-- Differencing, aggregate first: with 6 students who took a quiz, the instructor reads the quiz average (nothing
-  disclosed yet), then opens the results of the students who share: the quiz score is hidden in the overviews
-  from the moment five of the six would be disclosed (only four are shown), while the KC bands that were never
-  part of a released number are shown. The release log holds no values and no question text.
+- Differencing, aggregate first: with 6 students who took a quiz and `min_group` 5, the instructor reads the quiz
+  average (nothing disclosed yet), then opens the overviews of the students who share: the first score is shown
+  (5 undisclosed contributors remain), every further score is hidden (it would leave 4), while the KC bands that
+  were never part of a released number are shown. The release log holds no values and no question text.
+- Differencing, mixed consent windows: 6 students take a quiz; 5 had agreed before their attempt, the sixth
+  agrees only afterwards. The instructor opens all six overviews: five scores are shown, the sixth student's
+  attempt is not (it predates the agreement) and stays undisclosed; the quiz average is then hidden, because
+  one undisclosed contribution remains.
 - The overview never contains a question, an answer, the V15 instruction or a survey answer.
 - Every individual view is audited, and the student sees the count of views.
 - Copy to the next term and end of term carry no agreement.
