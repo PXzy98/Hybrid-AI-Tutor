@@ -60,6 +60,7 @@ ALL_PACKS = (
 )
 PARAPHRASE_PACKS = ("harvard_cs50x", "mit_6_002_circuits")
 DETAILED_SUFFIX = " Explain it in detail with a worked example and a comparison table."
+RESEARCH_LIMIT = 2048  # the summary labels answers and quiz drafts with it; main() checks the config
 RERUN_LIMIT = 4096
 INPUTS = ROOT / "eval/v16-drafts/results/inputs.json"
 STRUCTURE_KINDS = ("kcs", "check_items", "misconceptions")
@@ -672,14 +673,19 @@ def summary() -> str:
     answers = load("answers")
     if answers:
         plain = [r for r in answers if not r["detailed"]]
-        lines.append(stats_row("answers, S11", [r for r in plain if r["set"] == "s11"], 2048, 1024))
-        lines.append(
-            stats_row("answers, paraphrase", [r for r in plain if r["set"] == "paraphrase"], 2048, 1024)
-        )
-        lines.append(stats_row("answers, all plain", plain, 2048, 1024))
+        lines.append(stats_row("answers, S11", [r for r in plain if r["set"] == "s11"], RESEARCH_LIMIT, 1024))
         lines.append(
             stats_row(
-                "answers, asked for detail and a table", [r for r in answers if r["detailed"]], 2048, 1024
+                "answers, paraphrase", [r for r in plain if r["set"] == "paraphrase"], RESEARCH_LIMIT, 1024
+            )
+        )
+        lines.append(stats_row("answers, all plain", plain, RESEARCH_LIMIT, 1024))
+        lines.append(
+            stats_row(
+                "answers, asked for detail and a table",
+                [r for r in answers if r["detailed"]],
+                RESEARCH_LIMIT,
+                1024,
             )
         )
     if load("understand"):
@@ -692,7 +698,7 @@ def summary() -> str:
     for wanted in (5, 12):
         rows = [r for r in quiz if r["wanted"] == wanted]
         if rows:
-            lines.append(stats_row(f"quiz draft, {wanted} questions", rows, 2048, 1024))
+            lines.append(stats_row(f"quiz draft, {wanted} questions", rows, RESEARCH_LIMIT, 1024))
     out = ["The last column counts calls above 1024 tokens (for the tier 2 drafts: above 2048).", "", *lines]
     cuts = [r for p in ("answers", "understand", "drafts", "quiz") for r in load(p) if r.get("cut_off")]
     if cuts:
@@ -778,6 +784,10 @@ def main() -> None:
         print(text)
         return
     settings = load_settings(a.env_file)
+    if a.phase in ("answers", "quiz") and settings.llm.local.max_tokens != RESEARCH_LIMIT:
+        raise SystemExit(
+            f"llm.local.max_tokens is {settings.llm.local.max_tokens}, the research measures {RESEARCH_LIMIT}"
+        )
     asyncio.run(
         {
             "answers": phase_answers,
