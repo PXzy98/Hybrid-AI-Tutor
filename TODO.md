@@ -28,8 +28,8 @@ Reflection #2 (ethics, individual) 11/18 · video 11/25 · Design Day 12/3 · fi
 | ID | Task | Owner | Status |
 |---|---|---|---|
 | T13 | Web search evaluation (G1-106) | T | search built (#88: off / API / SearXNG); evaluation needs SearXNG or a key |
-| T10 | Video (11/25); French UI screenshots to Lavin | T | demo script merged (#116); screenshots not sent |
-| T11 | Renaming | T | waits for the project name |
+| T10 | Video (11/25) | T | demo script merged (#116) |
+| T11 | Renaming | T | done: PACT (2026-11-17, kept at the meeting); rename again only if the client picks another name with the domain |
 | T12 | Routing, frontend and web search handover notes | T | manuals done |
 | — | `transformers` 5, `react-router` 7, `katex` done (Z27); `vite`/`vitest` (dev-only advisories) | T, Z | partly done |
 | Z13, Z6, Z2 | Deploy on the test host with monitoring; vLLM load test; local speed of the 9B model | Z | waits for server access |
@@ -59,4 +59,3 @@ use the eight open course packs in `data/demo_courses/`.
 
 - Course server access: deployment, vLLM load test, Z2 local speed, monitoring.
 - The client: cloud provider and billing, alert receiver, project name.
-- Lavin: second review of the 30 revised check items; French UI screenshots.

@@ -17,7 +17,7 @@ section 10.
 | Open v4 PRs #102 to #107 | merged |
 | V1 statistics-only instructor view | merged (#109) |
 | V2 class statistics | merged (#115); small groups, differences and single scores hidden (#126) |
-| V3 privacy notice | merged (#114); French screenshots taken (25, outside the repository); Z sends them to Lavin |
+| V3 privacy notice | merged (#114); French screenshots sent to Lavin (Z, 2026-11-22) |
 | Z26 instructor guidelines reach the model | merged (#110) |
 | S15 demo learner content, S16 CS course type, Z25 pack scan | merged (#113, #111, #112); S16 checked with the vLLM |
 | Backend French texts | merged (#124) |
@@ -153,7 +153,7 @@ section 10.
   `knowledge_model`; course types are a text field; instructors cannot pick system model connections.
 - **Dependencies**: done (Z27): `transformers` 5, `react-router` 7, `katex` 0.19; `vite`/`vitest` advisories are dev-only.
 - **Handover (T12, S12)**: routing, frontend and web search notes; `docs/HANDOVER.md` and the progress pages.
-- Lavin's second review of the 30 revised check items.
+- The 30 revised check items: AI review with web search instead of a second expert review (Z, 2026-11-22; `docs/review/AI_REVIEW_2026-11-22.md`); a person still approves them.
 - From the client: real course material and an instructor to try the drafts; a maintainer after December.
 
 ## 7. Not this term (recorded for the next team)
@@ -225,7 +225,7 @@ next agent takes them in this order. Each is one task, one branch and one PR (AG
 | Z22b | **Privacy rule changes, low-risk part first.** Recognizers for: an AWS secret key after `secret_access_key`; `TOKEN` / `KEY` / `SECRET` assignments with any prefix, also inside dicts, and `'Bearer ...'`; the password in URL user info (`scheme://user:PASSWORD@host`); "the password for X is V" in prose; the whole 172.16.0.0/12 range, with and without a port; SCP-style `git@host:account/repo.git`. These only redact more. Re-run E6 (rule 4) and the Z22 course sets | E6 leak not worse on any set and over-redaction not worse on the main set; Z22 misses EH005, CH001, EH014, EH018, CH009, GH008, EH012, EH010 found. **State:** PR #139, all met |
 | V19 | **A course type as one plug-in package, including routing** (below) | design note reviewed by Z, then the code. **State:** design merged (#140), agreed by Z; code in the V19 PR (plan items 1 to 6, tests as listed); training ECE heads is left for a later PR with a before/after report |
 | Z22c | **After the video: an allow-list for course terms that look like names** (Smith chart, Hardy-Weinberg, Michaelis-Menten, Mendel, Krebs, Kant, Rawls, Django; "C" as a language). Risky: a student can be called Smith or Mendel, so only fixed phrases may pass, never a bare surname. Also a name after a role word ("my TA", "my partner"), and whether `life_science` and `general` get the lab address and repository recognizers | design agreed by Z before code; E6 and Z22 re-run |
-| — | French screenshots to Lavin: Z sends them (25 files in `notes/fr-screens-2026-11-20/`, outside the repository) | e-mail sent |
+| — | French screenshots to Lavin: sent by Z (25 files in `notes/fr-screens-2026-11-20/`, outside the repository) | done |
 | — | S14: accepted with the small losses listed in section 6 | done |
 | — | W27: Z checks by hand that a person can join from Edge (the new-password field) | checked |
 | — | T16: the original report was not reproduced; Z gives the steps if it comes back | — |
