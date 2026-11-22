@@ -269,7 +269,7 @@ def test_a_bad_model_answer_fails_the_draft_and_the_job(world):
     draft = _draft(world, created["id"])
     assert draft["status"] == "failed" and "invalid structure draft" in draft["error"]
     job = world["prof"].get(f"{world['url']}/jobs/{created['job_id']}").json()
-    assert job["status"] == "failed" and job["error"].startswith("DraftError")
+    assert job["status"] == "failed" and not job["error"].startswith("DraftError")  # for the instructor
     # a citation to a passage that does not exist is refused too
     bad = json.dumps({"title": "T", "body": "B", "citations": [7]})
     created, _ = _generate(world, "faq", bad)
@@ -406,3 +406,29 @@ def test_only_the_course_instructors_reach_drafts_and_insights(world):
     assert prof.get(f"{V2}/courses/{other_course['id']}/ai/drafts").json() == []
     assert _draft(world, created["id"])["status"] == "draft"  # nothing above changed it
     assert world["cloud"].calls == []
+
+
+def test_a_draft_cut_at_the_length_limit_says_so_without_the_class_name():
+    """V22 M8: a draft cut off at max_tokens is invalid JSON; the job error says why, for the instructor."""
+    from app.instructor_ai.drafts import DraftError
+    from app.platform.jobs import _message
+
+    assert _message(DraftError("The draft reached the model's length limit before it was complete.")) == (
+        "The draft reached the model's length limit before it was complete.")
+    assert _message(ValueError("boom")) == "ValueError: boom"  # other errors keep their class name
+
+
+def test_a_tier1_draft_cut_off_at_max_tokens_fails_with_a_clear_reason(world):
+    local = world["use"](TIER1)
+    complete = local.complete
+
+    async def cut(*args, **kwargs):
+        return (await complete(*args, **kwargs)).model_copy(update={"cut_off": True})
+
+    local.complete = cut
+    r = world["prof"].post(f"{world['url']}/ai/drafts", json={"kind": "faq"})
+    assert jobs.run_pending(world["services"]) == 1
+    draft = _draft(world, r.json()["id"])
+    assert draft["status"] == "failed"
+    assert draft["error"].startswith("The draft reached the model's length limit")
+    assert "DraftError" not in draft["error"]
