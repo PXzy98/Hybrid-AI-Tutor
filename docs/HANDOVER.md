@@ -71,6 +71,7 @@ tasks for whoever takes over (V18, Z22b, V19, Z22c).
 | V2 class statistics | merged (#115, #126): minimum group `max(5, setting)`, every row of the course counts (also of students who left), complementary suppression over all sums, quiz mean to 0.1 | `app/learner/statistics.py`, api-v2.md 3.4 |
 | V3 privacy notice | merged (#114) | `frontend/src/components/PrivacyNotice.tsx` |
 | V4 to V6 drafts from a free request, chosen sources, a file for one draft | merged (#119, #120) | `app/instructor_ai/drafts.py`, `app/api/v2/ai_drafts.py` |
+| M8 local tier 1 drafts in Markdown | the local model looped inside the JSON answer until `max_tokens` (17 of 24 runs); it now answers in Markdown, cloud drafts keep JSON (`eval/load-test/M8_DRAFT_LOOPS.md`) | `app/instructor_ai/drafts.py` |
 | V7 web pages | merged (#120): fetched through `PinnedTransport` (https, public addresses only, size and time limits), stored as `web-*.md`, re-fetch under a row lock | `app/rag/web_pages.py`, `app/api/v2/materials.py` |
 | V8 closed loop | merged (#123): "Explain it another way" for the student; topics weak for the class (minimum group) hand a request to the AI assistant | `app/learner/weak_topics.py`, `frontend/src/pages/instructor/Overview.tsx` |
 | V9 accounts from term to term | merged (#118, #125): admin student list, deactivate, reset, delete with audit and scrub | `app/api/v2/admin.py`, `app/auth/purge.py` |
