@@ -351,10 +351,10 @@ def practice_quiz(api: Api, report: CourseReport, sleep: Callable[[float], None]
     report.quiz_id = quiz["id"]
 
 
-def individual_view(api: Api, course_id: int) -> bool:
-    """Whether the deployment allows visibility mode B (v5 V1: off by default, statistics only)."""
-    course = next((c for c in ok(api.get("/courses"), "listing courses") if c["id"] == course_id), {})
-    return bool(course.get("individual_view"))
+def individual_view(api: Api) -> bool:
+    """Whether the deployment allows visibility mode B (v5 V1: off by default, statistics only); the flag
+    belongs to the deployment, so it is read from the course list once."""
+    return any(c.get("individual_view") for c in ok(api.get("/courses"), "listing courses"))
 
 
 def set_visibility_mode_b(api: Api, course_id: int) -> None:
@@ -502,8 +502,8 @@ def build_demo(client_factory: Callable[[], httpx.Client], packs: list[str], ins
             for r in usable:
                 log(f"drafting learner content for {r.code} ...")
                 draft_learner_content(admin, r, learner_modules, sleep)
-        for r in usable:
-            if individual_view(admin, r.course_id):
+        if individual_view(admin):
+            for r in usable:
                 set_visibility_mode_b(admin, r.course_id)
         if students:
             people = ensure_students(accounts_path, students)
