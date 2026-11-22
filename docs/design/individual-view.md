@@ -53,6 +53,23 @@ administrator switching individual views off) would otherwise let the instructor
 compute the sixth student's band. So the rule applies in mode A too, for the whole term, as soon as one
 individual view of the course was opened.
 
+**Both orders.** Hiding later class numbers is not enough: an instructor can first note a class number while
+nothing is disclosed (the average of a quiz six students took), then open five of those students' results and
+compute the sixth. So the rule is symmetric:
+
+- every class number shown to an instructor is recorded in a **release log**: which number (kind and key, for
+  example `quiz_average:quiz 12` or `band_counts:KC C.3`) and the pseudonymous IDs of the students it was
+  computed from; no values, no text;
+- before an individual view shows a datum of a student (a quiz score, a KC band, a misconception), the code
+  checks every released number that the datum went into: if showing it would leave `0 < not_disclosed <
+  min_group` contributors of that number undisclosed, that datum is hidden in the individual view ("hidden: part
+  of a class number already shown"), while the rest of the overview is shown;
+- and, as above, a class number is not released when its undisclosed contributors are fewer than the minimum
+  group.
+
+In practice a course that wants individual views should switch to mode B at the start of term, before class
+numbers are read; the manual says so.
+
 The record of who was disclosed is the audit log of individual views (see Audit above), not the acknowledgement
 columns: `visibility_ack_at` and `visible_since` are cleared when a student stops sharing and, since #151, for
 every course while individual views are switched off, so they cannot say what was already seen. The audit
@@ -95,6 +112,10 @@ refuse safely, and the instructor manual says so.
   back to mode A; the class band counts, quiz averages, weak topics and usage numbers stay hidden for the rest of
   the term. The same after the administrator switches individual views off (acknowledgements cleared, #151) and
   on again. A course where no individual view was ever opened behaves as in mode A.
+- Differencing, aggregate first: with 6 students who took a quiz, the instructor reads the quiz average (nothing
+  disclosed yet), then opens the results of the students who share: the quiz score is hidden in the overviews
+  from the moment five of the six would be disclosed (only four are shown), while the KC bands that were never
+  part of a released number are shown. The release log holds no values and no question text.
 - The overview never contains a question, an answer, the V15 instruction or a survey answer.
 - Every individual view is audited, and the student sees the count of views.
 - Copy to the next term and end of term carry no agreement.
