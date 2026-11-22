@@ -45,11 +45,16 @@ its contributions (one per student and datum: a quiz attempt, a KC band, a misco
 splits them into disclosed and undisclosed, and suppresses when `0 < students with an undisclosed contribution <
 min_group`. Counts of students (enrolled, active) are not affected.
 
-**Disclosed means shown, datum by datum.** A contribution counts as disclosed for the rest of the term once an
-instructor of the course has seen that datum in an individual view, whether or not the student still shares and
+**Disclosed means shown, datum by datum and version by version.** A contribution is identified by the student,
+the datum key and its **version**: the largest ID of the stored events it is computed from (evidence rows for a
+KC band or a misconception, the quiz attempt, the request-log rows of a week's questions). Events are never
+changed, only added, so a new answer or question gives the datum a new version. A contribution counts as
+disclosed for the rest of the term once an instructor of the course has seen that version in an individual view, whether or not the student still shares and
 whatever mode the course is in now. Opening a student's overview does not disclose the student's other data: a
 quiz attempt from before the student agreed (`visible_since`) is not shown and stays undisclosed, so a quiz
-average that includes it is still checked. Hiding the individual views does not take back what was seen: after
+average that includes it is still checked. A newer version is undisclosed until it is shown: if a student stops sharing and then asks more questions in the
+same week, that week's count has a new version that was never shown, so the class number that includes it is
+checked again. Hiding the individual views does not take back what was seen: after
 reading five students' bands in a course of six, switching back to mode A (or the administrator switching
 individual views off) would otherwise let the instructor read the class band counts and compute the sixth. So
 the rule applies in mode A too, for the whole term.
@@ -60,7 +65,7 @@ the last one. So the rule is symmetric:
 
 - every class number shown to an instructor is recorded in a **release log**: which number (kind and key, for
   example `quiz_average:quiz 12` or `band_counts:KC C.3`) and the contributions it was computed from
-  (pseudonymous student ID and datum key); no values, no text;
+  (pseudonymous student ID, datum key and version); no values, no text;
 - before an individual view shows a datum, the code checks every released number that the datum went into: if
   showing it would leave `0 < students with an undisclosed contribution < min_group` in that number, the datum is
   hidden in the individual view ("hidden: part of a class number already shown"), while the rest of the overview
@@ -73,8 +78,8 @@ numbers are read; the manual says so.
 The record of what was disclosed is the audit log of individual views (see Audit above), not the acknowledgement
 columns: `visibility_ack_at` and `visible_since` are cleared when a student stops sharing and, since #151, for
 every course while individual views are switched off, so they cannot say what was already seen. Each audit entry
-names the course, the student's pseudonymous ID and the keys of the data shown (quiz, KC, misconception, week);
-no values. The entries stay until the end of term, when the course's student data is removed and the next term
+names the course, the student's pseudonymous ID and the keys and versions of the data shown (quiz, KC,
+misconception, week); no values. The entries stay until the end of term, when the course's student data is removed and the next term
 starts with nothing disclosed.
 
 This makes the class statistics poorer when almost everybody shares. That is the price of letting the others
@@ -121,6 +126,10 @@ refuse safely, and the instructor manual says so.
   agrees only afterwards. The instructor opens all six overviews: five scores are shown, the sixth student's
   attempt is not (it predates the agreement) and stays undisclosed; the quiz average is then hidden, because
   one undisclosed contribution remains.
+- Differencing after sharing stops: six students share and the instructor views all six current-week question
+  counts; one student stops sharing and asks two more questions; the instructor refreshes the other five
+  overviews: the class question count of that week is hidden, because the stopped student's week has a new
+  version that was never shown.
 - The overview never contains a question, an answer, the V15 instruction or a survey answer.
 - Every individual view is audited, and the student sees the count of views.
 - Copy to the next term and end of term carry no agreement.
