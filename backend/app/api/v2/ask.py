@@ -294,4 +294,5 @@ def conversation(conversation_id: str, access: CourseStudent, request: Request, 
     for t in turns:
         if t.role == "tutor":
             t.text = localize.answer(t.text, language)
+            t.notes = [localize.text(n, language) for n in t.notes]
     return ConversationDetailOut(conversation_id=conversation_id, turns=turns)

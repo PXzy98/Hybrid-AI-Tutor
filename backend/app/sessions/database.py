@@ -30,14 +30,15 @@ class DatabaseSessionStore:
             ).all()
         return [StoredTurn(role=r.role, text=r.text, created_at=r.created_at, sources=r.sources or [],
                            target=r.target if r.target in ("local", "cloud") else None,
-                           cut_off=bool(r.cut_off)) for r in reversed(rows)]
+                           cut_off=bool(r.cut_off), notes=list(r.notes or [])) for r in reversed(rows)]
 
     def append(self, session_id: str, student_id: str, turn: Turn) -> None:
         with Session(self.engine) as s:
             s.add(SessionTurn(session_id=session_id, student_id=student_id, course_id=self.course_id,
                               role=turn.role, text=turn.text, created_at=turn.created_at,
                               sources=[x.model_dump() for x in getattr(turn, "sources", [])],
-                              target=getattr(turn, "target", None), cut_off=getattr(turn, "cut_off", False)))
+                              target=getattr(turn, "target", None), cut_off=getattr(turn, "cut_off", False),
+                              notes=list(getattr(turn, "notes", []))))
             s.commit()
 
     def owner(self, session_id: str) -> str | None:

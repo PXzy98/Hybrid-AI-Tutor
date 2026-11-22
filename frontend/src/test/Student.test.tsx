@@ -181,6 +181,18 @@ describe("chat", () => {
     expect(screen.getByText("Earlier question")).toBeInTheDocument();
   });
 
+  it("shows the stored notes of an answer in a reopened conversation (N6)", async () => {
+    mockApi(studentRoutes({
+      "GET /courses/1/conversations/c-9": { conversation_id: "c-9", turns: [
+        { role: "student", text: "Earlier question" },
+        { role: "tutor", text: "Earlier answer", target: "local", cut_off: false, sources: [],
+          notes: ["Some parts of this answer may go beyond the course material."] }] },
+    }));
+    renderApp("/courses/1/chat?c=c-9");
+    expect(await screen.findByText("Earlier answer")).toBeInTheDocument();
+    expect(screen.getByText("Some parts of this answer may go beyond the course material.")).toBeInTheDocument();
+  });
+
   it("shows the sources and the model of a stored answer in a reopened conversation", async () => {
     mockApi(studentRoutes({
       "GET /courses/1/conversations/c-9": { conversation_id: "c-9", turns: [

@@ -163,6 +163,7 @@ class StoredTurn(Turn):
     sources: list["Source"] = []  # what the answer cited
     target: Target | None = None  # the model that answered
     cut_off: bool = False  # the answer stopped at the model's max_tokens
+    notes: list[str] = []  # the fixed notes shown under the answer (V22 N6)
 
 
 # -------------------------------------------------------------------------- learner

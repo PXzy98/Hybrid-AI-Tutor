@@ -272,3 +272,6 @@ def test_an_answer_cut_off_at_max_tokens_says_so(world):
     assert any("longueur maximale" in w for w in fr["warnings"])
     stored = alice.get(f"{world.url}/conversations/{body['conversation_id']}").json()["turns"]
     assert [t["cut_off"] for t in stored] == [False, True]  # a reopened answer still says it stops early
+    assert any("length limit" in n for n in stored[1]["notes"]) and stored[0]["notes"] == []  # V22 N6
+    url = f"{world.url}/conversations/{body['conversation_id']}?language=fr"
+    assert any("longueur maximale" in n for n in alice.get(url).json()["turns"][1]["notes"])

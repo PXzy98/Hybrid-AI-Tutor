@@ -5002,6 +5002,11 @@ export interface components {
              * @default false
              */
             cut_off?: boolean;
+            /**
+             * Notes
+             * @default []
+             */
+            notes?: string[];
         };
         /** StudentAccountOut */
         StudentAccountOut: {
