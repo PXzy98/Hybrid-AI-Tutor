@@ -259,6 +259,9 @@ api / worker ──► 外部模型 API（云端模型、教师自己的 OpenAI 
 
 ### 4.8 可见性方案（每门课由教师选）
 
+让方案 B 真正可用（学生主动同意才公开、拒绝不会被看出来、不能从班级统计反推）的设计在
+[design/individual-view.md](design/individual-view.md)（任务 V23，还没实现）。
+
 **v5（V1，2026-11-17 的决定）：教师只能看到班级统计。** `learner.instructor_individual_view` 默认是
 `false`：每门课都按方案 A 运行，不能选方案 B（HTTP 422），已经存成方案 B 的课程也按方案 A 读取；界面上没有
 Students 页面、学习计划、按学生的测验结果，也没有分享选项（前端看 `CourseOut.individual_view`）。同意书里加了一句：

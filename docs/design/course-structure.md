@@ -206,7 +206,8 @@ documents it. The `KnowledgeModel` interface gains a `course_id` argument on `st
 ### 4.5 Visibility (S9)
 
 > v5 (V1): individual views are switched off (`learner.instructor_individual_view: false`); every course reads
-> as mode A. This section describes the kept code (guide 4.8).
+> as mode A. This section describes the kept code (guide 4.8). How it becomes usable by the student's
+> choice: [individual-view.md](individual-view.md) (V23).
 
 Fields on `course_member`:
 - `hidden_from_instructor` (bool): the student opted out in mode B;
