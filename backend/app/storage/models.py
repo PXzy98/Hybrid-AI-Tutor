@@ -106,6 +106,8 @@ class SessionTurn(SQLModel, table=True):
     sources: list = Field(default_factory=list, sa_column=Column(JSON, nullable=False, server_default="[]"))
     target: str | None = None
     cut_off: bool = Field(default=False, sa_column=Column(Boolean, nullable=False, server_default="false"))
+    # the fixed notes shown under the answer (English constants, translated when read; never student text)
+    notes: list = Field(default_factory=list, sa_column=Column(JSON, nullable=False, server_default="[]"))
 
 
 # ---------------------------------------------------------------------- learner model (design §5, §9)

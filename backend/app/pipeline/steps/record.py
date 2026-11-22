@@ -45,7 +45,8 @@ class RecordStep(BaseStep):
         self.services.sessions.append(req.session_id, req.student_id, Turn(role="student", text=question))
         self.services.sessions.append(req.session_id, req.student_id, StoredTurn(
             role="tutor", text=answer, sources=answer_sources(ctx.passages) if ctx.answer else [],
-            target=ctx.llm.backend if ctx.llm else None, cut_off=ANSWER_CUT_OFF_NOTE in ctx.warnings))
+            target=ctx.llm.backend if ctx.llm else None, cut_off=ANSWER_CUT_OFF_NOTE in ctx.warnings,
+            notes=[w[:300] for w in ctx.warnings[:10]]))  # fixed pipeline texts, never the student's
         ctx.clear_pii_mapping()  # nothing after this step needs the original values
         return ctx
 

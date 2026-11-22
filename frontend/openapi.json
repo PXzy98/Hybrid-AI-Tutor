@@ -14380,6 +14380,14 @@
             "type": "boolean",
             "title": "Cut Off",
             "default": false
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes",
+            "default": []
           }
         },
         "type": "object",
