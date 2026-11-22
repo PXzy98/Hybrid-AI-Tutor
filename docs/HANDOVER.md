@@ -129,7 +129,7 @@ What Z did in other owners' areas (for their review): guide section 7.5.
 | Z | deploy on the test host with the monitoring profile; the app under load and the speed of the whole ask pipeline on vLLM | needs access to the test host |
 | Z | E4 privacy audit on API v2 and the current `main` (audit P4); the health check also for vLLM (audit I6, A4) | the last full E4 predates v4 |
 | Z | choose the alert receiver (`deploy/monitoring/alertmanager.yml`) | alerts are only visible in Alertmanager until then |
-| Others | Lavin's second review of the 30 revised items | content |
+| Others | Lavin's second review of the 30 revised items: replaced on 2026-11-22 by an AI review with web search (`docs/review/AI_REVIEW_2026-11-22.md`: 0 major, 26 minor, all keyed answers correct, most advanced items too easy); a person still has to approve the items | content |
 
 ## 5. Working on the code
 

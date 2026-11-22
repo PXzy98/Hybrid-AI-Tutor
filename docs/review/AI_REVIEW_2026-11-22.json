@@ -1,0 +1,1176 @@
+[
+  {
+    "id": "AST.1-q3",
+    "topic": "asthma",
+    "level": "advanced",
+    "reason": "Advanced item: replace obviously nonsensical alternatives with respiratory-mechanism misconceptions",
+    "reviewer_comment": "",
+    "answer_changed": false,
+    "question": {
+      "id": "AST.1-q3",
+      "level": "advanced",
+      "stem": "Why can asthma cause difficulty breathing?",
+      "options": {
+        "A": "Inflammation affects only the air sacs, without narrowing the airways",
+        "B": "Breathlessness occurs only because oxygen delivery in the blood stops completely",
+        "C": "The airways widen during an attack, making it harder to breathe out",
+        "D": "Airways can narrow and become inflamed"
+      },
+      "keyed_answer": "D",
+      "explanation": "Inflammation and narrowing of the airways can restrict airflow."
+    },
+    "review": {
+      "verdict": "minor",
+      "keyed_answer_correct": true,
+      "best_answer": "D",
+      "factual_issues": [],
+      "distractor_issues": [
+        "B is implausibly extreme: asthma can impair oxygenation in severe attacks, but oxygen delivery in the blood does not 'stop completely' as the mechanism of breathlessness.",
+        "C is clearly the opposite of the mechanism: during an asthma attack, airways narrow/shrink rather than widen.",
+        "A is also easy to reject because asthma primarily affects the airways, not only the air sacs, and airway narrowing is central."
+      ],
+      "level_fit": "too easy",
+      "suggested_fix": "For an advanced item, ask for the combined mechanisms: bronchoconstriction, airway inflammation/edema, mucus production, and expiratory airflow limitation/air trapping; make distractors more plausible.",
+      "sources": [
+        "https://medlineplus.gov/ency/article/000141.htm",
+        "https://www.cdc.gov/asthma/about/index.html",
+        "https://www.nhlbi.nih.gov/health/asthma/attacks",
+        "https://www.nhlbi.nih.gov/health/asthma"
+      ]
+    }
+  },
+  {
+    "id": "AST.2-q1",
+    "topic": "asthma",
+    "level": "basic",
+    "reason": "Lavin: replace irrelevant eye-colour distractor with a plausible cough-only misconception",
+    "reviewer_comment": "Coughing only would be a better option than eye colour change.",
+    "answer_changed": false,
+    "question": {
+      "id": "AST.2-q1",
+      "level": "basic",
+      "stem": "Which statement about asthma symptoms is accurate?",
+      "options": {
+        "A": "Asthma may cause wheezing, coughing or chest tightness",
+        "B": "Everyone has exactly the same symptoms",
+        "C": "Wheezing is the only symptom asthma can cause",
+        "D": "Asthma causes coughing only and never wheezing"
+      },
+      "keyed_answer": "A",
+      "explanation": "Wheezing, coughing, chest tightness and shortness of breath are common asthma symptoms."
+    },
+    "review": {
+      "verdict": "ok",
+      "keyed_answer_correct": true,
+      "best_answer": "A",
+      "factual_issues": [],
+      "distractor_issues": [],
+      "level_fit": "fits",
+      "suggested_fix": "",
+      "sources": [
+        "https://www.cdc.gov/asthma/about/",
+        "https://www.nhlbi.nih.gov/health/asthma/symptoms",
+        "https://medlineplus.gov/asthma.html",
+        "https://www.who.int/news-room/fact-sheets/detail/asthma"
+      ]
+    }
+  },
+  {
+    "id": "AST.4-q1",
+    "topic": "asthma",
+    "level": "basic",
+    "reason": "Lavin: replace shoe-size distractor with realistic errors about assessment",
+    "reviewer_comment": "The question is labelled as basic and I understand the response should be easy but shoe size as an answer is something you wouldn’t see in a real course setting.",
+    "answer_changed": false,
+    "question": {
+      "id": "AST.4-q1",
+      "level": "basic",
+      "stem": "Which statement about evaluating possible asthma is accurate?",
+      "options": {
+        "A": "Wheezing reported at a single visit is sufficient to confirm asthma",
+        "B": "Symptoms triggered by exercise alone distinguish asthma from every other cause of breathlessness",
+        "C": "Clinicians consider symptom history and appropriate breathing tests",
+        "D": "One normal breathing test always rules out asthma"
+      },
+      "keyed_answer": "C",
+      "explanation": "Symptoms over time and objective breathing assessments may help evaluate asthma."
+    },
+    "review": {
+      "verdict": "ok",
+      "keyed_answer_correct": true,
+      "best_answer": "C",
+      "factual_issues": [],
+      "distractor_issues": [],
+      "level_fit": "fits",
+      "suggested_fix": "",
+      "sources": [
+        "https://www.nhlbi.nih.gov/health/asthma/diagnosis",
+        "https://www.nice.org.uk/guidance/ng245/chapter/recommendations",
+        "https://www.ncbi.nlm.nih.gov/books/NBK7230/",
+        "https://www.cdc.gov/niosh/asthma/hcp/diagnosing/index.html"
+      ]
+    }
+  },
+  {
+    "id": "AST.4-q3",
+    "topic": "asthma",
+    "level": "advanced",
+    "reason": "Advanced item: make the distractors about real diagnostic reasoning",
+    "reviewer_comment": "",
+    "answer_changed": false,
+    "question": {
+      "id": "AST.4-q3",
+      "level": "advanced",
+      "stem": "Why is one isolated symptom not enough to determine a diagnosis?",
+      "options": {
+        "A": "Many different conditions can produce similar symptoms",
+        "B": "A normal breathing test on one occasion rules out asthma in every person",
+        "C": "Wheezing on examination confirms asthma without considering other causes",
+        "D": "Allergic triggers alone are enough to confirm an asthma diagnosis"
+      },
+      "keyed_answer": "A",
+      "explanation": "A healthcare professional considers patterns and appropriate tests because symptoms can overlap across conditions."
+    },
+    "review": {
+      "verdict": "minor",
+      "keyed_answer_correct": true,
+      "best_answer": "A",
+      "factual_issues": [],
+      "distractor_issues": [
+        "B is an implausible distractor because the absolute claim 'rules out asthma in every person' is clearly false; authoritative guidance notes normal examination or lung function testing at one time does not necessarily exclude asthma.",
+        "C is an implausible distractor because 'confirms asthma without considering other causes' is too absolute; guidelines emphasize excluding alternative causes of wheeze/respiratory symptoms.",
+        "D is an implausible distractor because allergic triggers may support suspicion or help identify triggers after diagnosis, but are not enough alone to confirm asthma."
+      ],
+      "level_fit": "too easy",
+      "suggested_fix": "For an advanced item, make distractors less absolute and focus on nuanced issues such as variable airflow limitation, normal spirometry between episodes, need for objective testing, and differential diagnoses such as COPD, vocal cord dysfunction, infection, or heart failure.",
+      "sources": [
+        "https://www.nice.org.uk/guidance/ng245/chapter/Recommendations",
+        "https://www.nhlbi.nih.gov/health/asthma/diagnosis",
+        "https://www.nhs.uk/conditions/asthma/",
+        "https://www.nhlbi.nih.gov/health/asthma/symptoms",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC9907191/"
+      ]
+    }
+  },
+  {
+    "id": "AST.5-q3",
+    "topic": "asthma",
+    "level": "advanced",
+    "reason": "Advanced item: replace joke distractors with plausible but unsafe self-management mistakes",
+    "reviewer_comment": "",
+    "answer_changed": false,
+    "question": {
+      "id": "AST.5-q3",
+      "level": "advanced",
+      "stem": "What is the safest general response before changing a prescribed asthma treatment?",
+      "options": {
+        "A": "Stop daily controller treatment after several symptom-free days without discussing the plan",
+        "B": "Increase the prescribed dose on any bad day without checking the action plan",
+        "C": "Replace all long-term prescribed treatment with a reliever inhaler",
+        "D": "Discuss the change with the treating clinician and follow the action plan"
+      },
+      "keyed_answer": "D",
+      "explanation": "Prescribed treatment should be adjusted with appropriate clinical guidance."
+    },
+    "review": {
+      "verdict": "minor",
+      "keyed_answer_correct": true,
+      "best_answer": "D",
+      "factual_issues": [
+        "The keyed idea is correct: authoritative sources advise taking asthma medication as prescribed, not stopping or changing the treatment plan without clinician guidance, and using a written asthma action plan. However, the wording could imply every action-plan-directed adjustment requires a new discussion beforehand; many asthma action plans contain pre-agreed instructions for temporary medication adjustments during worsening symptoms."
+      ],
+      "distractor_issues": [
+        "A, B, and C are all obviously unsafe, making the item very easy despite being labeled advanced.",
+        "C is especially implausible because replacing controller therapy with only a reliever conflicts with current guidance against reliever-only management for asthma."
+      ],
+      "level_fit": "too easy",
+      "suggested_fix": "To fit an advanced level, ask about a nuanced scenario such as stepping down controller therapy after sustained control versus following pre-specified action-plan instructions during an exacerbation.",
+      "sources": [
+        "https://www.cdc.gov/asthma/emergency/index.html",
+        "https://www.nhlbi.nih.gov/health/asthma/treatment-action-plan",
+        "https://www.nhlbi.nih.gov/files/docs/guidelines/asthma_qrg.pdf",
+        "https://www.nice.org.uk/guidance/ng245/chapter/Recommendations",
+        "https://www.nhs.uk/conditions/asthma/"
+      ]
+    }
+  },
+  {
+    "id": "HBP.1-q4",
+    "topic": "high_blood_pressure",
+    "level": "advanced",
+    "reason": "Lavin: increase advanced-level interpretation of a persistently high diastolic reading",
+    "reviewer_comment": "The question itself is fine but the answers are really basic for an advanced level question - might be more useful in determining someones level of understanding if there is an answer that reflects what high diastolic pressure can be indicative of.",
+    "answer_changed": false,
+    "question": {
+      "id": "HBP.1-q4",
+      "level": "advanced",
+      "stem": "A person has repeated normal systolic readings but consistently raised diastolic readings using a suitable technique. What is the best interpretation?",
+      "options": {
+        "A": "Normal systolic readings rule out hypertension even if diastolic pressure remains high",
+        "B": "Raised diastolic readings by themselves prove that the monitor is faulty",
+        "C": "A high bottom number reflects a longer pause between heartbeats rather than raised arterial pressure",
+        "D": "This may indicate isolated diastolic hypertension and warrants clinical review"
+      },
+      "keyed_answer": "D",
+      "explanation": "Persistently raised diastolic pressure can be important even when systolic pressure is normal. A clinician can confirm the pattern using appropriate repeat or out-of-office measurements and the relevant guideline."
+    },
+    "review": {
+      "verdict": "minor",
+      "keyed_answer_correct": true,
+      "best_answer": "D",
+      "factual_issues": [
+        "The stem does not specify actual systolic/diastolic thresholds or whether readings are clinic, home, or ambulatory; diagnostic cutoffs differ by guideline and measurement context.",
+        "The wording 'repeated normal systolic readings but consistently raised diastolic readings' is broadly accurate, but hypertension should generally be confirmed with repeated properly taken measurements and often out-of-office monitoring rather than inferred from unspecified readings alone."
+      ],
+      "distractor_issues": [
+        "B is somewhat implausible: raised diastolic readings alone do not prove a faulty monitor, though device/cuff accuracy is one possible thing to check.",
+        "C is poorly phrased: diastolic pressure is measured when the heart rests between beats, but it is still arterial pressure, not a 'longer pause between heartbeats.'"
+      ],
+      "level_fit": "fits",
+      "suggested_fix": "Add thresholds and measurement context, e.g. 'office readings with SBP <140 mmHg and DBP ≥90 mmHg on repeated properly taken measurements' or specify home/ambulatory equivalents.",
+      "sources": [
+        "https://medlineplus.gov/highbloodpressure.html",
+        "https://medlineplus.gov/lab-tests/measuring-blood-pressure/",
+        "https://www.heart.org/en/health-topics/high-blood-pressure/understanding-blood-pressure-readings/",
+        "https://www.heart.org/en/health-topics/high-blood-pressure/understanding-blood-pressure-readings/monitoring-your-blood-pressure-at-home",
+        "https://www.nice.org.uk/guidance/ng136/chapter/recommendations"
+      ]
+    }
+  },
+  {
+    "id": "HBP.3-q3",
+    "topic": "high_blood_pressure",
+    "level": "intermediate",
+    "reason": "Lavin: replace an obvious single-factor classification with a paired-risk reasoning item",
+    "reviewer_comment": "Feels basic as opposed to intermediate because you don’t necessarily need to know anything about hypertension to know family history and age cannot be changed.",
+    "answer_changed": false,
+    "question": {
+      "id": "HBP.3-q3",
+      "level": "intermediate",
+      "stem": "Which pair contains two risk factors for high blood pressure that can both be modified?",
+      "options": {
+        "A": "Age and physical activity level",
+        "B": "Family history and high sodium intake",
+        "C": "High sodium intake and low physical activity",
+        "D": "Age and family history"
+      },
+      "keyed_answer": "C",
+      "explanation": "Sodium intake and physical activity can both be changed. Age and family history cannot be modified."
+    },
+    "review": {
+      "verdict": "ok",
+      "keyed_answer_correct": true,
+      "best_answer": "C",
+      "factual_issues": [],
+      "distractor_issues": [],
+      "level_fit": "fits",
+      "suggested_fix": "",
+      "sources": [
+        "https://www.cdc.gov/high-blood-pressure/risk-factors/index.html",
+        "https://www.nhlbi.nih.gov/health/high-blood-pressure/causes",
+        "https://www.who.int/news-room/fact-sheets/detail/hypertension",
+        "https://medlineplus.gov/ency/article/000468.htm"
+      ]
+    }
+  },
+  {
+    "id": "HBP.3-q4",
+    "topic": "high_blood_pressure",
+    "level": "advanced",
+    "reason": "Advanced item: remove obviously unrelated distractors",
+    "reviewer_comment": "",
+    "answer_changed": false,
+    "question": {
+      "id": "HBP.3-q4",
+      "level": "advanced",
+      "stem": "Why can someone who feels well and is not stressed still have high blood pressure?",
+      "options": {
+        "A": "Stress must be present for high blood pressure, even when the person does not notice it",
+        "B": "Because long-term factors such as family history, diet and weight also raise blood pressure, and it usually causes no symptoms",
+        "C": "High blood pressure is unlikely in younger adults, even when repeated measurements are raised",
+        "D": "An absence of headaches rules out high blood pressure"
+      },
+      "keyed_answer": "B",
+      "explanation": "High blood pressure has many contributing factors and is often silent, so how a person feels says little about it."
+    },
+    "review": {
+      "verdict": "minor",
+      "keyed_answer_correct": true,
+      "best_answer": "B",
+      "factual_issues": [],
+      "distractor_issues": [],
+      "level_fit": "too easy",
+      "suggested_fix": "For an advanced undergraduate item, add complexity such as repeated office vs home/ambulatory measurements, primary vs secondary hypertension, or modifiable/nonmodifiable risk factors while retaining the key point that hypertension is often asymptomatic.",
+      "sources": [
+        "https://www.cdc.gov/high-blood-pressure/about/",
+        "https://www.cdc.gov/high-blood-pressure/risk-factors/index.html",
+        "https://www.nhs.uk/conditions/high-blood-pressure/",
+        "https://medlineplus.gov/ency/article/000468.htm",
+        "https://www.who.int/news-room/fact-sheets/detail/hypertension"
+      ]
+    }
+  },
+  {
+    "id": "HBP.4-q4",
+    "topic": "high_blood_pressure",
+    "level": "advanced",
+    "reason": "Advanced item: use plausible but incomplete lists of affected organs",
+    "reviewer_comment": "",
+    "answer_changed": false,
+    "question": {
+      "id": "HBP.4-q4",
+      "level": "advanced",
+      "stem": "Which organs can be affected by long-term high blood pressure?",
+      "options": {
+        "A": "Heart and kidneys, but not the brain or eyes",
+        "B": "Only the heart; repeated high pressure does not damage other organs",
+        "C": "Heart, brain and kidneys, but not the eyes",
+        "D": "The heart, brain, kidneys and eyes"
+      },
+      "keyed_answer": "D",
+      "explanation": "Damage to blood vessels can lead to heart disease, stroke, kidney disease and changes in the eyes."
+    },
+    "review": {
+      "verdict": "minor",
+      "keyed_answer_correct": true,
+      "best_answer": "D",
+      "factual_issues": [
+        "The keyed concept is correct: long-term high blood pressure can affect the heart, brain, kidneys, and eyes. However, the stem is broad; hypertension can also damage blood vessels and other organs, so the item should make clear it is asking which listed organs can be affected."
+      ],
+      "distractor_issues": [
+        "A and C are near-duplicate distractors that differ only by excluding the brain or eyes; both are clearly false if students know hypertension can cause stroke/retinopathy.",
+        "B is implausibly absolute for an advanced-level item because it says only the heart is affected and explicitly denies damage to other organs.",
+        "The all-inclusive option D is made too obvious by the structure of the other options."
+      ],
+      "level_fit": "too easy",
+      "suggested_fix": "Revise stem to 'Which of the following listed organs can be damaged by long-term high blood pressure?' and make distractors less obviously absolute, or ask about mechanisms/complications for an advanced item.",
+      "sources": [
+        "https://medlineplus.gov/ency/article/000468.htm",
+        "https://www.nhs.uk/conditions/high-blood-pressure/",
+        "https://www.cdc.gov/high-blood-pressure/about/index.html",
+        "https://www.nice.org.uk/guidance/ng136/chapter/Recommendations"
+      ]
+    }
+  },
+  {
+    "id": "HBP.6-q4",
+    "topic": "high_blood_pressure",
+    "level": "advanced",
+    "reason": "Advanced item: make the incorrect alternatives specific self-adjustment errors",
+    "reviewer_comment": "",
+    "answer_changed": false,
+    "question": {
+      "id": "HBP.6-q4",
+      "level": "advanced",
+      "stem": "Someone notices a possible side effect from their blood pressure medicine. What is the safest general step?",
+      "options": {
+        "A": "Contact a doctor, nurse or pharmacist to discuss it rather than stopping on their own",
+        "B": "Stop the medicine until the suspected side effect goes away, then restart it independently",
+        "C": "Stop the medicine when readings are normal rather than discussing the possible side effect",
+        "D": "Switch to another medicine in the same class based only on online advice"
+      },
+      "keyed_answer": "A",
+      "explanation": "A clinician can check whether it is a side effect and adjust treatment safely."
+    },
+    "review": {
+      "verdict": "minor",
+      "keyed_answer_correct": true,
+      "best_answer": "A",
+      "factual_issues": [
+        "Stem says 'safest general step,' but does not distinguish routine/non-urgent side effects from potentially serious reactions. For severe symptoms such as difficulty breathing, swelling, chest pain, fainting, stroke symptoms, or other emergency symptoms, the safest step would be urgent/emergency care rather than routine contact."
+      ],
+      "distractor_issues": [],
+      "level_fit": "too easy",
+      "suggested_fix": "Clarify 'non-urgent possible side effect' in the stem, or add an emergency-care caveat in the explanation. For an advanced item, use a scenario involving a specific drug/side effect and ask when to seek urgent care vs contact the prescriber/pharmacist.",
+      "sources": [
+        "https://www.cdc.gov/high-blood-pressure/living-with/",
+        "https://www.heart.org/en/health-topics/high-blood-pressure/changes-you-can-make-to-manage-high-blood-pressure/managing-high-blood-pressure-medications",
+        "https://www.heart.org/en/health-topics/high-blood-pressure/changes-you-can-make-to-manage-high-blood-pressure/types-of-blood-pressure-medications",
+        "https://www.fda.gov/consumers/womens-health-topics/high-blood-pressure",
+        "https://www.bhf.org.uk/informationsupport/heart-matters-magazine/medical/blood-pressure-medicine-side-effects"
+      ]
+    }
+  },
+  {
+    "id": "MIG.1-q2",
+    "topic": "migraine",
+    "level": "intermediate",
+    "reason": "Lavin: replace hair-colour/fingerprint/ankle distractors with a meaningful migraine-versus-tension comparison",
+    "reviewer_comment": "The level of difficulty for this question could be improved by having less obviously incorrect answers.",
+    "answer_changed": false,
+    "question": {
+      "id": "MIG.1-q2",
+      "level": "intermediate",
+      "stem": "Which symptom pattern is more characteristic of migraine than uncomplicated tension-type headache?",
+      "options": {
+        "A": "Bilateral pressure-like pain without nausea or light sensitivity",
+        "B": "Mild scalp tightness without associated sensory symptoms",
+        "C": "A non-pulsating headache without nausea or sensory sensitivity",
+        "D": "Headache accompanied by nausea and sensitivity to light"
+      },
+      "keyed_answer": "D",
+      "explanation": "Nausea and sensitivity to light are common migraine-associated symptoms. Pressure-like pain without these features is more typical of a tension-type headache, although patterns can overlap."
+    },
+    "review": {
+      "verdict": "minor",
+      "keyed_answer_correct": true,
+      "best_answer": "D",
+      "factual_issues": [],
+      "distractor_issues": [
+        "Options A and C are somewhat redundant: both describe non-pulsating/pressure-like headache without nausea or light/sensory sensitivity, which points away from migraine and toward tension-type headache.",
+        "The phrase \"sensory symptoms\" in options A-C is a little ambiguous because it could mean migraine aura symptoms, photophobia/phonophobia, or nonspecific sensory sensitivity."
+      ],
+      "level_fit": "fits",
+      "suggested_fix": "Consider replacing \"sensory symptoms\" with \"light or sound sensitivity\" and making distractors more distinct.",
+      "sources": [
+        "https://medlineplus.gov/migraine.html",
+        "https://medlineplus.gov/ency/article/000797.htm",
+        "https://www.nhs.uk/conditions/migraine/",
+        "https://www.nice.org.uk/guidance/cg150/chapter/recommendations",
+        "https://ichd-3.org/1-migraine/1-1-migraine-without-aura/"
+      ]
+    }
+  },
+  {
+    "id": "MIG.1-q3",
+    "topic": "migraine",
+    "level": "advanced",
+    "reason": "Advanced item: compare migraine features and associated symptoms",
+    "reviewer_comment": "",
+    "answer_changed": false,
+    "question": {
+      "id": "MIG.1-q3",
+      "level": "advanced",
+      "stem": "Why is it inaccurate to judge migraine only by how much head pain a person reports?",
+      "options": {
+        "A": "Migraine can have associated symptoms and variable patterns",
+        "B": "Pain intensity alone reliably distinguishes migraine from tension-type headache",
+        "C": "Migraine can be recognized only when headache pain is severe and one-sided",
+        "D": "Associated symptoms such as nausea or light sensitivity add nothing to assessment"
+      },
+      "keyed_answer": "A",
+      "explanation": "Migraine experiences vary, and related symptoms may be important."
+    },
+    "review": {
+      "verdict": "minor",
+      "keyed_answer_correct": true,
+      "best_answer": "A",
+      "factual_issues": [],
+      "distractor_issues": [
+        "B is factually false, but the wording 'reliably distinguishes' makes it an easy reject; migraine and tension-type headache assessment depends on pattern and associated symptoms, not pain intensity alone.",
+        "C is factually false, but 'only' makes it overly absolute and easy to eliminate; migraine is often but not always one-sided and severe.",
+        "D is factually false, but 'add nothing' is an implausibly absolute distractor because nausea, photophobia, and phonophobia are standard migraine features."
+      ],
+      "level_fit": "too easy",
+      "suggested_fix": "For an advanced item, make distractors less absolute and test application of diagnostic features, e.g., ask which symptom pattern supports migraine despite moderate or bilateral pain.",
+      "sources": [
+        "https://medlineplus.gov/migraine.html",
+        "https://www.nhs.uk/conditions/Migraine/",
+        "https://ichd-3.org/1-migraine/1-1-migraine-without-aura/"
+      ]
+    }
+  },
+  {
+    "id": "MIG.2-q2",
+    "topic": "migraine",
+    "level": "intermediate",
+    "reason": "Lavin: remove the near-duplicate aura definition and assess interpretation of a short case",
+    "reviewer_comment": "This question and the previous question are almost identical",
+    "answer_changed": false,
+    "question": {
+      "id": "MIG.2-q2",
+      "level": "intermediate",
+      "stem": "A student describes gradually spreading zigzag lights that lasted about 20 minutes and then resolved before a headache. Which statement is most appropriate?",
+      "options": {
+        "A": "Visual aura can occur only after the headache has ended",
+        "B": "That description proves migraine with aura and excludes other causes",
+        "C": "This could fit visual aura, but new or unusual symptoms still need clinical assessment",
+        "D": "Aura must cause permanent visual loss rather than temporary symptoms"
+      },
+      "keyed_answer": "C",
+      "explanation": "Temporary, spreading visual symptoms can be consistent with migraine aura. A description alone does not establish a diagnosis or rule out other causes, especially when the symptoms are new or unusual."
+    },
+    "review": {
+      "verdict": "ok",
+      "keyed_answer_correct": true,
+      "best_answer": "C",
+      "factual_issues": [],
+      "distractor_issues": [],
+      "level_fit": "fits",
+      "suggested_fix": "",
+      "sources": [
+        "https://ichd-3.org/1-migraine/1-2-migraine-with-aura/",
+        "https://www.medlineplus.gov/ency/article/000709.htm",
+        "https://medlineplus.gov/genetics/condition/migraine/",
+        "https://www.nice.org.uk/guidance/cg150/chapter/recommendations"
+      ]
+    }
+  },
+  {
+    "id": "MIG.2-q3",
+    "topic": "migraine",
+    "level": "advanced",
+    "reason": "Advanced item: make diagnostic uncertainty and warning signs the competing choices",
+    "reviewer_comment": "",
+    "answer_changed": false,
+    "question": {
+      "id": "MIG.2-q3",
+      "level": "advanced",
+      "stem": "Why should someone discuss new visual or neurological symptoms with a clinician?",
+      "options": {
+        "A": "Any brief visual symptom can be assumed to be familiar aura if the person has had headaches before",
+        "B": "Flashing lights alone exclude other neurological causes",
+        "C": "New speech or sensory symptoms never require assessment if they resolve",
+        "D": "Similar symptoms can have more than one cause and may need assessment"
+      },
+      "keyed_answer": "D",
+      "explanation": "New or unusual neurological symptoms should not be assumed to be migraine without appropriate evaluation."
+    },
+    "review": {
+      "verdict": "minor",
+      "keyed_answer_correct": true,
+      "best_answer": "D",
+      "factual_issues": [],
+      "distractor_issues": [
+        "Distractors A, B, and C are implausibly absolute ('any', 'exclude', 'never'), making D obvious by test-taking strategy rather than clinical reasoning.",
+        "Option B is especially weak because flashing lights can occur in migraine aura but do not by themselves rule out other neurologic or eye-related causes."
+      ],
+      "level_fit": "too easy",
+      "suggested_fix": "Make distractors less absolute and more clinically plausible, e.g., distinguish familiar, gradual, stereotyped aura from first-time, sudden, prolonged, monocular, motor, speech, or sensory symptoms that warrant urgent assessment.",
+      "sources": [
+        "https://www.nhs.uk/conditions/Migraine/",
+        "https://medlineplus.gov/ency/article/000709.htm",
+        "https://medlineplus.gov/migraine.html",
+        "https://www.nice.org.uk/guidance/cg150/chapter/recommendations",
+        "https://americanmigrainefoundation.org/resource-library/demystifying-migraine-with-aura/",
+        "https://www.mayoclinic.org/diseases-conditions/migraine-with-aura/symptoms-causes/syc-20352072"
+      ]
+    }
+  },
+  {
+    "id": "MIG.3-q3",
+    "topic": "migraine",
+    "level": "advanced",
+    "reason": "Advanced item: use misleading interpretations of a diary instead of irrelevant handwriting",
+    "reviewer_comment": "",
+    "answer_changed": false,
+    "question": {
+      "id": "MIG.3-q3",
+      "level": "advanced",
+      "stem": "Why should a student avoid claiming a trigger from one diary entry?",
+      "options": {
+        "A": "A headache after one late night confirms that sleep loss is the trigger",
+        "B": "A diary entry proves causation whenever symptoms follow a suspected trigger",
+        "C": "One event cannot establish causality, even if symptoms happened afterward",
+        "D": "Keeping a diary automatically removes other possible contributing factors"
+      },
+      "keyed_answer": "C",
+      "explanation": "An isolated association is not enough to establish a cause."
+    },
+    "review": {
+      "verdict": "minor",
+      "keyed_answer_correct": true,
+      "best_answer": "C",
+      "factual_issues": [],
+      "distractor_issues": [
+        "A is implausible because the word 'confirms' makes it obviously false; a single headache after a late night may suggest an association but cannot establish a trigger.",
+        "B is implausible because 'proves causation whenever symptoms follow' is an overbroad post hoc fallacy.",
+        "D is implausible because 'automatically removes' is clearly false; diaries help identify patterns but do not eliminate confounding factors."
+      ],
+      "level_fit": "too easy",
+      "suggested_fix": "Make the item more advanced by asking which diary pattern would best support a suspected migraine trigger, emphasizing repeated temporal associations, alternative explanations, and possible prodrome symptoms rather than a single event.",
+      "sources": [
+        "https://www.medlineplus.gov/ency/patientinstructions/000420.htm",
+        "https://www.nhs.uk/conditions/Migraine/",
+        "https://americanmigrainefoundation.org/resource-library/role-adherence-triggers-headache-management/",
+        "https://americanmigrainefoundation.org/resource-library/tips-for-managing-migraine/"
+      ]
+    }
+  },
+  {
+    "id": "MIG.4-q3",
+    "topic": "migraine",
+    "level": "advanced",
+    "reason": "Advanced item: address the common mistake of attributing a new red flag to familiar migraine",
+    "reviewer_comment": "",
+    "answer_changed": false,
+    "question": {
+      "id": "MIG.4-q3",
+      "level": "advanced",
+      "stem": "What is the safest response to a sudden severe headache with unusual neurological symptoms?",
+      "options": {
+        "A": "A past history of migraine makes urgent evaluation unnecessary for any future headache",
+        "B": "Seek urgent medical assessment rather than self-diagnosing from a quiz",
+        "C": "Wait for usual headache medicine to work before seeking care for new neurological symptoms",
+        "D": "Identify a trigger in a headache diary before deciding whether new neurological symptoms require assessment"
+      },
+      "keyed_answer": "B",
+      "explanation": "Sudden severe or unusual neurological symptoms require prompt professional assessment."
+    },
+    "review": {
+      "verdict": "minor",
+      "keyed_answer_correct": true,
+      "best_answer": "B",
+      "factual_issues": [
+        "The keyed answer is directionally correct, but 'urgent medical assessment' is somewhat vague for a sudden severe headache with new/unusual neurological symptoms; authoritative sources generally advise emergency care/calling 911 or the local emergency number for sudden severe headache, especially with neurological symptoms such as weakness, vision change, slurred speech, confusion, balance problems, or sudden stroke-like symptoms."
+      ],
+      "distractor_issues": [
+        "A is an overly absolute and obviously unsafe statement, making it a weak distractor.",
+        "C and D are also clearly unsafe given new neurological symptoms, so the item may be too cueing rather than testing advanced discrimination."
+      ],
+      "level_fit": "too easy",
+      "suggested_fix": "Make B more explicit: 'Call emergency services/go to the emergency department immediately, especially for a sudden severe headache with new neurological symptoms.' Consider replacing one distractor with a more plausible but still incorrect option, such as contacting a routine primary-care appointment only if symptoms persist.",
+      "sources": [
+        "https://medlineplus.gov/ency/patientinstructions/000424.htm",
+        "https://www.nhs.uk/conditions/stroke/symptoms/",
+        "https://www.nia.nih.gov/health/stroke/stroke-signs-causes-and-treatment",
+        "https://www.mayoclinic.org/symptoms/headache/basics/causes/sym-20050800",
+        "https://www.nhs.uk/conditions/Subarachnoid-haemorrhage/"
+      ]
+    }
+  },
+  {
+    "id": "MIG.5-q2",
+    "topic": "migraine",
+    "level": "intermediate",
+    "reason": "Intermediate item: strengthen contrast with advanced management question",
+    "reviewer_comment": "",
+    "answer_changed": false,
+    "question": {
+      "id": "MIG.5-q2",
+      "level": "intermediate",
+      "stem": "How can a headache diary assist follow-up care?",
+      "options": {
+        "A": "By establishing the diagnosis without any professional assessment",
+        "B": "By showing frequency but not helping evaluate response to treatment",
+        "C": "By replacing medical follow-up if the symptoms seem stable",
+        "D": "By comparing headache frequency and response to the agreed plan over time"
+      },
+      "keyed_answer": "D",
+      "explanation": "Patterns can be discussed with a healthcare professional to review the plan."
+    },
+    "review": {
+      "verdict": "minor",
+      "keyed_answer_correct": true,
+      "best_answer": "D",
+      "factual_issues": [],
+      "distractor_issues": [
+        "Options A and C are very implausible because they use unsafe absolute claims that a diary can establish diagnosis or replace professional follow-up.",
+        "Option B is also too easy to reject because authoritative sources specifically note that headache diaries can help evaluate whether treatment is working."
+      ],
+      "level_fit": "too easy",
+      "suggested_fix": "Make distractors less absolute and more plausible; for example, contrast tracking frequency only, triggers only, medication use only, versus tracking frequency/severity/medication use and response over time for review with a clinician.",
+      "sources": [
+        "https://medlineplus.gov/ency/article/003024.htm",
+        "https://www.nice.org.uk/guidance/cg150/resources/headaches-pdf-243935625157",
+        "https://americanmigrainefoundation.org/resource-library/headache-journals/",
+        "https://headaches.org/resources/headache-diary-keeping-a-diary-can-help-your-doctor-help-you"
+      ]
+    }
+  },
+  {
+    "id": "MIG.5-q3",
+    "topic": "migraine",
+    "level": "advanced",
+    "reason": "Lavin: use a realistic medication decision and plausible but incorrect management options",
+    "reviewer_comment": "Again the question itself is fine but for a question marked as advanced the answers make this a very easy question to answer.",
+    "answer_changed": false,
+    "question": {
+      "id": "MIG.5-q3",
+      "level": "advanced",
+      "stem": "A person taking a prescribed daily migraine preventive medicine has fewer headaches but bothersome side effects. What is the best next step?",
+      "options": {
+        "A": "Review benefits, side effects and possible adjustments with the prescribing clinician",
+        "B": "Reduce the preventive dose independently and mention it at a later visit",
+        "C": "Take the preventive only on headache days despite the daily prescription",
+        "D": "Stop it because fewer headaches prove the preventive is no longer needed"
+      },
+      "keyed_answer": "A",
+      "explanation": "A clinician should review the benefits and adverse effects of preventive treatment before changes are made. Preventive medicines often follow a schedule different from acute headache treatments."
+    },
+    "review": {
+      "verdict": "minor",
+      "keyed_answer_correct": true,
+      "best_answer": "A",
+      "factual_issues": [],
+      "distractor_issues": [],
+      "level_fit": "too easy",
+      "suggested_fix": "If intended as advanced, add nuance such as considering dose adjustment, switching preventives, tapering requirements for some drugs, or assessing benefit versus adverse effects through shared decision-making with the prescriber.",
+      "sources": [
+        "https://americanmigrainefoundation.org/resource-library/understanding-migrainepreventive-treatments/",
+        "https://www.neurology.org/doi/full/10.1212/WNL.0000000000214881",
+        "https://www.guidelinecentral.com/guideline/5236152/patient-summary/5271595/",
+        "https://www.nhs.uk/conditions/Migraine/"
+      ]
+    }
+  },
+  {
+    "id": "PNE.1-q3",
+    "topic": "pneumonia",
+    "level": "advanced",
+    "reason": "Advanced item: distinguish alveolar gas exchange from upper-airway explanations",
+    "reviewer_comment": "",
+    "answer_changed": false,
+    "question": {
+      "id": "PNE.1-q3",
+      "level": "advanced",
+      "stem": "Why can pneumonia make breathing harder?",
+      "options": {
+        "A": "Pneumonia mainly narrows the bronchi without affecting the air sacs",
+        "B": "Inflammation and fluid in lung air sacs can interfere with gas exchange",
+        "C": "The infection changes breathing rate but does not influence oxygen transfer",
+        "D": "Only the throat becomes inflamed while the lung air sacs stay unaffected"
+      },
+      "keyed_answer": "B",
+      "explanation": "Inflamed or fluid-filled air sacs can make oxygen exchange more difficult."
+    },
+    "review": {
+      "verdict": "minor",
+      "keyed_answer_correct": true,
+      "best_answer": "B",
+      "factual_issues": [],
+      "distractor_issues": [
+        "Distractors are very obviously false because they use absolutes such as 'without affecting the air sacs,' 'does not influence oxygen transfer,' and 'only the throat becomes inflamed.' This makes the item easier than an advanced-level question.",
+        "Option A may be slightly misleading because pneumonia can involve airways and cause airway inflammation in some cases, but the central mechanism for impaired breathing/oxygenation is inflammation and fluid or pus in alveoli."
+      ],
+      "level_fit": "too easy",
+      "suggested_fix": "For an advanced item, make distractors more plausible, for example by contrasting alveolar consolidation/V-Q mismatch with bronchoconstriction, pleural pain, mucus production, or increased respiratory drive.",
+      "sources": [
+        "https://medlineplus.gov/pneumonia.html",
+        "https://www.nhlbi.nih.gov/health/pneumonia",
+        "https://www.who.int/health-topics/pneumonia",
+        "https://www.nhsinform.scot/illnesses-and-conditions/lungs-and-airways/pneumonia"
+      ]
+    }
+  },
+  {
+    "id": "PNE.2-q3",
+    "topic": "pneumonia",
+    "level": "advanced",
+    "reason": "Advanced item: more plausible differential-diagnosis errors",
+    "reviewer_comment": "",
+    "answer_changed": false,
+    "question": {
+      "id": "PNE.2-q3",
+      "level": "advanced",
+      "stem": "Why might a clinician examine someone with cough, fever and difficulty breathing?",
+      "options": {
+        "A": "To assess potential causes and whether further investigation is needed",
+        "B": "Cough, fever and difficulty breathing confirm pneumonia without further assessment",
+        "C": "These symptoms reliably identify a bacterial rather than viral infection",
+        "D": "A normal temperature at examination rules out pneumonia"
+      },
+      "keyed_answer": "A",
+      "explanation": "Clinical assessment helps distinguish causes and guide appropriate evaluation."
+    },
+    "review": {
+      "verdict": "minor",
+      "keyed_answer_correct": true,
+      "best_answer": "A",
+      "factual_issues": [],
+      "distractor_issues": [
+        "B is an implausibly absolute distractor: cough, fever and difficulty breathing are compatible with pneumonia but do not by themselves 'confirm' it.",
+        "C is an implausibly absolute distractor: these symptoms do not reliably distinguish bacterial from viral infection.",
+        "D is an implausibly absolute distractor: normal temperature does not rule out pneumonia, especially in older adults or atypical presentations."
+      ],
+      "level_fit": "too easy",
+      "suggested_fix": "For an advanced item, use a brief clinical vignette and ask what examination/assessment findings would guide differential diagnosis, severity assessment, or need for chest imaging/oxygen saturation rather than using obviously false absolute distractors.",
+      "sources": [
+        "https://www.nice.org.uk/guidance/ng250/chapter/recommendations",
+        "https://www.nice.org.uk/guidance/ng250/resources/pneumonia-diagnosis-and-management-pdf-20000408747461",
+        "https://medlineplus.gov/pneumonia.html",
+        "https://www.nhlbi.nih.gov/health/pneumonia/diagnosis",
+        "https://www.nhlbi.nih.gov/health/pneumonia/symptoms",
+        "https://www.cdc.gov/pneumonia/about/index.html"
+      ]
+    }
+  },
+  {
+    "id": "PNE.3-q3",
+    "topic": "pneumonia",
+    "level": "advanced",
+    "reason": "Lavin: test identification of a pneumonia-causing bacterial pathogen rather than a generic disclaimer",
+    "reviewer_comment": "Not sure if this is what you were intending with this questionnaire but a potential advanced question could be to identify a pneumonia causing pathogen (like streptococcus pneumoniae or rsv) - might be a better advanced level question.",
+    "answer_changed": true,
+    "question": {
+      "id": "PNE.3-q3",
+      "level": "advanced",
+      "stem": "Which of the following is a recognized bacterial cause of pneumonia?",
+      "options": {
+        "A": "Respiratory syncytial virus (RSV)",
+        "B": "Influenza A virus",
+        "C": "Streptococcus pneumoniae",
+        "D": "SARS-CoV-2"
+      },
+      "keyed_answer": "C",
+      "explanation": "Streptococcus pneumoniae is a bacterium that can cause pneumonia. RSV, influenza and SARS-CoV-2 are viruses that can also cause pneumonia."
+    },
+    "review": {
+      "verdict": "minor",
+      "keyed_answer_correct": true,
+      "best_answer": "C",
+      "factual_issues": [],
+      "distractor_issues": [],
+      "level_fit": "too easy",
+      "suggested_fix": "For an advanced item, make the options less classification-only, e.g., include multiple bacterial pathogens and ask which is the most common cause of community-acquired bacterial pneumonia, or ask about typical vs atypical bacterial causes.",
+      "sources": [
+        "https://medlineplus.gov/pneumonia.html",
+        "https://www.medlineplus.gov/ency/article/000145.htm",
+        "https://www.nhlbi.nih.gov/health/pneumonia/causes",
+        "https://www.cdc.gov/pneumonia/about/"
+      ]
+    }
+  },
+  {
+    "id": "PNE.4-q2",
+    "topic": "pneumonia",
+    "level": "intermediate",
+    "reason": "Lavin: use an all-of-the-above single-best-answer format for several genuine warning signs",
+    "reviewer_comment": "This is a good question to have multiple correct answers that give “all of the above” or “none of the above” a lot of my professors loved those kinds of questions and would be more useful than obvious incorrect choices that don’t really test your knowledge.",
+    "answer_changed": true,
+    "question": {
+      "id": "PNE.4-q2",
+      "level": "intermediate",
+      "stem": "Which of the following changes in someone with suspected pneumonia warrants prompt medical assessment?",
+      "options": {
+        "A": "Increasing difficulty breathing",
+        "B": "New confusion",
+        "C": "New or worsening chest pain",
+        "D": "All of the above"
+      },
+      "keyed_answer": "D",
+      "explanation": "Worsening breathlessness, new confusion and new or worsening chest pain can all be warning signs that call for prompt clinical assessment."
+    },
+    "review": {
+      "verdict": "minor",
+      "keyed_answer_correct": true,
+      "best_answer": "D",
+      "factual_issues": [],
+      "distractor_issues": [
+        "Options A, B, and C are each individually correct warning signs warranting prompt or urgent assessment, so the item is not uniquely answerable unless students recognize the intended 'all of the above' format."
+      ],
+      "level_fit": "too easy",
+      "suggested_fix": "Reword the stem to 'Which of the following are warning signs...' or remove 'All of the above' and ask for the most urgent single finding.",
+      "sources": [
+        "https://www.nhs.uk/conditions/pneumonia/",
+        "https://www.cdc.gov/pneumonia/about/index.html",
+        "https://medlineplus.gov/ency/article/000145.htm",
+        "https://www.nice.org.uk/guidance/NG250/chapter/recommendations"
+      ]
+    }
+  },
+  {
+    "id": "PNE.4-q3",
+    "topic": "pneumonia",
+    "level": "advanced",
+    "reason": "Lavin: clarify what “educational question” means and use clinical-decision distractors",
+    "reviewer_comment": "What does educational question mean here?",
+    "answer_changed": false,
+    "question": {
+      "id": "PNE.4-q3",
+      "level": "advanced",
+      "stem": "Why can a short symptom-based classroom quiz not determine a patient's pneumonia treatment?",
+      "options": {
+        "A": "A symptom score alone identifies whether the cause is bacterial or viral",
+        "B": "Antibiotics are appropriate for every person with cough and fever",
+        "C": "The cause, severity, individual health conditions and clinical examination affect decisions",
+        "D": "The same medicine and dose will work for all patients with pneumonia"
+      },
+      "keyed_answer": "C",
+      "explanation": "Individual diagnosis and prescribing require clinical evaluation."
+    },
+    "review": {
+      "verdict": "minor",
+      "keyed_answer_correct": true,
+      "best_answer": "C",
+      "factual_issues": [],
+      "distractor_issues": [
+        "A is too obviously false: symptom scores alone cannot reliably determine whether pneumonia is bacterial or viral; diagnosis and causative organism assessment require clinical evaluation and sometimes tests.",
+        "B is implausible and unsafe as a distractor: antibiotics are not appropriate for every cough and fever, and viral pneumonia generally is not treated with antibiotics.",
+        "D is implausible: pneumonia treatment varies by cause, severity, age, overall health, and other risk factors."
+      ],
+      "level_fit": "too easy",
+      "suggested_fix": "Make distractors more plausible for an advanced undergraduate item, for example by contrasting symptom scores with CURB-65/CRB-65 severity assessment, chest imaging, comorbidities, likely pathogen, antimicrobial resistance risk, and site-of-care decisions.",
+      "sources": [
+        "https://medlineplus.gov/pneumonia.html",
+        "https://www.nhlbi.nih.gov/health/pneumonia",
+        "https://www.nhlbi.nih.gov/health/pneumonia/diagnosis",
+        "https://www.nhlbi.nih.gov/health/pneumonia/treatment",
+        "https://www.medlineplus.gov/ency/article/000073.htm",
+        "https://www.lung.org/lung-health-diseases/lung-disease-lookup/pneumonia/treatment-and-recovery"
+      ]
+    }
+  },
+  {
+    "id": "PNE.5-q3",
+    "topic": "pneumonia",
+    "level": "advanced",
+    "reason": "Advanced item: test limits of combined prevention rather than absurd claims",
+    "reviewer_comment": "",
+    "answer_changed": false,
+    "question": {
+      "id": "PNE.5-q3",
+      "level": "advanced",
+      "stem": "Which statement best describes pneumonia prevention?",
+      "options": {
+        "A": "Vaccination by itself removes the need for any other preventive measure",
+        "B": "A combination of appropriate preventive measures can reduce risk but cannot guarantee prevention",
+        "C": "Preventive antibiotics are needed for everyone to avoid viral pneumonia",
+        "D": "Hand hygiene alone prevents pneumonia from every possible cause"
+      },
+      "keyed_answer": "B",
+      "explanation": "Prevention depends on cause and risk factors, and no single measure removes all risk."
+    },
+    "review": {
+      "verdict": "minor",
+      "keyed_answer_correct": true,
+      "best_answer": "B",
+      "factual_issues": [],
+      "distractor_issues": [
+        "A is implausibly absolute: vaccines reduce risk for some causes of pneumonia but do not eliminate the need for other measures.",
+        "C is implausible and factually false: antibiotics do not prevent viral pneumonia and are not recommended for everyone as prevention.",
+        "D is implausibly absolute: hand hygiene helps reduce respiratory infections but cannot prevent pneumonia from every possible cause."
+      ],
+      "level_fit": "too easy",
+      "suggested_fix": "Use less absolute distractors and make the item discriminate at an advanced undergraduate level, e.g., compare vaccination, smoking cessation, hand hygiene, risk-factor management, and appropriate infection-control measures rather than obviously false 'alone/everyone/every cause' claims.",
+      "sources": [
+        "https://www.cdc.gov/pneumonia/prevention/",
+        "https://medlineplus.gov/pneumonia.html",
+        "https://www.nhlbi.nih.gov/health/pneumonia/prevention",
+        "https://www.nhs.uk/conditions/pneumonia/"
+      ]
+    }
+  },
+  {
+    "id": "T2D.1-q3",
+    "topic": "type2_diabetes",
+    "level": "advanced",
+    "reason": "Lavin: replace an advanced item that only asked for the definition of high glucose with a mechanism-based scenario",
+    "reviewer_comment": "This is a very basic question.",
+    "answer_changed": false,
+    "question": {
+      "id": "T2D.1-q3",
+      "level": "advanced",
+      "stem": "After a meal, blood glucose rises. Which sequence best describes how insulin helps bring it back toward the usual range?",
+      "options": {
+        "A": "The pancreas releases glucagon, which directly moves glucose from the blood into muscle cells",
+        "B": "Insulin prevents glucose uptake by muscle and fat cells to keep blood glucose stable",
+        "C": "The pancreas releases insulin, which helps insulin-responsive cells take up glucose from the blood",
+        "D": "The pancreas stops releasing insulin so glucose can enter cells without hormonal signalling"
+      },
+      "keyed_answer": "C",
+      "explanation": "After a meal, a rise in blood glucose stimulates insulin release from pancreatic beta cells. Insulin helps insulin-responsive tissues take up glucose, supporting blood glucose regulation."
+    },
+    "review": {
+      "verdict": "minor",
+      "keyed_answer_correct": true,
+      "best_answer": "C",
+      "factual_issues": [],
+      "distractor_issues": [
+        "For an advanced undergraduate item, distractors B and D are very transparently false because they invert insulin's basic role in promoting glucose entry into cells.",
+        "Option A is also weak because glucagon is the counter-regulatory hormone more associated with raising blood glucose, and the phrase 'directly moves glucose' is mechanistically implausible."
+      ],
+      "level_fit": "too easy",
+      "suggested_fix": "For an advanced item, add mechanistic detail such as insulin binding its receptor, GLUT4 translocation in skeletal muscle/adipose tissue, and suppression of hepatic glucose output; make distractors target plausible pathway errors.",
+      "sources": [
+        "https://medlineplus.gov/lab-tests/insulin-in-blood-test/",
+        "https://www.cdc.gov/diabetes/about/",
+        "https://www.niddk.nih.gov/health-information/diabetes/overview/what-is-diabetes/type-2-diabetes",
+        "https://medlineplus.gov/ency/patientinstructions/000965.htm"
+      ]
+    }
+  },
+  {
+    "id": "T2D.2-q3",
+    "topic": "type2_diabetes",
+    "level": "advanced",
+    "reason": "Advanced item: test mechanisms rather than obviously irrelevant options",
+    "reviewer_comment": "",
+    "answer_changed": false,
+    "question": {
+      "id": "T2D.2-q3",
+      "level": "advanced",
+      "stem": "Which statement about type 2 diabetes is most accurate?",
+      "options": {
+        "A": "Type 2 diabetes requires complete loss of insulin secretion at the time of diagnosis",
+        "B": "It involves the body's difficulty using insulin effectively, sometimes with insufficient insulin production",
+        "C": "Type 2 diabetes occurs only because of dietary sugar, without a problem in insulin action",
+        "D": "In type 2 diabetes, cells always remain fully sensitive to insulin"
+      },
+      "keyed_answer": "B",
+      "explanation": "Type 2 diabetes often involves insulin resistance and reduced ability to maintain normal glucose levels."
+    },
+    "review": {
+      "verdict": "minor",
+      "keyed_answer_correct": true,
+      "best_answer": "B",
+      "factual_issues": [],
+      "distractor_issues": [
+        "A is very obviously false because complete loss of insulin secretion is characteristic of type 1 diabetes, not required for type 2 diabetes at diagnosis.",
+        "C is an oversimplified misconception and is implausible because authoritative sources describe insulin resistance and/or inadequate insulin production, not dietary sugar alone.",
+        "D is very obviously false because insulin resistance means cells do not respond normally to insulin."
+      ],
+      "level_fit": "too easy",
+      "suggested_fix": "For an advanced undergraduate item, make distractors less absolute and test nuance: e.g., insulin resistance with progressive beta-cell dysfunction, possible normal/elevated insulin early, and variable need for insulin therapy later.",
+      "sources": [
+        "https://www.cdc.gov/diabetes/about/about-type-2-diabetes.html",
+        "https://www.niddk.nih.gov/health-information/diabetes/overview/what-is-diabetes/type-2-diabetes",
+        "https://medlineplus.gov/diabetestype2.html",
+        "https://diabetesjournals.org/care/article/48/Supplement_1/S27/157566/2-Diagnosis-and-Classification-of-Diabetes"
+      ]
+    }
+  },
+  {
+    "id": "T2D.3-q2",
+    "topic": "type2_diabetes",
+    "level": "intermediate",
+    "reason": "Lavin: make the intermediate question specifically about diabetes and apply risk reasoning to a case",
+    "reviewer_comment": "Not directly a diabetes related question and again for an intermediate level question is pretty basic.",
+    "answer_changed": false,
+    "question": {
+      "id": "T2D.3-q2",
+      "level": "intermediate",
+      "stem": "A person has a family history of type 2 diabetes and low physical activity. Which statement is most appropriate?",
+      "options": {
+        "A": "Having affected relatives means changes in activity cannot reduce diabetes risk",
+        "B": "Increasing activity changes the genes inherited from the family",
+        "C": "If symptoms are absent, the person has no relevant risk factors",
+        "D": "Regular physical activity may reduce risk even though family history cannot be changed"
+      },
+      "keyed_answer": "D",
+      "explanation": "Family history is a nonmodifiable risk factor, while physical activity is modifiable and can help reduce type 2 diabetes risk."
+    },
+    "review": {
+      "verdict": "minor",
+      "keyed_answer_correct": true,
+      "best_answer": "D",
+      "factual_issues": [],
+      "distractor_issues": [
+        "A, B, and C are very implausible/absolutist, so the correct answer is easy to identify without much understanding. More plausible distractors would better fit an intermediate item."
+      ],
+      "level_fit": "too easy",
+      "suggested_fix": "Keep D as keyed, but replace obvious distractors with plausible misconceptions, e.g. whether family history increases risk despite lifestyle change, whether exercise only helps after prediabetes, or whether risk assessment/screening is still relevant without symptoms.",
+      "sources": [
+        "https://www.cdc.gov/diabetes/risk-factors/index.html",
+        "https://www.niddk.nih.gov/health-information/diabetes/overview/risk-factors-type-2-diabetes",
+        "https://medlineplus.gov/howtopreventdiabetes.html"
+      ]
+    }
+  },
+  {
+    "id": "T2D.3-q3",
+    "topic": "type2_diabetes",
+    "level": "advanced",
+    "reason": "Advanced item: test the difference between risk, screening and diagnosis",
+    "reviewer_comment": "",
+    "answer_changed": false,
+    "question": {
+      "id": "T2D.3-q3",
+      "level": "advanced",
+      "stem": "Why should a person with several risk factors ask about screening?",
+      "options": {
+        "A": "To establish whether testing is appropriate even when symptoms are absent",
+        "B": "People who feel well do not need screening even when they have several risk factors",
+        "C": "A family history is enough to confirm diabetes without a test",
+        "D": "Risk factors identify an appropriate medication before a diagnosis is made"
+      },
+      "keyed_answer": "A",
+      "explanation": "Risk factors can guide a healthcare professional's decision about appropriate screening."
+    },
+    "review": {
+      "verdict": "minor",
+      "keyed_answer_correct": true,
+      "best_answer": "A",
+      "factual_issues": [],
+      "distractor_issues": [
+        "For an advanced-level item, B is an obviously false negation because authoritative guidance explicitly supports screening/testing in asymptomatic people with relevant risk factors.",
+        "C is implausible because family history is a risk factor, not a basis for confirming diabetes without blood testing.",
+        "D is implausible as written: risk factors may prompt screening and prevention counseling, but they do not by themselves identify an appropriate medication before diagnosis/testing."
+      ],
+      "level_fit": "too easy",
+      "suggested_fix": "For an advanced item, make the stem more specific by asking which risk-factor profile meets screening criteria or which test/follow-up is appropriate after a risk-based screening decision.",
+      "sources": [
+        "https://www.cdc.gov/diabetes/diabetes-testing/",
+        "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/screening-for-prediabetes-and-type-2-diabetes",
+        "https://medlineplus.gov/lab-tests/diabetes-tests/",
+        "https://diabetesjournals.org/care/article/49/Supplement_1/S27/163926"
+      ]
+    }
+  },
+  {
+    "id": "T2D.4-q2",
+    "topic": "type2_diabetes",
+    "level": "intermediate",
+    "reason": "Lavin: use several plausible incomplete organ-system lists as alternatives",
+    "reviewer_comment": "This question might be improved by having the answers be “A) blood vessels, B) blood vessels and nerves, C) blood vessels and kidneys D) blood vessels nerves, kidneys, and eyes” I know my profs loved doing that.",
+    "answer_changed": true,
+    "question": {
+      "id": "T2D.4-q2",
+      "level": "intermediate",
+      "stem": "Which list best reflects the range of body systems that long-term high blood glucose can affect?",
+      "options": {
+        "A": "Blood vessels",
+        "B": "Blood vessels and nerves",
+        "C": "Blood vessels and kidneys",
+        "D": "Blood vessels, nerves, kidneys and eyes"
+      },
+      "keyed_answer": "D",
+      "explanation": "Over time, high blood glucose can damage blood vessels and nerves and contribute to complications affecting the kidneys and eyes, among other organs."
+    },
+    "review": {
+      "verdict": "minor",
+      "keyed_answer_correct": true,
+      "best_answer": "D",
+      "factual_issues": [],
+      "distractor_issues": [
+        "All distractors are nested subsets of option D, so the keyed answer is strongly cued by being the longest and most comprehensive option rather than requiring content knowledge."
+      ],
+      "level_fit": "too easy",
+      "suggested_fix": "Use parallel, non-nested options that mix correct and incorrect affected systems/organs, e.g., include heart/feet/skin vs unrelated systems, while keeping eyes, kidneys, nerves, and blood vessels as correct complications.",
+      "sources": [
+        "https://www.cdc.gov/diabetes/communication-resources/how-diabetes-can-affect-your-body.html",
+        "https://medlineplus.gov/diabetescomplications.html",
+        "https://medlineplus.gov/ency/patientinstructions/000327.htm"
+      ]
+    }
+  },
+  {
+    "id": "T2D.5-q3",
+    "topic": "type2_diabetes",
+    "level": "advanced",
+    "reason": "Advanced item: replace absurd alternatives with plausible misinterpretations of monitoring",
+    "reviewer_comment": "",
+    "answer_changed": false,
+    "question": {
+      "id": "T2D.5-q3",
+      "level": "advanced",
+      "stem": "What should a student conclude from a fictional class case where glucose is repeatedly above a prescribed target?",
+      "options": {
+        "A": "The repeated readings alone determine exactly how the prescribed dose should be changed",
+        "B": "Any above-target reading proves a complication without further assessment",
+        "C": "The pattern should be reviewed in the context of an individualized clinical care plan",
+        "D": "One later reading within target makes the earlier pattern irrelevant"
+      },
+      "keyed_answer": "C",
+      "explanation": "A pattern should be interpreted in a clinical context; education questions do not give individual treatment directions."
+    },
+    "review": {
+      "verdict": "minor",
+      "keyed_answer_correct": true,
+      "best_answer": "C",
+      "factual_issues": [],
+      "distractor_issues": [
+        "A, B, and D use extreme wording ('alone determine exactly,' 'any above-target reading proves,' 'makes the earlier pattern irrelevant'), making them easy to eliminate without much content knowledge.",
+        "B is especially implausible because above-target glucose can indicate hyperglycemia or need for reassessment, but it does not by itself prove a complication."
+      ],
+      "level_fit": "too easy",
+      "suggested_fix": "Make distractors more plausible by distinguishing appropriate pattern review, contacting the care team, checking measurement context, and avoiding independent dose changes.",
+      "sources": [
+        "https://medlineplus.gov/bloodglucose.html",
+        "https://www.cdc.gov/diabetes/diabetes-testing/monitoring-blood-sugar.html",
+        "https://www.niddk.nih.gov/health-information/diabetes/overview/managing-diabetes/",
+        "https://diabetesjournals.org/care/article/48/Supplement_1/S128/157561/"
+      ]
+    }
+  }
+]
