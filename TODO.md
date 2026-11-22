@@ -56,6 +56,7 @@ Reflection #2 (ethics, individual) 11/18 · video 11/25 · Design Day 12/3 · fi
 | Z23 | vLLM capacity: tokens per second in the load test, runs at 1 to 32 at a time, model limits set from them, step timing of one ask, GPU for more than 5 students at once | Z | needs the test host |
 | Z24 | The deployment's local model is its vLLM (`VLLM_BASE_URL`, `VLLM_KEY` replace `OLLAMA_URL`) | Z | done (#107) |
 | Z25 | Document scan refuses public course text (CS50x `pset_5.md` as `GRADE`); check all eight packs | Z | done: three allele exceptions never matched (a backspace instead of `\b`); 0 of 304 pack files refused |
+| Z25b | Web pages as draft sources refused as student data: the identifiers of a reference list (S2CID, arXiv, hdl, ProQuest, PMID, OCLC, …) looked like student numbers (5 of 7 Wikipedia pages refused, browser test of 2026-11-22) | Z | fixed in the Z25b PR (E6 identical); left: a journal volume and article number such as "150 104526" matches the SIN pattern on pages full of "sin" (Fourier transform) |
 | Z26 | The module guideline (Modules page) is stored but never reaches the answering model; use it for questions scoped to that module | Z | done: course and module guidelines reach the answering model (local and cloud) |
 | Z27 | Security review of the whole system (auth, CSRF, access, SSRF, uploads, prompt injection, proxy and networks, keys, logs, scans), report in `docs/SECURITY_REVIEW.md` | Z | report merged (#117); H1, M1, L4 fixed; M2, M3, M4 fixed (#130); L1 to L3 fixed (#132) |
 

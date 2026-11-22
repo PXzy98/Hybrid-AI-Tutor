@@ -22,6 +22,12 @@ def _blocking(profile: str, text: str) -> tuple[str, ...]:
     ("medical_science", "Pathologic Basis of Disease. 6th edition. Saunders, 1999. ISBN: 072167335X."),
     ("medical_science", "Comprehensive clinical hepatology. Mosby, 2000. 072343106X. Clinical signs."),
     ("general", "See the textbook (ISBN 0-7216-7335-X) for the figures."),
+    # identifiers of a reference list (Wikipedia pages as draft sources)
+    ("ece", "Journal of Experimental Algorithmics. 22. Article 1.3. arXiv:1509.05053. doi:10.1145/3053370. "
+            "S2CID 23752485."),
+    ("ece", "Combinatorics, Probability and Computing. S2CID 125374363. hdl:10092/9691."),
+    ("ece", "PhD thesis, Stanford University. ProQuest 301940891."),
+    ("medical_science", "Journal of Mathematical Biology. PMID 300418277. OCLC 212649328."),
     # a range of decimal numbers in a chart legend, and a run of one repeated digit in a figure
     ("medical_science", "BMI groups: 30.0-34.9 25.0-29.9 23.0-24.9 <23.0 Key research issues in diet."),
     ("ece", "(d) a_k as in Figure P10.7(b) 111111111 III -8 0 8 16 Figure P10.7"),
@@ -59,6 +65,12 @@ def test_teaching_cases_are_reported_but_do_not_block(text):
     "Student number: 300 418 277",
     "ID number: 300-418-277",
     "ID: 300-987 654, asthma flares when I run",  # mixed separators (E6 held-out 5)
+    # the reference-list labels are case-sensitive and must come right before the number
+    "Eric 300123456",
+    "ERIC 300123456",  # an upper-case roster: a first name, not the ERIC database
+    "MR 300123456",
+    "Mr 300123456 asked about the arXiv paper",
+    "my student number is 300418277, see doi 10.1145/3053370",
 ])
 def test_student_numbers_still_block(text):
     assert "STUDENT_ID" in _blocking("general", text)
