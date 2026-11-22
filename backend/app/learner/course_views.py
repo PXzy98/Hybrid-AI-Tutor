@@ -97,7 +97,8 @@ def invalidate_acknowledgements_while_off(engine: Engine, individual_view: bool)
     if individual_view:
         return []
     with Session(engine) as db:
-        acknowledged = or_(CourseMember.visibility_ack_at.is_not(None), CourseMember.visible_since.is_not(None))
+        acknowledged = or_(CourseMember.visibility_ack_at.is_not(None),
+                           CourseMember.visible_since.is_not(None))
         course_ids = sorted(set(db.exec(select(CourseMember.course_id).where(acknowledged)).all()))
         cleared = []
         for course_id in course_ids:
