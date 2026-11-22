@@ -269,6 +269,8 @@ The local model's `max_tokens` went from 1024 to 2048 on 2026-11-21 (#148) becau
 
 Output: a short report in `eval/load-test/` and the chosen limits in `config.yaml` (Z decides model settings), then V13 (`docs/GPU_COST.md`).
 
+**State (2026-11-22):** measured, report `eval/load-test/TOKEN_LIMIT_RESEARCH.md` (harness `eval/load-test/output_lengths.py`). Plain answers: median 300, p95 868, max 1,156 completion tokens, none cut (a 1024 limit would cut 2 of 84). Answers asked for detail and a table: median 1,065, p95 1,950, 1 of 64 cut at 2048 (a long table: it ended at 1,936 with 4096). Tier 2 drafts (limit 4096) max 1,545, quiz drafts (2048) max 1,801 for 12 questions, understand (200) max 48: none cut, no loop outside the tier 1 JSON drafts of M8. Slot time on the lab GPU: about 44 tokens/s per call, total throughput flat at about 270 to 300 tokens/s from 8 at once; a 2048-token call takes 47 s alone, 53 s at 8, up to 127 s at 16, so it can pass `llm.local.timeout_s` (60 s) under load. Cloud (fictional prompts): `deepseek-flash` reasoning 49 to 223 tokens, nothing cut at 2000; V16 cloud drafts used up to 78 % of 2000 (one text) and 89 % of 4096 (structure). Options A to G (keep 2048, limits per call kind, a retry asking for a shorter answer, a larger `timeout_s`, plan capacity on the mean answer) are for Z; no setting changed.
+
 ### What a course type selects today, and V19
 
 A course has one course type (`courses.course_type`). Today the type selects:
