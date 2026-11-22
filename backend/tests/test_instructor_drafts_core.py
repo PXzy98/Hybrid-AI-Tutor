@@ -101,18 +101,83 @@ def test_local_model_answers_with_reasoning_or_fences_are_parsed(text):
 
 
 @pytest.mark.asyncio
-async def test_the_gateway_receives_the_output_schema():
+async def test_the_local_model_is_asked_for_markdown_not_json():
+    """M8: asked for one JSON object, the local model looped until max_tokens in most custom drafts."""
     gateway = StubGateway()
     seen = {}
     original = gateway.complete
 
     async def complete(role, messages, **kw):
-        seen.update(kw)
+        seen.update(kw, messages=messages)
         return await original(role, messages, **kw)
 
     gateway.complete = complete
     await generate_tier1_draft(course_id=101, kind="faq", passages=[_chunk()], gateway=gateway, settings=None)
-    assert set(seen["json_schema"]["properties"]) == {"title", "body", "citations"}
+    assert seen.get("json_schema") is None
+    system = seen["messages"][0]["content"]
+    assert "Markdown" in system and "Citations:" in system and "JSON" not in system
+
+
+class TextGateway(StubGateway):
+    def __init__(self, text):
+        super().__init__()
+        self.text = text
+
+    async def complete(self, role, messages, **kw):
+        self.calls.append((role, messages))
+        return type("Response", (), {"text": self.text, "prompt_tokens": 900, "completion_tokens": 300})()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("last", ["Citations: 1", "**Citations:** 1", "citations: 1."])
+async def test_a_markdown_draft_is_parsed(last):
+    text = f"# Quartzzyme worked example\n\n## Example\n\nUse the fictional Quartzzyme step.\n\n{last}\n"
+    draft = await generate_tier1_draft(course_id=101, kind="custom", passages=[_chunk()],
+                                       gateway=TextGateway(text), settings=None, request="One example")
+    assert draft.title == "Quartzzyme worked example"
+    assert draft.body == "## Example\n\nUse the fictional Quartzzyme step."
+    assert draft.cited_sources == ["course/101/_course/syllabus.md"]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("text", [
+    "# Title only\n\nA body without a citations line.",
+    "No title line\n\nBody.\n\nCitations: 1",
+    "# Looped\n\nper passages 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12",
+])
+async def test_a_markdown_draft_without_title_or_citations_fails(text):
+    with pytest.raises(DraftError, match="valid draft"):
+        await generate_tier1_draft(course_id=101, kind="custom", passages=[_chunk()],
+                                   gateway=TextGateway(text), settings=None, request="One example")
+
+
+@pytest.mark.asyncio
+async def test_a_markdown_draft_citing_a_missing_passage_fails():
+    with pytest.raises(DraftError, match="citation"):
+        await generate_tier1_draft(course_id=101, kind="custom", passages=[_chunk()],
+                                   gateway=TextGateway("# T\n\nBody.\n\nCitations: 1, 3"), settings=None,
+                                   request="One example")
+
+
+@pytest.mark.asyncio
+async def test_the_draft_log_has_counts_and_no_text(caplog):
+    text = "# Quartzzyme secret title\n\nZephyrlens body text.\n\nCitations: 1"
+    with caplog.at_level("INFO", logger="app.instructor_ai.drafts"):
+        await generate_tier1_draft(course_id=101, kind="custom", passages=[_chunk()],
+                                   gateway=TextGateway(text), settings=None, request="Quartzzyme request")
+    logged = " ".join(r.getMessage() for r in caplog.records)
+    assert "passages=1" in logged and "prompt_tokens=900" in logged and "completion_tokens=300" in logged
+    assert "Quartzzyme" not in logged and "Zephyrlens" not in logged
+
+
+def test_the_cloud_draft_keeps_the_json_format():
+    from app.core.schemas import DraftCloudRequest
+    from app.instructor_ai.draft_cloud import render_draft
+
+    req = DraftCloudRequest.model_validate({"kind": "faq", "passages": [
+        {"number": 1, "source": "course/101/_course/syllabus.md", "text": "Fictional Quartzzyme text."}]})
+    messages, schema, _ = render_draft(req)
+    assert "JSON" in messages[0]["content"] and set(schema["properties"]) == {"title", "body", "citations"}
 
 
 @pytest.mark.asyncio

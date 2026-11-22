@@ -72,6 +72,7 @@ tasks for whoever takes over (V18, Z22b, V19, Z22c).
 | V3 privacy notice | merged (#114) | `frontend/src/components/PrivacyNotice.tsx` |
 | V4 to V6 drafts from a free request, chosen sources, a file for one draft | merged (#119, #120) | `app/instructor_ai/drafts.py`, `app/api/v2/ai_drafts.py` |
 | 2048-token research | measured: output lengths per call kind, cut-offs, slot time at 1, 8 and 16 at once, cloud reasoning tokens; options for the limits and `timeout_s` wait for Z | `eval/load-test/TOKEN_LIMIT_RESEARCH.md`, `eval/load-test/output_lengths.py` |
+| M8 local tier 1 drafts in Markdown | the local model looped inside the JSON answer until `max_tokens` (17 of 24 runs); it now answers in Markdown, cloud drafts keep JSON (`eval/load-test/M8_DRAFT_LOOPS.md`) | `app/instructor_ai/drafts.py` |
 | V7 web pages | merged (#120): fetched through `PinnedTransport` (https, public addresses only, size and time limits), stored as `web-*.md`, re-fetch under a row lock | `app/rag/web_pages.py`, `app/api/v2/materials.py` |
 | V8 closed loop | merged (#123): "Explain it another way" for the student; topics weak for the class (minimum group) hand a request to the AI assistant | `app/learner/weak_topics.py`, `frontend/src/pages/instructor/Overview.tsx` |
 | V9 accounts from term to term | merged (#118, #125): admin student list, deactivate, reset, delete with audit and scrub | `app/api/v2/admin.py`, `app/auth/purge.py` |
