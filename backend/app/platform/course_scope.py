@@ -16,7 +16,7 @@ from sqlmodel import Session, col, select
 from app.core.schemas import Chunk
 from app.storage.models import Announcement, Course, Module
 
-ANNOUNCEMENTS_PER_QUESTION = 2  # announcements that share words with a logistics question, best first
+ANNOUNCEMENTS_PER_QUESTION = 2  # announcements sharing two words or more with a logistics question
 SCOPED = ("content", "learner", "retriever", "sessions")
 GENERAL_TOPIC = "general"  # a question about the course as a whole (no module chosen)
 
@@ -104,7 +104,7 @@ class CourseModuleRetriever:
         ranked = []
         for row in rows:
             shared = len(asked & {w for w in analyze(f"{row.title} {row.body}") if " " not in w})
-            if shared:
+            if shared >= min(2, len(asked)):  # one common word ("due", "set") is not enough
                 ranked.append((shared + (1 if row.pinned else 0), row))
         ranked.sort(key=lambda item: -item[0])  # stable: newest first among equals
         return [Chunk(text=f"Course announcement of {row.created_at.date().isoformat()}: {row.title}\n\n"

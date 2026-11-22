@@ -141,8 +141,12 @@ export function firstDuplicateOptions(questions: QuizQuestion[]): number | null 
   return i < 0 ? null : i + 1;
 }
 
-/** The server writes the time with or without the zone; the same instant must compare equal. */
-const sameTime = (a: string, b: string) => a.replace(/(Z|[+-]00:?00)$/, "") === b.replace(/(Z|[+-]00:?00)$/, "");
+/** The same instant, however the server wrote it: with or without a zone, in UTC or in the database's own
+ *  zone ("...22:13:17Z" from a save, "...17:13:17-05:00" from the list); a time without a zone is UTC. */
+export const sameTime = (a: string, b: string) => {
+  const instant = (s: string) => Date.parse(/(Z|[+-]\d\d:?\d\d)$/.test(s) ? s : `${s}Z`);
+  return instant(a) === instant(b);
+};
 
 const blankQuestion = (): QuizQuestion => ({ kind: "mcq", kc: null, stem: "", options: ["", "", "", ""], answer: 0, explanation: "", sources: [], reviewed: true });
 

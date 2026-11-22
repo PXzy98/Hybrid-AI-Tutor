@@ -36,6 +36,7 @@ function stepDetail(stage: string, status: string, detail: string, lang: string,
   if (stage === "decision" && status === "completed") key = /^LOCAL/i.test(detail) ? "decision.completedLocal" : /^CLOUD/i.test(detail) ? "decision.completedCloud" : null;
   else if (status !== "running" && status !== "pending") key = `${stage}.${status}`;
   if (key && `routing.detail.${key}` in en && (count || !/\{n\}/.test(en[`routing.detail.${key}` as MessageKey]))) {
+    if (count === "1" && `routing.detail.${key}One` in en) return sentence(`${key}One`);  // "1 passage", not "1 passages"
     return sentence(key, { n: count ?? 0 });
   }
   return lang === "en" ? detail : null;

@@ -142,6 +142,7 @@ def test_a_logistics_question_reads_the_matching_announcements(world):
 
     _post(world, title="Problem set 4 due date", body="Problem set 4 is due with Lecture 22 this time.")
     _post(world, title="Office hours moved", body="Office hours are on Thursday this week.", pinned=True)
+    _post(world, title="Welcome", body="Problem sessions are on Monday.")  # one shared word only
     retriever = course_scope.CourseModuleRetriever(world.services, world.course, {})
     found = retriever.announcements("When is problem set 4 due?")
     assert [c.source for c in found] == ["Announcement: Problem set 4 due date"]
