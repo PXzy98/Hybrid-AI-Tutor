@@ -52,7 +52,10 @@ def check_budget(passages: int, chars: int, max_passages: int, max_chars: int) -
 
 
 class DraftError(ValueError):
-    """Invalid context or ungrounded model output; never echo source text."""
+    """Invalid context or ungrounded model output; never echo source text. The message is written for the
+    instructor, so a failed job shows it without the class name."""
+
+    for_instructor = True
 
 
 def trust_for(model: str) -> str:
@@ -174,6 +177,9 @@ async def generate_tier1_draft(
         result = await gateway.complete(model, tier1_messages(kind, material, request), settings=settings,
                                         trust_required=trust_for(model),
                                         json_schema=_Generated.model_json_schema(), stream=False)
+    if getattr(result, "cut_off", False):  # a cut JSON object cannot be parsed: say why instead (V22 M8)
+        raise DraftError("The draft reached the model's length limit before it was complete. "
+                         "Ask for a shorter draft or fewer parts.")
     try:
         generated = _Generated.model_validate(parse_model_json(result.text))
     except (ValidationError, ValueError, TypeError) as exc:

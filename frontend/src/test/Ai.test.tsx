@@ -31,6 +31,9 @@ describe("AI drafts", () => {
     expect(await screen.findByText("The local model is drafting…")).toBeInTheDocument();
     expect(await screen.findByText("Not visible to students until you accept it.", {}, { timeout: 5000 })).toBeInTheDocument();
     expect(screen.getByText("lecture1.pdf")).toBeInTheDocument();
+    // the list badge follows: no spinner left once the draft is written (V22)
+    const badges = () => [...document.querySelectorAll('[data-slot="badge"]')].map((b) => b.textContent);
+    await waitFor(() => expect(badges()).not.toContain("generating"), { timeout: 5000 });
 
     // the module is needed for knowledge components
     await user.selectOptions(await screen.findByLabelText("Module for the new knowledge components"), "10");

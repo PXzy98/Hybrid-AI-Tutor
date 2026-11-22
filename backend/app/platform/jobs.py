@@ -84,7 +84,7 @@ def _message(e: Exception) -> str:
     from app.llm.base import LLMError
 
     first = (str(e).splitlines() or [""])[0]
-    if isinstance(e, LLMError):  # written for the instructor (which model, what to check)
+    if isinstance(e, LLMError) or getattr(e, "for_instructor", False):  # written for the instructor
         return first[:300]
     return f"{type(e).__name__}: {first}"[:300]
 

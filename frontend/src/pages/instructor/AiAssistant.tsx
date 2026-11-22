@@ -52,7 +52,9 @@ function Drafts({ course }: { course: Course }) {
   const detail = useRef<HTMLDivElement>(null);
   // the opened draft is below the list: bring it into view
   useEffect(() => { if (selected !== null) detail.current?.scrollIntoView?.({ block: "start" }); }, [selected]);
-  const drafts = useQuery({ queryKey: ["ai-drafts", course.id, filter], queryFn: () => api.aiDrafts(course.id, filter || undefined) });
+  // while a draft is being written the list asks again, so its badge does not keep spinning after it is done
+  const drafts = useQuery({ queryKey: ["ai-drafts", course.id, filter], queryFn: () => api.aiDrafts(course.id, filter || undefined),
+    refetchInterval: (q) => (q.state.data?.some((x) => x.status === "generating") ? 2000 : false) });
   return (
     <div className="space-y-4">
       <StartForm course={course} onStarted={(d) => { setSelected(d.id); qc.invalidateQueries({ queryKey: ["ai-drafts", course.id] }); }} />
@@ -282,6 +284,11 @@ function DraftDetail({ course, id, onGone }: { course: Course; id: number; onGon
   });
   const [acceptedMsg, setAcceptedMsg] = useState("");
   const d = draft.data;
+  const status = d?.status;
+  // the list shows the same status: update it as soon as this draft is written or fails
+  useEffect(() => {
+    if (status && status !== "generating") qc.invalidateQueries({ queryKey: ["ai-drafts", course.id] });
+  }, [status, qc, course.id]);
   if (draft.error) return <ErrorNote error={draft.error} />;
   if (!d) return <Loading variant="form" />;
   const refresh = (fresh: AiDraft) => {
