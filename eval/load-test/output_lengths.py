@@ -28,6 +28,7 @@ long text.
 
 import argparse
 import asyncio
+import hashlib
 import importlib.util
 import json
 import statistics
@@ -115,12 +116,14 @@ async def timed(client, messages, *, json_schema=None, max_tokens=None) -> dict:
     try:
         r = await client.complete(messages, json_schema=json_schema, max_tokens=max_tokens)
     except LLMError as e:  # includes "cut off before any text"
+        cut = "cut off" in str(e)
         return {
             "ok": False,
             "error": type(e).__name__,
             "seconds": round(time.perf_counter() - t0, 1),
-            "cut_off": "cut off" in str(e),
-            "completion_tokens": max_tokens or client.max_tokens,
+            "cut_off": cut,
+            # the limit was spent only when the answer was cut off; a timeout or refused call has no usage
+            "completion_tokens": (max_tokens or client.max_tokens) if cut else None,
             "_text": "",
         }
     return {
@@ -189,7 +192,8 @@ def build_prompts(
     """The generate step's messages for the sampled questions of each pack, built with the app's code.
     `twins_per_pack` S11 concept or application questions are also asked for a long answer with a table.
     Indexing the packs is slow, so the prompts are kept in `cache_dir` (the raw directory: course text)."""
-    key = f"prompts_{'-'.join(p[:6] for p in packs)}_{per_pack}_{para_per_pack}_{twins_per_pack}.json"
+    selection = hashlib.sha256("|".join(packs).encode()).hexdigest()[:12]  # full pack names: no collisions
+    key = f"prompts_{selection}_{per_pack}_{para_per_pack}_{twins_per_pack}.json"
     cached = cache_dir / key if cache_dir else None
     if cached and cached.exists():
         return json.loads(cached.read_text(encoding="utf-8"))
@@ -622,6 +626,12 @@ def pct(values, p):
 
 
 def stats_row(name: str, rows: list[dict], limit: int, big: int | None = None) -> str:
+    """Lengths of the measured calls only: an answer, or a cut-off at the limit; failed calls are counted
+    apart (a timeout or refused call has no completion length)."""
+    failed = [r for r in rows if r.get("ok") is False and not r.get("cut_off")]
+    rows = [r for r in rows if r not in failed]
+    if failed:
+        name = f"{name} ({len(failed)} failed, not counted)"
     tokens = [r["completion_tokens"] for r in rows if r.get("completion_tokens") is not None]
     cut = [r for r in rows if r.get("cut_off")]
     loops = sum(1 for r in cut if r.get("loop"))
