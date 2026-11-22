@@ -123,7 +123,7 @@ What Z did in other owners' areas (for their review): guide section 7.5.
 
 | Owner | Task | Why it matters |
 |---|---|---|
-| T | video (T10, Nov 25); French UI screenshots to Lavin | course deliverable |
+| T | video (T10, Nov 25) | course deliverable |
 | T | routing, frontend and web search handover notes (T12) | handover |
 | T, Z | `transformers` 5 (6 pip-audit advisories ignored with reason), `react-router` 7 and `vite`/`vitest` (CI advisories) | CI reports them |
 | Z | deploy on the test host with the monitoring profile; the app under load and the speed of the whole ask pipeline on vLLM | needs access to the test host |

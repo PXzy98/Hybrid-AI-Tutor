@@ -28,8 +28,8 @@ Reflection #2 (ethics, individual) 11/18 · video 11/25 · Design Day 12/3 · fi
 | ID | Task | Owner | Status |
 |---|---|---|---|
 | T13 | Web search evaluation (G1-106) | T | search built (#88: off / API / SearXNG); evaluation needs SearXNG or a key |
-| T10 | Video (11/25); French UI screenshots to Lavin | T | demo script merged (#116); screenshots not sent |
-| T11 | Renaming | T | waits for the project name |
+| T10 | Video (11/25) | T | demo script merged (#116) |
+| T11 | Renaming | T | done: PACT (2026-11-17, kept at the meeting); rename again only if the client picks another name with the domain |
 | T12 | Routing, frontend and web search handover notes | T | manuals done |
 | — | `transformers` 5, `react-router` 7, `katex` done (Z27); `vite`/`vitest` (dev-only advisories) | T, Z | partly done |
 | Z13, Z6, Z2 | Deploy on the test host with monitoring; vLLM load test; local speed of the 9B model | Z | waits for server access |
@@ -44,8 +44,15 @@ Reflection #2 (ethics, individual) 11/18 · video 11/25 · Design Day 12/3 · fi
 | T17 | Course-rule questions routed to the cloud skip retrieval ("Can I use ChatGPT for the problem sets?" gets no syllabus) | T | done: the capability gate no longer skips retrieval inside a course or for logistics questions; the passages reach the cloud only through the CloudRequest; end-to-end test added |
 | Z22 | Privacy filter tests: held-out ECE set, `life_science` and `general` sets, E6 scores for the v4 types, a fresh held-out medical set | Z | partly done: ECE, computer science, `life_science`, `general` sets and E6 re-run done; the medical set is open; rule fixes: low-risk part in PR #139 (Z22b), allow-list for course terms later (Z22c), v5-plan.md section 10 |
 | — | Model behaviour from the browser tests of 2026-11-21 (M1 to M7: invented details in examples, general knowledge without material, web sources named as course material, slow web search, a cloud failure, long answers, unhelpful demo answers): evaluate and decide (docs/v5-plan.md section 10) | Z, S, T | open |
-| — | N6: store the notes under an answer so a reopened conversation shows them (docs/v5-plan.md section 10) | Z | to decide |
-| — | Re-audit the GPU choice and `llm.local.max_tokens` (now 2048, was 1024) together: answer length and time per answer at 2048, then GPU and `max_concurrent` (docs/v5-plan.md section 10, V22) | Z | open |
+| V10 | AWS deployment on Prof. Abbas's account with the domain (V11), monitoring and backups; then the browser test again on the production site | Z | waits for the AWS details |
+| V13 | GPU / local model cost report to Prof. Abbas (12/1), with the Z23 numbers and the token-limit research | Z | after the research below |
+| E4 | End-to-end privacy audit on v5 (announcements in retrieval, web search, question KC codes, stored notes) | Z | open |
+| V19 | Routing heads per course type: train ECE (and CS) heads from their question sets with a before/after report; no type has its own heads yet | T | open |
+| — | The 30 revised diagnostic items: decide whether to apply the AI review's suggestions (harder advanced items, more plausible distractors) and confirm the audience (undergraduate or medical school) with the client; a person approves them (`docs/review/AI_REVIEW_2026-11-22.md`) | Z | to decide |
+| — | Web audit and UI check leftovers (screen-reader names for wide tables, page title while loading, KaTeX woff2, manual Safari Chinese input and screen reader checks) and admin page gaps (delete a misconception, edit `checkers` / `knowledge_model`, course types as a list, system model connections for instructors) (docs/v5-plan.md section 6) | T, Z | open |
+| — | Demo data: course titles with 2004, repeated first names, the unhelpful stored answer (M7); rebuild the demo questions after the fixes | Z | open |
+| — | M8: local AI drafts fail when the JSON is cut at 2048 tokens; find the cause (passages, prompt and output length of the failing jobs) | Z | open |
+| — | Research the 2048-token limit (output lengths per call kind, why drafts reach it, cost of a cut-off, GPU time and slots, cloud reasoning tokens) and re-audit the GPU choice and `llm.local.max_tokens` (now 2048, was 1024) together: answer length and time per answer at 2048, then GPU and `max_concurrent` (docs/v5-plan.md section 10, V22) | Z | open |
 | Z23 | vLLM capacity: tokens per second in the load test, runs at 1 to 32 at a time, model limits set from them, step timing of one ask, GPU for more than 5 students at once | Z | needs the test host |
 | Z24 | The deployment's local model is its vLLM (`VLLM_BASE_URL`, `VLLM_KEY` replace `OLLAMA_URL`) | Z | done (#107) |
 | Z25 | Document scan refuses public course text (CS50x `pset_5.md` as `GRADE`); check all eight packs | Z | done: three allele exceptions never matched (a backspace instead of `\b`); 0 of 304 pack files refused |
@@ -59,4 +66,3 @@ use the eight open course packs in `data/demo_courses/`.
 
 - Course server access: deployment, vLLM load test, Z2 local speed, monitoring.
 - The client: cloud provider and billing, alert receiver, project name.
-- Lavin: second review of the 30 revised check items; French UI screenshots.
