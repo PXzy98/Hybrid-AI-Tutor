@@ -4,7 +4,7 @@ one student's learning data, even for a student who acknowledged mode B before t
 import pytest
 from sqlmodel import Session, select
 
-from app.storage.models import Account, Course, CourseMember, utcnow
+from app.storage.models import Account, AuditLog, ConfigHistory, Course, CourseMember, CourseSettings, utcnow
 from tests.test_ask_v2 import V2, World, _login
 from tests.test_learner_v2 import Q1
 
@@ -76,6 +76,100 @@ def test_a_stored_mode_b_does_not_block_saving_other_settings(world):
     r = world.prof.put(f"{world.url}/settings", json={"values": {**current["values"], "local_only": True},
                                                      "version": current["version"]})
     assert r.status_code == 200, r.text
+
+
+def _store_b_settings(world) -> int:
+    current = world.prof.get(f"{world.url}/settings").json()
+    with Session(_engine(world)) as db:
+        db.add(CourseSettings(course_id=world.course, visibility_mode="B", version=current["version"] + 1))
+        db.commit()
+    _stored_mode_b_with_alice_visible(world)
+    return world.prof.get(f"{world.url}/settings").json()["version"]
+
+
+def _alice_member(world) -> CourseMember:
+    with Session(_engine(world)) as db:
+        return db.exec(select(CourseMember).join(Account, CourseMember.account_id == Account.id).where(
+            CourseMember.course_id == world.course, Account.student_id == world.sid)).one()
+
+
+def _visibility_changes(world) -> int:
+    with Session(_engine(world)) as db:
+        history = db.exec(select(ConfigHistory).where(ConfigHistory.course_id == world.course)).all()
+        audit = db.exec(select(AuditLog).where(AuditLog.target == f"course:{world.course}")).all()
+    changed = [a for a in audit if "visibility_mode" in (a.details or {}).get("changed", [])]
+    return len([h for h in history if h.values.get("visibility_mode") != (h.previous or {}).get(
+        "visibility_mode")]) + len(changed)
+
+
+def test_saving_other_settings_keeps_a_stored_b_and_its_acknowledgements(world):
+    version = _store_b_settings(world)
+    current = world.prof.get(f"{world.url}/settings").json()
+    assert current["values"]["visibility_mode"] is None
+    r = world.prof.put(f"{world.url}/settings", json={"values": {**current["values"], "local_only": True},
+                                                     "version": version})
+    assert r.status_code == 200, r.text
+    with Session(_engine(world)) as db:
+        assert db.get(CourseSettings, world.course).visibility_mode == "B"
+        assert db.get(CourseSettings, world.course).local_only is True
+    member = _alice_member(world)
+    assert member.visibility_ack_at is not None and member.visible_since is not None
+    assert _visibility_changes(world) == 0
+    again = world.prof.get(f"{world.url}/settings").json()
+    r = world.prof.put(f"{world.url}/settings", json={"values": {**again["values"], "visibility_mode": "B"},
+                                                     "version": again["version"]})
+    assert r.status_code == 422
+
+
+def test_restoring_an_entry_with_b_works_while_off(world):
+    version = _store_b_settings(world)
+    with Session(_engine(world)) as db:
+        entry = ConfigHistory(account_id=None, scope="course", course_id=world.course, version=1,
+                              values={"visibility_mode": "B", "local_only": True}, previous={})
+        db.add(entry)
+        db.commit()
+        entry_id = entry.id
+    r = world.prof.post(f"{world.url}/settings/restore/{entry_id}")
+    assert r.status_code == 200, r.text
+    with Session(_engine(world)) as db:
+        row = db.get(CourseSettings, world.course)
+        assert row.visibility_mode == "B" and row.local_only is True and row.version > version
+    assert _alice_member(world).visibility_ack_at is not None
+
+
+def test_acknowledgements_are_cleared_at_startup_while_off(world):
+    from app.learner.course_views import invalidate_acknowledgements_while_off
+
+    _store_b_settings(world)
+    assert _alice_member(world).visibility_ack_at is not None
+    assert invalidate_acknowledgements_while_off(_engine(world), False) == [world.course]
+    member = _alice_member(world)
+    assert member.visibility_ack_at is None and member.visible_since is None
+    assert invalidate_acknowledgements_while_off(_engine(world), False) == []  # idempotent
+    with Session(_engine(world)) as db:
+        actions = [a.action for a in db.exec(select(AuditLog)).all()]
+    assert actions.count("visibility.reset.individual_views_off") == 1
+    alice = _login(world.app, "alice")
+    assert alice.post(f"{world.url}/me/visibility", json={"action": "acknowledge"}).status_code == 409
+    assert _alice_member(world).visibility_ack_at is None
+
+
+def test_acknowledgements_of_an_inherited_mode_b_are_cleared_too(world):
+    """Mode B on the course row, no settings override: the acknowledgement must not outlive the switch."""
+    from app.learner.course_views import invalidate_acknowledgements_while_off
+
+    _stored_mode_b_with_alice_visible(world)
+    assert invalidate_acknowledgements_while_off(_engine(world), False) == [world.course]
+    member = _alice_member(world)
+    assert member.visibility_ack_at is None and member.visible_since is None
+
+
+def test_nothing_is_cleared_while_individual_views_are_on(world):
+    from app.learner.course_views import invalidate_acknowledgements_while_off
+
+    _store_b_settings(world)
+    assert invalidate_acknowledgements_while_off(_engine(world), True) == []
+    assert _alice_member(world).visibility_ack_at is not None
 
 
 def test_quiz_results_are_class_statistics_only(world):

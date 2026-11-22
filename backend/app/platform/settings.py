@@ -364,6 +364,11 @@ class SettingsService:
             if row.version != expected_version:
                 raise SettingsConflict(f"the settings changed (version {row.version}); reload and try again")
             before = _values(row, COURSE_FIELDS)
+            if (values["visibility_mode"] is None and before["visibility_mode"] == "B"
+                    and not self.base.learner.instructor_individual_view):
+                # V1: course_values hides a stored B while individual views are off, so the page sends None
+                # back; that means "unchanged", not a change of mode (which would reset acknowledgements)
+                values["visibility_mode"] = "B"
             if before == values:
                 return row.version
             for name, value in values.items():
@@ -401,7 +406,10 @@ class SettingsService:
             return self.save_system(entry.values, expected_version=version, account_id=account_id,
                                     action="settings.system.restore")
         _, version = self.course_values(entry.course_id)
-        return self.save_course(entry.course_id, entry.values, expected_version=version,
+        values = dict(entry.values)
+        if values.get("visibility_mode") == "B" and not self.base.learner.instructor_individual_view:
+            values["visibility_mode"] = None  # V1: an old mode B cannot come back; the other values can
+        return self.save_course(entry.course_id, values, expected_version=version,
                                 account_id=account_id, action="settings.course.restore")
 
     # ------------------------------------------------------------------------- component apply (§6.5)

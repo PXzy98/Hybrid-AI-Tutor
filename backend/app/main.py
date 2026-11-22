@@ -35,6 +35,10 @@ async def lifespan(app: FastAPI):
     for warning in deployment_warnings(services.settings):
         logging.getLogger("app").warning("deployment: %s", warning)
     services.accounts.bootstrap_instructor()
+    from app.learner.course_views import invalidate_acknowledgements_while_off
+
+    invalidate_acknowledgements_while_off(  # V1: none counts when the switch goes on
+        services.engine, services.settings.learner.instructor_individual_view)
     app.state.services = services
     app.state.course_directory = DbCourseDirectory(services.engine)  # require_course_role (Z9)
     services.component_manager.sync()  # heartbeat; finishes a change that was applying when it started
