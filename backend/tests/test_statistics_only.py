@@ -154,6 +154,16 @@ def test_acknowledgements_are_cleared_at_startup_while_off(world):
     assert _alice_member(world).visibility_ack_at is None
 
 
+def test_acknowledgements_of_an_inherited_mode_b_are_cleared_too(world):
+    """Mode B on the course row, no settings override: the acknowledgement must not outlive the switch."""
+    from app.learner.course_views import invalidate_acknowledgements_while_off
+
+    _stored_mode_b_with_alice_visible(world)
+    assert invalidate_acknowledgements_while_off(_engine(world), False) == [world.course]
+    member = _alice_member(world)
+    assert member.visibility_ack_at is None and member.visible_since is None
+
+
 def test_nothing_is_cleared_while_individual_views_are_on(world):
     from app.learner.course_views import invalidate_acknowledgements_while_off
 

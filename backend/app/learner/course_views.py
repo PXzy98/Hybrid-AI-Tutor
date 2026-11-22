@@ -31,7 +31,6 @@ from app.storage.models import (
     Account,
     AuditLog,
     CourseMember,
-    CourseSettings,
     EvidenceLog,
     LearnerMisconception,
     LearnerPreference,
@@ -91,21 +90,17 @@ def reset_visibility(db: Session, course_id: int) -> None:
 def invalidate_acknowledgements_while_off(engine: Engine, individual_view: bool) -> list[int]:
     """V1: with individual views switched off, nobody can see a student, so an acknowledgement given before
     does not count when they are switched on again. Called at start-up; clears the acknowledgements of every
-    course stored in mode B (idempotent) and returns those course ids. Does nothing when individual views
-    are on. No personal data goes to the audit log."""
+    course that still has any (idempotent) and returns those course ids. Whatever mode a course stores or
+    inherits (its settings row, or the course row when the settings leave it unset), no acknowledgement may
+    outlive the switch; a course in mode A has none to clear. Does nothing when individual views are on.
+    No personal data goes to the audit log."""
     if individual_view:
         return []
     with Session(engine) as db:
-        course_ids = list(db.exec(
-            select(CourseSettings.course_id).where(CourseSettings.visibility_mode == "B")).all())
+        acknowledged = or_(CourseMember.visibility_ack_at.is_not(None), CourseMember.visible_since.is_not(None))
+        course_ids = sorted(set(db.exec(select(CourseMember.course_id).where(acknowledged)).all()))
         cleared = []
         for course_id in course_ids:
-            left = db.exec(select(CourseMember.id).where(
-                CourseMember.course_id == course_id,
-                or_(CourseMember.visibility_ack_at.is_not(None), CourseMember.visible_since.is_not(None))
-            ).limit(1)).first()
-            if left is None:
-                continue
             reset_visibility(db, course_id)
             db.add(AuditLog(account_id=None, action="visibility.reset.individual_views_off",
                             target=f"course:{course_id}", details={}))
