@@ -67,6 +67,8 @@ def test_teaching_cases_are_reported_but_do_not_block(text):
     "ID: 300-987 654, asthma flares when I run",  # mixed separators (E6 held-out 5)
     # the reference-list labels are case-sensitive and must come right before the number
     "Eric 300123456",
+    "ERIC 300123456",  # an upper-case roster: a first name, not the ERIC database
+    "MR 300123456",
     "Mr 300123456 asked about the arXiv paper",
     "my student number is 300418277, see doi 10.1145/3053370",
 ])

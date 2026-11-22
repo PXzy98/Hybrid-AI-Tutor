@@ -26,9 +26,10 @@ O_FOR_ZERO_RE = re.compile(r"(?<![\w.,/-])(?=(?:[^Oo\W]*[Oo]){1,2}[^Oo\W]*\b)[\d
 # (found by E6).
 ISBN_BEFORE_RE = re.compile(r"ISBN(?:-1[03])?\s*:?\s*$", re.I)
 # Z25b: identifiers of a reference list (Wikipedia pages as draft sources, V7): "S2CID 23752485",
-# "arXiv:1509.05053", "hdl:10092/9691", "ProQuest 301940891"; the label must come right before the number
-BIBLIO_BEFORE_RE = re.compile(r"\b(?:ISSN|S2CID|arXiv|hdl|PMID|PMCID|OCLC|ProQuest|JSTOR|Bibcode|LCCN|MR|Zbl|"
-                              r"OSTI|SSRN|CiteSeerX|ERIC|doi)\s*:?\s*$")
+# "arXiv:1509.05053", "hdl:10092/9691", "ProQuest 301940891"; the label must come right before the number.
+# Labels that are also names or titles in an upper-case roster ("ERIC", "MR") are left out.
+BIBLIO_BEFORE_RE = re.compile(r"\b(?:ISSN|S2CID|arXiv|hdl|PMID|PMCID|OCLC|ProQuest|JSTOR|Bibcode|LCCN|Zbl|"
+                              r"OSTI|SSRN|CiteSeerX|doi)\s*:?\s*$")
 ISBN_CHECK_AFTER_RE = re.compile(r"[ -]?[Xx](?![A-Za-z0-9])")
 DECIMAL_RE = re.compile(r"\d\.\d(?!\d)")
 
