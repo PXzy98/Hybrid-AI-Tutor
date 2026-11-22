@@ -320,16 +320,36 @@ class Recorder:
         self.client, self.slots, self.calls = client, slots, []
 
     async def complete(self, messages, *, json_schema=None, max_tokens=None):
-        async with self.slots:
-            r = await self.client.complete(messages, json_schema=json_schema, max_tokens=max_tokens)
+        from app.llm.base import LLMError
+
+        limit = max_tokens or self.client.max_tokens
+        t0 = time.perf_counter()
+        try:
+            async with self.slots:
+                r = await self.client.complete(messages, json_schema=json_schema, max_tokens=max_tokens)
+        except LLMError as e:  # a timeout, a refused call or a cut-off before any text: recorded too
+            cut = "cut off" in str(e)
+            self.calls.append(
+                {
+                    "ok": False,
+                    "completion_tokens": limit if cut else None,
+                    "prompt_tokens": None,
+                    "cut_off": cut,
+                    "seconds": round(time.perf_counter() - t0, 1),
+                    "_text": "",
+                    "limit": limit,
+                }
+            )
+            raise
         self.calls.append(
             {
+                "ok": True,
                 "completion_tokens": r.completion_tokens,
                 "prompt_tokens": r.prompt_tokens,
                 "cut_off": r.cut_off,
                 "seconds": round(r.latency_ms / 1000, 1),
                 "_text": r.text,
-                "limit": max_tokens or self.client.max_tokens,
+                "limit": limit,
             }
         )
         return r
@@ -633,6 +653,8 @@ def stats_row(name: str, rows: list[dict], limit: int, big: int | None = None) -
     if failed:
         name = f"{name} ({len(failed)} failed, not counted)"
     tokens = [r["completion_tokens"] for r in rows if r.get("completion_tokens") is not None]
+    if not tokens:  # an empty group (no paraphrase set for the pack, --twins 0): nothing measured
+        return f"| {name} | {len(rows)} | - | - | - | {limit} | - | - | - |"
     cut = [r for r in rows if r.get("cut_off")]
     loops = sum(1 for r in cut if r.get("loop"))
     over = f"{sum(t > big for t in tokens)} / {len(tokens)}" if big else "-"
