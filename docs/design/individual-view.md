@@ -20,7 +20,7 @@ change before it can be used.
 | Default for the student | **Nothing is shared until the student agrees** (opt-in: "I agree to share"); the student can stop at any time and start again | a default of "shared unless you switch it off" is not consent: many students never open the setting |
 | What is shared | Only data created **after** the student agreed (`visible_since`); stopping hides everything again, starting again starts a new window | as today |
 | Refusing must be safe | The instructor cannot tell who refused: a student who never agreed and one who stopped look the same ("not shared"); no count of refusals is shown per student; the student's choice is never sent to the instructor in any other form | a choice only works when refusing has no cost (Z's reflection, 2026-11-18) |
-| Class statistics with some students shared | No number may let the instructor compute the data of the students who did not share (see "Differencing") | otherwise the class totals reveal the refusers |
+| Class statistics with some students shared | Class numbers use only data never shown individually; individual views show only data recorded while the student shared (see "Differencing"; option B, chosen by Z on 2026-11-22) | otherwise the class totals reveal the refusers |
 | Never shown, in any mode | question text (it is never stored, rule 1); the answers the tutor gave; conversations; the student's own answer instruction (V15); the end-of-term survey answers (stay anonymous); anything from before the agreement | rule 1; the survey only works when it is anonymous; V15 is the student's private setting |
 | Audit | Every individual view (overview, plan, quiz results) is written to the audit log, as today; the student can see that their data was viewed (count and dates, not who) | transparency for the student |
 
@@ -32,77 +32,51 @@ short or detailed) when it was set after the agreement, the last active date, an
 instructor writes. The instructor can then use **Draft extra material** (V8) for the class, not for one student;
 targeted material for one student stays out of scope ("Not this term").
 
-## Differencing (the main new rule)
+## Differencing (the main new rule; decided 2026-11-22)
 
-Class statistics count every student; individual views show the students who share. If 6 students answered a
-quiz and 5 of them share, the class average minus the 5 visible scores is the sixth student's score. The same
-holds for band counts per KC, misconception counts, weak topics (V8) and the usage statistics (V2).
+Class statistics and individual views must never cover the same data: if 6 students answered a quiz and the
+instructor sees 5 of the scores, the class average minus those 5 is the sixth score. The same holds for band
+counts per KC, misconception counts, weak topics (V8), quiz results and the usage statistics (V2).
 
-Rule: **a class number is shown only when its undisclosed contributions come from at least the minimum group of
-students** (`learner.class_summary_min_group`, 5), or when none of its contributions was disclosed. Otherwise the
-number is hidden ("hidden: too few students who do not share"). Concretely, for each aggregate the code lists
-its contributions (one per student and datum: a quiz attempt, a KC band, a misconception, a week's questions),
-splits them into disclosed and undisclosed, and suppresses when `0 < students with an undisclosed contribution <
-min_group`. Counts of students (enrolled, active) are not affected.
+Rule (option B, see "How this rule was decided"): **the two sides use disjoint data, decided per stored event.**
 
-**Disclosed means shown, datum by datum and version by version.** A contribution is identified by the student,
-the datum key and its **event range**: the smallest and the largest ID of the stored events it is computed from
-(evidence rows for a KC band or a misconception, the quiz attempt, the request-log rows of a week's questions).
-Events are never changed, only added, so a new answer or question gives the datum a new range; and an individual
-band computed from the events since the agreement (`visible_since`) has another range than the class summary's
-band computed from the whole history, so seeing the first never discloses the second. A contribution counts as
-disclosed for the rest of the term once an instructor of the course has seen that version in an individual view, whether or not the student still shares and
-whatever mode the course is in now. Opening a student's overview does not disclose the student's other data: a
-quiz attempt from before the student agreed (`visible_since`) is not shown and stays undisclosed, so a quiz
-average that includes it is still checked. A newer version is undisclosed until it is shown: if a student stops sharing and then asks more questions in the
-same week, that week's count has a new version that was never shown, so the class number that includes it is
-checked again. Hiding the individual views does not take back what was seen: after
-reading five students' bands in a course of six, switching back to mode A (or the administrator switching
-individual views off) would otherwise let the instructor read the class band counts and compute the sixth. So
-the rule applies in mode A too, for the whole term.
+- An event (an evidence row, a quiz attempt, a request-log row) belongs to the **shared side** when it was
+  recorded inside one of the student's sharing windows in this course (from the agreement to the stop). Only the
+  shared side ever appears in an individual view.
+- Every other event, of every student, is on the **class side**: the events of students who never shared, and the
+  events a sharing student made before the agreement or after stopping. Class numbers (class summary, V2
+  statistics, weak topics, insights, quiz results, the end-of-term export) are computed from the class side only;
+  a KC band counted in a class number is the band replayed from that student's class-side events.
+- A class number is hidden when fewer than the minimum group (`learner.class_summary_min_group`, 5) of students
+  contribute class-side events to it, as in mode A.
 
-**Both orders.** Hiding later class numbers is not enough: an instructor can first note a class number while
-nothing is disclosed (the average of a quiz six students took), then open those students' results and compute
-the last one. So the rule is symmetric:
+Because an event is on exactly one side, no class number contains anything an individual view shows, and no
+individual view shows anything a class number contains: subtracting one from the other gives nothing, in any order
+and in any mode. A student who starts sharing does not leave the class numbers (their earlier events stay on the
+class side, so a total does not shrink); their new events go to the shared side only. A student who stops sharing
+adds new events to the class side again, like any student who does not share. Class numbers still change over
+time as students act; that is the same in mode A and is covered by the minimum group.
 
-- every class number shown to an instructor is recorded in a **release log**: which number (kind and key, for
-  example `quiz_average:quiz 12` or `band_counts:KC C.3`) and the contributions it was computed from
-  (pseudonymous student ID, datum key and event range); no values, no text;
-- before an individual view shows a datum, the code checks every released number that the datum went into: if
-  showing it would leave `0 < students with an undisclosed contribution < min_group` in that number, the datum is
-  hidden in the individual view ("hidden: part of a class number already shown"), while the rest of the overview
-  is shown;
-- and, as above, a class number is not released when it would break the same condition.
+**The sharing windows are kept for the term.** The side of an event is decided from a per-course record of each
+student's windows (start and end), kept until the end of term and never cleared by a mode change or by the
+administrator switching individual views off (#151 clears `visibility_ack_at` and `visible_since`, which say only
+the current state). Once a course has had any sharing window, the class numbers keep excluding those windows for
+the rest of the term, in mode A too. End of term removes the course's student data, the windows with it.
 
-In practice a course that wants individual views should switch to mode B at the start of term, before class
-numbers are read; the manual says so.
-
-The record of what was disclosed is the audit log of individual views (see Audit above), not the acknowledgement
-columns: `visibility_ack_at` and `visible_since` are cleared when a student stops sharing and, since #151, for
-every course while individual views are switched off, so they cannot say what was already seen. Each audit entry
-names the course, the student's pseudonymous ID and the keys and event ranges of the data shown (quiz, KC,
-misconception, week); no values. The entries stay until the end of term, when the course's student data is removed and the next term
-starts with nothing disclosed.
-
-**A simpler alternative to decide before the code.** The rules above keep class numbers wherever they cannot be
-used to infer an undisclosed contribution, but they need a release log, event ranges in every aggregate and in
-the audit, and a check in every class number; each review round found a further way to subtract. A simpler rule
-that is easier to verify: in a course in mode B, compute every class number only from students who never shared
-this term (and hide it below the minimum group), or show no class numbers in mode B at all. Both give the
-instructor less, and both remove differencing without logs. Z and Prof. Abbas choose one of the three before
-V23 is implemented.
-
-This makes the class statistics poorer when almost everybody shares. That is the price of letting the others
-refuse safely, and the instructor manual says so.
+This makes the class statistics poorer when many students share, and individual views show only what was
+recorded while the student shared. That is the price of letting the others refuse safely; the instructor manual
+says so and advises switching a course to mode B at the start of term.
 
 ## Changes to the code (when the switch is on)
 
 1. **Students page**: one state "Shared" or "Not shared" per student (today: "Visible", "Not visible", "Not
    joined yet", and the detail explains why). A student who stopped sharing and one who never agreed show the
    same "Not shared"; the API returns `visible_to_instructor` only (it already does) and no reason.
-2. **Differencing**: the suppression above in `admin/summary.py` (class summary), `learner/statistics.py` (V2),
-   `learner/weak_topics.py` (V8), `learner/quizzes.py` (`quiz_results` averages and per-question rates), the
-   insights (tier 3) and the end-of-term export.
+2. **Differencing**: a `sharing_window` table (course, student, start, end; kept until the end of term), and the
+   class-side filter on every class number: `admin/summary.py` (class summary, bands replayed from class-side
+   evidence), `learner/statistics.py` (V2), `learner/weak_topics.py` (V8), `learner/quizzes.py` (`quiz_results`
+   averages and per-question rates), the insights (tier 3) and the end-of-term export; individual views read the
+   shared side only (they already read only `visible_since` onwards).
 3. **Student side**: the sharing card on My progress asks first ("Share my progress with the instructors of this
    course?") with what is shared and what never is; the privacy notice (V3) and the consent text use the
    mode B wording (`privacy.lineIndividual`, `privacy.point.instructorIndividual`, already there); the student sees
@@ -122,31 +96,50 @@ refuse safely, and the instructor manual says so.
   overview 404 body, quiz results, statistics).
 - Nothing from before the agreement is shown; stopping hides it all; starting again shows only the new window
   (exists, extend to quizzes and V2).
-- Differencing: with 6 students and 5 sharing, no class number a student contributes to is shown; with 5 not
-  sharing, it is; with nobody sharing, every number behaves as in mode A.
-- Differencing after B -> A: with 6 students, the instructor views 5 overviews in mode B, the course is switched
-  back to mode A; the class band counts, quiz averages, weak topics and usage numbers stay hidden for the rest of
-  the term. The same after the administrator switches individual views off (acknowledgements cleared, #151) and
-  on again. A course where no individual view was ever opened behaves as in mode A.
-- Differencing, aggregate first: with 6 students who took a quiz and `min_group` 5, the instructor reads the quiz
-  average (nothing disclosed yet), then opens the overviews of the students who share: the first score is shown
-  (5 undisclosed contributors remain), every further score is hidden (it would leave 4), while the KC bands that
-  were never part of a released number are shown. The release log holds no values and no question text.
-- Differencing, mixed consent windows: 6 students take a quiz; 5 had agreed before their attempt, the sixth
-  agrees only afterwards. The instructor opens all six overviews: five scores are shown, the sixth student's
-  attempt is not (it predates the agreement) and stays undisclosed; the quiz average is then hidden, because
-  one undisclosed contribution remains.
-- Differencing with a consent window: six students share; one of them has answers from before the agreement.
-  The instructor views all six KC bands (each computed since the agreement): the class band counts, computed
-  from the whole history, stay hidden, because that student's whole-history band has a range that was never
-  shown.
-- Differencing after sharing stops: six students share and the instructor views all six current-week question
-  counts; one student stops sharing and asks two more questions; the instructor refreshes the other five
-  overviews: the class question count of that week is hidden, because the stopped student's week has a new
-  version that was never shown.
+- Disjoint sides: for every class number and every individual view in a course with sharing students, no event
+  is used by both (a property test over a generated course: random agreements, stops and answers).
+- Opt-in does not shrink a total: six students, a week's question total read; one student then agrees: the total
+  of that past week is unchanged (their earlier questions stay on the class side) and their later questions
+  appear only in their overview.
+- Aggregate first: a quiz average read before anyone shares stays the same after five students agree, and their
+  overviews show only attempts made after agreeing.
+- Mode and switch changes: after B -> A, and after the administrator switches individual views off and on, the
+  class numbers still exclude the shared windows of this term; a course that never had a sharing window behaves
+  as in mode A.
+- Stopping: a student who stops sharing and asks more questions adds them to the class side only; the windows
+  survive #151's clearing of the acknowledgement columns.
+- Minimum group: a class number with fewer than 5 students contributing class-side events is hidden.
 - The overview never contains a question, an answer, the V15 instruction or a survey answer.
 - Every individual view is audited, and the student sees the count of views.
 - Copy to the next term and end of term carry no agreement.
+
+## How this rule was decided (2026-11-22)
+
+The design went through six rounds of automated review (Codex, PR #153). Each round found a new way to subtract a
+class number from what the instructor saw individually; the record is kept here because the reasons matter for
+anyone who changes the rule later.
+
+| Round | Rule at that point | Hole found | Answer |
+|---|---|---|---|
+| 1 | Hide a class number in a course **in mode B** when fewer than 5 contributing students do not share | Read five students' bands in mode B, switch the course back to mode A, read the class band counts, subtract | count students as *disclosed* for the rest of the term, in any mode (record: the audit log, not the acknowledgement columns that #151 clears) |
+| 2 | Disclosed students, any mode | Read a class number first (nothing disclosed yet), then open the individual views and subtract | a *release log* of every class number shown, and a check before each individual datum is shown (both orders) |
+| 3 | Disclosed students, release log | A student's quiz attempt from before the agreement is never shown, yet opening their overview counted them as disclosed, so the quiz average was released; also an arithmetic slip in a test (with 6 contributors and a minimum of 5 only one score may be shown) | track disclosure per datum, not per student; fix the test |
+| 4 | Disclosure per datum | A changing datum (a week's question count) after a student stops sharing: the old view counted as disclosure of the new value | give each contribution a version (the newest event ID) |
+| 5 | Versioned contributions | An individual band is computed since the agreement, the class band from the whole history: same newest event, different data | identify a contribution by its event range |
+| 6 | Option B by student: class numbers only from students who never shared | A past total read with six students, recomputed from five after one opts in: the difference is the new sharer's earlier data | decide by event, not by student (the rule above) |
+
+After round 5 the patched rule needed a release log, event ranges in every class number and in the audit log, and
+a check before every individual datum, and each round still found a further case. Three options were compared:
+
+| Option | What the instructor gets | Cost |
+|---|---|---|
+| A. Keep patching the disclosure rule | the most class numbers | release log, versioned contributions, checks everywhere; hard to prove complete |
+| B. Class numbers only from data never shown individually | fewer class numbers when many share | one filter per class number and a table of sharing windows; the two sides are disjoint by construction |
+| C. No class numbers in mode B | none in mode B | simplest; the class overview is lost exactly where individual views exist |
+
+Z chose option B on 2026-11-22. The first form of B (by student) failed in round 6, so the rule decides per event.
+Its argument is structural (each event is on one side), so it does not depend on the order in which the instructor
+reads things or on mode changes; the property test above checks it on generated courses.
 
 ## Not decided here
 
