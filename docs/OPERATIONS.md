@@ -181,12 +181,15 @@ No request failed or timed out at any level. Findings:
 - Real asks are limited by reading the passages, not by writing the answer: total throughput stops at about
   120 to 160 tokens/s from 8 at the same time on, so more concurrency only makes everyone wait longer
   (first token p50 15 s at 16, 30 s at 32).
-- Recommendation for the model connection: `max_concurrent` 8 (now 4; more than 8 adds under 30% throughput and
+- Recommendation for the model connection: `max_concurrent` 8 (set in V13; more than 8 adds under 30% throughput and
   doubles the wait) and `queue_timeout_seconds` stays 60. With 8 slots and about 15 s per answer, the queue
   drains about 32 asks a minute: in a burst, the first 8 start at once and about 32 more get a slot within the
   60 s limit, so roughly the first 40 asks of a burst are answered and the rest get "the model is busy" and
   must ask again (a longer limit only makes them wait longer). A check-item draft of 45 to 50 s holds a slot
-  for that long. Not changed by this task. The limit is one deployment setting that applies to each model
+  for that long. V13 set it to 8 after a test through the whole app (`eval/load-test/app_load.py`, 4 to 32
+  students asking at once): with 4, 7 of 96 asks were refused at 32 students and the app answered at most
+  about 27 a minute; with 8, all 96 were answered, 45 a minute, the slowest after 62 s. The lab vLLM's KV
+  cache holds about 26,000 tokens, about 8 answers of 3,000 tokens (prompt and answer). The limit is one deployment setting that applies to each model
   connection on its own (the admin page cannot change it per connection): set `limits.models.max_concurrent`
   (and `queue_timeout_seconds`) in the deployment's `config.yaml` and restart the app and the worker.
 - One GPU (this server) serves about 8 answers at the same time with p95 under 25 s. If a student asks about
