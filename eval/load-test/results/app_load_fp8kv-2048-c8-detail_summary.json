@@ -1,0 +1,34 @@
+[
+ {
+  "level": 8,
+  "requests": 16,
+  "ok": 16,
+  "busy_503": 0,
+  "other_errors": 0,
+  "cut_off": 0,
+  "detailed": 16,
+  "p50_s": 31.8,
+  "p95_s": 42.7,
+  "max_s": 42.7,
+  "over_60s": 0,
+  "answers_per_min": 12.4,
+  "wall_s": 77.3,
+  "local_answers": 16
+ },
+ {
+  "level": 16,
+  "requests": 32,
+  "ok": 32,
+  "busy_503": 0,
+  "other_errors": 0,
+  "cut_off": 0,
+  "detailed": 32,
+  "p50_s": 50.2,
+  "p95_s": 59.7,
+  "max_s": 61.7,
+  "over_60s": 1,
+  "answers_per_min": 15.4,
+  "wall_s": 124.6,
+  "local_answers": 32
+ }
+]
