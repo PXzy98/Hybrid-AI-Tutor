@@ -560,6 +560,31 @@ CLOUD_QUESTIONS = [  # fictional topic only: nothing from the course packs
     "Give a worked example of converting 13 snibs to drubs when 1 snib is 2.5 drubs.",
     "Why is the Fenwick lattice rule needed in the fictional theory of tidal clocks?",
 ]
+CLOUD_HARD_QUESTIONS = [  # written for this study: the kind the routing sends to the cloud; no course text
+    "Compare memory safety in C, Rust and Go for systems programming today, with the trade-offs of each.",
+    "Explain in detail how a B-tree insertion splits nodes, with a worked example of inserting 10 keys "
+    "into an order-3 tree, and compare B-trees with red-black trees in a table.",
+    "Derive the time complexity of quicksort in the best, average and worst case, then explain why "
+    "randomized pivots help, with a worked example.",
+    "Explain the difference between TCP congestion control algorithms Reno, CUBIC and BBR, with a "
+    "comparison table and when each one is used.",
+    "Walk through Dijkstra's algorithm step by step on a graph with 6 nodes of your choice, then explain "
+    "why it fails with negative edges and how Bellman-Ford handles them.",
+    "Explain how a Fourier series approximates a square wave, derive the coefficients, and discuss the "
+    "Gibbs phenomenon with a worked example.",
+    "Design the state machine of a traffic light controller with a pedestrian button, give the state table, "
+    "and explain how you would test it.",
+    "Explain Thevenin and Norton equivalents, convert a circuit of three resistors and a source between "
+    "them in a worked example, and compare when each is more useful.",
+    "Explain how the immune system distinguishes self from non-self, covering T cell selection in the "
+    "thymus, with a table of the cells involved.",
+    "Explain Mendelian inheritance versus linkage, compute recombination frequencies for a fictional "
+    "two-gene cross, and draw the conclusion step by step.",
+    "Compare first-order and zero-order elimination kinetics of drugs with equations, a worked dosing "
+    "example and a comparison table.",
+    "Explain dynamic programming using the longest common subsequence problem: the recurrence, a filled "
+    "table for two short strings, and the reconstruction of the answer.",
+]
 CLOUD_MATERIAL = [
     (
         "Course ZZ 101 (fictional) introduces the Zorbian number system, which counts in gleebos "
@@ -588,11 +613,12 @@ async def phase_cloud(a, settings) -> None:
         timeout=settings.llm.cloud.timeout_s * 4,
         max_retries=1,
     )
-    out, slots = Out("cloud", None), asyncio.Semaphore(3)
+    out, slots = Out("cloud_hard" if a.hard else "cloud", None), asyncio.Semaphore(3)
     system = system_prompt(subject="general")
 
     async def one(i, question, limit):
-        user = f"Topic: Fictional course\n\n{material_block(CLOUD_MATERIAL)}\n\nStudent question: {question}"
+        material = [] if a.hard else CLOUD_MATERIAL
+        user = f"Topic: Fictional course\n\n{material_block(material)}\n\nStudent question: {question}"
         async with slots:
             t0 = time.perf_counter()
             try:
@@ -603,7 +629,8 @@ async def phase_cloud(a, settings) -> None:
                     messages=[{"role": "system", "content": system}, {"role": "user", "content": user}],
                 )
             except openai.APIError as e:
-                out.add({"id": f"c{i}", "limit": limit, "ok": False, "error": type(e).__name__})
+                out.add({"id": f"c{i}", "limit": limit, "ok": False, "error": type(e).__name__,
+                         "seconds": round(time.perf_counter() - t0, 1)})
                 return
         u = r.usage
         details = getattr(u, "completion_tokens_details", None)
@@ -625,8 +652,9 @@ async def phase_cloud(a, settings) -> None:
     await asyncio.gather(
         *(
             one(i, q, lim)
-            for lim in (settings.llm.cloud.max_tokens, a.cloud_small_limit)
-            for i, q in enumerate(CLOUD_QUESTIONS)
+            for lim in ((settings.llm.cloud.max_tokens, a.cloud_large_limit) if a.hard
+                        else (settings.llm.cloud.max_tokens, a.cloud_small_limit))
+            for i, q in enumerate(CLOUD_HARD_QUESTIONS if a.hard else CLOUD_QUESTIONS)
         )
     )
 
@@ -777,6 +805,8 @@ def main() -> None:
     ap.add_argument("--rounds", type=int, default=2, help="slots: waves at 8 and 16 at once")
     ap.add_argument("--rounds-1", type=int, default=3, help="slots: calls one after the other at 1")
     ap.add_argument("--cloud-small-limit", type=int, default=600)
+    ap.add_argument("--cloud-large-limit", type=int, default=8192, help="cloud --hard: the larger limit")
+    ap.add_argument("--hard", action="store_true", help="cloud: long questions of the kind sent to the cloud")
     a = ap.parse_args()
     if a.phase == "summary":
         text = summary()
