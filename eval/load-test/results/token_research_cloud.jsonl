@@ -1,0 +1,16 @@
+{"id": "c0", "limit": 2000, "ok": true, "completion_tokens": 126, "reasoning_tokens": 74, "finish": "stop", "visible_chars": 170, "seconds": 2.1}
+{"id": "c1", "limit": 2000, "ok": true, "completion_tokens": 139, "reasoning_tokens": 75, "finish": "stop", "visible_chars": 307, "seconds": 2.3}
+{"id": "c2", "limit": 2000, "ok": true, "completion_tokens": 391, "reasoning_tokens": 223, "finish": "stop", "visible_chars": 695, "seconds": 4.0}
+{"id": "c4", "limit": 2000, "ok": true, "completion_tokens": 241, "reasoning_tokens": 85, "finish": "stop", "visible_chars": 662, "seconds": 2.4}
+{"id": "c3", "limit": 2000, "ok": true, "completion_tokens": 367, "reasoning_tokens": 128, "finish": "stop", "visible_chars": 883, "seconds": 3.2}
+{"id": "c5", "limit": 2000, "ok": true, "completion_tokens": 187, "reasoning_tokens": 49, "finish": "stop", "visible_chars": 581, "seconds": 2.0}
+{"id": "c7", "limit": 2000, "ok": true, "completion_tokens": 154, "reasoning_tokens": 94, "finish": "stop", "visible_chars": 253, "seconds": 1.5}
+{"id": "c6", "limit": 2000, "ok": true, "completion_tokens": 240, "reasoning_tokens": 125, "finish": "stop", "visible_chars": 217, "seconds": 2.3}
+{"id": "c0", "limit": 600, "ok": true, "completion_tokens": 141, "reasoning_tokens": 86, "finish": "stop", "visible_chars": 174, "seconds": 1.4}
+{"id": "c1", "limit": 600, "ok": true, "completion_tokens": 218, "reasoning_tokens": 76, "finish": "stop", "visible_chars": 684, "seconds": 2.4}
+{"id": "c3", "limit": 600, "ok": true, "completion_tokens": 328, "reasoning_tokens": 195, "finish": "stop", "visible_chars": 589, "seconds": 2.7}
+{"id": "c2", "limit": 600, "ok": true, "completion_tokens": 425, "reasoning_tokens": 145, "finish": "stop", "visible_chars": 1290, "seconds": 3.9}
+{"id": "c4", "limit": 600, "ok": true, "completion_tokens": 261, "reasoning_tokens": 60, "finish": "stop", "visible_chars": 742, "seconds": 2.1}
+{"id": "c5", "limit": 600, "ok": true, "completion_tokens": 103, "reasoning_tokens": 50, "finish": "stop", "visible_chars": 239, "seconds": 1.5}
+{"id": "c6", "limit": 600, "ok": true, "completion_tokens": 146, "reasoning_tokens": 72, "finish": "stop", "visible_chars": 164, "seconds": 1.7}
+{"id": "c7", "limit": 600, "ok": true, "completion_tokens": 240, "reasoning_tokens": 135, "finish": "stop", "visible_chars": 460, "seconds": 2.4}
