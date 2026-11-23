@@ -1,5 +1,6 @@
 import pytest
 
+from app.core.config import get_settings
 from app.core.schemas import AskRequest, RequestContext
 from app.core.services import build_services
 from app.pipeline.runner import PipelineConfigError, PipelineError, PipelineRunner, build_runner
@@ -65,7 +66,8 @@ async def test_post_response_errors_are_swallowed(caplog):
 def test_build_runner_follows_config(use_config):
     use_config()
     runner = build_runner(build_services())
-    assert runner.step_names[0] == "privacy_filter" and len(runner.step_names) == 10
+    assert runner.step_names == get_settings().pipeline  # config.yaml's pipeline, all 12 steps
+    assert runner.step_names[0] == "privacy_filter" and len(runner.step_names) == 12
     assert [s.name for s in runner.post_response] == ["update_learner"]
 
 

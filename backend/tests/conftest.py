@@ -27,10 +27,9 @@ TEST_BASE = {"privacy": {"spacy_model": "en_core_web_sm"},
              # default (off, v5 V1) is tested in test_statistics_only.py
              "learner": {"knowledge": os.environ.get("TEST_LEARNER_KNOWLEDGE", "course"),
                          "instructor_individual_view": True},
-             "routing": {"impl": "stub"}, "rag": {"impl": "stub"},
-             "llm": {"cloud": {"fallback_to_local": True}},
-             "pipeline": ["privacy_filter", "understand", "learner_context", "retrieve", "route",
-                          "generate", "restore", "verify", "attach_check", "record"]}
+             # no real router or embeddings in unit tests (rule 6); the pipeline is config.yaml's, so the
+             # steps the deployment runs (analyze_route, web_search) run here too
+             "routing": {"impl": "stub"}, "rag": {"impl": "stub"}}
 
 
 def _write_config(path: Path, overrides: dict) -> None:

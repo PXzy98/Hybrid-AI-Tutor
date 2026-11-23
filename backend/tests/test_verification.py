@@ -228,9 +228,9 @@ def test_final_pipeline_and_failure_policies(services):
     """Design §7.1: the MVP pipeline and each step's on_error."""
     runner = build_runner(services)
     assert {s.name: s.on_error for s in runner.pipeline} == {
-        "privacy_filter": "stop", "learner_context": "skip", "understand": "skip", "retrieve": "skip",
-        "route": "skip", "generate": "stop", "restore": "stop", "verify": "warn", "attach_check": "skip",
-        "record": "skip"}
+        "privacy_filter": "stop", "learner_context": "skip", "understand": "skip", "analyze_route": "stop",
+        "retrieve": "skip", "route": "skip", "web_search": "skip", "generate": "stop", "restore": "stop",
+        "verify": "warn", "attach_check": "skip", "record": "skip"}
     assert list(get_settings().verify.checkers) == ["grounding", "medical_safety", "pii_leak", "profile_leak"]
 
 

@@ -9,12 +9,13 @@ For a sample of E6 positive questions, the local model answers several versions 
   hypothetical  B3, health questions only: the local model rewrites the question in the third person
                 ("a person with asthma ..."); a rewrite that still contains PII or a personal health
                 statement is rejected and counted (it would stay local)
-A judge model (gemma4:e4b by default, a different model from the answerer) scores each version against the
+A judge model (JUDGE_BASE_URL / JUDGE_MODEL or --judge-url / --judge-model; a different model from the answerer) scores each version against the
 reference answer from 1 to 5 and flags redaction artefacts. Placeholders echoed in an answer are restored and
 any left over is counted as a restore failure. Writes results/utility.md and results/utility.jsonl.
 This is an offline experiment: B2 and B3 are not enabled in the app.
 """
 import argparse
+import os
 import json
 import random
 import re
@@ -89,11 +90,13 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--n-plain", type=int, default=30)
     ap.add_argument("--n-health", type=int, default=15)
-    ap.add_argument("--judge-model", default="gemma4:e4b")
-    ap.add_argument("--judge-url", default="http://127.0.0.1:11434",
+    ap.add_argument("--judge-model", default=os.environ.get("JUDGE_MODEL"))
+    ap.add_argument("--judge-url", default=os.environ.get("JUDGE_BASE_URL"),
                     help="OpenAI-compatible server of the judge (a different model from the one that answers)")
     ap.add_argument("--out", type=Path, default=HERE / "results")
     a = ap.parse_args(argv)
+    if not (a.judge_url and a.judge_model):
+        ap.error("name the judge: --judge-url and --judge-model (or JUDGE_BASE_URL and JUDGE_MODEL)")
     s = get_settings()
     model = s.llm.local.model
 

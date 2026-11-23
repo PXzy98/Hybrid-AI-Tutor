@@ -10,7 +10,7 @@ and off (`learner.personalize: false`, i.e. LearnerContext(personalized=False)).
 local model unless --smoke; questions stay on the local route.
 
 A blind pairwise judge (any OpenAI-compatible API: JUDGE_BASE_URL, JUDGE_MODEL, JUDGE_API_KEY; default: the
-Ollama server's OpenAI endpoint with gemma4:e4b) sees the persona description, the question and the two
+deployment's vLLM (VLLM_BASE_URL); JUDGE_MODEL or --judge-model must name the judge model) sees the persona description, the question and the two
 answers in random A/B order. It only ever sees fictional personas, never real student data.
 
 Outputs in results/: report.md, pairs.jsonl (all answers and verdicts), abbas_sample.csv (30 blind pairs for
@@ -150,11 +150,13 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--questions", type=int, help="first N questions only (default: all 20)")
     ap.add_argument("--personas", help="comma-separated persona keys (default: all)")
     ap.add_argument("--judge-base-url", default=os.environ.get("JUDGE_BASE_URL"))
-    ap.add_argument("--judge-model", default=os.environ.get("JUDGE_MODEL", "gemma4:e4b"))
+    ap.add_argument("--judge-model", default=os.environ.get("JUDGE_MODEL"))
     ap.add_argument("--seed", type=int, default=3)
     ap.add_argument("--out", type=Path, default=HERE / "results")
     ap.add_argument("--report-only", action="store_true", help="rebuild the report from <out>/pairs.jsonl")
     a = ap.parse_args(argv)
+    if not a.judge_model and not a.report_only and not a.smoke:
+        ap.error("name the judge model: --judge-model or JUDGE_MODEL")
     a.out.mkdir(parents=True, exist_ok=True)
     personas = harness.PERSONAS[:2] if a.smoke else harness.PERSONAS
     if a.personas:
