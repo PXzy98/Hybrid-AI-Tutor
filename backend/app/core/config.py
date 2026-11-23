@@ -216,7 +216,7 @@ class LocalLLMConfig(Section):
     off (boundary test: loops, 5-7x latency) and structured answers follow their JSON schema."""
     model: str = "Qwen3.5-9B"  # the name the server lists under /models (vLLM --served-model-name)
     temperature: float = 0.2
-    timeout_s: float = 60
+    timeout_s: float = 120  # V13: a 2048-token answer takes 53 s at 8 at once and up to 127 s at 16
     max_tokens: int = Field(2048, ge=64)  # V22: 1024 cut long answers
 
 
@@ -226,8 +226,8 @@ class UnderstandLLMConfig(Section):
 
 
 class CloudLLMConfig(Section):
-    timeout_s: float = 30
-    max_tokens: int = 2000  # reasoning models count their hidden reasoning too (DeepSeek: up to ~800)
+    timeout_s: float = 60  # V13: long questions took up to 30 s with 8192
+    max_tokens: int = 8192  # reasoning counts too: at 2000, 9 of 12 long questions were cut (V13)
     fallback_to_local: bool = True
     history_turns: int = Field(0, ge=0)
     audit_log: str | None = None  # E4: record every cloud request to this JSONL file (app/llm/audit.py)

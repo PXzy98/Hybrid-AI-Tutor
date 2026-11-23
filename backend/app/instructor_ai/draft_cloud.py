@@ -15,4 +15,4 @@ def render_draft(req: DraftCloudRequest) -> tuple[list[dict[str, str]], dict, in
     if req.kind in TIER1:
         return tier1_messages(req.kind, material, req.request), _Generated.model_json_schema(), None
     return (tier2.structure_messages(req.kind, material, req.kc_names),
-            tier2.response_schema(req.kind, req.kc_names), tier2.STRUCTURE_MAX_TOKENS)
+            tier2.response_schema(req.kind, req.kc_names), None)  # the cloud's own limit: reasoning counts (V13)
