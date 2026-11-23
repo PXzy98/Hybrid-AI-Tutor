@@ -8,20 +8,21 @@ the redacted text and answers one yes/no question: does it reveal a health detai
 person they mention? Yes keeps the question local. It sees the redacted text, never the placeholder mapping;
 ordinary course questions do not trigger it, so most questions pay no latency. A failure (timeout, bad JSON)
 keeps the question local: the check fails closed. The prompt fits every course type (Z22d): a student of a
-programming or engineering course mentions health mostly as the reason for late or missed work.
+programming or engineering course mentions health mostly as the reason for late or missed work; a name or a
+number next to a general health question does not make it personal (a wider wording over-flagged those in E6).
 """
 import json
 
 from app.llm.base import LLMClient, LLMError
 
 PROMPT = """You check a student's message to a course tutor before it is sent to an external AI service.
-The course can be about any subject (programming, engineering, biology, medicine, ...). Names, numbers and
-contact details are already replaced by placeholders such as <PERSON_1>.
-Answer true if the message reveals a health condition, injury, symptom, medicine, treatment, test result or
-reading of the student or of a specific real person they mention (a relative, friend, classmate or a named
-person), even in passing, for example as the reason for late or missed work. Answer false if it is a
+The course can be about any subject. Names, numbers and contact details are already replaced by
+placeholders such as <PERSON_1>.
+Answer true if the message reveals a health condition, symptom, medicine, test result or reading of the
+student or of a specific real person they mention (a relative, friend, classmate or a named person),
+even in passing, also when it is given as the reason for late or missed work. Answer false if it is a
 general course question, a question about a hypothetical or textbook patient, or about health topics in
-general, or if it mentions only non-health reasons (a broken laptop, a busy week, a family trip).
+general, even when the message also contains a name or a number.
 Reply with JSON {"personal_health": true} or {"personal_health": false}.
 
 Message: """

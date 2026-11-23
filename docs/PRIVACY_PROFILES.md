@@ -58,8 +58,8 @@ finding in any profile, so it was cloud-safe (with a name and a student number t
   health detail the rules do not know (`policy.may_reveal_health`: "I have/got a(n) <word that is not a course
   noun>", "unwell", "medical", "appointment", a late or missed piece of work "because ..."). It still sees only
   the redacted text, runs once per request, and fails closed. Its prompt fits every course type (a course
-  about any subject; a health detail given as the reason for late or missed work counts, a broken laptop does
-  not) (no reachable local model: the question stays
+  about any subject; a health detail given as the reason for late or missed work counts; a name or number next
+  to a general health question does not make it personal) (no reachable local model: the question stays
   local). Ordinary course questions still skip it. The test suite turns it off in `tests/conftest.py` and on in
   its own tests.
 

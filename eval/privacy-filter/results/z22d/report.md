@@ -65,7 +65,7 @@ cloud-bound and the check did not read: 4 before, 3 after ("hey i think i have a
 
 ## The check on the real local model
 
-The deployment's trusted local vLLM (Qwen3.5-9B, thinking off), the check's prompt unchanged, eight fictional
+The deployment's trusted local vLLM (Qwen3.5-9B, thinking off), with the prompt on main, eight fictional
 redacted texts as the check sees them:
 
 | Text | Expected | Flagged | Time |
@@ -79,19 +79,42 @@ redacted texts as the check sees them:
 | "I have a question about recursion in Python." | general | no | 230 ms |
 | "Compare memory safety in C, Rust and Go for systems programming today." | general | no | 229 ms |
 
-## The check's prompt for every course type
+## The check's prompt for every course type, on the real model
 
-The prompt said "a student's message to a health-course tutor". It now names a course about any subject, adds
-injuries and treatments, says a health detail given as the reason for late or missed work counts, and that
-non-health reasons (a broken laptop, a busy week) do not. The eight texts above were judged with the old
-prompt. The comparison of the two prompts on the E6 sets with the real model (`run.py --beta
---llm-check-only`, new in this PR: the rules, the policy and the check, without GLiNER and A4) is **still to
-run**: the lab vLLM stopped answering (connection refused on 192.168.2.25:8000) after the old-prompt runs, so
-the new-prompt runs could not be made. Run both again when it is back:
+The prompt said "a student's message to a health-course tutor". It now says "a course tutor ... about any
+subject", counts a health detail "also when it is given as the reason for late or missed work", and says a
+general health question stays general "even when the message also contains a name or a number". A first,
+wider wording (injuries, treatments, "a broken laptop or a busy week" as examples) over-flagged general health
+questions that carry a name or a number ("Student ID <ID> here. how bad is exercise induced asthma?") and was
+dropped.
 
-```
-run.py --beta --llm-check-only --cases <cases|holdout|holdout2..5>.jsonl --out <dir>
-```
+`run.py --beta --llm-check-only` (new: the rules, the policy and the check, without GLiNER and A4), the lab vLLM
+(Qwen3.5-9B, temperature 0), configuration `b2_llm_classify` (the app: rules + check). Sensitivity / specificity
+in % (personal-health questions kept local / other questions left cloud-eligible):
+
+| Set | main (old trigger, old prompt) | wider trigger, old prompt | first new prompt | **this PR (wider trigger, revised prompt)** |
+|---|---|---|---|---|
+| main set | 96.7 / 98.5 | 96.7 / 98.2 | 98.4 / 92.3 | **96.7 / 97.5** |
+| v1 | 100.0 / 80.0 | 100.0 / 80.0 | 100.0 / 80.0 | **100.0 / 85.0** |
+| v2 | 98.8 / 59.1 | 98.8 / 63.6 | 98.8 / 68.2 | **97.5 / 77.3** |
+| v3 | 98.2 / 75.6 | 99.1 / 73.3 | 99.1 / 62.2 | **98.2 / 72.2** |
+| v4 | 97.7 / 78.1 | 99.2 / 78.1 | 100.0 / 68.5 | **99.2 / 78.1** |
+| v5 | 98.4 / 76.0 | 98.4 / 76.0 | 99.2 / 69.3 | **98.4 / 77.3** |
+
+Against main, over all six sets: personal-health questions caught 3 more, missed 2 more (net +1); general
+questions kept local without need 13 more, 15 fewer (net 2 fewer). Per set: better or equal on v1, v4, v5;
+the main set's specificity -1.0 point (3 questions with a name or e-mail next to a general question), v2 one
+personal question less ("Marcus Chen says his uncle is having problems", a debatable label) but specificity
++18.2, v3 specificity -3.4 points (lecture or quiz messages with a name). `b3_policy_llm` specificity within
+-1.3 to +2.5 points. Wider trigger alone (old prompt): v3 and v4 sensitivity +0.9 and +1.5, specificity at most
+-2.3. The Z22 course sets cannot run through `run.py` (no `variant` field); the rules-only numbers above cover
+them.
+
+Fourteen fictional redacted texts on the same model with the revised prompt, 14 of 14 right, 199 to 210 ms:
+the abscess sentence with placeholders, "a pilonidal sinus", "two nights in the ER", "I keep throwing up", "My
+mom had a stroke ... Verilog lab", "I tore my ACL" (personal); "How is an abscess treated?", "extension because
+my laptop broke", "three other deadlines this week", "a memory leak", "the ECG signal in the DSP assignment",
+"a fever of questions about pointers", recursion, memory safety (general).
 
 ## Negatives checked by unit tests
 
