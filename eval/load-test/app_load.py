@@ -95,14 +95,24 @@ async def discover(base: str, accounts: list[dict], codes: dict[str, str], need:
     return found
 
 
-async def student(i, acc, course_id, pack, a, rnd, rows, level, t_start):
+def workload(seed: int, level: int, i: int, pack: str, a) -> tuple[float, list[tuple[str, bool]]]:
+    """The start delay and the questions of one student, fixed before any request: the same seed gives every
+    configuration the same questions and the same long-answer flags, whatever the server's timing."""
+    rnd = random.Random(f"{seed}-{level}-{i}")
+    pool = questions(pack)
+    asks = []
+    for _ in range(a.per_student):
+        detailed = rnd.random() < a.detailed_share
+        asks.append((rnd.choice(pool) + (DETAILED_SUFFIX if detailed else ""), detailed))
+    return rnd.uniform(0, a.spread), asks
+
+
+async def student(i, acc, course_id, pack, a, plan, rows, level, t_start):
+    delay, asks = plan
     async with httpx.AsyncClient(timeout=a.client_timeout) as client:
         await login(client, a.base, acc)
-        pool = questions(pack)
-        await asyncio.sleep(rnd.uniform(0, a.spread))  # students do not press Enter in the same millisecond
-        for k in range(a.per_student):
-            detailed = rnd.random() < a.detailed_share
-            q = rnd.choice(pool) + (DETAILED_SUFFIX if detailed else "")
+        await asyncio.sleep(delay)  # students do not press Enter in the same millisecond
+        for k, (q, detailed) in enumerate(asks):
             t0 = time.perf_counter()
             try:
                 r = await client.post(
@@ -188,7 +198,7 @@ async def main() -> None:
         t_start = time.perf_counter()
         await asyncio.gather(
             *(
-                student(i, acc, course_id, pack, a, rnd, rows, level, t_start)
+                student(i, acc, course_id, pack, a, workload(a.seed, level, i, pack, a), rows, level, t_start)
                 for i, (acc, course_id, pack) in enumerate(chosen)
             )
         )

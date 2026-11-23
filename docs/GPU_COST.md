@@ -44,7 +44,10 @@ of the cache in use at the peak of the load test).
 course packs), ask 3 questions one after the other (S11 questions; 10 % of them ask for a long answer with a
 table). A copy of the demo database, the local model only (no cloud, so no course text left), 2026-11-23.
 Results: `eval/load-test/results/app_load_*`. Each level runs 1 to 3 minutes, so a single level varies by
-about 20 % from run to run.
+about 20 % from run to run. In these runs the questions and the long-answer flags also differed between
+configurations (the random choices depended on the server's timing; fixed in the harness since): at 32
+students the runs had 7 to 11 long-answer questions of 96 (bf16 limit 4: 11, limit 8: 7; fp8 limit 8: 7,
+limit 16: 8), so differences of under about 20 % between columns are not significant.
 
 | Students asking at once | bf16 KV, app limit 4 (old) | bf16 KV, limit 8 | fp8 KV, limit 8 | fp8 KV, limit 16 |
 |---|---|---|---|---|
@@ -69,7 +72,8 @@ Reading it:
 - Answer length decides the rate: about 45 to 49 a minute for ordinary questions, 15 to 20 when every question
   asks for a long answer.
 - No answer was cut at 2048 tokens in the ordinary mix; 3 of 48 long-answer requests were cut with limit 16
-  (the note "this answer reached the length limit" appears). 3072 tokens gave no benefit (#161).
+  (the note "this answer reached the length limit" appears). 3072 tokens gave no benefit: no cut-off at either limit, and no faster answers (#161; its run at 32
+  students had 11 long-answer questions against 7 for 2048, so it is not shown to be slower either).
 - Answer quality with fp8 KV (`eval/load-test/results/fp8kv_answer_quality*`, local judge, 10 questions per
   pack, all 8 packs): 62 of 64 answerable questions correct, 2 partly, 0 wrong; grounded 2.0 of 2 in every pack;
   16 of 16 questions outside the material handled. The two packs with a bf16 baseline (6.002, CS50x) gave the
