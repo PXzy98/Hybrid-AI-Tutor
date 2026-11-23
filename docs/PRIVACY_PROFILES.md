@@ -40,6 +40,31 @@ policy is the stricter of the profile and `privacy.health_detail_policy` in `con
 An explicit `privacy.recognizers` list in `config.yaml` (the E6 ablation) applies to every course instead of the
 profiles. Any change to a profile's recognizers re-runs E6 (rule 5).
 
+## Personal health details the term list does not know (task Z22d, 2026-11-23)
+
+Found while planning the video: "I have a perianal abscess and need to submit my assignment late" had no
+finding in any profile, so it was cloud-safe (with a name and a student number the cloud would have received
+"I'm <PERSON_1>, student number <STUDENT_ID_1>. I have a perianal abscess ..."). Two changes:
+
+- **Rules** (`health_detail`, every profile): more conditions, still only when attributed to the student or a
+  relative ("I have", "my brother has"): abscesses, words ending in -itis, named tumours (-oma: melanoma,
+  lymphoma, ...; not "diploma"), cysts, ulcers, hernias, kidney stones, concussions, injuries, fractures and
+  sprains of a body part ("fracture mechanics" is not one), infectious diseases (strep throat, shingles,
+  measles, ...); "diagnosed with / treated for / hospitalized for <up to three words>" for a condition no list
+  names; "I broke my wrist" style injuries. General questions ("How is an abscess treated?") stay cloud-safe.
+- **The local model's second check** (`privacy.llm_check`, `app/privacy/llm_check.py`) is **on by default**
+  (code default and `config.yaml`), because the deployment always has its trusted local model (Z24). It now
+  reads a cloud-bound question that names a health topic **or** has a first-person wording that may carry a
+  health detail the rules do not know (`policy.may_reveal_health`: "I have/got a(n) <word that is not a course
+  noun>", "unwell", "medical", "appointment", a late or missed piece of work "because ..."). It still sees only
+  the redacted text, runs once per request, and fails closed. Its prompt fits every course type (a course
+  about any subject; a health detail given as the reason for late or missed work counts; a name or number next
+  to a general health question does not make it personal) (no reachable local model: the question stays
+  local). Ordinary course questions still skip it. The test suite turns it off in `tests/conftest.py` and on in
+  its own tests.
+
+E6 and the counts of questions the check reads: `eval/privacy-filter/results/z22d/report.md`.
+
 ## Document scanning, web search queries, consent text (task Z11)
 
 - `scan_document(text, profile)` runs the profile's analyzer over an uploaded document (in windows of 20,000

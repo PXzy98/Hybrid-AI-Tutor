@@ -168,8 +168,10 @@ class LocalLLMClassifier:
         self.s, self.http = get_settings(), httpx.Client(timeout=120)
 
     def __call__(self, text: str, findings: list[Finding]) -> bool:
-        from app.privacy.policy import TOPIC_RE
-        if any(f.type in LOCAL_ONLY for f in findings) or not TOPIC_RE.search(text):
+        from app.privacy import policy
+        # the app's trigger: may_reveal_health since Z22d (TOPIC_RE before, kept for runs on older code)
+        trigger = getattr(policy, "may_reveal_health", policy.TOPIC_RE.search)
+        if any(f.type in LOCAL_ONLY for f in findings) or not trigger(text):
             return False
         sanitized, _, _ = anonymize(text, findings)
         schema = {"type": "object", "properties": {"personal_health": {"type": "boolean"}},
@@ -314,6 +316,8 @@ def main(argv=None) -> int:
     ap.add_argument("--smoke", action="store_true")
     ap.add_argument("--fast", action="store_true", help="skip GLiNER, transformer and LLM configurations")
     ap.add_argument("--beta", action="store_true", help="the Beta configurations only (rules, policy, LLM check)")
+    ap.add_argument("--llm-check-only", action="store_true",
+                    help="with --beta: the rules, the policy and the local model's check only (no GLiNER, no A4)")
     ap.add_argument("--out", type=Path, default=HERE / "results")
     ap.add_argument("--cases", type=Path, default=HERE / "cases.jsonl", help="e.g. holdout.jsonl")
     a = ap.parse_args(argv)
@@ -332,6 +336,7 @@ def main(argv=None) -> int:
             clf = LocalLLMClassifier()
             configs["b2_llm_classify"] = WithPolicy(rules, clf)
             configs["b3_policy_llm"] = WithPolicy(rules, lambda t, f: identified_health_topic(t, f) or clf(t, f))
+        if not a.fast and not a.llm_check_only:
             llm = LocalLLM()
             configs["a4_rules_llm"] = lambda t, n: (lambda first: union(first, llm(t, n, first)))(rules(t, n))
             gl = Gliner()

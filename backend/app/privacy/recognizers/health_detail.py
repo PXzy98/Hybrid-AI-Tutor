@@ -15,6 +15,8 @@ from app.core.registry import pii_recognizers
 FAMILY = (r"(?:mother|father|mom|mum|dad|parents?|brother|sister|son|daughter|child|children|kids?|wife|"
           r"husband|partner|boyfriend|girlfriend|grand(?:mother|father|ma|pa|parents?)|aunt|uncle|cousin|"
           r"roommate|friend)")
+BODY_PART = (r"(?:arm|leg|wrist|ankle|hip|ribs?|skull|foot|toes?|fingers?|collarbone|elbow|knee|shoulder|"
+             r"nose|hand|jaw|back|neck|acl|ligament|tendon|muscle)")
 TERMS = [
     # conditions
     r"asthma(?:tic)?", r"(?:pre)?diabet(?:es|ic)", r"type\s?[12]\s+diabetes", r"hypertensi(?:on|ve)",
@@ -24,6 +26,16 @@ TERMS = [
     r"autism", r"ptsd", r"eating disorder", r"covid(?:-19)?", r"the flu", r"infections?", r"appendicitis",
     r"pregnan(?:t|cy)", r"hiv", r"hepatitis", r"arthritis", r"allerg(?:y|ies|ic)", r"surgery",
     r"hospital(?:i[sz]ed)?",
+    # Z22d: conditions a student gives as the reason for late work ("I have a perianal abscess and need an
+    # extension"), missed by the list above. Words ending in -itis are conditions (bronchitis, tonsillitis);
+    # -oma only as named tumours ("diploma" is not one); fractures only of a body part ("fracture mechanics"
+    # is an engineering course)
+    r"abscess(?:es)?", r"\w{3,}itis", r"(?:lymph|melan|carcin|glauc|sarc|myel|hemat|haemat|fibr|gli)omas?",
+    r"cysts?", r"ulcers?", r"hernias?", r"ha?emorrhoids", r"kidney stones?", r"gallstones?", r"strep throat",
+    r"shingles", r"chicken ?pox", r"measles", r"mumps", r"food poisoning", r"stomach (?:flu|bug)",
+    r"concussions?", r"injur(?:y|ies|ed)", r"bleeding",
+    r"(?:hairline|stress|wrist|ankle|arm|leg|hip|rib|bone|skull|foot|toe|finger|elbow|knee) fractures?",
+    r"(?:fractured|broken|sprained|dislocated|twisted|torn) " + BODY_PART,
     # symptoms
     r"chest pains?", r"shortness of breath", r"trouble breathing", r"wheez(?:e|ing)", r"dizz(?:y|iness)",
     r"fevers?", r"headaches?", r"nausea", r"(?:high|low) blood sugar",
@@ -101,6 +113,21 @@ OWNED_RE = re.compile(
     r"\bmy\s+(?:\w+\s+)?(?:therapist|psychiatrist|psychologist|counsell?or|medication|medications|medicine|"
     r"meds|pills|inhaler|insulin|prescription|dose|dosage|diagnosis|symptoms|test results|blood test|"
     r"blood sugar|surgery|condition)\b",
+    re.I,
+)
+# Z22d: a condition the term list does not know, named after a diagnosis phrase: "I was diagnosed with
+# pilonidal disease", "my brother was hospitalized for a pulmonary embolism" (up to three words kept local)
+DIAGNOSED_RE = re.compile(
+    r"\b(?:I|she|he|my\s+" + FAMILY + r")\b[^.?!\n]{0,25}?\b(?:diagnosed with|treated for|"
+    r"hospitali[sz]ed (?:for|with)|admitted (?:to (?:the )?hospital )?(?:for|with)|operated on for)\s+"
+    r"(?:an?\s+|the\s+|some\s+)?([a-z][\w'-]*(?:\s+(?!(?:and|but|so|or|because|last|this|yesterday|today|"
+    r"in|on|at|which|that)\b)[a-z][\w'-]*){0,2})",
+    re.I,
+)
+# Z22d: an injury told as an action: "I broke my wrist", "my sister sprained her ankle"
+INJURY_RE = re.compile(
+    r"\b(?:I|she|he|my\s+" + FAMILY + r")\b[^.?!\n]{0,15}?\b(?:broke|fractured|sprained|dislocated|injured|"
+    r"hurt|twisted|tore)\s+(?:my|his|her|their|a|an|the)?\s*(" + BODY_PART + r")\b",
     re.I,
 )
 FIRST_PERSON_RE = re.compile(r"\b(?:I|I'm|I've|me|my|mine)\b", re.I)
@@ -197,6 +224,15 @@ class HealthDetailRecognizer(EntityRecognizer):
                     spans.add((base + m.start(1), base + m.end(1)))
             for m in OWNED_RE.finditer(s):
                 spans.add((base + m.start(), base + m.end()))
+            for m in DIAGNOSED_RE.finditer(s):
+                # "I'm studying how patients are diagnosed with ..." and "treated for the midterm" are not
+                if (not BLOCKERS_RE.search(s, m.start(), m.start(1)) and not COURSEWORK_RE.search(m.group(1))
+                        and not COURSE_AFTER_RE.match(s, m.end(1))):
+                    spans.add((base + m.start(1), base + m.end(1)))
+            for m in INJURY_RE.finditer(s):
+                if (not BLOCKERS_RE.search(s, m.start(), m.start(1))
+                        and not COURSE_AFTER_RE.match(s, m.end(1))):
+                    spans.add((base + m.start(1), base + m.end(1)))
             if FIRST_PERSON_RE.search(s) and not COURSEWORK_RE.search(s):
                 for m in READING_RE.finditer(s):
                     # any personal reading (blood pressure, "my vision is 20/40") is health, unless a
