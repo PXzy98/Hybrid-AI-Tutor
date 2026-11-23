@@ -266,7 +266,7 @@ class SettingsApplyLimits(Section):
 class ModelLimits(Section):
     """Per model connection (task Z6): requests at the same time, and the wait for a free slot."""
 
-    max_concurrent: int = Field(4, ge=1, le=256)
+    max_concurrent: int = Field(8, ge=1, le=256)  # V13: the lab vLLM's KV cache holds about 8 answers
     queue_timeout_seconds: float = Field(60.0, gt=0, le=600)
 
 
