@@ -66,9 +66,11 @@ def pack_codes() -> dict[str, str]:
 
 
 async def discover(base: str, accounts: list[dict], codes: dict[str, str], need: int) -> list[tuple]:
-    """(account, course id, pack) for the first `need` students with a course of a pack, read from the
-    memberships the login returns (any account file with email and password works, e.g. build_demo.py's)."""
-    found = []
+    """(account, course id, pack) for the first `need` students with a course of a pack. The courses come
+    from the memberships the login returns, so any account file with email and password works (e.g.
+    build_demo.py's); build_demo.py enrols every student in every course, so the students are spread evenly
+    over the packs."""
+    found, load = [], {pack: 0 for pack in codes.values()}
     for acc in accounts:
         async with httpx.AsyncClient(timeout=60) as client:
             client.headers["X-CSRF-Token"] = (await client.get(f"{base}/api/v2/auth/csrf")).json()[
@@ -82,8 +84,10 @@ async def discover(base: str, accounts: list[dict], codes: dict[str, str], need:
         courses = [
             m for m in r.json().get("memberships", []) if m.get("role") == "student" and m["code"] in codes
         ]
-        if courses:
-            found.append((acc, courses[0]["course_id"], codes[courses[0]["code"]]))
+        if courses:  # spread the students over the packs: the eligible course with the fewest so far
+            pick = min(courses, key=lambda m: (load[codes[m["code"]]], m["code"]))
+            load[codes[pick["code"]]] += 1
+            found.append((acc, pick["course_id"], codes[pick["code"]]))
         if len(found) >= need:
             break
     if len(found) < need:
