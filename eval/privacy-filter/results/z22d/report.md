@@ -79,6 +79,20 @@ redacted texts as the check sees them:
 | "I have a question about recursion in Python." | general | no | 230 ms |
 | "Compare memory safety in C, Rust and Go for systems programming today." | general | no | 229 ms |
 
+## The check's prompt for every course type
+
+The prompt said "a student's message to a health-course tutor". It now names a course about any subject, adds
+injuries and treatments, says a health detail given as the reason for late or missed work counts, and that
+non-health reasons (a broken laptop, a busy week) do not. The eight texts above were judged with the old
+prompt. The comparison of the two prompts on the E6 sets with the real model (`run.py --beta
+--llm-check-only`, new in this PR: the rules, the policy and the check, without GLiNER and A4) is **still to
+run**: the lab vLLM stopped answering (connection refused on 192.168.2.25:8000) after the old-prompt runs, so
+the new-prompt runs could not be made. Run both again when it is back:
+
+```
+run.py --beta --llm-check-only --cases <cases|holdout|holdout2..5>.jsonl --out <dir>
+```
+
 ## Negatives checked by unit tests
 
 `tests/test_privacy.py::test_z22d_general_questions_stay_cloud_safe`: "How is an abscess treated?", bronchitis
