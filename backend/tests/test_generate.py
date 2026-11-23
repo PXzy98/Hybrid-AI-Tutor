@@ -1,5 +1,7 @@
 import pytest
+import yaml
 
+from app.core.config import DEFAULT_CONFIG, PrivacyConfig
 from app.core.schemas import AskRequest, Chunk, LearnerContext, PIIEntity, PIIResult, RequestContext, Turn
 from app.core.services import build_services
 from app.llm.base import LLMError, LLMUnavailable
@@ -220,6 +222,12 @@ def llm_check_ctx(question: str) -> RequestContext:
     (LLMError("timeout"), "What triggers asthma attacks?", False, True),  # fails closed
     ("not json", "What triggers asthma attacks?", False, True),
     ('{"personal_health": true}', "When is the quiz due?", True, False),  # no health topic: no call
+    # Z22d: a first-person wording the rules may not know is read too; course nouns after "I have a" are not
+    ('{"personal_health": true}', "I have a pilonidal sinus, can I hand in the lab later?", False, True),
+    ('{"personal_health": true}', "Can I get an extension because my week was rough?", False, True),
+    ('{"personal_health": true}', "I'm not feeling well. When is the quiz due?", False, True),
+    ('{"personal_health": true}', "I have a question about recursion in Python.", True, False),
+    ('{"personal_health": true}', "I have a bug in my loop, can you look?", True, False),
 ])
 async def test_llm_check_at_the_cloud_gate(use_config, reply, question, cloud, called):
     s = build_services(use_config({"privacy": {"llm_check": True, "health_detail_policy": "local_only"}}))
@@ -243,12 +251,19 @@ async def test_llm_check_sees_only_the_redacted_text_and_runs_once(use_config):
     assert len(s.understand_llm.calls) == 1 and "300418277" not in s.understand_llm.sent_text()
 
 
-async def test_llm_check_is_off_by_default(services):
+def test_llm_check_is_on_by_default():
+    """Z22d: on in the code default and in config.yaml (the deployment has its trusted local model)."""
+    assert PrivacyConfig().llm_check is True
+    assert yaml.safe_load(DEFAULT_CONFIG.read_text(encoding="utf-8"))["privacy"]["llm_check"] is True
+
+
+async def test_llm_check_is_off_in_the_test_base(services):
     s = services()
     s.understand_llm = FakeLLMClient('{"personal_health": true}')
     s.cloud_llm = CloudClient(FakeLLMClient("cloud answer", model="gpt-test", backend="cloud"))
     ctx = await GenerateStep(s).run(make_ctx("cloud"))
     assert ctx.llm.backend == "cloud" and s.understand_llm.calls == []
+
 
 async def test_llm_check_then_generalize(use_config):
     """With both on (the recommended setup), a question the local model flags is not lost to the cloud: it
