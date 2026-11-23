@@ -118,16 +118,16 @@ api:
 
 llm:
   # the deployment's vLLM (VLLM_BASE_URL, VLLM_KEY in .env); model = the name the server lists under /models
-  local: { model: "Qwen3.5-9B", temperature: 0.2, max_tokens: 2048, timeout_s: 60 }   # 2048: 1024 cut long answers (V22)
+  local: { model: "Qwen3.5-9B", temperature: 0.2, max_tokens: 2048, timeout_s: 120 }   # 2048: 1024 cut long answers (V22); 120: V13
   understand: { model: "Qwen3.5-9B", timeout_s: 5 }
-  cloud: { timeout_s: 30, max_tokens: 2000, fallback_to_local: true, history_turns: 0 }   # reasoning tokens count
+  cloud: { timeout_s: 60, max_tokens: 8192, fallback_to_local: true, history_turns: 0 }   # reasoning tokens count
 
 limits:
   settings:
     poll_seconds: 5              # each process checks the system settings version this often (design 6.5)
     apply_timeout_seconds: 120   # a component change not applied everywhere by then is rolled back
   models:
-    max_concurrent: 4            # requests at the same time per model connection (vLLM batches them)
+    max_concurrent: 8            # requests at the same time per model connection; 4 refused 7 of 96 at 32 students (V13)
     queue_timeout_seconds: 60    # a request waiting longer for a slot gets "the model is busy"
   accounts:
     allowed_email_domains: [uottawa.ca, demo.invalid]  # roster import and activation; demo.invalid: demo accounts

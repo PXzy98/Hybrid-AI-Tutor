@@ -180,6 +180,17 @@ def test_the_cloud_draft_keeps_the_json_format():
     assert "JSON" in messages[0]["content"] and set(schema["properties"]) == {"title", "body", "citations"}
 
 
+def test_a_cloud_structure_draft_uses_the_cloud_connections_limit():
+    """V13: the hosted model's hidden reasoning counts against max_tokens; the structure drafts used up to
+    89% of 4096 there, so the cloud connection's own limit applies instead."""
+    from app.core.schemas import DraftCloudRequest
+    from app.instructor_ai.draft_cloud import render_draft
+
+    req = DraftCloudRequest.model_validate({"kind": "kcs", "passages": [
+        {"number": 1, "source": "course/101/_course/syllabus.md", "text": "Fictional Quartzzyme text."}]})
+    assert render_draft(req)[2] is None
+
+
 @pytest.mark.asyncio
 async def test_input_budget_can_be_raised_up_to_the_hard_limit():
     passages = [_chunk() for _ in range(12)]
