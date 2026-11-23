@@ -148,6 +148,7 @@ def test_ai_drafts_come_from_the_local_model_and_need_review(world):
     assert [(q["kind"], q["kc"], q["reviewed"], q["sources"]) for q in drafted] == [
         ("mcq", "C.1", False, ["notes.md"]), ("true_false", None, False, ["notes.md"])]
     assert len(local.calls) == 1 and cloud.calls == []  # course material stayed local
+    assert local.calls[0]["max_tokens"] == 4096  # 12 questions need up to 1,800 tokens (V13)
     assert "Ohm's law: V = I R" in local.sent_text()
     r = world.prof.patch(f"{world.url}/quizzes/{quiz['id']}", json={"status": "published"})
     assert r.status_code == 409 and "review" in r.json()["detail"]

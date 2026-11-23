@@ -118,9 +118,10 @@ class PrivacyConfig(Section):
     # Beta: also keep local a question that identifies someone (name, student number, contact) AND mentions a
     # health topic, even if no personal health detail was found (app/privacy/policy.py; measured in E6)
     local_if_identified_health_topic: bool = False
-    # Beta: before a question with a health topic goes to the cloud, the local model checks the redacted text
-    # for a personal health detail the rules missed (app/privacy/llm_check.py; fails closed)
-    llm_check: bool = False
+    # before a question that may reveal health goes to the cloud, the local model checks the redacted text for
+    # a personal health detail the rules missed (app/privacy/llm_check.py; fails closed). On by default since
+    # Z22d: the deployment always has its trusted local model (vLLM, Z24)
+    llm_check: bool = True
     allow_list: list[str] = []  # course staff names etc. that must never be redacted
     recognizers: list[str] | None = None  # custom recognizers to enable; None = all registered (E6 ablation)
     log_raw_text: Literal[False] = False  # privacy invariant 1: cannot be switched on
@@ -216,7 +217,7 @@ class LocalLLMConfig(Section):
     off (boundary test: loops, 5-7x latency) and structured answers follow their JSON schema."""
     model: str = "Qwen3.5-9B"  # the name the server lists under /models (vLLM --served-model-name)
     temperature: float = 0.2
-    timeout_s: float = 60
+    timeout_s: float = 120  # V13: a 2048-token answer takes 53 s at 8 at once and up to 127 s at 16
     max_tokens: int = Field(2048, ge=64)  # V22: 1024 cut long answers
 
 
@@ -226,8 +227,8 @@ class UnderstandLLMConfig(Section):
 
 
 class CloudLLMConfig(Section):
-    timeout_s: float = 30
-    max_tokens: int = 2000  # reasoning models count their hidden reasoning too (DeepSeek: up to ~800)
+    timeout_s: float = 60  # V13: long questions took up to 30 s with 8192
+    max_tokens: int = 8192  # reasoning counts too: at 2000, 9 of 12 long questions were cut (V13)
     fallback_to_local: bool = True
     history_turns: int = Field(0, ge=0)
     audit_log: str | None = None  # E4: record every cloud request to this JSONL file (app/llm/audit.py)
@@ -266,7 +267,7 @@ class SettingsApplyLimits(Section):
 class ModelLimits(Section):
     """Per model connection (task Z6): requests at the same time, and the wait for a free slot."""
 
-    max_concurrent: int = Field(4, ge=1, le=256)
+    max_concurrent: int = Field(8, ge=1, le=256)  # V13: the lab vLLM's KV cache holds about 8 answers
     queue_timeout_seconds: float = Field(60.0, gt=0, le=600)
 
 

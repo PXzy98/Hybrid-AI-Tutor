@@ -394,3 +394,39 @@ async def test_identified_health_topic_policy_is_off_by_default(use_config):
         question="My name is Lena Park, student 300418277. How does diabetes work?"))
     ctx = await PrivacyFilterStep(services).run(ctx)
     assert ctx.pii.cloud_safe
+
+
+# Z22d: conditions a student gives as the reason for late work, which the term list missed (all fictional)
+@pytest.mark.parametrize(("text", "kept"), [
+    ("I have a perianal abscess and need to submit my assignment late. What is the late penalty?", "abscess"),
+    ("Hi, I'm Ann Lee, student number 300123456. I have a perianal abscess, can I get an extension?",
+     "abscess"),
+    ("I have tonsillitis, can I write the quiz next week?", "tonsillitis"),
+    ("My brother has bronchitis so I missed the lab.", "bronchitis"),
+    ("I was diagnosed with pilonidal disease last week, can I defer the midterm?", "pilonidal disease"),
+    ("My mother was hospitalized for a pulmonary embolism, so I could not come.", "pulmonary embolism"),
+    ("I broke my wrist and cannot type the report.", "wrist"),
+    ("I have a sprained ankle and missed the presentation.", "sprained ankle"),
+    ("I got a concussion playing hockey.", "concussion"),
+    ("I have kidney stones and was in the ER.", "kidney stones"),
+    ("My dad has melanoma.", "melanoma"),
+])
+def test_z22d_personal_conditions_are_health_details(analyzer, text, kept):
+    found = find(analyzer, text)
+    assert any(t == "HEALTH_DETAIL" and kept in v for t, v in found), found
+
+
+@pytest.mark.parametrize("text", [
+    "How is an abscess treated?",
+    "What is the difference between bronchitis and pneumonia?",
+    "I have a question about fracture mechanics in steel beams.",
+    "I'm studying how patients are diagnosed with sleep apnea.",
+    "I have a diploma in electrical engineering.",
+    "I have a question about stress fractures in long bones.",
+    "Explain the stages of melanoma for the exam.",
+    "I broke my laptop screen, can I submit on paper?",
+    "I was treated for the midterm conflict by the department.",
+    "I have a sprained ankle case study for the physiotherapy module.",
+])
+def test_z22d_general_questions_stay_cloud_safe(analyzer, text):
+    assert not any(t == "HEALTH_DETAIL" for t, _ in find(analyzer, text)), find(analyzer, text)

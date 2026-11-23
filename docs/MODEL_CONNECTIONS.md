@@ -12,7 +12,7 @@ the connection for the role, checks it, and queues the request.
 
 The small local calls on the original text use the `local` connection too (task Z17): the understand step
 (knowledge components, question type), the hypothetical rewrite of a personal health question
-(`health_detail_policy: generalize`) and the second health check (`privacy.llm_check`). With a stored
+(`health_detail_policy: generalize`) and the second health check (`privacy.llm_check`, on by default since Z22d). With a stored
 connection they share its queue with the answers; a stored `local` connection that is not `trusted_local` is
 never used for them (understand is skipped, the question stays local). Without one they use the deployment's
 clients (`llm.understand`, `llm.local`). Checked on 2026-11-16 against vLLM (Qwen3.5-9B, thinking off):

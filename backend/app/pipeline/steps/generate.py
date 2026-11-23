@@ -10,7 +10,7 @@ from app.pipeline.steps.understand import local_helper
 from app.privacy.analyzer import PIIAnalyzer
 from app.privacy.generalize import generalize
 from app.privacy.llm_check import reveals_personal_health
-from app.privacy.policy import TOPIC_RE
+from app.privacy.policy import may_reveal_health
 from app.prompts import render_local
 from app.verify.leaks import CloudLeakGuard
 
@@ -153,14 +153,15 @@ class GenerateStep(BaseStep):
 
 
 async def llm_flags_health(ctx: RequestContext, services) -> bool:
-    """privacy.llm_check: the local model double-checks a cloud-bound question about a health topic.
+    """privacy.llm_check: the local model double-checks a cloud-bound question that may reveal health
+    (`may_reveal_health`: a health topic, or a first-person wording the rules may not know; task Z22d).
 
     Here rather than in the privacy filter, so only questions really going to the cloud pay the latency; once
     per request (a safety retry and the generate step after web search reuse the answer). Also run by the
     web_search step before anything is sent to a search service (task T13).
     """
     if (not services.settings.privacy.llm_check or ctx.pii.llm_checked
-            or not TOPIC_RE.search(ctx.request.question)):
+            or not may_reveal_health(ctx.request.question)):
         return False
     ctx.pii = ctx.pii.model_copy(update={"llm_checked": True})
     flagged = await reveals_personal_health(local_helper(services, ctx, services.understand_llm),
