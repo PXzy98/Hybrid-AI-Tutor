@@ -61,4 +61,14 @@ describe("scroll position of the shell (V24)", () => {
     s.go("/courses/1/settings#next-term");
     expect(s.top()).toBe(400);  // the page scrolls to its own anchor
   });
+
+  it("returns to an entry that inherited its position and was never scrolled", () => {
+    const s = setup("/courses/1/chat");
+    s.scrollTo(600);
+    s.go("/courses/1/chat?module=10");  // a module scope: same page, the position stays
+    s.go("/courses/1/progress");
+    expect(s.top()).toBe(0);
+    s.go(-1);
+    expect(s.top()).toBe(600);
+  });
 });

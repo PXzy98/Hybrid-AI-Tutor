@@ -36,10 +36,13 @@ export function useScrollMemory(scroller: RefObject<HTMLElement | null>) {
       if (saved !== undefined) return restore(el, saved);
       // an entry never seen in this tab (after a reload): start at the top, like a new page
     } else if (samePath || location.hash) {
+      // the new entry inherits the offset; remember it now, as the reader may never scroll on this entry
+      positions.current.set(location.key, el.scrollTop);
       return;
     }
     el.scrollTop = 0;
-  }, [location.key, location.pathname, location.hash, navigationType, scroller]);
+    positions.current.set(location.key, 0);
+  },[location.key, location.pathname, location.hash, navigationType, scroller]);
 }
 
 /** Scroll to `top`; when the page is not tall enough yet (its data still loading), try again as it grows,
