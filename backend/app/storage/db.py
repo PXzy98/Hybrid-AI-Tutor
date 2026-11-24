@@ -46,10 +46,11 @@ def make_engine(url: str | None, *, pooled: bool = True, password: str | None = 
 
     Every session runs in UTC, whatever the server's default time zone: timestamps are stored and compared in
     UTC, and a server set to local time (the team's test server is America/Toronto) shifted the timestamps
-    the API returns and the time windows of queries.
+    the API returns and the time windows of queries. The zone is named GMT (the same as UTC): it is built into
+    PostgreSQL, while UTC needs the time zone files, which the pgserver build for local tests leaves out.
     """
     kwargs: dict = {"pool_pre_ping": True} if pooled else {"poolclass": NullPool}
-    kwargs["connect_args"] = {"options": "-c timezone=UTC"}
+    kwargs["connect_args"] = {"options": "-c timezone=GMT"}
     if password:
         kwargs["connect_args"]["password"] = password
     return create_engine(normalize_url(url), **kwargs)

@@ -9,13 +9,13 @@ For a sample of E6 positive questions, the local model answers several versions 
   hypothetical  B3, health questions only: the local model rewrites the question in the third person
                 ("a person with asthma ..."); a rewrite that still contains PII or a personal health
                 statement is rejected and counted (it would stay local)
-A judge model (JUDGE_BASE_URL / JUDGE_MODEL or --judge-url / --judge-model; a different model from the answerer) scores each version against the
-reference answer from 1 to 5 and flags redaction artefacts. Placeholders echoed in an answer are restored and
-any left over is counted as a restore failure. Writes results/utility.md and results/utility.jsonl.
+A judge model (JUDGE_BASE_URL / JUDGE_MODEL / JUDGE_API_KEY from the environment or .env, or --judge-url /
+--judge-model; the server address with or without /v1; a different model from the answerer) scores each
+version against the reference answer from 1 to 5 and flags redaction artefacts. Placeholders echoed in an
+answer are restored and any left over is counted as a restore failure. Writes results/utility.md and results/utility.jsonl.
 This is an offline experiment: B2 and B3 are not enabled in the app.
 """
 import argparse
-import os
 import json
 import random
 import re
@@ -33,6 +33,7 @@ from app.core.config import PrivacyConfig, get_settings  # noqa: E402
 from app.privacy.analyzer import PIIAnalyzer, custom_recognizer_names  # noqa: E402
 from app.privacy.anonymizer import PLACEHOLDER_RE, anonymize, restore  # noqa: E402
 from app.prompts.render import system_prompt  # noqa: E402
+from env import api_root, env  # noqa: E402
 
 FAKE = {"PERSON": ["Alex Morgan", "Jordan Lee", "Sam Rivera", "Casey Brooks"], "STUDENT_ID": ["300000001"],
         "EMAIL_ADDRESS": ["student@example.com"], "PHONE_NUMBER": ["613-555-0000"], "GRADE": ["I got a low mark"]}
@@ -61,9 +62,12 @@ def chat(http, settings, prompt, system=None, max_tokens=500):
 
 
 def judge(http, base, model, q, ref, cand):
-    r = http.post(f"{base}/v1/chat/completions", json={
+    key = env("JUDGE_API_KEY")
+    r = http.post(f"{api_root(base)}/chat/completions", headers={"Authorization": f"Bearer {key}"} if key else {},
+                  json={
         "model": model, "temperature": 0, "max_tokens": 4000, "response_format": {"type": "json_object"},
         "messages": [{"role": "user", "content": JUDGE.format(q=q, ref=ref, cand=cand)}]})
+    r.raise_for_status()
     text = r.json()["choices"][0]["message"]["content"] or ""
     m = re.search(r"\{.*\}", text, re.S)
     try:
@@ -90,8 +94,8 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--n-plain", type=int, default=30)
     ap.add_argument("--n-health", type=int, default=15)
-    ap.add_argument("--judge-model", default=os.environ.get("JUDGE_MODEL"))
-    ap.add_argument("--judge-url", default=os.environ.get("JUDGE_BASE_URL"),
+    ap.add_argument("--judge-model", default=env("JUDGE_MODEL"))
+    ap.add_argument("--judge-url", default=env("JUDGE_BASE_URL"),
                     help="OpenAI-compatible server of the judge (a different model from the one that answers)")
     ap.add_argument("--out", type=Path, default=HERE / "results")
     a = ap.parse_args(argv)
@@ -139,7 +143,7 @@ def main(argv=None) -> int:
                 for fake, orig in sur_map.items():
                     ans = ans.replace(fake, orig)
             row["restore_left"][v] = len(PLACEHOLDER_RE.findall(ans))
-            row["scores"][v], row["artifacts"][v] = judge(http, a.judge_url.rstrip("/"), a.judge_model, q, ref, ans)
+            row["scores"][v], row["artifacts"][v] = judge(http, a.judge_url, a.judge_model, q, ref, ans)
         rows.append(row)
         print(f"{i}/{len(sample)} {c['id']} {row['scores']}", file=sys.stderr)
 

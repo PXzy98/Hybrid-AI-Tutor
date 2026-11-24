@@ -9,9 +9,10 @@ scripted check answers (eval/common/harness.py). Each persona asks every questio
 and off (`learner.personalize: false`, i.e. LearnerContext(personalized=False)). Answers come from the real
 local model unless --smoke; questions stay on the local route.
 
-A blind pairwise judge (any OpenAI-compatible API: JUDGE_BASE_URL, JUDGE_MODEL, JUDGE_API_KEY; default: the
-deployment's vLLM (VLLM_BASE_URL); JUDGE_MODEL or --judge-model must name the judge model) sees the persona description, the question and the two
-answers in random A/B order. It only ever sees fictional personas, never real student data.
+A blind pairwise judge (any OpenAI-compatible API: JUDGE_BASE_URL with or without /v1, JUDGE_MODEL,
+JUDGE_API_KEY, from the environment or .env; default: the deployment's vLLM (VLLM_BASE_URL); JUDGE_MODEL or
+--judge-model must name the judge model) sees the persona description, the question and the two answers in
+random A/B order. It only ever sees fictional personas, never real student data.
 
 Outputs in results/: report.md, pairs.jsonl (all answers and verdicts), abbas_sample.csv (30 blind pairs for
 Dr. Abbas, A/B as shown) and abbas_key.csv (which side was personalized; keep it away from the rater).
@@ -20,7 +21,6 @@ import argparse
 import asyncio
 import csv
 import json
-import os
 import random
 import re
 import sys
@@ -30,6 +30,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent / "common"))
 
 import harness  # noqa: E402
+from env import api_root, env as env_value  # noqa: E402
 
 TARGETS = {"win": (0.65, 0.55), "misconception": (0.80, 0.70), "preference": (0.90, 0.90)}
 SAMPLE_SIZE = 30
@@ -149,8 +150,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--smoke", action="store_true")
     ap.add_argument("--questions", type=int, help="first N questions only (default: all 20)")
     ap.add_argument("--personas", help="comma-separated persona keys (default: all)")
-    ap.add_argument("--judge-base-url", default=os.environ.get("JUDGE_BASE_URL"))
-    ap.add_argument("--judge-model", default=os.environ.get("JUDGE_MODEL"))
+    ap.add_argument("--judge-base-url", default=env_value("JUDGE_BASE_URL"))
+    ap.add_argument("--judge-model", default=env_value("JUDGE_MODEL"))
     ap.add_argument("--seed", type=int, default=3)
     ap.add_argument("--out", type=Path, default=HERE / "results")
     ap.add_argument("--report-only", action="store_true", help="rebuild the report from <out>/pairs.jsonl")
@@ -199,7 +200,7 @@ def main(argv: list[str] | None = None) -> int:
             if not base_url:
                 raise SystemExit("set JUDGE_BASE_URL or VLLM_BASE_URL for the judge")
             vllm_key = s.vllm_key.get_secret_value() if s.vllm_key else "none"
-            judge = LLMJudge(base_url.rstrip("/"), a.judge_model, os.environ.get("JUDGE_API_KEY", vllm_key))
+            judge = LLMJudge(api_root(base_url), a.judge_model, env_value("JUDGE_API_KEY", vllm_key))
         by_key = {p.key: p for p in personas}
         prompts = []
         for pr in pairs:
