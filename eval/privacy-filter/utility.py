@@ -12,7 +12,8 @@ For a sample of E6 positive questions, the local model answers several versions 
 A judge model (JUDGE_BASE_URL / JUDGE_MODEL / JUDGE_API_KEY from the environment or .env, or --judge-url /
 --judge-model; the server address with or without /v1; a different model from the answerer) scores each
 version against the reference answer from 1 to 5 and flags redaction artefacts. Placeholders echoed in an
-answer are restored and any left over is counted as a restore failure. Writes results/utility.md and results/utility.jsonl.
+answer are restored and any left over is counted as a restore failure. Writes results/utility.md and
+results/utility.jsonl.
 This is an offline experiment: B2 and B3 are not enabled in the app.
 """
 import argparse
@@ -63,8 +64,8 @@ def chat(http, settings, prompt, system=None, max_tokens=500):
 
 def judge(http, base, model, q, ref, cand):
     key = env("JUDGE_API_KEY")
-    r = http.post(f"{api_root(base)}/chat/completions", headers={"Authorization": f"Bearer {key}"} if key else {},
-                  json={
+    headers = {"Authorization": f"Bearer {key}"} if key else {}
+    r = http.post(f"{api_root(base)}/chat/completions", headers=headers, json={
         "model": model, "temperature": 0, "max_tokens": 4000, "response_format": {"type": "json_object"},
         "messages": [{"role": "user", "content": JUDGE.format(q=q, ref=ref, cand=cand)}]})
     r.raise_for_status()
