@@ -1,5 +1,5 @@
 import { PanelLeft } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Outlet, useLocation, useMatch } from "react-router-dom";
 
 import type { Me } from "@/api/endpoints";
@@ -12,6 +12,7 @@ import { useI18n } from "@/i18n";
 import ErrorBoundary from "./ErrorBoundary";
 import Sidebar from "./shell/Sidebar";
 import UserMenu from "./shell/UserMenu";
+import { useScrollMemory } from "./shell/useScrollMemory";
 
 const SIDEBAR_KEY = "tutor.sidebar";  // interface preference only
 const DESKTOP_QUERY = "(min-width: 48rem)";  // Tailwind md: the sidebar instead of the sheet
@@ -38,6 +39,8 @@ export default function AppShell({ me }: { me: Me }) {
   const showSidebar = !me.must_change_password;
   const [collapsed, setCollapsedState] = useState(storedCollapsed);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const mainRef = useRef<HTMLElement>(null);
+  useScrollMemory(mainRef);
 
   const setCollapsed = useCallback((next: boolean) => {
     setCollapsedState(next);
@@ -107,7 +110,7 @@ export default function AppShell({ me }: { me: Me }) {
         </header>
         {/* relative: the containing block of the absolutely positioned sr-only elements inside the page; without it
             they sit against the viewport, outside this scroll container, and make the document itself scroll */}
-        <main id="main" tabIndex={-1} className="relative min-h-0 flex-1 overflow-y-auto outline-hidden">
+        <main ref={mainRef} id="main" tabIndex={-1} className="relative min-h-0 flex-1 overflow-y-auto outline-hidden">
           <div className="mx-auto w-full max-w-6xl min-w-0 px-4 py-6 [overflow-wrap:anywhere] sm:px-6">
             <ErrorBoundary><Outlet /></ErrorBoundary>
           </div>
