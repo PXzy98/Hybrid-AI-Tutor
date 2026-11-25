@@ -5614,7 +5614,7 @@
           "ask"
         ],
         "summary": "Ask Stream",
-        "description": "Server-sent events: `meta`, `progress` (fixed status text and scores, never question or passage\ntext), then `result` or `error`, then `done`.",
+        "description": "Server-sent events: `meta`, `progress` (fixed status text and scores, never question or passage\ntext), `queued` (`{\"waiting\": true}`: the question waits for a free model slot), then `result` or\n`error` (`busy: true` when the wait ended without a slot), then `done`.",
         "operationId": "ask_stream_api_v2_courses__course_id__ask_stream_post",
         "parameters": [
           {
@@ -7906,6 +7906,11 @@
           "request_id": {
             "type": "string",
             "title": "Request Id"
+          },
+          "busy": {
+            "type": "boolean",
+            "title": "Busy",
+            "default": false
           }
         },
         "type": "object",

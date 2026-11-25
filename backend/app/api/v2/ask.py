@@ -23,6 +23,8 @@ from app.api.v2.errors import ApiError, ErrorCode
 from app.catalog import CatalogError
 from app.core.schemas import AskRequest, AskResponse, RequestContext, StoredTurn
 from app.learner.content import ContentError
+from app.llm import gateway as model_gateway
+from app.llm.base import MODEL_BUSY_MESSAGE, ModelBusy
 from app.pipeline.runner import PipelineError
 from app.pipeline.steps.generate import CLOUD_LIMIT_NOTE
 from app.platform import course_scope, usage
@@ -51,6 +53,7 @@ class AskErrorOut(BaseModel):
     detail: str
     step: str
     request_id: str
+    busy: bool = False  # the question waited for a model and none became free: high volume
 
 
 class ConversationOut(BaseModel):
@@ -172,9 +175,20 @@ def _out(ctx: RequestContext) -> AskOut:
     return out
 
 
-def _error_out(ctx: RequestContext, step: str) -> dict:
+def _was_busy(error: BaseException | None) -> bool:
+    while error is not None:
+        if isinstance(error, ModelBusy):
+            return True
+        error = error.__cause__ or error.__context__
+    return False
+
+
+def _error_out(ctx: RequestContext, step: str, cause: BaseException | None = None) -> dict:
     body = _error(ctx, step).model_dump()
     body["detail"] = localize.text(body["detail"], ctx.request.language)
+    if _was_busy(cause):
+        body["detail"] = localize.text(MODEL_BUSY_MESSAGE, ctx.request.language)
+        body["busy"] = True
     return body
 
 
@@ -193,7 +207,7 @@ async def ask(body: AskIn, access: CourseStudent, request: Request, background: 
             ctx = await runner.run(ctx)
     except PipelineError as e:
         _release(ctx)
-        return JSONResponse(status_code=503, content=_error_out(ctx, e.step))
+        return JSONResponse(status_code=503, content=_error_out(ctx, e.step, e))
     except BaseException:
         _release(ctx)
         raise
@@ -207,7 +221,8 @@ async def ask(body: AskIn, access: CourseStudent, request: Request, background: 
 @router.post("/courses/{course_id}/ask/stream", responses={200: {"content": {"text/event-stream": {}}}})
 async def ask_stream(body: AskIn, access: CourseStudent, request: Request):
     """Server-sent events: `meta`, `progress` (fixed status text and scores, never question or passage
-    text), then `result` or `error`, then `done`."""
+    text), `queued` (`{"waiting": true}`: the question waits for a free model slot), then `result` or
+    `error` (`busy: true` when the wait ended without a slot), then `done`."""
     services = _services(request)
     ctx, scope = _prepare(body, access, services)  # access, validation and limits fail before HTTP 200
     runner = services.components.runner
@@ -218,8 +233,12 @@ async def ask_stream(body: AskIn, access: CourseStudent, request: Request):
 
     ctx.set_progress_sink(progress)
 
+    async def queued():  # a model call of this question waits for a free slot: tell the chat (no text)
+        await queue.put(("queued", {"waiting": True}))
+
     async def produce():
         answered = False
+        model_gateway.wait_notice.set(queued)  # this task's own context
         try:
             with course_scope.use(scope):
                 await runner.run(ctx)
@@ -229,11 +248,11 @@ async def ask_stream(body: AskIn, access: CourseStudent, request: Request):
                 await queue.put(("result", _out(ctx).model_dump(mode="json")))
                 await runner.run_post(ctx)
         except PipelineError as e:
-            await queue.put(("error", _error_out(ctx, e.step)))
+            await queue.put(("error", _error_out(ctx, e.step, e)))
         except asyncio.CancelledError:
             raise
-        except Exception:  # noqa: BLE001 - the stream ends with an error event, never with a broken body
-            await queue.put(("error", _error_out(ctx, "pipeline")))
+        except Exception as e:  # noqa: BLE001 - the stream ends with an error event, never with a broken body
+            await queue.put(("error", _error_out(ctx, "pipeline", e)))
         finally:
             if not answered:
                 _release(ctx)

@@ -20,6 +20,7 @@ notes:
   DEFAULT_FAILURE: "Le tuteur ne peut pas répondre pour le moment. Veuillez réessayer."
   PRIVACY_FILTER_FAILURE: "Le filtre de confidentialité n’est pas disponible : la question n’a pas été traitée."
   MODEL_UNAVAILABLE: "Le modèle choisi n’est pas disponible. Vérifiez le serveur local ou la configuration infonuagique, puis réessayez."
+  MODEL_BUSY_MESSAGE: "Beaucoup d’étudiants posent des questions en même temps et le tuteur n’a pas pu prendre la vôtre à temps. Veuillez la renvoyer."
   STATISTICS_ONLY_NOTE: "Votre enseignant ne voit que des statistiques de la classe, par exemple combien d’étudiants utilisent le tuteur, les sujets les plus fréquents et les moyennes des quiz. Personne, pas même l’enseignant, ne voit votre propre profil, vos questions ou vos réponses."
 
 step_failed: "{step} : n’a pas pu être terminé"

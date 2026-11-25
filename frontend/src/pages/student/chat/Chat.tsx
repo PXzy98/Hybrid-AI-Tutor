@@ -64,6 +64,7 @@ function ChatPane({ course, initialConversation: initial, moduleId, onStarted, p
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversation, setConversation] = useState<string | null>(initialConversation);
   const [partial, setPartial] = useState("");
+  const [queued, setQueued] = useState(false);  // the question waits for a free model slot
   const [question, setQuestion] = useState("");
   useEffect(() => {
     if (!prefill) return;
@@ -105,18 +106,21 @@ function ChatPane({ course, initialConversation: initial, moduleId, onStarted, p
     mutationFn: (input: SendInput) => {
       controller.current = new AbortController();
       setPartial("");
+      setQueued(false);
       return api.askStream(course.id, {
         question: input.question, module_id: moduleId, language: lang,  // fixed notes come back in it
         ...(conversation ? { conversation_id: conversation } : {}),
       }, (event) => {
         if (event.type === "meta") updateTrace(input.traceId, { visible: event.data.show_progress, method: event.data.method });
         if (event.type === "progress") updateTrace(input.traceId, {}, event.data);
-        if (event.type === "token") setPartial((p) => p + (event.data.text ?? ""));
+        if (event.type === "queued") setQueued(true);
+        if (event.type === "token") { setQueued(false); setPartial((p) => p + (event.data.text ?? "")); }
         if (event.type === "result") updateTrace(input.traceId, { details: event.data.routing_details, events: event.data.routing_progress ?? [] });
       }, controller.current.signal);
     },
     onSuccess: (reply, input) => {
       setPartial("");
+      setQueued(false);
       updateTrace(input.traceId, { running: false, finishedAt: Date.now(), details: reply.routing_details,
         privacyKeptLocal: keptLocalByPrivacy(reply.routing_details, reply.warnings) });
       setConversation(reply.conversation_id);
@@ -126,6 +130,7 @@ function ChatPane({ course, initialConversation: initial, moduleId, onStarted, p
     },
     onError: (error, input) => {
       setPartial("");
+      setQueued(false);
       // the student pressed Stop: end quietly, without an error message
       if (isAbort(error)) {
         updateTrace(input.traceId, { running: false, finishedAt: Date.now() });
@@ -179,7 +184,7 @@ function ChatPane({ course, initialConversation: initial, moduleId, onStarted, p
         <Badge variant="secondary">{scopeLabel}</Badge>
         {lastTutor?.reply.kc_level && <Band band={lastTutor.reply.kc_level} label={t("chat.levelLabel")} />}
       </div>
-      <MessageList courseId={course.id} messages={messages} partial={partial} pending={ask.isPending}
+      <MessageList courseId={course.id} messages={messages} partial={partial} queued={queued} pending={ask.isPending}
                    loadingHistory={history.isLoading} historyError={history.error} onSuggest={suggest} onRetry={retry}>
         <Composer ref={inputRef} value={question} onChange={setQuestion} onSubmit={send} pending={ask.isPending}
                   onStop={() => controller.current?.abort()} scopeLabel={scopeLabel} localOnly={!!course.local_only} />

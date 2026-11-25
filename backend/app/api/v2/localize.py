@@ -13,6 +13,7 @@ import yaml
 from app.api.v1.ask import DEFAULT_FAILURE, FAILURE_MESSAGES, MODEL_UNAVAILABLE
 from app.api.v1.onboarding import PREFERENCE_QUESTIONS, Choice, PreferenceQuestion
 from app.learner.misconceptions import NOTE_HEADER
+from app.llm.base import MODEL_BUSY_MESSAGE
 from app.pipeline.steps import generate, route, verify
 from app.privacy.profiles import CONSENT_BASE, STATISTICS_ONLY_NOTE
 
@@ -37,6 +38,7 @@ ENGLISH = {
     "DEFAULT_FAILURE": DEFAULT_FAILURE,
     "PRIVACY_FILTER_FAILURE": FAILURE_MESSAGES["privacy_filter"],
     "MODEL_UNAVAILABLE": MODEL_UNAVAILABLE,
+    "MODEL_BUSY_MESSAGE": MODEL_BUSY_MESSAGE,
     "STATISTICS_ONLY_NOTE": STATISTICS_ONLY_NOTE,
 }
 

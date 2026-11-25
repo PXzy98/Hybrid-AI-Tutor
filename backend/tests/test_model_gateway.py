@@ -8,10 +8,10 @@ from sqlmodel import Session, select
 
 from app.core.services import build_services
 from app.llm import endpoints
-from app.llm.base import LLMUnavailable
+from app.llm.base import LLMUnavailable, ModelBusy
 from app.llm.endpoints import EndpointError, create_endpoint, delete_endpoint
 from app.llm.fake import FakeLLMClient
-from app.llm.gateway import TrustViolation
+from app.llm.gateway import TrustViolation, wait_notice
 from app.llm.ssrf import UnsafeEndpoint, check_endpoint_url
 from app.storage.models import AuditLog, ModelEndpoint
 
@@ -295,3 +295,40 @@ def test_the_default_cloud_connection_is_queued_and_trusted_results_are_local(se
                                                    settings=services.effective(),
                                                    trust_required="trusted_local"))
     assert result.backend == "local"
+
+
+def test_a_call_that_has_to_wait_tells_the_notice_once_and_a_free_slot_does_not(use_config):
+    services = build_services(use_config({"limits": {"models": {"max_concurrent": 1,
+                                                                "queue_timeout_seconds": 0.2}}}))
+    started = asyncio.Event()
+
+    class Slow:
+        model = "slow"
+
+        async def complete(self, messages, *, json_schema=None, max_tokens=None):
+            started.set()
+            await asyncio.sleep(0.5)
+            return await FakeLLMClient("done").complete(messages)
+
+    services.local_llm = Slow()
+    eff = services.effective()
+    notices = []
+
+    async def noticed():
+        notices.append("waiting")
+
+    def call(text):
+        return services.gateway.complete("local", [{"role": "user", "content": text}], settings=eff,
+                                         trust_required="trusted_local")
+
+    async def run():
+        wait_notice.set(noticed)
+        first = asyncio.create_task(call("a"))
+        await started.wait()
+        assert notices == []  # the first call found a free slot
+        with pytest.raises(ModelBusy):
+            await call("b")
+        await first
+
+    asyncio.run(run())
+    assert notices == ["waiting"]

@@ -1,6 +1,8 @@
 """API v2 ask (api-v2.md 3.5; guide 4.5): the pipeline runs in the request's course (content, learner data,
 conversations), behind the course role check and the usage limits. Fictional data; the models are fakes."""
+import asyncio
 import json
+import threading
 
 import pytest
 from fastapi.testclient import TestClient
@@ -275,3 +277,56 @@ def test_an_answer_cut_off_at_max_tokens_says_so(world):
     assert any("length limit" in n for n in stored[1]["notes"]) and stored[0]["notes"] == []  # V22 N6
     url = f"{world.url}/conversations/{body['conversation_id']}?language=fr"
     assert any("longueur maximale" in n for n in alice.get(url).json()["turns"][1]["notes"])
+
+
+def _events(text: str) -> list[tuple[str, dict]]:
+    out = []
+    for block in text.strip().split("\n\n"):
+        if block.startswith("event:"):
+            head, data = block.split("\n", 1)
+            out.append((head.removeprefix("event: "), json.loads(data.removeprefix("data: "))))
+    return out
+
+
+@pytest.mark.parametrize("language, busy_text", [
+    ("en", "Many students are asking at the same time"), ("fr", "Beaucoup d\u2019\u00e9tudiants posent")])
+def test_a_question_waiting_for_a_model_slot_gets_a_queued_event_then_the_busy_error(
+        make_client, language, busy_text):
+    config = {"limits": {"models": {"max_concurrent": 1, "queue_timeout_seconds": 0.5}}}
+    with make_client(config) as client:
+        world = World(client)
+        started, release = threading.Event(), threading.Event()
+
+        class Slow:
+            model = "slow"
+
+            async def complete(self, messages, *, json_schema=None, max_tokens=None):
+                started.set()
+                await asyncio.get_running_loop().run_in_executor(None, release.wait, 10)
+                return await FakeLLMClient("Fake local answer.").complete(messages)
+
+        world.services.local_llm = Slow()
+        # one client inside `with`: every request runs on its portal's single event loop, as in production
+        login = {"username": "alice", "password": PASSWORD}
+        assert client.post(f"{V2}/auth/login", json=login).status_code == 200
+        alice = bob = client
+        first = {}
+        holder = threading.Thread(target=lambda: first.update(
+            r=alice.post(f"{world.url}/ask/stream", json={"question": "What is a volt?"})))
+        holder.start()
+        try:
+            assert started.wait(10)
+            question = "A private question about Ohm"
+            r = bob.post(f"{world.url}/ask/stream", json={"question": question, "language": language})
+        finally:
+            release.set()
+            holder.join(15)
+        events = _events(r.text)
+        names = [n for n, _ in events]
+        assert names[0] == "meta" and "queued" in names and names[-2:] == ["error", "done"]
+        assert dict(events)["queued"] == {"waiting": True}
+        error = dict(events)["error"]
+        assert error["busy"] is True and busy_text in error["detail"]
+        assert question not in r.text  # no question text in the stream
+        first_names = [n for n, _ in _events(first["r"].text)]
+        assert "queued" not in first_names and "result" in first_names  # the first one found a free slot

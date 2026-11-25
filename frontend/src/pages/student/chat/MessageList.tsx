@@ -27,6 +27,7 @@ type Props = {
   courseId: number;
   messages: Message[];
   partial: string;
+  queued?: boolean;  // waiting in line for the model
   pending: boolean;
   loadingHistory: boolean;
   historyError: unknown;
@@ -36,7 +37,7 @@ type Props = {
 };
 
 /** The conversation and, pinned under it, the composer. Follows new text only while the reader is at the end. */
-export default function MessageList({ courseId, messages, partial, pending, loadingHistory, historyError, onSuggest, onRetry, children }: Props) {
+export default function MessageList({ courseId, messages, partial, queued, pending, loadingHistory, historyError, onSuggest, onRetry, children }: Props) {
   const { t } = useI18n();
   const endRef = useRef<HTMLDivElement>(null);
   const atEnd = useRef(true);
@@ -130,8 +131,8 @@ export default function MessageList({ courseId, messages, partial, pending, load
         )}
         {pending && !partial && (
           <TutorFrame>
-            <div role="status" className="flex h-7 items-center gap-1" >
-              <span className="sr-only">{t("chat.thinking")}</span>
+            <div role="status" className="flex min-h-7 flex-wrap items-center gap-x-3 gap-y-1">
+              <span className={queued ? "text-sm text-muted-foreground" : "sr-only"}>{t(queued ? "chat.queued" : "chat.thinking")}</span>
               {[0, 1, 2].map((d) => (
                 <span key={d} aria-hidden className="animate-shimmer size-1.5 rounded-full bg-muted-foreground"
                       style={{ animationDelay: `${d * 160}ms` }} />
