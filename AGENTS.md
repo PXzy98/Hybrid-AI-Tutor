@@ -1,6 +1,7 @@
 # Instructions for coding agents
 
-This repository is PACT, the Privacy-Aware Course Tutor (ELG 5902, Group 1). It is being turned into a
+This repository is ScholarMind AI, a privacy-aware course tutor (ELG 5902, Group 1; named PACT until
+2026-11-25). It is being turned into a
 multi-course product ("v4").
 
 ## Read first

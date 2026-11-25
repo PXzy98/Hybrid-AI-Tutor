@@ -80,7 +80,7 @@ async def _no_store(request: Request, call_next):
 
 def create_app() -> FastAPI:
     app = FastAPI(
-        title="PACT: Privacy-Aware Course Tutor",
+        title="ScholarMind AI: a privacy-aware course tutor",
         version="0.1.0",
         description=("Course tutor that keeps student data private: a local model the course controls, "
                      "a cloud model only for de-identified text, and a local learner model. "

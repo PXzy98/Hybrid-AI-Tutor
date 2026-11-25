@@ -1,7 +1,7 @@
 # Privacy subsystem: problem definition, concepts, detailed design and MVP test
 
 > **Status (2026-11-17).** A report of 4 Nov 2026; numbers and design are as of that date. The product is now
-> named PACT (Privacy-Aware Course Tutor). Later changes: the subject prompt and checkers per course type
+> named ScholarMind AI (PACT, the Privacy-Aware Course Tutor, until 2026-11-25). Later changes: the subject prompt and checkers per course type
 > ([../PRIVACY_PROFILES.md](../PRIVACY_PROFILES.md), Z16) and the local calls through the model gateway
 > ([../MODEL_CONNECTIONS.md](../MODEL_CONNECTIONS.md), Z17).
 

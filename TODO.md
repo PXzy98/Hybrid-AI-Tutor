@@ -29,7 +29,7 @@ Reflection #2 (ethics, individual) 11/18 · video 11/25 · Design Day 12/3 · fi
 |---|---|---|---|
 | T13 | Web search evaluation (G1-106) | T | search built (#88: off / API / SearXNG); evaluation needs SearXNG or a key |
 | T10 | Video (11/25) | T | demo script merged (#116) |
-| T11 | Renaming | T | done: PACT (2026-11-17, kept at the meeting); rename again only if the client picks another name with the domain |
+| T11 | Renaming | T | done: renamed to ScholarMind AI on 2026-11-25 (X9; before: PACT, chosen 2026-11-17) |
 | T12 | Routing, frontend and web search handover notes | T | manuals done |
 | — | `transformers` 5, `react-router` 7, `katex` done (Z27); `vite`/`vitest` (dev-only advisories) | T, Z | partly done |
 | Z13, Z6, Z2 | Deploy on the test host with monitoring; vLLM load test; local speed of the 9B model | Z | waits for server access |

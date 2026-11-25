@@ -1,6 +1,6 @@
 # Instructor manual
 
-For instructors (and administrators) who run a course in PACT (Privacy-Aware Course Tutor). Interface labels are quoted as
+For instructors (and administrators) who run a course in ScholarMind AI. Interface labels are quoted as
 they appear in the English interface. Students: [STUDENT_MANUAL.md](STUDENT_MANUAL.md). Technical background:
 [design/course-structure.md](design/course-structure.md), [design/api-v2.md](design/api-v2.md); deploying the
 system: [OPERATIONS.md](OPERATIONS.md).

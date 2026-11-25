@@ -41,7 +41,7 @@
 - **学生个人概览**：教师能看到每个学生的情况，并制定学习计划。
 - **部署**：放在客户自己的环境。
 
-**v4 目标**：在现有代码上**改造**（不重写），变成多课程、多教师的课程助教 **PACT**（Privacy-Aware Course Tutor，2026-11-17 定名）：
+**v4 目标**：在现有代码上**改造**（不重写），变成多课程、多教师的课程助教 **ScholarMind AI**（2026-11-17 定名为 PACT，即 Privacy-Aware Course Tutor；2026-11-25 改名，X9）：
 - 隐私规则按课程类型切换；
 - 增加教师端 AI；
 - 用一套 Docker Compose 部署。
@@ -456,7 +456,7 @@ v5 的任务（`V1`……以及还没完成的 v4 任务）在 [v5-plan.md](v5-p
 | T8 | "数据可能发往云端"的提示（文字由 Z 提供）；所有新页面的英法文字，包括小测和问卷；已删除的每条回答评分和风格按钮不再需要文字 | S6–S7 | Z11 | `frontend/src/i18n/` | 三处都有提示 |
 | T9 | 演示账号和示例数据脚本（只通过 API）；两门课的演示流程 | S6 | Z9、S5 | `scripts/` | 一条命令建好演示环境 |
 | T10 | 视频（11/25）；把法语界面截图发给 Lavin 审核并改回 | S6 | T3 | — | 按时交付 |
-| T11 | 改名为 **PACT**（Privacy-Aware Course Tutor，2026-11-17 定名，由 Z 代做，见 7.5）；无障碍自查（键盘、屏幕阅读器、对比度、放大）（**已完成**，见 [ACCESSIBILITY.md](ACCESSIBILITY.md)；axe 测试在 `frontend/src/test/Accessibility.test.tsx`） | S7 | 定名 | `frontend/` | 自查清单 |
+| T11 | 改名为 **PACT**（Privacy-Aware Course Tutor，2026-11-17 定名，由 Z 代做，见 7.5；2026-11-25 再改名为 **ScholarMind AI**，v6 X9）；无障碍自查（键盘、屏幕阅读器、对比度、放大）（**已完成**，见 [ACCESSIBILITY.md](ACCESSIBILITY.md)；axe 测试在 `frontend/src/test/Accessibility.test.tsx`） | S7 | 定名 | `frontend/` | 自查清单 |
 | T12 | **进行中**：学生使用手册（[STUDENT_MANUAL.md](STUDENT_MANUAL.md)）和教师使用手册（[INSTRUCTOR_MANUAL.md](INSTRUCTOR_MANUAL.md)，含 course-structure.md 3.4 关于助教的说明）已完成；路由、前端、网络搜索的交接文档未完成 | S8 | — | `docs/` | 新教师照着能用 |
 | T13 | 网络搜索（G1-92）+ 评估（G1-106）。**搜索已完成**（#88；见 [WEB_SEARCH.md](WEB_SEARCH.md)：部署时选择 `off`、外部 `api` 或自建 `searxng`）；评估还没做：搜索 API、白名单、清洗结果、作为资料交给生成步骤；查询只用 `search_query()`；出网只走统一的出网函数 | S7 | Z11、Z6 | 新的 `backend/app/websearch/`、`config.yaml` 的 pipeline | E4 审计：搜索请求里没有个人信息；评估报告 |
 | T14 | 清除 `docs/` 以外 Markdown 里的中文（规则 14）：按第 7 节用英文重写 `TODO.md`；把仓库根目录的中文版入门文档挪到 `docs/GETTING_STARTED_zh.md` 并修好链接；删掉 `README.md`、`GETTING_STARTED.md` 里的中文行。`frontend/src/test/Routing.test.tsx` 里的中文测试文本保留（它测试的是中文输入） | S5 | — | 上述文件 | `docs/` 以外的 Markdown 里没有中文 |
@@ -524,10 +524,10 @@ v5 的任务（`V1`……以及还没完成的 v4 任务）在 [v5-plan.md](v5-p
 | T13（搜索） | T | 三种部署模式的网页搜索、`route` 之后的 `web_search` 步骤、按课程类型的白名单、SearXNG 的 Compose profile | #88 | 审查 |
 | Z19（证据） | T | 在 `assess_evidence` 和 `select_passages` 里，本次请求所在课程的段落算作同一主题 | 见 PR | 审查 |
 | Z20（结构草稿） | S | 4,096 个输出 token，schema 里知识点名字是枚举，无效的前置知识点链接去掉（以前整份草稿作废） | 见 PR | 审查 |
-| T11（改名） | T | 界面（英文和法文）、网页标题、API 标题、README、AGENTS.md、手册、界面设计示意图、文件开头的注释和 Grafana 看板里的产品名改为 PACT；内部名字（数据库用户 `tutor`、`tutor_*` 指标、包名、仓库名）和历史文档不变 | 见 PR | 审查 |
+| T11（改名） | T | 界面（英文和法文）、网页标题、API 标题、README、AGENTS.md、手册、界面设计示意图、文件开头的注释和 Grafana 看板里的产品名改为 PACT（2026-11-25 起为 ScholarMind AI，X9）；内部名字（数据库用户 `tutor`、`tutor_*` 指标、包名、仓库名）和历史文档不变 | 见 PR | 审查 |
 | T11（无障碍部分）、T12（手册） | T | 无障碍自查和 axe 测试；学生手册和教师手册 | #74、#73 | 审查 |
 
-从 2026-11-11 起，按同样的决定，Z 也用这种方式做 7.2 和 7.3 里 S 和 T 剩下的任务（每个任务一个 PR，开 PR 时加到上表）。还没开始的（2026-11-15）：网页搜索的评估（T13，G1-106）；视频（T10）；改名（T11）2026-11-17 开始，名字是 PACT；路由、前端和网页搜索的交接说明（T12）；CI 扫描报告的 `transformers` 5、`react-router` 7 和 `vite`/`vitest` 升级。
+从 2026-11-11 起，按同样的决定，Z 也用这种方式做 7.2 和 7.3 里 S 和 T 剩下的任务（每个任务一个 PR，开 PR 时加到上表）。还没开始的（2026-11-15）：网页搜索的评估（T13，G1-106）；视频（T10）；改名（T11）2026-11-17 开始，名字是 PACT（2026-11-25 起为 ScholarMind AI）；路由、前端和网页搜索的交接说明（T12）；CI 扫描报告的 `transformers` 5、`react-router` 7 和 `vite`/`vitest` 升级。
 
 ## 8. 开发流程
 

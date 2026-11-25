@@ -335,7 +335,8 @@ def write_pack(c: dict) -> None:
     (pack / "manifest.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n",
                                         encoding="utf-8")
     lines = [f"# {c['code']}: {c['title']}", "",
-             "Open course material used as a demo and test course of PACT, the Privacy-Aware Course Tutor "
+             "Open course material used as a demo and test course of ScholarMind AI, a privacy-aware course "
+             "tutor "
              f"(course type `{c['course_type']}`). See [../README.md](../README.md).", "",
              f"- **Source**: [{c['home']}]({c['home']})",
              f"- **Author**: {c['author']}",

@@ -32,6 +32,16 @@ Browser test of 2026-11-24 (dev server on df779bc, lab vLLM up, fictional accoun
 | 12/3 | Design Day: live demo, on the production site if V10 is done, otherwise on the lab build |
 | 12/13 | Final report |
 
+## 1a. First priority: the product is renamed ScholarMind AI (decided by Z on 2026-11-25)
+
+The product is renamed from PACT (Privacy-Aware Course Tutor) to **ScholarMind AI**. This comes before every
+other task of this plan.
+
+| ID | Task | Owner | Done when |
+|---|---|---|---|
+| X9 | **Rename to ScholarMind AI** in the repository, the same scope as T11: the name in the interface (English and French), the tab title, the API title, README, AGENTS.md, the manuals, file header comments, the Grafana dashboard, the web page fetcher's User-Agent, the current docs; the domain ideas (`DOMAIN_NAMES.md`) proposed again with the new name. Internal names stay (`tutor` database user, `tutor_*` metrics, package names, storage keys such as `pact.privacyNotice.seenBy`, the repository name); history and earlier plans keep the old name. | Z | PR merged; the browser shows ScholarMind AI on the login page, the sidebar and the tab title |
+| X9b | Outside the repository: the video, the Design Day slides and script, the cost report sent to Prof. Abbas, the final report and the domain (V11) use the new name; the GitHub repository name only if Z decides so | Z, all | each item checked |
+
 ## 2. Phase A: fixes from the browser test (before Design Day)
 
 Each is one task, one branch and one PR (AGENTS.md workflow). Order is the order below.
@@ -54,7 +64,7 @@ Each is one task, one branch and one PR (AGENTS.md workflow). Order is the order
 
 | ID | Task | Owner | Done when |
 |---|---|---|---|
-| V10 | AWS deployment: Compose stack on Prof. Abbas's account, Canadian region, only this project's resources; HTTPS on the domain; monitoring and database backups; `AUTH__COOKIE_SECURE=true`, API v1 off | Z | the domain serves PACT; a restore from a backup tested |
+| V10 | AWS deployment: Compose stack on Prof. Abbas's account, Canadian region, only this project's resources; HTTPS on the domain; monitoring and database backups; `AUTH__COOKIE_SECURE=true`, API v1 off | Z | the domain serves ScholarMind AI; a restore from a backup tested |
 | V11 | Domain: Prof. Abbas chooses from `docs/DOMAIN_NAMES.md` and buys it | Abbas | name chosen |
 | V12 | Local model for production: RunPod or the lab vLLM forwarded, HTTPS, `VLLM_KEY` required, one port (`docs/DEMO_VLLM.md`) | Z decides | the production site answers through it |
 | — | Alert receiver in `alertmanager.yml` | Abbas, Z | set |
