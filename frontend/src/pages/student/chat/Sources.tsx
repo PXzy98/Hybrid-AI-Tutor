@@ -1,6 +1,11 @@
 import type { AskResponse } from "@/api/endpoints";
 import { useI18n } from "@/i18n";
 
+/** The file name of a source without its internal folder path; a web address stays whole. */
+export function sourceLabel(source: string): string {
+  return /^https?:\/\//i.test(source) ? source : source.split(/[\\/]/).pop() || source;
+}
+
 /** The course material an answer cites. The API returns no passage text, so there is no preview. */
 export default function Sources({ sources }: { sources: NonNullable<AskResponse["sources"]> }) {
   const { t } = useI18n();
@@ -17,7 +22,7 @@ export default function Sources({ sources }: { sources: NonNullable<AskResponse[
             <span className="min-w-0">
               <span className="sr-only">[{i + 1}] </span>
               <span className="line-clamp-2 font-medium">{s.title}</span>
-              {s.source !== s.title && <span className="block truncate text-muted-foreground">{s.source}</span>}
+              {sourceLabel(s.source) !== s.title && <span className="block truncate text-muted-foreground">{sourceLabel(s.source)}</span>}
             </span>
           </li>
         ))}

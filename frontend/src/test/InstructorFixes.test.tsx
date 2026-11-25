@@ -140,6 +140,7 @@ describe("class overview (B14 to B16)", () => {
     expect(cells.slice(0, 5)).toEqual(["Ohm's law", "—", "hidden", "6", "2"]);
     expect(cells[5]).toBe("");  // the bar column: no second "hidden"
     expect(screen.getByText(/not the list|This is not the list/)).toBeInTheDocument();
+    expect(screen.getAllByText("Students per level")).toHaveLength(1);
   });
 });
 

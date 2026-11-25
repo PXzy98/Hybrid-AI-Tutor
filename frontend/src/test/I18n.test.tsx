@@ -27,6 +27,19 @@ describe("translation files", () => {
   });
 });
 
+describe("count messages", () => {
+  it("use the singular for one in French and English", async () => {
+    const { I18nProvider, useI18n } = await import("../i18n");
+    const { render } = await import("@testing-library/react");
+    const Probe = () => { const { t } = useI18n(); return <p>{t("survey.responsesN", { n: 1 })} / {t("survey.responsesN", { n: 2 })}</p>; };
+    const { unmount } = render(<I18nProvider lang="fr"><Probe /></I18nProvider>);
+    expect(screen.getByText("1 réponse / 2 réponses")).toBeInTheDocument();
+    unmount();
+    render(<I18nProvider lang="en"><Probe /></I18nProvider>);
+    expect(screen.getByText("1 answer / 2 answers")).toBeInTheDocument();
+  });
+});
+
 describe("language switch", () => {
   it("switches the login page to French, remembers the choice and sets the page language", async () => {
     mockApi({ "GET /auth/me": () => reply({ detail: "Not logged in", code: "forbidden" }, 401) });

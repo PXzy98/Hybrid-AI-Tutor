@@ -12,8 +12,13 @@ const STORAGE_KEY = "tutor.lang";  // interface language only; nothing about the
 export type T = (key: MessageKey, vars?: Record<string, string | number>) => string;
 
 function translate(lang: Lang): T {
+  const rules = new Intl.PluralRules(LOCALES[lang]);
   return (key, vars) => {
-    const text = MESSAGES[lang][key] ?? en[key];
+    // a count message may have a `<key>_one` variant for the singular (French counts 0 as singular too)
+    const one = `${key}_one` as MessageKey;
+    const useOne = typeof vars?.n === "number" && rules.select(vars.n) === "one" && one in en;
+    const k = useOne ? one : key;
+    const text = MESSAGES[lang][k] ?? en[k];
     return vars ? text.replace(/\{(\w+)\}/g, (m, name) => (name in vars ? String(vars[name]) : m)) : text;
   };
 }

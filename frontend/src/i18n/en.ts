@@ -347,6 +347,7 @@ export const en = {
   "overview.noMisconceptions": "No shared misconceptions.",
   "overview.misconceptionsHint": "Misconceptions still open in the students' learning profiles. This is not the list \"Common misconceptions\" above, which counts the wrong answers seen in check items.",
   "overview.studentsN": "{n} students",
+  "overview.studentsN_one": "{n} student",
   "overview.moreHidden": "{n} more are hidden because too few students share them.",
 
   "students.title": "Students",
@@ -527,6 +528,7 @@ export const en = {
   "quiz.questionsOne": "1 question",
   "quiz.aiAfterSave": "Save the quiz first to draft questions with AI.",
   "quiz.attemptsN": "{n} answered",
+  "quiz.attemptsN_one": "{n} answered",
   "quiz.unreviewed": "AI draft, not reviewed",
   "quiz.unreviewedN": "{n} not reviewed",
   "quiz.reviewGate": "AI-drafted questions must be checked and saved before the quiz can be published. Saving marks every question as reviewed.",
@@ -593,6 +595,7 @@ export const en = {
   "survey.notSet": "not set",
   "survey.results": "Results",
   "survey.responsesN": "{n} answers",
+  "survey.responsesN_one": "{n} answer",
   "survey.notEnough": "Not enough answers yet: averages appear once at least {n} students have answered.",
   "survey.item": "Statement",
   "survey.mean": "Average (1 to 5)",

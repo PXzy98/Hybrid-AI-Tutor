@@ -347,6 +347,7 @@ export const fr: Messages = {
   "overview.noMisconceptions": "Aucune confusion partagée.",
   "overview.misconceptionsHint": "Confusions encore ouvertes dans les profils d’apprentissage des étudiants. Ce n’est pas la liste « Confusions courantes » ci-dessus, qui compte les mauvaises réponses vues dans les questions de vérification.",
   "overview.studentsN": "{n} étudiants",
+  "overview.studentsN_one": "{n} étudiant",
   "overview.moreHidden": "{n} autres sont masquées parce que trop peu d’étudiants les partagent.",
 
   "students.title": "Étudiants",
@@ -527,6 +528,7 @@ export const fr: Messages = {
   "quiz.questionsOne": "1 question",
   "quiz.aiAfterSave": "Enregistrez d’abord le quiz pour rédiger des questions avec l’IA.",
   "quiz.attemptsN": "{n} réponses",
+  "quiz.attemptsN_one": "{n} réponse",
   "quiz.unreviewed": "Brouillon de l’IA, non révisé",
   "quiz.unreviewedN": "{n} non révisées",
   "quiz.reviewGate": "Les questions rédigées par l’IA doivent être vérifiées et enregistrées avant la publication du quiz. L’enregistrement marque chaque question comme révisée.",
@@ -593,6 +595,7 @@ export const fr: Messages = {
   "survey.notSet": "non défini",
   "survey.results": "Résultats",
   "survey.responsesN": "{n} réponses",
+  "survey.responsesN_one": "{n} réponse",
   "survey.notEnough": "Pas encore assez de réponses : les moyennes apparaissent lorsqu’au moins {n} étudiants ont répondu.",
   "survey.item": "Énoncé",
   "survey.mean": "Moyenne (1 à 5)",

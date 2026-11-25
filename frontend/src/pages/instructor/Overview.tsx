@@ -64,7 +64,7 @@ export default function Overview({ course }: { course: Course }) {
                 <TableHeader><TableRow>
                   <TableHead>{t("overview.kc")}</TableHead>
                   {BANDS.map((b) => <TableHead key={b}>{t(`band.${b}` as MessageKey)}</TableHead>)}
-                  <TableHead className="hidden w-40 md:table-cell"><span className="sr-only">{t("overview.bands")}</span></TableHead>
+                  <TableHead className="hidden w-40 md:table-cell" aria-hidden />
                 </TableRow></TableHeader>
                 <TableBody>
                   {data.kcs?.map((k) => (
