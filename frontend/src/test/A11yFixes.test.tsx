@@ -26,7 +26,7 @@ describe("document title", () => {
     mockApi({ "GET /auth/me": { detail: "no", code: "unauthenticated" } });
     const login = renderApp("/login");
     await screen.findByRole("heading", { level: 1 });
-    expect(document.title).toBe("ScholarMind AI");
+    expect(document.title).toBe("Log in · ScholarMind AI");
     login.unmount();
 
     mockApi(studentRoutes());

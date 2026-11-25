@@ -98,7 +98,7 @@ describe("system administration", () => {
     }));
     renderApp("/admin");
     const user = userEvent.setup();
-    const field = await screen.findByLabelText("Basic level below (mastery)");
+    const field = await screen.findByLabelText("Where the basic level ends");
     await user.clear(field);
     await user.type(field, "0.35");
     await user.click(screen.getByRole("button", { name: "Save" }));
@@ -322,7 +322,7 @@ describe("follow-up fixes", () => {
     await user.selectOptions(localSelect, "Course local");
     await user.selectOptions(screen.getByLabelText("Cloud model connection"), "Course cloud");
     expect(screen.getByText("Unsaved changes")).toBeInTheDocument();
-    await user.click(screen.getAllByRole("button", { name: "Save" })[1]);
+    await user.click(screen.getByRole("button", { name: "Save settings" }));
     await waitFor(() => expect(calls.some((c) => c.method === "PUT")).toBe(true));
     expect(calls.find((c) => c.method === "PUT")!.body).toMatchObject({ version: 2, values: { local_endpoint_id: 8, cloud_endpoint_id: 9 } });
     // the form is rebuilt with the new version and still confirms the save

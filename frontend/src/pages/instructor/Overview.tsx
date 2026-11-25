@@ -36,23 +36,25 @@ export default function Overview({ course }: { course: Course }) {
   const data = summary.data;
   return (
     <div className="space-y-6">
-      <PageHeader title={t("overview.title")} description={t("overview.intro")} actions={
-        <div className="grid gap-1.5">
-          <Label htmlFor="overview-module">{t("overview.module")}</Label>
-          <Select id="overview-module" value={moduleId ?? ""} onChange={(e) => setChosen(Number(e.target.value))}>
-            {modules.data?.map((m) => <option key={m.id} value={m.id}>{m.title}</option>)}
-          </Select>
-        </div>
-      } />
+      <PageHeader title={t("overview.title")} description={t("overview.intro")} />
       <ErrorNote error={summary.error} />
       <UsageCard course={course} />
       <WeakTopicsCard course={course} />
       <InsightsCard course={course} />
+      {/* the module picker sits with the topic levels it changes, and only when there is a module to pick */}
+      {!!modules.data?.length && (
+        <div className="grid max-w-sm gap-1.5">
+          <Label htmlFor="overview-module">{t("overview.module")}</Label>
+          <Select id="overview-module" value={moduleId ?? ""} onChange={(e) => setChosen(Number(e.target.value))}>
+            {modules.data.map((m) => <option key={m.id} value={m.id}>{m.title}</option>)}
+          </Select>
+        </div>
+      )}
       {summary.isLoading && <Loading variant="cards" />}
       {data?.suppressed && <Alert variant="info" role="status" icon>{t("overview.suppressed", { n: data.min_group })}</Alert>}
       {data && !data.suppressed && (
         <>
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
             <StatCard label={t("overview.students")} value={data.students ?? 0} icon={Users} />
             <StatCard label={t("overview.kcs")} value={data.kcs?.length ?? 0} icon={BookOpen} />
             <StatCard label={t("overview.misconceptions")} value={data.misconceptions?.length ?? 0} icon={Lightbulb} />
@@ -110,6 +112,10 @@ function UsageCard({ course }: { course: Course }) {
   const hidden = t("overview.hidden");
   const show = (n: number | null | undefined) => (n == null ? hidden : n);
   const modules = (data?.modules ?? []).filter((m) => m.module_id !== null || m.questions !== 0);
+  // a week or module nobody asked about is not a row: the lists stay short and say so when they are empty
+  const busyModules = modules.filter((m) => m.questions !== 0);
+  const quietModules = modules.filter((m) => m.questions === 0);
+  const busyWeeks = (data?.weeks ?? []).filter((w) => w.questions !== 0);
   const most = Math.max(1, ...modules.map((m) => m.questions ?? 0));
   const weekMax = Math.max(1, ...(data?.weeks ?? []).map((w) => w.questions ?? 0));
   return (
@@ -120,7 +126,7 @@ function UsageCard({ course }: { course: Course }) {
         {stats.isLoading && <Loading variant="cards" />}
         {data && (
           <>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
               <StatCard label={t("usage.enrolled")} value={data.students_enrolled} icon={Users} />
               <StatCard label={t("usage.active7d")} value={show(data.active_students_7d)} icon={UserCheck} />
               <StatCard label={t("usage.questions7d")} value={show(data.questions_7d)} icon={MessageSquare} />
@@ -131,21 +137,32 @@ function UsageCard({ course }: { course: Course }) {
               <div>
                 <h3 className="mb-2 text-sm font-medium">{t("usage.perWeek")}</h3>
                 <ul className="space-y-1.5 text-sm">
-                  {data.weeks.map((w) => (
+                  {busyWeeks.map((w) => (
                     <RankedRow key={w.week_start} label={t("usage.weekOf", { date: fmt.day(w.week_start) })}
-                               count={w.questions == null ? hidden : t("usage.questionsStudents", { q: w.questions, s: w.students ?? 0 })}
+                               count={w.questions == null ? hidden
+                                 // a student count below the minimum group is not sent: never write it as 0
+                                 : w.students == null ? t("usage.questionsOnly", { q: w.questions })
+                                   : t("usage.questionsStudents", { q: w.questions, s: w.students })}
                                share={(w.questions ?? 0) / weekMax} />
                   ))}
                 </ul>
+                {busyWeeks.length === 0 && <p className="text-sm text-muted-foreground">{t("usage.noActivity")}</p>}
               </div>
               <div>
                 <h3 className="mb-2 text-sm font-medium">{t("usage.perModule")}</h3>
                 <ul className="space-y-1.5 text-sm">
-                  {modules.map((m) => (
+                  {busyModules.map((m) => (
                     <RankedRow key={m.module_id ?? "course"} label={m.module_id === null ? t("usage.wholeCourse") : m.title}
                                count={show(m.questions)} share={(m.questions ?? 0) / most} />
                   ))}
                 </ul>
+                {busyModules.length === 0 && <p className="text-sm text-muted-foreground">{t("usage.noActivity")}</p>}
+                {quietModules.length > 0 && (
+                  <details className="mt-2 text-sm">
+                    <summary className="cursor-pointer text-muted-foreground">{t("usage.quietModules", { n: quietModules.length })}</summary>
+                    <ul className="mt-1 list-disc space-y-0.5 pl-5">{quietModules.map((m) => <li key={m.module_id}>{m.title}</li>)}</ul>
+                  </details>
+                )}
               </div>
             </div>
             <div>

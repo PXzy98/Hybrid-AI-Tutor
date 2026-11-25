@@ -6,15 +6,15 @@ const LOCALES = { en: "en-CA", fr: "fr-CA" } as const;
 type Lang = keyof typeof LOCALES;
 type Input = string | number | Date;
 
-/** A date in the interface language. */
+/** A date in the interface language, spelled out ("Nov 16, 2026", "16 nov. 2026"), never as ISO digits. */
 export function formatDate(value: Input, lang: Lang = "en"): string {
-  return new Date(value).toLocaleDateString(LOCALES[lang]);
+  return new Date(value).toLocaleDateString(LOCALES[lang], { dateStyle: "medium" });
 }
 
 /** A calendar day sent as a date only ("2026-11-16"): shown as that day, without a time-zone shift (parsed as
  *  UTC midnight, it would be the day before west of UTC). */
 export function formatDay(value: string, lang: Lang = "en"): string {
-  return new Date(value).toLocaleDateString(LOCALES[lang], { timeZone: "UTC" });
+  return new Date(value).toLocaleDateString(LOCALES[lang], { dateStyle: "medium", timeZone: "UTC" });
 }
 
 /** A date and time in the interface language: hours and minutes, no seconds. */

@@ -1,6 +1,6 @@
 import { KeyRound } from "lucide-react";
 import { useState, type FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { api } from "@/api/endpoints";
 import { useMe, useResetSession } from "@/auth";
@@ -19,7 +19,10 @@ export default function ChangePassword() {
   const navigate = useNavigate();
   const resetSession = useResetSession();
   const { t } = useI18n();
-  useDocumentTitle(t("pw.title"));
+  // "Choose" is for the first login with a temporary password; later it is a change, and the user can go back
+  const first = !!me?.must_change_password;
+  const title = t(first ? "pw.title" : "pw.titleChange");
+  useDocumentTitle(title);
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [repeat, setRepeat] = useState("");
@@ -49,10 +52,10 @@ export default function ChangePassword() {
     <div className="mx-auto w-full max-w-sm space-y-6 py-6">
       <div className="flex flex-col items-center gap-3 text-center">
         <span aria-hidden className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground"><KeyRound className="size-5" /></span>
-        <h1 className="text-xl font-semibold tracking-tight">{t("pw.title")}</h1>
+        <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
       </div>
       <form onSubmit={submit} className="space-y-4 rounded-xl border bg-card p-6">
-        {me?.must_change_password && <Alert variant="info" icon>{t("pw.temporary")}</Alert>}
+        {first && <Alert variant="info" icon>{t("pw.temporary")}</Alert>}
         <div className="grid gap-1.5">
           <Label htmlFor="pw-current">{t("pw.current")}</Label>
           <Input id="pw-current" className="h-10" aria-describedby={error ? "pw-error" : undefined} type="password" autoComplete="current-password" value={current} onChange={(e) => setCurrent(e.target.value)} required />
@@ -69,6 +72,7 @@ export default function ChangePassword() {
         {local && <Alert variant="destructive" role="alert" id="pw-local" icon>{local}</Alert>}
         <ErrorNote error={error} id="pw-error" />
         <Button type="submit" size="lg" className="w-full" loading={busy}>{busy ? t("pw.saving") : t("pw.save")}</Button>
+        {!first && <p className="text-center text-sm"><Link to="/courses" className="font-medium text-primary underline-offset-4 hover:underline">{t("pw.cancel")}</Link></p>}
       </form>
     </div>
   );

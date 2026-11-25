@@ -254,7 +254,7 @@ describe("materials", () => {
     expect(post.headers["X-CSRF-Token"]).toBe("test-token");
     expect(await screen.findByText("week1.md")).toBeInTheDocument();
     await waitFor(() => expect(screen.queryByText(/Rebuilding the search index/)).not.toBeInTheDocument(), { timeout: 5000 });
-    expect(await screen.findByText("Index version 2")).toBeInTheDocument();
+    expect(await screen.findByText("Search index updated 2 times")).toBeInTheDocument();
   });
 
   it("shows the server's message naming the privacy findings when a file is refused", async () => {

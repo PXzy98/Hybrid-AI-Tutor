@@ -51,8 +51,9 @@ function UsageCard() {
         {stats.isLoading && <Loading variant="table" />}
         {data && (
           <>
-            <div className="grid gap-4 sm:grid-cols-3">
-              <StatCard label={t("usage.enrolled")} value={data.students_enrolled} />
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+              {/* the API adds up the courses: a student in two courses counts twice, so it is not "students" */}
+              <StatCard label={t("usage.enrolments")} value={data.students_enrolled} />
               <StatCard label={t("usage.active7d")} value={show(data.active_students_7d)} />
               <StatCard label={t("usage.questions7d")} value={show(data.questions_7d)} />
             </div>
@@ -72,6 +73,7 @@ function UsageCard() {
                 </TableRow>
               ))}</TableBody>
             </Table>
+            <p className="text-xs text-muted-foreground">{t("usage.hiddenLegend", { n: data.min_group })}</p>
           </>
         )}
       </CardContent>
@@ -137,7 +139,7 @@ function StudentAccountsCard() {
                   <TableCell className="font-medium whitespace-nowrap">{a.display_name}</TableCell>
                   <TableCell className="break-words">{a.email ?? "—"}</TableCell>
                   <TableCell className="tabular-nums">{a.courses}</TableCell>
-                  <TableCell>{a.last_login_at ? fmt.date(a.last_login_at) : "—"}</TableCell>
+                  <TableCell className="whitespace-nowrap">{a.last_login_at ? fmt.date(a.last_login_at) : "—"}</TableCell>
                   <TableCell><Badge variant={a.active ? "success" : "secondary"}>{t(a.active ? "admin.active" : "admin.disabled")}</Badge></TableCell>
                   <TableCell className={`space-x-1 whitespace-nowrap text-right ${STICKY}`}>
                     <Button type="button" size="sm" variant="outline" aria-label={t(a.active ? "admin.disableFor" : "admin.enableFor", { name: a.display_name })}
@@ -275,6 +277,11 @@ function StaffCard({ selfId }: { selfId?: number }) {
   );
 }
 
+/** Plain-language help under an expert field; the technical name of the setting comes second. */
+function FieldHint({ id, children, name }: { id: string; children: string; name: string }) {
+  return <p id={id} className="text-xs text-muted-foreground">{children} <code className="font-mono">{name}</code></p>;
+}
+
 function SystemSettingsCard() {
   const { t } = useI18n();
   const settings = useQuery({
@@ -351,21 +358,27 @@ function SystemSettingsForm({ initial, onConflict, saved, onSaved }:
           <p className="text-sm text-muted-foreground sm:col-span-2">{t("admin.applyState", { state: t(`admin.apply.${initial.apply_state}`) })}</p>
           <label className="flex items-start gap-2 text-sm sm:col-span-2">
             <input type="checkbox" className="mt-0.5 accent-primary" checked={!!(values.weak_evidence ?? d?.weak_evidence)} onChange={(e) => set({ weak_evidence: e.target.checked })} />
-            <span className="font-medium">{t("admin.weakEvidence")}</span>
+            <span><span className="font-medium">{t("admin.weakEvidence")}</span><br />
+              <span className="text-muted-foreground">{t("admin.weakEvidenceHint")} <code className="font-mono text-xs">weak_evidence</code></span></span>
           </label>
           <div className="grid gap-1.5"><Label htmlFor="sys-basic">{t("admin.basicBelow")}</Label>
-            <Input id="sys-basic" type="number" min={0} max={1} step={0.01} value={values.level_basic_below ?? ""} placeholder={shown(d?.level_basic_below)} onChange={(e) => set({ level_basic_below: num(e.target.value) })} /></div>
+            <Input id="sys-basic" type="number" min={0} max={1} step={0.01} value={values.level_basic_below ?? ""} placeholder={shown(d?.level_basic_below)} aria-describedby="sys-basic-hint" onChange={(e) => set({ level_basic_below: num(e.target.value) })} />
+            <FieldHint id="sys-basic-hint" name="level_basic_below">{t("admin.basicBelowHint")}</FieldHint></div>
           <div className="grid gap-1.5"><Label htmlFor="sys-adv">{t("admin.advancedAbove")}</Label>
-            <Input id="sys-adv" type="number" min={0} max={1} step={0.01} value={values.level_advanced_above ?? ""} placeholder={shown(d?.level_advanced_above)} onChange={(e) => set({ level_advanced_above: num(e.target.value) })} /></div>
+            <Input id="sys-adv" type="number" min={0} max={1} step={0.01} value={values.level_advanced_above ?? ""} placeholder={shown(d?.level_advanced_above)} aria-describedby="sys-adv-hint" onChange={(e) => set({ level_advanced_above: num(e.target.value) })} />
+            <FieldHint id="sys-adv-hint" name="level_advanced_above">{t("admin.advancedAboveHint")}</FieldHint></div>
           <div className="grid gap-1.5"><Label htmlFor="sys-hyst">{t("admin.hysteresis")}</Label>
-            <Input id="sys-hyst" type="number" min={0} max={0.2} step={0.01} value={values.level_hysteresis ?? ""} placeholder={shown(d?.level_hysteresis)} onChange={(e) => set({ level_hysteresis: num(e.target.value) })} /></div>
+            <Input id="sys-hyst" type="number" min={0} max={0.2} step={0.01} value={values.level_hysteresis ?? ""} placeholder={shown(d?.level_hysteresis)} aria-describedby="sys-hyst-hint" onChange={(e) => set({ level_hysteresis: num(e.target.value) })} />
+            <FieldHint id="sys-hyst-hint" name="level_hysteresis">{t("admin.hysteresisHint")}</FieldHint></div>
           <div className="grid gap-1.5"><Label htmlFor="sys-method">{t("admin.routingMethod")}</Label>
-            <Select id="sys-method" value={values.default_routing_method ?? d?.default_routing_method ?? "lr"} onChange={(e) => set({ default_routing_method: e.target.value as "lr" | "svm" })}>
+            <Select id="sys-method" aria-describedby="sys-method-hint" value={values.default_routing_method ?? d?.default_routing_method ?? "lr"} onChange={(e) => set({ default_routing_method: e.target.value as "lr" | "svm" })}>
               <option value="lr">{t("admin.methodLr")}</option>
               <option value="svm">{t("admin.methodSvm")}</option>
-            </Select></div>
+            </Select>
+            <FieldHint id="sys-method-hint" name="default_routing_method">{t("admin.routingMethodHint")}</FieldHint></div>
           <div className="grid gap-1.5"><Label htmlFor="sys-url">{t("admin.localUrl")}</Label>
-            <Input id="sys-url" type="url" value={values.local_llm_url ?? ""} placeholder={shown(d?.local_llm_url)} onChange={(e) => set({ local_llm_url: e.target.value })} /></div>
+            <Input id="sys-url" type="url" value={values.local_llm_url ?? ""} placeholder={t("admin.localUrlExample")} aria-describedby="sys-url-hint" onChange={(e) => set({ local_llm_url: e.target.value })} />
+            <FieldHint id="sys-url-hint" name="local_llm_url">{d?.local_llm_url ? `${t("admin.localUrlHint")} ${shown(d.local_llm_url)}.` : t("admin.localUrlHint")}</FieldHint></div>
           <div className="grid gap-1.5"><Label htmlFor="sys-llm">{t("admin.localModel")}</Label>
             <Input id="sys-llm" value={values.local_llm_model ?? ""} placeholder={shown(d?.local_llm_model)} onChange={(e) => set({ local_llm_model: e.target.value })} /></div>
           <div className="grid gap-1.5 sm:col-span-2"><Label htmlFor="sys-types">{t("admin.courseTypes")}</Label>

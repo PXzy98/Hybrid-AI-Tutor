@@ -61,7 +61,7 @@ function QuizList({ course, onOpen }: { course: Course; onOpen: (v: View) => voi
                   actions={<Button ref={newButton} type="button" onClick={() => onOpen({ kind: "edit", id: null })}><Plus aria-hidden />{t("quiz.new")}</Button>} />
       <ErrorNote error={quizzes.error ?? change.error} />
       {quizzes.isLoading && <Loading variant="list" />}
-      {quizzes.data?.length === 0 && <EmptyState icon={ListChecks} title={t("empty.quizzes.title")}>{t("quiz.none")}</EmptyState>}
+      {quizzes.data?.length === 0 && <EmptyState icon={ListChecks} title={t("empty.quizzes.title")} />}
       <ul className="space-y-3">
         {quizzes.data?.map((q) => {
           const pending = unreviewed(q);
