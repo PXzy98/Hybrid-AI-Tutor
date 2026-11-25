@@ -32,6 +32,9 @@ BIBLIO_BEFORE_RE = re.compile(r"\b(?:ISSN|S2CID|arXiv|hdl|PMID|PMCID|OCLC|ProQue
                               r"OSTI|SSRN|CiteSeerX|doi)\s*:?\s*$")
 ISBN_CHECK_AFTER_RE = re.compile(r"[ -]?[Xx](?![A-Za-z0-9])")
 DECIMAL_RE = re.compile(r"\d\.\d(?!\d)")
+# Z25c: binary codes in a truth table or a DAC/ADC table ("111110101", "0 1 0 0 0 0 0 0 0" across columns
+# D0 to D7) are not student numbers: a student number has digits other than 0 and 1 (the prefix 300)
+BINARY_DIGITS = frozenset("01")
 
 
 def _not_a_student_number(text: str, start: int, end: int) -> bool:
@@ -41,7 +44,7 @@ def _not_a_student_number(text: str, start: int, end: int) -> bool:
     before = text[max(0, start - 12):start]
     return (bool(ISBN_BEFORE_RE.search(before)) or bool(BIBLIO_BEFORE_RE.search(before))
             or bool(ISBN_CHECK_AFTER_RE.match(text, end))
-            or len(digits) == 1
+            or len(digits) == 1 or digits <= BINARY_DIGITS
             or (len(separators) > 1 and bool(DECIMAL_RE.search(value))))
 
 

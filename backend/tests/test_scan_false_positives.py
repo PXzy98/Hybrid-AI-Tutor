@@ -31,6 +31,10 @@ def _blocking(profile: str, text: str) -> tuple[str, ...]:
     # a range of decimal numbers in a chart legend, and a run of one repeated digit in a figure
     ("medical_science", "BMI groups: 30.0-34.9 25.0-29.9 23.0-24.9 <23.0 Key research issues in diet."),
     ("ece", "(d) a_k as in Figure P10.7(b) 111111111 III -8 0 8 16 Figure P10.7"),
+    # Z25c: binary codes of a DAC table and of a decoder truth table (lecture notes of a biomedical course)
+    ("ece", "Digital-to-Analog Converters\nAnalog output\n000 100011010001 111110101\n1/8 Vref\n0 V"),
+    ("medical_science", "x y z D0 D1 D2 D3 D4 D5 D6 D7\n0 0 0 1 0 0 0 0 0 0 0\n0 0 1 0 1 0 0 0 0 0 0\n"
+                        "0 1 0 0 0 1 0 0 0 0 0\n0 1 1 0 0 0 1 0 0 0 0"),
     # a placeholder, not a credential
     ("ece", "Request a URL like `https://api.example.com/v1/quote/nflx?token=API_KEY`. Notice the symbol."),
     ("ece", 'Set password = "YOUR_PASSWORD" and api_key: <your-api-key> before you run it.'),
@@ -63,6 +67,7 @@ def test_teaching_cases_are_reported_but_do_not_block(text):
     "Ann Lee 300123456",
     "student 300418277 got 87% on the midterm",
     "Student number: 300 418 277",
+    "Student number: 300 101 010",  # Z25c: only 0 and 1 after the prefix is still a student number
     "ID number: 300-418-277",
     "ID: 300-987 654, asthma flares when I run",  # mixed separators (E6 held-out 5)
     # the reference-list labels are case-sensitive and must come right before the number
