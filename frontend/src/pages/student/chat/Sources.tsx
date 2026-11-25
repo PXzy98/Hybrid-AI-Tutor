@@ -6,6 +6,17 @@ export function sourceLabel(source: string): string {
   return /^https?:\/\//i.test(source) ? source : source.split(/[\\/]/).pop() || source;
 }
 
+/** A readable title: no leading number prefix ("01 lecture 1"), underscores as spaces, a capital first letter when
+ *  the title has no capital at all (a title taken from a file name). A title that is already clean is unchanged. */
+export function sourceTitle(title: string): string {
+  let out = title.trim();
+  if (!/^https?:\/\//i.test(out)) {
+    out = out.replace(/_+/g, " ").replace(/^\d+(?:[\s.)-]+)(?=\S)/, "").replace(/\s{2,}/g, " ").trim();
+    if (out && out === out.toLowerCase()) out = out.charAt(0).toUpperCase() + out.slice(1);
+  }
+  return out || title;
+}
+
 /** The course material an answer cites. The API returns no passage text, so there is no preview. */
 export default function Sources({ sources }: { sources: NonNullable<AskResponse["sources"]> }) {
   const { t } = useI18n();
@@ -21,8 +32,8 @@ export default function Sources({ sources }: { sources: NonNullable<AskResponse[
             </span>
             <span className="min-w-0">
               <span className="sr-only">[{i + 1}] </span>
-              <span className="line-clamp-2 font-medium">{s.title}</span>
-              {sourceLabel(s.source) !== s.title && <span className="block truncate text-muted-foreground">{sourceLabel(s.source)}</span>}
+              <span className="line-clamp-2 font-medium">{sourceTitle(s.title)}</span>
+              {sourceLabel(s.source) !== s.title && <span title={sourceLabel(s.source)} className="block truncate text-muted-foreground">{sourceLabel(s.source)}</span>}
             </span>
           </li>
         ))}

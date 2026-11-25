@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
 import type { RoutingProgress as Progress } from "../api/askStream";
@@ -12,11 +13,11 @@ const trace = (events: Progress[]): RoutingTrace =>
 describe("routing steps", () => {
   it("shows the web search step only when it ran", () => {
     const { unmount } = render(<I18nProvider lang="en"><RoutingProgress trace={trace([event("decision")])} /></I18nProvider>);
-    expect(screen.getByText("Local / Cloud decision")).toBeInTheDocument();
-    expect(screen.queryByText("Web search on allowed sites")).not.toBeInTheDocument();
+    expect(screen.getByText("Chose which model answers")).toBeInTheDocument();
+    expect(screen.queryByText("Searched the allowed websites")).not.toBeInTheDocument();
     unmount();
     render(<I18nProvider lang="en"><RoutingProgress trace={trace([event("decision"), event("web_search")])} /></I18nProvider>);
-    expect(screen.getByText("Web search on allowed sites")).toBeInTheDocument();
+    expect(screen.getByText("Searched the allowed websites")).toBeInTheDocument();
   });
 });
 
@@ -31,22 +32,28 @@ describe("routing step details (V22 B19)", () => {
     detailed("classification", "completed", "Cloud need 19.2%; evidence required: True."),
   ];
 
-  it("shows translated plain sentences and no technical English in French", () => {
+  it("shows translated plain sentences and no technical English in French", async () => {
     const t = trace(events);
     t.details = { target: "cloud", evidence: { status: "unavailable", coverage: 0 }, analysis: { label_origin: "prototype_policy" } } as never;
     const { container } = render(<I18nProvider lang="fr"><RoutingProgress trace={t} /></I18nProvider>);
     expect(screen.getByText("4 passages trouvés dans le matériel du cours.")).toBeInTheDocument();
     expect(screen.getByText("Modèle infonuagique choisi.")).toBeInTheDocument();
+    expect(container.textContent).not.toMatch(/Retrieved|selected using|gate did not|vector ready|Cloud need|Web search|prototype/i);
+    // the technical values are inside the collapsed Details
+    expect(screen.queryByText(/Preuves : indisponibles/)).not.toBeInTheDocument();
+    await userEvent.setup().click(screen.getByRole("button", { name: "Détails" }));
     expect(screen.getByText(/Preuves : indisponibles/)).toBeInTheDocument();
     expect(container.textContent).not.toMatch(/Retrieved|selected using|gate did not|vector ready|Cloud need|Web search|prototype/i);
   });
 
-  it("hides a detail it does not know in French and shows it in English", () => {
+  it("hides a detail it does not know in French and shows it in English, in the Details only", async () => {
     const unknown = trace([detailed("retrieval", "skipped", "Something new.")]);
     const fr = render(<I18nProvider lang="fr"><RoutingProgress trace={unknown} /></I18nProvider>);
     expect(fr.container.textContent).not.toContain("Something new.");
     fr.unmount();
     render(<I18nProvider lang="en"><RoutingProgress trace={trace([detailed("embedding", "running", "Encoding the question locally.")])} /></I18nProvider>);
+    expect(screen.queryByText("Encoding the question locally.")).not.toBeInTheDocument();
+    await userEvent.setup().click(screen.getByRole("button", { name: "Details" }));
     expect(screen.getByText("Encoding the question locally.")).toBeInTheDocument();
   });
 
@@ -81,7 +88,7 @@ describe("privacy check kept the question local (X3)", () => {
   it("leaves a normal cloud answer unchanged", () => {
     const { container } = render(<I18nProvider lang="en"><RoutingProgress trace={withDecision(false)} /></I18nProvider>);
     expect(container).not.toHaveTextContent("privacy check kept");
-    expect(container.querySelector("ol > li:last-child")).toHaveTextContent("Check answer");
+    expect(container.querySelector("ol > li:last-child")).toHaveTextContent("Checked the answer");
   });
 
   it("detects the override from the answer notice, only for a cloud route", () => {
@@ -91,5 +98,27 @@ describe("privacy check kept the question local (X3)", () => {
     expect(keptLocalByPrivacy(cloud, fr)).toBe(true);
     expect(keptLocalByPrivacy(cloud, ["No cloud model is connected, so the local model answered this question."])).toBe(false);
     expect(keptLocalByPrivacy({ target: "local" } as never, en)).toBe(false);
+  });
+});
+
+describe("plain default view (Q1-01)", () => {
+  const timed = (stage: string, detail: string, duration_ms: number): Progress => ({ stage, status: "completed", detail, duration_ms, elapsed_ms: 10 });
+  const full = () => {
+    const t = trace([timed("retrieval", "Retrieved 4 passages.", 0), timed("evidence", "x", 0), timed("decision", "LOCAL selected using LR.", 1200)]);
+    t.details = { target: "local", analysis: { cloud_probability: 0.043, label_origin: "prototype_policy" }, evidence: { status: "not_required", coverage: 0 } } as never;
+    return t;
+  };
+
+  it("shows plain steps, and the method, percentages and timings only after opening Details", async () => {
+    const { container } = render(<I18nProvider lang="en"><RoutingProgress trace={full()} /></I18nProvider>);
+    expect(screen.getByText("Found 4 passages in the course material.")).toBeInTheDocument();
+    expect(screen.getByText(/Answered by the course's own model/)).toBeInTheDocument();
+    expect(container.textContent).not.toMatch(/\bLR\b|LOCAL|Estimated|coverage|0\.000 s|still being evaluated/);
+    await userEvent.setup().click(screen.getByRole("button", { name: "Details" }));
+    expect(container).toHaveTextContent("Routing · LR");
+    expect(container).toHaveTextContent("Model: Local model");
+    expect(container).toHaveTextContent("Estimated cloud need: 4.3%");
+    expect(container).toHaveTextContent("1.200 s");
+    expect(container.textContent).not.toMatch(/0\.000 s|still being evaluated/);
   });
 });

@@ -212,7 +212,7 @@ function DeleteData({ course }: { course: Course }) {
       <CardHeader><CardTitle>{t("del.title")}</CardTitle><CardDescription>{t("del.hint")}</CardDescription></CardHeader>
       <CardContent className="space-y-3">
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild><Button type="button" variant="destructive" className="h-auto min-h-9 max-w-full py-2 whitespace-normal">{t("del.button")}</Button></DialogTrigger>
+          <DialogTrigger asChild><Button type="button" variant="outline" className="h-auto min-h-9 max-w-full border-destructive/40 py-2 whitespace-normal text-destructive hover:bg-destructive/10 hover:text-destructive">{t("del.button")}</Button></DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{t("del.confirmTitle")}</DialogTitle>

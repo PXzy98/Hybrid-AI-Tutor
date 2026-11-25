@@ -9,11 +9,11 @@ export default function EmptyChat({ onSuggest }: { onSuggest: (text: string) => 
   // and the privacy filter are English; V22 B2)
   const suggestions = (["chat.suggest1", "chat.suggest2", "chat.suggest3"] as const).map((key) => ({ key, label: t(key), text: tEnglish(key) }));
   return (
-    <div className="animate-in-fade flex min-h-[45vh] flex-col items-center justify-center gap-3 py-8 text-center">
+    <div className="animate-in-fade flex flex-col items-center justify-center gap-2 py-4 text-center sm:py-6">
       <BrandMark className="size-10" />
       <p className="text-xl font-semibold tracking-tight">{t("chat.emptyTitle")}</p>
       <p className="text-sm text-muted-foreground">{t("chat.empty")}</p>
-      <div role="group" aria-label={t("chat.suggested")} className="mt-4 grid w-full gap-2 sm:grid-cols-3">
+      <div role="group" aria-label={t("chat.suggested")} className="mt-3 grid w-full gap-2 sm:grid-cols-3">
         {suggestions.map((s) => (
           <button key={s.key} type="button" onClick={() => onSuggest(s.text)}
                   className="rounded-xl border bg-card p-3 text-left text-sm transition-colors outline-hidden hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring">
