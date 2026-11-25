@@ -724,6 +724,8 @@ export const fr: Messages = {
   "insights.hint": "Les sujets sur lesquels les étudiants posent le plus de questions et les confusions les plus courantes. Des totaux seulement, jamais les questions.",
   "insights.suppressed": "Moins de {n} étudiants ont contribué : rien n’est affiché.",
   "insights.kcs": "Sujets les plus demandés",
+  "insights.kcsCaption": "Seuls les étudiants qui ont accepté de partager leurs données d’apprentissage sont comptés. Un sujet n’est affiché que si au moins {n} d’entre eux ont posé une question à son sujet.",
+  "insights.kcsNone": "Aucun sujet n’a été demandé par {n} étudiants ou plus ayant accepté de partager leurs données d’apprentissage.",
   "insights.misconceptions": "Confusions courantes",
   "insights.none": "Rien à afficher pour l’instant.",
   "eval.title": "Évaluation des modèles local et infonuagique",

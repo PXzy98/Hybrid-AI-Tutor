@@ -211,13 +211,14 @@ function InsightsCard({ course }: { course: Course }) {
         {data && !data.suppressed && (
           <div className="grid gap-6 md:grid-cols-2">
             <div>
-              <h3 className="mb-2 text-sm font-medium">{t("insights.kcs")}</h3>
+              <h3 className="text-sm font-medium">{t("insights.kcs")}</h3>
+              <p className="mb-2 text-xs text-muted-foreground">{t("insights.kcsCaption", { n: data.min_group })}</p>
               <ul className="space-y-1.5 text-sm">
                 {data.kc_question_counts.map((k) => (
                   <RankedRow key={k.label} label={k.name ?? k.label} count={k.count}
                              share={k.count / Math.max(1, ...data.kc_question_counts.map((x) => x.count))} />
                 ))}
-                {data.kc_question_counts.length === 0 && <li className="text-muted-foreground">{t("insights.none")}</li>}
+                {data.kc_question_counts.length === 0 && <li className="text-muted-foreground">{t("insights.kcsNone", { n: data.min_group })}</li>}
               </ul>
             </div>
             <div>
