@@ -188,6 +188,9 @@ export const en = {
   "routing.status.skipped": "skipped",
   "routing.status.failed": "failed",
   "routing.selected": "Selected: {target}",
+  // the notice the backend adds to an answer (PRIVACY_BLOCK_WARNING); matched, not shown
+  "routing.privacyNotice": "A privacy check kept this question on the local model.",
+  "routing.privacyKeptLocal": "A privacy check kept this question on the local model, so the local model answered.",
   "routing.cloudNeed": " · Estimated Cloud need: {p}%",
   "routing.evidence": "Evidence: {status} · Support coverage: {p}%",
   "routing.detail.embedding.completed": "The question was encoded on the course server, not in the cloud.",

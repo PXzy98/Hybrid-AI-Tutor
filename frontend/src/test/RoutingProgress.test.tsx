@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import type { RoutingProgress as Progress } from "../api/askStream";
-import RoutingProgress, { type RoutingTrace } from "../components/RoutingProgress";
+import RoutingProgress, { keptLocalByPrivacy, type RoutingTrace } from "../components/RoutingProgress";
 import { I18nProvider } from "../i18n";
 
 const event = (stage: string): Progress => ({ stage, status: "completed", detail: "", duration_ms: 3, elapsed_ms: 10 });
@@ -62,5 +62,34 @@ describe("one passage (retest N5)", () => {
     render(<I18nProvider lang="fr"><RoutingProgress trace={trace([one("retrieval", "Retrieved 1 passages."), one("web_search", "Added 1 web passages.")])} /></I18nProvider>);
     expect(screen.getByText("1 passage trouvé dans le matériel du cours.")).toBeInTheDocument();
     expect(screen.getByText("1 passage du web ajouté.")).toBeInTheDocument();
+  });
+});
+
+describe("privacy check kept the question local (X3)", () => {
+  const cloud = { target: "cloud" } as never;
+  const withDecision = (kept: boolean) => ({ ...trace([event("decision")]), details: cloud, privacyKeptLocal: kept });
+
+  it("ends the panel with a step saying the privacy check kept it local, in English and French", () => {
+    const en = render(<I18nProvider lang="en"><RoutingProgress trace={withDecision(true)} /></I18nProvider>);
+    expect(en.container.querySelector("ol > li:last-child"))
+      .toHaveTextContent("A privacy check kept this question on the local model, so the local model answered.");
+    en.unmount();
+    const fr = render(<I18nProvider lang="fr"><RoutingProgress trace={withDecision(true)} /></I18nProvider>);
+    expect(fr.container.querySelector("ol > li:last-child")).toHaveTextContent("a gardé cette question sur le modèle local");
+  });
+
+  it("leaves a normal cloud answer unchanged", () => {
+    const { container } = render(<I18nProvider lang="en"><RoutingProgress trace={withDecision(false)} /></I18nProvider>);
+    expect(container).not.toHaveTextContent("privacy check kept");
+    expect(container.querySelector("ol > li:last-child")).toHaveTextContent("Check answer");
+  });
+
+  it("detects the override from the answer notice, only for a cloud route", () => {
+    const en = ["A privacy check kept this question on the local model."];
+    const fr = ["Une vérification de confidentialité a gardé cette question sur le modèle local."];
+    expect(keptLocalByPrivacy(cloud, en)).toBe(true);
+    expect(keptLocalByPrivacy(cloud, fr)).toBe(true);
+    expect(keptLocalByPrivacy(cloud, ["No cloud model is connected, so the local model answered this question."])).toBe(false);
+    expect(keptLocalByPrivacy({ target: "local" } as never, en)).toBe(false);
   });
 });

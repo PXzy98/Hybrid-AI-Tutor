@@ -5,10 +5,13 @@ import type { RoutingProgress as Progress } from "@/api/askStream";
 import type { Schemas } from "@/api/client";
 import { useI18n, type T } from "@/i18n";
 import { en, type MessageKey } from "@/i18n/en";
+import { fr } from "@/i18n/fr";
 
 export type RoutingTrace = {
   id: string; method: string; visible: boolean; events: Progress[]; running: boolean;
   startedAt: number; finishedAt?: number; details?: Schemas["RouteScore"] | null; error?: string;
+  /** the router chose the cloud model but a privacy check kept the question on the local model */
+  privacyKeptLocal?: boolean;
 };
 
 const STAGES = ["preparation", "embedding", "classification", "retrieval", "evidence", "decision", "web_search",
@@ -16,6 +19,14 @@ const STAGES = ["preparation", "embedding", "classification", "retrieval", "evid
 // shown only when it ran: web search is off in most deployments and runs only for some cloud answers
 const OPTIONAL_STAGES = new Set<string>(["web_search"]);
 const STATUSES = ["pending", "running", "completed", "skipped", "failed"];
+
+// the notice the backend adds to the answer when a privacy check overrides the cloud route, in the language of
+// the request: the only signal of the override in the answer
+const PRIVACY_KEPT_LOCAL_NOTICES = [en["routing.privacyNotice"], fr["routing.privacyNotice"]];
+
+export function keptLocalByPrivacy(details: Schemas["RouteScore"] | null | undefined, warnings: string[] | undefined): boolean {
+  return details?.target === "cloud" && !!warnings?.some((w) => PRIVACY_KEPT_LOCAL_NOTICES.includes(w));
+}
 
 export function latestEvents(events: Progress[]): Progress[] {
   const byStage = new Map<string, Progress>();
@@ -81,6 +92,12 @@ export default function RoutingProgress({ trace }: { trace: RoutingTrace }) {
             </li>
           );
         })}
+        {trace.privacyKeptLocal && !trace.running && (
+          <li className="relative pl-6 text-xs">
+            <StageDot state="completed" />
+            {t("routing.privacyKeptLocal")}
+          </li>
+        )}
       </ol>
       {trace.details && (
         <div className="mt-3 border-t pt-2 text-xs">
