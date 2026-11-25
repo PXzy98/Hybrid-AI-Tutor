@@ -1,6 +1,7 @@
 """Tasks S6, S7, S10: instructor AI tiers 1 to 3 over the API (drafts, accept, insights), fake models only."""
 import json
 import zipfile
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -303,12 +304,12 @@ def test_the_module_scopes_the_material(world):
 
 
 # ------------------------------------------------------------------------------------ class insights
-def _evidence(services, course_id, students, kc, source, misconception=None, extra=None):
+def _evidence(services, course_id, students, kc, source, misconception=None, extra=None, at=None):
     with Session(services.engine) as db:
         for student in students:
             db.add(EvidenceLog(student_id=student, course_id=course_id, kc_id=kc, kind="weak", source=source,
                                signal="misconception" if misconception else "confusion",
-                               misconception_id=misconception))
+                               misconception_id=misconception, **({"created_at": at} if at else {})))
         for text in extra or []:
             db.add(RequestLog(request_id=text, session_id="s", student_id="s1", course_id=course_id,
                               topic="circuits", sanitized_question=text))
@@ -357,7 +358,9 @@ def test_insights_keep_older_weak_signals_and_bound_the_events(world, monkeypatc
     from app.instructor_ai import insights_source
 
     prof, url, services, course_id = world["prof"], world["url"], world["services"], world["course_id"]
-    _evidence(services, course_id, [f"p{i}" for i in range(5)], "C.1", "understand")  # older questions
+    # older questions: a minute earlier, so they are older than the logged question even within one clock tick
+    _evidence(services, course_id, [f"p{i}" for i in range(5)], "C.1", "understand",
+              at=datetime.now(UTC) - timedelta(minutes=1))
     with Session(services.engine) as db:
         db.add(RequestLog(request_id="new", session_id="s", student_id="p9", course_id=course_id,
                           topic="circuits", sanitized_question="x", kc_ids=["C.2"]))

@@ -146,8 +146,6 @@ Prometheus, alert rules and Grafana are ready to start (`--profile monitoring`, 
 |---|---|---|
 | Deployment on the test host; an alert receiver; the vLLM address for scraping | the monitoring stack is ready but not started anywhere yet | Z13 part 2 |
 | The app under load on the real servers | the vLLM server was measured on 2026-11-20 (section 10); one full ask through the app (accounts needed) and the app's own queue under load were not | Z23 |
-| A health check for vLLM | `/api/v1/health` asks Ollama's `/api/tags`; a vLLM-only deployment shows the local model as unreachable although answers work | audit I6 |
-| A vLLM connection in the deployment's configuration | a vLLM-only deployment needs an administrator to add a trusted local connection after the first start (`MODEL_CONNECTIONS.md`) | audit A4 |
 
 ## 10. Capacity of the local model (Z23, measured 2026-11-20)
 

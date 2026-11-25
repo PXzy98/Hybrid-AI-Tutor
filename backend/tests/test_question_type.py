@@ -69,8 +69,10 @@ def test_unusable_head_means_concept(tmp_path):
     write_head(tmp_path)
     assert question_type.classify(np.ones(3, dtype=np.float32), cfg) == "concept"  # wrong dimension
     assert question_type.classify(np.full(DIMENSION, np.nan, dtype=np.float32), cfg) == "concept"
-    write_head(tmp_path, schema=2)
-    assert question_type.classify(LOGISTICS, cfg) == "concept"  # unknown format
+    # a new folder: rewritten in the same clock tick with the same size, the file would hit the load cache
+    (tmp_path / "v2").mkdir()
+    write_head(tmp_path / "v2", schema=2)
+    assert question_type.classify(LOGISTICS, config(tmp_path / "v2")) == "concept"  # unknown format
 
 
 def test_shipped_head_on_fixed_questions():

@@ -65,7 +65,7 @@ def test_a_streamed_response_is_timed_to_its_last_byte():
     before = REGISTRY.get_sample_value("tutor_http_request_duration_seconds_sum", labels) or 0.0
     assert TestClient(app).get("/test-stream").text.endswith("last event\n")
     took = REGISTRY.get_sample_value("tutor_http_request_duration_seconds_sum", labels) - before
-    assert took >= 0.3
+    assert took >= 0.28  # asyncio.sleep(0.3) may wake a timer tick (about 15 ms) early on Windows
 
 
 def test_every_live_process_reports_its_settings_version(make_client):
