@@ -122,13 +122,13 @@ def test_model_unavailable_is_the_v1_text():
 
 
 def test_the_routing_panel_knows_the_privacy_notice_in_both_languages():
-    # v6 X3: the student's routing panel adds a step when the answer carries this notice; it matches the text,
-    # so a reworded notice must be reworded in RoutingProgress.tsx too
+    # v6 X3: the student's routing panel adds a step when the answer carries this notice; it matches the text
+    # of `routing.privacyNotice` in the interface catalogs, so a reworded notice must be reworded there too
     from pathlib import Path
 
     from app.pipeline.steps.generate import PRIVACY_BLOCK_WARNING
 
-    frontend = Path(__file__).resolve().parents[2] / "frontend"
-    panel = (frontend / "src/components/RoutingProgress.tsx").read_text("utf-8")
-    for text in (PRIVACY_BLOCK_WARNING, localize._notes()[PRIVACY_BLOCK_WARNING]):
-        assert f'"{text}"' in panel
+    i18n = Path(__file__).resolve().parents[2] / "frontend" / "src" / "i18n"
+    french = localize._notes()[PRIVACY_BLOCK_WARNING]
+    for catalog, text in (("en.ts", PRIVACY_BLOCK_WARNING), ("fr.ts", french)):
+        assert f'"routing.privacyNotice": "{text}",' in (i18n / catalog).read_text("utf-8")

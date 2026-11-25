@@ -188,6 +188,7 @@ export const fr: Messages = {
   "routing.status.skipped": "ignoré",
   "routing.status.failed": "échec",
   "routing.selected": "Choisi : {target}",
+  "routing.privacyNotice": "Une vérification de confidentialité a gardé cette question sur le modèle local.",
   "routing.privacyKeptLocal": "Une vérification de confidentialité a gardé cette question sur le modèle local, qui a donc répondu.",
   "routing.cloudNeed": " · Besoin estimé du modèle infonuagique : {p} %",
   "routing.evidence": "Preuves : {status} · Couverture du soutien : {p} %",

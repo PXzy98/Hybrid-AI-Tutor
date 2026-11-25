@@ -5,6 +5,7 @@ import type { RoutingProgress as Progress } from "@/api/askStream";
 import type { Schemas } from "@/api/client";
 import { useI18n, type T } from "@/i18n";
 import { en, type MessageKey } from "@/i18n/en";
+import { fr } from "@/i18n/fr";
 
 export type RoutingTrace = {
   id: string; method: string; visible: boolean; events: Progress[]; running: boolean;
@@ -19,10 +20,9 @@ const STAGES = ["preparation", "embedding", "classification", "retrieval", "evid
 const OPTIONAL_STAGES = new Set<string>(["web_search"]);
 const STATUSES = ["pending", "running", "completed", "skipped", "failed"];
 
-// The notice the backend adds to the answer when a privacy check overrides the cloud route (the same
-// sentence is the only signal in the answer, in the language of the request).
-const PRIVACY_KEPT_LOCAL_NOTICES = ["A privacy check kept this question on the local model.",
-  "Une vérification de confidentialité a gardé cette question sur le modèle local."];
+// the notice the backend adds to the answer when a privacy check overrides the cloud route, in the language of
+// the request: the only signal of the override in the answer
+const PRIVACY_KEPT_LOCAL_NOTICES = [en["routing.privacyNotice"], fr["routing.privacyNotice"]];
 
 export function keptLocalByPrivacy(details: Schemas["RouteScore"] | null | undefined, warnings: string[] | undefined): boolean {
   return details?.target === "cloud" && !!warnings?.some((w) => PRIVACY_KEPT_LOCAL_NOTICES.includes(w));
