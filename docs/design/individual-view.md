@@ -144,5 +144,5 @@ reads things or on mode changes; the property test above checks it on generated 
 ## Not decided here
 
 - Whether teaching assistants may see shared students (there is no TA role).
-- Whether the instructor may message a shared student from PACT (no messaging exists).
+- Whether the instructor may message a shared student from ScholarMind AI (no messaging exists).
 - Prof. Abbas's agreement for any course with real students.
