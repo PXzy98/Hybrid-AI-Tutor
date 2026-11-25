@@ -399,7 +399,7 @@ def test_sources_rejected_by_the_freshness_check_are_not_used_as_unverified():
     a = analysis(requires_fresh_evidence=True)
     x = input_for(passages=[chunk()])  # no verified_current metadata: fails the freshness check
     r = assess_evidence(x, a, RoutingConfig())
-    assert r.checked and select_passages(x, r, RoutingConfig()) == []
+    assert r.checked and select_passages(x, r, RoutingConfig(), fresh=True) == []
 
 
 def test_prepare_check_reports_every_missing_asset(monkeypatch, capsys):
@@ -431,7 +431,6 @@ def test_a_logistics_question_keeps_retrieved_passages_when_none_is_judged_relev
     x = input_for(question="When is problem set 4 due?", passages=[row, notice])
     r = assess_evidence(x, analysis(), RoutingConfig())
     assert r.checked and r.relevant_indices == []
-    assert select_passages(x, r, RoutingConfig()) == []  # a concept question: unchanged
     kept = select_passages(x, r, RoutingConfig(), logistics=True)
     assert [c.text for c in kept] == [row.text, notice.text]
     assert all(c.metadata["evidence_check"] == "unverified" for c in kept)
@@ -461,14 +460,14 @@ def test_the_logistics_fallback_keeps_the_freshness_check(monkeypatch):
     assert len(select_passages(x, r, RoutingConfig(), logistics=True, fresh=False)) == 2  # not a fresh one
 
 
-def test_a_question_about_the_chosen_module_keeps_its_retrieved_passages(monkeypatch):
-    """Retest N2: "summarize the key ideas of this module" shares no words with any passage, so the relevance
-    model accepts none; with a module chosen the retrieved module passages are used, unverified."""
+def test_a_question_without_a_relevant_passage_keeps_the_retrieved_passages(monkeypatch):
+    """Retest N2 and X2: "summarize the key ideas of this module", or a broad whole-course question, shares no
+    words with any passage, so the relevance model accepts none. The passages the panel reported as found
+    are still used, unverified, instead of the answer saying that no material was provided."""
     monkeypatch.setattr("app.routing.evidence.pair_scores",
                         lambda name, pairs, cfg: np.array([0.01] * len(pairs)))
     x = input_for(question="Summarize the key ideas of this module", passages=[chunk()])
     r = assess_evidence(x, analysis(), RoutingConfig())
     assert r.checked and r.relevant_indices == []
-    assert select_passages(x, r, RoutingConfig()) == []  # whole course, concept: unchanged
-    kept = select_passages(x, r, RoutingConfig(), module=True)
+    kept = select_passages(x, r, RoutingConfig())
     assert [c.text for c in kept] == [chunk().text] and kept[0].metadata["evidence_check"] == "unverified"
