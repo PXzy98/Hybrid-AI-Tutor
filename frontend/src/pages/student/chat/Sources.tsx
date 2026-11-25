@@ -6,12 +6,14 @@ export function sourceLabel(source: string): string {
   return /^https?:\/\//i.test(source) ? source : source.split(/[\\/]/).pop() || source;
 }
 
-/** A readable title: no leading number prefix ("01 lecture 1"), underscores as spaces, a capital first letter when
- *  the title has no capital at all (a title taken from a file name). A title that is already clean is unchanged. */
+/** A readable title: no file-ordering prefix ("01 lecture 1", "10_intro"), underscores as spaces, a capital first
+ *  letter when the title has no capital at all (a title taken from a file name). Only a zero-padded number or one
+ *  joined by an underscore counts as such a prefix: section numbers ("2.3 Kirchhoff's laws") and numbers that are
+ *  part of the title ("3 phase power", "1.5 V cells") stay. A title that is already clean is unchanged. */
 export function sourceTitle(title: string): string {
   let out = title.trim();
   if (!/^https?:\/\//i.test(out)) {
-    out = out.replace(/_+/g, " ").replace(/^\d+(?:[\s.)-]+)(?=\S)/, "").replace(/\s{2,}/g, " ").trim();
+    out = out.replace(/^(?:0\d+[\s._)-]+|\d+_+)(?=\S)/, "").replace(/_+/g, " ").replace(/\s{2,}/g, " ").trim();
     if (out && out === out.toLowerCase()) out = out.charAt(0).toUpperCase() + out.slice(1);
   }
   return out || title;

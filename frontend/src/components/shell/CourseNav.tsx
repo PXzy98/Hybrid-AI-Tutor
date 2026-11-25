@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { SquarePen } from "lucide-react";
+import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 import { api, type Course } from "@/api/endpoints";
@@ -28,10 +29,14 @@ export default function CourseNav({ course, student, tab }: { course: Course; st
   const courseId = course.id;
   const modules = useQuery({ queryKey: ["modules", courseId], queryFn: () => api.modules(courseId), enabled: student });
   const conversations = useQuery({ queryKey: ["conversations", courseId], queryFn: () => api.conversations(courseId), enabled: student });
-  // the most recent ones sit under New chat; each row is a date and the number of messages (no title is stored)
-  const recent = [...(conversations.data ?? [])].sort((x, y) => y.last_at.localeCompare(x.last_at)).slice(0, RECENT);
+  const [showAll, setShowAll] = useState(false);
   const activeModule = params.get("module");
   const activeConversation = params.get("c");
+  // the most recent ones sit under New chat, the rest one click away; each row is a date and the number of messages
+  // (no title is stored). An older conversation that is open shows the whole list, so it stays highlighted.
+  const sorted = [...(conversations.data ?? [])].sort((x, y) => y.last_at.localeCompare(x.last_at));
+  const expanded = showAll || sorted.findIndex((c) => c.conversation_id === activeConversation) >= RECENT;
+  const recent = expanded ? sorted : sorted.slice(0, RECENT);
   const current = activeSection(student, tab, course.individual_view);
   const chatPath = `/courses/${courseId}/chat`;
 
@@ -66,6 +71,12 @@ export default function CourseNav({ course, student, tab }: { course: Course; st
               </div>
             </div>
           ))}
+          {sorted.length > RECENT && (
+            <button type="button" aria-expanded={expanded} onClick={() => setShowAll(!expanded)}
+                    className={cn(itemClass(false), "mt-0.5 text-muted-foreground")}>
+              <span className="truncate">{expanded ? t("nav.showFewer") : t("nav.showAll", { n: sorted.length })}</span>
+            </button>
+          )}
         </nav>
       )}
       <nav aria-label={t(student ? "dash.student" : "dash.instructor")}>

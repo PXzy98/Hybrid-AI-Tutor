@@ -14,8 +14,15 @@ describe("sources (Q1-06)", () => {
     expect(sourceTitle("01 lecture 1")).toBe("Lecture 1");
     expect(sourceTitle("02_circuit_basics")).toBe("Circuit basics");
     expect(sourceTitle("Kirchhoff's laws")).toBe("Kirchhoff's laws");
-    expect(sourceTitle("2026 budget plan")).toBe("Budget plan");
+    expect(sourceTitle("10_intro")).toBe("Intro");
     expect(sourceTitle("12")).toBe("12");
+  });
+
+  it("keeps section numbers and numbers that are part of the title", () => {
+    expect(sourceTitle("2.3 Kirchhoff's laws")).toBe("2.3 Kirchhoff's laws");
+    expect(sourceTitle("3 phase power")).toBe("3 phase power");
+    expect(sourceTitle("1.5 V cells")).toBe("1.5 V cells");
+    expect(sourceTitle("2026 budget plan")).toBe("2026 budget plan");
   });
 
   it("shows the clean title and still the file it came from", () => {
@@ -30,6 +37,13 @@ describe("placeholders in past turns (Q1-03 display)", () => {
     expect(readablePlaceholders("What is <PERSON_1>'s law, asked by <EMAIL_ADDRESS_2>?", tEnglish)).toBe("What is [name]'s law, asked by [email address]?");
     expect(readablePlaceholders("<SOMETHING_NEW_3> here", tEnglish)).toBe("[removed] here");
     expect(readablePlaceholders("a < b and b > c", tEnglish)).toBe("a < b and b > c");
+  });
+
+  it("reads markers the model reformatted, and leaves code as written", () => {
+    expect(readablePlaceholders("Ask <person_1> or [ PERSON_2 ].", tEnglish)).toBe("Ask [name] or [name].");
+    expect(readablePlaceholders("Use a[i_1] here", tEnglish)).toBe("Use a[i_1] here");
+    const code = "`template<N_1>` and\n```\nx = <T_1>\n```\n";
+    expect(readablePlaceholders(`${code}by <PERSON_1>`, tEnglish)).toBe(`${code}by [name]`);
   });
 
   it("shows them in the stored conversation the student reopens", async () => {
@@ -56,11 +70,16 @@ describe("first visit layout (Q1-04, Q1-07)", () => {
 
   it("does not scroll to the end of an empty conversation", async () => {
     const scroll = vi.fn();
+    const original = Element.prototype.scrollIntoView;
     Element.prototype.scrollIntoView = scroll;
-    mockApi(studentRoutes({ "GET /courses/1/announcements": [] }));
-    renderApp("/courses/1/chat");
-    expect(await screen.findByText("What would you like to understand today?")).toBeInTheDocument();
-    expect(scroll).not.toHaveBeenCalled();
+    try {
+      mockApi(studentRoutes({ "GET /courses/1/announcements": [] }));
+      renderApp("/courses/1/chat");
+      expect(await screen.findByText("What would you like to understand today?")).toBeInTheDocument();
+      expect(scroll).not.toHaveBeenCalled();
+    } finally {
+      Element.prototype.scrollIntoView = original;
+    }
   });
 });
 
@@ -76,6 +95,25 @@ describe("conversation list (Q1-08)", () => {
     expect(newChat.compareDocumentPosition(history) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(history.compareDocumentPosition(screen.getAllByRole("navigation", { name: "Student dashboard" })[0]) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
+
+  it("keeps the older conversations one click away", async () => {
+    const rows = Array.from({ length: 10 }, (_, i) => ({ conversation_id: `c-${i}`, turns: i + 1, last_at: `2020-01-${String(20 - i).padStart(2, "0")}T10:00:00Z` }));
+    mockApi(studentRoutes({ "GET /courses/1/conversations": rows }));
+    renderApp("/courses/1/chat");
+    const history = await screen.findByRole("navigation", { name: "Conversations" });
+    expect(within(history).queryByText(/· 10 messages/)).not.toBeInTheDocument();
+    await userEvent.setup().click(within(history).getByRole("button", { name: "Show all conversations (10)" }));
+    expect(within(history).getByText(/· 10 messages/)).toBeInTheDocument();
+    expect(within(history).getByRole("button", { name: "Show recent only" })).toHaveAttribute("aria-expanded", "true");
+  });
+
+  it("shows the whole list when an older conversation is open", async () => {
+    const rows = Array.from({ length: 10 }, (_, i) => ({ conversation_id: `c-${i}`, turns: i + 1, last_at: `2020-01-${String(20 - i).padStart(2, "0")}T10:00:00Z` }));
+    mockApi(studentRoutes({ "GET /courses/1/conversations": rows, "GET /courses/1/conversations/c-9": { conversation_id: "c-9", turns: [] } }));
+    renderApp("/courses/1/chat?c=c-9");
+    const history = await screen.findByRole("navigation", { name: "Conversations" });
+    expect(await within(history).findByText(/· 10 messages/)).toBeInTheDocument();
+  });
 });
 
 describe("course pages that are not there (Q1-10)", () => {
@@ -90,8 +128,10 @@ describe("course pages that are not there (Q1-10)", () => {
     mockApi(studentRoutes());
     renderApp("/courses/1/nonexistent");
     expect(await screen.findByText("Page not found")).toBeInTheDocument();
-    expect(screen.queryByText("What would you like to understand today?")).not.toBeInTheDocument();
+    // the chat stays mounted, hidden, so an answer that is still coming in is kept
+    expect(screen.getByText("What would you like to understand today?")).not.toBeVisible();
     expect(screen.getByRole("link", { name: "Back to the course" })).toHaveAttribute("href", "/courses/1");
+    expect(document.title).toMatch(/^Page not found · /);
   });
 
   it("does the same for an instructor", async () => {

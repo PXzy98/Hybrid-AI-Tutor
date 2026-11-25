@@ -13,6 +13,9 @@ export type RoutingTrace = {
   startedAt: number; finishedAt?: number; details?: Schemas["RouteScore"] | null; error?: string;
   /** the router chose the cloud model but a privacy check kept the question on the local model */
   privacyKeptLocal?: boolean;
+  /** the model that actually answered (the response's route_target): differs from the routing decision when the
+   *  cloud model was missing, failed or reached its limit and the local model answered instead */
+  answeredBy?: "local" | "cloud";
 };
 
 const STAGES = ["preparation", "embedding", "classification", "retrieval", "evidence", "decision", "web_search",
@@ -27,6 +30,18 @@ const PRIVACY_KEPT_LOCAL_NOTICES = [en["routing.privacyNotice"], fr["routing.pri
 
 export function keptLocalByPrivacy(details: Schemas["RouteScore"] | null | undefined, warnings: string[] | undefined): boolean {
   return details?.target === "cloud" && !!warnings?.some((w) => PRIVACY_KEPT_LOCAL_NOTICES.includes(w));
+}
+
+/** The plain summary under the steps, from the model that answered, not only from the routing decision. It says the
+ *  question stayed on the course server only when nothing was sent out: the decision was local and no web search
+ *  ran. It gives no single reason for a cloud answer, since the router weighs several. */
+export function summaryKey(trace: RoutingTrace, events: Progress[]): MessageKey | null {
+  const decided = trace.details?.target;
+  const answered = trace.answeredBy ?? decided;
+  if (answered === "cloud") return "routing.summaryCloud";
+  if (answered !== "local") return null;
+  const searched = events.some((e) => e.stage === "web_search" && e.status === "completed");
+  return decided === "local" && !searched ? "routing.summaryLocal" : "routing.summaryLocalAnswered";
 }
 
 export function latestEvents(events: Progress[]): Progress[] {
@@ -68,7 +83,7 @@ export default function RoutingProgress({ trace }: { trace: RoutingTrace }) {
   const total = Math.max(0, (trace.finishedAt ?? now) - trace.startedAt);
   const eventEnd = Math.max(0, ...events.map((e) => e.elapsed_ms));
   const elapsed = trace.running ? Math.max(total, eventEnd) : eventEnd || total;
-  const target = trace.details?.target;
+  const summary = summaryKey(trace, events);
   const shown = STAGES.filter((id) => events.some((p) => p.stage === id) || !OPTIONAL_STAGES.has(id));
   return (
     <section aria-label={t("routing.region")} aria-live="off" className="w-full rounded-xl border bg-card px-4 py-3">
@@ -94,8 +109,8 @@ export default function RoutingProgress({ trace }: { trace: RoutingTrace }) {
           </li>
         )}
       </ol>
-      {!trace.running && !trace.error && (target === "local" || target === "cloud") && !trace.privacyKeptLocal && (
-        <p className="mt-3 border-t pt-2 text-xs">{t(target === "local" ? "routing.summaryLocal" : "routing.summaryCloud")}</p>
+      {!trace.running && !trace.error && summary && !trace.privacyKeptLocal && (
+        <p className="mt-3 border-t pt-2 text-xs">{t(summary)}</p>
       )}
       {trace.error && <p className="mt-2 text-xs text-destructive">{trace.error}</p>}
       <Collapsible className="mt-3 border-t pt-2">
@@ -127,7 +142,7 @@ function TechnicalDetails({ trace, events, elapsed, lang }: { trace: RoutingTrac
           const e = events.find((p) => p.stage === id);
           if (!e && OPTIONAL_STAGES.has(id)) return null;
           const state = e?.status ?? "pending";
-          const duration = e?.duration_ms ?? null;
+          const duration = e?.duration_ms ?? (state === "running" ? Math.max(0, elapsed - (e?.elapsed_ms ?? 0)) : null);
           const raw = e?.detail ? stepDetail(id, state, e.detail, lang, t) : null;
           return (
             <li key={id}>
@@ -142,9 +157,10 @@ function TechnicalDetails({ trace, events, elapsed, lang }: { trace: RoutingTrac
       </ul>
       {d && (
         <div className="border-t pt-2">
-          {(target === "local" || target === "cloud") && <strong>{t("routing.selected", { target: t(target === "local" ? "chat.local" : "chat.cloud") })}</strong>}
+          {target && <strong>{t("routing.selected", { target: t(target === "local" ? "chat.local" : "chat.cloud") })}</strong>}
           {d.analysis && <span>{t("routing.cloudNeed", { p: ((d.analysis.cloud_probability ?? 0) * 100).toFixed(1) })}</span>}
           {d.evidence && <p>{t("routing.evidence", { status: EVIDENCE_STATUSES.includes(d.evidence.status) ? t(`routing.evidenceStatus.${d.evidence.status}` as MessageKey) : d.evidence.status, p: ((d.evidence.coverage ?? 0) * 100).toFixed(0) })}</p>}
+          {d.analysis?.label_origin === "prototype_policy" && <p className="mt-1 text-warning">{t("routing.prototype")}</p>}
         </div>
       )}
     </div>

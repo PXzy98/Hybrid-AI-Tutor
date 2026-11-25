@@ -80,16 +80,8 @@ function Dashboard({ course, student, tab }: { course: Course; student: boolean;
   const active = activeSection(student, tab, course.individual_view);
   const headingId = useId();
   const unknown = !isKnownSection(student, tab);
-  useDocumentTitle(t(active.label), course.code);
+  useDocumentTitle(t(unknown ? "page.notFoundTitle" : active.label), course.code);
   const chatActive = student && active.id === "chat" && !unknown;
-  if (unknown) {
-    return (
-      <EmptyState icon={FileQuestion} title={t("page.notFoundTitle")}
-                  action={<Button asChild variant="outline"><Link to={`/courses/${course.id}`}>{t("page.backToCourse")}</Link></Button>}>
-        {t("page.notFound")}
-      </EmptyState>
-    );
-  }
   return (
     <>
       {student && <PrivacyNotice key={course.id} course={course} />}
@@ -100,7 +92,14 @@ function Dashboard({ course, student, tab }: { course: Course; student: boolean;
           <Chat course={course} />
         </section>
       )}
-      {!chatActive && (
+      {/* a mistyped section: the chat above stays mounted, hidden, so a running answer is not lost */}
+      {unknown && (
+        <EmptyState icon={FileQuestion} title={t("page.notFoundTitle")}
+                    action={<Button asChild variant="outline"><Link to={`/courses/${course.id}`}>{t("page.backToCourse")}</Link></Button>}>
+          {t("page.notFound")}
+        </EmptyState>
+      )}
+      {!chatActive && !unknown && (
         <section key={active.id} aria-labelledby={headingId}>
           {/* My progress shows its own visible heading: a second, hidden one would read twice */}
           {active.id === "progress" && student

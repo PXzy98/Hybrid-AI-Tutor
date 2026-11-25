@@ -123,7 +123,7 @@ function ChatPane({ course, initialConversation: initial, moduleId, onStarted, p
       setPartial("");
       setQueued(false);
       updateTrace(input.traceId, { running: false, finishedAt: Date.now(), details: reply.routing_details,
-        privacyKeptLocal: keptLocalByPrivacy(reply.routing_details, reply.warnings) });
+        privacyKeptLocal: keptLocalByPrivacy(reply.routing_details, reply.warnings), answeredBy: reply.route_target });
       setConversation(reply.conversation_id);
       if (!conversation) onStarted(reply.conversation_id);
       setMessages((prev) => [...prev, { role: "tutor", reply }]);

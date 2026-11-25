@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
 import type { RoutingProgress as Progress } from "../api/askStream";
-import RoutingProgress, { keptLocalByPrivacy, type RoutingTrace } from "../components/RoutingProgress";
+import RoutingProgress, { keptLocalByPrivacy, summaryKey, type RoutingTrace } from "../components/RoutingProgress";
 import { I18nProvider } from "../i18n";
 
 const event = (stage: string): Progress => ({ stage, status: "completed", detail: "", duration_ms: 3, elapsed_ms: 10 });
@@ -119,6 +119,42 @@ describe("plain default view (Q1-01)", () => {
     expect(container).toHaveTextContent("Model: Local model");
     expect(container).toHaveTextContent("Estimated cloud need: 4.3%");
     expect(container).toHaveTextContent("1.200 s");
-    expect(container.textContent).not.toMatch(/0\.000 s|still being evaluated/);
+    expect(container.textContent).not.toMatch(/0\.000 s/);
+    // the prototype estimates keep their caveat, inside Details
+    expect(container).toHaveTextContent("The routing estimates are still being evaluated.");
+  });
+
+  it("times a step that is still running in Details", async () => {
+    const running: RoutingTrace = { ...trace([{ stage: "generation", status: "running", detail: "", elapsed_ms: 0 } as Progress]),
+      running: true, startedAt: Date.now() - 2000, finishedAt: undefined };
+    const { container } = render(<I18nProvider lang="en"><RoutingProgress trace={running} /></I18nProvider>);
+    await userEvent.setup().click(screen.getByRole("button", { name: "Details" }));
+    expect(container.textContent).toMatch(/Generate answer running[\s\S]*\d\.\d{3} s/);
+  });
+});
+
+describe("plain summary (Q1-01 review)", () => {
+  const web = (status: string): Progress => ({ stage: "web_search", status: status as Progress["status"], detail: "", duration_ms: 3, elapsed_ms: 10 });
+  const at = (target: string, events: Progress[] = [], answeredBy?: "local" | "cloud") =>
+    ({ ...trace(events), details: { target } as never, answeredBy });
+
+  it("says the question stayed on the server only when nothing was sent out", () => {
+    expect(summaryKey(at("local"), [])).toBe("routing.summaryLocal");
+    expect(summaryKey(at("local", [], "local"), [])).toBe("routing.summaryLocal");
+    expect(summaryKey(at("local"), [web("completed")])).toBe("routing.summaryLocalAnswered");
+    expect(summaryKey(at("local"), [web("skipped")])).toBe("routing.summaryLocal");
+  });
+
+  it("follows the model that answered when the cloud model fell back to the local one", () => {
+    expect(summaryKey(at("cloud", [], "local"), [])).toBe("routing.summaryLocalAnswered");
+    expect(summaryKey(at("cloud", [], "cloud"), [])).toBe("routing.summaryCloud");
+    expect(summaryKey(at("cloud"), [])).toBe("routing.summaryCloud");
+    expect(summaryKey(at("unknown"), [])).toBeNull();
+  });
+
+  it("gives no fixed reason for a cloud answer", () => {
+    render(<I18nProvider lang="en"><RoutingProgress trace={at("cloud", [event("decision")], "cloud")} /></I18nProvider>);
+    expect(screen.getByText("Answered by a cloud model. Personal details were removed from the question first.")).toBeInTheDocument();
+    expect(screen.queryByText(/stayed on the course server|not enough/)).not.toBeInTheDocument();
   });
 });
