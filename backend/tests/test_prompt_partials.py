@@ -64,6 +64,7 @@ def test_cloud_prompt_uses_labels_only():
 def test_health_detail_does_not_cancel_the_course_part():
     system = render_local(make_ctx(None))[0]["content"]
     assert "Do not refuse the whole question" in system
-    assert "still answer its course part" in system
+    assert "answer its course part" in system
+    assert "as you would answer it without the health detail" in system  # no extra licence to generalise
     assert "never give personal medical advice" in system  # rule 3 still forbids medical advice
     assert "contact emergency services or seek urgent care now" in system  # rule 4 is unchanged
