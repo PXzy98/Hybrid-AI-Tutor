@@ -204,6 +204,8 @@ describe("chat", () => {
     expect(await screen.findByText("Earlier answer")).toBeInTheDocument();
     expect(screen.getByText("Cloud model")).toBeInTheDocument();
     expect(screen.getByText(/Lecture 3, page 2/)).toBeInTheDocument();
+    expect(screen.getByText("lecture_3.pdf")).toBeInTheDocument();
+    expect(screen.queryByText(/course\/1\/3/)).not.toBeInTheDocument();
     expect(screen.getByText(/reached the length limit/)).toBeInTheDocument();
   });
 
