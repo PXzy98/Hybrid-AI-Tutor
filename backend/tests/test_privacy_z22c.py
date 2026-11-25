@@ -1,0 +1,84 @@
+"""Course terms that hold a surname are not people, formula digits are not student numbers (task Z22c).
+
+All texts are fictional; the formulas are short imitations of the digit runs a PDF extraction makes from
+equation subscripts.
+"""
+import pytest
+
+from app.core.config import PrivacyConfig
+from app.privacy.analyzer import PIIAnalyzer
+from app.privacy.profiles import privacy_profile, scan_document
+
+
+@pytest.fixture(scope="module")
+def analyzer() -> PIIAnalyzer:
+    return PIIAnalyzer(PrivacyConfig())
+
+
+def _types(analyzer: PIIAnalyzer, text: str) -> list[str]:
+    return [f.type for f in analyzer.analyze(text)]
+
+
+@pytest.mark.parametrize("text", [
+    "What is Kirchhoff's current law, in two sentences?",
+    "State Kirchhoff's voltage law for a loop.",
+    "Explain Kirchhoff's laws with an example.",
+    "How does Ohm's law apply to a resistor?",
+    "Find the Thevenin equivalent of this circuit.",
+    "Find the Thévenin equivalent of this circuit.",
+    "How do I get the Norton equivalent?",
+    "Write Maxwell's equations in integral form.",
+    "What does Faraday's law say about induced voltage?",
+    "Coulomb's law and Gauss's law are related, right?",
+    "How do I compute the Fourier transform of a pulse?",
+    "Is a Fourier series the same as a Laplace transform?",
+    "How do I read a Bode plot or a Nyquist plot?",
+    "Explain Dijkstra's algorithm and Bayes' theorem.",
+    "What do Newton's laws say? And Euler's formula?",
+    "Is Hardy-Weinberg equilibrium relevant to Mendel's laws?",
+    "Where does the Krebs cycle happen, and what does a Gram stain show?",
+    "What are the symptoms of Parkinson's disease or Alzheimer's disease?",
+    "what is kirchhoff's current law",
+])
+def test_course_terms_are_not_people(analyzer: PIIAnalyzer, text: str) -> None:
+    assert "PERSON" not in _types(analyzer, text)
+
+
+@pytest.mark.parametrize("text", [
+    "Kirchhoff said the loop rule holds, please check my notes.",
+    "My friend Kirchhoff asked me to explain the circuit.",
+    "Alex Morgan asked about Ohm's law in the lab.",
+    "Please ask Priya Raman about the Fourier transform.",
+])
+def test_names_next_to_course_terms_are_still_found(analyzer: PIIAnalyzer, text: str) -> None:
+    assert "PERSON" in _types(analyzer, text)
+
+
+FORMULA_LINES = [
+    "0)()()( 152402312 =-+-+- IGeGVeGee",
+    "(e1 - e2) 152402312 = (G1 + G2) * 140543231 + (G3 - G4) I1",
+    "140543231 )()()( IGVGGGeGe",
+    "V1 = 0)()( 231402315 )-( + I2",
+]
+
+
+@pytest.mark.parametrize("line", FORMULA_LINES)
+def test_formula_digit_runs_are_not_student_ids(line: str) -> None:
+    text = f"Nodal analysis of the circuit.\n{line}\nSolve for the node voltages."
+    result = scan_document(text, privacy_profile("ece"))
+    assert "STUDENT_ID" not in {f.type for f in result.findings}
+    assert result.blocking == ()
+
+
+@pytest.mark.parametrize("text", [
+    "My student number is 300123456, can you check my mark?",
+    "300123456",
+    "Please look up 300123456 in the roster.",
+    "Ann Lee (300123456) is in my group.",
+    "Student ID: 300123456 = the one on the card.",
+    "e1 + e2 = 0, and my student number is (300123456).",
+    "id 300123456 + (G1 - G2)",
+])
+def test_student_numbers_are_still_found(text: str) -> None:
+    result = scan_document(text, privacy_profile("ece"))
+    assert "STUDENT_ID" in {f.type for f in result.findings}

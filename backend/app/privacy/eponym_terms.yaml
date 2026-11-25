@@ -1,0 +1,156 @@
+# Fixed phrases of science and engineering that hold a person's surname (Z22c). The surname inside such a
+# phrase is not a PERSON ("What is Kirchhoff's current law?"); the same surname alone ("Kirchhoff said") is.
+# Only whole phrases belong here, never a bare surname. A possessive after the first word ("Ohm's law") and a
+# plural of the last word ("laws") are accepted without being listed; matching ignores case.
+terms:
+  # circuits and electromagnetism
+  - Kirchhoff current law
+  - Kirchhoff voltage law
+  - Kirchhoff law
+  - Kirchhoff circuit laws
+  - Kirchhoff rules
+  - Ohm law
+  - Thevenin equivalent
+  - Thevenin theorem
+  - Thevenin equivalent circuit
+  - Thévenin equivalent
+  - Thévenin theorem
+  - Norton equivalent
+  - Norton theorem
+  - Norton equivalent circuit
+  - Maxwell equations
+  - Maxwell relations
+  - Faraday law
+  - Lenz law
+  - Coulomb law
+  - Gauss law
+  - Ampere law
+  - Biot-Savart law
+  - Joule heating
+  - Joule law
+  - Poynting vector
+  - Schottky diode
+  - Zener diode
+  - Hall effect
+  - Miller effect
+  - Wheatstone bridge
+  - Smith chart
+  - Karnaugh map
+  - Boolean algebra
+  - Boolean function
+  - Boolean expression
+  - Boolean logic
+  - De Morgan law
+  - De Morgan theorem
+  # signals and systems
+  - Fourier transform
+  - Fourier series
+  - Fourier analysis
+  - Fourier coefficients
+  - Fourier integral
+  - Laplace transform
+  - Laplace equation
+  - Bode plot
+  - Bode diagram
+  - Nyquist plot
+  - Nyquist criterion
+  - Nyquist rate
+  - Nyquist frequency
+  - Nyquist theorem
+  - Nyquist stability criterion
+  - Shannon theorem
+  - Shannon entropy
+  - Shannon limit
+  - Parseval theorem
+  - Gibbs phenomenon
+  - Kalman filter
+  - Butterworth filter
+  - Chebyshev filter
+  - Hamming code
+  - Hamming distance
+  - Hamming window
+  - Hann window
+  - Huffman code
+  - Huffman coding
+  - Huffman tree
+  - Gray code
+  - Routh-Hurwitz criterion
+  # mathematics and computer science
+  - Dijkstra algorithm
+  - Bayes theorem
+  - Bayes rule
+  - Euler formula
+  - Euler method
+  - Euler identity
+  - Euler characteristic
+  - Newton law
+  - Newton method
+  - Newton-Raphson method
+  - Taylor series
+  - Taylor expansion
+  - Gauss-Jordan elimination
+  - Cauchy-Schwarz inequality
+  - Bellman-Ford algorithm
+  - Floyd-Warshall algorithm
+  - Kruskal algorithm
+  - Prim algorithm
+  - Turing machine
+  - Turing test
+  - Von Neumann architecture
+  - Markov chain
+  - Markov property
+  - Poisson distribution
+  - Bernoulli trial
+  - Bernoulli distribution
+  # physics and chemistry
+  - Hooke law
+  - Boyle law
+  - Charles law
+  - Avogadro law
+  - Avogadro number
+  - Henry law
+  - Raoult law
+  - Hess law
+  - Le Chatelier principle
+  - Bohr model
+  - Pauli exclusion principle
+  - Heisenberg uncertainty principle
+  - Schrodinger equation
+  - Schrödinger equation
+  - Bernoulli equation
+  - Bernoulli principle
+  - Navier-Stokes equations
+  - Reynolds number
+  - Planck constant
+  - Boltzmann constant
+  # biology and medicine
+  - Mendel law
+  - Mendel laws of inheritance
+  - Mendelian inheritance
+  - Hardy-Weinberg equilibrium
+  - Hardy-Weinberg principle
+  - Hardy-Weinberg law
+  - Krebs cycle
+  - Calvin cycle
+  - Gram stain
+  - Petri dish
+  - Golgi apparatus
+  - Michaelis-Menten kinetics
+  - Michaelis-Menten equation
+  - Punnett square
+  - Parkinson disease
+  - Alzheimer disease
+  - Huntington disease
+  - Crohn disease
+  - Graves disease
+  - Addison disease
+  - Cushing syndrome
+  - Down syndrome
+  - Turner syndrome
+  - Klinefelter syndrome
+  - Marfan syndrome
+  - Guillain-Barre syndrome
+  - Hodgkin lymphoma
+  - Henderson-Hasselbalch equation
+  - Fick law
+  - Frank-Starling law

@@ -7,5 +7,5 @@ recognizers:
   - repo_url           # github.com/<account>/<repo> and other code hosts: the account names the student
 prompt: engineering    # task Z16
 consent_note: >-
-  Please remove passwords, API keys and lab network addresses from code you paste; the tutor also removes
+  Please remove passwords, API keys and addresses of lab computers or servers from code you paste; the tutor also removes
   the ones it recognises before anything leaves the course's servers.
