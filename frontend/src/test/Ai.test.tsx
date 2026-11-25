@@ -192,6 +192,18 @@ describe("class insights", () => {
   });
 });
 
+describe("class insights caption", () => {
+  it("says who is counted and shows the same note when no topic reaches the minimum", async () => {
+    mockApi(instructorRoutes({
+      "GET /courses/1/class-summary": { topic: "t", min_group: 5, suppressed: true },
+      "GET /courses/1/insights": { min_group: 6, suppressed: false, kc_question_counts: [], misconception_counts: [] },
+    }));
+    renderApp("/courses/1/overview");
+    expect(await screen.findByText(/Only students who agreed to share learner data are counted\. A topic is shown only when at least 6 of them/)).toBeInTheDocument();
+    expect(screen.getByText("No topic was asked about by 6 or more students who agreed to share learner data.")).toBeInTheDocument();
+  });
+});
+
 describe("cloud evaluation", () => {
   const evaluation = (over = {}) => ({ id: 3, status: "review", options: {}, results: [], report: {}, error: null, created_at: "", updated_at: "",
     questions: [{ id: 1, module_id: 10, module: "Ohm's law", type: "concept", question: "What is resistance?", reference: "Opposition to current." }], ...over });

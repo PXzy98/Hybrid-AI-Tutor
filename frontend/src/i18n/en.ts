@@ -730,6 +730,8 @@ export const en = {
   "insights.hint": "Which topics students asked about most, and the most common misconceptions. Counts only, never questions.",
   "insights.suppressed": "Fewer than {n} students contributed, so nothing is shown.",
   "insights.kcs": "Most asked topics",
+  "insights.kcsCaption": "Only students who agreed to share learner data are counted. A topic is shown only when at least {n} of them asked about it.",
+  "insights.kcsNone": "No topic was asked about by {n} or more students who agreed to share learner data.",
   "insights.misconceptions": "Common misconceptions",
   "insights.none": "Nothing to show yet.",
   "eval.title": "Local and cloud model evaluation",
