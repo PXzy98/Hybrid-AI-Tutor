@@ -87,6 +87,24 @@ How this phase runs:
 | Q3 | **One brand.** The ScholarMind AI name, mark and favicon are the same on the login page, sidebar, browser tab, invitation texts, manuals, Design Day slides and video | T | checklist done |
 | Q4 | **Accessibility re-check** after the v5 and v6 changes: axe tests cover the new parts (announcements, the busy notice, statistics captions, routing panel step); keyboard path through chat and quizzes; contrast in dark mode | T | axe tests pass for every page; `ACCESSIBILITY.md` updated |
 
+Q1 findings (walk-through of 2026-11-25 on the local Compose stack from `main` da9cb32, demo build with 4
+courses and 6 students; report `var/q1/report.md`): 5 major, 21 minor. Every page loads in under 2 s, there is no
+horizontal scroll on a phone, and French and dark mode render cleanly. Decisions by Z on 2026-11-25 are in the
+last column.
+
+| ID | Major finding | Fix |
+|---|---|---|
+| Q1-01 | The student's routing panel shows internal values ("Routing · LR", "Estimated Cloud need: 4.3%", "Support coverage: 0%", "0.000 s") and an unfinished-looking sentence | Z: plain-language steps by default; the technical values move into a collapsed "Details" (shown at Design Day) |
+| Q1-02 | "Found by search but not checked for relevance" under an answer whose panel says the material was checked (after X2, the check ran and confirmed none) | its own note when the check ran but confirmed none |
+| Q1-03 | "Kirchhoff's current law" read as a person: the model gets "<PERSON_1>'s current law", and the placeholder shows after a reload | Z: Z22c now (allow-list of fixed course phrases, never a bare surname), with an E6 re-run; placeholders shown as "[name]" |
+| Q1-04 | First visit to a course: the page opens scrolled down and the suggestion cards are hidden behind the question box | the first view starts at the top; notices kept compact |
+| Q1-05 | Admin and instructor rosters show name, e-mail and last login | Z: keep (needed to manage accounts; learning data stays hidden) |
+| — | A public MIT 6.002 lecture refused at upload: formula subscripts extracted as 9-digit runs read as STUDENT_ID | with Q1-03: digit runs inside formulas are not student numbers in the document scan; E6 not worse |
+
+The 21 minor findings (Q1-06 to Q1-26: source titles, empty states, French slips, instructor and admin wording,
+the materials and members pages, phone layout of tables) are fixed in two PRs: student pages and instructor/admin
+pages. The conversation list in the student sidebar (Q1-08) uses the existing API (decided by Z).
+
 **Stable**
 
 | ID | Task | Owner | Done when |
