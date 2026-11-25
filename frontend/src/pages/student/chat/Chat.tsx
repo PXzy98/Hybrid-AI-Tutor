@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState, type FormEvent } from "react"
 
 import { api, type AskResponse, type Course, type CourseProfile } from "@/api/endpoints";
 import Band from "@/components/Band";
-import type { RoutingTrace } from "@/components/RoutingProgress";
+import { keptLocalByPrivacy, type RoutingTrace } from "@/components/RoutingProgress";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { useI18n } from "@/i18n";
@@ -117,7 +117,8 @@ function ChatPane({ course, initialConversation: initial, moduleId, onStarted, p
     },
     onSuccess: (reply, input) => {
       setPartial("");
-      updateTrace(input.traceId, { running: false, finishedAt: Date.now(), details: reply.routing_details });
+      updateTrace(input.traceId, { running: false, finishedAt: Date.now(), details: reply.routing_details,
+        privacyKeptLocal: keptLocalByPrivacy(reply.routing_details, reply.warnings) });
       setConversation(reply.conversation_id);
       if (!conversation) onStarted(reply.conversation_id);
       setMessages((prev) => [...prev, { role: "tutor", reply }]);
