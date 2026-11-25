@@ -33,8 +33,8 @@ def test_the_medical_profile_is_the_v3_behaviour_and_others_build_on_the_base_la
         assert {"student_id", "grade", "address", "health_detail"} <= set(p.recognizers)
         assert "health_context" not in p.recognizers and p.health_detail_policy == "local_only"
         assert not p.medical_disclaimer and p.checkers == ()
-    assert profiles.profile_names() == ["computer_science", "ece", "general", "life_science",
-                                        "medical_science"]
+    assert profiles.profile_names() == ["biomedical_engineering", "computer_science", "ece", "general",
+                                        "life_science", "medical_science"]
 
 
 def test_a_new_profile_needs_one_file_and_becomes_a_course_type(profile_dir):

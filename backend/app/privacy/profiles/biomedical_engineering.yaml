@@ -1,0 +1,19 @@
+# Biomedical engineering (task X10): medical devices, biosignals and instrumentation, diagnostic engineering.
+# Students write about patients and their own health (the health rules of medical_science) and paste lab code,
+# device data and lab network addresses (the engineering rules of ece). Signal and circuit values (mV, Hz, dB,
+# bits) are not personal readings; a reading the student attributes to themselves is (health_extra).
+extends: base
+recognizers:
+  - health_context   # condition and medicine names next to a personal statement
+  - health_extra     # readings, symptoms with a duration, ...
+  - fr_health
+  - internal_address # private IPv4 host addresses (with a port) and MAC addresses
+  - repo_url         # github.com/<account>/<repo> and other code hosts: the account names the student
+health_detail_policy: generalize   # as medical_science: a checked hypothetical rewrite may go to the cloud
+checkers: [medical_safety]
+medical_disclaimer: true           # "not medical advice"
+prompt: biomedical_engineering     # engineering notation and steps, with the health safety rules
+consent_note: >-
+  Questions about your own health are answered by the course's local model; at most a general rewrite
+  without your personal details may go to an external service. The tutor does not give medical advice.
+  Please remove passwords, API keys and lab network addresses from code you paste.
