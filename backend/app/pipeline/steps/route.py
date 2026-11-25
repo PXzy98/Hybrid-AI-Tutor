@@ -12,7 +12,6 @@ from app.pipeline.settings_view import (
     routing_threshold,
 )
 from app.pipeline.steps.analyze_route import route_input
-from app.platform import course_scope
 from app.routing.evidence import assess_evidence, select_passages
 
 UNVERIFIED_SOURCES_NOTE = "The course sources below were found by search but not checked for relevance."
@@ -86,8 +85,6 @@ class RouteStep(BaseStep):
         # from the routing decision: relevant ones if the evidence models ran, otherwise unverified ones.
         ctx.passages = select_passages(x, score.evidence, self.services.settings.routing,
                                        logistics=ctx.question_type == "logistics",
-                                       module=course_scope.current() is not None
-                                       and ctx.request.topic != course_scope.GENERAL_TOPIC,
                                        fresh=analysis.requires_fresh_evidence)
         if ctx.passages and evidence is not None and (
                 not score.evidence.checked
