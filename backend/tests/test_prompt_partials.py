@@ -59,3 +59,11 @@ def test_cloud_prompt_uses_labels_only():
                        labels=CloudLabels(level="basic", sequencing="example_first", detail="detailed"))
     system = render_cloud(req)[0]["content"]
     assert level_partial("basic") in system and style_partial("example_first", "detailed") in system
+
+
+def test_health_detail_does_not_cancel_the_course_part():
+    system = render_local(make_ctx(None))[0]["content"]
+    assert "Do not refuse the whole question" in system
+    assert "still answer its course part" in system
+    assert "never give personal medical advice" in system  # rule 3 still forbids medical advice
+    assert "contact emergency services or seek urgent care now" in system  # rule 4 is unchanged
