@@ -8,11 +8,13 @@ never the recognizer rules. Two steps, run once; outputs committed:
                write short fictional student messages -> bme_holdout_raw.jsonl
     label      two stronger labellers (anthropic/claude-sonnet-5.5, openai/gpt-6.1-terra) label
                every message on their own -> bme_holdout.jsonl (both agree) and
-               bme_holdout_disagreements.jsonl (a person decides; resolved rows are added to bme_holdout.jsonl)
+               bme_holdout_disagreements.jsonl (a person decides)
+    resolve    adds the disputed rows to bme_holdout.jsonl by the decisions recorded below
 
     set OPENROUTER_API_KEY (environment or the repository's .env)
     .venv\\Scripts\\python eval\\privacy-filter\\make_bme_set.py generate
     .venv\\Scripts\\python eval\\privacy-filter\\make_bme_set.py label
+    .venv\\Scripts\\python eval\\privacy-filter\\make_bme_set.py resolve
 
 Only invented people, numbers, keys and addresses are asked for (rule 6); no course material is sent. Same
 record format as ece_holdout.jsonl; scored by course_sets.py.
@@ -150,10 +152,50 @@ def _write(path: Path, rows: list[dict]) -> None:
     path.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), encoding="utf-8")
 
 
+# Decided by Z on 2026-11-25. Span rule: where both labellers mark the same kind of data with different
+# spans, the shorter core span counts (a span that contains another of the same type is dropped), as in the
+# hand-labelled sets. The other disputes, one by one:
+DROP = {"BH069"}  # "02:FA:KE:00:10:22" is not a valid MAC address
+ADD = {"BH055": [("SECRET", "FAKE-ECG-7")]}  # a "microcontroller key" is a credential
+REMOVE = {"BH082": [("PERSON", "leo.chen")]}  # the local part of an e-mail address is not a separate name
+NOT_HEALTH = {"BH063"}  # "my EMG readings keep jumping" is a lab signal, not the student's health
+
+
+def resolve() -> None:
+    """Add the disputed rows, decided by the rules above, to bme_holdout.jsonl (run after `label`)."""
+    agreed = [json.loads(x) for x in (HERE / "bme_holdout.jsonl").read_text(encoding="utf-8").splitlines()]
+    disputed = [json.loads(x) for x in
+                (HERE / "bme_holdout_disagreements.jsonl").read_text(encoding="utf-8").splitlines()]
+    have = {r["id"] for r in agreed}
+    for row in disputed:
+        if row["id"] in DROP or row["id"] in have:
+            continue
+        labels = list(row["labels"].values())
+        both = {tuple(e) for e in labels[0]["entities"]} & {tuple(e) for e in labels[1]["entities"]}
+        either = {tuple(e) for lab in labels for e in lab["entities"]}
+        spans = (either if row["id"] not in REMOVE else either - set(REMOVE[row["id"]])) | set(ADD.get(row["id"], []))
+        # the shorter core span: drop a span that contains another of the same type
+        spans = {(t, s) for t, s in spans if not any(t == t2 and s2 != s and s2 in s for t2, s2 in spans)}
+        if row["id"] in NOT_HEALTH:
+            spans = {e for e in spans if e[0] != "HEALTH_DETAIL"} | {e for e in both if e[0] != "HEALTH_DETAIL"}
+        keep = [k for k in row["keep"] if not any(k in s or s in k for _, s in spans)]
+        health = row["id"] not in NOT_HEALTH and all(lab["personal_health"] for lab in labels)
+        agreed.append({**{k: v for k, v in row.items() if k != "labels"},
+                       "group": "positive" if spans else "negative", "keep": keep,
+                       "entities": [{"type": t, "text": s} for t, s in sorted(spans)],
+                       "personal_health": health, "decided_by_hand": True})
+    agreed.sort(key=lambda r: r["id"])
+    _write(HERE / "bme_holdout.jsonl", agreed)
+    print(f"{len(agreed)} rows", file=sys.stderr)
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("step", choices=["generate", "label"])
+    ap.add_argument("step", choices=["generate", "label", "resolve"])
     a = ap.parse_args(argv)
+    if a.step == "resolve":
+        resolve()
+        return 0
     if not env("OPENROUTER_API_KEY"):
         print("OPENROUTER_API_KEY is not set", file=sys.stderr)
         return 2
