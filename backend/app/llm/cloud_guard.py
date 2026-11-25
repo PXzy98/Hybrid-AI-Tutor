@@ -14,7 +14,7 @@ from app.core.schemas import (
     RequestContext,
 )
 from app.llm.base import LLMClient, LLMUnavailable
-from app.prompts import render_cloud
+from app.prompts import passage_text, render_cloud
 
 
 def build_cloud_request(ctx: RequestContext) -> CloudRequest:
@@ -26,7 +26,7 @@ def build_cloud_request(ctx: RequestContext) -> CloudRequest:
     return CloudRequest(
         sanitized_question=ctx.pii.sanitized_text,
         topic=ctx.request.topic,
-        passages=[c.text for c in ctx.passages],
+        passages=[passage_text(c) for c in ctx.passages],
         labels=learner.to_cloud_labels(),
         language=ctx.request.language,
         subject=ctx.profile.prompt if ctx.profile else "general",
