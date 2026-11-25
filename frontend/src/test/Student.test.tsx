@@ -255,6 +255,51 @@ describe("chat composer and scrolling", () => {
     expect(screen.queryByRole("button", { name: "Try again" })).not.toBeInTheDocument();
   });
 
+  it("shows a notice while the question waits for a model and removes it when the answer arrives", async () => {
+    const encoder = new TextEncoder();
+    let push: (frames: [string, unknown][]) => void = () => undefined;
+    let close: () => void = () => undefined;
+    mockApi(studentRoutes({}));
+    interceptFetch("/courses/1/ask/stream", async () => new Response(new ReadableStream({
+      start(c) {
+        push = (frames) => frames.forEach(([k, d]) => c.enqueue(encoder.encode(`event: ${k}\ndata: ${JSON.stringify(d)}\n\n`)));
+        close = () => c.close();
+      },
+    }), { headers: { "Content-Type": "text/event-stream" } }));
+    renderApp("/courses/1/chat");
+    const user = userEvent.setup();
+    await user.type(await screen.findByLabelText("Your question"), "Explain resonance");
+    await user.click(screen.getByRole("button", { name: "Send" }));
+    const notice = "Many students are asking right now. Your question is in line and will be answered shortly.";
+    await waitFor(() => expect(push).not.toBe(undefined));
+    expect(screen.queryByText(notice)).not.toBeInTheDocument();
+    push([["queued", { waiting: true }]]);
+    expect(await screen.findByText(notice)).toBeInTheDocument();
+    push([["result", answer], ["done", {}]]);
+    close();
+    expect(await screen.findByText("Local model")).toBeInTheDocument();
+    expect(screen.queryByText(notice)).not.toBeInTheDocument();
+  });
+
+  it("says it was high volume when no model slot became free, and sends the question again", async () => {
+    let attempts = 0;
+    const calls = mockApi(studentRoutes({
+      "POST /courses/1/ask/stream": () => (++attempts === 1
+        ? sse(["queued", { waiting: true }], ["error", { detail: "Many students ...", busy: true }], ["done", {}])
+        : sse(["result", answer], ["done", {}])),
+    }));
+    renderApp("/courses/1/chat");
+    const user = userEvent.setup();
+    await user.type(await screen.findByLabelText("Your question"), "Explain resonance");
+    await user.click(screen.getByRole("button", { name: "Send" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Many students were asking at the same time");
+    expect(screen.queryByText(/Your question is in line/)).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Try again" }));
+    expect(await screen.findByText("Local model")).toBeInTheDocument();
+    const bodies = calls.filter((c) => c.path === "/courses/1/ask/stream").map((c) => c.body as Record<string, unknown>);
+    expect(bodies.map((b) => b.question)).toEqual(["Explain resonance", "Explain resonance"]);
+  });
+
   it("scrolls past the composer to the latest error, so nothing is left under it", async () => {
     mockApi(studentRoutes({ "POST /courses/1/ask/stream": () => sse(["error", { detail: "The model is busy." }], ["done", {}]) }));
     const targets: Element[] = [];

@@ -12,15 +12,21 @@ connection (`limits.models`: at most `max_concurrent` at a time, `queue_timeout_
 `FakeGateway` (Z1) maps roles to clients for unit tests.
 """
 import asyncio
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
+from contextvars import ContextVar
 from typing import Literal, Protocol
 
 from app.core.schemas import EffectiveSettings, LLMResult
-from app.llm.base import LLMClient, LLMUnavailable, Message
+from app.llm.base import LLMClient, LLMUnavailable, Message, ModelBusy
 
 EndpointRole = Literal["local", "cloud", "judge"]
 TrustRequired = Literal["trusted_local", "external_ok"]
+
+
+# Set by the code that serves one student's question (the answer stream); called once per wait, without
+# any argument or text, when a model call of that question has to wait for a free slot.
+wait_notice: ContextVar[Callable[[], Awaitable[None]] | None] = ContextVar("wait_notice", default=None)
 
 
 class TrustViolation(Exception):
@@ -122,10 +128,17 @@ class Gateway:
         sem = self._slots.get(loop_key)
         if sem is None:
             sem = self._slots[loop_key] = asyncio.Semaphore(limits.max_concurrent)
+        if sem.locked():  # no slot is free right now: this call has to wait in line
+            notice = wait_notice.get()
+            if notice is not None:
+                try:
+                    await notice()
+                except Exception:  # noqa: BLE001 - the notice is a courtesy; the call still waits for its slot
+                    pass
         try:
             await asyncio.wait_for(sem.acquire(), timeout=limits.queue_timeout_seconds)
         except TimeoutError:
-            raise LLMUnavailable("the model is busy; try again in a moment") from None
+            raise ModelBusy("the model is busy; try again in a moment") from None
         try:
             yield
         finally:

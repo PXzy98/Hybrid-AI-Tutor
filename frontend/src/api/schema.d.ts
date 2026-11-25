@@ -1894,7 +1894,8 @@ export interface paths {
         /**
          * Ask Stream
          * @description Server-sent events: `meta`, `progress` (fixed status text and scores, never question or passage
-         *     text), then `result` or `error`, then `done`.
+         *     text), `queued` (`{"waiting": true}`: the question waits for a free model slot), then `result` or
+         *     `error` (`busy: true` when the wait ended without a slot), then `done`.
          */
         post: operations["ask_stream_api_v2_courses__course_id__ask_stream_post"];
         delete?: never;
@@ -2647,6 +2648,11 @@ export interface components {
             step: string;
             /** Request Id */
             request_id: string;
+            /**
+             * Busy
+             * @default false
+             */
+            busy?: boolean;
         };
         /** AskIn */
         AskIn: {

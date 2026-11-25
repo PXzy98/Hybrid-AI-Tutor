@@ -5,6 +5,7 @@ export type AskOut = Schemas["AskOut"];
 export type RoutingEvent =
   | { type: "meta"; data: { request_id: string; conversation_id: string; show_progress: boolean; method: string } }
   | { type: "progress"; data: RoutingProgress }
+  | { type: "queued"; data: { waiting: boolean } }  // the question waits for a free model slot
   | { type: "token"; data: { text?: string } }
   | { type: "result"; data: AskOut };
 
@@ -29,12 +30,14 @@ export async function askStream(courseId: number, body: Schemas["AskIn"], onEven
     if (!data.length) return;
     const parsed = JSON.parse(data.join("\n"));
     if (kind === "error") {
+      // high volume: the server's text says so; the code lets the error note show the translated sentence
+      if (parsed.busy) throw new ApiError(503, parsed.detail ?? "", "model_busy");
       // without a detail the code lets the error note show the translated sentence (error.modelFailed)
       throw new ApiError(503, parsed.detail ?? "The selected model could not answer.", parsed.detail ? "" : "model_failed");
     }
     if (kind === "done") { doneEvent = true; return; }
     if (kind === "result") reply = parsed;
-    if (kind === "meta" || kind === "progress" || kind === "token" || kind === "result") {
+    if (kind === "meta" || kind === "progress" || kind === "queued" || kind === "token" || kind === "result") {
       onEvent({ type: kind, data: parsed } as RoutingEvent);
     }
   };

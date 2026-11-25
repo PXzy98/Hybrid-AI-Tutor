@@ -130,6 +130,11 @@ logged in. Owner = component owner who implements it.
 Notes on ask (implemented in `backend/app/api/v2/ask.py`):
 - the response is the v1 answer plus `conversation_id`; the stream sends `meta`, `progress`, `result` or
   `error`, then `done`;
+- X7 (additive): while a model call of the question waits for a free slot (`limits.models.max_concurrent`),
+  the stream also sends `event: queued` with `{"waiting": true}` (no text; it may come more than once and
+  before or between `progress` events). When the wait ends without a slot (`queue_timeout_seconds`), the
+  `error` event (and the 503 body of `/ask`) has `busy: true` and a detail saying it was high volume, in the
+  request's `language`;
 - without `module_id` the question is about the course as a whole: retrieval searches the whole course and
   no check item is attached;
 - 429 `usage_limit` when the student reached the question limit of the course; when only the daily cloud

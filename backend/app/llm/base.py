@@ -17,6 +17,15 @@ class LLMUnavailable(LLMError):
     """The model could not be reached (connection, timeout, not configured)."""
 
 
+class ModelBusy(LLMUnavailable):
+    """No model slot became free within the queue timeout (high volume; `limits.models`)."""
+
+
+# the fixed text of a question that waited for a slot and timed out; French in app/api/v2/fr.yaml
+MODEL_BUSY_MESSAGE = ("Many students are asking at the same time and the tutor could not take your question "
+                      "in time. Please send it again.")
+
+
 @runtime_checkable
 class LLMClient(Protocol):
     model: str
