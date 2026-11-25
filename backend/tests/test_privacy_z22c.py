@@ -59,6 +59,9 @@ FORMULA_LINES = [
     "(e1 - e2) 152402312 = (G1 + G2) * 140543231 + (G3 - G4) I1",
     "140543231 )()()( IGVGGGeGe",
     "V1 = 0)()( 231402315 )-( + I2",
+    # a fraction laid out one row per line: the digits alone on their line, formula rows around them
+    "1e ++++++++\n++++\n=\n()( )( )( )\n5343\n2\n3524232514131\n104321013\n2\n"
+    "GGGGGGGGGGGGGGGGG\nIVGGGGVGGe\n++++++++",
 ]
 
 
@@ -78,6 +81,8 @@ def test_formula_digit_runs_are_not_student_ids(line: str) -> None:
     "Student ID: 300123456 = the one on the card.",
     "e1 + e2 = 0, and my student number is (300123456).",
     "id 300123456 + (G1 - G2)",
+    "Class list\nAlice Smith\n300123456\nBob Lee\n300654321\n",
+    "Marks (final)\n300123456\nB+ (75)\n=> pass\n",
 ])
 def test_student_numbers_are_still_found(text: str) -> None:
     result = scan_document(text, privacy_profile("ece"))
