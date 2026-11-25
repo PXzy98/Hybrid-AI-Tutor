@@ -27,8 +27,9 @@ Browser test of 2026-11-24 (dev server on df779bc, lab vLLM up, fictional accoun
 | Date | What |
 |---|---|
 | 11/25 | Video submitted (rough cut of part 1 is ready) |
-| week of 11/24 | Z confirms the AWS details and the domain with Prof. Abbas |
-| 12/1 | GPU / local model cost report to Prof. Abbas (`docs/GPU_COST.md`, merged in #162) |
+| week of 11/24 | Z confirms the AWS details and the domain with Prof. Abbas; deployment meeting with the TA, Jean (meeting of 11/25) |
+| 12/1 | GPU / local model cost report to Prof. Abbas (`docs/GPU_COST.md`, merged in #162); Design Day dry run (Q16) and feature freeze |
+| 12/2 | Final prototype presented in class |
 | 12/3 | Design Day: live demo, on the production site if V10 is done, otherwise on the lab build |
 | 12/13 | Final report |
 
@@ -55,10 +56,68 @@ Each is one task, one branch and one PR (AGENTS.md workflow). Order is the order
 | X5 | **"Most asked topics" empty with 6 active students.** Check that only consenting students count (expected) and whether the demo data simply has fewer than 5 consenting students; if so, say in the UI that only students who agreed to learner data are counted. | S | cause written; the caption explains who is counted |
 | X6 | **Small UI items**: a source shown as an internal path (`course/5/73/05_week_4_memory.md`) instead of the file title; French "1 réponses"; no character counter seen on the announcement title at 217 characters (B11); the "Students per level" heading shown twice; check that an instructor can delete an announcement (the tester found no delete button). | T | each item fixed or explained in the PR; frontend tests |
 | X7 | **Tell the student when the tutor is busy.** Today a question waits silently for a free model slot (`app/llm/gateway.py`: at most `limits.models.max_concurrent` = 8 at a time, up to `queue_timeout_seconds` = 60 s), and only after that says "the model is busy; try again in a moment". In the load test of #162 the slowest answer at 32 students took 48 s. Change: when a question has to wait for a slot, or no text has arrived after a few seconds, the answer stream sends a new event (additive in v2, no question text) and the chat shows a notice such as "Many students are asking right now. Your question is in line and will be answered shortly." (en and fr), which goes away when the answer starts. The same notice on AI drafts and quiz drafts that wait. When the wait ends in the busy error, the message says that it was high volume and offers to send the question again. | Z (gateway, stream event), T (chat and draft UI) | backend test with a fake model and a full gateway (the event is sent, no text in it); frontend test of the notice and its removal; checked in the browser with `eval/load-test/app_load.py` at 32 students against a copy of the demo database |
-| X8 | **Drafts may write new examples and exercises; facts stay from the material.** Today every tier 1 draft, local and cloud, gets the same rule (`instructor_ai/drafts.py` `_RULES`: "Use only the supplied material; do not invent facts ..."; a custom draft adds "from the passages only ... say so instead of inventing it"), so a request for a worked example on a lecture without one returns "the material has no example" on both models. Change the rule by what is written, not only by the model: worked examples, practice questions, analogies and scenarios may be new, built on the concepts and formulas of the passages; dates, grading, requirements, citations and facts or numbers not in the passages are never invented. Cloud drafts (public material only, V16, unchanged) get the new rule; the local 9B model either keeps the strict rule or gets it with a note on the draft ("examples are generated; check them"), decided by Z from the comparison. Prompt change only; no privacy rule, no cloud gate change. | Z (S's component, Z allowed) | design note agreed by Z first; then the V16 method before and after (five drafts per kind, the lecture-3 worked example among them, local and cloud): usable drafts and invented facts counted |
+| X8 | **Drafts may write new examples and exercises; facts stay from the material.** Today every tier 1 draft, local and cloud, gets the same rule (`instructor_ai/drafts.py` `_RULES`: "Use only the supplied material; do not invent facts ..."; a custom draft adds "from the passages only ... say so instead of inventing it"), so a request for a worked example on a lecture without one returns "the material has no example" on both models. Change the rule by what is written, not only by the model: worked examples, practice questions, analogies and scenarios may be new, built on the concepts and formulas of the passages; dates, grading, requirements, citations and facts or numbers not in the passages are never invented. Cloud drafts (public material only, V16, unchanged) get the new rule; the local 9B model either keeps the strict rule or gets it with a note on the draft ("examples are generated; check them"), decided by Z from the comparison. Prompt change only; no privacy rule, no cloud gate change. | Z (S's component, Z allowed) | design note agreed by Z first; then the V16 method before and after (five drafts per kind, the lecture-3 worked example among them, local and cloud): usable drafts and invented facts counted; **after Design Day** (section 2a: no behaviour change in the last week) |
 | V24 | **A new page starts at the top** (the app scrolls inside `main`, so a new page kept the old position); back and forward return to the old position. Branch `fix/V24-scroll-position` is ready. | T | PR merged |
 | — | Review and merge #163 (tests run the deployment's pipeline, UTC database sessions, no local Ollama defaults) | Z | merged |
 | — | Retest after Phase A: the failed and not-run items of section 0 (a dated quiz, a one-passage case, saving one admin setting back to its value) | Z (agent) | report in `var/` |
+
+## 2a. Quality before Design Day (Prof. Abbas, meeting of 2026-11-25)
+
+Prof. Abbas: in the last week, **quality only, no new features**. The platform has to look professional and be
+stable, fast and private: no information leaks, and no one can break into the database. He will use it in the
+winter term in one small course (under 20 students), so students will also need an orientation. Research on
+the deployment environment and on GPUs waits until after Design Day; for Design Day the AWS deployment uses
+Z's vLLM server, reachable from the internet (V12).
+
+How this phase runs:
+- Q1 comes first, because it finds the work; then the Q tasks run in parallel. One task, one branch, one PR, as
+  in section 2.
+- Fixes only. A fix may add a field (additive v2) only when it cannot be done otherwise.
+- Browser checks use fictional accounts and questions only.
+- X8 changes what drafts may write. It is a behaviour change, so it moves to after Design Day unless Z decides
+  otherwise. V23 stays in section 5.
+- Feature freeze from 12/1: after the dry run (Q16), only fixes for what the dry run finds.
+
+**Professional look (interface and user experience)**
+
+| ID | Task | Owner | Done when |
+|---|---|---|---|
+| Q1 | **Walk through every page** as a student, an instructor and an admin, in English and French, on a desktop (1280 px) and a phone (375 px), in light and dark mode. Note inconsistent wording, labels and spacing; empty states (no course, quiz, announcement or data yet); loading states; error messages that show raw codes; untranslated text; broken layouts. Give each finding a severity | Z (agent), T | report in `var/`; findings listed in this section; every major one fixed |
+| Q2 | **First use.** A student's first login: join with an invitation code, the privacy notice, Personalize, the first question. An instructor's new empty course: create a module, upload, publish, invite students. Add short in-app hints where a step is unclear. Update the student and instructor manuals with screenshots of ScholarMind AI (also the base of the students' orientation in the winter) | Z, T | both flows done in the browser without help; manuals updated |
+| Q3 | **One brand.** The ScholarMind AI name, mark and favicon are the same on the login page, sidebar, browser tab, invitation texts, manuals, Design Day slides and video | T | checklist done |
+| Q4 | **Accessibility re-check** after the v5 and v6 changes: axe tests cover the new parts (announcements, the busy notice, statistics captions, routing panel step); keyboard path through chat and quizzes; contrast in dark mode | T | axe tests pass for every page; `ACCESSIBILITY.md` updated |
+
+**Stable**
+
+| ID | Task | Owner | Done when |
+|---|---|---|---|
+| Q5 | **Retest and regression.** Retest the section 0 items not yet run (a dated quiz, a one-passage case, saving one admin setting back to its value) and the main path of every role. Run it on a fresh build from `main` with the demo data | Z (agent) | report; every failure is fixed or explained |
+| Q6 | **Failure behaviour.** What students and instructors see when the local model is down or slow, or the cloud is off; when the worker restarts during an index rebuild; when the database restarts. Every case shows a clear message, never a blank page or a raw error, and the app recovers without a manual restart | Z | each case checked on the local Compose stack; fixes come with tests |
+| Q7 | **Believable demo data** (section 6 item): course titles, repeated first names, the unhelpful stored answer (M7), the test leftovers removed. Enough consenting demo students that some topics reach the minimum group (X5), so the statistics are not all hidden | Z | demo database rebuilt |
+| Q8 | **Soak run.** 60 minutes of mixed use by a few scripted fictional students (`eval/load-test/app_load.py` at a low rate) on the deployment candidate. Watch errors, response times, memory and the worker queue | Z | report: no errors, memory flat |
+
+**Fast**
+
+| ID | Task | Owner | Done when |
+|---|---|---|---|
+| Q9 | **Measure, then fix the largest delays.** Measure on the Compose stack: page load (first and later visits), time to the first answer token and to the full answer on the local model, routing step duration, and the web search step (M4: about 30 s). Targets at normal load: pages under 2 s, first token under 5 s. Fix the largest delays found (for example a time cap on the web search step, or slow queries in the database log) | Z, T | numbers before and after, in the report |
+| Q10 | **Frontend delivery.** Caddy sends hashed assets with a long cache and `index.html` without cache, compressed; check the bundle size after T16 | T | Lighthouse performance at least 90 on login and chat (desktop) |
+
+**Private and secure**
+
+| ID | Task | Owner | Done when |
+|---|---|---|---|
+| Q11 | **E4 moves here** (section 4): an end-to-end privacy audit of announcements in retrieval, web search queries, KC codes, stored notes and the local check on by default. Also check that after a test run the Compose stack's logs and the course exports contain no question text | Z | report; E6 not worse |
+| Q12 | **Security re-check of the deployment** against `SECURITY_REVIEW.md` "Before the public deployment": the production Compose file (secure cookie, API v1 off, `SITE_ADDRESS`); HTTPS only; security headers (CSP, HSTS); login rate limit; CSRF; the database not published; no default or initial passwords left (admin, Grafana); secrets only in the server's `.env`; image scan (Trivy) with no fixable HIGH or CRITICAL | Z | checklist done on the AWS stack after V10 |
+| Q13 | **Attack checks** on our own deployment, fictional data only. Try: another course's IDs (covered by `test_access_every_endpoint.py`); uploads (a path in the file name, a zip bomb, an oversized file, a wrong type); the web page fetcher against internal addresses (SSRF); Markdown and HTML in answers and announcements (XSS); injection through search and filter parameters; login brute force. Write down the results | Z | report; every finding fixed, or accepted with a reason |
+| Q14 | **The local model on the internet** for Design Day (V12, Z's server): vLLM with `--api-key`, HTTPS, one open port, and if possible a firewall that admits only the AWS server's address. The deployment sets `VLLM_KEY` | Z | checked from outside: a request without the key is refused |
+| Q15 | **The database at rest**, with Jean and V10: daily backups and a tested restore; the database user has only the rights it needs; the AWS volume encrypted at rest; retention of exports and logs as documented | Z, Jean | restore test done; settings written in `OPERATIONS.md` |
+
+**Dry run**
+
+| ID | Task | Owner | Done when |
+|---|---|---|---|
+| Q16 | **Design Day dry run** on the deployed site with `DEMO_SCRIPT.md`: all three roles, English and French, one phone, timed | all | done by 12/1; every failure fixed or cut from the script |
 
 ## 3. Phase B: production (blocked on Prof. Abbas)
 
@@ -74,7 +133,7 @@ Each is one task, one branch and one PR (AGENTS.md workflow). Order is the order
 
 | ID | Task | Owner | Done when |
 |---|---|---|---|
-| E4 | End-to-end privacy audit on v5: announcements in retrieval, web search, question KC codes, stored notes, the local check on by default | Z | report |
+| E4 | End-to-end privacy audit on v5: announcements in retrieval, web search, question KC codes, stored notes, the local check on by default (**moved to Q11**, section 2a) | Z | report |
 | Z22 | A fresh held-out medical privacy set; E6 on it | Z | set and scores in `eval/privacy-filter/` |
 | Z22c | Allow-list for course terms that look like names (fixed phrases only, never a bare surname); a name after a role word ("my TA") | Z | design agreed by Z, then code; E6 and Z22 re-run, not worse |
 | T13 | Web search evaluation, with the time of the search step (M4: about 30 s) and the source wording (X1) | T | report |
@@ -94,8 +153,8 @@ Each is one task, one branch and one PR (AGENTS.md workflow). Order is the order
 | Task | Owner | Done when |
 |---|---|---|
 | Video: assemble the rest after part 1, add narration, submit | Z, all | submitted 11/25 |
-| Design Day script (`docs/DEMO_SCRIPT.md`) checked on the build that will be shown | T, Z | dry run done |
-| Demo data: course titles with 2004, repeated first names, the unhelpful stored answer (M7); remove the test leftovers of 2026-11-24 on the dev server ("Lab note" announcement, "Retest quiz (temp)") | Z | rebuilt or cleaned |
+| Design Day script (`docs/DEMO_SCRIPT.md`) checked on the build that will be shown (Q16) | T, Z | dry run done |
+| Demo data: course titles with 2004, repeated first names, the unhelpful stored answer (M7); remove the test leftovers of 2026-11-24 on the dev server ("Lab note" announcement, "Retest quiz (temp)") (Q7) | Z | rebuilt or cleaned |
 | Merge the v5 and v6 plans into the guide; update HANDOVER.md and TODO.md | Z | merged |
 | Final report: same story as Design Day ("Brightspace plus", privacy first), measured numbers from E6, V16, V13 and the browser tests | all | 12/13 |
 
