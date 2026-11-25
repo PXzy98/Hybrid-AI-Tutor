@@ -15,6 +15,24 @@ from app.pipeline.steps.analyze_route import route_input
 from app.routing.evidence import assess_evidence, select_passages
 
 UNVERIFIED_SOURCES_NOTE = "The course sources below were found by search but not checked for relevance."
+# the relevance check ran but confirmed none of the passages (X2 keeps them): a different note, so the answer
+# does not say "not checked" under a routing panel that says the material was checked (Q1-02)
+UNCONFIRMED_SOURCES_NOTE = ("The course sources below were found by search, but the relevance check could "
+                            "not confirm that they answer this question.")
+
+
+def sources_note(passages, evidence_ran: bool, checked: bool) -> str | None:
+    """The note under an answer whose course passages were not confirmed relevant, or None.
+
+    Not checked (evidence skipped or failed): UNVERIFIED_SOURCES_NOTE. Checked, but the passages are the
+    retriever's fallback because the relevance model accepted none: UNCONFIRMED_SOURCES_NOTE."""
+    if not passages or not evidence_ran:
+        return None
+    if not checked:
+        return UNVERIFIED_SOURCES_NOTE
+    if any(c.metadata.get("evidence_check") == "unverified" for c in passages):
+        return UNCONFIRMED_SOURCES_NOTE
+    return None
 
 
 @steps.register("route")
@@ -86,10 +104,9 @@ class RouteStep(BaseStep):
         ctx.passages = select_passages(x, score.evidence, self.services.settings.routing,
                                        logistics=ctx.question_type == "logistics",
                                        fresh=analysis.requires_fresh_evidence)
-        if ctx.passages and evidence is not None and (
-                not score.evidence.checked
-                or any(c.metadata.get("evidence_check") == "unverified" for c in ctx.passages)):
-            ctx.warnings.append(UNVERIFIED_SOURCES_NOTE)
+        note = sources_note(ctx.passages, evidence is not None, score.evidence.checked)
+        if note:
+            ctx.warnings.append(note)
         await ctx.report(
             "decision",
             "completed",
