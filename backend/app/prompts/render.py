@@ -10,8 +10,9 @@ anything the allow-list does not contain.
 import re
 from functools import cache
 from pathlib import Path
+from urllib.parse import urlparse
 
-from app.core.schemas import CloudRequest, Detail, Level, RequestContext, Sequencing
+from app.core.schemas import Chunk, CloudRequest, Detail, Level, RequestContext, Sequencing
 from app.core.topics import topic_name
 from app.learner.misconceptions import prompt_block
 from app.llm.base import Message
@@ -112,11 +113,39 @@ def system_prompt(level: Level | None = None, sequencing: Sequencing | None = No
     return "\n\n".join(parts)
 
 
+WEB_HEADING = (
+    "Web sources (found on the web for this question; this is not course material, so never call it that "
+    "and say in the answer that this information comes from the web):"
+)
+WEB_SOURCE_PREFIX = "Web source: "  # starts the text of every web passage in the prompt (task X1)
+
+
+def passage_text(chunk: Chunk) -> str:
+    """The prompt text of a passage: a web passage (task T13) is labelled with its title and domain, so the
+    prompt, which only carries strings (CloudRequest), can tell it from course material."""
+    if not chunk.metadata.get("web"):
+        return chunk.text
+    domain = urlparse(str(chunk.metadata.get("url") or chunk.source)).hostname or ""
+    title = " ".join(str(chunk.metadata.get("title") or "").split()) or domain
+    where = f" ({domain})" if domain and domain != title else ""
+    return f"{WEB_SOURCE_PREFIX}{title}{where}\n{chunk.text}"
+
+
 def material_block(passages: list[str]) -> str:
-    """Number every passage; the API Sources list must retain this exact order and length."""
+    """Number every passage; the API Sources list must retain this exact order and length.
+
+    Web passages (labelled by `passage_text`, always after the course passages) get their own heading and the
+    numbering continues, so a citation [n] still matches the Sources list."""
     if not passages:
         return "Course material: none was found for this question."
-    return "Course material:\n" + "\n\n".join(f"[{i}] {p.strip()}" for i, p in enumerate(passages, 1))
+    numbered = [(i, p.strip()) for i, p in enumerate(passages, 1)]
+    course = [f"[{i}] {p}" for i, p in numbered if not p.startswith(WEB_SOURCE_PREFIX)]
+    web = [f"[{i}] {p}" for i, p in numbered if p.startswith(WEB_SOURCE_PREFIX)]
+    parts = ["Course material:\n" + "\n\n".join(course) if course
+             else "Course material: none was found for this question."]
+    if web:
+        parts.append(WEB_HEADING + "\n" + "\n\n".join(web))
+    return "\n\n".join(parts)
 
 
 def _user_message(topic: str, passages: list[str], question: str) -> Message:
@@ -143,7 +172,8 @@ def render_local(ctx: RequestContext, *, safety_retry: bool = False) -> list[Mes
     messages: list[Message] = [{"role": "system", "content": system}]
     for turn in ctx.history:  # sanitized earlier turns
         messages.append({"role": "user" if turn.role == "student" else "assistant", "content": turn.text})
-    messages.append(_user_message(ctx.request.topic, [c.text for c in ctx.passages], ctx.request.question))
+    passages = [passage_text(c) for c in ctx.passages]
+    messages.append(_user_message(ctx.request.topic, passages, ctx.request.question))
     return messages
 
 
