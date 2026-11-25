@@ -131,7 +131,10 @@ class Gateway:
         if sem.locked():  # no slot is free right now: this call has to wait in line
             notice = wait_notice.get()
             if notice is not None:
-                await notice()
+                try:
+                    await notice()
+                except Exception:  # noqa: BLE001 - the notice is a courtesy; the call still waits for its slot
+                    pass
         try:
             await asyncio.wait_for(sem.acquire(), timeout=limits.queue_timeout_seconds)
         except TimeoutError:
