@@ -119,3 +119,16 @@ def test_any_french_variant_is_french_in_onboarding(world):
 def test_model_unavailable_is_the_v1_text():
     from app.api.v1 import ask
     assert localize.ENGLISH["MODEL_UNAVAILABLE"] is ask.MODEL_UNAVAILABLE
+
+
+def test_the_routing_panel_knows_the_privacy_notice_in_both_languages():
+    # v6 X3: the student's routing panel adds a step when the answer carries this notice; it matches the text,
+    # so a reworded notice must be reworded in RoutingProgress.tsx too
+    from pathlib import Path
+
+    from app.pipeline.steps.generate import PRIVACY_BLOCK_WARNING
+
+    frontend = Path(__file__).resolve().parents[2] / "frontend"
+    panel = (frontend / "src/components/RoutingProgress.tsx").read_text("utf-8")
+    for text in (PRIVACY_BLOCK_WARNING, localize._notes()[PRIVACY_BLOCK_WARNING]):
+        assert f'"{text}"' in panel
