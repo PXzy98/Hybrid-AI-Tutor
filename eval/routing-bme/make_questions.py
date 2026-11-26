@@ -15,9 +15,15 @@ a labeller of another size (anthropic/claude-sonnet-5.5) assigns each question a
 pair is kept only when the labeller agrees with the category asked for on both questions. Only the subject
 is sent, never course material (rule 6).
 
+Both generators get the same prompt and often write the same question ("cutoff of an RC low-pass with 10 kΩ
+and 100 nF" / "... 0.1 μF"), so pairs whose questions are close in the router's embedding (cosine at least
+SAME_QUESTION) share one `group`, and the held-out split never separates them (found by Codex review);
+`source_family` keeps the generator's pair. `--regroup` redoes this on the written file without a model call.
+
     set OPENROUTER_API_KEY (environment or the repository's .env)
-    .venv\\Scripts\\python eval\\routing-bme\\make_questions.py
+    .venv\\Scripts\\python eval\\routing-bme\\make_questions.py [--regroup]
 """
+import argparse
 import json
 import re
 import sys
@@ -28,12 +34,16 @@ import httpx
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "backend"))
 from eval.common.env import env  # noqa: E402
 
 URL = "https://openrouter.ai/api/v1/chat/completions"
 GENERATORS = ["anthropic/claude-haiku-5.5", "openai/gpt-6-luna"]
 LABELLER = "anthropic/claude-sonnet-5.5"
 OUT = ROOT / "data" / "routing" / "bme_questions.jsonl"
+# cosine of the routing embedding; 0.65 joins "Why does a pulse oximeter use two wavelengths?" with "... red
+# and infrared light ...", while 0.6 already chains eleven pairs of different topics into one group
+SAME_QUESTION = 0.65
 LABELS = {"basic_concepts": (0, 0, 0), "simple_application": (0, 0, 0), "mechanism_explanation": (0, 0, 0),
           "course_evidence": (0, 1, 0), "current_information": (0, 1, 1), "complex_reasoning": (1, 0, 0)}
 RATIONALE = {
@@ -87,7 +97,41 @@ def categorize(http: httpx.Client, question: str) -> str | None:
     return _chat(http, LABELLER, prompt, 0.0).get("category")
 
 
+def regroup(rows: list[dict]) -> list[dict]:
+    """Pairs with a close question (any generator, any category) join one group, named by its first pair."""
+    import numpy as np
+
+    from app.core.config import get_settings
+    from app.routing.models import encode
+
+    x = encode([r["question"] for r in rows], get_settings().routing)
+    x = x / np.linalg.norm(x, axis=1, keepdims=True)
+    parent = {r["source_family"]: r["source_family"] for r in rows}
+
+    def root(g: str) -> str:
+        while parent[g] != g:
+            g = parent[g]
+        return g
+
+    for i, j in zip(*np.nonzero(np.triu(x @ x.T, 1) >= SAME_QUESTION), strict=True):
+        a, b = root(rows[i]["source_family"]), root(rows[j]["source_family"])
+        parent[max(a, b)] = min(a, b)
+    return [{**r, "group": root(r["source_family"])} for r in rows]
+
+
+def write(rows: list[dict]) -> None:
+    OUT.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), encoding="utf-8")
+
+
 def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--regroup", action="store_true", help="only regroup the written file (no model calls)")
+    if ap.parse_args().regroup:
+        rows = regroup([json.loads(line) for line in OUT.read_text(encoding="utf-8").splitlines()])
+        write(rows)
+        print(f"{len({r['source_family'] for r in rows})} pairs in {len({r['group'] for r in rows})} groups",
+              file=sys.stderr)
+        return 0
     if not env("OPENROUTER_API_KEY"):
         print("OPENROUTER_API_KEY is not set", file=sys.stderr)
         return 2

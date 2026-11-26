@@ -1,9 +1,9 @@
 """X10: routing heads for the biomedical engineering course type, before and after (no hosted model).
 
 Rows: `data/routing/bme_questions.jsonl` (make_questions.py; labels by category, prototype_policy). The
-held-out share is 30% of the paraphrase groups (GroupShuffleSplit, seed 42), so a question and its paraphrase
-are never split. Compared on it, with the capability gate of SemanticRouter (eval/routing-ece/run.py
-`decide`):
+held-out share is 30% of the paraphrase groups (GroupShuffleSplit, seed 42), so a question, its paraphrase
+and the same question written by the other generator (make_questions.py `regroup`) are never split. Compared
+on it, with the capability gate of SemanticRouter (eval/routing-ece/run.py `decide`):
 
     shared    the shipped heads (`data/routing/models`, trained on medical questions): what a
               biomedical_engineering course gets without its own folder
@@ -35,6 +35,7 @@ _spec.loader.exec_module(ece)
 HERE = Path(__file__).resolve().parent
 DATA = ROOT / "data" / "routing"
 TYPE = "biomedical_engineering"
+SPLITS = 10  # random states 0-9 for the mean accuracy
 
 
 def main() -> int:
@@ -42,6 +43,7 @@ def main() -> int:
     ap.add_argument("--write", action="store_true", help="write data/routing/models/biomedical_engineering/")
     ap.add_argument("--out", type=Path, default=HERE / "results")
     a = ap.parse_args()
+    import numpy as np
     from sklearn.model_selection import GroupShuffleSplit
 
     cfg = get_settings().routing
@@ -49,36 +51,49 @@ def main() -> int:
     bme = read_rows(DATA / "bme_questions.jsonl")
     seed_x = encode([r["question"] for r in seed], cfg)
     bme_x = encode([r["question"] for r in bme], cfg)
-    train_idx, test_idx = next(GroupShuffleSplit(n_splits=1, test_size=0.3, random_state=42).split(
-        bme_x, groups=[r["group"] for r in bme]))
-    test_rows, test_x = [bme[i] for i in test_idx], bme_x[test_idx]
+    groups = [r["group"] for r in bme]
+
+    def split(random_state: int):
+        return next(GroupShuffleSplit(n_splits=1, test_size=0.3, random_state=random_state).split(
+            bme_x, groups=groups))
+
+    def routes(method: str, train_idx, test_idx) -> tuple[list, list]:
+        """Routes of the held-out rows by the shared heads and by heads fitted on the training share."""
+        metadata, arrays = load_weights(cfg, method)  # the shared heads
+        x = np.vstack([seed_x, bme_x[train_idx]])
+        own_meta, own_arrays = ece.fit_arrays(x, seed + [bme[i] for i in train_idx], method, cfg)
+        return (ece.predict(bme_x[test_idx], metadata, arrays, cfg),
+                ece.predict(bme_x[test_idx], own_meta, own_arrays, cfg))
+
+    train_idx, test_idx = split(42)
+    test_rows = [bme[i] for i in test_idx]
     report: dict = {"rows": len(bme), "held_out": len(test_rows), "methods": {}}
     for method in ece.METHODS:
-        metadata, arrays = load_weights(cfg, method)  # the shared heads
-        shared = ece.predict(test_x, metadata, arrays, cfg)
-        import numpy as np
-
-        rows = seed + [bme[i] for i in train_idx]
-        x = np.vstack([seed_x, bme_x[train_idx]])
-        own_meta, own_arrays = ece.fit_arrays(x, rows, method, cfg)
-        own = ece.predict(test_x, own_meta, own_arrays, cfg)
+        shared, own = routes(method, train_idx, test_idx)
+        # one split of 50-odd rows moves by several points with the seed, so the mean of SPLITS splits too
+        means = {"shared": [], "own": []}
+        for random_state in range(SPLITS):
+            tr, te = split(random_state)
+            for name, routed in zip(("shared", "own"), routes(method, tr, te), strict=True):
+                means[name].append(ece.score([bme[i] for i in te], routed)["accuracy"])
         report["methods"][method] = {
             "shared": ece.score(test_rows, shared), "own": ece.score(test_rows, own),
+            "accuracy_mean_of_splits": {k: round(float(np.mean(v)), 3) for k, v in means.items()},
             "by_category": {"shared": ece.grouped(test_rows, shared, lambda r: r["category"]),
                             "own": ece.grouped(test_rows, own, lambda r: r["category"])}}
     a.out.mkdir(parents=True, exist_ok=True)
     (a.out / "metrics.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     lines = ["# Routing heads for biomedical_engineering (X10)", "",
              f"{len(bme)} questions (`data/routing/bme_questions.jsonl`), held-out {len(test_rows)} "
-             "(30% of the paraphrase groups). Route = the capability gate of SemanticRouter; label: cloud "
-             "iff `cloud_required`.", "",
-             "| Method | Heads | Accuracy | Cloud share (label) | Cloud recall | Local recall "
-             "| Outside support |"
-             " Evidence head |", "|---|---|---|---|---|---|---|---|"]
+             "(30% of the paraphrase groups, seed 42). Route = the capability gate of SemanticRouter; label: "
+             "cloud iff `cloud_required`.", "",
+             f"| Method | Heads | Accuracy | Accuracy, mean of {SPLITS} splits | Cloud share (label) "
+             "| Cloud recall | Local recall | Outside support | Evidence head |",
+             "|---|---|---|---|---|---|---|---|---|"]
     for method, m in report["methods"].items():
         for name in ("shared", "own"):
             s = m[name]
-            lines.append(f"| {method} | {name} | {s['accuracy']} "
+            lines.append(f"| {method} | {name} | {s['accuracy']} | {m['accuracy_mean_of_splits'][name]} "
                          f"| {s['cloud_share']} ({s['label_cloud_share']}) | {s['cloud_recall']} "
                          f"| {s['local_recall']} | {s['unreliable_share']} | {s['evidence_head_accuracy']} |")
     (a.out / "report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")

@@ -2,42 +2,42 @@
   "label_origin": "prototype_policy",
   "course_type": "biomedical_engineering",
   "rows": 654,
-  "heldout_rows": 121,
+  "heldout_rows": 124,
   "warning": "Policy-label holdout is NOT a benchmark of local LLM answer quality.",
   "split": "GroupShuffleSplit by paraphrase group; calibration uses separate group folds",
   "methods": {
     "lr": {
       "cloud_required": {
-        "accuracy": 0.9752066115702479,
-        "positive_recall": 0.92,
-        "brier": 0.024640371165666537
+        "accuracy": 0.9596774193548387,
+        "positive_recall": 0.875,
+        "brier": 0.04338756965676769
       },
       "requires_evidence": {
-        "accuracy": 0.9173553719008265,
-        "positive_recall": 0.9777777777777777,
-        "brier": 0.06248310966857459
+        "accuracy": 0.8709677419354839,
+        "positive_recall": 0.9111111111111111,
+        "brier": 0.08324030011647503
       },
       "requires_fresh_evidence": {
-        "accuracy": 0.9917355371900827,
+        "accuracy": 1.0,
         "positive_recall": 1.0,
-        "brier": 0.005399974036653447
+        "brier": 0.0031410238070687193
       }
     },
     "svm": {
       "cloud_required": {
-        "accuracy": 0.9669421487603306,
-        "positive_recall": 0.92,
-        "brier": 0.021475467434171034
+        "accuracy": 0.967741935483871,
+        "positive_recall": 0.9,
+        "brier": 0.03657205185839709
       },
       "requires_evidence": {
-        "accuracy": 0.9090909090909091,
+        "accuracy": 0.8951612903225806,
         "positive_recall": 0.9333333333333333,
-        "brier": 0.06791993739495107
+        "brier": 0.07826277605631851
       },
       "requires_fresh_evidence": {
-        "accuracy": 0.9917355371900827,
+        "accuracy": 1.0,
         "positive_recall": 1.0,
-        "brier": 0.004602335849700653
+        "brier": 0.00360787611617752
       }
     }
   }
