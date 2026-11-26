@@ -58,8 +58,8 @@ describe("language switch", () => {
     }));
     renderApp("/courses/1/materials", "fr");
     expect(await screen.findByText("syllabus.md")).toBeInTheDocument();
-    expect(screen.getByText("accepté")).toBeInTheDocument();
-    expect(screen.queryByText("accepted")).toBeNull();
+    expect(screen.getAllByText("Accepté").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Accepted")).toBeNull();
   });
 
   it("shows the student dashboard, the cloud notice and the English-only note in French", async () => {
@@ -75,7 +75,7 @@ describe("language switch", () => {
   it("shows the instructor dashboard sections in French", async () => {
     mockApi(instructorRoutes({ "GET /courses/1/class-summary": { topic: "t", min_group: 5, suppressed: true } }));
     renderApp("/courses/1/overview", "fr");
-    for (const name of ["Aperçu de la classe", "Étudiants", "Membres", "Fin de session", "Quiz", "Sondage de fin de session"]) {
+    for (const name of ["Aperçu de la classe", "Étudiants", "Membres", "Fin de session / session suivante", "Quiz", "Sondage de fin de session"]) {
       expect(await screen.findByRole("link", { name })).toBeInTheDocument();
     }
   });

@@ -67,7 +67,9 @@ function OnboardingForm({ course, moduleId }: { course: Course; moduleId: number
   return (
     <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); submit.mutate(); }}>
       <Step id="consent-title" title={t("onb.consentTitle")}>
-        <p className="text-sm leading-relaxed">{data.consent_text}</p>
+        <div className="space-y-2 text-sm leading-relaxed">
+          {sentences(data.consent_text).map((sentence) => <p key={sentence}>{sentence}</p>)}
+        </div>
         <label className={choiceRow(agreed)}>
           <input type="checkbox" className="mt-0.5 accent-primary" checked={agreed} onChange={(e) => setConsent(e.target.checked)} />
           <span>{t("onb.consentAgree")}</span>
@@ -95,12 +97,12 @@ function OnboardingForm({ course, moduleId }: { course: Course; moduleId: number
         ))}
       </Step>
 
-      <Step id="diag-title" title={t("onb.diagTitle")} action={
+      {/* a module without check items has nothing to ask: no empty step */}
+      {data.diagnostic.length > 0 && <Step id="diag-title" title={t("onb.diagTitle")} action={
         <Button type="button" variant="ghost" size="sm" onClick={() => setSkipDiagnostic(!skipDiagnostic)} aria-pressed={skipDiagnostic}>
           {skipDiagnostic ? t("onb.answer") : t("onb.skip")}
         </Button>
       }>
-        {data.diagnostic.length === 0 && <p className="text-sm text-muted-foreground">{t("onb.noItems")}</p>}
         {!skipDiagnostic && data.diagnostic.map((item, n) => (
           <div key={item.id} className="border-t pt-4 first:border-0 first:pt-0">
             <fieldset>
@@ -117,17 +119,21 @@ function OnboardingForm({ course, moduleId }: { course: Course; moduleId: number
             </fieldset>
           </div>
         ))}
-        {!agreed && data.diagnostic.length > 0 && !skipDiagnostic && <Alert variant="warning" icon>{t("onb.noConsent")}</Alert>}
-      </Step>
+        {!agreed && !skipDiagnostic && <Alert variant="warning" icon>{t("onb.noConsent")}</Alert>}
+      </Step>}
 
       <ErrorNote error={submit.error} />
-      <div className="sticky bottom-0 z-10 -mx-1 flex flex-wrap gap-3 border-t bg-background px-1 py-3">
+      {/* floats a little above the bottom edge, so it never sits against the footer line */}
+      <div className="sticky bottom-2 z-10 flex flex-wrap gap-3 rounded-xl border bg-background p-3 shadow-sm">
         <Button loading={submit.isPending} type="submit" disabled={submit.isPending}>{submit.isPending ? t("onb.saving") : t("onb.save")}</Button>
         <Button asChild variant="outline"><Link to={`/courses/${course.id}/chat`}>{t("onb.skipAll")}</Link></Button>
       </div>
     </form>
   );
 }
+
+/** The sentences of a text, one per paragraph: a long consent text is easier to read in short pieces. */
+export const sentences = (text: string) => text.split(/(?<=[.!?])\s+(?=[A-ZÀ-ÝÉ])/).map((x) => x.trim()).filter(Boolean);
 
 /** One part of the form, numbered down the left edge. The number comes from the title ("1. ..."), so the text
  *  read aloud stays the same. */

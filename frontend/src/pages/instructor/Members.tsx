@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Copy, RefreshCw } from "lucide-react";
 import { useRef, useState, type FormEvent } from "react";
 
+import { useMe } from "@/auth";
 import { api, type Course, type ImportReport } from "@/api/endpoints";
 import { ErrorNote } from "@/components/common";
 import ResetPasswordDialog from "@/components/ResetPasswordDialog";
@@ -20,6 +21,7 @@ export default function Members({ course }: { course: Course }) {
   const { t } = useI18n();
   const qc = useQueryClient();
   const members = useQuery({ queryKey: ["members", course.id], queryFn: () => api.members(course.id) });
+  const me = useMe();
   const refresh = () => qc.invalidateQueries({ queryKey: ["members", course.id] });
   const [temporary, setTemporary] = useState<{ name: string; password: string } | null>(null);
   const [pendingReset, setPendingReset] = useState<{ id: number; name: string } | null>(null);
@@ -64,8 +66,11 @@ export default function Members({ course }: { course: Course }) {
                     {m.role === "student" && m.status === "active" && (
                       <Button type="button" size="sm" variant="outline" onClick={() => { setTemporary(null); setPendingReset({ id: m.id, name: m.display_name ?? "" }); }}>{t("members.reset")}</Button>
                     )}
-                    <Button type="button" size="sm" variant="outline" aria-label={t("members.removeFor", { name: m.display_name ?? m.email ?? "" })}
-                            onClick={() => remove.mutate(m.id)}>{t("members.remove")}</Button>
+                    {/* nobody removes themselves here; the server refuses it as well */}
+                    {(m.account_id === null || m.account_id !== me.data?.account_id) && (
+                      <Button type="button" size="sm" variant="outline" aria-label={t("members.removeFor", { name: m.display_name ?? m.email ?? "" })}
+                              onClick={() => remove.mutate(m.id)}>{t("members.remove")}</Button>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
@@ -99,11 +104,11 @@ function InviteCard({ course }: { course: Course }) {
             <Button type="button" variant="ghost" size="icon" aria-label={t("invite.copy")}
                     onClick={() => navigator.clipboard?.writeText(code).catch(() => undefined)}><Copy aria-hidden /></Button>
           </div>
-        ) : <p className="text-muted-foreground">{data ? t("invite.notShown") : t("invite.none")}</p>}
+        ) : <p className="text-muted-foreground">{!data ? t("invite.none") : rotate.isSuccess ? t("invite.notShown") : t("invite.hidden")}</p>}
         {data && (
           <p className="text-muted-foreground">
-            {t("invite.uses", { n: data.uses, max: data.max_uses ?? "∞" })}
-            {data.expires_at && ` · ${t(data.expired ? "invite.expired" : "invite.expires", { date: fmt.date(data.expires_at) })}`}
+            {data.max_uses === null ? t("invite.usesUnlimited", { n: data.uses }) : t("invite.uses", { n: data.uses, max: data.max_uses })}
+            {` · ${data.expires_at ? t(data.expired ? "invite.expired" : "invite.expires", { date: fmt.date(data.expires_at) }) : t("invite.noExpiry")}`}
           </p>
         )}
         <Button type="button" variant="outline" onClick={() => rotate.mutate()} disabled={rotate.isPending}>

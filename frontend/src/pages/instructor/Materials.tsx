@@ -15,6 +15,7 @@ import { Select } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useI18n } from "@/i18n";
 import type { MessageKey } from "@/i18n/en";
+import { capitalize } from "@/lib/utils";
 
 /** Course materials: upload (privacy-scanned by the server), delete, and the state of the search index. */
 export default function Materials({ course }: { course: Course }) {
@@ -57,7 +58,7 @@ export default function Materials({ course }: { course: Course }) {
       <section aria-labelledby="mat-list" className="space-y-3">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h3 id="mat-list" className="text-sm font-semibold">{t("materials.list", { n: materials.data?.materials.length ?? 0 })}</h3>
-          {materials.data && <p className="text-xs text-muted-foreground">{t("materials.indexVersion", { n: materials.data.index_version })}</p>}
+          {materials.data && <p className="text-xs text-muted-foreground">{materials.data.index_version === 0 ? t("materials.indexNone") : t("materials.indexVersion", { n: materials.data.index_version })}</p>}
         </div>
         {materials.isLoading && <Loading variant="table" />}
         {materials.data?.materials.length === 0 && <EmptyState icon={FileStack} title={t("empty.materials.title")}>{t("materials.none")}</EmptyState>}
@@ -65,7 +66,7 @@ export default function Materials({ course }: { course: Course }) {
           <Table>
             <TableHeader><TableRow>
               <TableHead>{t("materials.file")}</TableHead><TableHead className="hidden sm:table-cell">{t("content.module")}</TableHead>
-              <TableHead className="hidden sm:table-cell">{t("materials.size")}</TableHead><TableHead>{t("members.status")}</TableHead>
+              <TableHead className="hidden sm:table-cell">{t("materials.size")}</TableHead><TableHead className="hidden sm:table-cell">{t("members.status")}</TableHead>
               <TableHead><span className="sr-only">{t("students.actions")}</span></TableHead>
             </TableRow></TableHeader>
             <TableBody>
@@ -74,10 +75,12 @@ export default function Materials({ course }: { course: Course }) {
                   <TableCell>
                     <span className="flex items-center gap-2.5 font-medium">
                       <span aria-hidden className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground"><FileText className="size-4" /></span>
-                      <span className="max-w-64 min-w-0 break-words">{m.filename}</span>
+                      <span className="max-w-40 min-w-0 break-words sm:max-w-64">{m.filename}</span>
                     </span>
                     {/* V17 W14: on a phone the module is shown under the file name instead of in a column off screen */}
                     <span className="mt-1 block text-xs text-muted-foreground sm:hidden">{moduleName(m.module_id)}</span>
+                    {/* the status column is off the phone screen too: the status sits under the name there */}
+                    <span className="mt-1.5 block sm:hidden"><ScanBadge status={m.scan_status} /></span>
                     {m.source_url && (isHttps(m.source_url) ? (
                       <a href={m.source_url} target="_blank" rel="noopener noreferrer nofollow" className="mt-1 block max-w-64 break-words text-xs text-muted-foreground underline underline-offset-2">{m.source_url}</a>
                     ) : (
@@ -86,13 +89,13 @@ export default function Materials({ course }: { course: Course }) {
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">{moduleName(m.module_id)}</TableCell>
                   <TableCell className="hidden tabular-nums text-muted-foreground sm:table-cell">{Math.max(1, Math.round(m.size_bytes / 1024))} KB</TableCell>
-                  <TableCell><Badge variant={scanVariant(m.scan_status)}>{SCAN_STATES.includes(m.scan_status) ? t(`materials.scan.${m.scan_status}` as MessageKey) : m.scan_status}</Badge></TableCell>
+                  <TableCell className="hidden sm:table-cell"><ScanBadge status={m.scan_status} /></TableCell>
                   <TableCell className="text-right">
                     {m.source_url && (
                       <Button type="button" size="sm" variant="ghost" loading={refetch.isPending && refetch.variables?.id === m.id}
                               aria-label={t("materials.refetchFor", { name: m.filename })} onClick={() => refetch.mutate(m)}>{t("materials.refetch")}</Button>
                     )}
-                    <Button type="button" size="icon-sm" variant="ghost" className="text-muted-foreground hover:text-destructive" aria-label={t("materials.deleteFor", { name: m.filename })} onClick={() => setPendingDelete(m)}><Trash2 aria-hidden /></Button>
+                    <Button type="button" size="icon-sm" variant="ghost" className="text-muted-foreground hover:text-destructive" aria-label={t("materials.deleteFor", { name: m.filename })} title={t("materials.deleteFor", { name: m.filename })} onClick={() => setPendingDelete(m)}><Trash2 aria-hidden /></Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -211,10 +214,16 @@ function WebPageCard({ course, modules, onDone }: { course: Course; modules: { i
   );
 }
 
-const SCAN_STATES = ["pending", "accepted", "rejected"];
+const SCAN_STATES = ["pending", "accepted", "rejected", "indexed", "clean", "infected", "failed"];
+
+/** The state of a file as a readable, translated label; a state this page does not know is shown as it came. */
+function ScanBadge({ status }: { status: string }) {
+  const { t } = useI18n();
+  return <Badge variant={scanVariant(status)}>{SCAN_STATES.includes(status) ? t(`materials.scan.${status}` as MessageKey) : capitalize(status)}</Badge>;
+}
 
 function scanVariant(status: string): "success" | "secondary" | "destructive" {
-  if (status === "accepted") return "success";
+  if (status === "accepted" || status === "clean" || status === "indexed") return "success";
   if (status === "infected" || status === "failed" || status === "rejected") return "destructive";
   return "secondary";
 }

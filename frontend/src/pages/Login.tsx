@@ -10,12 +10,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useI18n } from "@/i18n";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 export default function Login() {
   const { data: me } = useMe();
   const navigate = useNavigate();
   const resetSession = useResetSession();
   const { t } = useI18n();
+  useDocumentTitle(t("login.submit"));
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<unknown>(null);
