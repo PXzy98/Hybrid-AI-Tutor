@@ -26,6 +26,8 @@ export default function Sidebar({ me, current, student, tab, onCollapse }: Props
   const { t } = useI18n();
   const courses = useCourses();
   const navigate = useNavigate();
+  // by course code, the same way in the switcher and in the list ("MED 0000" before "MIT 6.002")
+  const sorted = [...(courses.data ?? [])].sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true, sensitivity: "base" }));
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -48,16 +50,16 @@ export default function Sidebar({ me, current, student, tab, onCollapse }: Props
           {current ? (
             <>
               <label htmlFor="course-switch" className="sr-only">{t("nav.courses")}</label>
-              <select id="course-switch" value={current.id} onChange={(e) => navigate(`/courses/${e.target.value}`)}
+              <select id="course-switch" value={current.id} title={`${current.code} · ${current.title}`} onChange={(e) => navigate(`/courses/${e.target.value}`)}
                       className="select-chevron h-9 w-full appearance-none truncate rounded-md border border-input bg-background py-1 pr-8 pl-2.5 text-sm font-medium outline-hidden focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/30">
-                {courses.data?.map((c) => <option key={c.id} value={c.id}>{c.code} · {c.title}</option>)}
+                {sorted.map((c) => <option key={c.id} value={c.id} title={c.title}>{c.code} · {c.title}</option>)}
               </select>
             </>
           ) : (
             <>
               <p className="px-2.5 pb-1 text-xs font-medium text-muted-foreground">{t("nav.courses")}</p>
-              {courses.data?.map((c) => (
-                <Link key={c.id} to={`/courses/${c.id}`} className={itemClass(false)}>
+              {sorted.map((c) => (
+                <Link key={c.id} to={`/courses/${c.id}`} className={itemClass(false)} title={`${c.code} · ${c.title}`}>
                   <span className="truncate"><span className="font-medium">{c.code}</span> <span className="text-muted-foreground">{c.title}</span></span>
                 </Link>
               ))}

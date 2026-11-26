@@ -32,6 +32,9 @@ BIBLIO_BEFORE_RE = re.compile(r"\b(?:ISSN|S2CID|arXiv|hdl|PMID|PMCID|OCLC|ProQue
                               r"OSTI|SSRN|CiteSeerX|doi)\s*:?\s*$")
 ISBN_CHECK_AFTER_RE = re.compile(r"[ -]?[Xx](?![A-Za-z0-9])")
 DECIMAL_RE = re.compile(r"\d\.\d(?!\d)")
+# Z25c: binary codes in a truth table or a DAC/ADC table ("111110101", "0 1 0 0 0 0 0 0 0" across columns
+# D0 to D7) are not student numbers: a student number has digits other than 0 and 1 (the prefix 300)
+BINARY_DIGITS = frozenset("01")
 
 
 # Z22c: PDF text extraction joins equation subscripts into digit runs ("0)()()( 152402312 =-+-+- IGeGVeGee").
@@ -42,6 +45,9 @@ FORMULA_NEAR_CHARS = 30  # the formula test looks at this many characters on eac
 STUDENT_WORD_RE = re.compile(r"(?i)\b(?:student|stu\w*|std\w*|id|i\.d\.|number|num|no\.?)(?!\w)|#|学号")
 # words of prose ("same", "Smith"), not formula variables that extraction glued together ("GGGGGG")
 LONG_WORD_RE = re.compile(r"\b[A-Za-z][a-z]{3,}\b")
+# a run of one repeated character is a separator line or a table border ("---------", "+------+", "====="),
+# not a formula: a roster set off by such lines keeps its student numbers (found in review of Z22c)
+RULE_RE = re.compile(r"([-−=_*~])\1{2,}")
 
 
 def _in_formula(text: str, start: int, end: int) -> bool:
@@ -56,6 +62,7 @@ def _in_formula(text: str, start: int, end: int) -> bool:
         # around it decide, and a few words of the slide's prose there do not outweigh many formula characters
         before = text[max(0, start - 2 * FORMULA_NEAR_CHARS):start]
         after = text[end:end + 2 * FORMULA_NEAR_CHARS]
+    before, after = RULE_RE.sub("", before), RULE_RE.sub("", after)
     left, right = before.rstrip(" ")[-1:], after.lstrip(" ")[:1]
     chars = sum(c in FORMULA_CHARS for c in before + after)
     # an operator on one side and an operator or bracket on the other; "Ann (300123456)" and
@@ -74,7 +81,7 @@ def _not_a_student_number(text: str, start: int, end: int) -> bool:
     before = text[max(0, start - 12):start]
     return (bool(ISBN_BEFORE_RE.search(before)) or bool(BIBLIO_BEFORE_RE.search(before))
             or bool(ISBN_CHECK_AFTER_RE.match(text, end))
-            or len(digits) == 1
+            or len(digits) == 1 or digits <= BINARY_DIGITS
             or (len(value) == 9 and value.isdigit() and _in_formula(text, start, end))
             or (len(separators) > 1 and bool(DECIMAL_RE.search(value))))
 

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 
 import { api, type Course } from "@/api/endpoints";
-import { ErrorNote } from "@/components/common";
+import { ErrorNote, PageHeader } from "@/components/common";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -46,6 +46,7 @@ export default function EndOfTerm({ course }: { course: Course }) {
   const done = end.data;
   return (
     <div className="mx-auto max-w-3xl space-y-6">
+      <PageHeader title={t("end.title")} description={t("end.intro")} />
       <p className="text-sm text-muted-foreground">
         {t("end.nextTerm")} <Link to={`/courses/${course.id}/settings#next-term`} className="font-medium text-primary underline underline-offset-2">{t("end.nextTermLink")}</Link>
       </p>

@@ -8,6 +8,7 @@ import { keptLocalByPrivacy, type RoutingTrace } from "@/components/RoutingProgr
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { useI18n } from "@/i18n";
+import { readablePlaceholders } from "@/lib/placeholders";
 import { LatestAnnouncements } from "../../Announcements";
 import Composer, { CloudNotice } from "./Composer";
 import MessageList, { type Message } from "./MessageList";
@@ -91,10 +92,10 @@ function ChatPane({ course, initialConversation: initial, moduleId, onStarted, p
     hydrated.current = true;
     // stored answers keep their sources and model since V22; older ones have neither
     const past: Message[] = history.data.turns.map((x) => x.role === "student"
-      ? { role: "student", text: x.text }
-      : { role: "history", text: x.text, sources: x.sources, target: x.target, cutOff: x.cut_off, notes: x.notes });
+      ? { role: "student", text: readablePlaceholders(x.text, t) }
+      : { role: "history", text: readablePlaceholders(x.text, t), sources: x.sources, target: x.target, cutOff: x.cut_off, notes: x.notes });
     setMessages((live) => [...past, ...live]);
-  }, [history.data]);
+  }, [history.data, t]);
   const scope = modules.data?.find((m) => m.id === moduleId);
 
   const updateTrace = (id: string, patch: Partial<RoutingTrace>, event?: RoutingTrace["events"][number]) =>
@@ -122,7 +123,7 @@ function ChatPane({ course, initialConversation: initial, moduleId, onStarted, p
       setPartial("");
       setQueued(false);
       updateTrace(input.traceId, { running: false, finishedAt: Date.now(), details: reply.routing_details,
-        privacyKeptLocal: keptLocalByPrivacy(reply.routing_details, reply.warnings) });
+        privacyKeptLocal: keptLocalByPrivacy(reply.routing_details, reply.warnings), answeredBy: reply.route_target });
       setConversation(reply.conversation_id);
       if (!conversation) onStarted(reply.conversation_id);
       setMessages((prev) => [...prev, { role: "tutor", reply }]);
@@ -170,7 +171,7 @@ function ChatPane({ course, initialConversation: initial, moduleId, onStarted, p
   const scopeLabel = scope ? scope.title : t("nav.wholeCourse");
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-3">
       <VisibilityBanner course={course} profile={profile.data} />
       {profile.data && !profile.data.personalized && (
         <Alert variant="info" icon>
@@ -179,11 +180,14 @@ function ChatPane({ course, initialConversation: initial, moduleId, onStarted, p
       )}
       {/* the course home: a new conversation shows the latest announcements (V20) */}
       {!initialConversation && messages.length === 0 && <LatestAnnouncements course={course} />}
-      <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-        <span>{t("chat.scope")}</span>
-        <Badge variant="secondary">{scopeLabel}</Badge>
-        {lastTutor?.reply.kc_level && <Band band={lastTutor.reply.kc_level} label={t("chat.levelLabel")} />}
-      </div>
+      {/* the scope chip only when it says something: a chosen module, or a conversation under way */}
+      {(scope || messages.length > 0) && (
+        <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+          <span>{t("chat.scope")}</span>
+          <Badge variant="secondary">{scopeLabel}</Badge>
+          {lastTutor?.reply.kc_level && <Band band={lastTutor.reply.kc_level} label={t("chat.levelLabel")} />}
+        </div>
+      )}
       <MessageList courseId={course.id} messages={messages} partial={partial} queued={queued} pending={ask.isPending}
                    loadingHistory={history.isLoading} historyError={history.error} onSuggest={suggest} onRetry={retry}>
         <Composer ref={inputRef} value={question} onChange={setQuestion} onSubmit={send} pending={ask.isPending}

@@ -25,7 +25,7 @@ export default function Settings({ course }: { course: Course }) {
     if (hash === "#next-term") document.getElementById("next-term")?.scrollIntoView({ block: "start" });
   }, [hash, settings.isLoading]);
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="space-y-6">
       <CourseInfo course={course} />
       <ErrorNote error={settings.error} />
       {settings.isLoading && <Loading variant="form" />}
@@ -117,11 +117,12 @@ function CourseInfo({ course }: { course: Course }) {
         <form className="grid gap-4 sm:grid-cols-3" onSubmit={(e) => { e.preventDefault(); save.mutate(); }}>
           <div className="grid gap-1.5"><Label htmlFor="ci-code">{t("course.code")}</Label><Input id="ci-code" autoCapitalize="off" autoCorrect="off" spellCheck={false} value={form.code} onChange={set("code")} required /></div>
           <div className="grid gap-1.5"><Label htmlFor="ci-title">{t("course.title")}</Label><Input id="ci-title" value={form.title} onChange={set("title")} required /></div>
-          <div className="grid gap-1.5"><Label htmlFor="ci-term">{t("course.term")}</Label><Input id="ci-term" value={form.term_label} onChange={set("term_label")} /></div>
+          <div className="grid gap-1.5"><Label htmlFor="ci-term">{t("course.term")}</Label><Input id="ci-term" value={form.term_label} onChange={set("term_label")} aria-describedby={form.term_label.trim() ? undefined : "ci-term-hint"} />
+            {!form.term_label.trim() && <p id="ci-term-hint" className="text-xs text-muted-foreground">{t("course.termEmpty")}</p>}</div>
           <div className="sm:col-span-3 space-y-2">
             <ErrorNote error={save.error} />
             <div className="flex flex-wrap items-center gap-3">
-              <Button type="submit" loading={save.isPending}>{t("settings.save")}</Button>
+              <Button type="submit" loading={save.isPending}>{t("course.save")}</Button>
               {dirty && !save.isPending && <span className="text-xs text-muted-foreground">{t("form.unsaved")}</span>}
               {!dirty && save.isSuccess && <StatusText>{t("settings.saved")}</StatusText>}
             </div>
@@ -194,6 +195,7 @@ function SettingsForm({ course, initial, justSaved, onSaved }:
             <option value="">{t("settings.useDefault")}</option>
             {pick("trusted_local").map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
           </Select>
+          <p className="text-xs text-muted-foreground">{t("settings.localEndpointHint")}</p>
         </div>
         <div className={field}>
           <Label htmlFor="set-cloud-endpoint">{t("settings.cloudEndpoint")}</Label>
@@ -202,6 +204,7 @@ function SettingsForm({ course, initial, justSaved, onSaved }:
             <option value="">{t("settings.useDefault")}</option>
             {pick("external").map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
           </Select>
+          <p className="text-xs text-muted-foreground">{t("settings.cloudEndpointHint")}</p>
         </div>
       </SettingsGroup>
       <SettingsGroup title={t("settings.group.display")}>
@@ -215,7 +218,7 @@ function SettingsForm({ course, initial, justSaved, onSaved }:
       <ErrorNote error={conflict ? null : save.error} />
       {/* stays at the bottom of the content area while the groups scroll */}
       <div className="sticky bottom-0 z-10 flex flex-wrap items-center gap-3 border-t bg-background py-3">
-        <Button loading={save.isPending} type="submit" disabled={save.isPending}>{save.isPending ? t("settings.saving") : t("settings.save")}</Button>
+        <Button loading={save.isPending} type="submit" disabled={save.isPending}>{save.isPending ? t("settings.saving") : t("settings.saveSettings")}</Button>
         {dirty && !save.isPending && <span className="text-xs text-muted-foreground">{t("form.unsaved")}</span>}
         {!dirty && (save.isSuccess || justSaved) && <StatusText>{t("settings.saved")}</StatusText>}
       </div>

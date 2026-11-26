@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/i18n";
+import { capitalize } from "@/lib/utils";
 import { ItemEditDialog, KcEditDialog, itemLabel } from "./ContentEdit";
 import ContentTransfer from "./ContentTransfer";
 import Misconceptions from "./Misconceptions";
@@ -124,7 +125,7 @@ function ModuleRow({ course, module, onSaved, actions }: { course: Course; modul
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-center gap-2">
-        <Badge variant="outline">{module.code}</Badge>
+        <span className="shrink-0 text-xs text-muted-foreground" title={t("content.moduleCode")}>{module.code}</span>
         <Input aria-label={t("content.titleOf", { name: module.title })} className="min-w-0 flex-1 basis-48" value={title} onChange={(e) => setTitle(e.target.value)} />
         <div className="ml-auto flex shrink-0">{actions}</div>
       </div>
@@ -150,6 +151,7 @@ function KcsCard({ course }: { course: Course }) {
   });
   const retire = useMutation({ mutationFn: (id: number) => api.updateKc(course.id, id, { status: "retired" }), onSuccess: refresh });
   const [saved, setSaved] = useState(false);
+  const moduleTitle = new Map((modules.data ?? []).map((m) => [m.id, m.title]));
   return (
     <Card>
       <CardHeader><CardTitle>{t("content.kcs")}</CardTitle><CardDescription>{t("content.kcsHint")}</CardDescription></CardHeader>
@@ -159,8 +161,9 @@ function KcsCard({ course }: { course: Course }) {
         <ul className="divide-y text-sm">
           {kcs.data?.map((k) => (
             <li key={k.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
-              <span><span className="font-medium">{k.code}</span> {k.name} <Badge variant="outline">{t(`band.${k.difficulty}`)}</Badge>{" "}
-                <Badge variant={k.status === "active" ? "success" : "secondary"}>{t(`content.status.${k.status}`)}</Badge></span>
+              <span><span className="font-medium">{k.code}</span> {k.name} <Badge variant="outline">{capitalize(t(`band.${k.difficulty}`))}</Badge>{" "}
+                <Badge variant={k.status === "active" ? "success" : "secondary"}>{capitalize(t(`content.status.${k.status}`))}</Badge>
+                {moduleTitle.get(k.module_id ?? -1) && <span className="block text-xs text-muted-foreground">{moduleTitle.get(k.module_id ?? -1)}</span>}</span>
               {k.status !== "retired" && (
                 <span className="flex shrink-0 gap-1">
                   <KcEditDialog course={course} kc={k} onSaved={() => setSaved(true)} />
@@ -178,7 +181,7 @@ function KcsCard({ course }: { course: Course }) {
             </Select></div>
           <div className="grid gap-1.5"><Label htmlFor="kc-level">{t("content.level")}</Label>
             <Select id="kc-level" value={form.difficulty} onChange={(e) => setForm({ ...form, difficulty: e.target.value as Difficulty })}>
-              {LEVELS.map((l) => <option key={l} value={l}>{t(`band.${l}`)}</option>)}
+              {LEVELS.map((l) => <option key={l} value={l}>{capitalize(t(`band.${l}`))}</option>)}
             </Select></div>
           <div className="grid gap-1.5"><Label htmlFor="kc-code">{t("content.kcCode")}</Label>
             <Input id="kc-code" autoCapitalize="off" autoCorrect="off" spellCheck={false} value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} required /></div>
@@ -221,7 +224,7 @@ function ItemsCard({ course }: { course: Course }) {
           {items.data?.map((it) => (
             <li key={it.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
               <span><span className="font-medium">{it.code}</span> {it.stem}{" "}
-                <Badge variant={it.status === "active" ? "success" : "secondary"}>{t(`content.status.${it.status}`)}</Badge></span>
+                <Badge variant={it.status === "active" ? "success" : "secondary"}>{capitalize(t(`content.status.${it.status}`))}</Badge></span>
               {it.status !== "retired" && (
                 <span className="flex shrink-0 gap-1">
                   <ItemEditDialog course={course} item={it} onSaved={() => setSaved(true)} />
@@ -251,7 +254,7 @@ function ItemsCard({ course }: { course: Course }) {
             </Select></div>
           <div className="grid gap-1.5"><Label htmlFor="it-level">{t("content.level")}</Label>
             <Select id="it-level" value={form.level} onChange={(e) => setForm({ ...form, level: e.target.value as Difficulty })}>
-              {LEVELS.map((l) => <option key={l} value={l}>{t(`band.${l}`)}</option>)}
+              {LEVELS.map((l) => <option key={l} value={l}>{capitalize(t(`band.${l}`))}</option>)}
             </Select></div>
           <div className="grid gap-1.5 sm:col-span-2"><Label htmlFor="it-expl">{t("content.explanation")}</Label>
             <Textarea id="it-expl" value={form.explanation} onChange={(e) => setForm({ ...form, explanation: e.target.value })} /></div>

@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { SquarePen } from "lucide-react";
+import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 import { api, type Course } from "@/api/endpoints";
@@ -8,6 +9,8 @@ import { useFormat } from "@/lib/format";
 import type { MessageKey } from "@/i18n/en";
 import { cn } from "@/lib/utils";
 import { activeSection, sectionGroups } from "@/pages/sections";
+
+const RECENT = 8;
 
 export const itemClass = (active: boolean) =>
   cn("flex h-9 w-full min-w-0 items-center gap-2.5 rounded-md px-2.5 text-left text-sm outline-hidden transition-colors focus-visible:ring-2 focus-visible:ring-ring [&_svg]:size-4 [&_svg]:shrink-0",
@@ -26,8 +29,14 @@ export default function CourseNav({ course, student, tab }: { course: Course; st
   const courseId = course.id;
   const modules = useQuery({ queryKey: ["modules", courseId], queryFn: () => api.modules(courseId), enabled: student });
   const conversations = useQuery({ queryKey: ["conversations", courseId], queryFn: () => api.conversations(courseId), enabled: student });
+  const [showAll, setShowAll] = useState(false);
   const activeModule = params.get("module");
   const activeConversation = params.get("c");
+  // the most recent ones sit under New chat, the rest one click away; each row is a date and the number of messages
+  // (no title is stored). An older conversation that is open shows the whole list, so it stays highlighted.
+  const sorted = [...(conversations.data ?? [])].sort((x, y) => y.last_at.localeCompare(x.last_at));
+  const expanded = showAll || sorted.findIndex((c) => c.conversation_id === activeConversation) >= RECENT;
+  const recent = expanded ? sorted : sorted.slice(0, RECENT);
   const current = activeSection(student, tab, course.individual_view);
   const chatPath = `/courses/${courseId}/chat`;
 
@@ -45,6 +54,30 @@ export default function CourseNav({ course, student, tab }: { course: Course; st
                 className="mb-1 flex h-9 w-full items-center gap-2.5 rounded-md border bg-background px-2.5 text-sm font-medium shadow-xs outline-hidden transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring">
           <SquarePen aria-hidden className="size-4" />{t("nav.newChat")}
         </button>
+      )}
+      {student && recent.length > 0 && (
+        <nav aria-label={t("nav.conversations")}>
+          {byDay(recent).map(([label, rows]) => (
+            <div key={label}>
+              <GroupLabel>{t(label)}</GroupLabel>
+              <div className="space-y-0.5">
+                {rows.map((c) => (
+                  <button key={c.conversation_id} type="button" className={itemClass(activeConversation === c.conversation_id)}
+                          aria-current={activeConversation === c.conversation_id ? "true" : undefined}
+                          onClick={() => open({ c: c.conversation_id })}>
+                    <span className="truncate">{fmt.dateTime(c.last_at)} · {t("nav.turns", { n: c.turns })}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+          {sorted.length > RECENT && (
+            <button type="button" aria-expanded={expanded} onClick={() => setShowAll(!expanded)}
+                    className={cn(itemClass(false), "mt-0.5 text-muted-foreground")}>
+              <span className="truncate">{expanded ? t("nav.showFewer") : t("nav.showAll", { n: sorted.length })}</span>
+            </button>
+          )}
+        </nav>
       )}
       <nav aria-label={t(student ? "dash.student" : "dash.instructor")}>
         {sectionGroups(student, course.individual_view).map((group, i) => (
@@ -78,24 +111,6 @@ export default function CourseNav({ course, student, tab }: { course: Course; st
           {modules.data?.length === 0 && <p className="px-2.5 text-sm text-muted-foreground">{t("nav.noModules")}</p>}
         </div>
       </nav>}
-      {student && !!conversations.data?.length && (
-        <nav aria-label={t("nav.conversations")}>
-          {byDay(conversations.data).map(([label, rows]) => (
-            <div key={label}>
-              <GroupLabel>{t(label)}</GroupLabel>
-              <div className="space-y-0.5">
-                {rows.map((c) => (
-                  <button key={c.conversation_id} type="button" className={itemClass(activeConversation === c.conversation_id)}
-                          aria-current={activeConversation === c.conversation_id ? "true" : undefined}
-                          onClick={() => open({ c: c.conversation_id })}>
-                    <span className="truncate">{fmt.date(c.last_at)} · {t("nav.turns", { n: c.turns })}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
-        </nav>
-      )}
     </>
   );
 }

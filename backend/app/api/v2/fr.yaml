@@ -9,6 +9,7 @@ notes:
   GENERALIZED_NOTE: "Pour votre vie privée, le modèle infonuagique a reçu une version générale de votre question, sans vos détails de santé personnels."
   LOCAL_CAPABILITY_NOTE: "Cette question dépasse peut-être ce que le modèle local fait bien ; vérifiez la réponse à l’aide des sources ci-dessous."
   ANSWER_CUT_OFF_NOTE: "Cette réponse a atteint la longueur maximale et s’arrête avant la fin ; posez une question de suivi pour la suite."
+  UNCONFIRMED_SOURCES_NOTE: "Les sources du cours ci-dessous ont été trouvées par la recherche, mais la vérification de pertinence n’a pas pu confirmer qu’elles répondent à cette question."
   UNVERIFIED_SOURCES_NOTE: "Les sources du cours ci-dessous ont été trouvées par la recherche, mais leur pertinence n’a pas été vérifiée."
   REPLACED_WARNING: "La première réponse n’a pas passé la vérification de sécurité et a été remplacée par un message sûr."
   GROUNDING_WARNING: "Certaines parties de cette réponse peuvent dépasser le matériel du cours."

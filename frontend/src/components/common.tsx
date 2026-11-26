@@ -18,6 +18,8 @@ function serverSentence(message: string, t: ReturnType<typeof useI18n>["t"]): st
     "the course is archived": "error.courseArchived",
     "announcement not found": "error.announcementGone",
     "options must differ": "error.optionsDiffer",
+    "invalid username or password": "error.loginInvalid",
+    "too many failed attempts; try again later": "error.loginLocked",
   };
   const key = fixed[message.toLowerCase()] as MessageKey | undefined;
   return key ? t(key) : null;

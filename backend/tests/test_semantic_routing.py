@@ -471,3 +471,16 @@ def test_a_question_without_a_relevant_passage_keeps_the_retrieved_passages(monk
     assert r.checked and r.relevant_indices == []
     kept = select_passages(x, r, RoutingConfig())
     assert [c.text for c in kept] == [chunk().text] and kept[0].metadata["evidence_check"] == "unverified"
+
+
+def test_the_sources_note_says_whether_the_passages_were_checked():
+    # Q1-02: "not checked" only when the relevance check did not run; a check that confirmed none of the kept
+    # passages gets its own note, so the answer does not contradict a routing panel that says "checked"
+    from app.pipeline.steps.route import UNCONFIRMED_SOURCES_NOTE, UNVERIFIED_SOURCES_NOTE, sources_note
+
+    fallback = [chunk().model_copy(update={"metadata": {"evidence_check": "unverified"}})]
+    assert sources_note(fallback, evidence_ran=True, checked=False) == UNVERIFIED_SOURCES_NOTE
+    assert sources_note(fallback, evidence_ran=True, checked=True) == UNCONFIRMED_SOURCES_NOTE
+    assert sources_note([chunk()], evidence_ran=True, checked=True) is None  # judged relevant
+    assert sources_note([], evidence_ran=True, checked=True) is None
+    assert sources_note(fallback, evidence_ran=False, checked=False) is None  # no evidence step configured
