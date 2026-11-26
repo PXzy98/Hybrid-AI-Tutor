@@ -39,8 +39,8 @@ consent: >-
 # the privacy profiles' consent notes (app/privacy/profiles/<name>.yaml)
 consent_notes:
   ece: >-
-    Veuillez retirer les mots de passe, les clés d’API et les adresses réseau du laboratoire du code que vous
-    collez ; le tuteur retire aussi ceux qu’il reconnaît avant que quoi que ce soit ne quitte les serveurs du cours.
+    Veuillez retirer les mots de passe, les clés d’API et les adresses des ordinateurs ou serveurs du laboratoire du
+    code que vous collez ; le tuteur retire aussi ceux qu’il reconnaît avant que quoi que ce soit ne quitte les serveurs du cours.
   computer_science: >-
     Veuillez retirer les mots de passe, les clés d’API et les adresses de serveur du code que vous collez ; le
     tuteur retire aussi ceux qu’il reconnaît avant que quoi que ce soit ne quitte les serveurs du cours.

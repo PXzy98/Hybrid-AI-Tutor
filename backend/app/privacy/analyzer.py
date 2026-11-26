@@ -10,6 +10,7 @@ from presidio_analyzer.nlp_engine import NlpEngineProvider
 
 from app.core.config import PrivacyConfig
 from app.core.registry import import_submodules, pii_recognizers
+from app.privacy.eponyms import inside_course_term
 
 log = logging.getLogger("app.privacy")
 logging.getLogger("presidio-analyzer").setLevel(logging.WARNING)  # its INFO/DEBUG lines can contain text
@@ -123,6 +124,7 @@ def clean_person(text: str, f: Finding) -> Finding | None:
     - "Tom Becker 300477120": cut the span before the first digit (the number is found as STUDENT_ID).
     - "DICOM metadata": spans containing an all-caps acronym are not names.
     - "Cohen's kappa", "Brier score": eponyms of statistics, units and diseases are not people here.
+    - "Kirchhoff's current law", "Fourier transform": fixed phrases of eponym_terms.yaml are not people.
     - "Je m'appelle Chloé Martin", "J'ai de l'asthme": leading French function words are cut; nothing left
       that looks like a name → not a person.
     """
@@ -156,6 +158,8 @@ def clean_person(text: str, f: Finding) -> Finding | None:
         return None
     nxt = _NEXT_WORD.match(text, f.end)  # "Cohen's kappa", "Compute Cohen's kappa", "Brier score"
     if nxt and nxt.group(1).lower() in _EPONYM_NOUNS:
+        return None
+    if inside_course_term(text, f.start, f.end):  # "Kirchhoff's current law", "Fourier transform" (Z22c)
         return None
     return f
 

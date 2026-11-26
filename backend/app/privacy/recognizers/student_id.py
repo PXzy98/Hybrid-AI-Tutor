@@ -37,6 +37,44 @@ DECIMAL_RE = re.compile(r"\d\.\d(?!\d)")
 BINARY_DIGITS = frozenset("01")
 
 
+# Z22c: PDF text extraction joins equation subscripts into digit runs ("0)()()( 152402312 =-+-+- IGeGVeGee").
+# A plain run of nine digits inside a formula is not a student number unless a word that names one is close.
+FORMULA_CHARS = "=+-−*/()"
+OPERATORS = "=+-−*"
+FORMULA_NEAR_CHARS = 30  # the formula test looks at this many characters on each side, on the same line
+STUDENT_WORD_RE = re.compile(r"(?i)\b(?:student|stu\w*|std\w*|id|i\.d\.|number|num|no\.?)(?!\w)|#|学号")
+# words of prose ("same", "Smith"), not formula variables that extraction glued together ("GGGGGG")
+LONG_WORD_RE = re.compile(r"\b[A-Za-z][a-z]{3,}\b")
+# a run of one repeated character, also spaced out, is a separator line or a table border ("---------",
+# "- - - - -", "+------+", "====="), not a formula: a roster set off by such lines keeps its student numbers
+# (found in review of Z22c)
+RULE_RE = re.compile(r"([-−=_*~])(?: ?\1){2,}")
+
+
+def _in_formula(text: str, start: int, end: int) -> bool:
+    """The digits sit in a formula: formula characters right next to them, or a line of mostly formula."""
+    if STUDENT_WORD_RE.search(text[max(0, start - 25):start]) or STUDENT_WORD_RE.search(text[end:end + 12]):
+        return False
+    before = text[max(0, start - FORMULA_NEAR_CHARS):start].rsplit("\n", 1)[-1]
+    after = text[end:end + FORMULA_NEAR_CHARS].split("\n", 1)[0]
+    alone = not before.strip() and not after.strip()
+    if alone:
+        # alone on its line, as in a fraction or matrix that extraction laid out one row per line: the lines
+        # around it decide, and a few words of the slide's prose there do not outweigh many formula characters
+        before = text[max(0, start - 2 * FORMULA_NEAR_CHARS):start]
+        after = text[end:end + 2 * FORMULA_NEAR_CHARS]
+    before, after = RULE_RE.sub("", before), RULE_RE.sub("", after)
+    left, right = before.rstrip(" ")[-1:], after.lstrip(" ")[:1]
+    chars = sum(c in FORMULA_CHARS for c in before + after)
+    # an operator on one side and an operator or bracket on the other; "Ann (300123456)" and
+    # "Ann / 300123456 / mail" are not formulas
+    if left and right and ((left in OPERATORS and right in OPERATORS + "()")
+                           or (left in "()" and right in OPERATORS)):
+        return True
+    words = len(LONG_WORD_RE.findall(before + after))
+    return chars >= 6 and (words < 3 or (alone and words < chars // 4))
+
+
 def _not_a_student_number(text: str, start: int, end: int) -> bool:
     value = text[start:end]
     digits = {c for c in value if c.isdigit()}
@@ -45,6 +83,10 @@ def _not_a_student_number(text: str, start: int, end: int) -> bool:
     return (bool(ISBN_BEFORE_RE.search(before)) or bool(BIBLIO_BEFORE_RE.search(before))
             or bool(ISBN_CHECK_AFTER_RE.match(text, end))
             or len(digits) == 1 or digits <= BINARY_DIGITS
+            # the university's prefix 300 is never taken for formula digits: a number alone between
+            # formula rows can be a student number; a lecture whose digits start with 300 is only held back
+            or (len(value) == 9 and value.isdigit() and not value.startswith("300")
+                and _in_formula(text, start, end))
             or (len(separators) > 1 and bool(DECIMAL_RE.search(value))))
 
 
