@@ -104,6 +104,10 @@ def test_formula_digit_runs_are_not_student_ids(line: str) -> None:
     "Class list\n---------\n300123456\n---------\n",
     "Class list\n=========\n300123456\n=========\n",
     "+-----------+\n| 300123456 |\n+-----------+\n| 300654321 |\n+-----------+\n",
+    "Class list\n- - - - - - - -\n300123456\n- - - - - - - -\n",
+    # a number with the university's prefix is a student number even between formula rows
+    "Grades:\nx = (a + b) * (c - d)\n300123456\ny = (e + f) - (g * h)\n",
+    "V1 = 0)()( 300123456 )-( + I2",
 ])
 def test_student_numbers_are_still_found(text: str) -> None:
     result = scan_document(text, privacy_profile("ece"))

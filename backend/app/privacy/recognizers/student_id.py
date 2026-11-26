@@ -45,9 +45,10 @@ FORMULA_NEAR_CHARS = 30  # the formula test looks at this many characters on eac
 STUDENT_WORD_RE = re.compile(r"(?i)\b(?:student|stu\w*|std\w*|id|i\.d\.|number|num|no\.?)(?!\w)|#|学号")
 # words of prose ("same", "Smith"), not formula variables that extraction glued together ("GGGGGG")
 LONG_WORD_RE = re.compile(r"\b[A-Za-z][a-z]{3,}\b")
-# a run of one repeated character is a separator line or a table border ("---------", "+------+", "====="),
-# not a formula: a roster set off by such lines keeps its student numbers (found in review of Z22c)
-RULE_RE = re.compile(r"([-−=_*~])\1{2,}")
+# a run of one repeated character, also spaced out, is a separator line or a table border ("---------",
+# "- - - - -", "+------+", "====="), not a formula: a roster set off by such lines keeps its student numbers
+# (found in review of Z22c)
+RULE_RE = re.compile(r"([-−=_*~])(?: ?\1){2,}")
 
 
 def _in_formula(text: str, start: int, end: int) -> bool:
@@ -82,7 +83,10 @@ def _not_a_student_number(text: str, start: int, end: int) -> bool:
     return (bool(ISBN_BEFORE_RE.search(before)) or bool(BIBLIO_BEFORE_RE.search(before))
             or bool(ISBN_CHECK_AFTER_RE.match(text, end))
             or len(digits) == 1 or digits <= BINARY_DIGITS
-            or (len(value) == 9 and value.isdigit() and _in_formula(text, start, end))
+            # the university's prefix 300 is never taken for formula digits: a number alone between
+            # formula rows can be a student number; a lecture whose digits start with 300 is only held back
+            or (len(value) == 9 and value.isdigit() and not value.startswith("300")
+                and _in_formula(text, start, end))
             or (len(separators) > 1 and bool(DECIMAL_RE.search(value))))
 
 
