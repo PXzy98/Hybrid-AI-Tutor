@@ -28,6 +28,9 @@ SETS = [  # (file, course type, profiles to run)
     ("cs_holdout.jsonl", "computer science", ["general", "computer_science"]),
     ("life_holdout.jsonl", "life science", ["general", "life_science", "medical_science"]),
     ("general_holdout.jsonl", "general", ["general"]),
+    # X10, make_bme_set.py: written and labelled by models of two families; disagreements decided by hand
+    ("bme_holdout.jsonl", "biomedical engineering",
+     ["general", "medical_science", "ece", "biomedical_engineering"]),
 ]
 
 

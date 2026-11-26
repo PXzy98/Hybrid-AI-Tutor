@@ -16,6 +16,7 @@ which upgrade is worth it? All data is fictional.
 | `spot_check.md` | 50 random labels of the main set checked |
 | `ece_cases.jsonl`, `ece.py` | engineering courses (task Z11): 47 fictional ECE questions (22 positive: fake keys and tokens, also inside JSON and Python dictionaries, lab addresses, repository URLs, names and numbers; 25 negative: course terms) → `results/ece/report.md`, `general` vs `ece` profile |
 | `make_course_sets.py` → `ece_holdout.jsonl`, `cs_holdout.jsonl`, `life_holdout.jsonl`, `general_holdout.jsonl`, `course_sets.py` | held-out sets per course type (task Z22), 25 to 41 fictional questions each, written blind; `course_sets.py` runs each with its course profile and with `general` → `results/z22/metrics.json`; after the Z22b rule changes: `results/z22b/` (report with E6 before and after) |
+| `make_bme_set.py` → `bme_holdout_raw.jsonl`, `bme_holdout.jsonl`, `bme_holdout_disagreements.jsonl`, `bme_holdout_labels.jsonl` | the biomedical engineering set (X10): fictional messages written by two model families through OpenRouter (Claude Haiku 5.5, GPT-6 Luna), labelled by two stronger models (Claude Sonnet 5.5, GPT-6.1 Terra); rows both agree on go to `bme_holdout.jsonl`, the others are decided by hand; scored by `course_sets.py` with `general`, `medical_science`, `ece` and `biomedical_engineering` |
 | `results/z22d/report.md` | Z22d: health conditions the term list did not know and the local model's check on by default; E6 before and after, how many questions the check reads |
 
 ```

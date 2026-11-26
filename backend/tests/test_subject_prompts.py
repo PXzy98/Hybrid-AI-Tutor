@@ -18,7 +18,8 @@ def test_every_profile_names_a_subject_prompt():
     assert privacy_profile("medical_science").prompt == "health"
     assert privacy_profile("ece").prompt == "engineering"
     assert privacy_profile("general").prompt == privacy_profile("life_science").prompt == "general"
-    assert {"general", "health", "engineering"} <= set(subject_names())
+    assert privacy_profile("biomedical_engineering").prompt == "biomedical_engineering"
+    assert {"general", "health", "engineering", "biomedical_engineering"} <= set(subject_names())
     assert subject_checkers() == {"medical_safety"}
 
 
@@ -29,7 +30,8 @@ def test_only_the_health_prompt_is_a_health_tutor():
         prompt = system_prompt(subject=subject)
         assert prompt.startswith(base_system())
         assert ("health-education course" in prompt) == (subject == "health")
-        assert ("medicine or a dose" in prompt) == (subject == "health")
+        # the health safety rules: the health tutor and biomedical engineering (X10, an engineering tutor)
+        assert ("medicine or a dose" in prompt) == (subject in ("health", "biomedical_engineering"))
 
 
 def test_an_unknown_subject_is_refused(monkeypatch):

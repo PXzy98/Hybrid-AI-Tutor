@@ -1,0 +1,506 @@
+{
+  "rows": 154,
+  "held_out": 56,
+  "methods": {
+    "lr": {
+      "shared": {
+        "n": 56,
+        "accuracy": 0.661,
+        "head_only_accuracy": 0.804,
+        "cloud_share": 0.196,
+        "label_cloud_share": 0.214,
+        "cloud_recall": 0.167,
+        "local_recall": 0.795,
+        "confusion": {
+          "local->local": 35,
+          "local->cloud": 9,
+          "cloud->local": 10,
+          "cloud->cloud": 2
+        },
+        "unreliable_share": 0.196,
+        "evidence_head_accuracy": 0.875
+      },
+      "own": {
+        "n": 56,
+        "accuracy": 0.946,
+        "head_only_accuracy": 0.946,
+        "cloud_share": 0.196,
+        "label_cloud_share": 0.214,
+        "cloud_recall": 0.833,
+        "local_recall": 0.977,
+        "confusion": {
+          "local->local": 43,
+          "local->cloud": 1,
+          "cloud->local": 2,
+          "cloud->cloud": 10
+        },
+        "unreliable_share": 0.0,
+        "evidence_head_accuracy": 0.911
+      },
+      "accuracy_mean_of_splits": {
+        "shared": 0.733,
+        "own": 0.917
+      },
+      "by_category": {
+        "shared": {
+          "basic_concepts": {
+            "n": 8,
+            "accuracy": 1.0,
+            "head_only_accuracy": 1.0,
+            "cloud_share": 0.0,
+            "label_cloud_share": 0.0,
+            "cloud_recall": null,
+            "local_recall": 1.0,
+            "confusion": {
+              "local->local": 8,
+              "local->cloud": 0,
+              "cloud->local": 0,
+              "cloud->cloud": 0
+            },
+            "unreliable_share": 0.0,
+            "evidence_head_accuracy": 1.0
+          },
+          "complex_reasoning": {
+            "n": 12,
+            "accuracy": 0.167,
+            "head_only_accuracy": 0.083,
+            "cloud_share": 0.167,
+            "label_cloud_share": 1.0,
+            "cloud_recall": 0.167,
+            "local_recall": null,
+            "confusion": {
+              "local->local": 0,
+              "local->cloud": 0,
+              "cloud->local": 10,
+              "cloud->cloud": 2
+            },
+            "unreliable_share": 0.167,
+            "evidence_head_accuracy": 0.75
+          },
+          "course_evidence": {
+            "n": 4,
+            "accuracy": 1.0,
+            "head_only_accuracy": 1.0,
+            "cloud_share": 0.0,
+            "label_cloud_share": 0.0,
+            "cloud_recall": null,
+            "local_recall": 1.0,
+            "confusion": {
+              "local->local": 4,
+              "local->cloud": 0,
+              "cloud->local": 0,
+              "cloud->cloud": 0
+            },
+            "unreliable_share": 0.0,
+            "evidence_head_accuracy": 1.0
+          },
+          "current_information": {
+            "n": 4,
+            "accuracy": 1.0,
+            "head_only_accuracy": 1.0,
+            "cloud_share": 0.0,
+            "label_cloud_share": 0.0,
+            "cloud_recall": null,
+            "local_recall": 1.0,
+            "confusion": {
+              "local->local": 4,
+              "local->cloud": 0,
+              "cloud->local": 0,
+              "cloud->cloud": 0
+            },
+            "unreliable_share": 0.0,
+            "evidence_head_accuracy": 0.75
+          },
+          "mechanism_explanation": {
+            "n": 10,
+            "accuracy": 0.8,
+            "head_only_accuracy": 1.0,
+            "cloud_share": 0.2,
+            "label_cloud_share": 0.0,
+            "cloud_recall": null,
+            "local_recall": 0.8,
+            "confusion": {
+              "local->local": 8,
+              "local->cloud": 2,
+              "cloud->local": 0,
+              "cloud->cloud": 0
+            },
+            "unreliable_share": 0.2,
+            "evidence_head_accuracy": 1.0
+          },
+          "simple_application": {
+            "n": 18,
+            "accuracy": 0.611,
+            "head_only_accuracy": 1.0,
+            "cloud_share": 0.389,
+            "label_cloud_share": 0.0,
+            "cloud_recall": null,
+            "local_recall": 0.611,
+            "confusion": {
+              "local->local": 11,
+              "local->cloud": 7,
+              "cloud->local": 0,
+              "cloud->cloud": 0
+            },
+            "unreliable_share": 0.389,
+            "evidence_head_accuracy": 0.833
+          }
+        },
+        "own": {
+          "basic_concepts": {
+            "n": 8,
+            "accuracy": 0.875,
+            "head_only_accuracy": 0.875,
+            "cloud_share": 0.125,
+            "label_cloud_share": 0.0,
+            "cloud_recall": null,
+            "local_recall": 0.875,
+            "confusion": {
+              "local->local": 7,
+              "local->cloud": 1,
+              "cloud->local": 0,
+              "cloud->cloud": 0
+            },
+            "unreliable_share": 0.0,
+            "evidence_head_accuracy": 1.0
+          },
+          "complex_reasoning": {
+            "n": 12,
+            "accuracy": 0.833,
+            "head_only_accuracy": 0.833,
+            "cloud_share": 0.833,
+            "label_cloud_share": 1.0,
+            "cloud_recall": 0.833,
+            "local_recall": null,
+            "confusion": {
+              "local->local": 0,
+              "local->cloud": 0,
+              "cloud->local": 2,
+              "cloud->cloud": 10
+            },
+            "unreliable_share": 0.0,
+            "evidence_head_accuracy": 0.917
+          },
+          "course_evidence": {
+            "n": 4,
+            "accuracy": 1.0,
+            "head_only_accuracy": 1.0,
+            "cloud_share": 0.0,
+            "label_cloud_share": 0.0,
+            "cloud_recall": null,
+            "local_recall": 1.0,
+            "confusion": {
+              "local->local": 4,
+              "local->cloud": 0,
+              "cloud->local": 0,
+              "cloud->cloud": 0
+            },
+            "unreliable_share": 0.0,
+            "evidence_head_accuracy": 0.75
+          },
+          "current_information": {
+            "n": 4,
+            "accuracy": 1.0,
+            "head_only_accuracy": 1.0,
+            "cloud_share": 0.0,
+            "label_cloud_share": 0.0,
+            "cloud_recall": null,
+            "local_recall": 1.0,
+            "confusion": {
+              "local->local": 4,
+              "local->cloud": 0,
+              "cloud->local": 0,
+              "cloud->cloud": 0
+            },
+            "unreliable_share": 0.0,
+            "evidence_head_accuracy": 0.75
+          },
+          "mechanism_explanation": {
+            "n": 10,
+            "accuracy": 1.0,
+            "head_only_accuracy": 1.0,
+            "cloud_share": 0.0,
+            "label_cloud_share": 0.0,
+            "cloud_recall": null,
+            "local_recall": 1.0,
+            "confusion": {
+              "local->local": 10,
+              "local->cloud": 0,
+              "cloud->local": 0,
+              "cloud->cloud": 0
+            },
+            "unreliable_share": 0.0,
+            "evidence_head_accuracy": 1.0
+          },
+          "simple_application": {
+            "n": 18,
+            "accuracy": 1.0,
+            "head_only_accuracy": 1.0,
+            "cloud_share": 0.0,
+            "label_cloud_share": 0.0,
+            "cloud_recall": null,
+            "local_recall": 1.0,
+            "confusion": {
+              "local->local": 18,
+              "local->cloud": 0,
+              "cloud->local": 0,
+              "cloud->cloud": 0
+            },
+            "unreliable_share": 0.0,
+            "evidence_head_accuracy": 0.889
+          }
+        }
+      }
+    },
+    "svm": {
+      "shared": {
+        "n": 56,
+        "accuracy": 0.661,
+        "head_only_accuracy": 0.804,
+        "cloud_share": 0.196,
+        "label_cloud_share": 0.214,
+        "cloud_recall": 0.167,
+        "local_recall": 0.795,
+        "confusion": {
+          "local->local": 35,
+          "local->cloud": 9,
+          "cloud->local": 10,
+          "cloud->cloud": 2
+        },
+        "unreliable_share": 0.196,
+        "evidence_head_accuracy": 0.875
+      },
+      "own": {
+        "n": 56,
+        "accuracy": 1.0,
+        "head_only_accuracy": 1.0,
+        "cloud_share": 0.214,
+        "label_cloud_share": 0.214,
+        "cloud_recall": 1.0,
+        "local_recall": 1.0,
+        "confusion": {
+          "local->local": 44,
+          "local->cloud": 0,
+          "cloud->local": 0,
+          "cloud->cloud": 12
+        },
+        "unreliable_share": 0.0,
+        "evidence_head_accuracy": 0.929
+      },
+      "accuracy_mean_of_splits": {
+        "shared": 0.744,
+        "own": 0.937
+      },
+      "by_category": {
+        "shared": {
+          "basic_concepts": {
+            "n": 8,
+            "accuracy": 1.0,
+            "head_only_accuracy": 1.0,
+            "cloud_share": 0.0,
+            "label_cloud_share": 0.0,
+            "cloud_recall": null,
+            "local_recall": 1.0,
+            "confusion": {
+              "local->local": 8,
+              "local->cloud": 0,
+              "cloud->local": 0,
+              "cloud->cloud": 0
+            },
+            "unreliable_share": 0.0,
+            "evidence_head_accuracy": 1.0
+          },
+          "complex_reasoning": {
+            "n": 12,
+            "accuracy": 0.167,
+            "head_only_accuracy": 0.083,
+            "cloud_share": 0.167,
+            "label_cloud_share": 1.0,
+            "cloud_recall": 0.167,
+            "local_recall": null,
+            "confusion": {
+              "local->local": 0,
+              "local->cloud": 0,
+              "cloud->local": 10,
+              "cloud->cloud": 2
+            },
+            "unreliable_share": 0.167,
+            "evidence_head_accuracy": 0.75
+          },
+          "course_evidence": {
+            "n": 4,
+            "accuracy": 1.0,
+            "head_only_accuracy": 1.0,
+            "cloud_share": 0.0,
+            "label_cloud_share": 0.0,
+            "cloud_recall": null,
+            "local_recall": 1.0,
+            "confusion": {
+              "local->local": 4,
+              "local->cloud": 0,
+              "cloud->local": 0,
+              "cloud->cloud": 0
+            },
+            "unreliable_share": 0.0,
+            "evidence_head_accuracy": 1.0
+          },
+          "current_information": {
+            "n": 4,
+            "accuracy": 1.0,
+            "head_only_accuracy": 1.0,
+            "cloud_share": 0.0,
+            "label_cloud_share": 0.0,
+            "cloud_recall": null,
+            "local_recall": 1.0,
+            "confusion": {
+              "local->local": 4,
+              "local->cloud": 0,
+              "cloud->local": 0,
+              "cloud->cloud": 0
+            },
+            "unreliable_share": 0.0,
+            "evidence_head_accuracy": 0.75
+          },
+          "mechanism_explanation": {
+            "n": 10,
+            "accuracy": 0.8,
+            "head_only_accuracy": 1.0,
+            "cloud_share": 0.2,
+            "label_cloud_share": 0.0,
+            "cloud_recall": null,
+            "local_recall": 0.8,
+            "confusion": {
+              "local->local": 8,
+              "local->cloud": 2,
+              "cloud->local": 0,
+              "cloud->cloud": 0
+            },
+            "unreliable_share": 0.2,
+            "evidence_head_accuracy": 1.0
+          },
+          "simple_application": {
+            "n": 18,
+            "accuracy": 0.611,
+            "head_only_accuracy": 1.0,
+            "cloud_share": 0.389,
+            "label_cloud_share": 0.0,
+            "cloud_recall": null,
+            "local_recall": 0.611,
+            "confusion": {
+              "local->local": 11,
+              "local->cloud": 7,
+              "cloud->local": 0,
+              "cloud->cloud": 0
+            },
+            "unreliable_share": 0.389,
+            "evidence_head_accuracy": 0.833
+          }
+        },
+        "own": {
+          "basic_concepts": {
+            "n": 8,
+            "accuracy": 1.0,
+            "head_only_accuracy": 1.0,
+            "cloud_share": 0.0,
+            "label_cloud_share": 0.0,
+            "cloud_recall": null,
+            "local_recall": 1.0,
+            "confusion": {
+              "local->local": 8,
+              "local->cloud": 0,
+              "cloud->local": 0,
+              "cloud->cloud": 0
+            },
+            "unreliable_share": 0.0,
+            "evidence_head_accuracy": 1.0
+          },
+          "complex_reasoning": {
+            "n": 12,
+            "accuracy": 1.0,
+            "head_only_accuracy": 1.0,
+            "cloud_share": 1.0,
+            "label_cloud_share": 1.0,
+            "cloud_recall": 1.0,
+            "local_recall": null,
+            "confusion": {
+              "local->local": 0,
+              "local->cloud": 0,
+              "cloud->local": 0,
+              "cloud->cloud": 12
+            },
+            "unreliable_share": 0.0,
+            "evidence_head_accuracy": 0.917
+          },
+          "course_evidence": {
+            "n": 4,
+            "accuracy": 1.0,
+            "head_only_accuracy": 1.0,
+            "cloud_share": 0.0,
+            "label_cloud_share": 0.0,
+            "cloud_recall": null,
+            "local_recall": 1.0,
+            "confusion": {
+              "local->local": 4,
+              "local->cloud": 0,
+              "cloud->local": 0,
+              "cloud->cloud": 0
+            },
+            "unreliable_share": 0.0,
+            "evidence_head_accuracy": 1.0
+          },
+          "current_information": {
+            "n": 4,
+            "accuracy": 1.0,
+            "head_only_accuracy": 1.0,
+            "cloud_share": 0.0,
+            "label_cloud_share": 0.0,
+            "cloud_recall": null,
+            "local_recall": 1.0,
+            "confusion": {
+              "local->local": 4,
+              "local->cloud": 0,
+              "cloud->local": 0,
+              "cloud->cloud": 0
+            },
+            "unreliable_share": 0.0,
+            "evidence_head_accuracy": 0.75
+          },
+          "mechanism_explanation": {
+            "n": 10,
+            "accuracy": 1.0,
+            "head_only_accuracy": 1.0,
+            "cloud_share": 0.0,
+            "label_cloud_share": 0.0,
+            "cloud_recall": null,
+            "local_recall": 1.0,
+            "confusion": {
+              "local->local": 10,
+              "local->cloud": 0,
+              "cloud->local": 0,
+              "cloud->cloud": 0
+            },
+            "unreliable_share": 0.0,
+            "evidence_head_accuracy": 1.0
+          },
+          "simple_application": {
+            "n": 18,
+            "accuracy": 1.0,
+            "head_only_accuracy": 1.0,
+            "cloud_share": 0.0,
+            "label_cloud_share": 0.0,
+            "cloud_recall": null,
+            "local_recall": 1.0,
+            "confusion": {
+              "local->local": 18,
+              "local->cloud": 0,
+              "cloud->local": 0,
+              "cloud->cloud": 0
+            },
+            "unreliable_share": 0.0,
+            "evidence_head_accuracy": 0.889
+          }
+        }
+      }
+    }
+  }
+}

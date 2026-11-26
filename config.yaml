@@ -52,6 +52,8 @@ websearch:                        # task T13; docs/WEB_SEARCH.md
   timeout_s: 8
   cache_hours: 24                 # results per query, per process (sanitized query and public pages only)
   allowlist:                      # sites searched per course type (a site includes its subdomains)
+    biomedical_engineering: [nih.gov, fda.gov, medlineplus.gov, ieee.org, nist.gov, python.org, arxiv.org,
+                             semanticscholar.org]
     medical_science: [medlineplus.gov, nih.gov, cdc.gov, who.int, semanticscholar.org, nature.com]
     life_science: [nih.gov, ebi.ac.uk, nature.com, khanacademy.org, arxiv.org, semanticscholar.org]
     ece: [ieee.org, nist.gov, python.org, developer.mozilla.org, en.cppreference.com, arxiv.org,
@@ -60,6 +62,7 @@ websearch:                        # task T13; docs/WEB_SEARCH.md
                        semanticscholar.org, stackoverflow.com]
     general: [wikipedia.org]
   searxng_engines:                # API-backed engines (scraped web engines get blocked; docs/WEB_SEARCH.md)
+    biomedical_engineering: [pubmed, arxiv, semantic scholar]
     medical_science: [pubmed, semantic scholar]
     life_science: [pubmed, semantic scholar, arxiv]
     ece: [arxiv, semantic scholar, mdn, stackoverflow]
