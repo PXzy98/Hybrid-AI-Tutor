@@ -55,21 +55,18 @@ export function LatestAnnouncements({ course }: { course: Course }) {
   const list = useAnnouncements(course);
   if (!list.data) return null;  // loading, or failed: the chat stays usable without them
   const shown = list.data.slice(0, HOME_COUNT);
+  if (shown.length === 0) return null;  // no empty box in the chat; the Announcements page says there are none
   return (
     <section aria-labelledby="home-announcements" className="space-y-2">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h3 id="home-announcements" className="flex items-center gap-2 text-sm font-semibold">
           <Megaphone aria-hidden className="size-4 text-muted-foreground" />{t("ann.title")}
         </h3>
-        {shown.length > 0 && (
-          <Link to={`/courses/${course.id}/announcements`} className="text-sm font-medium underline underline-offset-2">
-            {list.data.length > HOME_COUNT ? t("ann.seeAll", { n: list.data.length }) : t("ann.readMore")}
-          </Link>
-        )}
+        <Link to={`/courses/${course.id}/announcements`} className="text-sm font-medium underline underline-offset-2">
+          {list.data.length > HOME_COUNT ? t("ann.seeAll", { n: list.data.length }) : t("ann.readMore")}
+        </Link>
       </div>
-      {shown.length === 0
-        ? <p className="text-sm text-muted-foreground">{t("ann.noneStudent")}</p>
-        : <ul className="space-y-2">{shown.map((a) => <li key={a.id}><AnnouncementCard item={a} level={4} compact /></li>)}</ul>}
+      <ul className="space-y-2">{shown.map((a) => <li key={a.id}><AnnouncementCard item={a} level={4} compact /></li>)}</ul>
     </section>
   );
 }

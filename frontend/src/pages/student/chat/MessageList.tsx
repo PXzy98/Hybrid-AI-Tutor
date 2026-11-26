@@ -63,6 +63,8 @@ export default function MessageList({ courseId, messages, partial, queued, pendi
     const sent = sentCount > lastSentCount.current;
     lastSentCount.current = sentCount;
     if (!sent && !atEnd.current) return;
+    // nothing to follow yet: a new conversation opens at the top, with the welcome and the suggestions in view
+    if (messages.length === 0) return;
     // a block body on purpose: in some browsers scrollIntoView returns a Promise, which must not be
     // returned to React as if it were a cleanup function
     endRef.current?.scrollIntoView?.({ block: "end" });

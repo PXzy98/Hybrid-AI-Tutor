@@ -1,10 +1,12 @@
 import { useId, type ReactNode } from "react";
-import { useParams } from "react-router-dom";
+import { BookX, FileQuestion } from "lucide-react";
+import { Link, useParams } from "react-router-dom";
 
 import type { Course } from "@/api/endpoints";
 import { roleIn, useCourses, useMe } from "@/auth";
-import { ErrorNote, Loading } from "@/components/common";
+import { EmptyState, ErrorNote, Loading } from "@/components/common";
 import PrivacyNotice from "@/components/PrivacyNotice";
+import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n";
 import InstructorAnnouncements, { StudentAnnouncements } from "./Announcements";
 import AiAssistant from "./instructor/AiAssistant";
@@ -16,7 +18,7 @@ import InstructorQuizzes from "./instructor/Quizzes";
 import Overview from "./instructor/Overview";
 import Settings from "./instructor/Settings";
 import Students from "./instructor/Students";
-import { activeSection } from "./sections";
+import { activeSection, isKnownSection } from "./sections";
 import Survey from "./Survey";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import Chat from "./student/chat/Chat";
@@ -35,7 +37,14 @@ export default function CourseDashboard() {
   if (courses.isLoading || !me) return <Loading variant="list" />;
   if (courses.isError) return <ErrorNote error={courses.error} />;
   const course = courses.data?.find((c) => c.id === id);
-  if (!course) return <p role="alert" className="text-destructive">{t("course.notFound")}</p>;
+  if (!course) {
+    return (
+      <EmptyState icon={BookX} title={t("course.notFoundTitle")}
+                  action={<Button asChild variant="outline"><Link to="/courses">{t("course.backToCourses")}</Link></Button>}>
+        {t("course.notFound")}
+      </EmptyState>
+    );
+  }
   return <Dashboard course={course} student={roleIn(course, me) === "student"} tab={tab} />;
 }
 
@@ -70,8 +79,9 @@ function Dashboard({ course, student, tab }: { course: Course; student: boolean;
   const { t } = useI18n();
   const active = activeSection(student, tab, course.individual_view);
   const headingId = useId();
-  useDocumentTitle(t(active.label), course.code);
-  const chatActive = student && active.id === "chat";
+  const unknown = !isKnownSection(student, tab);
+  useDocumentTitle(t(unknown ? "page.notFoundTitle" : active.label), course.code);
+  const chatActive = student && active.id === "chat" && !unknown;
   return (
     <>
       {student && <PrivacyNotice key={course.id} course={course} />}
@@ -82,9 +92,19 @@ function Dashboard({ course, student, tab }: { course: Course; student: boolean;
           <Chat course={course} />
         </section>
       )}
-      {!chatActive && (
+      {/* a mistyped section: the chat above stays mounted, hidden, so a running answer is not lost */}
+      {unknown && (
+        <EmptyState icon={FileQuestion} title={t("page.notFoundTitle")}
+                    action={<Button asChild variant="outline"><Link to={`/courses/${course.id}`}>{t("page.backToCourse")}</Link></Button>}>
+          {t("page.notFound")}
+        </EmptyState>
+      )}
+      {!chatActive && !unknown && (
         <section key={active.id} aria-labelledby={headingId}>
-          <h2 id={headingId} className="sr-only">{t(active.label)}</h2>
+          {/* My progress shows its own visible heading: a second, hidden one would read twice */}
+          {active.id === "progress" && student
+            ? <span id={headingId} className="sr-only">{t(active.label)}</span>
+            : <h2 id={headingId} className="sr-only">{t(active.label)}</h2>}
           {sectionNode(course, student, active.id)}
         </section>
       )}

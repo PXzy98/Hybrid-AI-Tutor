@@ -28,11 +28,12 @@ describe("announcements for students (V20)", () => {
     expect(within(region).getByRole("link", { name: "See all 4" })).toHaveAttribute("href", "/courses/1/announcements");
   });
 
-  it("says so on the course home when there are none", async () => {
-    mockApi(studentRoutes({ "GET /courses/1/announcements": [] }));
+  it("shows no announcements box on the course home when there are none", async () => {
+    const calls = mockApi(studentRoutes({ "GET /courses/1/announcements": [] }));
     renderApp("/courses/1/chat");
-    const region = await screen.findByRole("region", { name: "Announcements" });
-    expect(region).toHaveTextContent("Your instructors have not posted any announcements yet.");
+    expect(await screen.findByText("What would you like to understand today?")).toBeInTheDocument();
+    await waitFor(() => expect(calls.some((c) => c.path === "/courses/1/announcements")).toBe(true));
+    expect(screen.queryByRole("region", { name: "Announcements" })).not.toBeInTheDocument();
   });
 
   it("lists them all on their own page, without the instructor's buttons", async () => {

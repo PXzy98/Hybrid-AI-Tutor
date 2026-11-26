@@ -50,3 +50,11 @@ export function activeSection(student: boolean, tab: string | undefined, individ
   const all = sectionGroups(student, individualView).flatMap((g) => g.sections);
   return all.find((s) => s.id === tab) ?? all[0];
 }
+
+/** Whether a URL segment names a page of the course for this role. A missing segment is the first section. The
+ *  instructor sections are known with individual views off too (a link kept from before still opens the fallback),
+ *  and `chat` is known for instructors (an old link). Anything else is a page that does not exist. */
+export function isKnownSection(student: boolean, tab: string | undefined): boolean {
+  if (!tab) return true;
+  return (student ? STUDENT_SECTIONS : INSTRUCTOR_SECTIONS).some((g) => g.sections.some((s) => s.id === tab)) || tab === "chat";
+}
