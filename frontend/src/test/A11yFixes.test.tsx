@@ -16,37 +16,37 @@ afterEach(() => vi.unstubAllGlobals());
 
 describe("document title", () => {
   it("joins the page, the course code and the product name without repeating it", () => {
-    expect(documentTitle("Chat", "ECE 1000")).toBe("Chat · ECE 1000 · ScholarMind AI");
-    expect(documentTitle("My courses")).toBe("My courses · ScholarMind AI");
-    expect(documentTitle("ScholarMind AI")).toBe("ScholarMind AI");
-    expect(documentTitle()).toBe("ScholarMind AI");
+    expect(documentTitle("Chat", "ECE 1000")).toBe("Chat · ECE 1000 · PACT");
+    expect(documentTitle("My courses")).toBe("My courses · PACT");
+    expect(documentTitle("PACT")).toBe("PACT");
+    expect(documentTitle()).toBe("PACT");
   });
 
   it("follows the page: login, course picker, course section", async () => {
     mockApi({ "GET /auth/me": { detail: "no", code: "unauthenticated" } });
     const login = renderApp("/login");
     await screen.findByRole("heading", { level: 1 });
-    expect(document.title).toBe("Log in · ScholarMind AI");
+    expect(document.title).toBe("Log in · PACT");
     login.unmount();
 
     mockApi(studentRoutes());
     const picker = renderApp("/courses");
     await screen.findByRole("heading", { level: 1, name: "My courses" });
-    expect(document.title).toBe("My courses · ScholarMind AI");
+    expect(document.title).toBe("My courses · PACT");
     picker.unmount();
 
     renderApp("/courses/1/quizzes");
     // the course page is loaded on demand (T16); under a full parallel run that can take over a second
-    await vi.waitFor(() => expect(document.title).toBe("Quizzes · ECE 1000 · ScholarMind AI"), { timeout: 5000 });
+    await vi.waitFor(() => expect(document.title).toBe("Quizzes · ECE 1000 · PACT"), { timeout: 5000 });
   });
 
   it("a section header mounted later keeps the course page's title", () => {
-    document.title = "Start · ECE 1000 · ScholarMind AI";
+    document.title = "Start · ECE 1000 · PACT";
     const section = render(<PageHeader title="Modules" />);
-    expect(document.title).toBe("Start · ECE 1000 · ScholarMind AI");
+    expect(document.title).toBe("Start · ECE 1000 · PACT");
     section.unmount();
     render(<PageHeader title="My courses" level={1} />);
-    expect(document.title).toBe("My courses · ScholarMind AI");
+    expect(document.title).toBe("My courses · PACT");
   });
 });
 

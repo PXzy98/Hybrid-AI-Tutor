@@ -1,6 +1,6 @@
 # Video (11/25) and Design Day (12/3) demo script (task T10, draft)
 
-Story: **ScholarMind AI, "Brightspace plus"**: a course platform with an AI tutor that keeps students' data private, for
+Story: **PACT, "Brightspace plus"**: a course platform with an AI tutor that keeps students' data private, for
 teaching, research groups and industry training; a bridge between academia, research and industry. Only
 fictional accounts and the open course packs (`data/demo_courses/`) are shown.
 

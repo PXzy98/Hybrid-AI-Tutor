@@ -1,4 +1,4 @@
-# ScholarMind AI (a privacy-aware course tutor): one command to run the whole system (task Z8; guide 4.2).
+# PACT (Privacy-Aware Course Tutor): one command to run the whole system (task Z8; guide 4.2).
 #   docker compose up --build            -> http://localhost:8080  (local: plain HTTP)
 # Production: SITE_ADDRESS=<domain>, HTTP_PORT=80, HTTPS_PORT=443 in .env, then
 #   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
@@ -11,15 +11,14 @@
 # Networks: `public` (proxy, api, worker) and `internal` (internal: true; db, api, worker). The database is on
 # the internal network only, so it is not reachable from outside the stack; only the proxy publishes ports.
 #
-# Names (task X9): the project is `scholarmind`, so containers, networks and volumes are scholarmind-api-1,
-# scholarmind_db-data, ...; the images are scholarmind-api (api and worker) and scholarmind-proxy. A stack
-# started before X9 was named after its folder: to keep using its volumes, set COMPOSE_PROJECT_NAME to that
-# name (for example hybrid-ai-tutor) in .env. Inside the stack the database user and name stay `tutor`.
+# Names: the project is `pact`, so containers, networks and volumes are pact-api-1, pact_db-data, ...,
+# whatever the folder is called; the images are pact-api (api and worker) and pact-proxy. Inside the stack the
+# database user and name stay `tutor`.
 
-name: scholarmind
+name: pact
 
 x-app: &app
-  image: scholarmind-api
+  image: pact-api
   build:
     context: .
     dockerfile: backend/Dockerfile
@@ -83,7 +82,7 @@ services:
 
   proxy:
     # Caddy: serves the frontend and forwards /api to the api service; HTTPS with a domain (deploy/Caddyfile)
-    image: scholarmind-proxy
+    image: pact-proxy
     build:
       context: .
       dockerfile: deploy/proxy.Dockerfile

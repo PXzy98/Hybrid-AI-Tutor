@@ -67,7 +67,7 @@ def test_the_fetcher_names_itself_with_a_contact_address():
         return _html()
     asyncio.run(web_pages.fetch_page("https://example.org/pullups", resolve=_resolver(),
                                      inner=httpx.MockTransport(handler)))
-    assert seen and seen[0].startswith("ScholarMind-AI-course-material-fetcher/") and "(+https://" in seen[0]
+    assert seen and seen[0].startswith("PACT-course-material-fetcher/") and "(+https://" in seen[0]
 
 
 def test_pages_that_differ_only_in_the_query_get_different_names():

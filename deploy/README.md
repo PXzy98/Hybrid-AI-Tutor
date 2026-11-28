@@ -11,10 +11,9 @@ browser ──80/443──► proxy (Caddy: serves the frontend, forwards /api t
                      └─ db       PostgreSQL (internal network only)
 ```
 
-- **Names**: the Compose project is `scholarmind` (containers `scholarmind-api-1`, ..., volumes
-  `scholarmind_db-data`, ...), the images `scholarmind-api` (api and worker) and `scholarmind-proxy`. A stack
-  started before the rename (X9) was named after its folder; set `COMPOSE_PROJECT_NAME` to that name in `.env`
-  to keep its volumes. The database user and name inside the stack stay `tutor`.
+- **Names**: the Compose project is `pact` (containers `pact-api-1`, ..., volumes `pact_db-data`, ...), whatever
+  the folder is called; the images are `pact-api` (api and worker) and `pact-proxy`. The database user and name
+  inside the stack stay `tutor`.
 - **Networks**: `public` (proxy, api, worker) and `internal` (`internal: true`: db, api, worker). Only the proxy
   publishes ports; the database is not reachable from outside the stack.
 - **Local**: `docker compose up --build` → <http://localhost:8080> (plain HTTP). `docker-compose.override.yml` is

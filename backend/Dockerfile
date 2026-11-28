@@ -1,7 +1,7 @@
 # Backend image. Build context: the repository root (it needs config.yaml, content/, data/routing/models and
 # data/medical_rag too).
-#   docker build -f backend/Dockerfile -t scholarmind-api .
-#   docker build -f backend/Dockerfile --build-arg SPACY_MODEL=en_core_web_sm -t scholarmind-api .   # smaller, for tests
+#   docker build -f backend/Dockerfile -t tutor-api .
+#   docker build -f backend/Dockerfile --build-arg SPACY_MODEL=en_core_web_sm -t tutor-api .   # smaller, for tests
 # The image carries every local model the app needs (spaCy, the routing encoder and LR/SVM weights, the two
 # evidence models): it runs offline and never downloads a model while a student is asking.
 FROM python:3.12-slim

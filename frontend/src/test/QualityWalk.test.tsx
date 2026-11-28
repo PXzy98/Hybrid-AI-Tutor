@@ -218,7 +218,7 @@ describe("login and password (Q1-09, Q1-12, Q1-24)", () => {
     mockApi({ "GET /auth/me": reply({ detail: "no", code: "unauthenticated" }, 401) });
     renderApp("/login");
     await screen.findByRole("heading", { level: 1 });
-    expect(document.title).toBe("Log in · ScholarMind AI");
+    expect(document.title).toBe("Log in · PACT");
   });
 
   it("calls the page Change your password with a way back, and Choose your password on the first login", async () => {
