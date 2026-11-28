@@ -1,5 +1,5 @@
 # Proxy image (task Z8): the built frontend served by Caddy, which also forwards /api to the api service.
-#   docker build -f deploy/proxy.Dockerfile -t scholarmind-proxy .
+#   docker build -f deploy/proxy.Dockerfile -t tutor-proxy .
 FROM node:20-slim AS build
 WORKDIR /web
 COPY frontend/package.json frontend/package-lock.json ./

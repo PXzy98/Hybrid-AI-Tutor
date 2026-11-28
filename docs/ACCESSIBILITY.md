@@ -1,7 +1,7 @@
 # Accessibility self-check (task T11)
 
-Scope: the v2 frontend (`frontend/`), checked against WCAG 2.1 level AA. Date: 2026-11-13. Renaming (to PACT, then to
-ScholarMind AI in X9) was the other part of T11 (#101).
+Scope: the v2 frontend (`frontend/`), checked against WCAG 2.1 level AA. Date: 2026-11-13. Renaming (to PACT) was
+the other part of T11 (#101).
 
 ## How it was checked
 
@@ -43,7 +43,7 @@ Not done: a test with a real screen reader (NVDA, VoiceOver) and an automated co
   "Student dashboard" or "Instructor dashboard", modules, conversations, each named), `header` (top bar), `main`,
   and the disclaimer note.
 - Headings: one `h1` per page (the page, or the course code and title in the top bar on a course page). Each
-  course section is a `section` labelled by a visually hidden `h2` with the section name. Card titles are `h3` elements. Every page sets `document.title` as page, course code, ScholarMind AI.
+  course section is a `section` labelled by a visually hidden `h2` with the section name. Card titles are `h3` elements. Every page sets `document.title` as page, course code, PACT.
   The sidebar group labels are no longer headings.
 - Forms: every field has a visible `label` (or an `aria-label` where the label is the context, for example module
   titles in the course editor). Login, join and password errors are `role="alert"` and referenced from the fields

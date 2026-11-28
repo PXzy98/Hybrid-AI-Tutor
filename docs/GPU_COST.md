@@ -1,6 +1,6 @@
 # Local model hosting: capacity per class size and GPU choice (task V13, for Prof. Abbas by 12/1)
 
-ScholarMind AI needs one GPU server for its local model (vLLM, Qwen3.5-9B): every question with personal data, every
+PACT needs one GPU server for its local model (vLLM, Qwen3.5-9B): every question with personal data, every
 learner-profile prompt and all course material go there, never to a cloud model. This report says how many
 students one GPU serves, measured on the lab server through the whole app, and which GPU to buy or rent for a
 class of a given size. Prof. Abbas set no fixed budget but asked for the cost to be justified.
@@ -125,7 +125,7 @@ Rented GPUs (per hour, on demand):
 
 | Provider and GPU | Bandwidth (GB/s) | Estimated vs the lab card | Price per hour | Class hours (172 h) / month | Note |
 |---|---|---|---|---|---|
-| AWS `g6.xlarge`, L4 24 GB, ca-central-1 | 300 | about 0.65x | about $0.89 | about $154 | same Canadian AWS account as the rest of ScholarMind AI; enough for a class up to about 100 |
+| AWS `g6.xlarge`, L4 24 GB, ca-central-1 | 300 | about 0.65x | about $0.89 | about $154 | same Canadian AWS account as the rest of PACT; enough for a class up to about 100 |
 | RunPod, L4 24 GB | 300 | about 0.65x | $0.39 to 0.49 | $67 to 84 | provider outside the university |
 | RunPod, A40 48 GB | about 696 (spec, not checked) | about 1.4x | $0.49 to 0.59 | $84 to 101 | |
 | RunPod, L40S 48 GB | 864 | about 1.7x | about $1.09 | about $187 | |

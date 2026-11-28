@@ -10,7 +10,7 @@ import type { MessageKey } from "@/i18n/en";
 
 // "<account>:<course>" pairs whose full notice this browser has already shown (a per-browser convenience, ids
 // only). Per account, so a new student on a shared computer still sees the full notice first (V17 W22).
-const SEEN_KEY = "pact.privacyNotice.seenBy";  // the former product name, kept so the notice is not shown again
+const SEEN_KEY = "pact.privacyNotice.seenBy";
 
 function seen(): string[] {
   try {

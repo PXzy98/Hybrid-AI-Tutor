@@ -2,7 +2,7 @@
  * `{name}` placeholders are filled in by t(). Content from the server (KC names, check questions, answers,
  * consent text, error sentences) is not translated here. */
 export const en = {
-  "app.name": "ScholarMind AI",
+  "app.name": "PACT",
   "app.loading": "Loading…",
   "app.unreachable": "The server is not reachable. Please try again later.",
   "app.retry": "Try again",

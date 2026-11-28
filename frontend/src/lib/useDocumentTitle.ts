@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 
-export const PRODUCT = "ScholarMind AI";
+export const PRODUCT = "PACT";
 
 /** The tab title: the page, the course code if any, then the product name. Parts that are empty are left out and
- *  the product name is not repeated (the login page is just "ScholarMind AI"). */
+ *  the product name is not repeated (the login page is just "PACT"). */
 export function documentTitle(page?: string | null, courseCode?: string | null): string {
   return [page, courseCode, PRODUCT].filter((p, i, all): p is string => !!p && all.indexOf(p) === i).join(" · ");
 }

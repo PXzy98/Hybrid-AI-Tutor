@@ -1,6 +1,6 @@
 # Extension points for course-platform features (task V14)
 
-Prof. Abbas sees ScholarMind AI growing into "Brightspace plus": the course platform plus AI for teaching, research and
+Prof. Abbas sees PACT growing into "Brightspace plus": the course platform plus AI for teaching, research and
 industry training. This term builds none of the platform features below (decision of 2026-11-17); this note
 shows the next team where each one plugs in, so it can be added without changing what exists. Read with
 [course-structure.md](course-structure.md) (data, roles, settings) and [api-v2.md](api-v2.md) (HTTP API). The
