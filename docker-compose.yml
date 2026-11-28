@@ -13,7 +13,9 @@
 #
 # Names: the project is `pact`, so containers, networks and volumes are pact-api-1, pact_db-data, ...,
 # whatever the folder is called; the images are pact-api (api and worker) and pact-proxy. Inside the stack the
-# database user and name stay `tutor`.
+# database user and name stay `tutor`. A stack started under another project name keeps its data only with that
+# name: set COMPOSE_PROJECT_NAME in .env (scholarmind for a stack started between X9 and X9r, or the folder name,
+# for example hybrid-ai-tutor, for one started before X9); otherwise Compose creates new, empty pact_* volumes.
 
 name: pact
 

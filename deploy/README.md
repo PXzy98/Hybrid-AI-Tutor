@@ -13,7 +13,10 @@ browser ──80/443──► proxy (Caddy: serves the frontend, forwards /api t
 
 - **Names**: the Compose project is `pact` (containers `pact-api-1`, ..., volumes `pact_db-data`, ...), whatever
   the folder is called; the images are `pact-api` (api and worker) and `pact-proxy`. The database user and name
-  inside the stack stay `tutor`.
+  inside the stack stay `tutor`. **An existing stack keeps its data only under its old project name**: set
+  `COMPOSE_PROJECT_NAME=scholarmind` in `.env` for a stack started with the ScholarMind version (X9, until X9r),
+  or the folder name (for example `hybrid-ai-tutor`) for one started before X9; check with `docker volume ls`
+  before the first start. Without it Compose creates new, empty `pact_*` volumes.
 - **Networks**: `public` (proxy, api, worker) and `internal` (`internal: true`: db, api, worker). Only the proxy
   publishes ports; the database is not reachable from outside the stack.
 - **Local**: `docker compose up --build` → <http://localhost:8080> (plain HTTP). `docker-compose.override.yml` is
